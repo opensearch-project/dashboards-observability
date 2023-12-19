@@ -1,138 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`No result component Renders No result component 1`] = `
-<NoResults>
-  <EuiPage
-    paddingSize="s"
+<div
+  className="euiPage euiPage--paddingSmall euiPage--grow"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
-      className="euiPage euiPage--paddingSmall euiPage--grow"
+      className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="center"
+      <div
+        className="euiCallOut euiCallOut--warning"
+        data-test-subj="observabilityNoResultsCallout"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          className="euiCallOutHeader"
         >
-          <EuiFlexItem
-            grow={false}
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            className="euiCallOutHeader__title"
           >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiCallOut
-                color="warning"
-                data-test-subj="observabilityNoResultsCallout"
-                iconType="help"
-                title={
-                  <FormattedMessage
-                    defaultMessage="No results match your search criteria"
-                    id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                    values={Object {}}
-                  />
-                }
-              >
-                <div
-                  className="euiCallOut euiCallOut--warning"
-                  data-test-subj="observabilityNoResultsCallout"
-                >
-                  <div
-                    className="euiCallOutHeader"
-                  >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiCallOutHeader__icon"
-                      color="inherit"
-                      size="m"
-                      type="help"
-                    >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
-                    </EuiIcon>
-                    <span
-                      className="euiCallOutHeader__title"
-                    >
-                      <FormattedMessage
-                        defaultMessage="No results match your search criteria"
-                        id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                        values={Object {}}
-                      >
-                        <span>
-                          No results match your search criteria
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </div>
-                </div>
-              </EuiCallOut>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiText>
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <h2
-                    data-test-subj="obsNoResultsTimefilter"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Select a data source, expand your time range, or modify the query"
-                      id="observability.noResults.expandYourTimeRangeTitle"
-                      values={Object {}}
-                    >
-                      <span>
-                        Select a data source, expand your time range, or modify the query
-                      </span>
-                    </FormattedMessage>
-                  </h2>
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="After selection, check the time range, query filters, fields, and query"
-                      id="observability.noResults.queryMayNotMatchTitle"
-                      values={Object {}}
-                    >
-                      <span>
-                        After selection, check the time range, query filters, fields, and query
-                      </span>
-                    </FormattedMessage>
-                  </p>
-                </div>
-              </EuiText>
-            </div>
-          </EuiFlexItem>
+            <span>
+              No results match your search criteria
+            </span>
+          </span>
         </div>
-      </EuiFlexGroup>
+      </div>
     </div>
-  </EuiPage>
-</NoResults>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+      <div
+        className="euiText euiText--medium"
+      >
+        <h2
+          data-test-subj="obsNoResultsTimefilter"
+        >
+          <span>
+            Select a data source, expand your time range, or modify the query
+          </span>
+        </h2>
+        <p>
+          <span>
+            After selection, check the time range, query filters, fields, and query
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 `;

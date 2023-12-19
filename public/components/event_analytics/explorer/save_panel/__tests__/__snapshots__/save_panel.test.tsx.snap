@@ -1,646 +1,248 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Saved query table component Renders saved query table 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
-    }
-  }
->
-  <SavePanel
-    curVisId="line"
-    handleNameChange={[MockFunction]}
-    handleOptionChange={[MockFunction]}
-    metricChecked={true}
-    metricMeasure="hours (h)"
-    savePanelName="Count by depature"
-    savedObjects={
-      SavedObjects {
-        "http": [MockFunction],
-      }
-    }
-    selectedOptions={
-      Array [
-        Object {
-          "label": "[Logs] Web traffic Panel",
-          "panel": Object {
-            "dateCreated": 1637781403888,
-            "dateModified": 1637781403888,
-            "id": "uRZgU30B661cwDZT-ILw",
-            "name": "[Logs] Web traffic Panel",
-          },
-        },
-        Object {
-          "label": "[Logs] Web traffic Panel 2",
-          "panel": Object {
-            "dateCreated": 1637781403888,
-            "dateModified": 1637781403888,
-            "id": "uRZgU30B661cwDZT-ILw",
-            "name": "[Logs] Web traffic Panel",
-          },
-        },
-      ]
-    }
-    setMetricLabel={[MockFunction]}
-    setMetricMeasure="hours (h)"
-    setSubType="metric"
-    showOptionList={true}
-    spanValue={false}
+Array [
+  <h3
+    className="euiTitle euiTitle--xxsmall"
   >
-    <EuiTitle
-      size="xxs"
-    >
-      <h3
-        className="euiTitle euiTitle--xxsmall"
-      >
-        Custom operational dashboards/application
-      </h3>
-    </EuiTitle>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      helpText="Search existing dashboards or applications by name"
-      labelType="label"
+    Custom operational dashboards/application
+  </h3>,
+  <div
+    className="euiFormRow"
+    id="random_html_id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormRow"
-        id="random_html_id-row"
+        aria-describedby="random_html_id-help-0"
+        aria-expanded={false}
+        aria-haspopup="listbox"
+        className="euiComboBox"
+        data-test-subj="eventExplorer__querySaveComboBox"
+        onKeyDown={[Function]}
+        role="combobox"
       >
         <div
-          className="euiFormRow__fieldWrapper"
+          className="euiFormControlLayout"
         >
-          <EuiComboBox
-            aria-describedby="random_html_id-help-0"
-            async={false}
-            compressed={false}
-            data-test-subj="eventExplorer__querySaveComboBox"
-            fullWidth={false}
-            id="random_html_id"
-            isClearable={true}
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            options={Array []}
-            placeholder="Select dashboards/applications"
-            selectedOptions={
-              Array [
-                Object {
-                  "label": "[Logs] Web traffic Panel",
-                  "panel": Object {
-                    "dateCreated": 1637781403888,
-                    "dateModified": 1637781403888,
-                    "id": "uRZgU30B661cwDZT-ILw",
-                    "name": "[Logs] Web traffic Panel",
-                  },
-                },
-                Object {
-                  "label": "[Logs] Web traffic Panel 2",
-                  "panel": Object {
-                    "dateCreated": 1637781403888,
-                    "dateModified": 1637781403888,
-                    "id": "uRZgU30B661cwDZT-ILw",
-                    "name": "[Logs] Web traffic Panel",
-                  },
-                },
-              ]
-            }
-            singleSelection={
-              Object {
-                "asPlainText": true,
-              }
-            }
-            sortMatchesBy="none"
+          <div
+            className="euiFormControlLayout__childrenWrapper"
           >
             <div
-              aria-describedby="random_html_id-help-0"
-              aria-expanded={false}
-              aria-haspopup="listbox"
-              className="euiComboBox"
-              data-test-subj="eventExplorer__querySaveComboBox"
-              onKeyDown={[Function]}
-              role="combobox"
+              className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+              data-test-subj="comboBoxInput"
+              onClick={[Function]}
+              tabIndex={-1}
             >
-              <EuiComboBoxInput
-                autoSizeInputRef={[Function]}
-                compressed={false}
-                fullWidth={false}
-                hasSelectedOptions={true}
-                id="random_html_id"
-                inputRef={[Function]}
-                isListOpen={false}
-                noIcon={false}
-                onChange={[Function]}
-                onClear={[Function]}
-                onClick={[Function]}
-                onCloseListClick={[Function]}
-                onFocus={[Function]}
-                onOpenListClick={[Function]}
-                onRemoveOption={[Function]}
-                placeholder="Select dashboards/applications"
-                rootId={[Function]}
-                searchValue=""
-                selectedOptions={
-                  Array [
-                    Object {
-                      "label": "[Logs] Web traffic Panel",
-                      "panel": Object {
-                        "dateCreated": 1637781403888,
-                        "dateModified": 1637781403888,
-                        "id": "uRZgU30B661cwDZT-ILw",
-                        "name": "[Logs] Web traffic Panel",
-                      },
-                    },
-                    Object {
-                      "label": "[Logs] Web traffic Panel 2",
-                      "panel": Object {
-                        "dateCreated": 1637781403888,
-                        "dateModified": 1637781403888,
-                        "id": "uRZgU30B661cwDZT-ILw",
-                        "name": "[Logs] Web traffic Panel",
-                      },
-                    },
-                  ]
-                }
-                singleSelection={
+              <span
+                className="euiComboBoxPill euiComboBoxPill--plainText"
+                panel={
                   Object {
-                    "asPlainText": true,
+                    "dateCreated": 1637781403888,
+                    "dateModified": 1637781403888,
+                    "id": "uRZgU30B661cwDZT-ILw",
+                    "name": "[Logs] Web traffic Panel",
                   }
                 }
-                toggleButtonRef={[Function]}
-                updatePosition={[Function]}
-                value="[Logs] Web traffic Panel, [Logs] Web traffic Panel 2"
               >
-                <EuiFormControlLayout
-                  clear={
+                [Logs] Web traffic Panel
+              </span>
+              <span
+                className="euiComboBoxPill euiComboBoxPill--plainText"
+                panel={
+                  Object {
+                    "dateCreated": 1637781403888,
+                    "dateModified": 1637781403888,
+                    "id": "uRZgU30B661cwDZT-ILw",
+                    "name": "[Logs] Web traffic Panel",
+                  }
+                }
+              >
+                [Logs] Web traffic Panel 2
+              </span>
+              <div
+                className="euiComboBox__input"
+                style={
+                  Object {
+                    "display": "inline-block",
+                    "fontSize": 14,
+                  }
+                }
+              >
+                <input
+                  aria-controls=""
+                  data-test-subj="comboBoxSearchInput"
+                  id="random_html_id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  role="textbox"
+                  style={
                     Object {
-                      "data-test-subj": "comboBoxClearButton",
-                      "onClick": [Function],
+                      "boxSizing": "content-box",
+                      "width": "2px",
                     }
                   }
-                  compressed={false}
-                  fullWidth={false}
-                  icon={
+                  value=""
+                />
+                <div
+                  style={
                     Object {
-                      "aria-label": "Open list of options",
-                      "data-test-subj": "comboBoxToggleListButton",
-                      "disabled": undefined,
-                      "onClick": [Function],
-                      "ref": [Function],
-                      "side": "right",
-                      "type": "arrowDown",
+                      "height": 0,
+                      "left": 0,
+                      "overflow": "scroll",
+                      "position": "absolute",
+                      "top": 0,
+                      "visibility": "hidden",
+                      "whiteSpace": "pre",
                     }
                   }
-                >
-                  <div
-                    className="euiFormControlLayout"
-                  >
-                    <div
-                      className="euiFormControlLayout__childrenWrapper"
-                    >
-                      <div
-                        className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
-                        data-test-subj="comboBoxInput"
-                        onClick={[Function]}
-                        tabIndex={-1}
-                      >
-                        <EuiComboBoxPill
-                          asPlainText={true}
-                          color="hollow"
-                          key="[logs] web traffic panel"
-                          option={
-                            Object {
-                              "label": "[Logs] Web traffic Panel",
-                              "panel": Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
-                              },
-                            }
-                          }
-                          panel={
-                            Object {
-                              "dateCreated": 1637781403888,
-                              "dateModified": 1637781403888,
-                              "id": "uRZgU30B661cwDZT-ILw",
-                              "name": "[Logs] Web traffic Panel",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiComboBoxPill euiComboBoxPill--plainText"
-                            panel={
-                              Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
-                              }
-                            }
-                          >
-                            [Logs] Web traffic Panel
-                          </span>
-                        </EuiComboBoxPill>
-                        <EuiComboBoxPill
-                          asPlainText={true}
-                          color="hollow"
-                          key="[logs] web traffic panel 2"
-                          option={
-                            Object {
-                              "label": "[Logs] Web traffic Panel 2",
-                              "panel": Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
-                              },
-                            }
-                          }
-                          panel={
-                            Object {
-                              "dateCreated": 1637781403888,
-                              "dateModified": 1637781403888,
-                              "id": "uRZgU30B661cwDZT-ILw",
-                              "name": "[Logs] Web traffic Panel",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiComboBoxPill euiComboBoxPill--plainText"
-                            panel={
-                              Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
-                              }
-                            }
-                          >
-                            [Logs] Web traffic Panel 2
-                          </span>
-                        </EuiComboBoxPill>
-                        <AutosizeInput
-                          aria-controls=""
-                          className="euiComboBox__input"
-                          data-test-subj="comboBoxSearchInput"
-                          id="random_html_id"
-                          injectStyles={true}
-                          inputRef={[Function]}
-                          minWidth={1}
-                          onBlur={[Function]}
-                          onChange={[Function]}
-                          onFocus={[Function]}
-                          role="textbox"
-                          style={
-                            Object {
-                              "fontSize": 14,
-                            }
-                          }
-                          value=""
-                        >
-                          <div
-                            className="euiComboBox__input"
-                            style={
-                              Object {
-                                "display": "inline-block",
-                                "fontSize": 14,
-                              }
-                            }
-                          >
-                            <input
-                              aria-controls=""
-                              data-test-subj="comboBoxSearchInput"
-                              id="random_html_id"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onFocus={[Function]}
-                              role="textbox"
-                              style={
-                                Object {
-                                  "boxSizing": "content-box",
-                                  "width": "2px",
-                                }
-                              }
-                              value=""
-                            />
-                            <div
-                              style={
-                                Object {
-                                  "height": 0,
-                                  "left": 0,
-                                  "overflow": "scroll",
-                                  "position": "absolute",
-                                  "top": 0,
-                                  "visibility": "hidden",
-                                  "whiteSpace": "pre",
-                                }
-                              }
-                            />
-                          </div>
-                        </AutosizeInput>
-                      </div>
-                      <EuiFormControlLayoutIcons
-                        clear={
-                          Object {
-                            "data-test-subj": "comboBoxClearButton",
-                            "onClick": [Function],
-                          }
-                        }
-                        compressed={false}
-                        icon={
-                          Object {
-                            "aria-label": "Open list of options",
-                            "data-test-subj": "comboBoxToggleListButton",
-                            "disabled": undefined,
-                            "onClick": [Function],
-                            "ref": [Function],
-                            "side": "right",
-                            "type": "arrowDown",
-                          }
-                        }
-                      >
-                        <div
-                          className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                        >
-                          <EuiFormControlLayoutClearButton
-                            data-test-subj="comboBoxClearButton"
-                            onClick={[Function]}
-                            size="m"
-                          >
-                            <EuiI18n
-                              default="Clear input"
-                              token="euiFormControlLayoutClearButton.label"
-                            >
-                              <button
-                                aria-label="Clear input"
-                                className="euiFormControlLayoutClearButton"
-                                data-test-subj="comboBoxClearButton"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <EuiIcon
-                                  className="euiFormControlLayoutClearButton__icon"
-                                  type="cross"
-                                >
-                                  <EuiIconEmpty
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                    focusable="false"
-                                    role="img"
-                                    style={null}
-                                  >
-                                    <svg
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                      focusable="false"
-                                      height={16}
-                                      role="img"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width={16}
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    />
-                                  </EuiIconEmpty>
-                                </EuiIcon>
-                              </button>
-                            </EuiI18n>
-                          </EuiFormControlLayoutClearButton>
-                          <EuiFormControlLayoutCustomIcon
-                            aria-label="Open list of options"
-                            data-test-subj="comboBoxToggleListButton"
-                            iconRef={[Function]}
-                            onClick={[Function]}
-                            size="m"
-                            type="arrowDown"
-                          >
-                            <button
-                              aria-label="Open list of options"
-                              className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                              data-test-subj="comboBoxToggleListButton"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
-                                type="arrowDown"
-                              >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
-                              </EuiIcon>
-                            </button>
-                          </EuiFormControlLayoutCustomIcon>
-                        </div>
-                      </EuiFormControlLayoutIcons>
-                    </div>
-                  </div>
-                </EuiFormControlLayout>
-              </EuiComboBoxInput>
+                />
+              </div>
             </div>
-          </EuiComboBox>
-          <EuiFormHelpText
-            className="euiFormRow__text"
-            id="random_html_id-help-0"
-            key="Search existing dashboards or applications by name"
-          >
             <div
-              className="euiFormHelpText euiFormRow__text"
-              id="random_html_id-help-0"
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
             >
-              Search existing dashboards or applications by name
+              <button
+                aria-label="Clear input"
+                className="euiFormControlLayoutClearButton"
+                data-test-subj="comboBoxClearButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+              <button
+                aria-label="Open list of options"
+                className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                data-test-subj="comboBoxToggleListButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
             </div>
-          </EuiFormHelpText>
+          </div>
         </div>
       </div>
-    </EuiFormRow>
-    <EuiTitle
-      size="xxs"
-    >
-      <h3
-        className="euiTitle euiTitle--xxsmall"
+      <div
+        className="euiFormHelpText euiFormRow__text"
+        id="random_html_id-help-0"
       >
-        Name
-      </h3>
-    </EuiTitle>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      helpText="Name for your savings"
-      labelType="label"
+        Search existing dashboards or applications by name
+      </div>
+    </div>
+  </div>,
+  <h3
+    className="euiTitle euiTitle--xxsmall"
+  >
+    Name
+  </h3>,
+  <div
+    className="euiFormRow"
+    id="random_html_id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormRow"
-        id="random_html_id-row"
+        className="euiFormControlLayout"
       >
         <div
-          className="euiFormRow__fieldWrapper"
+          className="euiFormControlLayout__childrenWrapper"
         >
-          <EuiFieldText
+          <input
             aria-describedby="random_html_id-help-0"
+            className="euiFieldText"
             data-test-subj="eventExplorer__querySaveName"
             id="random_html_id"
-            isInvalid={false}
-            key="save-panel-id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
+            type="text"
             value="Count by depature"
-          >
-            <EuiFormControlLayout
-              fullWidth={false}
-              inputId="random_html_id"
-            >
-              <div
-                className="euiFormControlLayout"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <EuiValidatableControl
-                    isInvalid={false}
-                  >
-                    <input
-                      aria-describedby="random_html_id-help-0"
-                      className="euiFieldText"
-                      data-test-subj="eventExplorer__querySaveName"
-                      id="random_html_id"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      type="text"
-                      value="Count by depature"
-                    />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons />
-                </div>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
-          <EuiFormHelpText
-            className="euiFormRow__text"
-            id="random_html_id-help-0"
-            key="Name for your savings"
-          >
-            <div
-              className="euiFormHelpText euiFormRow__text"
-              id="random_html_id-help-0"
-            >
-              Name for your savings
-            </div>
-          </EuiFormHelpText>
+          />
         </div>
       </div>
-    </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="columnCompressedSwitch"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
       <div
-        className="euiFormRow euiFormRow--compressed euiFormRow--horizontal euiFormRow--hasSwitch"
-        id="random_html_id-row"
+        className="euiFormHelpText euiFormRow__text"
+        id="random_html_id-help-0"
+      >
+        Name for your savings
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal euiFormRow--hasSwitch"
+    id="random_html_id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onKeyUp={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
       >
         <div
-          className="euiFormRow__fieldWrapper"
+          className="euiSwitch euiSwitch--compressed"
         >
-          <EuiToolTip
-            content="Only Time Series visualization and a query including stats/span can be saved as Metric"
-            delay="regular"
+          <button
+            aria-checked={false}
+            aria-labelledby="random_html_id"
+            className="euiSwitch__button"
+            data-test-subj="eventExplorer__metricSaveName"
+            disabled={true}
             id="random_html_id"
             onBlur={[Function]}
+            onClick={[Function]}
             onFocus={[Function]}
-            position="top"
+            role="switch"
+            type="button"
           >
             <span
-              className="euiToolTipAnchor"
-              onKeyUp={[Function]}
-              onMouseOut={[Function]}
-              onMouseOver={[Function]}
+              className="euiSwitch__body"
             >
-              <EuiSwitch
-                checked={false}
-                compressed={true}
-                data-test-subj="eventExplorer__metricSaveName"
-                disabled={true}
-                label="Save as Metric"
-                onBlur={[Function]}
-                onChange={[Function]}
-                onFocus={[Function]}
-                showLabel={true}
-              >
-                <div
-                  className="euiSwitch euiSwitch--compressed"
-                >
-                  <button
-                    aria-checked={false}
-                    aria-labelledby="random_html_id"
-                    className="euiSwitch__button"
-                    data-test-subj="eventExplorer__metricSaveName"
-                    disabled={true}
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    role="switch"
-                    type="button"
-                  >
-                    <span
-                      className="euiSwitch__body"
-                    >
-                      <span
-                        className="euiSwitch__thumb"
-                      />
-                      <span
-                        className="euiSwitch__track"
-                      />
-                    </span>
-                  </button>
-                  <span
-                    className="euiSwitch__label"
-                    id="random_html_id"
-                    onClick={[Function]}
-                  >
-                    Save as Metric
-                  </span>
-                </div>
-              </EuiSwitch>
+              <span
+                className="euiSwitch__thumb"
+              />
+              <span
+                className="euiSwitch__track"
+              />
             </span>
-          </EuiToolTip>
+          </button>
+          <span
+            className="euiSwitch__label"
+            id="random_html_id"
+            onClick={[Function]}
+          >
+            Save as Metric
+          </span>
         </div>
-      </div>
-    </EuiFormRow>
-  </SavePanel>
-</Provider>
+      </span>
+    </div>
+  </div>,
+]
 `;

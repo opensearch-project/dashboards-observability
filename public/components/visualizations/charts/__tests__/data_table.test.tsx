@@ -22,7 +22,7 @@ describe('Data table component', () => {
     expect(agGridReactObj).toBeTruthy();
     await waitFor(() => {
       expect(
-        toJson(wrapper, {
+        toJson(gridWrapper, {
           mode: 'deep',
         })
       ).toMatchSnapshot();
