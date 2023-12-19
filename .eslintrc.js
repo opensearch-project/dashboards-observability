@@ -14,7 +14,37 @@ module.exports = {
     '@elastic/eslint-config-kibana',
     'plugin:@elastic/eui/recommended',
     'plugin:react-hooks/recommended',
+    "eslint:recommended",
+    "plugin:cypress/recommended",
+    "plugin:import/recommended",
+    "prettier"
   ],
+  env: {
+    'cypress/globals': true,
+  },
+  plugins: [
+    'cypress',
+  ],
+  rules: {
+    '@osd/eslint/no-restricted-paths': [
+      'error',
+      {
+        basePath: __dirname,
+        zones: [
+          {
+            target: ['(public|server)/**/*'],
+            from: ['../../packages/**/*','packages/**/*'],
+          },
+        ],
+      },
+    ],
+    // Add cypress specific rules here
+    'cypress/no-assigning-return-values': 'error',
+    'cypress/no-unnecessary-waiting': 'error',
+    'cypress/assertion-before-screenshot': 'warn',
+    'cypress/no-force': 'warn',
+    'cypress/no-async-tests': 'error',
+  },
   overrides: [
     {
       files: ['**/*.{js,ts,tsx}'],
@@ -29,4 +59,5 @@ module.exports = {
       },
     },
   ],
+  "ignorePatterns": ["**/*.d.ts"]
 };
