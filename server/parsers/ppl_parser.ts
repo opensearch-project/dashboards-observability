@@ -33,19 +33,22 @@ export const PPLParsers: MessageParser = {
             return [];
         }
 
-        return statsPPLs.map((query) => ({
-            type: 'output',
-            content: query
+        return statsPPLs.map((query) => {
+            const finalQuery = query
                 .replace(/`/g, '')  // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
-                .replace(/\bSPAN\(/g, 'span('),  // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
-            contentType: 'ppl_visualization',
-            suggestedActions: [
-                {
-                    message: 'View details',
-                    actionType: 'view_ppl_visualization',
-                    metadata: { query, question: interaction.input },
-                },
-            ],
-        }));
+                .replace(/\bSPAN\(/g, 'span(');  // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
+            return ({
+                type: 'output',
+                content: finalQuery,
+                contentType: 'ppl_visualization',
+                suggestedActions: [
+                    {
+                        message: 'View details',
+                        actionType: 'view_ppl_visualization',
+                        metadata: { query: finalQuery, question: interaction.input },
+                    },
+                ],
+            });
+        });
     },
 };
