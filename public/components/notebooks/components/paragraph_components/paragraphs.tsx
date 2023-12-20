@@ -203,7 +203,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       filters: [],
       useMargins: false,
       id: vizUniqueId,
-      visSavedObjectId: objectId,
+      visSavedObjId: objectId,
       timeRange: {
         to: para.visEndTime,
         from: para.visStartTime,

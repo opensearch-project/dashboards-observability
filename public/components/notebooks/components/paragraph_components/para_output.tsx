@@ -8,7 +8,6 @@ import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { set } from '@elastic/safer-lodash-set';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -125,8 +124,8 @@ const OutputBody = ({
           </>
         );
       case 'OBSERVABILITY_VISUALIZATION':
-        let http = getOSDHttp();
-        let pplService = getPPLService();
+        const http = getOSDHttp();
+        const pplService = getPPLService();
         let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
         let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
         fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
