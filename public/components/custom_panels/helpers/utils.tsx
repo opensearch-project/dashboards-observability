@@ -146,7 +146,6 @@ export const fetchVisualizationById = async (
     .then((res) => {
       const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
         .savedVisualization;
-      console.log('visualization in fetching visualization', visualization);
       savedVisualization = {
         ...visualization,
         id: res.observabilityObjectList[0].objectId,
@@ -498,22 +497,18 @@ export const renderOpenTelemetryVisualization = async (
 ) => {
   startTime = 'now-15y';
   endTime = 'now';
-  console.log('render panelVisualization: ', panelVisualization);
   const { http } = coreRefs;
   const visualizationType = 'bar';
   let index = panelVisualization?.metric?.index;
 
   if (index === undefined) {
     const indexAndDocumentName = extractIndexAndDocumentName(panelVisualization.name);
-    console.log('test: ', indexAndDocumentName);
     index = indexAndDocumentName[0];
     savedVisualizationId = indexAndDocumentName[1];
   }
-  console.log('index and documentName: ', index, savedVisualizationId);
   const fetchSampleDocument = await fetchSampleOTDocument(index, http, savedVisualizationId)();
 
   const source = fetchSampleDocument.hits[0]._source;
-  console.log('source: ', source);
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
       const formattedStartTime = convertDateTime(startTime, false, false, false, true);
@@ -536,11 +531,9 @@ export const renderOpenTelemetryVisualization = async (
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min;
       }
-      console.log('fetchingAggregatedBinCount: ', fetchingAggregatedBinCount);
       return {
         xAxis: bucket.min + ' - ' + bucket.max,
         'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
-        // 'count()': getRandomInt(1, 100),
       };
     } catch (error) {
       console.error('Error processing bucket:', error);

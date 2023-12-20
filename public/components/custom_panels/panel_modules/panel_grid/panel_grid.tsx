@@ -92,7 +92,6 @@ export const PanelGrid = (props: PanelGridProps) => {
   };
 
   const loadVizComponents = () => {
-    // console.log('panelVisualizations[0]: ', panelVisualizations[0]);
     const gridDataComps = panelVisualizations.map(
       (panelVisualization: VisualizationType, index) => (
         <VisualizationContainer

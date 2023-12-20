@@ -144,7 +144,6 @@ export const ENABLED_VIS_TYPES = [
   VIS_CHART_TYPES.Pie,
   VIS_CHART_TYPES.HeatMap,
   VIS_CHART_TYPES.Text,
-  VIS_CHART_TYPES.Histogram,
 ];
 
 // Live tail constants
