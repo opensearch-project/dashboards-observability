@@ -226,9 +226,6 @@ export const {
 } = metricSlice.actions;
 
 /** private actions */
-const { setDateSpan } = metricSlice.actions;
-
-/** private actions */
 
 const { selectMetric, setMetric, setSortedIds } = metricSlice.actions;
 

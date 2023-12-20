@@ -5,8 +5,6 @@
 
 import React, { PropsWithChildren } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import type { RenderOptions } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 
@@ -149,7 +147,8 @@ describe('Export Metrics Panel Component', () => {
 
     expect(await screen.findByText('Custom operational dashboards/application'));
 
-    userEvent.keyboard('{ESCAPE}');
+    const dialog = screen.getByRole('dialog');
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
 
     await waitFor(() => {
       expect(screen.queryByTestId('metrics__SaveCancel')).not.toBeInTheDocument();
