@@ -250,9 +250,15 @@ export const renderSavedVisualization = async ({
 const dynamicLayoutFromQueryData = (queryData) => {
   const labelCount = queryData.jsonData.length;
   const legendLines = min([labelCount, 10]);
+  const legendLineHeight = 30;
+  const graphHeight = 280;
+  const legendVerticalOffset = -0.5;
+  const legendOffsetPerLine = -0.4;
+  const legendOffset = legendVerticalOffset + legendOffsetPerLine * legendLines;
 
-  const height = 230 + legendLines * 30;
-  const y = -0.35 + -0.15 * legendLines;
+  const height = graphHeight + legendLines * legendLineHeight;
+  const y = legendOffset;
+
   return {
     height,
     legend: { orientation: 'h', x: 0, y },

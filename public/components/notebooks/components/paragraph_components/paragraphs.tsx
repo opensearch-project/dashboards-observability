@@ -169,7 +169,11 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
 
   useEffect(() => {
     if (para.isVizualisation) {
-      if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
+      if (para.visSavedObjId !== '') {
+        const parsedVisInput = JSON.parse(para.vizObjectInput);
+        setVisInput({ ...parsedVisInput, visSavedObjId: para.visSavedObjId });
+      }
+
       fetchVisualizations();
     }
   }, []);
@@ -199,6 +203,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       filters: [],
       useMargins: false,
       id: vizUniqueId,
+      visSavedObjId: objectId,
       timeRange: {
         to: para.visEndTime,
         from: para.visStartTime,
