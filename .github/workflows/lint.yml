@@ -52,10 +52,11 @@ jobs:
         working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
         run: |
           git fetch origin main
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E "\.(js|ts|tsx)$")
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E "\.(js|ts|tsx)$" || true)
           if [ -n "$CHANGED_FILES" ]; then
             echo "Linting changed files..."
             yarn lint $CHANGED_FILES
           else
-            echo "No JavaScript/TypeScript files changed."
+            echo "No matching files changed."
+            exit 0
           fi
