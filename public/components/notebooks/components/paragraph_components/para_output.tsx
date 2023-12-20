@@ -103,7 +103,6 @@ const OutputBody = ({
   const to = convertDateTime(visInput?.timeRange?.from, false, false);
   const displayFrom = convertDateTime(visInput?.timeRange?.from, true) || 'Invalid date';
   const displayTo = convertDateTime(visInput?.timeRange?.from, false) || 'Invalid date';
-  console.log('display', { displayFrom, displayTo, from, to, dateFormat });
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
