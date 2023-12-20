@@ -4,7 +4,7 @@ on:  [push, pull_request]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: 'main'
+  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
 
 jobs:
   build:
@@ -51,8 +51,8 @@ jobs:
       - name: lint code base
         working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
         run: |
-          git fetch origin main
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E "\.(js|ts|tsx)$")
+          git fetch origin 2.x
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/2.x | grep -E "\.(js|ts|tsx)$")
           if [ -n "$CHANGED_FILES" ]; then
             echo "Linting changed files..."
             yarn lint $CHANGED_FILES
