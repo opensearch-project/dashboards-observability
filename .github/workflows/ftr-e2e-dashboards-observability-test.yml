@@ -10,7 +10,7 @@ env:
 
 jobs:
   tests:
-    name: Run test group of ${{ matrix.testgroups }}
+    name: Run FTR E2E Dashboards Observability Tests
     env:
       # Prevents extra Cypress installation progress messages
       CI: 1
