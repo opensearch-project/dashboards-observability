@@ -10,6 +10,9 @@
     "cypress:run": "TZ=America/Los_Angeles cypress run",
     "cypress:open": "TZ=America/Los_Angeles cypress open",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "prepare": "husky install",
+    "lint:es": "node ../../scripts/eslint",
+    "lint": "yarn lint:es",
     "cypress:parallel": "cypress-parallel -s cypress:run -t 2 -d .cypress/integration"
   },
   "dependencies": {

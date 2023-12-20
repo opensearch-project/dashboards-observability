@@ -1,0 +1,61 @@
+name: Lint
+
+on:  [push, pull_request]
+
+env:
+  PLUGIN_NAME: dashboards-observability
+  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v2
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}         
+
+      - name: Get node and yarn versions
+        working-directory: ${{ env.WORKING_DIR }}
+        id: versions_step
+        run: |
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
+          echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install correct yarn version for OpenSearch Dashboards
+        run: |
+          npm uninstall -g yarn
+          echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Bootstrap the plugin
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}  
+        run:
+          yarn osd bootstrap
+
+      - name: lint code base
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        run: |
+          git fetch origin 2.x
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB origin/2.x | grep -E "\.(js|ts|tsx)$")
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Linting changed files..."
+            yarn lint $CHANGED_FILES
+          else
+            echo "No JavaScript/TypeScript files changed."
+          fi
