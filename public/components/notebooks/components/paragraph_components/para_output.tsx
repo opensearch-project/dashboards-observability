@@ -6,7 +6,6 @@
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
-import moment from 'moment';
 import React, { useState } from 'react';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
@@ -18,6 +17,7 @@ import {
 import { ParaType } from '../../../../../common/types/notebooks';
 import { getOSDHttp, getPPLService, uiSettingsService } from '../../../../../common/utils';
 import { QueryDataGridMemo } from './para_query_grid';
+import { convertDateTime } from '../../../common/query_utils';
 
 const createQueryColumns = (jsonColumns: any[]) => {
   let index = 0;
@@ -99,7 +99,11 @@ const OutputBody = ({
    * TODO: add table rendering
    */
   const dateFormat = uiSettingsService.get('dateFormat');
-
+  const from = convertDateTime(visInput?.timeRange?.from, true, false);
+  const to = convertDateTime(visInput?.timeRange?.from, false, false);
+  const displayFrom = convertDateTime(visInput?.timeRange?.from, true) || 'Invalid date';
+  const displayTo = convertDateTime(visInput?.timeRange?.from, false) || 'Invalid date';
+  console.log('display', { displayFrom, displayTo, from, to, dateFormat });
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
@@ -111,14 +115,10 @@ const OutputBody = ({
           </EuiText>
         );
       case 'VISUALIZATION':
-        let from = moment(visInput?.timeRange?.from).format(dateFormat);
-        let to = moment(visInput?.timeRange?.to).format(dateFormat);
-        from = from === 'Invalid date' ? visInput.timeRange.from : from;
-        to = to === 'Invalid date' ? visInput.timeRange.to : to;
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${from} - ${to}`}
+              {`${displayFrom} - ${displayTo}`}
             </EuiText>
             <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
           </>
@@ -126,17 +126,14 @@ const OutputBody = ({
       case 'OBSERVABILITY_VISUALIZATION':
         const http = getOSDHttp();
         const pplService = getPPLService();
-        let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
-        let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
-        fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
-        toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
+
         const onEditClick = (savedVisualizationId: string) => {
           window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
         };
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${fromObs} - ${toObs}`}
+              {`${displayFrom} - ${displayTo}`}
             </EuiText>
             <div style={{ height: '300px', width: '100%' }}>
               <VisualizationContainer
@@ -146,8 +143,8 @@ const OutputBody = ({
                 onEditClick={onEditClick}
                 savedVisualizationId={visInput.visSavedObjId}
                 pplService={pplService}
-                fromTime={visInput?.timeRange?.from}
-                toTime={visInput?.timeRange?.to}
+                fromTime={from}
+                toTime={to}
                 onRefresh={false}
                 pplFilterValue={''}
                 usedInNotebooks={true}
