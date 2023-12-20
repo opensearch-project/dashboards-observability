@@ -17,7 +17,7 @@ jest.mock('react-router-dom', () => ({
     state: null,
     key: '',
   }),
-  useHistory: jest.fn()
+  useHistory: jest.fn(),
 }));
 
 describe('<NoteTable /> spec', () => {
@@ -62,8 +62,8 @@ describe('<NoteTable /> spec', () => {
     const notebooks = Array.from({ length: 5 }, (v, k) => ({
       path: `path-${k}`,
       id: `id-${k}`,
-      dateCreated: 'date-created',
-      dateModified: 'date-modified',
+      dateCreated: '2023-01-01 12:00:00',
+      dateModified: '2023-01-02 12:00:00',
     }));
     const utils = render(
       <NoteTable
@@ -125,7 +125,7 @@ describe('<NoteTable /> spec', () => {
     );
     utils.getByText('Create notebook').click();
     await waitFor(() => {
-      expect(global.window.location.href).toContain('/create')
+      expect(global.window.location.href).toContain('/create');
     });
   });
 });

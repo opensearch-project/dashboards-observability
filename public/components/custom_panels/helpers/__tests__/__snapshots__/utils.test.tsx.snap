@@ -147,7 +147,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               ],
               "span": undefined,
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -602,7 +602,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 ],
                 "span": undefined,
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -919,7 +919,23 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
             "responsive": true,
           }
         }
-        layout={[Function]}
+        layout={
+          Object {
+            "height": 1180,
+            "legend": Object {
+              "orientation": "v",
+              "traceorder": "normal",
+            },
+            "margin": Object {
+              "b": 30,
+              "l": 60,
+              "pad": 0,
+              "r": 30,
+              "t": 50,
+            },
+            "showlegend": true,
+          }
+        }
         visualizations={
           Object {
             "data": Object {
@@ -1064,7 +1080,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                   ],
                   "span": undefined,
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
@@ -1433,9 +1449,11 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 "#BD6F26",
                 "#4C636F",
               ],
+              "height": 1180,
               "hovermode": "closest",
               "legend": Object {
                 "orientation": "v",
+                "traceorder": "normal",
               },
               "margin": Object {
                 "b": 30,
@@ -1526,9 +1544,11 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                   "#BD6F26",
                   "#4C636F",
                 ],
+                "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
                   "orientation": "v",
+                  "traceorder": "normal",
                 },
                 "margin": Object {
                   "b": 30,
@@ -1741,7 +1761,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 ],
               },
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -2257,7 +2277,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                   ],
                 },
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -2628,7 +2648,47 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             },
           }
         }
-        layout={[Function]}
+        layout={
+          Object {
+            "colorway": Array [
+              "#3CA1C7",
+              "#54B399",
+              "#DB748A",
+              "#F2BE4B",
+              "#68CCC2",
+              "#2A7866",
+              "#843769",
+              "#374FB8",
+              "#BD6F26",
+              "#4C636F",
+            ],
+            "height": 1180,
+            "legend": Object {
+              "orientation": "v",
+              "traceorder": "normal",
+            },
+            "margin": Object {
+              "b": 30,
+              "l": 60,
+              "pad": 0,
+              "r": 30,
+              "t": 50,
+            },
+            "paper_bgcolor": "rgba(0, 0, 0, 0)",
+            "plot_bgcolor": "rgba(0, 0, 0, 0)",
+            "showlegend": true,
+            "xaxis": Object {
+              "fixedrange": true,
+              "showgrid": false,
+              "visible": true,
+            },
+            "yaxis": Object {
+              "fixedrange": true,
+              "showgrid": false,
+              "visible": true,
+            },
+          }
+        }
         visualizations={
           Object {
             "data": Object {
@@ -2787,7 +2847,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                     ],
                   },
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
@@ -3205,8 +3265,22 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
           layout={
             Object {
               "autosize": true,
+              "colorway": Array [
+                "#3CA1C7",
+                "#54B399",
+                "#DB748A",
+                "#F2BE4B",
+                "#68CCC2",
+                "#2A7866",
+                "#843769",
+                "#374FB8",
+                "#BD6F26",
+                "#4C636F",
+              ],
+              "height": 1180,
               "legend": Object {
                 "orientation": "v",
+                "traceorder": "normal",
               },
               "margin": Object {
                 "b": 30,
@@ -3215,6 +3289,8 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "r": 5,
                 "t": 50,
               },
+              "paper_bgcolor": "rgba(0, 0, 0, 0)",
+              "plot_bgcolor": "rgba(0, 0, 0, 0)",
               "shapes": Array [],
               "showlegend": true,
               "title": "",
@@ -3295,9 +3371,23 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               Object {
                 "autosize": true,
                 "barmode": "stack",
+                "colorway": Array [
+                  "#3CA1C7",
+                  "#54B399",
+                  "#DB748A",
+                  "#F2BE4B",
+                  "#68CCC2",
+                  "#2A7866",
+                  "#843769",
+                  "#374FB8",
+                  "#BD6F26",
+                  "#4C636F",
+                ],
+                "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
                   "orientation": "v",
+                  "traceorder": "normal",
                 },
                 "margin": Object {
                   "b": 30,
@@ -3306,6 +3396,8 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                   "r": 5,
                   "t": 50,
                 },
+                "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                "plot_bgcolor": "rgba(0, 0, 0, 0)",
                 "shapes": Array [],
                 "showlegend": true,
                 "title": "",
@@ -3492,7 +3584,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               ],
               "span": undefined,
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -3947,7 +4039,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 ],
                 "span": undefined,
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -4264,7 +4356,23 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
             "responsive": true,
           }
         }
-        layout={[Function]}
+        layout={
+          Object {
+            "height": 1180,
+            "legend": Object {
+              "orientation": "v",
+              "traceorder": "normal",
+            },
+            "margin": Object {
+              "b": 30,
+              "l": 60,
+              "pad": 0,
+              "r": 30,
+              "t": 50,
+            },
+            "showlegend": true,
+          }
+        }
         visualizations={
           Object {
             "data": Object {
@@ -4409,7 +4517,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                   ],
                   "span": undefined,
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
@@ -4778,9 +4886,11 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 "#BD6F26",
                 "#4C636F",
               ],
+              "height": 1180,
               "hovermode": "closest",
               "legend": Object {
                 "orientation": "v",
+                "traceorder": "normal",
               },
               "margin": Object {
                 "b": 30,
@@ -4871,9 +4981,11 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                   "#BD6F26",
                   "#4C636F",
                 ],
+                "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
                   "orientation": "v",
+                  "traceorder": "normal",
                 },
                 "margin": Object {
                   "b": 30,

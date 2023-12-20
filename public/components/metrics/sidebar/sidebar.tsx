@@ -5,27 +5,35 @@
 
 import './sidebar.scss';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
+  addSelectedMetric,
   availableMetricsSelector,
-  deSelectMetric,
-  selectMetric,
+  clearSelectedMetrics,
   loadMetrics,
+  removeSelectedMetric,
+  selectedMetricsIdsSelector,
   selectedMetricsSelector,
+  selectMetricByIdSelector,
 } from '../redux/slices/metrics_slice';
-import { CoreStart } from '../../../../../../src/core/public';
-import PPLService from '../../../services/requests/ppl';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 
-export const Sidebar = () => {
+export const Sidebar = ({
+  additionalSelectedMetricId,
+}: {
+  additionalSelectedMetricId?: string;
+}) => {
   const dispatch = useDispatch();
 
   const availableMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
+  const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
+
+  const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
 
   useEffect(() => {
     batch(() => {
@@ -33,32 +41,45 @@ export const Sidebar = () => {
     });
   }, [dispatch]);
 
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
+  useEffect(() => {
+    if (additionalMetric) {
+      dispatch(clearSelectedMetrics());
+      dispatch(addSelectedMetric(additionalMetric));
+    }
+  }, [additionalMetric]);
+
+  const selectedMetricsList = useMemo(() => {
+    return selectedMetricsIds.map((id) => selectedMetrics[id]).filter((m) => m); // filter away null entries
+  }, [selectedMetrics, selectedMetricsIds]);
+
+  const handleAddMetric = (metric: any) => dispatch(addSelectedMetric(metric));
 
   const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
+    dispatch(removeSelectedMetric(metric));
   };
 
   return (
     <I18nProvider>
-      <section className="sidebarHeight">
+      <div id="sidebar">
         <SearchBar />
         <EuiSpacer size="s" />
 
-        <MetricsAccordion
-          metricsList={selectedMetrics}
-          headerName="Selected Metrics"
-          handleClick={handleRemoveMetric}
-          dataTestSubj="metricsListItems_selectedMetrics"
-        />
-        <EuiSpacer size="s" />
-        <MetricsAccordion
-          metricsList={availableMetrics}
-          headerName="Available Metrics"
-          handleClick={handleAddMetric}
-          dataTestSubj="metricsListItems_availableMetrics"
-        />
-      </section>
+        <section className="sidebar">
+          <MetricsAccordion
+            metricsList={selectedMetricsList}
+            headerName="Selected Metrics"
+            handleClick={handleRemoveMetric}
+            dataTestSubj="metricsListItems_selectedMetrics"
+          />
+          <EuiSpacer size="s" />
+          <MetricsAccordion
+            metricsList={availableMetrics}
+            headerName="Available Metrics"
+            handleClick={handleAddMetric}
+            dataTestSubj="metricsListItems_availableMetrics"
+          />
+        </section>
+      </div>
     </I18nProvider>
   );
 };

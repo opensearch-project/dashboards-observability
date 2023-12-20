@@ -8269,6 +8269,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="tooltip_options"
                       labelType="label"
                     >
                       <div
@@ -9743,6 +9744,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="legend"
                       labelType="label"
                     >
                       <div
@@ -11188,6 +11190,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="chart_styles"
                       labelType="label"
                     >
                       <div
@@ -14360,6 +14363,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="color-theme"
                       labelType="label"
                     >
                       <div

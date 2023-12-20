@@ -2245,6 +2245,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                           "xxs": 1,
                         }
                       }
+                      draggableHandle=".mouseGrabber"
                       layouts={
                         Object {
                           "lg": Array [],
@@ -2275,6 +2276,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                             "xxs": 1,
                           }
                         }
+                        draggableHandle=".mouseGrabber"
                         layouts={
                           Object {
                             "lg": Array [],
@@ -2294,7 +2296,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                           compactType="vertical"
                           containerPadding={null}
                           draggableCancel=""
-                          draggableHandle=""
+                          draggableHandle=".mouseGrabber"
                           isDraggable={true}
                           isResizable={true}
                           layout={Array []}
@@ -4332,6 +4334,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                           "xxs": 1,
                         }
                       }
+                      draggableHandle=".mouseGrabber"
                       layouts={
                         Object {
                           "lg": Array [],
@@ -4362,6 +4365,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                             "xxs": 1,
                           }
                         }
+                        draggableHandle=".mouseGrabber"
                         layouts={
                           Object {
                             "lg": Array [],
@@ -4381,7 +4385,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                           compactType="vertical"
                           containerPadding={null}
                           draggableCancel=""
-                          draggableHandle=""
+                          draggableHandle=".mouseGrabber"
                           isDraggable={true}
                           isResizable={true}
                           layout={Array []}
