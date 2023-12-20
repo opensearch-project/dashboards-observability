@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
+import { EuiContextMenuItem, EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import { connect } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -53,6 +53,19 @@ const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType
   },
 });
 
+const promQLActionMenu = [
+  <EuiContextMenuItem
+    data-test-subj="showCatalogPPLQuery"
+    key="view_query"
+    onClick={() => {
+      closeActionsMenu();
+      showModal('catalogModal');
+    }}
+  >
+    View query
+  </EuiContextMenuItem>,
+];
+
 const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
   window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
 };
@@ -80,6 +93,7 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
         inlineEditor={
           metric.subType === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
         }
+        actionMenuType="metricsGrid"
       />
     </EuiDraggable>
   );
