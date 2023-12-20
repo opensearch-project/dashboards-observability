@@ -57,6 +57,6 @@ jobs:
             echo "Linting changed files..."
             yarn lint $CHANGED_FILES
           else
-            echo "No JavaScript/TypeScript files changed."
+            echo "No matching files changed."
             exit 0
           fi

@@ -98,6 +98,10 @@ export function AppTable(props: AppTableProps) {
     setIsModalVisible(true);
   };
 
+  const showModalTesting = () => {
+    setIsModalVisible(true);
+  };
+
   const onRename = async (newApplicationName: string) => {
     renameApplication(newApplicationName, selectedApplications[0].id);
     closeModal();

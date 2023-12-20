@@ -145,6 +145,31 @@ export const updatePromQLQueryFilters = (
   return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
 };
 
+export const updatePromQLQueryFiltersTestings = (
+  promQLQuery: string,
+  startTime: string,
+  endTime: string
+) => {
+  const { connection, metric, aggregation, attributesGroupBy } = parsePromQLIntoKeywords(
+    promQLQuery
+  );
+  console.log('updatePromQLQueryFilters', {
+    connection,
+    metric,
+    aggregation,
+    attributesGroupBy,
+    promQLQuery,
+  });
+  const promQLPart = buildPromQLFromMetricQuery({
+    metric,
+    attributesGroupBy: attributesGroupBy.split(','),
+    aggregation,
+  });
+  const start = convertDateTime(startTime, true, false, true);
+  const end = convertDateTime(endTime, false, false, true);
+  return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
+};
+
 const getPPLIndex = (query: string): string => {
   const matches = query.match(PPL_INDEX_REGEX);
   if (matches) {
