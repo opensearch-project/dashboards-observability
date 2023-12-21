@@ -11,6 +11,7 @@ import {
   IToasts,
   SavedObjectsClientContract,
 } from '../../../../src/core/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
@@ -24,6 +25,8 @@ class CoreRefs {
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
   public assistantEnabled?: boolean;
+  public dashboard?: DashboardStart;
+  public dashboardProviders?: unknown;
   private constructor() {
     // ...
   }

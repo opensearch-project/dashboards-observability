@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from '../../../src/core/public';
 import { SavedObjectsClient } from '../../../src/core/server';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
@@ -12,6 +11,7 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
+import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -19,14 +19,6 @@ export interface AppPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsClient: SavedObjectsClient;
   data: DataPublicPluginStart;
-}
-
-type ContentRenderer = (content: unknown) => React.ReactElement;
-type ActionExecutor = (params: Record<string, unknown>) => void;
-export interface AssistantSetup {
-  registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
-  registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
-  assistantEnabled: () => Promise<boolean>;
 }
 
 export interface SetupDependencies {
@@ -43,3 +35,11 @@ export interface ObservabilitySetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityStart {}
+
+/**
+ * Introduce a compile dependency on dashboards-assistant
+ * as observerability need some types from the plugin.
+ * It will gives an type error when dashboards-assistant is not installed so add a ts-ignore to suppress the error.
+ */
+// @ts-ignore
+export type { AssistantSetup } from "../../dashboards-assistant/public";

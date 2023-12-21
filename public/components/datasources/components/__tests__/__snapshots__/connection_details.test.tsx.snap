@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Connection Details test Renders connection details for prometheus datasource 1`] = `
-<Component
+<ConnectionDetails
   connector="PROMETHEUS"
   dataConnection="prom"
   description=""
@@ -16,7 +16,7 @@ exports[`Connection Details test Renders connection details for prometheus datas
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
-  <Component>
+  <ConnectionManagementCallout>
     <EuiCallOut
       iconType="iInCircle"
       title="Configurations may be managed elsewhere."
@@ -86,7 +86,7 @@ exports[`Connection Details test Renders connection details for prometheus datas
         </EuiText>
       </div>
     </EuiCallOut>
-  </Component>
+  </ConnectionManagementCallout>
   <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
@@ -260,11 +260,11 @@ exports[`Connection Details test Renders connection details for prometheus datas
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
-</Component>
+</ConnectionDetails>
 `;
 
 exports[`Connection Details test Renders connection details for s3 datasource 1`] = `
-<Component
+<ConnectionDetails
   connector="S3GLUE"
   dataConnection="ya"
   description=""
@@ -280,7 +280,7 @@ exports[`Connection Details test Renders connection details for s3 datasource 1`
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
-  <Component>
+  <ConnectionManagementCallout>
     <EuiCallOut
       iconType="iInCircle"
       title="Configurations may be managed elsewhere."
@@ -345,7 +345,7 @@ exports[`Connection Details test Renders connection details for s3 datasource 1`
         </EuiText>
       </div>
     </EuiCallOut>
-  </Component>
+  </ConnectionManagementCallout>
   <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
@@ -546,5 +546,5 @@ exports[`Connection Details test Renders connection details for s3 datasource 1`
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
-</Component>
+</ConnectionDetails>
 `;

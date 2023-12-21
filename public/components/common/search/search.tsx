@@ -13,7 +13,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -50,6 +49,10 @@ import {
   useGetIndexPatterns,
 } from '../../event_analytics/explorer/query_assist/hooks';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
+import {
+  resetSummary,
+  selectQueryAssistantSummarization,
+} from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
 import { reset } from '../../event_analytics/redux/slices/query_result_slice';
 import {
   changeData,
@@ -57,17 +60,11 @@ import {
   selectQueries,
 } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
-import {
-  selectQueryAssistantSummarization,
-  resetSummary,
-} from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
 import { PPLReferenceFlyout } from '../helpers';
-import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
-import { Autocomplete } from './autocomplete';
+import { LiveTailButton } from '../live_tail/live_tail_button';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
 import './search.scss';
-import PPLService from '../../../services/requests/ppl';
 
 export interface IQueryBarProps {
   query: string;
@@ -332,48 +329,16 @@ export const Search = (props: any) => {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center" wrap>
-            {appLogEvents ? (
-              <>
-                <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
-                  <EuiToolTip position="top" content={baseQuery}>
-                    <EuiBadge className="base-query-popover" color="hollow">
-                      Base Query
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  key="search-bar"
-                  className="search-area"
-                  grow={5}
-                  style={{ minWidth: 400 }}
-                >
-                  <Autocomplete
-                    key={'autocomplete-search-bar'}
-                    query={query}
-                    tempQuery={tempQuery}
-                    baseQuery={baseQuery}
-                    handleQueryChange={handleQueryChange}
-                    handleQuerySearch={() => {
-                      onQuerySearch(queryLang);
-                    }}
-                    dslService={dslService}
-                    getSuggestions={getSuggestions}
-                    onItemSelect={onItemSelect}
-                    tabId={tabId}
-                  />
-                  <EuiBadge
-                    className={`ppl-link ${
-                      uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
-                    }`}
-                    color="hollow"
-                    onClick={() => showFlyout()}
-                    onClickAriaLabel={'pplLinkShowFlyout'}
-                  >
-                    PPL
+            {appLogEvents && (
+              <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
+                <EuiToolTip position="top" content={baseQuery}>
+                  <EuiBadge className="base-query-popover" color="hollow">
+                    Base Query
                   </EuiBadge>
-                </EuiFlexItem>
-              </>
-            ) : (
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!appLogEvents && (
               <>
                 <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
                   <EuiSuperSelect

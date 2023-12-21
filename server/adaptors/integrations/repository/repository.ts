@@ -7,7 +7,7 @@ import * as path from 'path';
 import { IntegrationReader } from './integration';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 
-export class RepositoryReader {
+export class TemplateManager {
   reader: CatalogDataAdaptor;
   directory: string;
 
@@ -24,20 +24,22 @@ export class RepositoryReader {
       return [];
     }
     const integrations = await Promise.all(
-      folders.value.map((i) => this.getIntegration(path.basename(i)))
+      folders.value.map((i) =>
+        this.getIntegration(path.relative(this.directory, path.join(this.directory, i)))
+      )
     );
     return integrations.filter((x) => x !== null) as IntegrationReader[];
   }
 
-  async getIntegration(name: string): Promise<IntegrationReader | null> {
-    if ((await this.reader.getDirectoryType(name)) !== 'integration') {
-      console.error(`Requested integration '${name}' does not exist`);
+  async getIntegration(integPath: string): Promise<IntegrationReader | null> {
+    if ((await this.reader.getDirectoryType(integPath)) !== 'integration') {
+      console.error(`Requested integration '${integPath}' does not exist`);
       return null;
     }
-    const integ = new IntegrationReader(name, this.reader.join(name));
+    const integ = new IntegrationReader(integPath, this.reader.join(integPath));
     const checkResult = await integ.getConfig();
     if (!checkResult.ok) {
-      console.error(`Integration '${name}' is invalid:`, checkResult.error);
+      console.error(`Integration '${integPath}' is invalid:`, checkResult.error);
       return null;
     }
     return integ;

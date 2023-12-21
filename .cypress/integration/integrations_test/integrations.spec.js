@@ -7,7 +7,7 @@
 
 import {
   TEST_INTEGRATION_INSTANCE, TEST_SAMPLE_INSTANCE,
-} from '../utils/constants';
+} from '../../utils/constants';
 
 let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;
@@ -66,7 +66,7 @@ describe('Basic sanity test for integrations plugin', () => {
     moveToAvailableNginxIntegration();
     cy.get('.euiFilterGroup').trigger('mouseover').click();
     cy.get('.euiFilterSelectItem').contains('visualization').click();
-    cy.get('.euiTableRow').should('have.length', 4);//Filters correctly to visualization types
+    cy.get('.euiTableRow').should('have.length', 6);//Filters correctly to visualization types
   })
 });
 
@@ -75,17 +75,14 @@ describe('Tests the add nginx integration instance flow', () => {
     createSamples();
     moveToAvailableNginxIntegration();
     cy.get('[data-test-subj="add-integration-button"]').click();
-    cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
-    cy.get('[data-test-subj="createInstanceButton"]').should('be.disabled')
-    cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+    cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx Integration');
+    cy.get('[data-test-subj="create-instance-button"]').should('be.disabled')
     // Modifies the name of the integration
-    cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
-    // validates the created sample index
-    cy.get('[data-test-subj="data-source-name"]').type('ss4o_logs-nginx-sample-sample');
-    cy.get('[data-test-subj="validateIndex"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'valid');
-    cy.get('[data-test-subj="createInstanceButton"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'successfully');
+    cy.get('[data-test-subj="new-instance-name"]').clear().type(testInstance);
+    // Validates the created sample index
+    cy.get('[data-test-subj="data-source-name"]').type('ss4o_logs-nginx-sample-sample{enter}');
+    cy.get('[data-test-subj="create-instance-button"]').click();
+    cy.get('[data-test-subj="eventHomePageTitle"]').should('contain', 'nginx');
   })
 
   it('Navigates to installed integrations page and verifies that nginx-test exists', () => {

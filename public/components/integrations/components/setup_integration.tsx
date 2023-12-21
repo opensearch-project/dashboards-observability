@@ -226,6 +226,7 @@ export function SetupIntegrationForm({
           onChange={(event) => updateConfig({ displayName: event.target.value })}
           placeholder={`${integration.name} Integration`}
           isInvalid={config.displayName.length === 0}
+          data-test-subj="new-instance-name"
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -273,6 +274,7 @@ export function SetupIntegrationForm({
             updateConfig({ connectionDataSource: newOption.label });
           }}
           customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
+          data-test-subj="data-source-name"
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
@@ -436,6 +438,7 @@ export function SetupBottomBar({
                 console.error('Invalid data source type');
               }
             }}
+            data-test-subj="create-instance-button"
           >
             Add Integration
           </EuiButton>

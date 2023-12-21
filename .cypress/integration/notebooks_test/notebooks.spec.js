@@ -15,9 +15,9 @@ import {
   NOTEBOOK_TEXT,
   OPENSEARCH_URL,
   COMMAND_TIMEOUT_LONG,
-} from '../utils/constants';
+} from '../../utils/constants';
 
-import { SAMPLE_PANEL } from '../utils/panel_constants';
+import { SAMPLE_PANEL } from '../../utils/panel_constants';
 
 import { skipOn } from '@cypress/skip-test';
 

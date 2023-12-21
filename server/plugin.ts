@@ -21,7 +21,8 @@ import {
   searchSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
-import { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import { ObservabilityPluginSetup, ObservabilityPluginStart, AssistantPluginSetup } from './types';
+import { PPLParsers } from './parsers/ppl_parser';
 
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
@@ -31,7 +32,13 @@ export class ObservabilityPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(
+    core: CoreSetup,
+    deps: {
+      assistantDashboards?: AssistantPluginSetup;
+    }
+  ) {
+    const { assistantDashboards } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
     const config = await this.initializerContext.config
@@ -126,6 +133,8 @@ export class ObservabilityPlugin
         show: true,
       },
     }));
+
+    assistantDashboards?.registerMessageParser(PPLParsers);
 
     return {};
   }

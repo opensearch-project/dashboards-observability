@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Histogram component Renders histogram component 1`] = `
-<Component
+<Histogram
   config={true}
   layout={
     Object {
@@ -818,5 +818,5 @@ exports[`Histogram component Renders histogram component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</Histogram>
 `;

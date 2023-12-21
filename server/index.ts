@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TypeOf, schema } from '@osd/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../src/core/server';
 import { ObservabilityPlugin } from './plugin';
 
@@ -15,12 +15,10 @@ export { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 
 const observabilityConfig = {
   schema: schema.object({
-    observability: schema.object({
-      query_assist: schema.object({
-        ppl_agent_id: schema.maybe(schema.string()),
-        response_summary_agent_id: schema.maybe(schema.string()),
-        error_summary_agent_id: schema.maybe(schema.string()),
-      }),
+    query_assist: schema.object({
+      ppl_agent_id: schema.maybe(schema.string()),
+      response_summary_agent_id: schema.maybe(schema.string()),
+      error_summary_agent_id: schema.maybe(schema.string()),
     }),
   }),
 };
