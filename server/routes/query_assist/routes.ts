@@ -37,7 +37,7 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
     ppl_agent_id: pplAgentId,
     response_summary_agent_id: responseSummaryAgentId,
     error_summary_agent_id: ErrorSummaryAgentId,
-  } = config.observability.query_assist;
+  } = config.query_assist;
 
   router.post(
     {
@@ -54,7 +54,12 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!pplAgentId) return response.custom({ statusCode: 400, body: 'PPL agent not found.' });
+      if (!pplAgentId)
+        return response.custom({
+          statusCode: 400,
+          body:
+            'PPL agent not found in opensearch_dashboards.yml. Expected observability.query_assist.ppl_agent_id',
+        });
 
       const client = context.core.opensearch.client.asCurrentUser;
       try {
@@ -112,7 +117,11 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       if (!responseSummaryAgentId || !ErrorSummaryAgentId)
-        return response.custom({ statusCode: 400, body: 'Summary agent not found.' });
+        return response.custom({
+          statusCode: 400,
+          body:
+            'Summary agent not found in opensearch_dashboards.yml. Expected observability.query_assist.response_summary_agent_id and observability.query_assist.error_summary_agent_id',
+        });
 
       const client = context.core.opensearch.client.asCurrentUser;
       const { index, question, query, response: _response, isError } = request.body;
