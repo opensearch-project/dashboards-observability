@@ -12,7 +12,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
     }
   }
 >
-  <Component
+  <MetricsExportPanel
     availableDashboards={
       Array [
         Object {
@@ -551,6 +551,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
         </EuiForm>
       </div>
     </div>
-  </Component>
+  </MetricsExportPanel>
 </Provider>
 `;

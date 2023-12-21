@@ -12,7 +12,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
     }
   }
 >
-  <Component>
+  <Sidebar>
     <I18nProvider>
       <IntlProvider
         defaultLocale="en"
@@ -102,7 +102,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
           <div
             id="sidebar"
           >
-            <Component>
+            <SearchBar>
               <div
                 className="metrics-search-bar-input"
                 data-test-subj="metricsSearch"
@@ -233,7 +233,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   </EuiFlexGroup>
                 </EuiSearchBar>
               </div>
-            </Component>
+            </SearchBar>
             <EuiSpacer
               size="s"
             >
@@ -244,7 +244,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
             <section
               className="sidebar"
             >
-              <Component
+              <MetricsAccordion
                 dataTestSubj="metricsListItems_selectedMetrics"
                 handleClick={[Function]}
                 headerName="Selected Metrics"
@@ -356,7 +356,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                     </div>
                   </div>
                 </EuiAccordion>
-              </Component>
+              </MetricsAccordion>
               <EuiSpacer
                 size="s"
               >
@@ -364,7 +364,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   className="euiSpacer euiSpacer--s"
                 />
               </EuiSpacer>
-              <Component
+              <MetricsAccordion
                 dataTestSubj="metricsListItems_availableMetrics"
                 handleClick={[Function]}
                 headerName="Available Metrics"
@@ -476,12 +476,12 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                     </div>
                   </div>
                 </EuiAccordion>
-              </Component>
+              </MetricsAccordion>
             </section>
           </div>
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Component>
+  </Sidebar>
 </Provider>
 `;

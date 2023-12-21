@@ -12,7 +12,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     }
   }
 >
-  <Connect(Component)
+  <Connect(InnerMetricsGrid)
     chrome={
       Object {
         "addApplicationClass": [MockFunction],
@@ -173,7 +173,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     spanParam="1h"
     startTime="now-30m"
   >
-    <Component
+    <InnerMetricsGrid
       allMetrics={Object {}}
       chrome={
         Object {
@@ -462,7 +462,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           </DragDropContext>
         </EuiDragDropContext>
       </section>
-    </Component>
-  </Connect(Component)>
+    </InnerMetricsGrid>
+  </Connect(InnerMetricsGrid)>
 </Provider>
 `;

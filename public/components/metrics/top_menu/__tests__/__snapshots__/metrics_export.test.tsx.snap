@@ -12,7 +12,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
     }
   }
 >
-  <Component>
+  <MetricsExport>
     <MetricsExportPopOver>
       <EuiPopover
         anchorPosition="downCenter"
@@ -120,6 +120,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
         </div>
       </EuiPopover>
     </MetricsExportPopOver>
-  </Component>
+  </MetricsExport>
 </Provider>
 `;
