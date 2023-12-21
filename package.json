@@ -58,8 +58,7 @@
     "eslint": "^6.8.0",
     "husky": "^8.0.3",
     "jest-dom": "^4.0.0",
-    "lint-staged": "^13.1.0",
-    "ts-jest": "^29.1.0"
+    "lint-staged": "^13.1.0"
   },
   "resolutions": {
     "react-syntax-highlighter": "^15.4.3",
