@@ -34,6 +34,7 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
+import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 
 interface SummarizationContext {
   question: string;
@@ -98,7 +99,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
             },
           })
         );
-        generateSummary();
+        if (explorerData.total > 0) generateSummary();
       })();
     }
   }, [summaryData.responseForSummaryStatus]);
@@ -127,7 +128,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
 
   // generic method for generating ppl from natural language
   const request = async () => {
-    const generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
+    const generatedPPL = await getOSDHttp().post(QUERY_ASSIST_API.GENERATE_PPL, {
       body: JSON.stringify({
         question: props.nlqInput,
         index: props.selectedIndex[0].label,
@@ -173,48 +174,46 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
     try {
-      if (explorerData.total > 0) {
-        const isError = summaryData.responseForSummaryStatus === 'failure';
-        const summarizationContext: SummarizationContext = {
-          question: props.nlqInput,
-          index: props.selectedIndex[0].label,
-          isError,
-          query: queryRedux.rawQuery,
-          response: isError
-            ? String(JSON.parse(explorerData.error.body.message).error.details)
-            : JSON.stringify({
-                datarows: explorerData.datarows,
-                schema: explorerData.schema,
-                size: explorerData.size,
-                total: explorerData.total,
-              }).slice(0, 7000),
-          ...context,
-        };
-        await dispatch(
-          changeSummary({
-            tabId: props.tabId,
-            data: {
-              summaryLoading: true,
-              isPPLError: isError,
-            },
-          })
-        );
-        const summary = await getOSDHttp().post<{
-          summary: string;
-          suggestedQuestions: string[];
-        }>('/api/assistant/summarize', {
-          body: JSON.stringify(summarizationContext),
-        });
-        await dispatch(
-          changeSummary({
-            tabId: props.tabId,
-            data: {
-              summary: summary.summary,
-              suggestedQuestions: summary.suggestedQuestions,
-            },
-          })
-        );
-      }
+      const isError = summaryData.responseForSummaryStatus === 'failure';
+      const summarizationContext: SummarizationContext = {
+        question: props.nlqInput,
+        index: props.selectedIndex[0].label,
+        isError,
+        query: queryRedux.rawQuery,
+        response: isError
+          ? String(JSON.parse(explorerData.error.body.message).error.details)
+          : JSON.stringify({
+              datarows: explorerData.datarows,
+              schema: explorerData.schema,
+              size: explorerData.size,
+              total: explorerData.total,
+            }).slice(0, 7000),
+        ...context,
+      };
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summaryLoading: true,
+            isPPLError: isError,
+          },
+        })
+      );
+      const summary = await getOSDHttp().post<{
+        summary: string;
+        suggestedQuestions: string[];
+      }>(QUERY_ASSIST_API.SUMMARIZE, {
+        body: JSON.stringify(summarizationContext),
+      });
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summary: summary.summary,
+            suggestedQuestions: summary.suggestedQuestions,
+          },
+        })
+      );
     } catch (error) {
       coreRefs.toasts?.addError(formatError(error as ResponseError), {
         title: 'Failed to summarize results',

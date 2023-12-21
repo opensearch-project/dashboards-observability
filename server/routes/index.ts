@@ -23,6 +23,7 @@ import { registerMetricsRoute } from './metrics/metrics_rounter';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
 import { registerDataConnectionsRoute } from './data_connections/data_connections_router';
 import { registerDatasourcesRoute } from './datasources/datasources_router';
+import { registerQueryAssistRoutes } from './query_assist/routes';
 
 export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
   PanelsRouter(router);
@@ -46,4 +47,5 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router);
   registerDatasourcesRoute(router);
+  registerQueryAssistRoutes(router);
 }
