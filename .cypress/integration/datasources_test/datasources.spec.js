@@ -3,33 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/// <reference types="cypress" />
+import {FONTEND_BASE_PATH, DATASOURCES_API_PREFIX} from '../../utils/constants'
 
-const moveToDatasourcesHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/datasources`);
-};
-
-// const moveToNewDatasourcesPage = () => {
-//   cy.visit(`${Cypress.env('opensearchDashboards')}/app/datasources#/new`);
-// };
-
-// const moveToCreatePrometheusDatasourcePage = () => {
-//   cy.visit(`${Cypress.env('opensearchDashboards')}/app/datasources#/configure/PROMETHEUS`);
-// };
+const visitDatasourcesHomePage = () => {
+  cy.visit(FONTEND_BASE_PATH + DATASOURCES_API_PREFIX);
+}
 
 describe('Integration tests for datasources plugin', () => {
-  // const testPrometheusSuffix = (Math.random() + 1).toString(36).substring(7);
-  // const testPrometheusInstance = `Prometheus_${testPrometheusSuffix}`;
-  // const testS3Suffix = (Math.random() + 1).toString(36).substring(7);
-  // const testS3Instance = `S3_${testS3Suffix}`;
+
 
   it('Navigates to datasources plugin and expects the correct header', () => {
-    moveToDatasourcesHome();
+    visitDatasourcesHomePage();
     cy.get('[data-test-subj="dataconnections-header"]').should('exist');
   });
 
   it('Tests navigation between tabs and goes to Prometheus creation flow', () => {
-    moveToDatasourcesHome();
+    visitDatasourcesHomePage();
     cy.get('[data-test-subj="new"]').click();
     cy.url().should('include', '/new');
     cy.get('[data-test-subj="datasource_card_prometheus"]').click();
