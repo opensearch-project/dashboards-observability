@@ -5,6 +5,7 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { schema } from '@osd/config-schema';
+import { ObservabilityConfig } from '../..';
 import {
   IOpenSearchDashboardsResponse,
   IRouter,
@@ -12,10 +13,6 @@ import {
 } from '../../../../../src/core/server';
 import { ML_COMMONS_API_PREFIX, QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-
-const pplAgentId = '284wjowBQRcDZmIs1OF8';
-const summarySuccessAgentId = 'o84kjowBQRcDZmIsweF6';
-const summaryErrorAgentId = 'pM4kjowBQRcDZmIsweGb';
 
 const AGENT_REQUEST_OPTIONS = {
   /**
@@ -35,7 +32,13 @@ type AgentResponse = ApiResponse<{
   }>;
 }>;
 
-export function registerQueryAssistRoutes(router: IRouter) {
+export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
+  const {
+    ppl_agent_id: pplAgentId,
+    response_summary_agent_id: responseSummaryAgentId,
+    error_summary_agent_id: ErrorSummaryAgentId,
+  } = config.observability.query_assist;
+
   router.post(
     {
       path: QUERY_ASSIST_API.GENERATE_PPL,
@@ -51,6 +54,8 @@ export function registerQueryAssistRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      if (!pplAgentId) return response.custom({ statusCode: 400, body: 'PPL agent not found.' });
+
       const client = context.core.opensearch.client.asCurrentUser;
       try {
         const pplRequest = (await client.transport.request(
@@ -106,6 +111,9 @@ export function registerQueryAssistRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      if (!responseSummaryAgentId || !ErrorSummaryAgentId)
+        return response.custom({ statusCode: 400, body: 'Summary agent not found.' });
+
       const client = context.core.opensearch.client.asCurrentUser;
       const { index, question, query, response: _response, isError } = request.body;
       const queryResponse = JSON.stringify(_response);
@@ -115,7 +123,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
           summaryRequest = (await client.transport.request(
             {
               method: 'POST',
-              path: `${ML_COMMONS_API_PREFIX}/agents/${summarySuccessAgentId}/_execute`,
+              path: `${ML_COMMONS_API_PREFIX}/agents/${responseSummaryAgentId}/_execute`,
               body: {
                 parameters: { index, question, query, response: queryResponse },
               },
@@ -131,7 +139,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
           summaryRequest = (await client.transport.request(
             {
               method: 'POST',
-              path: `${ML_COMMONS_API_PREFIX}/agents/${summaryErrorAgentId}/_execute`,
+              path: `${ML_COMMONS_API_PREFIX}/agents/${ErrorSummaryAgentId}/_execute`,
               body: {
                 parameters: { index, question, query, response: queryResponse, fields },
               },
