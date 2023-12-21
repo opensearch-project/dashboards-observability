@@ -12,7 +12,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
     }
   }
 >
-  <Component>
+  <TopMenu>
     <EuiFlexGroup
       gutterSize="s"
       justifyContent="flexEnd"
@@ -804,7 +804,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <Component>
+            <MetricsExport>
               <MetricsExportPopOver>
                 <EuiPopover
                   anchorPosition="downCenter"
@@ -912,11 +912,11 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                   </div>
                 </EuiPopover>
               </MetricsExportPopOver>
-            </Component>
+            </MetricsExport>
           </div>
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </Component>
+  </TopMenu>
 </Provider>
 `;

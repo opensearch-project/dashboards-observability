@@ -2,7 +2,7 @@
 
 exports[`Utils helper functions renders displayVisualization function 1`] = `
 <div>
-  <Component
+  <Visualization
     visualizations={
       Object {
         "data": Object {
@@ -457,7 +457,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
       }
     }
   >
-    <Component
+    <VisualizationChart
       visualizations={
         Object {
           "data": Object {
@@ -912,7 +912,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
         }
       }
     >
-      <Component
+      <Bar
         config={
           Object {
             "displaylogo": false,
@@ -1594,15 +1594,15 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Component>
-    </Component>
-  </Component>
+      </Bar>
+    </VisualizationChart>
+  </Visualization>
 </div>
 `;
 
 exports[`Utils helper functions renders displayVisualization function 2`] = `
 <div>
-  <Component
+  <Visualization
     visualizations={
       Object {
         "data": Object {
@@ -2118,7 +2118,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
       }
     }
   >
-    <Component
+    <VisualizationChart
       visualizations={
         Object {
           "data": Object {
@@ -2634,7 +2634,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
         }
       }
     >
-      <Component
+      <Line
         config={
           Object {
             "barmode": "line",
@@ -3431,15 +3431,15 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Component>
-    </Component>
-  </Component>
+      </Line>
+    </VisualizationChart>
+  </Visualization>
 </div>
 `;
 
 exports[`Utils helper functions renders displayVisualization function 3`] = `
 <div>
-  <Component
+  <Visualization
     visualizations={
       Object {
         "data": Object {
@@ -3894,7 +3894,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
       }
     }
   >
-    <Component
+    <VisualizationChart
       visualizations={
         Object {
           "data": Object {
@@ -4349,7 +4349,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
         }
       }
     >
-      <Component
+      <Bar
         config={
           Object {
             "displaylogo": false,
@@ -5031,9 +5031,9 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Component>
-    </Component>
-  </Component>
+      </Bar>
+    </VisualizationChart>
+  </Visualization>
 </div>
 `;
 

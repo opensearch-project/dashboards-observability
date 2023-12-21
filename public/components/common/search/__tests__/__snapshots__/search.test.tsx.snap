@@ -12,7 +12,7 @@ exports[`Explorer Search component renders basic component 1`] = `
     }
   }
 >
-  <Component>
+  <Search>
     <div
       className="globalQueryBar"
     >
@@ -160,7 +160,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                 }
               }
             >
-              <Component
+              <Autocomplete
                 baseQuery=""
                 handleQuerySearch={[Function]}
                 key="autocomplete-search-bar"
@@ -236,7 +236,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                     </EuiValidatableControl>
                   </EuiTextArea>
                 </div>
-              </Component>
+              </Autocomplete>
               <EuiBadge
                 className="ppl-link ppl-link-light"
                 color="hollow"
@@ -801,7 +801,7 @@ exports[`Explorer Search component renders basic component 1`] = `
               <EuiPopover
                 anchorPosition="downCenter"
                 button={
-                  <Unknown
+                  <LiveTailButton
                     dataTestSubj="eventLiveTail"
                   />
                 }
@@ -817,7 +817,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                   <div
                     className="euiPopover__anchor"
                   >
-                    <Component
+                    <LiveTailButton
                       dataTestSubj="eventLiveTail"
                     >
                       <EuiButton
@@ -896,7 +896,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                           </button>
                         </EuiButtonDisplay>
                       </EuiButton>
-                    </Component>
+                    </LiveTailButton>
                   </div>
                 </div>
               </EuiPopover>
@@ -905,6 +905,6 @@ exports[`Explorer Search component renders basic component 1`] = `
         </div>
       </EuiFlexGroup>
     </div>
-  </Component>
+  </Search>
 </Provider>
 `;

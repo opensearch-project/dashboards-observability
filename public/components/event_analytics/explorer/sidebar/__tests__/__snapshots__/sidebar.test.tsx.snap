@@ -12,7 +12,7 @@ exports[`Siderbar component Renders empty sidebar component 1`] = `
     }
   }
 >
-  <Component
+  <Sidebar
     explorerData={Object {}}
     explorerFields={
       Object {
@@ -314,7 +314,7 @@ exports[`Siderbar component Renders empty sidebar component 1`] = `
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Component>
+  </Sidebar>
 </Provider>
 `;
 
@@ -330,7 +330,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
     }
   }
 >
-  <Component
+  <Sidebar
     explorerData={
       Object {
         "jsonData": Array [
@@ -1139,7 +1139,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="double_per_ip_bytes"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "double_per_ip_bytes",
@@ -1426,7 +1426,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -1526,7 +1526,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="host"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "host",
@@ -1813,7 +1813,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -1913,7 +1913,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="ip_count"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "ip_count",
@@ -2200,7 +2200,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -2300,7 +2300,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="per_ip_bytes"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "per_ip_bytes",
@@ -2587,7 +2587,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -2687,7 +2687,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="resp_code"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "resp_code",
@@ -2974,7 +2974,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -3074,7 +3074,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="sum_bytes"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "sum_bytes",
@@ -3361,7 +3361,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -3619,7 +3619,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="agent"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "agent",
@@ -3963,7 +3963,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -4063,7 +4063,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="bytes"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "bytes",
@@ -4351,7 +4351,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -4451,7 +4451,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="clientip"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "clientip",
@@ -4739,7 +4739,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -4839,7 +4839,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="event"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "event",
@@ -5127,7 +5127,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -5227,7 +5227,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="extension"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "extension",
@@ -5571,7 +5571,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -5671,7 +5671,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="geo"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "geo",
@@ -5959,7 +5959,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -6059,7 +6059,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="host"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "host",
@@ -6403,7 +6403,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -6503,7 +6503,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="index"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "index",
@@ -6847,7 +6847,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -6947,7 +6947,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="ip"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "ip",
@@ -7235,7 +7235,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -7335,7 +7335,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="machine"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "machine",
@@ -7623,7 +7623,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -7723,7 +7723,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="memory"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "memory",
@@ -8011,7 +8011,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -8111,7 +8111,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="message"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "message",
@@ -8455,7 +8455,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -8555,7 +8555,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="phpmemory"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "phpmemory",
@@ -8843,7 +8843,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -8943,7 +8943,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="referer"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "referer",
@@ -9287,7 +9287,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -9387,7 +9387,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="request"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "request",
@@ -9731,7 +9731,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -9831,7 +9831,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="response"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "response",
@@ -10175,7 +10175,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -10275,7 +10275,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="tags"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "tags",
@@ -10619,7 +10619,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -10719,7 +10719,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="timestamp"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "timestamp",
@@ -11048,7 +11048,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -11148,7 +11148,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="url"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "url",
@@ -11492,7 +11492,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -11592,7 +11592,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         data-attr-field="utc_time"
                                                         data-test-subj="fieldList-field"
                                                       >
-                                                        <Component
+                                                        <Field
                                                           field={
                                                             Object {
                                                               "name": "utc_time",
@@ -11936,7 +11936,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               </EuiFlexItem>
                                                             </div>
                                                           </EuiFlexGroup>
-                                                        </Component>
+                                                        </Field>
                                                       </div>
                                                     </EuiPanel>
                                                   </div>
@@ -11971,6 +11971,6 @@ exports[`Siderbar component Renders sidebar component 1`] = `
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Component>
+  </Sidebar>
 </Provider>
 `;

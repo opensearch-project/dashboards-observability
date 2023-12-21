@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Service Config component renders empty service config 1`] = `
-<Component
+<ServiceConfig
   appConfigs={Array []}
   chrome={
     Object {
@@ -1171,11 +1171,11 @@ exports[`Service Config component renders empty service config 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</ServiceConfig>
 `;
 
 exports[`Service Config component renders with one service selected 1`] = `
-<Component
+<ServiceConfig
   appConfigs={Array []}
   chrome={
     Object {
@@ -2373,5 +2373,5 @@ exports[`Service Config component renders with one service selected 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</ServiceConfig>
 `;
