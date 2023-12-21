@@ -259,25 +259,34 @@ const dynamicLayoutFromQueryData = (queryData) => {
   };
 };
 
-const createCatalogVisualizationMetaData = (
-  catalogSource: string,
-  visualizationQuery: string,
-  visualizationType: string,
-  visualizationTimeField: string,
-  queryData: object
-) => {
+const createCatalogVisualizationMetaData = ({
+  catalogSource,
+  query,
+  type,
+  subType,
+  timeField,
+  queryData,
+}: {
+  catalogSource: string;
+  query: string;
+  type: string;
+  subType: string;
+  timeField: string;
+  queryData: object;
+}) => {
   return {
     name: catalogSource,
     description: '',
-    query: visualizationQuery,
-    type: visualizationType,
+    query,
+    type,
+    subType,
     selected_date_range: {
       start: 'now/y',
       end: 'now',
       text: '',
     },
     selected_timestamp: {
-      name: visualizationTimeField,
+      name: timeField,
       type: 'timestamp',
     },
     selected_fields: {
@@ -332,6 +341,7 @@ export const renderCatalogVisualization = async ({
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
+  const visualizationSubType = visualization.subType;
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...visualization.queryMetaData,
@@ -357,15 +367,15 @@ export const renderCatalogVisualization = async ({
     );
     setVisualizationData(queryData);
 
-    const visualizationMetaData = createCatalogVisualizationMetaData(
+    const visualizationMetaData = createCatalogVisualizationMetaData({
       catalogSource,
-      visualizationQuery,
-      visualizationType,
-      visualizationTimeField,
-      queryData
-    );
+      query: visualizationQuery,
+      type: visualizationType,
+      subType: visualization.subType,
+      timeField: visualizationTimeField,
+      queryData,
+    });
 
-    console.log('renderCatalogVisualization', { visualizationMetaData });
     setVisualizationMetaData(visualizationMetaData);
   } catch (error) {
     setIsError({ error });
