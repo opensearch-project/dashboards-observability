@@ -100,9 +100,10 @@ const OutputBody = ({
    */
   const dateFormat = uiSettingsService.get('dateFormat');
   const from = convertDateTime(visInput?.timeRange?.from, true, false);
-  const to = convertDateTime(visInput?.timeRange?.from, false, false);
-  const displayFrom = convertDateTime(visInput?.timeRange?.from, true) || 'Invalid date';
-  const displayTo = convertDateTime(visInput?.timeRange?.from, false) || 'Invalid date';
+  const to = convertDateTime(visInput?.timeRange?.to, false, false);
+  const displayFrom =
+    convertDateTime(visInput?.timeRange?.from, true, dateFormat) || 'Invalid date';
+  const displayTo = convertDateTime(visInput?.timeRange?.to, false, dateFormat) || 'Invalid date';
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
