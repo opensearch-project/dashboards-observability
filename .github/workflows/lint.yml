@@ -62,7 +62,7 @@ jobs:
       - name: Lint Changed Files
         run: |
           CHANGED_FILES="${{ steps.files.outputs.changed }}"
-          if [[ -n "$CHANGED_FILES" && "$CHANGED_FILES" != "" ]]; then
+          if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
             IFS=$'\n' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
             yarn lint "${FILES_TO_LINT[@]}"
