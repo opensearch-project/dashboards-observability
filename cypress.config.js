@@ -18,7 +18,7 @@ module.exports = defineConfig({
   env: {
     opensearch: 'localhost:9200',
     opensearchDashboards: 'localhost:5601',
-    security_enabled: true,
+    security_enabled: false,
   },
   'cypress-watch-and-reload': {
     watch: ['common/**', 'public/**', 'server/**'],

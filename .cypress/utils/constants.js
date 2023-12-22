@@ -12,7 +12,7 @@ export const FONTEND_BASE_PATH = Cypress.env('opensearchDashboards');
 
 //Datasources API Constants
 export const DATASOURCES_API_PREFIX = '/app/datasources';
-export const DATASOURCES_API = {
+export const DATASOURCES_PATH = {
   DATASOURCES_CREATION_BASE: `${DATASOURCES_API_PREFIX}#/new`,
   DATASOURCES_CONFIG_BASE: `${DATASOURCES_API_PREFIX}#/configure`
 }
