@@ -60,6 +60,8 @@ describe('<ParaOutput /> spec', () => {
         DashboardContainerByValueRenderer={() => null}
       />
     );
+    console.log('rendervis test', { container: utils.container.innerHTML });
+    expect(utils.container.textContent).toMatch(/2020-07-21 18:37.*2020-08-20 18:37/);
     expect(utils.container.firstChild).toMatchSnapshot();
   });
 
