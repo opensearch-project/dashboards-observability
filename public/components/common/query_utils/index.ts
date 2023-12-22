@@ -74,7 +74,9 @@ export const convertDateTime = (
     const epochTime = myDate.getTime() / 1000.0;
     return Math.round(epochTime);
   }
-  if (formatted) return returnTime?.utc()?.format(PPL_DATE_FORMAT);
+  if (formatted === true) return returnTime?.utc()?.format(PPL_DATE_FORMAT);
+  if (formatted) return returnTime?.utc()?.format(formatted);
+
   return returnTime;
 };
 
