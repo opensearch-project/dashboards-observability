@@ -336,6 +336,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                     isDisabled={generating || generatingOrRunning}
                     iconSide="right"
                     fill={false}
+                    data-test-subj="query-assist-generate-button"
                     style={{ width: 160 }}
                   >
                     Generate query
@@ -350,6 +351,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                     iconSide="right"
                     type="submit"
                     fill={barSelected}
+                    data-test-subj="query-assist-generate-and-run-button"
                     style={{ width: 175 }}
                   >
                     Generate and run
