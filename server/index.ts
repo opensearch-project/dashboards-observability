@@ -16,6 +16,7 @@ export { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 const observabilityConfig = {
   schema: schema.object({
     query_assist: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
       ppl_agent_id: schema.maybe(schema.string()),
       response_summary_agent_id: schema.maybe(schema.string()),
       error_summary_agent_id: schema.maybe(schema.string()),
@@ -27,4 +28,7 @@ export type ObservabilityConfig = TypeOf<typeof observabilityConfig.schema>;
 
 export const config: PluginConfigDescriptor<ObservabilityConfig> = {
   schema: observabilityConfig.schema,
+  exposeToBrowser: {
+    query_assist: true,
+  },
 };

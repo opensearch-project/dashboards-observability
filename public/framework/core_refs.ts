@@ -24,7 +24,7 @@ class CoreRefs {
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
-  public assistantEnabled?: boolean;
+  public queryAssistEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   private constructor() {

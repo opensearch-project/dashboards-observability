@@ -24,7 +24,7 @@ export const NoResults = ({ tabId }: any) => {
 
   return (
     <EuiPage paddingSize="s">
-      {coreRefs.assistantEnabled ? (
+      {coreRefs.queryAssistEnabled ? (
         <>
           {/* check to see if the rawQuery is empty or not */}
           {queryInfo?.rawQuery ? (

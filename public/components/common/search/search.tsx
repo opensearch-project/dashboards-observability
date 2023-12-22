@@ -136,9 +136,8 @@ export const Search = (props: any) => {
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [isQueryBarVisible, setIsQueryBarVisible] = useState(!coreRefs.assistantEnabled);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
-  const [timeRange, setTimeRange] = useState(['now-5y', 'now']); // default time range
+  const [timeRange, setTimeRange] = useState(['now-15m', 'now']); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
@@ -309,20 +308,13 @@ export const Search = (props: any) => {
   ]);
   const { data: indices, loading: indicesLoading } = useCatIndices();
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
-  const data =
+  const indicesAndIndexPatterns =
     indexPatterns && indices
       ? [...indexPatterns, ...indices].filter(
           (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
         )
       : undefined;
   const loading = indicesLoading || indexPatternsLoading;
-  // HARDCODED INDEXES BELOW
-  const filteredData = [
-    { label: 'opensearch_dashboards_sample_data_ecommerce' },
-    { label: 'opensearch_dashboards_sample_data_logs' },
-    { label: 'opensearch_dashboards_sample_data_flights' },
-    { label: 'sso_logs-*.*' },
-  ];
 
   return (
     <div className="globalQueryBar">
@@ -362,30 +354,34 @@ export const Search = (props: any) => {
                     // onClickAriaLabel={'pplLinkShowFlyout'}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiComboBox
-                    placeholder="Select an index"
-                    isClearable={true}
-                    prepend={<EuiText>Index</EuiText>}
-                    singleSelection={true}
-                    isLoading={loading}
-                    options={filteredData}
-                    selectedOptions={selectedIndex}
-                    onChange={(index) => {
-                      // clear previous state
-                      batch(() => {
-                        dispatch(reset({ tabId }));
-                        dispatch(resetSummary({ tabId }));
-                      });
-                      // change the query in the editor to be just source=
-                      const indexQuery = `source = ${index[0].label}`;
-                      handleQueryChange(indexQuery);
-                      // get the fields into the sidebar
-                      getAvailableFields(indexQuery);
-                      setSelectedIndex(index);
-                    }}
-                  />
-                </EuiFlexItem>
+                {coreRefs.queryAssistEnabled ? (
+                  <EuiFlexItem>
+                    <EuiComboBox
+                      placeholder="Select an index"
+                      isClearable={true}
+                      prepend={<EuiText>Index</EuiText>}
+                      singleSelection={true}
+                      isLoading={loading}
+                      options={indicesAndIndexPatterns}
+                      selectedOptions={selectedIndex}
+                      onChange={(index) => {
+                        // clear previous state
+                        batch(() => {
+                          dispatch(reset({ tabId }));
+                          dispatch(resetSummary({ tabId }));
+                        });
+                        // change the query in the editor to be just source=
+                        const indexQuery = `source = ${index[0].label}`;
+                        handleQueryChange(indexQuery);
+                        // get the fields into the sidebar
+                        getAvailableFields(indexQuery);
+                        setSelectedIndex(index);
+                      }}
+                    />
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem />
+                )}
               </>
             )}
             <EuiFlexItem grow={false} />

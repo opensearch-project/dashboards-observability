@@ -20,15 +20,9 @@ export function DatePicker(props: IDatePickerProps) {
   const fixedStartTime = 'now-40y';
   const fixedEndTime = 'now';
 
-  const handleTimeChange = (e: any) => {
-    if (coreRefs.assistantEnabled) {
-      handleTimePickerChange([e.start, e.end]);
-    } else {
-      handleTimePickerChange(['now-40y', 'now']);
-    }
-  };
+  const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
 
-  return coreRefs.assistantEnabled || isAppAnalytics ? (
+  return !coreRefs.queryAssistEnabled || isAppAnalytics ? (
     <EuiSuperDatePicker
       data-test-subj="pplSearchDatePicker"
       start={startTime}

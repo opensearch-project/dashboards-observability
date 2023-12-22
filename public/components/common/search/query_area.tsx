@@ -5,6 +5,7 @@
 
 import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { coreRefs } from '../../../framework/core_refs';
 import { QueryAssistInput } from '../../event_analytics/explorer/query_assist/input';
 import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
 
@@ -59,17 +60,19 @@ export function QueryArea({
             wrapEnabled={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <QueryAssistInput
-            tabId={tabId}
-            handleQueryChange={handleQueryChange}
-            handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-            setNeedsUpdate={setNeedsUpdate}
-            selectedIndex={selectedIndex}
-            nlqInput={nlqInput}
-            setNlqInput={setNlqInput}
-          />
-        </EuiFlexItem>
+        {coreRefs.queryAssistEnabled && (
+          <EuiFlexItem>
+            <QueryAssistInput
+              tabId={tabId}
+              handleQueryChange={handleQueryChange}
+              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              setNeedsUpdate={setNeedsUpdate}
+              selectedIndex={selectedIndex}
+              nlqInput={nlqInput}
+              setNlqInput={setNlqInput}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

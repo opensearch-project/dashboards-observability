@@ -28,7 +28,7 @@ const initialQueryState = {
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,
   [FILTERED_PATTERN]: '',
   [SELECTED_TIMESTAMP]: '',
-  [SELECTED_DATE_RANGE]: ['now-5y', 'now'],
+  [SELECTED_DATE_RANGE]: ['now-15m', 'now'],
   [OLLY_QUERY_ASSISTANT]: '',
 };
 
