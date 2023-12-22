@@ -24,7 +24,7 @@ type Action<T> =
 
 // TODO use instantiation expressions when typescript is upgraded to >= 4.7
 type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;
-const genericReducer: GenericReducer = (state, action) => {
+export const genericReducer: GenericReducer = (state, action) => {
   switch (action.type) {
     case 'request':
       return { data: state.data, loading: true };
