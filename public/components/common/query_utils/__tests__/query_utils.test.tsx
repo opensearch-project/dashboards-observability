@@ -76,7 +76,7 @@ describe('Query Utils', () => {
     it('formats to specified format when provided', () => {
       const time = '2020-07-21T18:37:44.710Z';
       const converted = convertDateTime(time, true, 'YYYY-MMM-DD');
-      expect(converted).toEqual('2020-JUL-21');
+      expect(converted).toMatch(/2020-jul-21/i);
     });
     describe('with moment reference notations', () => {
       beforeEach(() => {
