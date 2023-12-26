@@ -45,7 +45,6 @@ import {
   contextMenuViewReports,
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
-import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
 const panelStyles: CSS.Properties = {
   float: 'left',
@@ -140,12 +139,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     try {
       let parsedPara;
       // @ts-ignore
-      if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
-        parsedPara = zeppelinParagraphParser(paragraphs);
-        this.setState({ vizPrefix: '%sh #vizobject:' });
-      } else {
-        parsedPara = defaultParagraphParser(paragraphs);
-      }
+      parsedPara = defaultParagraphParser(paragraphs);
       parsedPara.forEach((para: ParaType) => {
         para.isInputExpanded = this.state.selectedViewId === 'input_only';
         para.paraRef = React.createRef();
