@@ -120,9 +120,10 @@ const queryAccumulator = (
   }
   const indexPartOfQuery = indexMatchArray[0];
   const filterPartOfQuery = originalQuery.replace(PPL_INDEX_REGEX, '');
-  const timeQueryFilter = ` | where ${timestampField} >= '${convertDateTime(
+  const finalTimestampField = timestampField || 'timestamp';
+  const timeQueryFilter = ` | where ${finalTimestampField} >= '${convertDateTime(
     startTime
-  )}' and ${timestampField} <= '${convertDateTime(endTime, false)}'`;
+  )}' and ${finalTimestampField} <= '${convertDateTime(endTime, false)}'`;
   const pplFilterQuery = panelFilterQuery === '' ? '' : ` | ${panelFilterQuery}`;
 
   return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
