@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
@@ -21,9 +22,14 @@ import {
 
 import './metrics_grid.scss';
 import { coreRefs } from '../../../framework/core_refs';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import {
+  PROMQL_METRIC_SUBTYPE,
+  OTEL_METRIC_SUBTYPE,
+  observabilityLogsID,
+} from '../../../../common/constants/shared';
 import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
 import { EmptyMetricsView } from './empty_view';
+// import { SavedVisualizationType } from '../../../../common/types/custom_panels';
 
 // HOC container to provide dynamic width for Grid layout
 
@@ -32,9 +38,10 @@ interface MetricsGridProps {
   moveToEvents: (savedVisualizationId: string) => any;
 }
 
-const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
+const visualizationFromPromethesMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
   ...metric,
   query: updateCatalogVisualizationQuery({ ...metric, ...dateSpanFilter }),
+  metricType: PROMQL_METRIC_SUBTYPE,
   queryMetaData: {
     catalogSourceName: metric.catalogSourceName,
     catalogTableName: metric.catalogTableName,
@@ -65,6 +72,30 @@ const promQLActionMenu = [
     View query
   </EuiContextMenuItem>,
 ];
+const visualizationFromOtelMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
+  ...metric,
+  name: metric.name,
+  description: '',
+  query: '',
+  type: 'bar',
+  metricType: OTEL_METRIC_SUBTYPE,
+  selected_date_range: {
+    start: dateSpanFilter.start,
+    end: dateSpanFilter.end,
+    text: '',
+  },
+  userConfigs: {
+    dataConfig: {
+      type: 'bar',
+    },
+  },
+});
+
+const visualizationFromMetric = (metric: any, dateSpanFilter: any) => {
+  if (metric.metricType === OTEL_METRIC_SUBTYPE)
+    return visualizationFromOtelMetric(metric, dateSpanFilter);
+  return visualizationFromPromethesMetric(metric, dateSpanFilter);
+};
 
 const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
   window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
@@ -72,7 +103,10 @@ const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
 
 export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
   if (!metric) return <></>;
-
+  console.log('metric in inner grid visualization: ', metric);
+  console.log('idx: ', idx);
+  console.log('id: ', id);
+  console.log('dateSpanFilter: ', dateSpanFilter);
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer
@@ -94,7 +128,7 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
           metric.subType === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
         }
         actionMenuType="metricsGrid"
-        metricType={metric.metricType}
+        metricType={metric.subType}
         panelVisualization={metric}
       />
     </EuiDraggable>

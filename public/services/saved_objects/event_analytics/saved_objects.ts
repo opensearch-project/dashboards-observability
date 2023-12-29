@@ -2,9 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { has, isArray, isEmpty } from 'lodash';
-import { IField } from 'common/types/explorer';
+import { IField } from '../../../../common/types/explorer';
 import {
   EVENT_ANALYTICS,
   OBSERVABILITY_BASE,
@@ -100,7 +101,7 @@ export default class SavedObjects {
     }
 
     if (!isEmpty(metricType)) {
-      objRequest.object.metric_type = metricType;
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

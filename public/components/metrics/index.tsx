@@ -2,11 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import './index.scss';
 import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, StaticContext } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { Sidebar } from './sidebar/sidebar';
 import PPLService from '../../services/requests/ppl';
@@ -50,9 +52,9 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
-  };
+  // const onEditClick = (savedVisualizationId: string) => {
+  //   window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
+  // };
 
   useEffect(() => {
     chrome.setBreadcrumbs([

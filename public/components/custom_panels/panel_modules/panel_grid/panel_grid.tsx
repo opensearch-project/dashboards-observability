@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -15,7 +16,6 @@ import { VisualizationType } from '../../../../../common/types/custom_panels';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import './panel_grid.scss';
 import { mergeLayoutAndVisualizations } from '../../helpers/utils';
-import { savedObjectDeleteTrigger } from '../../../../../../../src/plugins/saved_objects_management/public';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -92,6 +92,7 @@ export const PanelGrid = (props: PanelGridProps) => {
   };
 
   const loadVizComponents = () => {
+    console.log('panelVisualizations[0]: ', panelVisualizations[0]);
     const gridDataComps = panelVisualizations.map(
       (panelVisualization: VisualizationType, index) => (
         <VisualizationContainer

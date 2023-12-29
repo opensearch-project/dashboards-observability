@@ -2,13 +2,19 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { ShortDate } from '@elastic/eui';
+// eslint-disable-next-line import/no-unresolved
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { VISUALIZATION } from '../../../../common/constants/metrics';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+  PPL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
 import PPLService from '../../../services/requests/ppl';
 import { MetricType } from '../../../../common/types/metrics';
 import { VisualizationType } from '../../../../common/types/custom_panels';
@@ -74,7 +80,11 @@ export const sortMetricLayout = (metricsLayout: MetricType[]) => {
   });
 };
 
-export const visualizationFromMetric = (metric, span, resolution): SavedVisualizationType => {
+export const visualizationFromPrometheusMetric = (
+  metric,
+  span,
+  resolution
+): SavedVisualizationType => {
   const userConfigs = JSON.stringify({
     dataConfig: {
       chartStyles: {
@@ -95,7 +105,8 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
       resolution,
     },
     type: 'line',
-    subType: PROMQL_METRIC_SUBTYPE,
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: PROMQL_METRIC_SUBTYPE,
     userConfigs: JSON.stringify(userConfigs),
   };
 };
@@ -113,31 +124,23 @@ export const createOtelMetric = (metric: any) => {
       tokens: [],
     },
     sub_type: 'metric',
-    metric_type: 'openTelemetryMetric',
+    metric_type: OTEL_METRIC_SUBTYPE,
     user_configs: {},
   };
 };
 
-export const updateOpenTelemetryMetricsWithSelections = (
-  savedVisualization: any,
-  startTime: ShortDate,
-  endTime: ShortDate
-) => {
-  console.log(
-    'savedVisualization in updateOpenTelemetryMetricsWithSelections: ',
-    savedVisualization
-  );
+export const visualizationFromOtelMetric = (metric: any) => {
+  console.log('savedVisualization in updateOpenTelemetryMetricsWithSelections: ', metric);
   return {
     query: '',
-    index: savedVisualization.index,
-    documentName: savedVisualization.documentName,
-    fields: savedVisualization.selected_fields.tokens,
-    dateRange: [startTime, endTime],
-    name: savedVisualization.name,
-    description: savedVisualization.description,
+    index: metric.index,
+    documentName: metric.documentName,
+    dateRange: ['now-1d', 'now'],
+    name: '[Otel Metric] ' + metric.index + '.' + metric.name,
+    description: metric.description,
     type: 'bar',
-    subType: 'metric',
-    metricType: 'openTelemetryMetric',
-    userConfigs: JSON.stringify(savedVisualization.user_configs),
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: OTEL_METRIC_SUBTYPE,
+    userConfigs: JSON.stringify(metric.user_configs),
   };
 };

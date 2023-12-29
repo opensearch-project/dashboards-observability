@@ -2,8 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-prototype-builtins */
 
 import { ShortDate } from '@elastic/eui';
+// eslint-disable-next-line import/no-unresolved
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
@@ -12,6 +15,7 @@ import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   OBSERVABILITY_BASE,
+  OTEL_METRIC_SUBTYPE,
   PPL_DATE_FORMAT,
   PPL_INDEX_REGEX,
   PPL_WHERE_CLAUSE_REGEX,
@@ -33,6 +37,7 @@ import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
 import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
 import { coreRefs } from '../../../framework/core_refs';
+import { ConsoleAppender } from '../../../../../../src/core/server/logging/appenders/console/console_appender';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -342,6 +347,7 @@ export const renderCatalogVisualization = async ({
   queryMetaData?: MetricType;
   visualization: SavedVisualizationType;
 }) => {
+  console.log('visualization in catalog: ', visualization);
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
@@ -394,14 +400,15 @@ const createOtelVisualizationMetaData = (
   documentName: string,
   visualizationType: string,
   startTime: string,
-  endTime: string
+  endTime: string,
+  queryData: object
 ) => {
   return {
     name: documentName,
     description: '',
     query: '',
     type: visualizationType,
-    metricType: 'otel',
+    metricType: OTEL_METRIC_SUBTYPE,
     selected_date_range: {
       start: startTime,
       end: endTime,
@@ -414,6 +421,9 @@ const createOtelVisualizationMetaData = (
     selected_fields: {
       text: '',
       tokens: [],
+    },
+    userConfigs: {
+      layout: dynamicLayoutFromQueryData(queryData),
     },
   };
 };
@@ -481,34 +491,47 @@ const extractIndexAndDocumentName = (metricString: string): [string, string] | n
   }
 };
 
-export const renderOpenTelemetryVisualization = async (
-  savedVisualizationId: string,
-  startTime: string,
-  endTime: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
-  panelVisualization: any,
-  spanResolution?: string
-) => {
-  startTime = 'now-15y';
-  endTime = 'now';
+export const renderOpenTelemetryVisualization = async ({
+  startTime,
+  endTime,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+}: {
+  startTime: string;
+  endTime: string;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: any;
+}) => {
+  setIsLoading(true);
+  setIsError({} as VizContainerError);
+
   const { http } = coreRefs;
   const visualizationType = 'bar';
-  let index = panelVisualization?.metric?.index;
+  let index = visualization?.index;
+  let documentName = visualization?.name;
+  console.log('index: ', index);
 
   if (index === undefined) {
-    const indexAndDocumentName = extractIndexAndDocumentName(panelVisualization.name);
+    const indexAndDocumentName = extractIndexAndDocumentName(visualization.name);
     index = indexAndDocumentName[0];
-    savedVisualizationId = indexAndDocumentName[1];
+    documentName = indexAndDocumentName[1];
   }
-  const fetchSampleDocument = await fetchSampleOTDocument(index, http, savedVisualizationId)();
-
+  const fetchSampleDocument = await fetchSampleOTDocument(index, http, documentName)();
   const source = fetchSampleDocument.hits[0]._source;
+
+  setVisualizationType(visualizationType);
+  setVisualizationTitle(source.name);
+
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
       const formattedStartTime = convertDateTime(startTime, false, false, false, true);
@@ -518,19 +541,13 @@ export const renderOpenTelemetryVisualization = async (
         bucket.max.toString(),
         formattedStartTime,
         formattedEndTime,
-        savedVisualizationId,
+        documentName,
         http,
         index,
         setIsError,
         setIsLoading
       )();
 
-      function getRandomInt(min: number, max: number) {
-        // The maximum is exclusive and the minimum is inclusive
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min)) + min;
-      }
       return {
         xAxis: bucket.min + ' - ' + bucket.max,
         'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
@@ -545,18 +562,14 @@ export const renderOpenTelemetryVisualization = async (
     return { dataBins: { jsonData } };
   };
   const formatedJsonData = formatDataBinsName().dataBins;
-
-  setVisualizationType(visualizationType);
-  setVisualizationTitle(source.name);
-  setVisualizationData(formatedJsonData);
-
   const visualizationMetaData = createOtelVisualizationMetaData(
-    savedVisualizationId,
+    documentName,
     visualizationType,
     startTime,
-    endTime
+    endTime,
+    formatedJsonData
   );
-
+  setVisualizationData(formatedJsonData);
   setVisualizationMetaData(visualizationMetaData);
 };
 
@@ -593,7 +606,7 @@ export const parseSavedVisualizations = (
     subType: visualization.savedVisualization.hasOwnProperty('subType')
       ? visualization.savedVisualization.subType
       : '',
-    metric_type: visualization.savedVisualization.hasOwnProperty('metric_type')
+    metricType: visualization.savedVisualization.hasOwnProperty('metricType')
       ? visualization.savedVisualization.metricType
       : '',
     units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
@@ -732,7 +745,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
 
   // add otel metric specific overriding
-  if (metaData?.metricType === 'otel') {
+  if (metaData?.metricType === OTEL_METRIC_SUBTYPE) {
     finalDataConfig = { ...finalDataConfig, ...constructOtelMetricsMetaData() };
   }
 
@@ -747,6 +760,8 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       ...(metaData.userConfigs?.layout || {}),
     },
   };
+
+  console.log('type in displayVisualization: ', type);
 
   return (
     <Visualization

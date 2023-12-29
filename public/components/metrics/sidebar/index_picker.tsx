@@ -17,6 +17,7 @@ export const IndexPicker = (props) => {
     // eslint-disable-next-line no-shadow
     selectedIndex: React.SetStateAction<Array<{ label: string }>>
   ) => {
+    console.log(selectedIndex);
     setSelectedIndex(selectedIndex);
     setSelectedOTIndex(selectedIndex);
   };

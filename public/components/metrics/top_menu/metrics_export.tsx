@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import {
   EuiButton,
@@ -21,7 +22,11 @@ import { I18nProvider } from '@osd/i18n/react';
 import { MetricsExportPanel } from './metrics_export_panel';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
-import { addMultipleVizToPanels, isUuid } from '../../custom_panels/redux/panel_slice';
+import {
+  addMultipleVizToPanels,
+  isUuid,
+  selectPanelList,
+} from '../../custom_panels/redux/panel_slice';
 import { MetricType } from '../../../../common/types/metrics';
 import {
   dateSpanFilterSelector,
@@ -29,11 +34,15 @@ import {
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 import { coreRefs } from '../../../framework/core_refs';
-import { selectPanelList } from '../../../../public/components/custom_panels/redux/panel_slice';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { visualizationFromMetric } from '../helpers/utils';
+import { visualizationFromPrometheusMetric, visualizationFromOtelMetric } from '../helpers/utils';
 import { updateCatalogVisualizationQuery } from '../../common/query_utils';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import {
+  OTEL_DATE_FORMAT,
+  OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+  PPL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import { MountPoint } from '../../../../../../src/core/public';
 
@@ -105,6 +114,7 @@ const MetricsExportPopOver = () => {
   useEffect(() => {
     if (selectedMetrics && selectedMetricsIds) {
       const metricsArray = selectedMetricsIds.map((id) => selectedMetrics[id]);
+      console.log('metricsArray: ', metricsArray);
       setMetricsToExport(metricsArray);
     }
   }, [selectedMetrics, selectedMetricsIds]);
@@ -140,30 +150,44 @@ const MetricsExportPopOver = () => {
     ]);
 
   const createSavedVisualization = async (metric): Promise<any> => {
-    const [ds, index] = metric.index.split('.');
-    const queryMetaData = {
-      catalogSourceName: ds,
-      catalogTableName: index,
-      aggregation: metric.aggregation,
-      attributesGroupBy: metric.attributesGroupBy,
-    };
-    const visMetaData = visualizationFromMetric(
-      {
+    console.log('metric in createSavedVisualization: ', metric);
+    let visMetaData;
+    if (metric.metricType === OTEL_METRIC_SUBTYPE) {
+      visMetaData = visualizationFromOtelMetric({
         ...metric,
-        dataSources: datasourceMetaFrom(metric.catalog),
-        query: updateCatalogVisualizationQuery({
-          ...queryMetaData,
-          ...dateSpanFilter,
-        }),
-        queryMetaData,
-        subType: PROMQL_METRIC_SUBTYPE,
+        query: '',
+        subType: PPL_METRIC_SUBTYPE,
+        metricType: OTEL_METRIC_SUBTYPE,
         dateRange: ['now-1d', 'now'],
-        fields: ['@value'],
         timestamp: '@timestamp',
-      },
-      dateSpanFilter.span,
-      dateSpanFilter.reoslution
-    );
+      });
+    } else {
+      const [ds, index] = metric.index.split('.');
+      const queryMetaData = {
+        catalogSourceName: ds,
+        catalogTableName: index,
+        aggregation: metric.aggregation,
+        attributesGroupBy: metric.attributesGroupBy,
+      };
+      visMetaData = visualizationFromPrometheusMetric(
+        {
+          ...metric,
+          dataSources: datasourceMetaFrom(metric.catalog),
+          query: updateCatalogVisualizationQuery({
+            ...queryMetaData,
+            ...dateSpanFilter,
+          }),
+          queryMetaData,
+          subType: PPL_METRIC_SUBTYPE,
+          metricType: PROMQL_METRIC_SUBTYPE,
+          dateRange: ['now-1d', 'now'],
+          fields: ['@value'],
+          timestamp: '@timestamp',
+        },
+        dateSpanFilter.span,
+        dateSpanFilter.reoslution
+      );
+    }
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
     return savedObject;

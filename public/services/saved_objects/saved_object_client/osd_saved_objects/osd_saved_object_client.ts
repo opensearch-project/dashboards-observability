@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { isEmpty } from 'lodash';
 import {
@@ -120,7 +121,7 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     }
 
     if (!isEmpty(metricType)) {
-      objRequest.object.metric_type = metricType;
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

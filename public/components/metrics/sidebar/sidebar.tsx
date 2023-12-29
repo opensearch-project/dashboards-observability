@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import './sidebar.scss';
 
@@ -9,6 +10,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { keyBy, mergeWith, pick, sortBy, merge } from 'lodash';
 import {
   addSelectedMetric,
   availableMetricsSelector,
@@ -21,15 +23,23 @@ import {
   otelIndexSelector,
   setDataSourceIcons,
   coloredIconsFrom,
-  setMetrics,
+  // setMetrics,
   loadOTIndices,
   fetchOpenTelemetryDocumentNames,
+  mergeMetrics,
+  setSortedIds,
+  // selectedDataSourcesSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 import { DataSourcePicker } from './data_source_picker';
 import { IndexPicker } from './index_picker';
 import { OptionType } from '../../../../common/types/metrics';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PPL_INDEX_REGEX,
+  PPL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
 
 interface SideBarMenuProps {
   selectedDataSource: OptionType[];
@@ -59,7 +69,7 @@ export const Sidebar = ({
 
   const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
 
-  const dataSource = useSelector(selectedDataSourcesSelector);
+  // const dataSource = useSelector(selectedDataSourcesSelector);
   const otelIndices = useSelector(otelIndexSelector);
 
   useEffect(() => {
@@ -110,25 +120,36 @@ export const Sidebar = ({
       const fetchOtelDocuments = async () => {
         try {
           const documentNames = await fetchOpenTelemetryDocumentNames(selectedOTIndex[0]?.label)();
+          console.log('documentNames: ', documentNames);
           const availableOtelDocuments = documentNames?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
               return {
                 id: item.key,
                 name: item.key,
                 catalog: 'OpenTelemetry',
+                subType: PPL_METRIC_SUBTYPE,
+                metricType: OTEL_METRIC_SUBTYPE,
                 type: 'Histogram',
                 index: selectedOTIndex[0]?.label,
               };
             }
           );
+          console.log('availableOtelDocuments: ', availableOtelDocuments);
           setAvailableOTDocuments(availableOtelDocuments);
-          dispatch(setMetrics(availableOtelDocuments));
+          const metricsMapById = keyBy(availableOtelDocuments, 'id');
+          // console.log('metricsMapById: ', metricsMapById);
+
+          dispatch(mergeMetrics(metricsMapById));
+
+          const sortedIds = sortBy(availableOtelDocuments, 'catalog', 'id').map((m) => m.id);
+          // console.log('sortedIds: ', sortedIds);
+          dispatch(setSortedIds(sortedIds));
+          // dispatch(setMetrics(availableOtelDocuments));
           dispatch(setDataSourceIcons(coloredIconsFrom(['OpenTelemetry'])));
         } catch (error) {
           console.error('Error fetching OpenTelemetry documents:', error);
         }
       };
-
       fetchOtelDocuments();
     }
   }, [dispatch, selectedDataSource, selectedOTIndex]);
@@ -149,7 +170,7 @@ export const Sidebar = ({
 
   const handleAddMetric = (metric: any) => {
     console.log('handle add metrics: ', metric);
-    dispatch(selectMetric(metric));
+    dispatch(addSelectedMetric(metric));
   };
 
   const handleRemoveMetric = (metric: any) => {
@@ -177,7 +198,7 @@ export const Sidebar = ({
           />
           <EuiSpacer size="s" />
           <MetricsAccordion
-            metricsList={availableOTDocumentsRef.current}
+            metricsList={availableMetrics}
             headerName="Available Metrics"
             handleClick={handleAddMetric}
             dataTestSubj="metricsListItems_availableMetrics"

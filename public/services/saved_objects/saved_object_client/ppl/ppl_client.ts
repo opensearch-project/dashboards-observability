@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { has, isArray, isEmpty } from 'lodash';
 import { HttpStart } from '../../../../../../../src/core/public';
@@ -125,7 +126,7 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     }
 
     if (!isEmpty(metricType)) {
-      objRequest.object.metric_type = metricType;
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

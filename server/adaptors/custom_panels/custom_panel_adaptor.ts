@@ -2,6 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-prototype-builtins */
 
 import { v4 as uuidv4 } from 'uuid';
 import { PanelType, VisualizationType } from '../../../common/types/custom_panels';
@@ -228,8 +230,8 @@ export class CustomPanelsAdaptor {
       subType: visualization.savedVisualization.hasOwnProperty('subType')
         ? visualization.savedVisualization.subType
         : '',
-      metric_type: visualization.savedVisualization.hasOwnProperty('metric_type')
-        ? visualization.savedVisualization.metric_type
+      metricType: visualization.savedVisualization.hasOwnProperty('metricType')
+        ? visualization.savedVisualization.metricType
         : '',
       units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
         ? visualization.savedVisualization.units_of_measure

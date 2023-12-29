@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { createSlice } from '@reduxjs/toolkit';
 import { keyBy, mergeWith, pick, sortBy } from 'lodash';
@@ -11,7 +12,6 @@ import {
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
-  OBSERVABILITY_CUSTOM_METRIC,
 } from '../../../../../common/constants/metrics';
 import { MetricType } from '../../../../../common/types/metrics';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
@@ -49,8 +49,8 @@ export interface DateSpanFilter {
 
 const initialState = {
   metrics: {},
-  selectedIds: [],
-  sortedIds: [],
+  selectedIds: [], // selected IDs
+  sortedIds: [], // all avaliable metrics
   search: '',
   metricsLayout: [],
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
@@ -101,14 +101,16 @@ export const loadMetrics = () => async (dispatch) => {
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
+  // console.log('metricsResultSet: ', metricsResultSet);
   const metricsResult = metricsResultSet.flat();
-
+  // console.log('metricsResult: ', metricsResult);
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
   dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
+  // console.log('sortedIds: ', sortedIds);
   await dispatch(setSortedIds(sortedIds));
-  await dispatch(setOtelIndices(fetchOTindices));
+  // await dispatch(setOtelIndices(fetchOTindices));
 };
 
 export const loadOTIndices = () => async (dispatch) => {
@@ -123,7 +125,7 @@ const fetchCustomMetrics = async () => {
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
     [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.subType)
   );
-
+  console.log('savedMetrics: ', savedMetrics);
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     savedVisualizationId: obj.objectId,
@@ -132,6 +134,7 @@ const fetchCustomMetrics = async () => {
     catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
     subType: obj.savedVisualization.subType,
+    metricType: 'customMetric',
     aggregation: obj.savedVisualization.queryMetaData?.aggregation ?? 'avg',
     availableAttributes: [],
     attributesGroupBy: obj.savedVisualization.queryMetaData?.attributesGroupBy ?? [],
@@ -164,12 +167,12 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
         attributesGroupBy: [],
         availableAttributes: [],
         type: 'line',
-        subType: PROMQL_METRIC_SUBTYPE,
+        subType: PPL_METRIC_SUBTYPE,
+        metricType: PROMQL_METRIC_SUBTYPE,
         recentlyCreated: false,
       }))
     )
   );
-};
 
 export const fetchOpenTelemetryIndices = async () => {
   const { http } = coreRefs;
@@ -319,7 +322,7 @@ export const {
 
 /** private actions */
 
-const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
+export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
 const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
   const { toasts } = coreRefs;
@@ -342,7 +345,9 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) =
 };
 
 export const addSelectedMetric = (metric: MetricType) => async (dispatch, getState) => {
+  // console.log('metric in addSelectedMetric: ', metric);
   const currentSelectedIds = getState().metrics.selectedIds;
+  // console.log('currentSelectedIds: ', currentSelectedIds);
   if (currentSelectedIds.includes(metric.id)) return;
 
   if (metric.subType === PROMQL_METRIC_SUBTYPE) {

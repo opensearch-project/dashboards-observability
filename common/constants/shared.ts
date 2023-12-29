@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import CSS from 'csstype';
+/* eslint-disable no-unused-vars */
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -81,6 +81,7 @@ export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export const SPAN_REGEX = /span/;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const OTEL_METRIC_SUBTYPE = 'openTelemetryMetric';
 export const PPL_METRIC_SUBTYPE = 'metric';
 
 export const PPL_SPAN_REGEX = /by\s*span/i;

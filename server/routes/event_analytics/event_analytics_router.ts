@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
 import { schema } from '@osd/config-schema';
 import {
@@ -137,14 +138,9 @@ export const registerEventAnalyticsRouter = ({
             name: schema.string(),
             description: schema.string(),
             application_id: schema.maybe(schema.string()),
-<<<<<<< HEAD
             userConfigs: schema.maybe(schema.string()),
             subType: schema.maybe(schema.string()),
-=======
-            user_configs: schema.maybe(schema.string()),
-            sub_type: schema.maybe(schema.string()),
-            metric_type: schema.maybe(schema.string()),
->>>>>>> 2ba09f94 (View otel metric in dashboards)
+            metricType: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
             selected_labels: schema.maybe(
               schema.object({
@@ -239,7 +235,7 @@ export const registerEventAnalyticsRouter = ({
             application_id: schema.maybe(schema.string()),
             userConfigs: schema.maybe(schema.string()),
             subType: schema.maybe(schema.string()),
-            metric_type: schema.maybe(schema.string()),
+            metricType: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
             selected_labels: schema.maybe(
               schema.object({

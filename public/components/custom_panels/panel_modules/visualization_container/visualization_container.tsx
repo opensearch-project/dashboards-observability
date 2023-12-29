@@ -2,6 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-prototype-builtins */
 
 import {
   EuiButton,
@@ -33,7 +35,6 @@ import {
   renderCatalogVisualization,
   renderSavedVisualization,
   renderOpenTelemetryVisualization,
-  fetchVisualizationById,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
@@ -42,6 +43,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import {
   PROMQL_METRIC_SUBTYPE,
   observabilityMetricsID,
+  OTEL_METRIC_SUBTYPE,
 } from '../../../../../common/constants/shared';
 
 /*
@@ -243,45 +245,37 @@ export const VisualizationContainer = ({
   }
 
   const fetchVisualization = async () => {
-    return savedVisualizationId
-      ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
-      : inputMetaData;
+    try {
+      return savedVisualizationId
+        ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+        : inputMetaData;
+    } catch (error) {
+      setIsError({ error });
+      return null;
+    }
   };
 
   const loadVisaulization = async () => {
     const visualization = await fetchVisualization();
     setVisualizationMetaData(visualization);
+    console.log('visualization: ', visualization);
 
     if (!visualization && !savedVisualizationId) return;
 
-    // console.log('panelViz: ', panelVisualization);
-    // if (panelVisualization.metricType === undefined) {
-    //   const fetchedVisualization = await fetchVisualizationById(
-    //     http,
-    //     savedVisualizationId,
-    //     setIsError
-    //   );
-    //   console.log('fetchedVisualization in if: ', fetchedVisualization);
-        //  metricType = fetchedVisualization.metric_type;
-
-        //  if (metricType === 'openTelemetryMetric') panelVisualization = fetchedVisualization;
-    // }
-    if (metricType === 'openTelemetryMetric')
-      await renderOpenTelemetryVisualization(
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        spanParam,
+    if (visualization.metricType === OTEL_METRIC_SUBTYPE)
+      await renderOpenTelemetryVisualization({
+        visualization,
+        startTime: fromTime,
+        endTime: toTime,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
-        panelVisualization
-      );
-    else if (visualization.subType === PROMQL_METRIC_SUBTYPE)
-       renderCatalogVisualization({
+      });
+    else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
+      renderCatalogVisualization({
         visualization,
         http,
         pplService,
@@ -299,7 +293,7 @@ export const VisualizationContainer = ({
         setIsError,
         queryMetaData,
       });
-     else
+    else
       await renderSavedVisualization({
         visualization,
         http,
@@ -355,6 +349,10 @@ export const VisualizationContainer = ({
   useEffect(() => {
     loadVisaulization();
   }, [onRefresh, inputMetaData, span, resolution, fromTime, toTime]);
+
+  useEffect(() => {
+    console.log('visualizationType: ' + visualizationType);
+  }, [visualizationType]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 
