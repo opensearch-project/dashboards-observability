@@ -12,9 +12,7 @@ import {
   EuiFlexItem,
   EuiForm,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { CoreStart } from '../../../../../../src/core/public';
-import { createPrometheusMetricById, createOtelMetric } from '../helpers/utils';
+import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchPanels } from '../../../../public/components/custom_panels/redux/panel_slice';
 
@@ -45,33 +43,6 @@ export const MetricsExportPanel = ({
   useEffect(() => {
     dispatch(fetchPanels());
   }, [dispatch]);
-
-  // const fetchAllvisualizationsById = async () => {
-  //   const tempVisualizationsMetaData = await Promise.all(
-  //     sortedMetricsLayout.map(async (metricLayout) => {
-  //       console.log('metricLayout in fetch: ', metricLayout);
-  //       // return metricLayout.metricType === 'savedCustomMetric'
-  //       //   ? await fetchVisualizationById(http, metricLayout.id, setErrorResponse)
-  //       //   : createPrometheusMetricById(metricLayout.id);
-  //       if (metricLayout.metricType === 'savedCustomMetric') {
-  //         return await fetchVisualizationById(http, metricLayout.id, setErrorResponse);
-  //       } else if (metricLayout.metricType === 'openTelemetryMetric') {
-  //         // Add the logic for openTelemetryMetric
-  //         // For now, assuming a function createOpenTelemetryMetricById
-  //         return createOtelMetric(metricLayout.metric);
-  //       } else {
-  //         // Assuming a default case or additional conditions
-  //         // If needed, adjust this part based on your specific requirements
-  //         return createPrometheusMetricById(metricLayout.id);
-  //       }
-  //     })
-  //   );
-  //   setVisualizationsMetaData(tempVisualizationsMetaData);
-  // };
-
-  // useEffect(() => {
-  //   fetchAllvisualizationsById();
-  // }, []);
 
   const onNameChange = (index: number, name: string) => {
     const tempMetrics = metricsToExport.map((metric, idx) =>

@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import './sidebar.scss';
 
@@ -10,7 +9,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { keyBy, mergeWith, pick, sortBy, merge } from 'lodash';
+import { keyBy, sortBy } from 'lodash';
 import {
   addSelectedMetric,
   availableMetricsSelector,
@@ -23,31 +22,23 @@ import {
   otelIndexSelector,
   setDataSourceIcons,
   coloredIconsFrom,
-  // setMetrics,
   loadOTIndices,
   fetchOpenTelemetryDocumentNames,
   mergeMetrics,
   setSortedIds,
-  // selectedDataSourcesSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 import { DataSourcePicker } from './data_source_picker';
 import { IndexPicker } from './index_picker';
 import { OptionType } from '../../../../common/types/metrics';
-import {
-  OTEL_METRIC_SUBTYPE,
-  PPL_INDEX_REGEX,
-  PPL_METRIC_SUBTYPE,
-} from '../../../../common/constants/shared';
+import { OTEL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 
 interface SideBarMenuProps {
   selectedDataSource: OptionType[];
   setSelectedDataSource: (sources: OptionType[]) => void;
   selectedOTIndex: React.SetStateAction<Array<{}>>;
   setSelectedOTIndex: React.Dispatch<React.SetStateAction<unknown>>;
-  availableTestOtelDocuments: Array<{}>;
-  setAvailableTestOtelDocuments: React.Dispatch<React.SetStateAction<unknown>>;
   additionalSelectedMetricId?: string;
 }
 export const Sidebar = ({
@@ -55,8 +46,6 @@ export const Sidebar = ({
   setSelectedDataSource,
   selectedOTIndex,
   setSelectedOTIndex,
-  availableTestOtelDocuments,
-  setAvailableTestOtelDocuments,
   additionalSelectedMetricId,
 }: SideBarMenuProps) => {
   const dispatch = useDispatch();
@@ -68,8 +57,6 @@ export const Sidebar = ({
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
-
-  // const dataSource = useSelector(selectedDataSourcesSelector);
   const otelIndices = useSelector(otelIndexSelector);
 
   useEffect(() => {
@@ -97,24 +84,6 @@ export const Sidebar = ({
     return selectedMetricsIds.map((id) => selectedMetrics[id]).filter((m) => m); // filter away null entries
   }, [selectedMetrics, selectedMetricsIds]);
 
-  // useEffect(() => {
-  //   console.log('hereeeee');
-  //   if (selectedOtelIndex.length > 0) {
-  //     // getting undefined here due to selectedOtelIndex turning into undefined
-  //     console.log('selectedOtelIndex: ', selectedOtelIndex);
-  //     console.log('selectedOtelIndex label: ', selectedOtelIndex[0]?.label);
-  //     loadOtelDocuments(dispatch, setAvailableTestOtelDocuments, selectedOtelIndex[0]?.label)();
-  //     // console.log('temp: ', temp);
-  //     console.log('atleasttttt');
-  //     const availableOtelDocuments = availableTestOtelDocuments?.distinct_names?.buckets.map((item: any) => {
-  //       return { id: item.key };
-  //     });
-  //     setAvailableOTDocuments(availableOtelDocuments);
-  //     console.log('otel metrics: ', availableOtelDocuments);
-  //     // console.log('availableOTDocuments: ', availableOTDocumentsRef.current);
-  //   }
-  // }, [selectedOtelIndex]);
-
   useEffect(() => {
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
       const fetchOtelDocuments = async () => {
@@ -134,17 +103,13 @@ export const Sidebar = ({
               };
             }
           );
-          console.log('availableOtelDocuments: ', availableOtelDocuments);
           setAvailableOTDocuments(availableOtelDocuments);
           const metricsMapById = keyBy(availableOtelDocuments, 'id');
-          // console.log('metricsMapById: ', metricsMapById);
 
           dispatch(mergeMetrics(metricsMapById));
 
           const sortedIds = sortBy(availableOtelDocuments, 'catalog', 'id').map((m) => m.id);
-          // console.log('sortedIds: ', sortedIds);
           dispatch(setSortedIds(sortedIds));
-          // dispatch(setMetrics(availableOtelDocuments));
           dispatch(setDataSourceIcons(coloredIconsFrom(['OpenTelemetry'])));
         } catch (error) {
           console.error('Error fetching OpenTelemetry documents:', error);
