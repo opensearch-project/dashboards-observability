@@ -2,8 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-prototype-builtins */
 
 import {
   EuiButton,
@@ -110,9 +108,9 @@ export const VisualizationContainer = ({
   catalogVisualization,
   inlineEditor,
   actionMenuType,
-  metricType,
-  panelVisualization,
-}: Props) => {
+}: // metricType,
+// panelVisualization,
+Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
   const [visualizationType, setVisualizationType] = useState('');
@@ -189,7 +187,7 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+        if (visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE) {
           window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
         } else {
           onEditClick(savedVisualizationId);
@@ -236,7 +234,7 @@ export const VisualizationContainer = ({
   ];
 
   if (
-    visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE &&
+    visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE &&
     actionMenuType === 'metricsGrid'
   ) {
     popoverPanel = [showPPLQueryPanel];
@@ -277,7 +275,6 @@ export const VisualizationContainer = ({
     else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
       renderCatalogVisualization({
         visualization,
-        http,
         pplService,
         catalogSource: visualizationId,
         startTime: fromTime,
@@ -349,10 +346,6 @@ export const VisualizationContainer = ({
   useEffect(() => {
     loadVisaulization();
   }, [onRefresh, inputMetaData, span, resolution, fromTime, toTime]);
-
-  useEffect(() => {
-    console.log('visualizationType: ' + visualizationType);
-  }, [visualizationType]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 

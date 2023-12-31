@@ -2,10 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiContextMenuItem, EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
+import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import { connect } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -29,7 +28,6 @@ import {
 } from '../../../../common/constants/shared';
 import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
 import { EmptyMetricsView } from './empty_view';
-// import { SavedVisualizationType } from '../../../../common/types/custom_panels';
 
 // HOC container to provide dynamic width for Grid layout
 
@@ -60,18 +58,6 @@ const visualizationFromPromethesMetric = (metric, dateSpanFilter): SavedVisualiz
   },
 });
 
-const promQLActionMenu = [
-  <EuiContextMenuItem
-    data-test-subj="showCatalogPPLQuery"
-    key="view_query"
-    onClick={() => {
-      closeActionsMenu();
-      showModal('catalogModal');
-    }}
-  >
-    View query
-  </EuiContextMenuItem>,
-];
 const visualizationFromOtelMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
   ...metric,
   name: metric.name,
@@ -104,9 +90,6 @@ const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
 export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
   if (!metric) return <></>;
   console.log('metric in inner grid visualization: ', metric);
-  console.log('idx: ', idx);
-  console.log('id: ', id);
-  console.log('dateSpanFilter: ', dateSpanFilter);
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer
@@ -125,7 +108,9 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
         resolution={dateSpanFilter.resolution}
         contextMenuId="metrics"
         inlineEditor={
-          metric.subType === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
+          metric.metricType === PROMQL_METRIC_SUBTYPE && (
+            <MetricsEditInline visualization={metric} />
+          )
         }
         actionMenuType="metricsGrid"
         metricType={metric.subType}

@@ -2,11 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-prototype-builtins */
 
 import { ShortDate } from '@elastic/eui';
-// eslint-disable-next-line import/no-unresolved
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
@@ -16,8 +13,8 @@ import { CoreStart } from '../../../../../../src/core/public';
 import {
   OBSERVABILITY_BASE,
   OTEL_METRIC_SUBTYPE,
-  PPL_DATE_FORMAT,
   PPL_INDEX_REGEX,
+  PPL_METRIC_SUBTYPE,
   PPL_WHERE_CLAUSE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
@@ -37,7 +34,6 @@ import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
 import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
 import { coreRefs } from '../../../framework/core_refs';
-import { ConsoleAppender } from '../../../../../../src/core/server/logging/appenders/console/console_appender';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -275,6 +271,7 @@ const createCatalogVisualizationMetaData = ({
   query,
   type,
   subType,
+  metricType,
   timeField,
   queryData,
 }: {
@@ -282,6 +279,7 @@ const createCatalogVisualizationMetaData = ({
   query: string;
   type: string;
   subType: string;
+  metricType: string;
   timeField: string;
   queryData: object;
 }) => {
@@ -291,6 +289,7 @@ const createCatalogVisualizationMetaData = ({
     query,
     type,
     subType,
+    metricType,
     selected_date_range: {
       start: 'now/y',
       end: 'now',
@@ -312,7 +311,6 @@ const createCatalogVisualizationMetaData = ({
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
-  http,
   pplService,
   catalogSource,
   startTime,
@@ -326,10 +324,8 @@ export const renderCatalogVisualization = async ({
   setVisualizationMetaData,
   setIsLoading,
   setIsError,
-  spanResolution,
   visualization,
 }: {
-  http: CoreStart['http'];
   pplService: PPLService;
   catalogSource: string;
   startTime: string;
@@ -343,7 +339,6 @@ export const renderCatalogVisualization = async ({
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
-  spanResolution?: string;
   queryMetaData?: MetricType;
   visualization: SavedVisualizationType;
 }) => {
@@ -353,7 +348,6 @@ export const renderCatalogVisualization = async ({
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
-  const visualizationSubType = visualization.subType;
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...visualization.queryMetaData,
@@ -384,6 +378,7 @@ export const renderCatalogVisualization = async ({
       query: visualizationQuery,
       type: visualizationType,
       subType: visualization.subType,
+      metricType: visualization.metricType,
       timeField: visualizationTimeField,
       queryData,
     });
@@ -408,6 +403,7 @@ const createOtelVisualizationMetaData = (
     description: '',
     query: '',
     type: visualizationType,
+    subType: PPL_METRIC_SUBTYPE,
     metricType: OTEL_METRIC_SUBTYPE,
     selected_date_range: {
       start: startTime,
@@ -428,7 +424,7 @@ const createOtelVisualizationMetaData = (
   };
 };
 
-const fetchAggregatedBinCount = (
+export const fetchAggregatedBinCount = (
   minimumBound: string,
   maximumBound: string,
   startTime: string,
@@ -463,7 +459,7 @@ const fetchAggregatedBinCount = (
     });
 };
 
-const fetchSampleOTDocument = (
+export const fetchSampleOTDocument = (
   selectedOtelIndex: string,
   http: CoreStart['http'],
   documentName: string
@@ -478,7 +474,7 @@ const fetchSampleOTDocument = (
     .catch((error) => console.error(error));
 };
 
-const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
+export const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
   const pattern = /\[Otel Metric\]\s(\S+?-\S+?)\.(\S+)/;
   const match = metricString.match(pattern);
 
@@ -519,7 +515,6 @@ export const renderOpenTelemetryVisualization = async ({
   const visualizationType = 'bar';
   let index = visualization?.index;
   let documentName = visualization?.name;
-  console.log('index: ', index);
 
   if (index === undefined) {
     const indexAndDocumentName = extractIndexAndDocumentName(visualization.name);
@@ -668,18 +663,18 @@ export const isPPLFilterValid = (
   return true;
 };
 
-export const processMetricsData = (schema: any, dataConfig: any) => {
+export const processMetricsData = (schema: any) => {
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
     schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
-    return prepareMetricsData(schema, dataConfig);
+    return prepareMetricsData(schema);
   }
   return {};
 };
 
-export const prepareMetricsData = (schema: any, dataConfig: any) => {
+export const prepareMetricsData = (schema: any) => {
   const metricBreakdown: any[] = [];
   const metricSeries: any[] = [];
   const metricDimension: any[] = [];
@@ -742,7 +737,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   };
 
   // add metric specific overriding
-  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
+  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema) };
 
   // add otel metric specific overriding
   if (metaData?.metricType === OTEL_METRIC_SUBTYPE) {
@@ -760,9 +755,8 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       ...(metaData.userConfigs?.layout || {}),
     },
   };
-
-  console.log('type in displayVisualization: ', type);
-
+  console.log('data: ', data);
+  console.log('mixedUserConfigs: ', mixedUserConfigs);
   return (
     <Visualization
       visualizations={getVizContainerProps({

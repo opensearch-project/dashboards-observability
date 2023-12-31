@@ -29,14 +29,14 @@ export const Visualization = ({
             [GROUPBY]: dimensions = [],
             [AGGREGATIONS]: series = [],
             queryMetaData = {},
-            subType = '',
+            metricType = '',
           } = {},
         } = {},
       },
       vis = {},
     }: IVisualizationContainerProps = vs;
 
-    if (subType === PROMQL_METRIC_SUBTYPE) {
+    if (metricType === PROMQL_METRIC_SUBTYPE) {
       if (isEmpty(queryMetaData)) return [false, VISUALIZATION_ERROR.NO_METRIC];
 
       // Metric checks OK.

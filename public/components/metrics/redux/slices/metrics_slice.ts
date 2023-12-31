@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import { createSlice } from '@reduxjs/toolkit';
 import { keyBy, mergeWith, pick, sortBy } from 'lodash';
@@ -18,7 +17,11 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { pplServiceRequestor } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
-import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE, OBSERVABILITY_BASE } from '../../../../../common/constants/shared';
+import {
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+  OBSERVABILITY_BASE,
+} from '../../../../../common/constants/shared';
 import { getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
@@ -125,7 +128,6 @@ const fetchCustomMetrics = async () => {
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
     [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.subType)
   );
-  console.log('savedMetrics: ', savedMetrics);
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     savedVisualizationId: obj.objectId,
@@ -195,48 +197,6 @@ export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => as
     })
     .catch((error) => console.error(error));
 };
-
-// const updateLayoutBySelection = (state: any, newMetric: any) => {
-//   const newDimensions = getNewVizDimensions(state.metricsLayout);
-
-//   const metricCatalog = (catalog: string) => {
-//     if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
-//       return 'savedCustomMetric';
-//     } else if (catalog === 'OpenTelemetry') {
-//       return 'openTelemetryMetric';
-//     } else {
-//       return 'prometheusMetric';
-//     }
-//   };
-//   const metricVisualization: MetricType = {
-//     id: newMetric.id,
-//     savedVisualizationId: newMetric.id,
-//     x: newDimensions.x,
-//     y: newDimensions.y,
-//     h: newDimensions.h,
-//     w: newDimensions.w,
-//     metricType: metricCatalog(newMetric.catalog),
-//     metric: newMetric.catalog === 'OpenTelemetry' ? newMetric : '',
-//   };
-//   state.metricsLayout = [...state.metricsLayout, metricVisualization];
-// };
-
-// const updateLayoutByDeSelection = (state: any, newMetric: any) => {
-//   const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
-
-//   const newMetricsLayout = [] as MetricType[];
-//   let heightSubtract = 0;
-
-//   sortedMetricsLayout.map((metricLayout: MetricType) => {
-//     if (metricLayout.id !== newMetric.id) {
-//       metricLayout.y = metricLayout.y - heightSubtract;
-//       newMetricsLayout.push(metricLayout);
-//     } else {
-//       heightSubtract = metricLayout.h;
-//     }
-//   });
-//   state.metricsLayout = newMetricsLayout;
-// };
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
@@ -324,7 +284,7 @@ export const {
 
 export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
-const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
+const getAvailableAttributes = (id, metricIndex) => async (dispatch) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
 
@@ -350,13 +310,13 @@ export const addSelectedMetric = (metric: MetricType) => async (dispatch, getSta
   // console.log('currentSelectedIds: ', currentSelectedIds);
   if (currentSelectedIds.includes(metric.id)) return;
 
-  if (metric.subType === PROMQL_METRIC_SUBTYPE) {
+  if (metric.metricType === PROMQL_METRIC_SUBTYPE) {
     await dispatch(getAvailableAttributes(metric.id, metric.index));
   }
   await dispatch(selectMetric(metric));
 };
 
-export const removeSelectedMetric = ({ id }) => async (dispatch, getState) => {
+export const removeSelectedMetric = ({ id }) => async (dispatch) => {
   dispatch(deSelectMetric(id));
 };
 
@@ -364,7 +324,7 @@ export const updateMetricQuery = (id, { availableAttributes, aggregation, attrib
   dispatch,
   getState
 ) => {
-  const state = getState();
+  // const state = getState();
   const staticMetric = getState().metrics.metrics[id];
   const metric = {
     ...staticMetric,

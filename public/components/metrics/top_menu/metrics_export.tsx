@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import {
   EuiButton,
@@ -38,7 +37,6 @@ import { SavedVisualization } from '../../../../common/types/explorer';
 import { visualizationFromPrometheusMetric, visualizationFromOtelMetric } from '../helpers/utils';
 import { updateCatalogVisualizationQuery } from '../../common/query_utils';
 import {
-  OTEL_DATE_FORMAT,
   OTEL_METRIC_SUBTYPE,
   PROMQL_METRIC_SUBTYPE,
   PPL_METRIC_SUBTYPE,
@@ -114,7 +112,6 @@ const MetricsExportPopOver = () => {
   useEffect(() => {
     if (selectedMetrics && selectedMetricsIds) {
       const metricsArray = selectedMetricsIds.map((id) => selectedMetrics[id]);
-      console.log('metricsArray: ', metricsArray);
       setMetricsToExport(metricsArray);
     }
   }, [selectedMetrics, selectedMetricsIds]);
@@ -249,7 +246,7 @@ const MetricsExportPopOver = () => {
     const client = dashboardsLoader.savedObjectsClient;
 
     Promise.all(
-      osdCoreSelectedDashboards.map(async ({ panel: dashboard }, index) => {
+      osdCoreSelectedDashboards.map(async ({ panel: dashboard }) => {
         const referenceCount = dashboard.references.length;
         const maxPanelY = dashboard.panelConfig.reduce(panelXYorGreaterThanValue, 0);
         const maxPanelVersion = dashboard.panelConfig.reduce(
@@ -271,6 +268,7 @@ const MetricsExportPopOver = () => {
 
         const panelsJSON = JSON.stringify(dashboard.panelConfig);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const updateRes = await client.update(
           dashboard.type,
           dashboard.id,
@@ -325,6 +323,7 @@ const MetricsExportPopOver = () => {
 
     try {
       savedMetrics = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         metricsToExport.map(async (metric, index) => {
           if (metric.savedVisualizationId === undefined) {
             return createSavedVisualization(metric);

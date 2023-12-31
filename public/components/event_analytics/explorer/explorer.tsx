@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import dateMath from '@elastic/datemath';
 import {
@@ -609,7 +610,7 @@ export const Explorer = ({
       indexFields: explorerFields,
       userConfigs: {
         ...visualizationSettings,
-        ...processMetricsData(explorerData.schema, visualizationSettings),
+        ...processMetricsData(explorerData.schema),
       },
       appData: { fromApp: appLogEvents },
       explorer: { explorerData, explorerFields, query, http, pplService },

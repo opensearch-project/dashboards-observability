@@ -217,19 +217,28 @@ export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
 };
 
+function extractSpanAndResolution(query: string) {
+  const regex = /'(\d+)([smhdwMy])'/;
+  const match = query.match(regex);
+  // eslint-disable-next-line radix
+  return match ? { span: parseInt(match[1]), resolution: match[2] } : null;
+}
+
 export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
   // convert to moment
   const start = convertDateTime(startTime, true);
   const end = convertDateTime(endTime, false);
 
-  const resolution = findMinInterval(start, end);
+  // const resolution = findMinInterval(start, end);
+  const spanResolution = extractSpanAndResolution(metaData.query);
+  console.log('blah: ', spanResolution);
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...metaData.queryMetaData,
     start,
     end,
-    span: '1',
-    resolution,
+    span: spanResolution.span,
+    resolution: spanResolution.resolution,
   });
 
   return visualizationQuery;
