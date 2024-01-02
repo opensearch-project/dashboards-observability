@@ -51,6 +51,10 @@ module.exports = {
     'cypress/assertion-before-screenshot': 'warn',
     'cypress/no-force': 'warn',
     'cypress/no-async-tests': 'error',
+    // default no-unused-vars doesn't handle when vars are only used in types, use extended version
+    // See: https://typescript-eslint.io/rules/no-unused-vars
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error'
   },
   overrides: [
     {

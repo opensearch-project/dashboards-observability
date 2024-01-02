@@ -26,11 +26,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { Color } from 'common/constants/integrations';
+import { Color } from '../../../../common/constants/integrations';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import {
+  CONSOLE_PROXY,
+  INTEGRATIONS_BASE,
+  DATACONNECTIONS_BASE,
+} from '../../../../common/constants/shared';
 
 export interface IntegrationSetupInputs {
   displayName: string;
@@ -144,9 +147,10 @@ const runQuery = async (
         method: 'POST',
       },
     });
+    let poll: { status: string; error?: string } = { status: 'undefined' };
     const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
-    while (true) {
-      const poll: { status: string; error?: string } = await http.post(CONSOLE_PROXY, {
+    while (!poll.error) {
+      poll = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
           path: '_plugins/_async_query/' + queryId,
@@ -170,6 +174,7 @@ const runQuery = async (
       }
       await sleep(3000);
     }
+    return { ok: false, error: new Error(poll.error) };
   } catch (err: any) {
     console.error(err);
     return { ok: false, error: err };
