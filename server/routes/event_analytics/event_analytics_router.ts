@@ -5,13 +5,13 @@
 
 import { schema } from '@osd/config-schema';
 import {
-  IRouter,
   IOpenSearchDashboardsResponse,
+  IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
 import {
-  OBSERVABILITY_BASE,
   EVENT_ANALYTICS,
+  OBSERVABILITY_BASE,
   SAVED_OBJECTS,
   SAVED_QUERY,
   SAVED_VISUALIZATION,
@@ -137,8 +137,8 @@ export const registerEventAnalyticsRouter = ({
             name: schema.string(),
             description: schema.string(),
             application_id: schema.maybe(schema.string()),
-            user_configs: schema.maybe(schema.string()),
-            sub_type: schema.maybe(schema.string()),
+            userConfigs: schema.maybe(schema.string()),
+            subType: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
             selected_labels: schema.maybe(
               schema.object({
@@ -231,8 +231,8 @@ export const registerEventAnalyticsRouter = ({
             name: schema.string(),
             description: schema.string(),
             application_id: schema.maybe(schema.string()),
-            user_configs: schema.maybe(schema.string()),
-            sub_type: schema.maybe(schema.string()),
+            userConfigs: schema.maybe(schema.string()),
+            subType: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
             selected_labels: schema.maybe(
               schema.object({

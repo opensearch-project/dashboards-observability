@@ -1,0 +1,72 @@
+name: Lint
+
+on: [pull_request]
+
+env:
+  PLUGIN_NAME: dashboards-observability
+  OPENSEARCH_DASHBOARDS_VERSION: "main"
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v2
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+          fetch-depth: 0
+
+      - name: Get node and yarn versions
+        working-directory: ${{ env.WORKING_DIR }}
+        id: versions_step
+        run: |
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
+          echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install correct yarn version for OpenSearch Dashboards
+        run: |
+          npm uninstall -g yarn
+          echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Bootstrap the plugin
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        run: yarn osd bootstrap
+
+      - name: Get list of changed files
+        id: files
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          git fetch origin $BASE_SHA
+          git diff --name-only $BASE_SHA...$HEAD_SHA > changed_files.txt
+          CHANGED_FILES=$(cat changed_files.txt | grep -E '\.(js|ts|tsx)$' || true)
+          echo "::set-output name=changed::${CHANGED_FILES}"
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+
+      - name: Lint Changed Files
+        run: |
+          CHANGED_FILES="${{ steps.files.outputs.changed }}"
+          if [[ -n "$CHANGED_FILES" ]]; then
+            echo "Linting changed files..."
+            IFS=$'\n' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
+            yarn lint "${FILES_TO_LINT[@]}"
+          else
+            echo "No matched files to lint."
+          fi
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}

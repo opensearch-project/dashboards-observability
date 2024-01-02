@@ -17,4 +17,12 @@
 .mainContentTabs .euiResizableContainer {
   height: calc(100vh - 194px);
 }
-  
+
+.metricsContainer {
+  height: calc(100vh - 194px);
+
+  section {
+    line-height: normal;
+    overflow: auto;  
+  }
+}

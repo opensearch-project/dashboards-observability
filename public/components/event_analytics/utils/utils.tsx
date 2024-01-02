@@ -5,19 +5,18 @@
 
 /* eslint-disable no-bitwise */
 
-import { uniqueId, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { MutableRefObject } from 'react';
 import { EuiDataGridSorting, EuiText } from '@elastic/eui';
 import datemath from '@elastic/datemath';
-import { HttpStart } from '../../../../../../src/core/public';
 import {
-  CUSTOM_LABEL,
-  TIME_INTERVAL_OPTIONS,
-  GROUPBY,
   AGGREGATIONS,
   BREAKDOWNS,
+  CUSTOM_LABEL,
   DATE_PICKER_FORMAT,
+  GROUPBY,
+  TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
 import {
   PPL_DATE_FORMAT,
@@ -28,13 +27,10 @@ import {
 import {
   ConfigListEntry,
   GetTooltipHoverInfoType,
-  IExplorerFields,
-  IField,
   IQuery,
   MOMENT_UNIT_OF_TIME,
 } from '../../../../common/types/explorer';
 import PPLService from '../../../services/requests/ppl';
-import { DocViewRow, IDocType } from '../explorer/events_views';
 import { ConfigTooltip } from '../explorer/visualizations/config_panel/config_panes/config_controls';
 import {
   GroupByChunk,
@@ -76,16 +72,6 @@ const composeFinalQuery = (
   return indexPartOfQuery + timeQueryFilter + filterPartOfQuery + sortFilter;
 };
 
-const createTds = (
-  docs: IDocType[],
-  selectedCols: IField[],
-  getTds: (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => JSX.Element[]
-) => {
-  return docs.map((doc: IDocType) => (
-    <tr className="osdDocTable__row"> {getTds(doc, selectedCols, true).slice(1)}</tr>
-  ));
-};
-
 // fetches Surrounding events based on a timestamp
 export const fetchSurroundingData = async (
   pplService: PPLService,
@@ -96,9 +82,7 @@ export const fetchSurroundingData = async (
   typeOfDocs: 'new' | 'old',
   setEventsData: React.Dispatch<React.SetStateAction<JSX.Element[]>>,
   setIsError: React.Dispatch<React.SetStateAction<string>>,
-  setLoadingData: React.Dispatch<React.SetStateAction<boolean>>,
-  selectedCols: IField[],
-  getTds: (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => JSX.Element[]
+  setLoadingData: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   let resultCount = 0;
   let isErred = false;
@@ -268,6 +252,23 @@ export const getPropName = (queriedVizObj: {
   } else {
     return '';
   }
+};
+
+export const getMetricVisConfig = (metric) => {
+  const { aggregation } = metric;
+  return {
+    [AGGREGATIONS]: [
+      {
+        name: aggregation,
+        aggregation,
+        label: aggregation + '()',
+      },
+    ],
+    [BREAKDOWNS]: [],
+    queryMetaData: metric.queryMetaData,
+    subType: metric.subType,
+    legend: { showLegend: 'hidden' }, // force no-legend in dashboard displays
+  };
 };
 
 export const getDefaultVisConfig = (statsToken: statsChunk) => {

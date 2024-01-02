@@ -400,7 +400,6 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           <EuiFlexItem grow={false}>
             <EuiPopover
               panelPaddingSize="none"
-              withTitle
               button={
                 <EuiButtonIcon
                   aria-label="Open paragraph menu"

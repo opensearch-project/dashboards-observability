@@ -26,9 +26,11 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
   constructor(protected readonly client: HttpStart) {
     super();
   }
+
   create(params: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
+
   get(params: ISavedObjectRequestParams): Promise<SavedObjectsGetResponse> {
     return this.client.get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`, {
       query: {
@@ -36,6 +38,7 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
       },
     });
   }
+
   getBulk(params: ISavedObjectRequestParams): Promise<SavedObjectsGetResponse> {
     CONCAT_FIELDS.map((arrayField) => {
       this.stringifyList(params, arrayField, ',');
@@ -47,22 +50,27 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
       },
     });
   }
+
   update(params: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
+
   updateBulk(params: any): Promise<Array<Promise<any>>> {
     throw new Error('Method not implemented.');
   }
+
   delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {
     return this.client.delete(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/${params.objectId}`
     );
   }
+
   deleteBulk(params: SavedObjectsDeleteBulkParams): Promise<SavedObjectsDeleteResponse> {
     return this.client.delete(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/${params.objectIdList.join(',')}`
     );
   }
+
   buildRequestBody({
     query,
     fields,
@@ -108,11 +116,11 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {
-      objRequest.object.sub_type = subType;
+      objRequest.object.subType = subType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

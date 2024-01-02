@@ -4,7 +4,7 @@
  */
 
 /// <reference types="cypress" />
-import { suppressResizeObserverIssue } from '../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 
 import {
   delay,
@@ -33,7 +33,7 @@ import {
   newName,
   TYPING_DELAY,
   timeoutDelay
-} from '../utils/app_constants';
+} from '../../utils/app_constants';
 
 suppressResizeObserverIssue();//needs to be in file once
 

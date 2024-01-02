@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Log Config component renders empty log config 1`] = `
-<Component
+<LogConfig
   appConfigs={Array []}
   chrome={
     Object {
@@ -444,7 +444,7 @@ exports[`Log Config component renders empty log config 1`] = `
                                   onBlur={[Function]}
                                   onFocus={[Function]}
                                 >
-                                  <Component
+                                  <Autocomplete
                                     baseQuery=""
                                     dslService={
                                       Object {
@@ -561,7 +561,7 @@ exports[`Log Config component renders empty log config 1`] = `
                                         </EuiValidatableControl>
                                       </EuiTextArea>
                                     </div>
-                                  </Component>
+                                  </Autocomplete>
                                   <EuiBadge
                                     className="ppl-link ppl-link-light"
                                     color="hollow"
@@ -616,11 +616,11 @@ exports[`Log Config component renders empty log config 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</LogConfig>
 `;
 
 exports[`Log Config component renders with query 1`] = `
-<Component
+<LogConfig
   appConfigs={Array []}
   chrome={
     Object {
@@ -1068,7 +1068,7 @@ exports[`Log Config component renders with query 1`] = `
                                   onBlur={[Function]}
                                   onFocus={[Function]}
                                 >
-                                  <Component
+                                  <Autocomplete
                                     baseQuery=""
                                     dslService={
                                       Object {
@@ -1185,7 +1185,7 @@ exports[`Log Config component renders with query 1`] = `
                                         </EuiValidatableControl>
                                       </EuiTextArea>
                                     </div>
-                                  </Component>
+                                  </Autocomplete>
                                   <EuiBadge
                                     className="ppl-link ppl-link-light"
                                     color="hollow"
@@ -1240,5 +1240,5 @@ exports[`Log Config component renders with query 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</LogConfig>
 `;
