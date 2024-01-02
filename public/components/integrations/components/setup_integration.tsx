@@ -122,7 +122,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
       console.error(`Unknown connection type: ${type}`);
       return [];
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error(err.message);
     return [];
   }
@@ -175,7 +175,7 @@ const runQuery = async (
       await sleep(3000);
     }
     return { ok: false, error: new Error(poll.error) };
-  } catch (err: any) {
+  } catch (err) {
     console.error(err);
     return { ok: false, error: err };
   }
