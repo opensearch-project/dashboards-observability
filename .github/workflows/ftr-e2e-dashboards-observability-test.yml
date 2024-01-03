@@ -4,9 +4,9 @@ on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  OPENSEARCH_VERSION: '3.0.0'
-  OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
+  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
+  OPENSEARCH_VERSION: '2.12.0'
+  OPENSEARCH_PLUGIN_VERSION: '2.12.0.0'
 
 jobs:
   tests:
