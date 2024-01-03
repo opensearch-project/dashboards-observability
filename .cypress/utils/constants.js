@@ -15,7 +15,7 @@ export const DATASOURCES_API_PREFIX = '/app/datasources';
 export const DATASOURCES_PATH = {
   DATASOURCES_CREATION_BASE: `${DATASOURCES_API_PREFIX}#/new`,
   DATASOURCES_CONFIG_BASE: `${DATASOURCES_API_PREFIX}#/configure`
-}
+};
 
 // trace analytics
 export const TRACE_ID = '8832ed6abbb2a83516461960c89af49d';

@@ -11,16 +11,16 @@ import {
 
 const manageDataSourcesTag = 'button[data-test-subj="manage"]';
 const newDataSourcesTag = 'button[data-test-subj="new"]';
-const createS3Button = '[data-test-subj="datasource_card_s3glue"]'
+const createS3Button = '[data-test-subj="datasource_card_s3glue"]';
 const createPrometheusButton = '[data-test-subj="datasource_card_prometheus"]';
 
 const visitDatasourcesHomePage = () => {
   cy.visit(FONTEND_BASE_PATH + DATASOURCES_API_PREFIX);
-}
+};
 
 const visitDatasourcesCreationPage = () => {
   cy.visit(FONTEND_BASE_PATH + DATASOURCES_PATH.DATASOURCES_CREATION_BASE);
-}
+};
 
 describe('Integration tests for datasources plugin', () => {
   it('Navigates to datasources plugin and expects the correct header', () => {
@@ -51,7 +51,10 @@ describe('Integration tests for datasources plugin', () => {
     visitDatasourcesCreationPage();
 
     cy.get(createS3Button).should('be.visible').click();
-    cy.url().should('include', DATASOURCES_PATH.DATASOURCES_CONFIG_BASE + '/AmazonS3AWSGlue')
+    cy.url().should(
+      'include',
+      DATASOURCES_PATH.DATASOURCES_CONFIG_BASE + '/AmazonS3AWSGlue'
+    );
 
     cy.get('h1.euiTitle.euiTitle--medium')
       .should('be.visible')
@@ -62,7 +65,10 @@ describe('Integration tests for datasources plugin', () => {
     visitDatasourcesCreationPage();
 
     cy.get(createPrometheusButton).should('be.visible').click();
-    cy.url().should('include', DATASOURCES_PATH.DATASOURCES_CONFIG_BASE + '/Prometheus')
+    cy.url().should(
+      'include',
+      DATASOURCES_PATH.DATASOURCES_CONFIG_BASE + '/Prometheus'
+    );
 
     cy.get('h4.euiTitle.euiTitle--medium')
       .should('be.visible')
