@@ -10,8 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 interface QueryDataGridProps {
   rowCount: number;
   queryColumns: any[];
-  visibleColumns: any[];
-  setVisibleColumns: (visibleColumns: string[]) => void;
   dataValues: any[];
 }
 
@@ -21,23 +19,25 @@ interface RenderCellValueProps {
 }
 
 function QueryDataGrid(props: QueryDataGridProps) {
-  const { rowCount, queryColumns, visibleColumns, setVisibleColumns, dataValues } = props;
+  const { rowCount, queryColumns, dataValues } = props;
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState([]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
+
   const [isVisible, setIsVisible] = useState(false);
 
   const onSort = useCallback(
-    (sortColumns) => {
-      setSortingColumns(sortColumns);
+    (newColumns) => {
+      setSortingColumns(newColumns);
     },
     [setSortingColumns]
   );
 
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
-      setPagination((paginate) => ({
-        ...paginate,
+      setPagination((newPagination) => ({
+        ...newPagination,
         pageSize,
         pageIndex: 0,
       })),
@@ -45,7 +45,7 @@ function QueryDataGrid(props: QueryDataGridProps) {
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((paginate) => ({ ...paginate, pageIndex })),
+    (pageIndex) => setPagination((newPagination) => ({ ...newPagination, pageIndex })),
     [setPagination]
   );
 
@@ -55,10 +55,10 @@ function QueryDataGrid(props: QueryDataGridProps) {
     };
   }, []);
 
-  const getUpdatedVisibleColumns = (queryCols: any[]) => {
+  const getUpdatedVisibleColumns = () => {
     const updatedVisibleColumns = [];
-    for (let index = 0; index < queryCols.length; ++index) {
-      updatedVisibleColumns.push(queryCols[index].displayAsText);
+    for (let index = 0; index < queryColumns.length; ++index) {
+      updatedVisibleColumns.push(queryColumns[index].displayAsText);
     }
     return updatedVisibleColumns;
   };
@@ -72,8 +72,8 @@ function QueryDataGrid(props: QueryDataGridProps) {
         setIsVisible(true);
       }
     }, 1000);
-    setVisibleColumns(getUpdatedVisibleColumns(queryColumns));
-  }, [queryColumns, setVisibleColumns]);
+    setVisibleColumns(getUpdatedVisibleColumns());
+  }, []);
 
   const displayLoadingSpinner = !isVisible ? (
     <>
@@ -108,7 +108,6 @@ function queryDataGridPropsAreEqual(prevProps: QueryDataGridProps, nextProps: Qu
   return (
     prevProps.rowCount === nextProps.rowCount &&
     JSON.stringify(prevProps.queryColumns) === JSON.stringify(nextProps.queryColumns) &&
-    JSON.stringify(prevProps.visibleColumns) === JSON.stringify(nextProps.visibleColumns) &&
     JSON.stringify(prevProps.dataValues) === JSON.stringify(nextProps.dataValues)
   );
 }

@@ -7,7 +7,7 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
@@ -76,7 +76,6 @@ const OutputBody = ({
    */
 
   const dateFormat = uiSettingsService.get('dateFormat');
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   if (typeOut !== undefined) {
     switch (typeOut) {
@@ -88,7 +87,6 @@ const OutputBody = ({
         } else {
           const columns = createQueryColumns(queryObject.schema);
           const data = getQueryOutputData(queryObject);
-          setVisibleColumns(columns.map(({ id }) => id));
           return (
             <div>
               <EuiText key={'query-input-key'} className="wrapAll">
@@ -99,8 +97,6 @@ const OutputBody = ({
                 key={key}
                 rowCount={queryObject.datarows.length}
                 queryColumns={columns}
-                visibleColumns={visibleColumns}
-                setVisibleColumns={setVisibleColumns}
                 dataValues={data}
               />
             </div>
