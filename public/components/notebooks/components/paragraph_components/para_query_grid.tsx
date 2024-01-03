@@ -10,6 +10,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 interface QueryDataGridProps {
   rowCount: number;
   queryColumns: any[];
+  visibleColumns: any[];
+  setVisibleColumns: (visibleColumns: string[]) => void;
   dataValues: any[];
 }
 
@@ -19,25 +21,23 @@ interface RenderCellValueProps {
 }
 
 function QueryDataGrid(props: QueryDataGridProps) {
-  const { rowCount, queryColumns, dataValues } = props;
+  const { rowCount, queryColumns, visibleColumns, setVisibleColumns, dataValues } = props;
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState([]);
-  const [visibleColumns, setVisibleColumns] = useState<Array<{ id: any; displayAsText: any }>>([]);
-
   const [isVisible, setIsVisible] = useState(false);
 
   const onSort = useCallback(
-    (newColumns) => {
-      setSortingColumns(newColumns);
+    (sortColumns) => {
+      setSortingColumns(sortColumns);
     },
     [setSortingColumns]
   );
 
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
-      setPagination((newPagination) => ({
-        ...newPagination,
+      setPagination((paginate) => ({
+        ...paginate,
         pageSize,
         pageIndex: 0,
       })),
@@ -45,7 +45,7 @@ function QueryDataGrid(props: QueryDataGridProps) {
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((newPagination) => ({ ...newPagination, pageIndex })),
+    (pageIndex) => setPagination((paginate) => ({ ...paginate, pageIndex })),
     [setPagination]
   );
 
@@ -55,10 +55,10 @@ function QueryDataGrid(props: QueryDataGridProps) {
     };
   }, []);
 
-  const getUpdatedVisibleColumns = () => {
+  const getUpdatedVisibleColumns = (queryCols: any[]) => {
     const updatedVisibleColumns = [];
-    for (let index = 0; index < queryColumns.length; ++index) {
-      updatedVisibleColumns.push(queryColumns[index].displayAsText);
+    for (let index = 0; index < queryCols.length; ++index) {
+      updatedVisibleColumns.push(queryCols[index].displayAsText);
     }
     return updatedVisibleColumns;
   };
@@ -72,8 +72,8 @@ function QueryDataGrid(props: QueryDataGridProps) {
         setIsVisible(true);
       }
     }, 1000);
-    setVisibleColumns(getUpdatedVisibleColumns());
-  }, []);
+    setVisibleColumns(getUpdatedVisibleColumns(queryColumns));
+  }, [queryColumns, setVisibleColumns]);
 
   const displayLoadingSpinner = !isVisible ? (
     <>

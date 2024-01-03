@@ -91,7 +91,7 @@ const OutputBody = ({
           setVisibleColumns(columns.map(({ id }) => id));
           return (
             <div>
-              <EuiText key={'query-input-key'}>
+              <EuiText key={'query-input-key'} className="wrapAll">
                 <b>{inputQuery}</b>
               </EuiText>
               <EuiSpacer />
@@ -108,7 +108,7 @@ const OutputBody = ({
         }
       case 'MARKDOWN':
         return (
-          <EuiText key={key} className="markdown-output-text">
+          <EuiText key={key} className="wrapAll markdown-output-text">
             <MarkdownRender source={val} />
           </EuiText>
         );
