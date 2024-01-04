@@ -22,28 +22,34 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   }
 
   async findIntegrationVersions(dirname?: string | undefined): Promise<Result<string[], Error>> {
+    const versions: string[] = [];
+    for (const integration of this.integrationsList) {
+      if (integration.config.name !== dirname) {
+        continue;
+      }
+      versions.push(integration.config.version);
+    }
+    return { ok: true, value: versions };
+  }
+
+  async readFile(_filename: string, _type?: IntegrationPart): Promise<Result<object[] | object>> {
     // TODO
     return { ok: false, error: new Error('Not Implemented') };
   }
 
-  async readFile(filename: string, type?: IntegrationPart): Promise<Result<object[] | object>> {
+  async readFileRaw(_filename: string, _type?: IntegrationPart): Promise<Result<Buffer>> {
     // TODO
     return { ok: false, error: new Error('Not Implemented') };
   }
 
-  async readFileRaw(filename: string, type?: IntegrationPart): Promise<Result<Buffer>> {
-    // TODO
-    return { ok: false, error: new Error('Not Implemented') };
-  }
-
-  async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
+  async findIntegrations(_dirname: string = '.'): Promise<Result<string[]>> {
     // TODO
     return { ok: false, error: new Error('Not Implemented') };
   }
 
   private async collectIntegrationsRecursive(
-    dirname: string,
-    integrations: string[]
+    _dirname: string,
+    _integrations: string[]
   ): Promise<void> {
     // TODO
     return;

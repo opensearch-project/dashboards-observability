@@ -22,6 +22,13 @@ const TEST_CATALOG: SerializedIntegration[] = [
       name: 'sample2',
     },
   },
+  {
+    config: {
+      ...TEST_INTEGRATION_CONFIG,
+      name: 'sample2',
+      version: '2.1.0',
+    },
+  },
 ];
 
 describe('JSON Data Adaptor', () => {
@@ -35,13 +42,13 @@ describe('JSON Data Adaptor', () => {
 
     expect(serialized.ok).toBe(true);
     if (!serialized.ok) {
-      return; // Trick type system into allowing access to value
+      return; // Trick typescript into allowing access to serialized.value
     }
 
     const adaptor: JsonCatalogDataAdaptor = new JsonCatalogDataAdaptor([serialized.value]);
     const jsonIntegration = new IntegrationReader('nginx', adaptor);
 
-    expect(jsonIntegration.getConfig()).resolves.toEqual(fsConfig);
+    await expect(jsonIntegration.getConfig()).resolves.toEqual(fsConfig);
   });
 
   it('Should filter its list on join', async () => {
@@ -52,12 +59,18 @@ describe('JSON Data Adaptor', () => {
 
   it('Should correctly identify repository type', async () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG);
-    expect(adaptor.getDirectoryType()).resolves.toBe('repository');
+    await expect(adaptor.getDirectoryType()).resolves.toBe('repository');
   });
 
   it('Should correctly identify integration type after filtering', async () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG);
     const joined = await adaptor.join('sample1');
-    expect(joined.getDirectoryType()).resolves.toBe('integration');
+    await expect(joined.getDirectoryType()).resolves.toBe('integration');
+  });
+
+  it('Should correctly retrieve integration versions', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG);
+    const versions = await adaptor.findIntegrationVersions('sample2');
+    expect((versions as { value: string[] }).value).toHaveLength(2);
   });
 });
