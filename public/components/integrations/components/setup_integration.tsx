@@ -26,11 +26,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { Color } from 'common/constants/integrations';
+import { Color } from '../../../../common/constants/integrations';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import {
+  CONSOLE_PROXY,
+  INTEGRATIONS_BASE,
+  DATACONNECTIONS_BASE,
+} from '../../../../common/constants/shared';
 
 export interface IntegrationSetupInputs {
   displayName: string;
@@ -119,7 +122,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
       console.error(`Unknown connection type: ${type}`);
       return [];
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error(err.message);
     return [];
   }
@@ -144,9 +147,10 @@ const runQuery = async (
         method: 'POST',
       },
     });
+    let poll: { status: string; error?: string } = { status: 'undefined' };
     const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
-    while (true) {
-      const poll: { status: string; error?: string } = await http.post(CONSOLE_PROXY, {
+    while (!poll.error) {
+      poll = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
           path: '_plugins/_async_query/' + queryId,
@@ -170,7 +174,8 @@ const runQuery = async (
       }
       await sleep(3000);
     }
-  } catch (err: any) {
+    return { ok: false, error: new Error(poll.error) };
+  } catch (err) {
     console.error(err);
     return { ok: false, error: err };
   }
@@ -226,6 +231,7 @@ export function SetupIntegrationForm({
           onChange={(event) => updateConfig({ displayName: event.target.value })}
           placeholder={`${integration.name} Integration`}
           isInvalid={config.displayName.length === 0}
+          data-test-subj="new-instance-name"
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -273,6 +279,7 @@ export function SetupIntegrationForm({
             updateConfig({ connectionDataSource: newOption.label });
           }}
           customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
+          data-test-subj="data-source-name"
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
@@ -397,7 +404,13 @@ export function SetupBottomBar({
                     '{table_name}',
                     `${config.connectionDataSource}.default.${config.connectionTableName}`
                   );
-                  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+                  // We append to this URI in internal queries, so we normalize it to have no trailing slash
+                  let trimmedLocation = config.connectionLocation.trim();
+                  trimmedLocation = trimmedLocation.endsWith('/')
+                    ? trimmedLocation.slice(0, trimmedLocation.length - 1)
+                    : trimmedLocation;
+
+                  queryStr = queryStr.replaceAll('{s3_bucket_location}', trimmedLocation);
                   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
                   queryStr = queryStr.replaceAll(/\s+/g, ' ');
                   const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
@@ -430,6 +443,7 @@ export function SetupBottomBar({
                 console.error('Invalid data source type');
               }
             }}
+            data-test-subj="create-instance-button"
           >
             Add Integration
           </EuiButton>

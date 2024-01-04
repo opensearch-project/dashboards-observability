@@ -128,6 +128,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 className="euiFormRow__fieldWrapper"
                               >
                                 <EuiFieldText
+                                  data-test-subj="new-instance-name"
                                   id="random_html_id"
                                   isInvalid={false}
                                   onBlur={[Function]}
@@ -151,6 +152,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                         >
                                           <input
                                             className="euiFieldText"
+                                            data-test-subj="new-instance-name"
                                             id="random_html_id"
                                             onBlur={[Function]}
                                             onChange={[Function]}
@@ -368,6 +370,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   async={false}
                                   compressed={false}
                                   customOptionText="Select {searchValue} as your index"
+                                  data-test-subj="data-source-name"
                                   fullWidth={false}
                                   id="random_html_id"
                                   isClearable={true}
@@ -396,6 +399,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                     aria-expanded={false}
                                     aria-haspopup="listbox"
                                     className="euiComboBox"
+                                    data-test-subj="data-source-name"
                                     onKeyDown={[Function]}
                                     role="combobox"
                                   >
@@ -761,6 +765,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           >
                             <button
                               class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                              data-test-subj="create-instance-button"
                               disabled=""
                               type="button"
                             >
@@ -901,6 +906,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButton
+                                data-test-subj="create-instance-button"
                                 disabled={true}
                                 fill={true}
                                 iconSide="right"
@@ -910,6 +916,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
+                                  data-test-subj="create-instance-button"
                                   disabled={true}
                                   element="button"
                                   fill={true}
@@ -922,6 +929,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 >
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    data-test-subj="create-instance-button"
                                     disabled={true}
                                     onClick={[Function]}
                                     style={
@@ -1125,6 +1133,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <EuiFieldText
+              data-test-subj="new-instance-name"
               id="random_html_id"
               isInvalid={false}
               onBlur={[Function]}
@@ -1148,6 +1157,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                     >
                       <input
                         className="euiFieldText"
+                        data-test-subj="new-instance-name"
                         id="random_html_id"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1384,6 +1394,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               async={false}
               compressed={false}
               customOptionText="Select {searchValue} as your index"
+              data-test-subj="data-source-name"
               fullWidth={false}
               id="random_html_id"
               isClearable={true}
@@ -1412,6 +1423,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                 aria-expanded={false}
                 aria-haspopup="listbox"
                 className="euiComboBox"
+                data-test-subj="data-source-name"
                 onKeyDown={[Function]}
                 role="combobox"
               >
