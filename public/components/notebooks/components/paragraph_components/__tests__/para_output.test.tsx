@@ -7,9 +7,9 @@ import { render } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
+import { uiSettingsService } from '../../../../../../common/utils/core_services';
 import { sampleParsedParagraghs1 } from '../../../../../../test/sample_default_notebooks';
 import { ParaOutput } from '../para_output';
-import { uiSettingsService } from '../../../../../../common/utils/core_services';
 
 describe('<ParaOutput /> spec', () => {
   configure({ adapter: new Adapter() });
@@ -32,6 +32,23 @@ describe('<ParaOutput /> spec', () => {
 
   it('renders query outputs', () => {
     const para = sampleParsedParagraghs1[3];
+    para.isSelected = true;
+    const setVisInput = jest.fn();
+    const utils = render(
+      <ParaOutput
+        key={para.uniqueId}
+        para={para}
+        visInput={jest.fn()}
+        setVisInput={setVisInput}
+        DashboardContainerByValueRenderer={jest.fn()}
+      />
+    );
+    expect(utils.container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders query outputs with error', () => {
+    const para = sampleParsedParagraghs1[3];
+    para.out = ['{"error":"Invalid SQL query"}'];
     para.isSelected = true;
     const setVisInput = jest.fn();
     const utils = render(

@@ -67,6 +67,23 @@ exports[`<ParaOutput /> spec renders query outputs 1`] = `
 </div>
 `;
 
+exports[`<ParaOutput /> spec renders query outputs with error 1`] = `
+<div
+  class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge prismjs language-none"
+>
+  <pre
+    class="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+    tabindex="-1"
+  >
+    <code
+      class="euiCodeBlock__code"
+    >
+      {"error":"Invalid SQL query"}
+    </code>
+  </pre>
+</div>
+`;
+
 exports[`<ParaOutput /> spec renders visualization outputs 1`] = `
 <div
   class="euiText euiText--small"
