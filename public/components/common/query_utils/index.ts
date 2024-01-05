@@ -218,6 +218,8 @@ export const getIndexPatternFromRawQuery = (query: string): string => {
 };
 
 function extractSpanAndResolution(query: string) {
+  if (!query) return;
+
   const regex = /'(\d+)([smhdwMy])'/;
   const match = query.match(regex);
   // eslint-disable-next-line radix
@@ -228,17 +230,14 @@ export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
   // convert to moment
   const start = convertDateTime(startTime, true);
   const end = convertDateTime(endTime, false);
-
-  // const resolution = findMinInterval(start, end);
-  const spanResolution = extractSpanAndResolution(metaData.query);
-  console.log('blah: ', spanResolution);
+  const spanResolution = extractSpanAndResolution(metaData?.query);
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...metaData.queryMetaData,
     start,
     end,
-    span: spanResolution.span,
-    resolution: spanResolution.resolution,
+    span: spanResolution?.span || 1,
+    resolution: spanResolution?.resolution || 'h',
   });
 
   return visualizationQuery;

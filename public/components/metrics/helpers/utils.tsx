@@ -2,10 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import { ShortDate } from '@elastic/eui';
-// eslint-disable-next-line import/no-unresolved
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -130,7 +128,6 @@ export const createOtelMetric = (metric: any) => {
 };
 
 export const visualizationFromOtelMetric = (metric: any) => {
-  console.log('savedVisualization in updateOpenTelemetryMetricsWithSelections: ', metric);
   return {
     query: '',
     index: metric.index,

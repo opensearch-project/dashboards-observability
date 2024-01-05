@@ -342,7 +342,6 @@ export const renderCatalogVisualization = async ({
   queryMetaData?: MetricType;
   visualization: SavedVisualizationType;
 }) => {
-  console.log('visualization in catalog: ', visualization);
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
@@ -755,8 +754,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       ...(metaData.userConfigs?.layout || {}),
     },
   };
-  console.log('data: ', data);
-  console.log('mixedUserConfigs: ', mixedUserConfigs);
+
   return (
     <Visualization
       visualizations={getVizContainerProps({

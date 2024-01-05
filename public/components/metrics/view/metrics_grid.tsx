@@ -89,7 +89,6 @@ const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
 
 export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
   if (!metric) return <></>;
-  console.log('metric in inner grid visualization: ', metric);
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer

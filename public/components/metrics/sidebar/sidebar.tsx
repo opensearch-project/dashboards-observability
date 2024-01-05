@@ -89,7 +89,6 @@ export const Sidebar = ({
       const fetchOtelDocuments = async () => {
         try {
           const documentNames = await fetchOpenTelemetryDocumentNames(selectedOTIndex[0]?.label)();
-          console.log('documentNames: ', documentNames);
           const availableOtelDocuments = documentNames?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
               return {
@@ -134,7 +133,6 @@ export const Sidebar = ({
   }, [promethuesMetrics, selectedDataSource, availableOTDocuments, selectedOTIndex]);
 
   const handleAddMetric = (metric: any) => {
-    console.log('handle add metrics: ', metric);
     dispatch(addSelectedMetric(metric));
   };
 

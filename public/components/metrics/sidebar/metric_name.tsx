@@ -4,19 +4,17 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiFacetButton, EuiIcon } from '@elastic/eui';
+import { EuiFacetButton, EuiIcon } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { metricIconsSelector } from '../redux/slices/metrics_slice';
 import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
 
 const MetricIcon = ({ metric }) => {
   const metricIcons = useSelector(metricIconsSelector);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const iconMeta = metricIcons[metric?.catalog];
-  // console.log('iconMeta: ', iconMeta);
   const metricCatalog = metric?.catalog;
-  // console.log('metricCatalog: ', metricCatalog);
-  if (metric?.catalog === OBSERVABILITY_CUSTOM_METRIC || metric?.catalog === 'OpenTelemetry') {
-    // console.log('satisfies this condition');
+  if (metricCatalog === OBSERVABILITY_CUSTOM_METRIC || metricCatalog === 'OpenTelemetry') {
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   } else return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   // } else return <EuiAvatar name={metricCatalog} size="s" type="space" {...iconMeta} />;

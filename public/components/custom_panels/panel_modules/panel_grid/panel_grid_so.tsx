@@ -5,9 +5,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import _, { forEach } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { VisualizationContainer } from '../visualization_container';
@@ -82,14 +82,14 @@ export const PanelGridSO = (props: PanelGridProps) => {
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   // Reset Size of Visualizations when layout is changed
-  const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
+  const layoutChanged = (currLayouts: Layout[]) => {
     window.dispatchEvent(new Event('resize'));
     setPostEditLayout(currLayouts);
   };
 
   const loadVizComponents = () => {
-    console.log('panelVisualizations[0] so: ', panelVisualizations[0]);
     const gridDataComps = panelVisualizations.map(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (panelVisualization: VisualizationType, index) => (
         <VisualizationContainer
           key={panelVisualization.id}

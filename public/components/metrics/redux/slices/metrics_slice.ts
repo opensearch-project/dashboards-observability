@@ -104,16 +104,12 @@ export const loadMetrics = () => async (dispatch) => {
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
-  // console.log('metricsResultSet: ', metricsResultSet);
   const metricsResult = metricsResultSet.flat();
-  // console.log('metricsResult: ', metricsResult);
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
   dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  // console.log('sortedIds: ', sortedIds);
   await dispatch(setSortedIds(sortedIds));
-  // await dispatch(setOtelIndices(fetchOTindices));
 };
 
 export const loadOTIndices = () => async (dispatch) => {
@@ -305,9 +301,7 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch) => {
 };
 
 export const addSelectedMetric = (metric: MetricType) => async (dispatch, getState) => {
-  // console.log('metric in addSelectedMetric: ', metric);
   const currentSelectedIds = getState().metrics.selectedIds;
-  // console.log('currentSelectedIds: ', currentSelectedIds);
   if (currentSelectedIds.includes(metric.id)) return;
 
   if (metric.metricType === PROMQL_METRIC_SUBTYPE) {

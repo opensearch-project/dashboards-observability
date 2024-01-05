@@ -256,7 +256,6 @@ Props) => {
   const loadVisaulization = async () => {
     const visualization = await fetchVisualization();
     setVisualizationMetaData(visualization);
-    console.log('visualization: ', visualization);
 
     if (!visualization && !savedVisualizationId) return;
 

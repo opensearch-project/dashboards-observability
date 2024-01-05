@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
@@ -86,14 +85,14 @@ export const PanelGrid = (props: PanelGridProps) => {
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   // Reset Size of Visualizations when layout is changed
-  const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
+  const layoutChanged = (currLayouts: Layout[]) => {
     window.dispatchEvent(new Event('resize'));
     setPostEditLayout(currLayouts);
   };
 
   const loadVizComponents = () => {
-    console.log('panelVisualizations[0]: ', panelVisualizations[0]);
     const gridDataComps = panelVisualizations.map(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (panelVisualization: VisualizationType, index) => (
         <VisualizationContainer
           key={panelVisualization.id}

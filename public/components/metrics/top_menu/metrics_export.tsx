@@ -147,7 +147,6 @@ const MetricsExportPopOver = () => {
     ]);
 
   const createSavedVisualization = async (metric): Promise<any> => {
-    console.log('metric in createSavedVisualization: ', metric);
     let visMetaData;
     if (metric.metricType === OTEL_METRIC_SUBTYPE) {
       visMetaData = visualizationFromOtelMetric({

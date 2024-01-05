@@ -323,7 +323,6 @@ export const fetchOtelMetric = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
 }) => {
-  console.log('visualizationName: ', visualizationName);
   const osdHttp = getOSDHttp();
   const indexAndDocumentName = extractIndexAndDocumentName(visualizationName);
   const index = indexAndDocumentName[0];
@@ -361,7 +360,6 @@ export const fetchOtelMetric = async ({
   const formatDataBinsName = () => {
     return { dataBins: { jsonData } };
   };
-  console.log(formatDataBinsName());
   return formatDataBinsName().dataBins;
 };
 
