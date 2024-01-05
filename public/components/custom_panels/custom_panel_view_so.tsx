@@ -45,7 +45,6 @@ import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { getCustomModal } from './helpers/modal_containers';
 import {
-  convertDateTime,
   isDateValid,
   isNameValid,
   isPPLFilterValid,
@@ -66,7 +65,8 @@ import {
 import { useToast } from '../common/toast';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
- 
+import { convertDateTime } from '../common/query_utils';
+
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
  *
@@ -181,7 +181,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       timeProps.end,
       recentlyUsedRanges
     );
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }, '', ''));
+    dispatch(
+      updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }, '', '')
+    );
 
     setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
@@ -354,7 +356,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
-    addVisualizationToCurrentPanel({ savedVisualizationId, successMsg: `Visualization ${visualzationTitle} successfully added!`, failureMsg: `Error in adding ${visualzationTitle} visualization to the panel` });
+    addVisualizationToCurrentPanel({
+      savedVisualizationId,
+      successMsg: `Visualization ${visualzationTitle} successfully added!`,
+      failureMsg: `Error in adding ${visualzationTitle} visualization to the panel`,
+    });
   };
 
   const cancelButton = (

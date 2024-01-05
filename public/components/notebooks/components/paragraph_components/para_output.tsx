@@ -6,9 +6,7 @@
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
-import moment from 'moment';
 import React, { useState } from 'react';
-import { set } from '@elastic/safer-lodash-set';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -17,11 +15,72 @@ import {
   DashboardStart,
 } from '../../../../../../../src/plugins/dashboard/public';
 import { ParaType } from '../../../../../common/types/notebooks';
-import { uiSettingsService } from '../../../../../common/utils';
+import { getOSDHttp, getPPLService, uiSettingsService } from '../../../../../common/utils';
 import { QueryDataGridMemo } from './para_query_grid';
+import { convertDateTime } from '../../../common/query_utils';
+
+const createQueryColumns = (jsonColumns: any[]) => {
+  let index = 0;
+  const datagridColumns = [];
+  for (index = 0; index < jsonColumns.length; ++index) {
+    const datagridColumnObject = {
+      id: jsonColumns[index].name,
+      displayAsText: jsonColumns[index].name,
+    };
+    datagridColumns.push(datagridColumnObject);
+  }
+  return datagridColumns;
+};
+
+const getQueryOutputData = (queryObject: any) => {
+  const data = [];
+  let index = 0;
+  let schemaIndex = 0;
+  for (index = 0; index < queryObject.datarows.length; ++index) {
+    const datarowValue = {};
+    for (schemaIndex = 0; schemaIndex < queryObject.schema.length; ++schemaIndex) {
+      const columnName = queryObject.schema[schemaIndex].name;
+      if (typeof queryObject.datarows[index][schemaIndex] === 'object') {
+        datarowValue[columnName] = JSON.stringify(queryObject.datarows[index][schemaIndex]);
+      } else if (typeof queryObject.datarows[index][schemaIndex] === 'boolean') {
+        datarowValue[columnName] = queryObject.datarows[index][schemaIndex].toString();
+      } else {
+        datarowValue[columnName] = queryObject.datarows[index][schemaIndex];
+      }
+    }
+    data.push(datarowValue);
+  }
+  return data;
+};
+
+const QueryPara = ({ inp, val }) => {
+  const inputQuery = inp.substring(4, inp.length);
+  const queryObject = JSON.parse(val);
+
+  const columns = createQueryColumns(queryObject.schema);
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
+  const data = getQueryOutputData(queryObject);
+
+  return queryObject.hasOwnProperty('error') ? (
+    <EuiCodeBlock>{val}</EuiCodeBlock>
+  ) : (
+    <div>
+      <EuiText key={'query-input-key'} className={'wrapAll'}>
+        <b>{inputQuery}</b>
+      </EuiText>
+      <EuiSpacer />
+      <QueryDataGridMemo
+        rowCount={queryObject.datarows.length}
+        queryColumns={columns}
+        visibleColumns={visibleColumns}
+        setVisibleColumns={setVisibleColumns}
+        dataValues={data}
+      />
+    </div>
+  );
+};
 
 const OutputBody = ({
-  key,
   typeOut,
   val,
   inp,
@@ -29,7 +88,6 @@ const OutputBody = ({
   setVisInput,
   DashboardContainerByValueRenderer,
 }: {
-  key: string;
   typeOut: string;
   val: string;
   inp: string;
@@ -42,66 +100,15 @@ const OutputBody = ({
    * TODO: add table rendering
    */
   const dateFormat = uiSettingsService.get('dateFormat');
-
-  const createQueryColumns = (jsonColumns: any[]) => {
-    let index = 0;
-    const datagridColumns = [];
-    for (index = 0; index < jsonColumns.length; ++index) {
-      const datagridColumnObject = {
-        id: jsonColumns[index].name,
-        displayAsText: jsonColumns[index].name,
-      };
-      datagridColumns.push(datagridColumnObject);
-    }
-    return datagridColumns;
-  };
-
-  const getQueryOutputData = (queryObject: any) => {
-    const data = [];
-    let index = 0;
-    let schemaIndex = 0;
-    for (index = 0; index < queryObject.datarows.length; ++index) {
-      const datarowValue = {};
-      for (schemaIndex = 0; schemaIndex < queryObject.schema.length; ++schemaIndex) {
-        const columnName = queryObject.schema[schemaIndex].name;
-        if (typeof queryObject.datarows[index][schemaIndex] === 'object') {
-          datarowValue[columnName] = JSON.stringify(queryObject.datarows[index][schemaIndex]);
-        } else if (typeof queryObject.datarows[index][schemaIndex] === 'boolean') {
-          datarowValue[columnName] = queryObject.datarows[index][schemaIndex].toString();
-        } else {
-          datarowValue[columnName] = queryObject.datarows[index][schemaIndex];
-        }
-      }
-      data.push(datarowValue);
-    }
-    return data;
-  };
-
+  const from = convertDateTime(visInput?.timeRange?.from, true, false);
+  const to = convertDateTime(visInput?.timeRange?.to, false, false);
+  const displayFrom =
+    convertDateTime(visInput?.timeRange?.from, true, dateFormat) || 'Invalid date';
+  const displayTo = convertDateTime(visInput?.timeRange?.to, false, dateFormat) || 'Invalid date';
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
-        const inputQuery = inp.substring(4, inp.length);
-        const queryObject = JSON.parse(val);
-        if (queryObject.hasOwnProperty('error')) {
-          return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
-        } else {
-          const columns = createQueryColumns(queryObject.schema);
-          const data = getQueryOutputData(queryObject);
-          return (
-            <div>
-              <EuiText key={'query-input-key'}>
-                <b>{inputQuery}</b>
-              </EuiText>
-              <EuiSpacer />
-              <QueryDataGridMemo
-                key={key}
-                rowCount={queryObject.datarows.length}
-                queryColumns={columns}
-                dataValues={data}
-              />
-            </div>
-          );
-        }
+        return <QueryPara inp={inp} val={val} />;
       case 'MARKDOWN':
         return (
           <EuiText className="wrapAll markdown-output-text">
@@ -109,41 +116,36 @@ const OutputBody = ({
           </EuiText>
         );
       case 'VISUALIZATION':
-        let from = moment(visInput?.timeRange?.from).format(dateFormat);
-        let to = moment(visInput?.timeRange?.to).format(dateFormat);
-        from = from === 'Invalid date' ? visInput.timeRange.from : from;
-        to = to === 'Invalid date' ? visInput.timeRange.to : to;
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${from} - ${to}`}
+              {`${displayFrom} - ${displayTo}`}
             </EuiText>
             <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
           </>
         );
       case 'OBSERVABILITY_VISUALIZATION':
-        let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
-        let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
-        fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
-        toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
+        const http = getOSDHttp();
+        const pplService = getPPLService();
+
         const onEditClick = (savedVisualizationId: string) => {
           window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
         };
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${fromObs} - ${toObs}`}
+              {`${displayFrom} - ${displayTo}`}
             </EuiText>
             <div style={{ height: '300px', width: '100%' }}>
               <VisualizationContainer
-                http={props.http}
+                http={http}
                 editMode={false}
                 visualizationId={''}
                 onEditClick={onEditClick}
-                savedVisualizationId={para.visSavedObjId}
-                pplService={props.pplService}
-                fromTime={para.visStartTime}
-                toTime={para.visEndTime}
+                savedVisualizationId={visInput.visSavedObjId}
+                pplService={pplService}
+                fromTime={from}
+                toTime={to}
                 onRefresh={false}
                 pplFilterValue={''}
                 usedInNotebooks={true}

@@ -12,7 +12,7 @@ exports[`Field component Renders a sidebar field 1`] = `
     }
   }
 >
-  <Component
+  <Field
     field={
       Object {
         "name": "agent",
@@ -357,6 +357,6 @@ exports[`Field component Renders a sidebar field 1`] = `
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </Component>
+  </Field>
 </Provider>
 `;

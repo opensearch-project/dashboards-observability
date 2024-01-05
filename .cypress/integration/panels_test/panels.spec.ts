@@ -17,7 +17,7 @@ import {
 } from '../../utils/panel_constants';
 
 describe('Panels testing with Sample Data', () => {
-  suppressResizeObserverIssue();//needs to be in file once
+  suppressResizeObserverIssue(); //needs to be in file once
 
   before(() => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
@@ -30,7 +30,7 @@ describe('Panels testing with Sample Data', () => {
   beforeEach(() => {
     eraseTestPanels();
     eraseSavedVisualizations();
-  })
+  });
 
   after(() => {
     eraseTestPanels();
@@ -54,8 +54,8 @@ describe('Panels testing with Sample Data', () => {
         .click({ force: true });
       cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]')
         .trigger('mouseover')
-        .click({force: true});
-      cy.wait(delay*5); //Wont save as correct name without wait
+        .click({ force: true });
+      cy.wait(delay * 5); //Wont save as correct name without wait
       cy.get('[data-test-subj="eventExplorer__querySaveName"]')
         .focus()
         .type(PPL_VISUALIZATIONS_NAMES[0]);
@@ -151,7 +151,7 @@ describe('Panels testing with Sample Data', () => {
       it('Searches panels', () => {
         createLegacyPanel('Legacy Named');
         createSavedObjectPanel('Saved Object');
-        cy.wait(delay);//Needed so the panel appears on the dashboard page
+        cy.wait(delay); //Needed so the panel appears on the dashboard page
         cy.reload();
         cy.get('input[data-test-subj="operationalPanelSearchBar"]')
           .focus()
@@ -203,7 +203,7 @@ describe('Panels testing with Sample Data', () => {
 
       it('Deletes the panel', () => {
         createSavedObjectPanel();
-        cy.get('a[data-test-subj="breadcrumb last"]').click();//refresh so panel appears
+        cy.get('a[data-test-subj="breadcrumb last"]').click(); //refresh so panel appears
         cy.get('input[data-test-subj="checkboxSelectAll"]').click();
         openActionsDropdown();
         cy.get('button[data-test-subj="deleteContextMenuItem"]').click({ force: true });
@@ -251,7 +251,7 @@ describe('Panels testing with Sample Data', () => {
     beforeEach(() => {
       const test_name = `test_${new Date().getTime()}`;
       createSavedObjectPanel(test_name).as('thePanel');
-      cy.then(function (){
+      cy.then(function () {
         moveToThePanel(this.thePanel.id);
       });
     });
@@ -264,19 +264,23 @@ describe('Panels testing with Sample Data', () => {
 
     it('Redirects to correct page on breadcrumb click', () => {
       cy.get('a[data-test-subj="breadcrumb last"]').click();
-      cy.then(function (){
-        cy.get('h1[data-test-subj="panelNameHeader"]').contains(this.thePanel.attributes.title).should('exist');
+      cy.then(function () {
+        cy.get('h1[data-test-subj="panelNameHeader"]')
+          .contains(this.thePanel.attributes.title)
+          .should('exist');
       });
     });
 
     it('Duplicate the open panel', () => {
       cy.get('button[data-test-subj="panelActionContextMenu"]').click();
       cy.get('button[data-test-subj="duplicatePanelContextMenuItem"]').click();
-      cy.then(function (){
-        cy.get(`input.euiFieldText[value="${this.thePanel.attributes.title} (copy)"]`).should('exist');
+      cy.then(function () {
+        cy.get(`input.euiFieldText[value="${this.thePanel.attributes.title} (copy)"]`).should(
+          'exist'
+        );
       });
       cy.get('button[data-test-subj="runModalButton"]').click();
-      cy.then(function (){
+      cy.then(function () {
         cy.get('h1[data-test-subj="panelNameHeader"]')
           .contains(this.thePanel.attributes.title + ' (copy)')
           .should('exist');
@@ -284,9 +288,11 @@ describe('Panels testing with Sample Data', () => {
     });
 
     it('Rename the open panel', () => {
-      cy.then(function (){
+      cy.then(function () {
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
         cy.get('button[data-test-subj="panelActionContextMenu"]').click();
         cy.get('button[data-test-subj="renamePanelContextMenuItem"]').click();
@@ -295,15 +301,19 @@ describe('Panels testing with Sample Data', () => {
           .clear({ force: true })
           .focus()
           .type('Renamed Panel');
-        });
+      });
       cy.get('button[data-test-subj="runModalButton"]').click();
       cy.get('h1[data-test-subj="panelNameHeader"]').contains('Renamed Panel').should('exist');
     });
 
     it('Change date filter of the panel', () => {
-      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({force: true});
-      cy.wait(delay);//flyout won't open sometimes without
-      cy.get('button[data-test-subj="superDatePickerCommonlyUsed_This_year"]').click({force: true});
+      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
+        force: true,
+      });
+      cy.wait(delay); //flyout won't open sometimes without
+      cy.get('button[data-test-subj="superDatePickerCommonlyUsed_This_year"]').click({
+        force: true,
+      });
       cy.get('button[data-test-subj="superDatePickerShowDatesButton"]')
         .contains('This year')
         .should('exist');
@@ -320,7 +330,7 @@ describe('Panels testing with Sample Data', () => {
       cy.get('select').select(PPL_VISUALIZATIONS_NAMES[0]);
       cy.get('button[aria-label="refreshPreview"]').trigger('mouseover').click();
       cy.get('.plot-container').should('exist');
-      cy.get('button[data-test-subj="addFlyoutButton"]').click({force: true});
+      cy.get('button[data-test-subj="addFlyoutButton"]').click({ force: true });
       cy.get('.euiToastHeader__title').contains('successfully').should('exist');
     });
 
@@ -335,7 +345,7 @@ describe('Panels testing with Sample Data', () => {
       cy.get('select').select(PPL_VISUALIZATIONS_NAMES[1]);
       cy.get('button[aria-label="refreshPreview"]').trigger('mouseover').click();
       cy.get('.plot-container').should('exist');
-      cy.get('button[data-test-subj="addFlyoutButton"]').click({force: true});
+      cy.get('button[data-test-subj="addFlyoutButton"]').click({ force: true });
       cy.get('.euiToastHeader__title').contains('successfully').should('exist');
     });
 
@@ -350,11 +360,15 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
-      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({force: true,});
+      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
+        force: true,
+      });
       cy.get('[data-test-subj="superDatePickerQuickMenu"')
         .first()
         .within(() => {
@@ -365,11 +379,11 @@ describe('Panels testing with Sample Data', () => {
 
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
         .trigger('mouseover')
-        .click({force: true})
-        .wait(delay*5)
+        .click({ force: true })
+        .wait(delay * 5)
         .focus()
         .type(PPL_FILTER);
-      cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({force: true});
+      cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
       cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.get('.xtick').should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
@@ -389,7 +403,9 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
@@ -419,7 +435,9 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
@@ -446,7 +464,9 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
@@ -470,7 +490,9 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
@@ -503,15 +525,17 @@ describe('Panels testing with Sample Data', () => {
         PPL_VISUALIZATIONS[2],
         PPL_VISUALIZATION_CONFIGS[2]
       ).as('vis2');
-      
+
       cy.then(function () {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click({ force: true });
       });
-      
+
       cy.get('button[aria-label="actionMenuButton"]').eq(0).click();
       cy.get('button[data-test-subj="replaceVizContextMenuItem"]').click();
       cy.get('select').select(PPL_VISUALIZATIONS_NAMES[2]);
@@ -540,18 +564,20 @@ describe('Panels testing with Sample Data', () => {
       cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]')
         .trigger('mouseover')
         .click();
-        
-        cy.then(function () {
-          cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(this.thePanel.attributes.title);
-          cy.get(`input[value="${this.thePanel.attributes.title}"]`).trigger('mouseover').click();
-        });
+
+      cy.then(function () {
+        cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(
+          this.thePanel.attributes.title
+        );
+        cy.get(`input[value="${this.thePanel.attributes.title}"]`).trigger('mouseover').click();
+      });
 
       cy.get('[data-test-subj="eventExplorer__querySaveName"]')
         .focus()
         .type(PPL_VISUALIZATIONS_NAMES[2]);
       cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').trigger('mouseover').click();
       cy.get('.euiToastHeader__title').contains('successfully').should('exist');
-      
+
       cy.then(function () {
         moveToThePanel(this.thePanel.id);
       });
@@ -572,7 +598,9 @@ describe('Panels testing with Sample Data', () => {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
         moveToThePanel(this.thePanel.id);
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(this.thePanel.attributes.title);
+        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+          .focus()
+          .type(this.thePanel.attributes.title);
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
@@ -813,7 +841,7 @@ const createVisualization = (newName, query, vizConfig) => {
             description: '',
             type: 'bar',
             user_configs: vizConfig,
-            sub_type: 'visualization',
+            subType: 'visualization',
           },
         },
       },

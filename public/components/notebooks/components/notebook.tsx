@@ -885,7 +885,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       <div>
         <EuiPopover
           panelPaddingSize="none"
-          withTitle
           button={
             <EuiButton
               id="reportingActionsButton"
@@ -931,7 +930,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
-                  withTitle
                   button={
                     <EuiButton
                       data-test-subj="notebook-paragraph-actions-button"
@@ -952,7 +950,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
-                  withTitle
                   button={
                     <EuiButton
                       data-test-subj="notebook-notebook-actions-button"
@@ -1021,7 +1018,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     <EuiSpacer />
                     <EuiPopover
                       panelPaddingSize="none"
-                      withTitle
                       button={
                         <EuiButton
                           iconType="arrowDown"

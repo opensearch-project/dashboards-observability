@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Gauge component Renders gauge component 1`] = `
-<Component
+<Gauge
   config={true}
   layout={
     Object {
@@ -535,7 +535,7 @@ exports[`Gauge component Renders gauge component 1`] = `
     }
   }
 >
-  <Component
+  <EmptyPlaceholder
     icon="visGauge"
   >
     <EuiText
@@ -611,6 +611,6 @@ exports[`Gauge component Renders gauge component 1`] = `
         </EuiTextAlign>
       </div>
     </EuiText>
-  </Component>
-</Component>
+  </EmptyPlaceholder>
+</Gauge>
 `;
