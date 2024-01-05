@@ -56,6 +56,7 @@ describe('<Notebook /> spec', () => {
   location.search = '';
   const history = jest.fn() as any;
   history.replace = jest.fn();
+  history.push = jest.fn();
 
   it('renders the empty component and test reporting action button', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
