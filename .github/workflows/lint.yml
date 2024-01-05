@@ -48,24 +48,28 @@ jobs:
         working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
         run: yarn osd bootstrap
 
-      - name: Get list of changed files
+      - name: Get list of changed files using GitHub Action
+        uses: lots0logs/gh-action-get-changed-files@2.2.2
         id: files
-        run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          git fetch origin $BASE_SHA
-          git diff --name-only $BASE_SHA...$HEAD_SHA > changed_files.txt
-          CHANGED_FILES=$(cat changed_files.txt | grep -E '\.(js|ts|tsx)$' || true)
-          echo "::set-output name=changed::${CHANGED_FILES}"
-        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          format: 'space-delimited'
+          filters: |
+            added: .*\.(js|ts|tsx)$
+            modified: .*\.(js|ts|tsx)$
 
       - name: Lint Changed Files
         run: |
-          CHANGED_FILES="${{ steps.files.outputs.changed }}"
+          CHANGED_FILES="${{ steps.files.outputs.all }}"
+          echo "These are the files to be lint: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
-            IFS=$'\n' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
-            yarn lint "${FILES_TO_LINT[@]}"
+            IFS=' ' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
+            for file in "${FILES_TO_LINT[@]}"; do
+              if [[ $file == *.js || $file == *.ts || $file == *.tsx ]]; then
+                yarn lint "$file"
+              fi
+            done
           else
             echo "No matched files to lint."
           fi
