@@ -33,7 +33,6 @@ import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import {
   CREATE_NOTE_MESSAGE,
   NOTEBOOKS_API_PREFIX,
-  NOTEBOOKS_SELECTED_BACKEND,
 } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
