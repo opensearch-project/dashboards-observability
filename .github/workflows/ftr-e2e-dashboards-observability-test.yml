@@ -1,6 +1,10 @@
 name: FTR E2E Dashboards observability Test
 
-on: [pull_request, push]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
 
 env:
   PLUGIN_NAME: dashboards-observability
