@@ -44,7 +44,7 @@ export class IntegrationReader {
       if (!assets.ok || Object.keys(assets).length === 0) {
         return { ok: false, error: new Error('An integration must have at least one asset') };
       }
-    } catch (err: any) {
+    } catch (err) {
       return { ok: false, error: err };
     }
 
@@ -223,7 +223,7 @@ export class IntegrationReader {
     version?: string
   ): Promise<
     Result<{
-      mappings: { [key: string]: any };
+      mappings: { [key: string]: unknown };
     }>
   > {
     const configResult = await this.getConfig(version);
@@ -299,40 +299,7 @@ export class IntegrationReader {
    * @param version The version of the integration to serialize.
    * @returns A large object which includes all of the integration's data.
    */
-  async serialize(version?: string): Promise<Result<SerializedIntegration>> {
-    const configResult = await this.getConfig(version);
-    if (!configResult.ok) {
-      return configResult;
-    }
-    const config: IntegrationConfig = configResult.value;
-
-    const staticsResult = await this.getAllStatics(config);
-    if (!staticsResult.ok) {
-      return staticsResult;
-    }
-    const statics = staticsResult.value;
-
-    const componentsResult = await this.getSchemas(version);
-    if (!componentsResult.ok) {
-      return componentsResult;
-    }
-    const components = componentsResult.value;
-
-    const assetsResult = await this.getAssets(version); // TODO
-    if (!assetsResult.ok) {
-      return assetsResult;
-    }
-    const assets = assetsResult.value;
-
-    const sampleDataResult = await this.getSampleData(version);
-    if (!sampleDataResult.ok) {
-      return sampleDataResult;
-    }
-    const sampleData = JSON.stringify(sampleDataResult.value.sampleData);
-
-    return {
-      ok: true,
-      value: { config, statics, components, assets, sampleData },
-    };
+  async serialize(_version?: string): Promise<Result<SerializedIntegration>> {
+    return { ok: false, error: new Error('Not implemented') };
   }
 }
