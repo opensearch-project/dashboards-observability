@@ -168,6 +168,33 @@ export const sampleParsedParagraghs1 = [
   },
 ];
 
+export const sampleObservabilityVizParagraph = {
+  uniqueId: 'paragraph_6d3237a9-6486-4f93-aa25-0a1c838faahh',
+  isRunning: false,
+  inQueue: false,
+  isSelected: false,
+  isInputHidden: false,
+  isOutputHidden: false,
+  showAddPara: false,
+  isVizualisation: true,
+  vizObjectInput:
+    '{"viewMode":"view","panels":{"1":{"gridData":{"x":0,"y":0,"w":50,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"xmcchIwB5xYbk0tldrMA"}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"id2ae6b50-aa91-11ee-b006-2351d419df89","timeRange":{"to":"2024-01-03T23:42:52.909Z","from":"2023-12-04T23:42:52.909Z"},"title":"embed_viz_id2ae6b50-aa91-11ee-b006-2351d419df89","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+  id: 3,
+  inp:
+    '{"viewMode":"view","panels":{"1":{"gridData":{"x":0,"y":0,"w":50,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"xmcchIwB5xYbk0tldrMA"}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"id2ae6b50-aa91-11ee-b006-2351d419df89","timeRange":{"to":"2024-01-03T23:42:52.909Z","from":"2023-12-04T23:42:52.909Z"},"title":"embed_viz_id2ae6b50-aa91-11ee-b006-2351d419df89","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+  lang: 'text/x-',
+  isInputExpanded: false,
+  isOutputStale: false,
+  paraDivRef: undefined,
+  paraRef: undefined,
+  visEndTime: '2020-08-20T18:37:44.710Z',
+  visSavedObjId: '935afa20-e0cd-11e7-9d07-1398ccfcefa3',
+  visStartTime: '2020-07-21T18:37:44.710Z',
+  editorLanguage: '',
+  typeOut: ['OBSERVABILITY_VISUALIZATION'],
+  out: [''],
+};
+
 // Sample notebook with all input and cleared outputs
 export const sampleNotebook2 = {
   id: 'note_5f4b9eed-5898-4b39-ba6c-755c0fadd84e',

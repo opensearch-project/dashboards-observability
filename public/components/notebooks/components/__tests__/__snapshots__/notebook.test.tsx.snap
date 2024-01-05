@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Notebook /> spec renders the empty component 1`] = `
+exports[`<Notebook /> spec renders the empty component and test reporting action button 1`] = `
 <div
   style="float: left; width: 100%; max-width: 1500px;"
 >

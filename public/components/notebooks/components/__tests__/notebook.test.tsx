@@ -9,7 +9,7 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { HttpResponse } from '../../../../../../../src/core/public';
-import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
+import { getOSDHttp } from '../../../../../common/utils';
 import {
   addCodeBlockResponse,
   clearOutputNotebook,
@@ -45,7 +45,8 @@ global.fetch = jest.fn(() =>
 
 describe('<Notebook /> spec', () => {
   configure({ adapter: new Adapter() });
-  const pplService = new PPLService(httpClientMock);
+  const httpClient = getOSDHttp();
+  const pplService = new PPLService(httpClient);
   const setBreadcrumbs = jest.fn();
   const renameNotebook = jest.fn();
   const cloneNotebook = jest.fn();
@@ -56,14 +57,14 @@ describe('<Notebook /> spec', () => {
   const history = jest.fn() as any;
   history.replace = jest.fn();
 
-  it('renders the empty component', async () => {
-    httpClientMock.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+  it('renders the empty component and test reporting action button', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
     const utils = render(
       <Notebook
         pplService={pplService}
         openedNoteId="mock-id"
         DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
+        http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
         setBreadcrumbs={setBreadcrumbs}
         renameNotebook={renameNotebook}
@@ -78,12 +79,26 @@ describe('<Notebook /> spec', () => {
       expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
     });
     expect(utils.container.firstChild).toMatchSnapshot();
+
+    act(() => {
+      fireEvent.click(utils.getByText('Reporting actions'));
+    });
+
+    expect(utils.queryByTestId('download-notebook-pdf')).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(utils.getByText('Reporting actions'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('download-notebook-pdf')).toBeNull();
+    });
   });
 
   it('renders the empty component and checks code block operations', async () => {
-    httpClientMock.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
     let postFlag = 1;
-    httpClientMock.post = jest.fn(() => {
+    httpClient.post = jest.fn(() => {
       if (postFlag === 1) {
         postFlag += 1;
         return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
@@ -94,7 +109,7 @@ describe('<Notebook /> spec', () => {
         pplService={pplService}
         openedNoteId="mock-id"
         DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
+        http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
         setBreadcrumbs={setBreadcrumbs}
         renameNotebook={renameNotebook}
@@ -160,13 +175,11 @@ describe('<Notebook /> spec', () => {
   });
 
   it('renders a notebook and checks paragraph actions', async () => {
-    httpClientMock.get = jest.fn(() =>
-      Promise.resolve((codeBlockNotebook as unknown) as HttpResponse)
-    );
-    httpClientMock.put = jest.fn(() =>
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
+    httpClient.put = jest.fn(() =>
       Promise.resolve((clearOutputNotebook as unknown) as HttpResponse)
     );
-    httpClientMock.delete = jest.fn(() =>
+    httpClient.delete = jest.fn(() =>
       Promise.resolve(({ paragraphs: [] } as unknown) as HttpResponse)
     );
 
@@ -175,7 +188,7 @@ describe('<Notebook /> spec', () => {
         pplService={pplService}
         openedNoteId="mock-id"
         DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
+        http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
         setBreadcrumbs={setBreadcrumbs}
         renameNotebook={renameNotebook}
@@ -244,15 +257,13 @@ describe('<Notebook /> spec', () => {
       Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
     );
     const cloneNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
-    httpClientMock.get = jest.fn(() =>
-      Promise.resolve((codeBlockNotebook as unknown) as HttpResponse)
-    );
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
 
-    httpClientMock.put = jest.fn(() => {
+    httpClient.put = jest.fn(() => {
       return Promise.resolve((notebookPutResponse as unknown) as HttpResponse);
     });
 
-    httpClientMock.post = jest.fn(() => {
+    httpClient.post = jest.fn(() => {
       return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
     });
 
@@ -261,7 +272,7 @@ describe('<Notebook /> spec', () => {
         pplService={pplService}
         openedNoteId="mock-id"
         DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
+        http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
         setBreadcrumbs={setBreadcrumbs}
         renameNotebook={renameNotebookMock}
@@ -347,7 +358,7 @@ describe('<Notebook /> spec', () => {
       observabilityObjectList: [{ savedVisualization: sampleSavedVisualization }],
     });
 
-    httpClientMock.get = jest.fn(() =>
+    httpClient.get = jest.fn(() =>
       Promise.resolve(({
         ...sampleNotebook1,
         path: sampleNotebook1.name,
@@ -372,7 +383,7 @@ describe('<Notebook /> spec', () => {
         pplService={pplService}
         openedNoteId={sampleNotebook1.id}
         DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
+        http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
         setBreadcrumbs={setBreadcrumbs}
         renameNotebook={renameNotebook}
