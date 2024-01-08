@@ -12,6 +12,7 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiPanel,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import moment from 'moment';
 import { MutableRefObject } from 'react';
@@ -28,11 +29,10 @@ import { FlyoutButton } from './docViewRow';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 
-interface DataGridProps {
+export interface DataGridProps {
   http: HttpSetup;
   pplService: PPLService;
   rows: any[];
-  rowsAll: any[];
   explorerFields: IExplorerFields;
   timeStampField: string;
   rawQuery: string;
@@ -41,14 +41,17 @@ interface DataGridProps {
   startTime: string;
   endTime: string;
   storedSelectedColumns: IField[];
+  formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
+  OUIDataGridProps?: Partial<EuiDataGridProps>;
 }
+
+const defaultFormatGrid = (columns: EuiDataGridColumn[]) => columns;
 
 export function DataGrid(props: DataGridProps) {
   const {
     http,
     pplService,
     rows,
-    rowsAll,
     explorerFields,
     timeStampField,
     rawQuery,
@@ -56,6 +59,8 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    formatGridColumn = defaultFormatGrid,
+    OUIDataGridProps,
   } = props;
   const { fetchEvents } = useFetchEvents({
     pplService,
@@ -109,7 +114,7 @@ export function DataGrid(props: DataGridProps) {
   // creates the header for each column listing what that column is
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
-    selectedColumns.map(({ name, type }) => {
+    selectedColumns.map(({ name }) => {
       if (name === 'timestamp') {
         columns.push(DEFAULT_TIMESTAMP_COLUMN);
       } else if (name === '_source') {
@@ -122,7 +127,7 @@ export function DataGrid(props: DataGridProps) {
         });
       }
     });
-    return columns;
+    return formatGridColumn(columns);
   };
 
   // used for which columns are visible and their order
@@ -134,7 +139,7 @@ export function DataGrid(props: DataGridProps) {
       });
       return {
         visibleColumns: columns,
-        setVisibleColumns: (visibleColumns: string[]) => {
+        setVisibleColumns: () => {
           // TODO: implement with sidebar field order (dragability) changes
         },
       };
@@ -260,6 +265,7 @@ export function DataGrid(props: DataGridProps) {
             showStyleSelector: false,
           }}
           rowHeightsOptions={rowHeightsOptions()}
+          {...OUIDataGridProps}
         />
       </div>
     </EuiPanel>
