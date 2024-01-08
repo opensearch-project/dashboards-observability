@@ -344,6 +344,7 @@ export class IntegrationReader {
   /**
    * Serialize the referenced integration as a flat JSON object.
    * Useful for normalizing the format for sending to other locations.
+   * This method implements the serialization scheme expected by `JsonCatalogDataAdaptor`.
    *
    * @param version The version of the integration to serialize.
    * @returns A large object which includes all of the integration's data.
@@ -375,11 +376,33 @@ export class IntegrationReader {
     });
 
     if (config.assets.savedObjects) {
-      // TODO
+      const soMetadata = config.assets.savedObjects;
+      const soResult = await this.reader.readFile(
+        `${soMetadata.name}-${soMetadata.version}.ndjson`,
+        'assets'
+      );
+      if (!soResult.ok) {
+        return soResult;
+      }
+      config.assets.savedObjects = { ...soMetadata, data: JSON.stringify(soResult.value) };
     }
 
     if (config.assets.queries) {
-      // TODO
+      const queryResults = await Promise.all(
+        config.assets.queries.map((query) =>
+          this.reader.readFileRaw(`${query.name}-${query.version}.${query.language}`, 'assets')
+        )
+      );
+      const queriesResult = foldResults(queryResults);
+      if (!queriesResult.ok) {
+        return queriesResult;
+      }
+      config.assets.queries = config.assets.queries.map((query, idx) => {
+        return {
+          ...query,
+          data: JSON.stringify(queriesResult.value[idx].toString('utf8')),
+        };
+      });
     }
 
     if (config.statics) {

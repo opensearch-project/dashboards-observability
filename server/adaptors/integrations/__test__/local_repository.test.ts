@@ -65,6 +65,7 @@ describe('Local Nginx Integration', () => {
     const config = await integration!.getConfig();
     const serialized = await integration!.serialize();
 
+    expect(serialized).toHaveProperty('ok', true);
     expect((serialized as { value: object }).value).toMatchObject(
       (config as { value: object }).value
     );
