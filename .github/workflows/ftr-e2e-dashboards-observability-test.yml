@@ -1,0 +1,167 @@
+name: FTR E2E Dashboards observability Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+env:
+  PLUGIN_NAME: dashboards-observability
+  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
+  OPENSEARCH_VERSION: '2.12.0'
+  OPENSEARCH_PLUGIN_VERSION: '2.12.0.0'
+
+jobs:
+  tests:
+    name: Run FTR E2E Dashboards Observability Tests
+    env:
+      # Prevents extra Cypress installation progress messages
+      CI: 1
+      # Avoid warnings like "tput: No value for $TERM and no -T specified"
+      TERM: xterm
+      WORKING_DIR: ${{ matrix.working_directory }}.
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        java: [11]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '11'
+
+      - name: Download observability artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          target: plugin-artifacts/
+          filename: observability.zip
+
+      - name: Download SQL artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          target: plugin-artifacts/
+          filename: sql.zip
+
+      - name: Download OpenSearch
+        uses: peternied/download-file@v2
+        with:
+          url: https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/opensearch-min-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Install observability plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/observability.zip"
+        shell: bash
+
+      - name: Install SQL plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/sql.zip"
+        shell: bash
+
+      - name: Run OpenSearch
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
+        shell: bash
+
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v2
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
+
+      - name: Get node and yarn versions
+        working-directory: ${{ env.WORKING_DIR }}
+        id: versions_step
+        run: |
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
+          echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install correct yarn version for OpenSearch Dashboards
+        run: |
+          npm uninstall -g yarn
+          echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Bootstrap the plugin
+        run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn osd bootstrap
+
+      - name: Run OpenSearch Dashboards server
+        run: |
+          cd OpenSearch-Dashboards
+          nohup yarn start --no-base-path --no-watch | tee dashboard.log &
+
+      - name : Check If OpenSearch Dashboards Is Ready
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          cd ./OpenSearch-Dashboards
+          if timeout 600 grep -q "bundles compiled successfully after" <(tail -n0 -f dashboard.log); then
+            echo "OpenSearch Dashboards compiled successfully."
+          else
+            echo "Timeout for 600 seconds reached. OpenSearch Dashboards did not finish compiling."
+            exit 1
+          fi
+
+      - name: Checkout Dashboards Functioanl Test Repo
+        uses: actions/checkout@v2
+        with:
+          path: opensearch-dashboards-functional-test
+          repository: opensearch-project/opensearch-dashboards-functional-test
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          fetch-depth: 0
+  
+      - name: Install Cypress
+        run: |
+          npm install cypress --save-dev
+        shell: bash
+        working-directory: opensearch-dashboards-functional-test
+
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
+        working-directory: opensearch-dashboards-functional-test
+
+      - name: Run Cypress tests
+        run: |
+          yarn cypress:run-without-security --browser chromium --spec 'cypress/integration/plugins/observability-dashboards/*.js'
+        working-directory: opensearch-dashboards-functional-test
+
+      - name: Capture failure screenshots
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ matrix.os }}
+          path: opensearch-dashboards-functional-test/cypress/screenshots
+
+      - name: Capture failure test video
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-videos-${{ matrix.os }}
+          path: opensearch-dashboards-functional-test/cypress/videos
