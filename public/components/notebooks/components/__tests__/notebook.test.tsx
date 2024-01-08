@@ -121,7 +121,45 @@ describe('<Notebook /> spec', () => {
     });
   });
 
-  it('Checks code block operations', async () => {
+  it('Adds a code block', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    let postFlag = 1;
+    httpClient.post = jest.fn(() => {
+      if (postFlag === 1) {
+        postFlag += 1;
+        return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+      } else return Promise.resolve((runCodeBlockResponse as unknown) as HttpResponse);
+    });
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    act(() => {
+      utils.getByText('Add code block').click();
+    });
+
+    await waitFor(() => {
+      expect(utils.getByPlaceholderText(codePlaceholderText)).toBeInTheDocument();
+    });
+  });
+
+  it('toggles show input in code block', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
     let postFlag = 1;
     httpClient.post = jest.fn(() => {
@@ -165,9 +203,43 @@ describe('<Notebook /> spec', () => {
     await waitFor(() => {
       expect(utils.queryByPlaceholderText(codePlaceholderText)).toBeNull();
     });
+  });
+
+  it('runs a code block and checks the output', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    let postFlag = 1;
+    httpClient.post = jest.fn(() => {
+      if (postFlag === 1) {
+        postFlag += 1;
+        return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+      } else return Promise.resolve((runCodeBlockResponse as unknown) as HttpResponse);
+    });
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
 
     act(() => {
-      utils.getByLabelText('Toggle show input').click();
+      utils.getByText('Add code block').click();
+    });
+
+    await waitFor(() => {
+      expect(utils.getByPlaceholderText(codePlaceholderText)).toBeInTheDocument();
     });
 
     act(() => {
@@ -180,6 +252,49 @@ describe('<Notebook /> spec', () => {
     await waitFor(() => {
       expect(utils.queryByText('Run')).toBeNull();
       expect(utils.getByText('hello')).toBeInTheDocument();
+    });
+  });
+
+  it('toggles between input/output only views', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    act(() => {
+      utils.getByText('Add code block').click();
+    });
+
+    await waitFor(() => {
+      expect(utils.getByPlaceholderText(codePlaceholderText)).toBeInTheDocument();
+    });
+
+    act(() => {
+      utils.getByLabelText('Toggle show input').click();
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByPlaceholderText(codePlaceholderText)).toBeNull();
+    });
+
+    act(() => {
+      utils.getByLabelText('Toggle show input').click();
     });
 
     act(() => {
