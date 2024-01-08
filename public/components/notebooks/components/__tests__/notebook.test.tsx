@@ -59,7 +59,31 @@ describe('<Notebook /> spec', () => {
   history.replace = jest.fn();
   history.push = jest.fn();
 
-  it('renders the empty component and test reporting action button', async () => {
+  it('Renders the empty component', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+    expect(utils.container.firstChild).toMatchSnapshot();
+  });
+
+  it('test reporting action button', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
     const utils = render(
       <Notebook
@@ -97,7 +121,7 @@ describe('<Notebook /> spec', () => {
     });
   });
 
-  it('renders the empty component and checks code block operations', async () => {
+  it('Checks code block operations', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
     let postFlag = 1;
     httpClient.post = jest.fn(() => {
@@ -176,7 +200,7 @@ describe('<Notebook /> spec', () => {
     });
   });
 
-  it('renders a notebook and checks paragraph actions', async () => {
+  it('Renders a notebook and checks paragraph actions', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
     httpClient.put = jest.fn(() =>
       Promise.resolve((clearOutputNotebook as unknown) as HttpResponse)
@@ -254,7 +278,7 @@ describe('<Notebook /> spec', () => {
     });
   });
 
-  it('renders a notebook and checks notebook actions', async () => {
+  it('Checks notebook rename action', async () => {
     const renameNotebookMock = jest.fn(() =>
       Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
     );
@@ -311,6 +335,42 @@ describe('<Notebook /> spec', () => {
     await waitFor(() => {
       expect(renameNotebookMock).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('Checks notebook clone action', async () => {
+    const renameNotebookMock = jest.fn(() =>
+      Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
+    );
+    const cloneNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
+
+    httpClient.put = jest.fn(() => {
+      return Promise.resolve((notebookPutResponse as unknown) as HttpResponse);
+    });
+
+    httpClient.post = jest.fn(() => {
+      return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+    });
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebookMock}
+        cloneNotebook={cloneNotebookMock}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
 
     act(() => {
       fireEvent.click(utils.getByText('Notebook actions'));
@@ -329,6 +389,42 @@ describe('<Notebook /> spec', () => {
     });
 
     expect(cloneNotebookMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('Checks notebook delete action', async () => {
+    const renameNotebookMock = jest.fn(() =>
+      Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
+    );
+    const cloneNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
+
+    httpClient.put = jest.fn(() => {
+      return Promise.resolve((notebookPutResponse as unknown) as HttpResponse);
+    });
+
+    httpClient.post = jest.fn(() => {
+      return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+    });
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebookMock}
+        cloneNotebook={cloneNotebookMock}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
 
     act(() => {
       fireEvent.click(utils.getByText('Notebook actions'));
@@ -355,7 +451,7 @@ describe('<Notebook /> spec', () => {
     expect(deleteNotebook).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the visualization component', async () => {
+  it('Renders the visualization component', async () => {
     SavedObjectsActions.getBulk = jest.fn().mockResolvedValue({
       observabilityObjectList: [{ savedVisualization: sampleSavedVisualization }],
     });

@@ -91,6 +91,5 @@ describe('Testing default backend parser function with wrong schema', () => {
     expect(() => {
       const _parsedParagraphs3 = defaultParagraphParser(sampleNotebook5.paragraphs);
     }).toThrow(Error);
-    done();
   });
 });
