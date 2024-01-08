@@ -28,7 +28,7 @@ interface SerializedIntegration extends IntegrationConfig {
   statics?: SerializedIntegrationStatics;
   components: SerializedIntegrationComponent[];
   assets: SerializedIntegrationAssets;
-  sampleData: {
+  sampleData?: {
     path: string;
     data: string;
   };

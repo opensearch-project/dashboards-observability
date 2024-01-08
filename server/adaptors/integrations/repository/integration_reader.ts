@@ -9,6 +9,27 @@ import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor } from './catalog_data_adaptor';
 
 /**
+ * Helper method: Convert an Array<Result<type>> to Result<Array<type>>.
+ *
+ * @param results The list of results to fold.
+ * @returns A single result object with values in an array, or an error result.
+ */
+const foldResults = <T>(results: Array<Result<T>>) =>
+  results.reduce(
+    (result, currentValue) => {
+      if (!result.ok) {
+        return result;
+      }
+      if (!currentValue.ok) {
+        return currentValue;
+      }
+      result.value.push(currentValue.value);
+      return result;
+    },
+    { ok: true, value: [] } as Result<T[]>
+  );
+
+/**
  * The Integration class represents the data for Integration Templates.
  * It is backed by the repository file system.
  * It includes accessor methods for integration configs, as well as helpers for nested components.
@@ -292,21 +313,6 @@ export class IntegrationReader {
       serialized.darkModeLogo = serializeResult.value;
     }
 
-    const foldResults = (results: Array<Result<SerializedStaticAsset>>) =>
-      results.reduce(
-        (result, currentValue) => {
-          if (!result.ok) {
-            return result;
-          }
-          if (!currentValue.ok) {
-            return currentValue;
-          }
-          result.value.push(currentValue.value);
-          return result;
-        },
-        { ok: true, value: [] } as Result<SerializedStaticAsset[]>
-      );
-
     if (statics.gallery) {
       const results = await Promise.all(
         statics.gallery.map((asset) => this.serializeStaticAsset(asset))
@@ -347,9 +353,35 @@ export class IntegrationReader {
     if (!configResult.ok) {
       return configResult;
     }
-    const config: IntegrationConfig = configResult.value;
 
-    // For every type of asset, serialize the asset within the config.
+    // Type cast safety: all serializable properties must have the 'data' field.
+    // The remainder of the method is populating all such fields.
+    const config = configResult.value as SerializedIntegration;
+
+    const componentResults = await Promise.all(
+      config.components.map((component) =>
+        this.reader.readFile(`${component.name}-${component.version}.mapping.json`, 'schemas')
+      )
+    );
+    const componentsResult = foldResults(componentResults);
+    if (!componentsResult.ok) {
+      return componentsResult;
+    }
+    config.components = config.components.map((component, idx) => {
+      return {
+        ...component,
+        data: JSON.stringify(componentsResult.value[idx]),
+      };
+    });
+
+    if (config.assets.savedObjects) {
+      // TODO
+    }
+
+    if (config.assets.queries) {
+      // TODO
+    }
+
     if (config.statics) {
       const staticsResult = await this.serializeStatics(config.statics);
       if (!staticsResult.ok) {
@@ -358,7 +390,17 @@ export class IntegrationReader {
       config.statics = staticsResult.value;
     }
 
-    // Type cast safety: all serializable properties must have the 'data' field.
-    return { ok: true, value: config as SerializedIntegration };
+    if (config.sampleData) {
+      const dataResult = await this.getSampleData(version);
+      if (!dataResult.ok) {
+        return dataResult;
+      }
+      config.sampleData = {
+        ...config.sampleData,
+        data: JSON.stringify(dataResult.value.sampleData),
+      };
+    }
+
+    return { ok: true, value: config };
   }
 }
