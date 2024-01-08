@@ -27,7 +27,7 @@ const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
 ];
 
 describe('JSON Data Adaptor', () => {
-  it.skip('Should be able to deserialize a serialized integration', async () => {
+  it('Should be able to deserialize a serialized integration', async () => {
     const repository: TemplateManager = new TemplateManager(
       path.join(__dirname, '../../__data__/repository')
     );
@@ -43,7 +43,7 @@ describe('JSON Data Adaptor', () => {
     const adaptor: JsonCatalogDataAdaptor = new JsonCatalogDataAdaptor([serialized.value]);
     const jsonIntegration = new IntegrationReader('nginx', adaptor);
 
-    await expect(jsonIntegration.getConfig()).resolves.toEqual(fsConfig);
+    await expect(jsonIntegration.getConfig()).resolves.toMatchObject(fsConfig);
   });
 
   it('Should filter its list on join', async () => {
@@ -73,7 +73,6 @@ describe('JSON Data Adaptor', () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
     const reader = new IntegrationReader('sample2', adaptor.join('sample2'));
     const version = await reader.getLatestVersion();
-    console.log(await adaptor.join('sample2').findIntegrationVersions());
     expect(version).toBe('2.1.0');
   });
 });

@@ -38,11 +38,8 @@ const foldResults = <T>(results: Array<Result<T>>) =>
  * @returns -1 if a < b, 1 if a > b, 0 otherwise.
  */
 export function compareVersions(a: string, b: string): number {
-  console.log(a.split('.'), b.split('.'));
   const aParts = a.split('.').map((part) => Number.parseInt(part, 10));
   const bParts = b.split('.').map((part) => Number.parseInt(part, 10));
-
-  console.log(aParts, bParts);
 
   for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
     const aValue = i < aParts.length ? aParts[i] : 0;
