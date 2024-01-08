@@ -24,10 +24,10 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   async findIntegrationVersions(dirname?: string | undefined): Promise<Result<string[], Error>> {
     const versions: string[] = [];
     for (const integration of this.integrationsList) {
-      if (integration.config.name !== dirname) {
+      if (dirname && integration.name !== dirname) {
         continue;
       }
-      versions.push(integration.config.version);
+      versions.push(integration.version);
     }
     return { ok: true, value: versions };
   }
@@ -47,25 +47,17 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
     return { ok: false, error: new Error('Not Implemented') };
   }
 
-  private async collectIntegrationsRecursive(
-    _dirname: string,
-    _integrations: string[]
-  ): Promise<void> {
-    // TODO
-    return;
-  }
-
   async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
     // First, filter list by dirname if available
     const integrationsList = dirname
-      ? this.integrationsList.filter((i) => i.config.name === dirname)
+      ? this.integrationsList.filter((i) => i.name === dirname)
       : this.integrationsList;
     if (integrationsList.length === 0) {
       return 'unknown';
     }
     // The list is an integration iff all of its names match
     for (let i = 0; i < integrationsList.length - 1; i++) {
-      if (integrationsList[i].config.name !== integrationsList[i + 1].config.name) {
+      if (integrationsList[i].name !== integrationsList[i + 1].name) {
         return 'repository';
       }
     }
@@ -74,9 +66,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
 
   join(filename: string): JsonCatalogDataAdaptor {
     // In other adaptors, joining moves from directories to integrations.
-    // Since for JSON adapting we use a flat structure, we just filter.
-    return new JsonCatalogDataAdaptor(
-      this.integrationsList.filter((i) => i.config.name === filename)
-    );
+    // Since for JSON catalogs we use a flat structure, we just filter.
+    return new JsonCatalogDataAdaptor(this.integrationsList.filter((i) => i.name === filename));
   }
 }

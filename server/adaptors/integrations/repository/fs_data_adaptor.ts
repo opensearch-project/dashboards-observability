@@ -5,7 +5,7 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
-import { compareVersions, CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
+import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 
 function tryParseNDJson(content: string): object[] | null {
   try {
@@ -18,7 +18,7 @@ function tryParseNDJson(content: string): object[] | null {
       objects.push(JSON.parse(line));
     }
     return objects;
-  } catch (err: any) {
+  } catch (err) {
     return null;
   }
 }
@@ -54,14 +54,14 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
       content = await fs.readFile(path.join(this.directory, type ?? '.', filename), {
         encoding: 'utf-8',
       });
-    } catch (err: any) {
+    } catch (err) {
       return { ok: false, error: err };
     }
     // First try to parse as JSON, then NDJSON, then fail.
     try {
       const parsed = JSON.parse(content);
       return { ok: true, value: parsed };
-    } catch (err: any) {
+    } catch (err) {
       const parsed = tryParseNDJson(content);
       if (parsed) {
         return { ok: true, value: parsed };
@@ -77,7 +77,7 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
     try {
       const buffer = await fs.readFile(path.join(this.directory, type ?? '.', filename));
       return { ok: true, value: buffer };
-    } catch (err: any) {
+    } catch (err) {
       return { ok: false, error: err };
     }
   }
@@ -87,7 +87,7 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
       const integrations: string[] = [];
       await this.collectIntegrationsRecursive(dirname, integrations);
       return { ok: true, value: integrations };
-    } catch (err: any) {
+    } catch (err) {
       return { ok: false, error: err };
     }
   }
@@ -115,7 +115,7 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
     const integPath = path.join(this.directory, dirname);
     try {
       files = await fs.readdir(integPath);
-    } catch (err: any) {
+    } catch (err) {
       return { ok: false, error: err };
     }
     const versions: string[] = [];
@@ -131,7 +131,6 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
       }
     }
 
-    versions.sort((a, b) => compareVersions(a, b));
     return { ok: true, value: versions };
   }
 

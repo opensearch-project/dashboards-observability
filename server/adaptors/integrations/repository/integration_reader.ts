@@ -30,6 +30,36 @@ const foldResults = <T>(results: Array<Result<T>>) =>
   );
 
 /**
+ * Helper function to compare version numbers.
+ * Assumes that the version numbers are valid, produces undefined behavior otherwise.
+ *
+ * @param a Left-hand number
+ * @param b Right-hand number
+ * @returns -1 if a < b, 1 if a > b, 0 otherwise.
+ */
+export function compareVersions(a: string, b: string): number {
+  console.log(a.split('.'), b.split('.'));
+  const aParts = a.split('.').map((part) => Number.parseInt(part, 10));
+  const bParts = b.split('.').map((part) => Number.parseInt(part, 10));
+
+  console.log(aParts, bParts);
+
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    const aValue = i < aParts.length ? aParts[i] : 0;
+    const bValue = i < bParts.length ? bParts[i] : 0;
+
+    if (aValue > bValue) {
+      return 1;
+    }
+    if (aValue < bValue) {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+/**
  * The Integration class represents the data for Integration Templates.
  * It is backed by the repository file system.
  * It includes accessor methods for integration configs, as well as helpers for nested components.
@@ -85,7 +115,12 @@ export class IntegrationReader {
       console.error(versions.error);
       return null;
     }
-    return versions.value.length > 0 ? versions.value[0] : null;
+    if (versions.value.length === 0) {
+      return null;
+    }
+    // Sort descending
+    versions.value.sort((a, b) => -compareVersions(a, b));
+    return versions.value[0];
   }
 
   /**
