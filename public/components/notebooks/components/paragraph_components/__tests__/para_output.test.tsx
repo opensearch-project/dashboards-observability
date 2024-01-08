@@ -17,7 +17,7 @@ import {
 import {
   sampleObservabilityVizParagraph,
   sampleParsedParagraghs1,
-} from '../../../../../../test/sample_default_notebooks';
+} from '../../../../../../test/notebooks_constants';
 import { rootReducer } from '../../../../../framework/redux/reducers';
 import PPLService from '../../../../../services/requests/ppl';
 import { ParaOutput } from '../para_output';

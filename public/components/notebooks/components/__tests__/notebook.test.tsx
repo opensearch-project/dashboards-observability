@@ -15,11 +15,12 @@ import {
   clearOutputNotebook,
   codeBlockNotebook,
   codePlaceholderText,
+  emptyNotebook,
   notebookPutResponse,
   runCodeBlockResponse,
+  sampleNotebook1,
 } from '../../../../../test/notebooks_constants';
 import { sampleSavedVisualization } from '../../../../../test/panels_constants';
-import { emptyNotebook, sampleNotebook1 } from '../../../../../test/sample_default_notebooks';
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { Notebook } from '../notebook';
