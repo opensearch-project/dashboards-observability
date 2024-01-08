@@ -25,7 +25,7 @@ describe('The local repository', () => {
         }
         // Otherwise, all directories must be integrations
         const integ = new IntegrationReader(integPath);
-        expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
+        await expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
       })
     );
   });
@@ -54,7 +54,7 @@ describe('Local Nginx Integration', () => {
     );
     const integration = await repository.getIntegration('nginx');
 
-    expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
+    await expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
   });
 
   it('Should serialize to include the config', async () => {
@@ -65,12 +65,8 @@ describe('Local Nginx Integration', () => {
     const config = await integration!.getConfig();
     const serialized = await integration!.serialize();
 
-    expect(serialized).toHaveProperty('value');
-    expect(config).toHaveProperty('value');
-    // Manual if-statement check wrapping expects to satisfy TS check
-    if (!('value' in serialized) || !('value' in config)) {
-      return;
-    }
-    expect(serialized.value.config).toEqual(config.value);
+    expect((serialized as { value: object }).value).toMatchObject(
+      (config as { value: object }).value
+    );
   });
 });
