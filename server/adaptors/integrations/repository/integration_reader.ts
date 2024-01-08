@@ -256,39 +256,82 @@ export class IntegrationReader {
     return await this.reader.readFileRaw(staticPath, 'static');
   }
 
-  private async getAllStatics(
-    config: IntegrationConfig
-  ): Promise<Result<{ [key: string]: string }>> {
-    const allStatics: StaticAsset[] = [
-      config.statics?.logo ?? null,
-      config.statics?.darkModeLogo ?? null,
-      ...(config.statics?.gallery ?? [null]),
-      ...(config.statics?.darkModeGallery ?? [null]),
-    ].filter((s) => s !== null) as StaticAsset[];
-
-    const staticsData = await Promise.all(
-      allStatics.map(async (s: StaticAsset) => {
-        return {
-          path: s.path,
-          result: await this.getStatic(s.path),
-        };
-      })
-    );
-
-    for (const data of staticsData) {
-      if (!data.result.ok) {
-        return data.result;
-      }
+  private async serializeStaticAsset(asset: StaticAsset): Promise<Result<SerializedStaticAsset>> {
+    const data = await this.getStatic(asset.path);
+    if (!data.ok) {
+      return data;
     }
 
     return {
       ok: true,
-      value: Object.fromEntries(
-        staticsData.map((data) => [
-          data.path,
-          (data.result as { value: Buffer }).value.toString('base64'),
-        ])
-      ),
+      value: {
+        ...asset,
+        data: data.value.toString('base64'),
+      },
+    };
+  }
+
+  private async serializeStatics(
+    statics: IntegrationStatics
+  ): Promise<Result<SerializedIntegrationStatics>> {
+    const serialized: SerializedIntegrationStatics = {};
+
+    if (statics.logo) {
+      const serializeResult = await this.serializeStaticAsset(statics.logo);
+      if (!serializeResult.ok) {
+        return serializeResult;
+      }
+      serialized.logo = serializeResult.value;
+    }
+
+    if (statics.darkModeLogo) {
+      const serializeResult = await this.serializeStaticAsset(statics.darkModeLogo);
+      if (!serializeResult.ok) {
+        return serializeResult;
+      }
+      serialized.darkModeLogo = serializeResult.value;
+    }
+
+    const foldResults = (results: Array<Result<SerializedStaticAsset>>) =>
+      results.reduce(
+        (result, currentValue) => {
+          if (!result.ok) {
+            return result;
+          }
+          if (!currentValue.ok) {
+            return currentValue;
+          }
+          result.value.push(currentValue.value);
+          return result;
+        },
+        { ok: true, value: [] } as Result<SerializedStaticAsset[]>
+      );
+
+    if (statics.gallery) {
+      const results = await Promise.all(
+        statics.gallery.map((asset) => this.serializeStaticAsset(asset))
+      );
+      const foldedResult = foldResults(results);
+      if (!foldedResult.ok) {
+        return foldedResult;
+      }
+      serialized.gallery = foldedResult.value;
+    }
+
+    if (statics.darkModeGallery) {
+      const results = await Promise.all(
+        statics.darkModeGallery.map((asset) => this.serializeStaticAsset(asset))
+      );
+      const foldedResult = foldResults(results);
+      if (!foldedResult.ok) {
+        return foldedResult;
+      }
+      serialized.darkModeGallery = foldedResult.value;
+    }
+
+    return {
+      ok: true,
+      value: serialized,
     };
   }
 
@@ -299,7 +342,23 @@ export class IntegrationReader {
    * @param version The version of the integration to serialize.
    * @returns A large object which includes all of the integration's data.
    */
-  async serialize(_version?: string): Promise<Result<SerializedIntegration>> {
-    return { ok: false, error: new Error('Not implemented') };
+  async serialize(version?: string): Promise<Result<SerializedIntegration>> {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
+    }
+    const config: IntegrationConfig = configResult.value;
+
+    // For every type of asset, serialize the asset within the config.
+    if (config.statics) {
+      const staticsResult = await this.serializeStatics(config.statics);
+      if (!staticsResult.ok) {
+        return staticsResult;
+      }
+      config.statics = staticsResult.value;
+    }
+
+    // Type cast safety: all serializable properties must have the 'data' field.
+    return { ok: true, value: config as SerializedIntegration };
   }
 }

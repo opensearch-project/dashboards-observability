@@ -5,6 +5,49 @@
 
 type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
+interface IntegrationConfig {
+  name: string;
+  version: string;
+  displayName?: string;
+  license: string;
+  type: string;
+  labels?: string[];
+  author?: string;
+  description?: string;
+  sourceUrl?: string;
+  statics?: IntegrationStatics;
+  components: IntegrationComponent[];
+  assets: IntegrationAssets;
+  sampleData?: {
+    path: string;
+  };
+}
+
+// IntegrationConfig extended with local copies of all data
+interface SerializedIntegration extends IntegrationConfig {
+  statics?: SerializedIntegrationStatics;
+  components: SerializedIntegrationComponent[];
+  assets: SerializedIntegrationAssets;
+  sampleData: {
+    path: string;
+    data: string;
+  };
+}
+
+interface IntegrationStatics {
+  logo?: StaticAsset;
+  gallery?: StaticAsset[];
+  darkModeLogo?: StaticAsset;
+  darkModeGallery?: StaticAsset[];
+}
+
+interface SerializedIntegrationStatics {
+  logo?: SerializedStaticAsset;
+  gallery?: SerializedStaticAsset[];
+  darkModeLogo?: SerializedStaticAsset;
+  darkModeGallery?: SerializedStaticAsset[];
+}
+
 interface IntegrationAssets {
   savedObjects?: {
     name: string;
@@ -17,27 +60,18 @@ interface IntegrationAssets {
   }>;
 }
 
-interface IntegrationConfig {
-  name: string;
-  version: string;
-  displayName?: string;
-  license: string;
-  type: string;
-  labels?: string[];
-  author?: string;
-  description?: string;
-  sourceUrl?: string;
-  statics?: {
-    logo?: StaticAsset;
-    gallery?: StaticAsset[];
-    darkModeLogo?: StaticAsset;
-    darkModeGallery?: StaticAsset[];
+interface SerializedIntegrationAssets extends IntegrationAssets {
+  savedObjects?: {
+    name: string;
+    version: string;
+    data: string;
   };
-  components: IntegrationComponent[];
-  assets: IntegrationAssets;
-  sampleData?: {
-    path: string;
-  };
+  queries?: Array<{
+    name: string;
+    version: string;
+    language: string;
+    data: string;
+  }>;
 }
 
 interface StaticAsset {
@@ -45,9 +79,17 @@ interface StaticAsset {
   path: string;
 }
 
+interface SerializedStaticAsset extends StaticAsset {
+  data: string;
+}
+
 interface IntegrationComponent {
   name: string;
   version: string;
+}
+
+interface SerializedIntegrationComponent extends IntegrationComponent {
+  data: string;
 }
 
 interface DisplayAsset {
@@ -89,12 +131,4 @@ interface IntegrationInstancesSearchResult {
 interface IntegrationInstanceQuery {
   added?: boolean;
   id?: string;
-}
-
-interface SerializedIntegration {
-  config: IntegrationConfig;
-  statics?: unknown;
-  components?: unknown;
-  assets?: unknown;
-  sampleData?: unknown;
 }
