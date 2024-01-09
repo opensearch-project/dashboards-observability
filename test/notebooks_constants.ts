@@ -2,6 +2,65 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+export const addCodeBlockResponse = {
+  id: 'paragraph_044d9850-b0b2-4034-8590-6d845c65d1a7',
+  dateCreated: '2023-12-18T06:27:34.320Z',
+  dateModified: '2023-12-18T06:27:34.320Z',
+  input: { inputType: 'MARKDOWN', inputText: '' },
+  output: [{ outputType: 'MARKDOWN', result: '', execution_time: '0s' }],
+};
+
+export const runCodeBlockResponse = {
+  output: [{ outputType: 'MARKDOWN', result: '\n\nhello', execution_time: '0.939 ms' }],
+  input: { inputText: '%md \n\nhello', inputType: 'MARKDOWN' },
+  dateCreated: '2023-12-18T22:13:39.627Z',
+  dateModified: '2023-12-18T22:17:24.853Z',
+  id: 'paragraph_7713f4d5-c3b2-406d-9f06-99a1fe0251f3',
+};
+
+export const codePlaceholderText =
+  'Type %md, %sql or %ppl on the first line to define the input type. Code block starts here.';
+
+export const codeBlockNotebook = {
+  path: 'sample-notebook-1',
+  dateCreated: '2023-12-14T18:49:43.375Z',
+  dateModified: '2023-12-18T23:40:59.500Z',
+  paragraphs: [
+    {
+      output: [{ result: 'hello', outputType: 'MARKDOWN', execution_time: '0.018 ms' }],
+      input: { inputText: '%md\nhello', inputType: 'MARKDOWN' },
+      dateCreated: '2023-12-18T23:38:50.848Z',
+      dateModified: '2023-12-18T23:39:12.265Z',
+      id: 'paragraph_de00ea2d-a8fb-45d1-8085-698f51c6b6be',
+    },
+  ],
+};
+
+export const clearOutputNotebook = {
+  paragraphs: [
+    {
+      output: [],
+      input: { inputText: '%md\nhello', inputType: 'MARKDOWN' },
+      dateCreated: '2023-12-18T23:38:50.848Z',
+      dateModified: '2023-12-18T23:39:12.265Z',
+      id: 'paragraph_de00ea2d-a8fb-45d1-8085-698f51c6b6be',
+    },
+  ],
+};
+
+export const notebookPutResponse = {
+  status: 'OK',
+  message: { objectId: '69CpaYwBKIZhlDIhx-OK' },
+};
+
+// ///////////////// /////////////////// ///////////////////  SAMPLE NOTEBOOKS DEFAULTS /////////////////// /////////////////// ///////////////////
+
+export const emptyNotebook = {
+  path: 'sample-notebook-1',
+  dateCreated: '2023-12-14T18:49:43.375Z',
+  dateModified: '2023-12-15T06:13:23.463Z',
+  paragraphs: [],
+};
 
 // Sample notebook with all input and output
 export const sampleNotebook1 = {
@@ -119,7 +178,8 @@ export const sampleParsedParagraghs1 = [
     vizObjectInput:
       '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
     id: 3,
-    inp: '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+    inp:
+      '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
     lang: 'text/x-',
     isInputExpanded: false,
     isOutputStale: false,
@@ -159,6 +219,33 @@ export const sampleParsedParagraghs1 = [
     ],
   },
 ];
+
+export const sampleObservabilityVizParagraph = {
+  uniqueId: 'paragraph_6d3237a9-6486-4f93-aa25-0a1c838faahh',
+  isRunning: false,
+  inQueue: false,
+  isSelected: false,
+  isInputHidden: false,
+  isOutputHidden: false,
+  showAddPara: false,
+  isVizualisation: true,
+  vizObjectInput:
+    '{"viewMode":"view","panels":{"1":{"gridData":{"x":0,"y":0,"w":50,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"xmcchIwB5xYbk0tldrMA"}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"id2ae6b50-aa91-11ee-b006-2351d419df89","timeRange":{"to":"2024-01-03T23:42:52.909Z","from":"2023-12-04T23:42:52.909Z"},"title":"embed_viz_id2ae6b50-aa91-11ee-b006-2351d419df89","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+  id: 3,
+  inp:
+    '{"viewMode":"view","panels":{"1":{"gridData":{"x":0,"y":0,"w":50,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"xmcchIwB5xYbk0tldrMA"}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"id2ae6b50-aa91-11ee-b006-2351d419df89","timeRange":{"to":"2024-01-03T23:42:52.909Z","from":"2023-12-04T23:42:52.909Z"},"title":"embed_viz_id2ae6b50-aa91-11ee-b006-2351d419df89","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+  lang: 'text/x-',
+  isInputExpanded: false,
+  isOutputStale: false,
+  paraDivRef: undefined,
+  paraRef: undefined,
+  visEndTime: '2020-08-20T18:37:44.710Z',
+  visSavedObjId: '935afa20-e0cd-11e7-9d07-1398ccfcefa3',
+  visStartTime: '2020-07-21T18:37:44.710Z',
+  editorLanguage: '',
+  typeOut: ['OBSERVABILITY_VISUALIZATION'],
+  out: [''],
+};
 
 // Sample notebook with all input and cleared outputs
 export const sampleNotebook2 = {
@@ -221,7 +308,8 @@ export const sampleParsedParagraghs2 = [
     isVizualisation: false,
     vizObjectInput: '',
     id: 1,
-    inp: '# Type no output here\n* Sample link: [link](https://opensearch.org/)\n* ~~Strike~~, **Bold**, __Italic__',
+    inp:
+      '# Type no output here\n* Sample link: [link](https://opensearch.org/)\n* ~~Strike~~, **Bold**, __Italic__',
     lang: 'text/x-md',
     isInputExpanded: false,
     isOutputStale: false,
@@ -272,7 +360,8 @@ export const sampleParsedParagraghs2 = [
     vizObjectInput:
       '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
     id: 3,
-    inp: '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
+    inp:
+      '{"viewMode":"view","panels":{"1":{"gridData":{"x":1,"y":0,"w":44,"h":20,"i":"1"},"type":"visualization","explicitInput":{"id":"1","savedObjectId":"935afa20-e0cd-11e7-9d07-1398ccfcefa3","vis":null}}},"isFullScreenMode":false,"filters":[],"useMargins":false,"id":"i3ccc6260-e314-11ea-9f99-b37e94bb02ca","timeRange":{"to":"2020-08-20T18:37:44.710Z","from":"2020-07-21T18:37:44.710Z"},"title":"embed_viz_i3ccc6260-e314-11ea-9f99-b37e94bb02ca","query":{"query":"","language":"lucene"},"refreshConfig":{"pause":true,"value":15}}',
     lang: 'text/x-',
     isInputExpanded: false,
     isOutputStale: false,

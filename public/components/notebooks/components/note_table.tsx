@@ -36,14 +36,13 @@ import {
   CREATE_NOTE_MESSAGE,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
-import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
+import { UI_DATE_FORMAT, pageStyles } from '../../../../common/constants/shared';
 import {
   DeleteNotebookModal,
   getCustomModal,
   getSampleNotebooksModal,
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
-import { pageStyles } from '../../../../common/constants/shared';
 
 interface NoteTableProps {
   loading: boolean;
@@ -222,6 +221,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         renameNote();
       }}
+      data-test-subj="rename-notebook-btn"
     >
       Rename
     </EuiContextMenuItem>,
@@ -232,6 +232,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         cloneNote();
       }}
+      data-test-subj="duplicate-notebook-btn"
     >
       Duplicate
     </EuiContextMenuItem>,
@@ -242,6 +243,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         deleteNote();
       }}
+      data-test-subj="delete-notebook-btn"
     >
       Delete
     </EuiContextMenuItem>,
@@ -251,6 +253,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         addSampleNotebooksModal();
       }}
+      data-test-subj="add-samples-btn"
     >
       Add samples
     </EuiContextMenuItem>,

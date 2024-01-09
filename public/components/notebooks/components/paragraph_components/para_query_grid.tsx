@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import $ from 'jquery';
 import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import $ from 'jquery';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface QueryDataGridProps {
   rowCount: number;
@@ -23,7 +23,7 @@ function QueryDataGrid(props: QueryDataGridProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState([]);
-  const [visibleColumns, setVisibleColumns] = useState<Array<{ id: any; displayAsText: any }>>([]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   const [isVisible, setIsVisible] = useState(false);
 
@@ -108,7 +108,6 @@ function queryDataGridPropsAreEqual(prevProps: QueryDataGridProps, nextProps: Qu
   return (
     prevProps.rowCount === nextProps.rowCount &&
     JSON.stringify(prevProps.queryColumns) === JSON.stringify(nextProps.queryColumns) &&
-    JSON.stringify(prevProps.visibleColumns) === JSON.stringify(nextProps.visibleColumns) &&
     JSON.stringify(prevProps.dataValues) === JSON.stringify(nextProps.dataValues)
   );
 }
