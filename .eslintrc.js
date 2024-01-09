@@ -14,16 +14,10 @@ module.exports = {
     '@elastic/eslint-config-kibana',
     'plugin:@elastic/eui/recommended',
     'plugin:react-hooks/recommended',
-    "plugin:cypress/recommended",
     'plugin:jest/recommended',
     'plugin:prettier/recommended',
   ],
-  env: {
-    'cypress/globals': true,
-  },
-  plugins: [
-    'cypress',
-  ],
+  
   rules: {
     '@typescript-eslint/no-unused-vars': [
       'error',
@@ -45,12 +39,6 @@ module.exports = {
         ],
       },
     ],
-    // Add cypress specific rules here
-    'cypress/no-assigning-return-values': 'error',
-    'cypress/no-unnecessary-waiting': 'error',
-    'cypress/assertion-before-screenshot': 'warn',
-    'cypress/no-force': 'warn',
-    'cypress/no-async-tests': 'error',
   },
   overrides: [
     {
