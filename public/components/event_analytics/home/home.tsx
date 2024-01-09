@@ -70,7 +70,7 @@ interface IHomeProps {
 const EventAnalyticsHome = (props: IHomeProps) => {
   const { setToast, http } = props;
   const history = useHistory();
-  const [selectedDateRange, _setSelectedDateRange] = useState<string[]>(['now-40y', 'now']);
+  const [selectedDateRange] = useState<string[]>(['now-40y', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -267,7 +267,12 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                   Use Events Analytics to monitor, correlate, analyze and visualize machine
                   generated data through Piped Processing Language. Save frequently searched queries
                   and visualizations for quick access{' '}
-                  <EuiLink external={true} href={EVENT_ANALYTICS_DOCUMENTATION_URL} target="blank">
+                  <EuiLink
+                    external={true}
+                    href={EVENT_ANALYTICS_DOCUMENTATION_URL}
+                    target="blank"
+                    data-test-subj="logHome__learnMore"
+                  >
                     Learn more
                   </EuiLink>
                 </EuiText>

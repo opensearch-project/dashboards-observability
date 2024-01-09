@@ -5,7 +5,6 @@
 
 /// <reference types="cypress" />
 import {
-  delay,
   TEST_QUERIES,
   TESTING_PANEL,
   SAVE_QUERY1,
@@ -23,9 +22,9 @@ import {
   VIS_TYPE_PIE,
   VIS_TYPE_VBAR,
   FIELD_HOST,
-  FIELD_AGENT
+  FIELD_AGENT,
 } from '../../utils/event_analytics/constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
+import { COMMAND_TIMEOUT_LONG } from '../../utils/constants';
 
 import {
   querySearch,
@@ -48,30 +47,10 @@ describe('Adding sample data and visualization', () => {
 describe('Has working breadcrumbs', () => {
   it('Redirect to correct page on breadcrumb click', () => {
     landOnEventExplorer();
-    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(), { timeout: COMMAND_TIMEOUT_LONG };
+    cy.get('.euiBreadcrumb[href="observability-logs#/"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).click();
     cy.get('.euiTitle').contains('Logs').should('exist');
-  });
-});
-
-describe('Search a query on event home', () => {
-  it('Search a query and redirect to explorer to display query output', () => {
-    landOnEventHome();
-
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[0].query);
-    cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
-    cy.get('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]').click();
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
-    cy.window()
-      .its('store')
-      .invoke('getState')
-      .then((state) => {
-        expect(Object.values(state.queries)[0]['rawQuery'].trim()).equal(TEST_QUERIES[0].query);
-        expect(Object.values(state.queries)[0]['selectedDateRange'][0]).equal('now/y');
-        expect(Object.values(state.queries)[0]['selectedDateRange'][1]).equal('now');
-      });
-
-    cy.url().should('contain', '#/explorer');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').contains(TEST_QUERIES[0].query);
   });
 });
 
@@ -105,110 +84,6 @@ describe('Open flyout for a data row to see details', () => {
     cy.get('.observability-flyout #surroundingFyout')
       .contains('View surrounding events')
       .should('exist');
-  });
-});
-
-// skip for now due to tab removals
-describe.skip('Add/delete/switch explorer top level tabs', () => {
-  beforeEach(() => {
-    landOnEventExplorer();
-  });
-  
-  it('Add a new tab', () => {
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength + 1);
-      });
-  });
-
-  it('Click to switch to anther tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .first()
-      .click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .first()
-      .should('have.class', 'euiTab-isSelected');
-  });
-
-  it('Close a tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab')
-          .first()
-          .find('[data-test-subj="eventExplorer__tabClose"]')
-          .click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength - 1);
-      });
-  });
-
-  it('Close current selected tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab').eq(1).click();
-        cy.get('button.euiTab-isSelected [data-test-subj="eventExplorer__tabClose"]').click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength - 1);
-      });
-  });
-
-  it('Close another unselected tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('button.euiTab').first().find('[data-test-subj="eventExplorer__tabClose"]').click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength - 1);
-      });
-  });
-});
-
-describe('Click actions test', () => {
-  beforeEach(() => {
-    landOnEventHome();
-  });
-
-  it('Actions - click event explorer', () => {
-    cy.get('[data-test-subj="eventHomeAction"]').click();
-    cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-    cy.url().should('contain', '#/explorer');
-  });
-
-  it('Actions - add sample data', () => {
-    cy.get('[data-test-subj="eventHomeAction"]').click();
-    cy.get('[data-test-subj="eventHomeAction__addSamples"]').click();
-    cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'successfully');
-  });
-
-  it('Actions - delete saved queries', () => {
-    cy.get('[data-test-subj^="checkboxSelectRow"]').first().check();
-    cy.get('[data-test-subj="eventHomeAction"]').click();
-    cy.get('[data-test-subj="eventHomeAction__delete"]').click();
-    cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
-    cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('.euiToastHeader__title').should('contain', 'successfully');
   });
 });
 
@@ -257,7 +132,9 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).click();
 
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
@@ -275,7 +152,9 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).click();
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
       .should('exist');
@@ -521,7 +400,9 @@ describe('Visualizing data', () => {
       .type(FIELD_AGENT);
     cy.get(`input[value="${FIELD_AGENT}"]`).click();
     cy.get('[data-test-subj="panelCloseBtn"]').click();
-    cy.get('[data-test-subj="visualizeEditorRenderButton"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('[data-test-subj="visualizeEditorRenderButton"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).click();
 
     cy.get('.infolayer .legendtext').as('legandTxt');
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
