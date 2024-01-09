@@ -3,13 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import $ from 'jquery';
-import { 
-  EuiDataGrid,
-  EuiLoadingSpinner,
-  EuiSpacer
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 type QueryDataGridProps = {
   rowCount: number,
@@ -35,6 +31,8 @@ function QueryDataGrid(props: QueryDataGridProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState([]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
+
   const [isVisible, setIsVisible] = useState(false);
 
   const onSort = useCallback(
@@ -119,10 +117,11 @@ function QueryDataGrid(props: QueryDataGridProps) {
 }
 
 function queryDataGridPropsAreEqual(prevProps: QueryDataGridProps, nextProps: QueryDataGridProps) {
-  return prevProps.rowCount === nextProps.rowCount
-    && JSON.stringify(prevProps.queryColumns) === JSON.stringify(nextProps.queryColumns)
-    && JSON.stringify(prevProps.visibleColumns) === JSON.stringify(nextProps.visibleColumns)
-    && JSON.stringify(prevProps.dataValues) === JSON.stringify(nextProps.dataValues)
+  return (
+    prevProps.rowCount === nextProps.rowCount &&
+    JSON.stringify(prevProps.queryColumns) === JSON.stringify(nextProps.queryColumns) &&
+    JSON.stringify(prevProps.dataValues) === JSON.stringify(nextProps.dataValues)
+  );
 }
 
-export const QueryDataGridMemo = React.memo(QueryDataGrid, queryDataGridPropsAreEqual);
+export const QueryDataGridMemo = React.memo(QueryDataGrid, queryDataGridPropsAreEqual)
