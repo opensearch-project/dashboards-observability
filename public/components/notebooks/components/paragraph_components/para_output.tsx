@@ -6,9 +6,8 @@
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
-import React, { useState } from 'react';
-import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
-import PPLService from '../../../../services/requests/ppl';
+import moment from 'moment';
+import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
@@ -16,8 +15,9 @@ import {
 } from '../../../../../../../src/plugins/dashboard/public';
 import { ParaType } from '../../../../../common/types/notebooks';
 import { getOSDHttp, getPPLService, uiSettingsService } from '../../../../../common/utils';
+import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
+import PPLService from '../../../../services/requests/ppl';
 import { QueryDataGridMemo } from './para_query_grid';
-import { convertDateTime } from '../../../common/query_utils';
 
 const createQueryColumns = (jsonColumns: any[]) => {
   let index = 0;
@@ -53,43 +53,19 @@ const getQueryOutputData = (queryObject: any) => {
   return data;
 };
 
-const QueryPara = ({ inp, val }) => {
-  const inputQuery = inp.substring(4, inp.length);
-  const queryObject = JSON.parse(val);
-
-  if (queryObject.hasOwnProperty('error')) return <EuiCodeBlock>{val}</EuiCodeBlock>;
-
-  const columns = createQueryColumns(queryObject.schema);
-  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
-  const data = getQueryOutputData(queryObject);
-  return (
-    <div>
-      <EuiText key={'query-input-key'} className={'wrapAll'}>
-        <b>{inputQuery}</b>
-      </EuiText>
-      <EuiSpacer />
-      <QueryDataGridMemo
-        rowCount={queryObject.datarows.length}
-        queryColumns={columns}
-        visibleColumns={visibleColumns}
-        setVisibleColumns={setVisibleColumns}
-        dataValues={data}
-      />
-    </div>
-  );
-};
-
 const OutputBody = ({
+  key,
   typeOut,
   val,
-  inp,
+  para,
   visInput,
   setVisInput,
   DashboardContainerByValueRenderer,
 }: {
+  key: string;
   typeOut: string;
   val: string;
-  inp: string;
+  para: ParaType;
   visInput: DashboardContainerInput;
   setVisInput: (input: DashboardContainerInput) => void;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
@@ -98,74 +74,100 @@ const OutputBody = ({
    * Currently supports HTML, TABLE, IMG
    * TODO: add table rendering
    */
+
   const dateFormat = uiSettingsService.get('dateFormat');
-  const from = convertDateTime(visInput?.timeRange?.from, true, false);
-  const to = convertDateTime(visInput?.timeRange?.to, false, false);
-  const displayFrom =
-    convertDateTime(visInput?.timeRange?.from, true, dateFormat) || 'Invalid date';
-  const displayTo = convertDateTime(visInput?.timeRange?.to, false, dateFormat) || 'Invalid date';
+
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
-        return <QueryPara inp={inp} val={val} />;
+        const inputQuery = para.inp.substring(4, para.inp.length);
+        const queryObject = JSON.parse(val);
+        if (queryObject.hasOwnProperty('error')) {
+          return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
+        } else {
+          const columns = createQueryColumns(queryObject.schema);
+          const data = getQueryOutputData(queryObject);
+          return (
+            <div>
+              <EuiText key={'query-input-key'} className="wrapAll">
+                <b>{inputQuery}</b>
+              </EuiText>
+              <EuiSpacer />
+              <QueryDataGridMemo
+                key={key}
+                rowCount={queryObject.datarows.length}
+                queryColumns={columns}
+                dataValues={data}
+              />
+            </div>
+          );
+        }
       case 'MARKDOWN':
         return (
-          <EuiText className="wrapAll markdown-output-text">
+          <EuiText key={key} className="wrapAll markdown-output-text">
             <MarkdownRender source={val} />
           </EuiText>
         );
       case 'VISUALIZATION':
+        let from = moment(visInput?.timeRange?.from).format(dateFormat);
+        let to = moment(visInput?.timeRange?.to).format(dateFormat);
+        from = from === 'Invalid date' ? visInput.timeRange.from : from;
+        to = to === 'Invalid date' ? visInput.timeRange.to : to;
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${displayFrom} - ${displayTo}`}
+              {`${from} - ${to}`}
             </EuiText>
-            <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
+            <DashboardContainerByValueRenderer
+              key={key}
+              input={visInput}
+              onInputUpdated={setVisInput}
+            />
           </>
         );
       case 'OBSERVABILITY_VISUALIZATION':
-        const http = getOSDHttp();
-        const pplService = getPPLService();
-
+        let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
+        let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
+        fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
+        toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
         const onEditClick = (savedVisualizationId: string) => {
           window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
         };
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${displayFrom} - ${displayTo}`}
+              {`${fromObs} - ${toObs}`}
             </EuiText>
             <div style={{ height: '300px', width: '100%' }}>
               <VisualizationContainer
-                http={http}
+                http={getOSDHttp()}
                 editMode={false}
                 visualizationId={''}
                 onEditClick={onEditClick}
-                savedVisualizationId={visInput.visSavedObjId}
-                pplService={pplService}
-                fromTime={from}
-                toTime={to}
+                savedVisualizationId={para.visSavedObjId}
+                pplService={getPPLService()}
+                fromTime={para.visStartTime}
+                toTime={para.visEndTime}
                 onRefresh={false}
                 pplFilterValue={''}
                 usedInNotebooks={true}
-                contextMenuId="notebook"
               />
             </div>
           </>
         );
       case 'HTML':
         return (
-          <EuiText>
+          <EuiText key={key}>
             {/* eslint-disable-next-line react/jsx-pascal-case */}
             <Media.HTML data={val} />
           </EuiText>
         );
       case 'TABLE':
-        return <pre>{val}</pre>;
+        return <pre key={key}>{val}</pre>;
       case 'IMG':
-        return <img alt="" src={'data:image/gif;base64,' + val} />;
+        return <img alt="" src={'data:image/gif;base64,' + val} key={key} />;
       default:
-        return <pre>{val}</pre>;
+        return <pre key={key}>{val}</pre>;
     }
   } else {
     console.log('output not supported', typeOut);
@@ -192,21 +194,23 @@ export const ParaOutput = (props: {
 }) => {
   const { para, DashboardContainerByValueRenderer, visInput, setVisInput } = props;
 
-  return !para.isOutputHidden ? (
-    <>
-      {para.typeOut.map((typeOut: string, tIdx: number) => {
-        return (
-          <OutputBody
-            key={para.uniqueId + '_paraOutputBody_' + tIdx}
-            typeOut={typeOut}
-            val={para.out[tIdx]}
-            inp={para.inp}
-            visInput={visInput}
-            setVisInput={setVisInput}
-            DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
-          />
-        );
-      })}
-    </>
-  ) : null;
+  return (
+    !para.isOutputHidden && (
+      <>
+        {para.typeOut.map((typeOut: string, tIdx: number) => {
+          return (
+            <OutputBody
+              key={para.uniqueId + '_paraOutputBody'}
+              typeOut={typeOut}
+              val={para.out[tIdx]}
+              para={para}
+              visInput={visInput}
+              setVisInput={setVisInput}
+              DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
+            />
+          );
+        })}
+      </>
+    )
+  );
 };

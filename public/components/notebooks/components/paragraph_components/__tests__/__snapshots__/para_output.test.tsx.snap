@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`<ParaOutput /> spec renders dashboards visualization outputs 1`] = `
+<div
+  class="euiText euiText--small"
+  style="margin-left: 9px;"
+>
+  2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
+</div>
+`;
+
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
 <div
   class="euiText euiText--medium wrapAll markdown-output-text"
@@ -11,6 +20,15 @@ exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
       Type your input here
     </h1>
   </div>
+</div>
+`;
+
+exports[`<ParaOutput /> spec renders observability visualization outputs 1`] = `
+<div
+  class="euiText euiText--small"
+  style="margin-left: 9px;"
+>
+  2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
 </div>
 `;
 
@@ -67,11 +85,19 @@ exports[`<ParaOutput /> spec renders query outputs 1`] = `
 </div>
 `;
 
-exports[`<ParaOutput /> spec renders visualization outputs 1`] = `
+exports[`<ParaOutput /> spec renders query outputs with error 1`] = `
 <div
-  class="euiText euiText--small"
-  style="margin-left: 9px;"
+  class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge prismjs language-none"
 >
-  2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
+  <pre
+    class="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+    tabindex="-1"
+  >
+    <code
+      class="euiCodeBlock__code"
+    >
+      {"error":"Invalid SQL query"}
+    </code>
+  </pre>
 </div>
 `;
