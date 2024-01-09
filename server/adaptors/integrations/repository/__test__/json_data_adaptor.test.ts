@@ -36,11 +36,10 @@ describe('JSON Data Adaptor', () => {
     const serialized = await fsIntegration.serialize();
 
     expect(serialized.ok).toBe(true);
-    if (!serialized.ok) {
-      return; // Trick typescript into allowing access to serialized.value
-    }
 
-    const adaptor: JsonCatalogDataAdaptor = new JsonCatalogDataAdaptor([serialized.value]);
+    const adaptor: JsonCatalogDataAdaptor = new JsonCatalogDataAdaptor([
+      (serialized as { value: SerializedIntegration }).value,
+    ]);
     const jsonIntegration = new IntegrationReader('nginx', adaptor);
 
     await expect(jsonIntegration.getConfig()).resolves.toMatchObject(fsConfig);

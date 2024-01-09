@@ -30,6 +30,40 @@ const foldResults = <T>(results: Array<Result<T>>) =>
   );
 
 /**
+ * Remove all fields from SerializedIntegration not present in IntegrationConfig.
+ *
+ * @param rawConfig The raw config to prune
+ * @returns A config with all data fields removed
+ */
+const pruneConfig = (rawConfig: IntegrationConfig | SerializedIntegration): IntegrationConfig => {
+  // Hacky workaround: we currently only need to prune 'data' fields, so just remove every 'data'.
+  // Lots of risky conversion in this method, so scope it to here and rewrite if more granular
+  // pruning is needed.
+  const prunePart = <T>(part: T): T => {
+    const result = {} as { [key: string]: unknown };
+    for (const [key, value] of Object.entries(part as { [key: string]: unknown })) {
+      if (key === 'data') {
+        continue;
+      } else if (Array.isArray(value)) {
+        result[key] = value.map((item) => {
+          if (item instanceof Object && item !== null) {
+            return prunePart(item);
+          }
+          return item;
+        });
+      } else if (value instanceof Object && value !== null) {
+        result[key] = prunePart(value as { [key: string]: unknown });
+      } else {
+        result[key] = value;
+      }
+    }
+    return (result as unknown) as T;
+  };
+
+  return prunePart(rawConfig);
+};
+
+/**
  * Helper function to compare version numbers.
  * Assumes that the version numbers are valid, produces undefined behavior otherwise.
  *
@@ -120,13 +154,10 @@ export class IntegrationReader {
     return versions.value[0];
   }
 
-  /**
-   * Get the configuration of the current integration.
-   *
-   * @param version The version of the config to retrieve.
-   * @returns The config if a valid config matching the version is present, otherwise null.
-   */
-  async getConfig(version?: string): Promise<Result<IntegrationConfig>> {
+  // Get config without pruning or validation.
+  private async getRawConfig(
+    version?: string
+  ): Promise<Result<IntegrationConfig | SerializedIntegration>> {
     if ((await this.reader.getDirectoryType()) !== 'integration') {
       return { ok: false, error: new Error(`${this.directory} is not a valid integration`) };
     }
@@ -147,6 +178,20 @@ export class IntegrationReader {
       return config;
     }
     return validateTemplate(config.value);
+  }
+
+  /**
+   * Get the configuration of the current integration.
+   *
+   * @param version The version of the config to retrieve.
+   * @returns The config if a valid config matching the version is present, otherwise null.
+   */
+  async getConfig(version?: string): Promise<Result<IntegrationConfig>> {
+    const maybeConfig = await this.getRawConfig(version);
+    if (!maybeConfig.ok) {
+      return maybeConfig;
+    }
+    return validateTemplate(pruneConfig(maybeConfig.value));
   }
 
   /**

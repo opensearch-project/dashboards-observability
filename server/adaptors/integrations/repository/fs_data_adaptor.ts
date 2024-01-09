@@ -37,6 +37,7 @@ const safeIsDirectory = async (maybeDirectory: string): Promise<boolean> => {
  * Used to read default Integrations shipped in the in-product catalog at `__data__`.
  */
 export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
+  isConfigLocalized = false;
   directory: string;
 
   /**

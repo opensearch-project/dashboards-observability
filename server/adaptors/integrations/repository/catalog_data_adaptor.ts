@@ -6,6 +6,10 @@
 export type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
 export interface CatalogDataAdaptor {
+  // Indicates whether the config for this type of adaptor should be localized.
+  // If true, the catalog supports reading serialized integrations.
+  isConfigLocalized: boolean;
+
   /**
    * Reads a Json or NDJson file from the data source.
    *

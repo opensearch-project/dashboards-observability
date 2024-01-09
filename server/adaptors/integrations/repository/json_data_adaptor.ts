@@ -6,44 +6,11 @@
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 
 /**
- * Remove all fields from SerializedIntegration not present in IntegrationConfig
- *
- * @param rawConfig The raw config to prune
- * @returns A config with all data fields removed
- */
-const pruneConfig = (rawConfig: SerializedIntegration): IntegrationConfig => {
-  // Hacky workaround: we currently only need to prune 'data' fields, so just remove every 'data'.
-  // Lots of risky conversion in this method, so scope it to here and rewrite if more granular
-  // pruning is needed.
-  const prunePart = <T>(part: T): T => {
-    const result = {} as { [key: string]: unknown };
-    for (const [key, value] of Object.entries(part as { [key: string]: unknown })) {
-      if (key === 'data') {
-        continue;
-      } else if (Array.isArray(value)) {
-        result[key] = value.map((item) => {
-          if (item instanceof Object && item !== null) {
-            return prunePart(item);
-          }
-          return item;
-        });
-      } else if (value instanceof Object && value !== null) {
-        result[key] = prunePart(value as { [key: string]: unknown });
-      } else {
-        result[key] = value;
-      }
-    }
-    return (result as unknown) as T;
-  };
-
-  return prunePart(rawConfig);
-};
-
-/**
  * A CatalogDataAdaptor that reads from a provided list of JSON objects.
  * Used to read Integration information when the user uploads their own catalog.
  */
 export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
+  isConfigLocalized = true;
   integrationsList: SerializedIntegration[];
 
   /**
@@ -67,24 +34,28 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   }
 
   async readFile(filename: string, type?: IntegrationPart): Promise<Result<object[] | object>> {
-    switch (type) {
-      case undefined:
-        const name = filename.split('-')[0];
-        const version = filename.match(/\d+(\.\d+)*/);
-        for (const integ of this.integrationsList) {
-          if (integ.name === name && integ.version === version?.[0]) {
-            return { ok: true, value: pruneConfig(integ) };
-          }
-        }
-        return { ok: false, error: new Error('Config file not found: ' + filename) };
-      default:
-        return { ok: false, error: new Error('Unsupported type for json read: ' + type) };
+    if (type !== undefined) {
+      return {
+        ok: false,
+        error: new Error('JSON adaptor does not support subtypes (isConfigLocalized: true)'),
+      };
     }
+
+    const name = filename.split('-')[0];
+    const version = filename.match(/\d+(\.\d+)*/);
+    for (const integ of this.integrationsList) {
+      if (integ.name === name && integ.version === version?.[0]) {
+        return { ok: true, value: integ };
+      }
+    }
+    return { ok: false, error: new Error('Config file not found: ' + filename) };
   }
 
   async readFileRaw(_filename: string, _type?: IntegrationPart): Promise<Result<Buffer>> {
-    // TODO
-    return { ok: false, error: new Error('Not Implemented') };
+    return {
+      ok: false,
+      error: new Error('JSON adaptor does not support raw files (isConfigLocalized: true)'),
+    };
   }
 
   async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
