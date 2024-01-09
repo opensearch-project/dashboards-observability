@@ -8,3 +8,9 @@ SELECT
     body_bytes_sent AS `http.response.bytes`,
     'nginx.access' AS `event.domain`
 FROM {table_name}
+WITH (
+    auto_refresh = 'true',
+    checkpoint_location = '{s3_bucket_location}/checkpoint',
+    watermark_delay = '1 Minute',
+    extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+);

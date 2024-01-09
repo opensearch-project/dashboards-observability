@@ -53,11 +53,6 @@
         "name": "create_mv",
         "version": "1.0.0",
         "language": "sql"
-      },
-      {
-        "name": "refresh_mv",
-        "version": "1.0.0",
-        "language": "sql"
       }
     ]
   },

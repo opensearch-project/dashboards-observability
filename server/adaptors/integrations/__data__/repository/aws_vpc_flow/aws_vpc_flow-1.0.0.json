@@ -57,11 +57,6 @@
         "name": "create_mv_vpc",
         "version": "1.0.0",
         "language": "sql"
-      },
-      {
-        "name": "refresh_mv_vpc",
-        "version": "1.0.0",
-        "language": "sql"
       }
     ]
   },
