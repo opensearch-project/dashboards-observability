@@ -75,4 +75,13 @@ describe('JSON Data Adaptor', () => {
     const version = await reader.getLatestVersion();
     expect(version).toBe('2.1.0');
   });
+
+  it('Should find integration names', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const integResult = await adaptor.findIntegrations();
+    const integs = (integResult as { value: string[] }).value;
+    integs.sort();
+
+    expect(integs).toEqual(['sample1', 'sample2']);
+  });
 });

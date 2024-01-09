@@ -78,7 +78,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
         }
         return { ok: false, error: new Error('Config file not found: ' + filename) };
       default:
-        return { ok: false, error: new Error('Unsupported type: ' + type) };
+        return { ok: false, error: new Error('Unsupported type for json read: ' + type) };
     }
   }
 
@@ -87,9 +87,18 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
     return { ok: false, error: new Error('Not Implemented') };
   }
 
-  async findIntegrations(_dirname: string = '.'): Promise<Result<string[]>> {
-    // TODO
-    return { ok: false, error: new Error('Not Implemented') };
+  async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
+    if (dirname !== '.') {
+      return {
+        ok: false,
+        error: new Error('Finding integrations for custom dirs not supported for JSONreader'),
+      };
+    }
+    const result: Set<string> = new Set([]);
+    for (const integration of this.integrationsList) {
+      result.add(integration.name);
+    }
+    return { ok: true, value: [...result] };
   }
 
   async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
