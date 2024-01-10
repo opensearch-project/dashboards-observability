@@ -53,10 +53,14 @@ jobs:
         id: files
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          format: 'space-delimited'
-          filters: |
-            added: .*\.(js|ts|tsx)$
-            modified: .*\.(js|ts|tsx)$
+
+      - name: Check Changed Files
+        id: check_changed_files
+        run: |
+          files_modified=$(cat ${HOME}/files_modified.json)
+          files_added=$(cat ${HOME}/files_added.json)
+          echo "here are the modified files $files_modified"
+          echo "here are the added files $files_added"
 
       - name: Lint Changed Files
         run: |
