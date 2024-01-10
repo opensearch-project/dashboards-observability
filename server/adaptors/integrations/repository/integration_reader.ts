@@ -426,7 +426,52 @@ export class IntegrationReader {
    * @returns A buffer with the static's data if present, otherwise null.
    */
   async getStatic(staticPath: string): Promise<Result<Buffer>> {
-    return await this.reader.readFileRaw(staticPath, 'static');
+    // Statics were originally designed to read straight from file system,
+    // so we use direct access if possible.
+    if (!this.reader.isConfigLocalized) {
+      return await this.reader.readFileRaw(staticPath, 'static');
+    }
+
+    // Otherwise, we need to search for the right static, by checking each version.
+    const versions = await this.reader.findIntegrationVersions();
+    if (!versions.ok) {
+      return versions;
+    }
+    for (const version of versions.value) {
+      const config = await this.getConfig(version);
+      if (!config.ok || !config.value.statics) {
+        continue;
+      }
+      const statics = config.value.statics;
+      if (statics.logo?.path === staticPath) {
+        if (!('data' in statics.logo)) {
+          return { ok: false, error: new Error('Localized config missing static data') };
+        }
+        return { ok: true, value: Buffer.from((statics.logo as { data: string }).data, 'base64') };
+      }
+      if (statics?.darkModeLogo?.path === staticPath) {
+        if (!('data' in statics.darkModeLogo)) {
+          return { ok: false, error: new Error('Localized config missing static data') };
+        }
+        return {
+          ok: true,
+          value: Buffer.from((statics.darkModeLogo as { data: string }).data, 'base64'),
+        };
+      }
+      for (const iterStatic of [...(statics?.gallery ?? []), ...(statics?.darkModeGallery ?? [])]) {
+        if (iterStatic.path === staticPath) {
+          if (!('data' in iterStatic)) {
+            return { ok: false, error: new Error('Localized config missing static data') };
+          }
+          return { ok: true, value: Buffer.from((iterStatic as { data: string }).data, 'base64') };
+        }
+      }
+    }
+
+    return {
+      ok: false,
+      error: new Error(`Static not found: ${staticPath}`, { code: 'ENOENT' } as ErrorOptions),
+    };
   }
 
   private async serializeStaticAsset(asset: StaticAsset): Promise<Result<SerializedStaticAsset>> {
