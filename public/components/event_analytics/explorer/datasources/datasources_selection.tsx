@@ -20,10 +20,9 @@ import { reset as resetCountDistribution } from '../../redux/slices/count_distri
 import { reset as resetFields } from '../../redux/slices/field_slice';
 import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
-import { changeData } from '../../redux/slices/query_slice';
+import { changeData, reset as resetQuery } from '../../redux/slices/query_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
-import { reset as resetQuery } from '../../redux/slices/query_slice';
 import { DirectQueryRequest, SelectedDataSource } from '../../../../../common/types/explorer';
 import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
 import {
