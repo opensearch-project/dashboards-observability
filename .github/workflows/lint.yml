@@ -60,10 +60,10 @@ jobs:
           files_added=$(cat ${HOME}/files_added.json)
           files_renamed=$(cat ${HOME}/files_renamed.json)
           files_deleted=$(cat ${HOME}/files_deleted.json)
-          echo "here are the modified files $files_modified"
-          echo "here are the added files $files_added"
-          echo "here are the renamed files $files_renamed"
-          echo "here are the renamed files $files_deleted"
+          echo "::set-output name=files_modified::$files_modified"
+          echo "::set-output name=files_added::$files_added"
+          echo "::set-output name=files_renamed::$files_renamed"
+          echo "::set-output name=files_deleted::$files_deleted"
 
       - name: Lint Changed Files
         run: |
