@@ -294,7 +294,7 @@ export class IntegrationReader {
       sampleData: object[] | null;
     }>
   > {
-    const configResult = await this.getConfig(version);
+    const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
     }
@@ -302,7 +302,22 @@ export class IntegrationReader {
 
     const resultValue: { sampleData: object[] | null } = { sampleData: null };
     if (config.sampleData) {
-      const jsonContent = await this.reader.readFile(config.sampleData.path, 'data');
+      let jsonContent: Result<object | object[]>;
+
+      if (this.reader.isConfigLocalized) {
+        const parsedData = tryParseNDJson(
+          (config.sampleData as { path: string; data: string }).data
+        );
+        if (parsedData === null) {
+          return {
+            ok: false,
+            error: new Error('Unable to parse included data in localized config'),
+          };
+        }
+        jsonContent = { ok: true, value: parsedData };
+      } else {
+        jsonContent = await this.reader.readFile(config.sampleData.path, 'data');
+      }
       if (!jsonContent.ok) {
         return jsonContent;
       }

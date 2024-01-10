@@ -217,9 +217,17 @@ describe('Integration', () => {
 
   describe('getSampleData', () => {
     it('should return sample data', async () => {
-      const sampleConfig = { sampleData: { path: 'sample.json' } };
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleConfig });
-      const readFileMock = jest.spyOn(fs, 'readFile').mockResolvedValue('[{"sample": true}]');
+      const readFileMock = jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            ...TEST_INTEGRATION_CONFIG,
+            sampleData: {
+              path: 'sample.json',
+            },
+          })
+        )
+        .mockResolvedValue('[{"sample": true}]');
 
       const result = await integration.getSampleData();
 
@@ -233,7 +241,11 @@ describe('Integration', () => {
     });
 
     it("should return null if there's no sample data", async () => {
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: {} });
+      jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+        JSON.stringify({
+          ...TEST_INTEGRATION_CONFIG,
+        })
+      );
 
       const result = await integration.getSampleData();
 
