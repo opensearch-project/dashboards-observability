@@ -11,7 +11,7 @@ import { IDatePickerProps } from './search';
 import {
   QUERY_ASSISTANT_FIXED_END_TIME,
   QUERY_ASSISTANT_FIXED_START_TIME,
-} from 'common/constants/shared';
+} from '../../../../common/constants/shared';
 
 export function DatePicker(props: IDatePickerProps) {
   const {
