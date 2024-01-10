@@ -4,8 +4,8 @@
  */
 
 type Result<T, E = Error> =
-  | { ok: true; value: T; error?: unknown }
-  | { ok: false; error: E; value?: unknown };
+  | { ok: true; value: T; error?: undefined }
+  | { ok: false; error: E; value?: undefined };
 
 interface IntegrationConfig {
   name: string;

@@ -203,4 +203,22 @@ describe('JSON Catalog with invalid data', () => {
     await expect(reader.getStatic('1.png')).resolves.toHaveProperty('ok', false);
     await expect(reader.getStatic('dm_1.png')).resolves.toHaveProperty('ok', false);
   });
+
+  it('Should report an error on read if a schema has invalid JSON', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const baseConfig = (serialized.value as SerializedIntegration[]).filter(
+      (integ: { name: string; components: unknown[] }) => integ.name === TEST_INTEGRATION
+    )[0];
+
+    expect(baseConfig.components.length).toBeGreaterThanOrEqual(2);
+    baseConfig.components[1].data = '{"invalid_json": true';
+
+    const reader = new IntegrationReader(
+      TEST_INTEGRATION,
+      new JsonCatalogDataAdaptor([baseConfig])
+    );
+
+    await expect(reader.getSchemas()).resolves.toHaveProperty('ok', false);
+  });
 });

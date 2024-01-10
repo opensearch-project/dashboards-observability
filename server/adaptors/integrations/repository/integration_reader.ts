@@ -171,14 +171,10 @@ export class IntegrationReader {
       return configResult;
     }
 
-    try {
-      // Some other checks are included in getConfig validation.
-      const assets = await this.getAssets();
-      if (!assets.ok || Object.keys(assets.value).length === 0) {
-        return { ok: false, error: new Error('An integration must have at least one asset') };
-      }
-    } catch (err) {
-      return { ok: false, error: err };
+    // Some other checks are included in getConfig validation.
+    const assets = await this.getAssets();
+    if (!assets.ok || Object.keys(assets.value).length === 0) {
+      return { ok: false, error: new Error('An integration must have at least one asset') };
     }
 
     return configResult;
@@ -194,7 +190,6 @@ export class IntegrationReader {
   async getLatestVersion(): Promise<string | null> {
     const versions = await this.reader.findIntegrationVersions();
     if (!versions.ok) {
-      console.error(versions.error);
       return null;
     }
     if (versions.value.length === 0) {
@@ -494,17 +489,11 @@ export class IntegrationReader {
 
     if (statics.logo) {
       const serializeResult = await this.serializeStaticAsset(statics.logo);
-      if (!serializeResult.ok) {
-        return serializeResult;
-      }
       serialized.logo = serializeResult.value;
     }
 
     if (statics.darkModeLogo) {
       const serializeResult = await this.serializeStaticAsset(statics.darkModeLogo);
-      if (!serializeResult.ok) {
-        return serializeResult;
-      }
       serialized.darkModeLogo = serializeResult.value;
     }
 
@@ -513,9 +502,6 @@ export class IntegrationReader {
         statics.gallery.map((asset) => this.serializeStaticAsset(asset))
       );
       const foldedResult = foldResults(results);
-      if (!foldedResult.ok) {
-        return foldedResult;
-      }
       serialized.gallery = foldedResult.value;
     }
 
@@ -524,9 +510,6 @@ export class IntegrationReader {
         statics.darkModeGallery.map((asset) => this.serializeStaticAsset(asset))
       );
       const foldedResult = foldResults(results);
-      if (!foldedResult.ok) {
-        return foldedResult;
-      }
       serialized.darkModeGallery = foldedResult.value;
     }
 
