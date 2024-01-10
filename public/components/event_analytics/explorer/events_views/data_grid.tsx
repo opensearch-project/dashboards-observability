@@ -42,7 +42,7 @@ export interface DataGridProps {
   endTime: string;
   storedSelectedColumns: IField[];
   formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
-  OUIDataGridProps?: Partial<EuiDataGridProps>;
+  OuiDataGridProps?: Partial<EuiDataGridProps>;
 }
 
 const defaultFormatGrid = (columns: EuiDataGridColumn[]) => columns;
