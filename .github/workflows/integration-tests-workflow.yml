@@ -109,6 +109,15 @@ jobs:
           node-version: ${{ steps.versions_step.outputs.node_version }}
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Configure OpenSearch Dashboards
+        run: |
+          rm -rf ./config/opensearch_dashboards.yml
+          cat << 'EOT' > ./config/opensearch_dashboards.yml
+          server.host: "0.0.0.0"
+          home.disableWelcomeScreen: true
+          EOT
+        working-directory: OpenSearch-Dashboards
+
       - name: Install correct yarn version for OpenSearch Dashboards
         run: |
           npm uninstall -g yarn
