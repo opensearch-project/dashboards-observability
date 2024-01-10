@@ -438,7 +438,7 @@ export class IntegrationReader {
       return versions;
     }
     for (const version of versions.value) {
-      const config = await this.getConfig(version);
+      const config = await this.getRawConfig(version);
       if (!config.ok || !config.value.statics) {
         continue;
       }

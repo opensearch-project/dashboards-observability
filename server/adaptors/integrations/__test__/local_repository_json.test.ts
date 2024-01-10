@@ -48,8 +48,33 @@ describe('The Local Serialized Catalog', () => {
 
     for (const integ of await repository.getIntegrationList()) {
       const validationResult = await integ.deepCheck();
-      console.log(integ.name, validationResult);
       await expect(validationResult).toHaveProperty('ok', true);
     }
+  });
+
+  it('Should correctly retrieve a logo', async () => {
+    const serialized = await fetchSerializedIntegrations();
+    const repository = new TemplateManager(
+      '.',
+      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[])
+    );
+    const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
+    const logoStatic = await integration.getStatic('logo.svg');
+
+    expect(logoStatic).toHaveProperty('ok', true);
+    expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
+  });
+
+  it('Should correctly retrieve a gallery image', async () => {
+    const serialized = await fetchSerializedIntegrations();
+    const repository = new TemplateManager(
+      '.',
+      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[])
+    );
+    const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
+    const logoStatic = await integration.getStatic('dashboard1.png');
+
+    expect(logoStatic).toHaveProperty('ok', true);
+    expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
   });
 });
