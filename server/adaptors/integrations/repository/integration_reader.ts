@@ -171,12 +171,9 @@ export class IntegrationReader {
     }
 
     try {
-      const schemas = await this.getSchemas();
-      if (!schemas.ok || Object.keys(schemas.value.mappings).length === 0) {
-        return { ok: false, error: new Error('The integration has no schemas available') };
-      }
+      // Some other checks are included in getConfig validation.
       const assets = await this.getAssets();
-      if (!assets.ok || Object.keys(assets).length === 0) {
+      if (!assets.ok || Object.keys(assets.value).length === 0) {
         return { ok: false, error: new Error('An integration must have at least one asset') };
       }
     } catch (err) {

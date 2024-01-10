@@ -78,3 +78,43 @@ describe('The Local Serialized Catalog', () => {
     expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
   });
 });
+
+describe('Integration validation', () => {
+  it('Should correctly fail an integration without schemas', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const transformedSerialized = (serialized.value as SerializedIntegration[])
+      .filter((integ: { name: string; components: unknown[] }) => integ.name === TEST_INTEGRATION)
+      .map((integ) => {
+        return {
+          ...integ,
+          components: [] as SerializedIntegrationComponent[],
+        };
+      });
+    const integration = new IntegrationReader(
+      TEST_INTEGRATION,
+      new JsonCatalogDataAdaptor(transformedSerialized)
+    );
+
+    await expect(integration.deepCheck()).resolves.toHaveProperty('ok', false);
+  });
+
+  it('Should correctly fail an integration without assets', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const transformedSerialized = (serialized.value as SerializedIntegration[])
+      .filter((integ: { name: string; components: unknown[] }) => integ.name === TEST_INTEGRATION)
+      .map((integ) => {
+        return {
+          ...integ,
+          assets: {} as SerializedIntegrationAssets,
+        };
+      });
+    const integration = new IntegrationReader(
+      TEST_INTEGRATION,
+      new JsonCatalogDataAdaptor(transformedSerialized)
+    );
+
+    await expect(integration.deepCheck()).resolves.toHaveProperty('ok', false);
+  });
+});
