@@ -43,10 +43,12 @@ export const Sidebar = ({
 
   useEffect(() => {
     if (additionalMetric) {
-      dispatch(clearSelectedMetrics());
-      dispatch(addSelectedMetric(additionalMetric));
+      (async function () {
+        await dispatch(clearSelectedMetrics());
+        await dispatch(addSelectedMetric(additionalMetric));
+      })();
     }
-  }, [additionalMetric]);
+  }, [additionalMetric?.id]);
 
   const selectedMetricsList = useMemo(() => {
     return selectedMetricsIds.map((id) => selectedMetrics[id]).filter((m) => m); // filter away null entries

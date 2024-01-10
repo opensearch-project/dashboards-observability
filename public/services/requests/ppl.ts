@@ -9,6 +9,7 @@ import { PPL_BASE, PPL_SEARCH } from '../../../common/constants/shared';
 /* eslint-disable import/no-default-export */
 export default class PPLService {
   private http;
+
   constructor(http: CoreStart['http']) {
     this.http = http;
   }
@@ -20,7 +21,6 @@ export default class PPLService {
     },
     errorHandler?: (error: any) => void
   ) => {
-    console.log('real fetch');
     return this.http
       .post(`${PPL_BASE}${PPL_SEARCH}`, {
         body: JSON.stringify(params),
