@@ -62,7 +62,7 @@ jobs:
 
       - name: Lint Changed Files
         run: |
-          jq -r '.[]' ${HOME}/files_modified.json > /tmp/changed_files.txt
+          jq -r '.[]' ${HOME}/files_modified.json ${HOME}/files_added.json | sort | uniq > /tmp/changed_files.txt
           CHANGED_FILES=$(cat /tmp/changed_files.txt)
           echo "These are the changed files: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
@@ -76,4 +76,4 @@ jobs:
           else
             echo "No matched files to lint."
           fi
-        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}      
