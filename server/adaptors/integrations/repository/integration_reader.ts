@@ -137,7 +137,8 @@ export class IntegrationReader {
         return {
           ok: false,
           error: new Error(
-            'The config for the provided reader is localized, but no data field is present.'
+            'The config for the provided reader is localized, but no data field is present. ' +
+              JSON.stringify(item)
           ),
         };
       }
@@ -544,7 +545,7 @@ export class IntegrationReader {
    * @returns A large object which includes all of the integration's data.
    */
   async serialize(version?: string): Promise<Result<SerializedIntegration>> {
-    const configResult = await this.getConfig(version);
+    const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
     }
@@ -555,7 +556,11 @@ export class IntegrationReader {
 
     const componentResults = await Promise.all(
       config.components.map((component) =>
-        this.reader.readFile(`${component.name}-${component.version}.mapping.json`, 'schemas')
+        this.fetchDataOrReadFile(
+          component,
+          { filename: `${component.name}-${component.version}.mapping.json`, type: 'schemas' },
+          'json'
+        )
       )
     );
     const componentsResult = foldResults(componentResults);
@@ -571,9 +576,13 @@ export class IntegrationReader {
 
     if (config.assets.savedObjects) {
       const soMetadata = config.assets.savedObjects;
-      const soResult = await this.reader.readFile(
-        `${soMetadata.name}-${soMetadata.version}.ndjson`,
-        'assets'
+      const soResult = await this.fetchDataOrReadFile(
+        config.assets.savedObjects,
+        {
+          filename: `${soMetadata.name}-${soMetadata.version}.ndjson`,
+          type: 'assets',
+        },
+        'json'
       );
       if (!soResult.ok) {
         return soResult;
@@ -584,7 +593,11 @@ export class IntegrationReader {
     if (config.assets.queries) {
       const queryResults = await Promise.all(
         config.assets.queries.map((query) =>
-          this.reader.readFileRaw(`${query.name}-${query.version}.${query.language}`, 'assets')
+          this.fetchDataOrReadFile(
+            query,
+            { filename: `${query.name}-${query.version}.${query.language}`, type: 'assets' },
+            'binary'
+          )
         )
       );
       const queriesResult = foldResults(queryResults);

@@ -77,6 +77,62 @@ describe('The Local Serialized Catalog', () => {
     expect(logoStatic).toHaveProperty('ok', true);
     expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
   });
+
+  it('Should correctly retrieve a dark mode logo', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const config = (serialized.value as SerializedIntegration[]).filter(
+      (integ: { name: string; components: unknown[] }) => integ.name === TEST_INTEGRATION
+    )[0];
+
+    if (!config.statics) {
+      throw new Error('NginX integration missing statics (invalid test)');
+    }
+    config.statics.darkModeGallery = config.statics.gallery;
+    config.statics.darkModeLogo = {
+      ...(config.statics.logo as SerializedStaticAsset),
+      path: 'dark_logo.svg',
+    };
+
+    const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
+
+    await expect(reader.getStatic('dark_logo.svg')).resolves.toHaveProperty('ok', true);
+  });
+
+  it('Should correctly re-serialize', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const config = (serialized.value as SerializedIntegration[]).filter(
+      (integ: { name: string }) => integ.name === TEST_INTEGRATION
+    )[0];
+
+    const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
+    const reserialized = await reader.serialize();
+
+    expect(reserialized.value).toEqual(config);
+  });
+
+  it('Should correctly re-serialize with dark mode values', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const config = (serialized.value as SerializedIntegration[]).filter(
+      (integ: { name: string }) => integ.name === TEST_INTEGRATION
+    )[0];
+
+    if (!config.statics) {
+      throw new Error('NginX integration missing statics (invalid test)');
+    }
+    config.statics.darkModeGallery = config.statics.gallery;
+    config.statics.darkModeLogo = {
+      ...(config.statics.logo as SerializedStaticAsset),
+      path: 'dark_logo.svg',
+    };
+
+    const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
+    const reserialized = await reader.serialize();
+
+    expect(reserialized.value).toEqual(config);
+  });
 });
 
 describe('Integration validation', () => {
@@ -116,5 +172,35 @@ describe('Integration validation', () => {
     );
 
     await expect(integration.deepCheck()).resolves.toHaveProperty('ok', false);
+  });
+});
+
+describe('JSON Catalog with invalid data', () => {
+  it('Should report an error if images are missing data', async () => {
+    const TEST_INTEGRATION = 'nginx';
+    const serialized = await fetchSerializedIntegrations();
+    const baseConfig = (serialized.value as SerializedIntegration[]).filter(
+      (integ: { name: string; components: unknown[] }) => integ.name === TEST_INTEGRATION
+    )[0];
+
+    if (!baseConfig.statics) {
+      throw new Error('NginX integration missing statics (invalid test)');
+    }
+
+    baseConfig.statics = {
+      logo: { path: 'logo.svg' } as SerializedStaticAsset,
+      darkModeLogo: { path: 'dm_logo.svg' } as SerializedStaticAsset,
+      gallery: [{ path: '1.png' }] as SerializedStaticAsset[],
+      darkModeGallery: [{ path: 'dm_1.png' }] as SerializedStaticAsset[],
+    };
+    const reader = new IntegrationReader(
+      TEST_INTEGRATION,
+      new JsonCatalogDataAdaptor([baseConfig])
+    );
+
+    await expect(reader.getStatic('logo.svg')).resolves.toHaveProperty('ok', false);
+    await expect(reader.getStatic('dm_logo.svg')).resolves.toHaveProperty('ok', false);
+    await expect(reader.getStatic('1.png')).resolves.toHaveProperty('ok', false);
+    await expect(reader.getStatic('dm_1.png')).resolves.toHaveProperty('ok', false);
   });
 });
