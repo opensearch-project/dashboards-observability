@@ -13,6 +13,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -60,11 +61,12 @@ import {
 } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
-import { LiveTailButton } from '../live_tail/live_tail_button';
+import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
 import './search.scss';
 import { QueryAssistSummarization } from './query_assist_summarization';
+import { Autocomplete } from './autocomplete';
 
 export interface IQueryBarProps {
   query: string;
@@ -143,6 +145,8 @@ export const Search = (props: any) => {
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
+
+  const showQueryArea = !appLogEvents && coreRefs.queryAssistEnabled;
 
   const {
     data: pollingResult,
@@ -324,7 +328,7 @@ export const Search = (props: any) => {
             {appLogEvents && (
               <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
                 <EuiToolTip position="top" content={baseQuery}>
-                  <EuiBadge className="base-query-popover" color="hollow">
+                  <EuiBadge className="base-query-popover" color="hollow" style={{ marginTop: 0 }}>
                     Base Query
                   </EuiBadge>
                 </EuiToolTip>
@@ -354,7 +358,7 @@ export const Search = (props: any) => {
                     // onClickAriaLabel={'pplLinkShowFlyout'}
                   />
                 </EuiFlexItem>
-                {coreRefs.queryAssistEnabled ? (
+                {coreRefs.queryAssistEnabled && (
                   <EuiFlexItem>
                     <EuiComboBox
                       placeholder="Select an index"
@@ -379,10 +383,41 @@ export const Search = (props: any) => {
                       }}
                     />
                   </EuiFlexItem>
-                ) : (
-                  <EuiFlexItem />
                 )}
               </>
+            )}
+            {!showQueryArea && (
+              <EuiFlexItem
+                key="search-bar"
+                className="search-area"
+                grow={5}
+                style={{ minWidth: 400 }}
+              >
+                <Autocomplete
+                  key={'autocomplete-search-bar'}
+                  query={query}
+                  tempQuery={tempQuery}
+                  baseQuery={baseQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={() => {
+                    onQuerySearch(queryLang);
+                  }}
+                  dslService={dslService}
+                  getSuggestions={getSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
+                />
+                <EuiBadge
+                  className={`ppl-link ${
+                    uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+                  }`}
+                  color="hollow"
+                  onClick={() => showFlyout()}
+                  onClickAriaLabel={'pplLinkShowFlyout'}
+                >
+                  PPL
+                </EuiBadge>
+              </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
             <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
@@ -398,7 +433,7 @@ export const Search = (props: any) => {
                   handleTimePickerChange={(tRange: string[]) => {
                     // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
                     setNeedsUpdate(
-                      (!coreRefs.queryAssistEnabled || isAppAnalytics) && // keeps statement false if not using query assistant ui
+                      !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
                         !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
                     );
                     // keeps the time range change local, to be used when update pressed
@@ -418,13 +453,30 @@ export const Search = (props: any) => {
                 <EuiButton
                   color={needsUpdate ? 'success' : 'primary'}
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
-                  fill={fillRun}
+                  fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
                   onClick={runChanges}
                 >
                   {needsUpdate ? 'Update' : 'Run'}
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
+            {!showQueryArea && showSaveButton && !showSavePanelOptionsList && (
+              <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
+                <EuiPopover
+                  panelPaddingSize="none"
+                  button={liveButton}
+                  isOpen={isLiveTailPopoverOpen}
+                  closePopover={closeLiveTailPopover}
+                >
+                  <EuiContextMenuPanel items={popoverItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+            {!showQueryArea && isLiveTailOn && (
+              <EuiFlexItem grow={false}>
+                <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
+              </EuiFlexItem>
+            )}
             {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
               <>
                 <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
@@ -482,7 +534,7 @@ export const Search = (props: any) => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!appLogEvents && (
+        {showQueryArea && (
           <>
             <EuiFlexItem>
               <QueryArea
