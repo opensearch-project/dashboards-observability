@@ -231,10 +231,7 @@ describe('Integration', () => {
 
       const result = await integration.getSampleData();
 
-      expect(result.ok).toBe(true);
-      expect((result as { value: { sampleData: unknown } }).value.sampleData).toStrictEqual([
-        { sample: true },
-      ]);
+      expect(result.value).toStrictEqual({ sampleData: [{ sample: true }] });
       expect(readFileMock).toBeCalledWith(path.join('sample', 'data', 'sample.json'), {
         encoding: 'utf-8',
       });

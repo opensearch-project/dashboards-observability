@@ -6,8 +6,7 @@
 import path from 'path';
 import { validateTemplate } from '../validators';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
-import { CatalogDataAdaptor } from './catalog_data_adaptor';
-import { tryParseNDJson } from './parse_ndjson';
+import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 
 /**
  * Helper method: Convert an Array<Result<type>> to Result<Array<type>>.
@@ -108,6 +107,59 @@ export class IntegrationReader {
   }
 
   /**
+   * Retrieve data from correct source regardless of if reader is config-localized or not.
+   *
+   * TODO refactor to assemble filename from `type` instead of requiring caller to format it.
+   *
+   * @param item An item which may have data in it.
+   * @param fileParams Information about the file to read if the config is not localized.
+   * @param format How to package the returned data.
+   *               If 'json', return `object | object[]`. If 'binary', return `Buffer`.
+   * @returns A result with the data, with a format based on the format field.
+   */
+  private async fetchDataOrReadFile(
+    item: { data?: string },
+    fileParams: { filename: string; type?: IntegrationPart },
+    format: 'json'
+  ): Promise<Result<object | object[]>>;
+  private async fetchDataOrReadFile(
+    item: { data?: string },
+    fileParams: { filename: string; type?: IntegrationPart },
+    format: 'binary'
+  ): Promise<Result<Buffer>>;
+  private async fetchDataOrReadFile(
+    item: { data?: string },
+    fileParams: { filename: string; type?: IntegrationPart },
+    format: 'json' | 'binary'
+  ): Promise<Result<object | object[] | Buffer>> {
+    if (this.reader.isConfigLocalized) {
+      if (!item.data) {
+        return {
+          ok: false,
+          error: new Error(
+            'The config for the provided reader is localized, but no data field is present.'
+          ),
+        };
+      }
+      try {
+        if (format === 'json') {
+          return { ok: true, value: JSON.parse(item.data) };
+        } else {
+          return { ok: true, value: Buffer.from(item.data, 'base64') };
+        }
+      } catch (error) {
+        return { ok: false, error };
+      }
+    }
+
+    if (format === 'json') {
+      return this.reader.readFile(fileParams.filename, fileParams.type);
+    } else {
+      return this.reader.readFileRaw(fileParams.filename, fileParams.type);
+    }
+  }
+
+  /**
    * Like getConfig(), but thoroughly checks all nested integration dependencies for validity.
    *
    * @returns a Result indicating whether the integration is valid.
@@ -174,6 +226,7 @@ export class IntegrationReader {
 
     const configFile = `${this.name}-${maybeVersion}.json`;
 
+    // Even config-localized readers must support config-read.
     const config = await this.reader.readFile(configFile);
     if (!config.ok) {
       return config;
@@ -200,17 +253,11 @@ export class IntegrationReader {
   ): Promise<Result<Array<{ language: string; query: string }>>> {
     const queries = await Promise.all(
       queriesList.map(async (item) => {
-        if (item.data) {
-          return {
-            ok: true as const,
-            value: {
-              language: item.language,
-              query: item.data,
-            },
-          };
-        }
-        const queryPath = `${item.name}-${item.version}.${item.language}`;
-        const query = await this.reader.readFileRaw(queryPath, 'assets');
+        const query = await this.fetchDataOrReadFile(
+          item,
+          { filename: `${item.name}-${item.version}.${item.language}`, type: 'assets' },
+          'binary'
+        );
         if (!query.ok) {
           return query;
         }
@@ -257,17 +304,18 @@ export class IntegrationReader {
       queries?: Array<{ query: string; language: string }>;
     } = {};
     if (config.assets.savedObjects) {
-      if (this.reader.isConfigLocalized) {
-        const parsedSo = tryParseNDJson((config.assets.savedObjects as { data: string }).data);
-        resultValue.savedObjects = Array.isArray(parsedSo) ? parsedSo : undefined;
-      } else {
-        const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
-        const assets = await this.reader.readFile(sobjPath, 'assets');
-        if (!assets.ok) {
-          return assets;
-        }
-        resultValue.savedObjects = assets.value as object[];
+      const assets = await this.fetchDataOrReadFile(
+        config.assets.savedObjects as { data?: string },
+        {
+          filename: `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`,
+          type: 'assets',
+        },
+        'json'
+      );
+      if (!assets.ok) {
+        return assets;
       }
+      resultValue.savedObjects = assets.value as object[];
     }
     if (config.assets.queries) {
       const queries = await this.getQueries(config.assets.queries);
@@ -302,22 +350,11 @@ export class IntegrationReader {
 
     const resultValue: { sampleData: object[] | null } = { sampleData: null };
     if (config.sampleData) {
-      let jsonContent: Result<object | object[]>;
-
-      if (this.reader.isConfigLocalized) {
-        const parsedData = tryParseNDJson(
-          (config.sampleData as { path: string; data: string }).data
-        );
-        if (parsedData === null) {
-          return {
-            ok: false,
-            error: new Error('Unable to parse included data in localized config'),
-          };
-        }
-        jsonContent = { ok: true, value: parsedData };
-      } else {
-        jsonContent = await this.reader.readFile(config.sampleData.path, 'data');
-      }
+      const jsonContent: Result<object | object[]> = await this.fetchDataOrReadFile(
+        config.sampleData as { data?: string },
+        { filename: config.sampleData.path, type: 'data' },
+        'json'
+      );
       if (!jsonContent.ok) {
         return jsonContent;
       }

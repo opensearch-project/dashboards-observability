@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+type Result<T, E = Error> =
+  | { ok: true; value: T; error?: unknown }
+  | { ok: false; error: E; value?: unknown };
 
 interface IntegrationConfig {
   name: string;
