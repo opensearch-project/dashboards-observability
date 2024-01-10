@@ -396,8 +396,11 @@ export const Search = (props: any) => {
                   liveStreamChecked={props.liveStreamChecked}
                   onLiveStreamChange={props.onLiveStreamChange}
                   handleTimePickerChange={(tRange: string[]) => {
-                    // modifies run button to look like the update button, if there is a time change
-                    setNeedsUpdate(!(tRange[0] === startTime && tRange[1] === endTime));
+                    // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
+                    setNeedsUpdate(
+                      (!coreRefs.queryAssistEnabled || isAppAnalytics) && // keeps statement false if not using query assistant ui
+                        !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
+                    );
                     // keeps the time range change local, to be used when update pressed
                     setTimeRange(tRange);
                     setStartTime(tRange[0]);
