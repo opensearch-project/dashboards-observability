@@ -55,18 +55,14 @@ jobs:
 
       - name: Check Changes of Files
         run: |
-          echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)" >> $GITHUB_ENV
-          echo "Modified files are: ${{ env.FILES_MODIFIED }}"
-          echo "FILES_ADDED=$(cat ${HOME}/files_added.json)" >> $GITHUB_ENV
-          echo "Added files are: ${{ env.FILES_ADDED }}"
-          echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)" >> $GITHUB_ENV
-          echo "Renamed files are: ${{ env.FILES_RENAMED }}"
-          echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)" >> $GITHUB_ENV
-          echo "Deleted files are: ${{ env.FILES_DELETED }}"
+          echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)"
+          echo "FILES_ADDED=$(cat ${HOME}/files_added.json)"
+          echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)"
+          echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)"
 
       - name: Lint Changed Files
         run: |
-          CHANGED_FILES="${{ env.FILES_MODIFIED }}"
+          CHANGED_FILES=$(cat ${HOME}/files_modified.json)
           echo "These are the files to be lint: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
