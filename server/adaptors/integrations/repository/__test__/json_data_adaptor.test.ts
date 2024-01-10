@@ -83,4 +83,27 @@ describe('JSON Data Adaptor', () => {
 
     expect(integs).toEqual(['sample1', 'sample2']);
   });
+
+  it('Should reject any attempts to read a file with a type', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    await expect(adaptor.readFile('logs-1.0.0.json', 'schemas')).resolves.toHaveProperty(
+      'ok',
+      false
+    );
+  });
+
+  it('Should reject any attempts to read a raw file', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    await expect(adaptor.readFileRaw('logo.svg', 'static')).resolves.toHaveProperty('ok', false);
+  });
+
+  it('Should reject nested directory searching', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    await expect(adaptor.findIntegrations('sample1')).resolves.toHaveProperty('ok', false);
+  });
+
+  it('Should report unknown directory type if integration list is empty', async () => {
+    const adaptor = new JsonCatalogDataAdaptor([]);
+    await expect(adaptor.getDirectoryType()).resolves.toBe('unknown');
+  });
 });
