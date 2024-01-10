@@ -91,8 +91,8 @@ describe('Integration', () => {
       const readFileMock = jest.spyOn(fs, 'readFile').mockImplementation((..._args) => {
         // Can't find any information on how to mock an actual file not found error,
         // But at least according to the current implementation this should be equivalent.
-        const error: any = new Error('ENOENT: File not found');
-        error.code = 'ENOENT';
+        const error: Error = new Error('ENOENT: File not found');
+        (error as { code?: string }).code = 'ENOENT';
         return Promise.reject(error);
       });
 
@@ -105,15 +105,15 @@ describe('Integration', () => {
 
   describe('getAssets', () => {
     it('should return linked saved object assets when available', async () => {
-      integration.getConfig = jest
-        .fn()
-        .mockResolvedValue({ ok: true, value: TEST_INTEGRATION_CONFIG });
-      jest.spyOn(fs, 'readFile').mockResolvedValue('{"name":"asset1"}\n{"name":"asset2"}');
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(JSON.stringify(TEST_INTEGRATION_CONFIG))
+        .mockResolvedValue('{"name":"asset1"}\n{"name":"asset2"}');
 
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(true);
-      expect((result as any).value.savedObjects).toStrictEqual([
+      expect((result as { value: { savedObjects: unknown } }).value.savedObjects).toStrictEqual([
         { name: 'asset1' },
         { name: 'asset2' },
       ]);
@@ -122,7 +122,7 @@ describe('Integration', () => {
     it('should return an error if the provided version has no config', async () => {
       integration.getConfig = jest.fn().mockResolvedValue({ ok: false, error: new Error() });
 
-      expect(integration.getAssets()).resolves.toHaveProperty('ok', false);
+      await expect(integration.getAssets()).resolves.toHaveProperty('ok', false);
     });
 
     it('should return an error if the saved object assets are invalid', async () => {
@@ -158,7 +158,7 @@ describe('Integration', () => {
       const result = await integration.getSchemas();
 
       expect(result.ok).toBe(true);
-      expect((result as any).value).toStrictEqual({
+      expect((result as { value: unknown }).value).toStrictEqual({
         mappings: {
           component1: { mapping: 'mapping1' },
           component2: { mapping: 'mapping2' },
@@ -201,17 +201,17 @@ describe('Integration', () => {
       const result = await integration.getStatic('logo.png');
 
       expect(result.ok).toBe(true);
-      expect((result as any).value).toStrictEqual(Buffer.from('logo data', 'ascii'));
+      expect((result as { value: unknown }).value).toStrictEqual(Buffer.from('logo data', 'ascii'));
       expect(readFileMock).toBeCalledWith(path.join('sample', 'static', 'logo.png'));
     });
 
     it('should return an error if the static file is not found', async () => {
       jest.spyOn(fs, 'readFile').mockImplementation((..._args) => {
-        const error: any = new Error('ENOENT: File not found');
-        error.code = 'ENOENT';
+        const error: Error = new Error('ENOENT: File not found');
+        (error as { code?: string }).code = 'ENOENT';
         return Promise.reject(error);
       });
-      expect(integration.getStatic('/logo.png')).resolves.toHaveProperty('ok', false);
+      await expect(integration.getStatic('/logo.png')).resolves.toHaveProperty('ok', false);
     });
   });
 
@@ -224,7 +224,9 @@ describe('Integration', () => {
       const result = await integration.getSampleData();
 
       expect(result.ok).toBe(true);
-      expect((result as any).value.sampleData).toStrictEqual([{ sample: true }]);
+      expect((result as { value: { sampleData: unknown } }).value.sampleData).toStrictEqual([
+        { sample: true },
+      ]);
       expect(readFileMock).toBeCalledWith(path.join('sample', 'data', 'sample.json'), {
         encoding: 'utf-8',
       });
@@ -236,7 +238,7 @@ describe('Integration', () => {
       const result = await integration.getSampleData();
 
       expect(result.ok).toBe(true);
-      expect((result as any).value.sampleData).toBeNull();
+      expect((result as { value: { sampleData: unknown } }).value.sampleData).toBeNull();
     });
 
     it('should catch and fail gracefully on invalid sample data', async () => {

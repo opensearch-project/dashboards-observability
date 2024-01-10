@@ -7,6 +7,7 @@ import path from 'path';
 import { validateTemplate } from '../validators';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor } from './catalog_data_adaptor';
+import { tryParseNDJson } from './parse_ndjson';
 
 /**
  * Helper method: Convert an Array<Result<type>> to Result<Array<type>>.
@@ -194,6 +195,37 @@ export class IntegrationReader {
     return validateTemplate(pruneConfig(maybeConfig.value));
   }
 
+  private async getQueries(
+    queriesList: Array<{ name: string; version: string; language: string; data?: string }>
+  ): Promise<Result<Array<{ language: string; query: string }>>> {
+    const queries = await Promise.all(
+      queriesList.map(async (item) => {
+        if (item.data) {
+          return {
+            ok: true as const,
+            value: {
+              language: item.language,
+              query: item.data,
+            },
+          };
+        }
+        const queryPath = `${item.name}-${item.version}.${item.language}`;
+        const query = await this.reader.readFileRaw(queryPath, 'assets');
+        if (!query.ok) {
+          return query;
+        }
+        return {
+          ok: true as const,
+          value: {
+            language: item.language,
+            query: query.value.toString('utf8'),
+          },
+        };
+      })
+    );
+    return foldResults(queries);
+  }
+
   /**
    * Retrieve assets associated with the integration.
    * This method greedily retrieves all assets.
@@ -214,7 +246,7 @@ export class IntegrationReader {
       }>;
     }>
   > {
-    const configResult = await this.getConfig(version);
+    const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
     }
@@ -225,37 +257,24 @@ export class IntegrationReader {
       queries?: Array<{ query: string; language: string }>;
     } = {};
     if (config.assets.savedObjects) {
-      const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
-      const assets = await this.reader.readFile(sobjPath, 'assets');
-      if (!assets.ok) {
-        return assets;
+      if (this.reader.isConfigLocalized) {
+        const parsedSo = tryParseNDJson((config.assets.savedObjects as { data: string }).data);
+        resultValue.savedObjects = Array.isArray(parsedSo) ? parsedSo : undefined;
+      } else {
+        const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
+        const assets = await this.reader.readFile(sobjPath, 'assets');
+        if (!assets.ok) {
+          return assets;
+        }
+        resultValue.savedObjects = assets.value as object[];
       }
-      resultValue.savedObjects = assets.value as object[];
     }
     if (config.assets.queries) {
-      resultValue.queries = [];
-      const queries = await Promise.all(
-        config.assets.queries.map(async (item) => {
-          const queryPath = `${item.name}-${item.version}.${item.language}`;
-          const query = await this.reader.readFileRaw(queryPath, 'assets');
-          if (!query.ok) {
-            return query;
-          }
-          return {
-            ok: true as const,
-            value: {
-              language: item.language,
-              query: query.value.toString('utf8'),
-            },
-          };
-        })
-      );
-      for (const query of queries) {
-        if (!query.ok) {
-          return query;
-        }
-        resultValue.queries.push(query.value);
+      const queries = await this.getQueries(config.assets.queries);
+      if (!queries.ok) {
+        return queries;
       }
+      resultValue.queries = queries.value;
     }
     return { ok: true, value: resultValue };
   }
