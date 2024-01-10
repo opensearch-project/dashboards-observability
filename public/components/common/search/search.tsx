@@ -13,6 +13,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -43,7 +44,6 @@ import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
-import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import {
   useCatIndices,
   useGetIndexPatterns,
@@ -61,10 +61,12 @@ import {
 } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
-import { LiveTailButton } from '../live_tail/live_tail_button';
+import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
 import './search.scss';
+import { QueryAssistSummarization } from './query_assist_summarization';
+import { Autocomplete } from './autocomplete';
 
 export interface IQueryBarProps {
   query: string;
@@ -143,6 +145,8 @@ export const Search = (props: any) => {
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
+
+  const showQueryArea = !appLogEvents && coreRefs.queryAssistEnabled;
 
   const {
     data: pollingResult,
@@ -324,7 +328,7 @@ export const Search = (props: any) => {
             {appLogEvents && (
               <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
                 <EuiToolTip position="top" content={baseQuery}>
-                  <EuiBadge className="base-query-popover" color="hollow">
+                  <EuiBadge className="base-query-popover" color="hollow" style={{ marginTop: 0 }}>
                     Base Query
                   </EuiBadge>
                 </EuiToolTip>
@@ -354,7 +358,7 @@ export const Search = (props: any) => {
                     // onClickAriaLabel={'pplLinkShowFlyout'}
                   />
                 </EuiFlexItem>
-                {coreRefs.queryAssistEnabled ? (
+                {coreRefs.queryAssistEnabled && (
                   <EuiFlexItem>
                     <EuiComboBox
                       placeholder="Select an index"
@@ -379,10 +383,41 @@ export const Search = (props: any) => {
                       }}
                     />
                   </EuiFlexItem>
-                ) : (
-                  <EuiFlexItem />
                 )}
               </>
+            )}
+            {!showQueryArea && (
+              <EuiFlexItem
+                key="search-bar"
+                className="search-area"
+                grow={5}
+                style={{ minWidth: 400 }}
+              >
+                <Autocomplete
+                  key={'autocomplete-search-bar'}
+                  query={query}
+                  tempQuery={tempQuery}
+                  baseQuery={baseQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={() => {
+                    onQuerySearch(queryLang);
+                  }}
+                  dslService={dslService}
+                  getSuggestions={getSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
+                />
+                <EuiBadge
+                  className={`ppl-link ${
+                    uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+                  }`}
+                  color="hollow"
+                  onClick={() => showFlyout()}
+                  onClickAriaLabel={'pplLinkShowFlyout'}
+                >
+                  PPL
+                </EuiBadge>
+              </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
             <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
@@ -396,8 +431,11 @@ export const Search = (props: any) => {
                   liveStreamChecked={props.liveStreamChecked}
                   onLiveStreamChange={props.onLiveStreamChange}
                   handleTimePickerChange={(tRange: string[]) => {
-                    // modifies run button to look like the update button, if there is a time change
-                    setNeedsUpdate(!(tRange[0] === startTime && tRange[1] === endTime));
+                    // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
+                    setNeedsUpdate(
+                      !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
+                        !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
+                    );
                     // keeps the time range change local, to be used when update pressed
                     setTimeRange(tRange);
                     setStartTime(tRange[0]);
@@ -415,13 +453,30 @@ export const Search = (props: any) => {
                 <EuiButton
                   color={needsUpdate ? 'success' : 'primary'}
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
-                  fill={fillRun}
+                  fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
                   onClick={runChanges}
                 >
                   {needsUpdate ? 'Update' : 'Run'}
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
+            {!showQueryArea && showSaveButton && !showSavePanelOptionsList && (
+              <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
+                <EuiPopover
+                  panelPaddingSize="none"
+                  button={liveButton}
+                  isOpen={isLiveTailPopoverOpen}
+                  closePopover={closeLiveTailPopover}
+                >
+                  <EuiContextMenuPanel items={popoverItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+            {!showQueryArea && isLiveTailOn && (
+              <EuiFlexItem grow={false}>
+                <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
+              </EuiFlexItem>
+            )}
             {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
               <>
                 <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
@@ -479,7 +534,7 @@ export const Search = (props: any) => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!appLogEvents && (
+        {showQueryArea && (
           <>
             <EuiFlexItem>
               <QueryArea
@@ -499,93 +554,11 @@ export const Search = (props: any) => {
             {(queryAssistantSummarization?.summary?.length > 0 ||
               queryAssistantSummarization?.summaryLoading) && (
               <EuiFlexItem grow={false}>
-                <EuiPanel>
-                  <EuiAccordion
-                    id="summarization-accordion"
-                    buttonContent="AI Insights"
-                    initialIsOpen
-                    isLoading={queryAssistantSummarization?.summaryLoading ?? false}
-                    isLoadingMessage="Loading summary.."
-                    extraAction={
-                      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                        <EuiFlexItem grow={false}>
-                          <EuiText color="subdued">
-                            <small>Generated by Opensearch Assistant</small>
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type={chatLogo} size="l" />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  >
-                    {queryAssistantSummarization?.summary?.length > 0 && (
-                      <>
-                        <EuiSpacer size="m" />
-                        {queryAssistantSummarization?.isPPLError ? (
-                          <>
-                            <EuiCallOut title="There was an error" color="danger" iconType="alert">
-                              <EuiMarkdownFormat>
-                                {queryAssistantSummarization.summary}
-                              </EuiMarkdownFormat>
-                            </EuiCallOut>
-                            <EuiSpacer size="s" />
-                            <EuiFlexGroup wrap gutterSize="s">
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="s">Suggestions:</EuiText>
-                              </EuiFlexItem>
-                              {queryAssistantSummarization.suggestedQuestions.map((question) => (
-                                <EuiFlexItem grow={false}>
-                                  <EuiBadge
-                                    color="hollow"
-                                    iconType="chatRight"
-                                    iconSide="left"
-                                    onClick={() => setNlqInput(question)}
-                                    onClickAriaLabel="Set input to the suggested question"
-                                  >
-                                    {question}
-                                  </EuiBadge>
-                                </EuiFlexItem>
-                              ))}
-                              <EuiFlexItem grow={false}>
-                                <EuiBadge
-                                  color="hollow"
-                                  iconType="questionInCircle"
-                                  iconSide="left"
-                                  onClick={showFlyout}
-                                  onClickAriaLabel="Show PPL documentation"
-                                >
-                                  PPL Documentation
-                                </EuiBadge>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </>
-                        ) : (
-                          <EuiPanel color="subdued" style={{ marginLeft: 16, marginRight: 16 }}>
-                            <EuiMarkdownFormat>
-                              {queryAssistantSummarization.summary}
-                            </EuiMarkdownFormat>
-                          </EuiPanel>
-                        )}
-                        <EuiSpacer size="m" />
-                        <EuiText color="subdued">
-                          <small>
-                            The OpenSearch Assistant may produce inaccurate information. Verify all
-                            information before using it in any environment or workload. Share
-                            feedback via{' '}
-                            <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
-                              Forum
-                            </EuiLink>{' '}
-                            or{' '}
-                            <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">
-                              Slack
-                            </EuiLink>
-                          </small>
-                        </EuiText>
-                      </>
-                    )}
-                  </EuiAccordion>
-                </EuiPanel>
+                <QueryAssistSummarization
+                  queryAssistantSummarization={queryAssistantSummarization}
+                  setNlqInput={setNlqInput}
+                  showFlyout={showFlyout}
+                />
               </EuiFlexItem>
             )}
           </>

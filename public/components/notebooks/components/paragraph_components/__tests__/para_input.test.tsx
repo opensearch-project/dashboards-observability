@@ -7,7 +7,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { sampleParsedParagraghs1 } from '../../helpers/__tests__/sampleDefaultNotebooks';
+import { sampleParsedParagraghs1 } from '../../../../../../test/notebooks_constants';
 import { ParaInput } from '../para_input';
 
 describe('<para_input /> spec', () => {

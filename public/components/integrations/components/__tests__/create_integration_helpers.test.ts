@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { HttpResponse, HttpSetup } from '../../../../../../../src/core/public';
+import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
 import {
   checkDataSourceName,
-  doTypeValidation,
+  doExistingDataSourceValidation,
   doNestedPropertyValidation,
   doPropertyValidation,
+  doTypeValidation,
   fetchDataSourceMappings,
   fetchIntegrationMappings,
-  doExistingDataSourceValidation,
 } from '../create_integration_helpers';
-import * as create_integration_helpers from '../create_integration_helpers';
-import { HttpSetup } from '../../../../../../../src/core/public';
 
 describe('doTypeValidation', () => {
   it('should return true if required type is not specified', () => {
@@ -261,73 +261,88 @@ describe('fetchIntegrationMappings', () => {
 
 describe('doExistingDataSourceValidation', () => {
   it('Catches and returns checkDataSourceName errors', async () => {
-    const mockHttp = {} as Partial<HttpSetup>;
-    jest
-      .spyOn(create_integration_helpers, 'checkDataSourceName')
-      .mockReturnValue({ ok: false, errors: ['mock'] });
+    coreStartMock.http.post = jest.fn(() =>
+      Promise.resolve(({
+        logs: { mappings: { properties: { test: true } } },
+      } as unknown) as HttpResponse)
+    );
+    coreStartMock.http.get = jest.fn(() =>
+      Promise.resolve(({
+        data: { mappings: { logs: { template: { mappings: { properties: { test: true } } } } } },
+        statusCode: 200,
+      } as unknown) as HttpResponse)
+    );
 
-    const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
+    const result = await doExistingDataSourceValidation('ss4o_metrics-test-test', 'target', 'logs');
 
-    await expect(result).resolves.toHaveProperty('ok', false);
+    expect(result).toHaveProperty('ok', false);
   });
 
   it('Catches data stream fetch errors', async () => {
-    const mockHttp = {} as Partial<HttpSetup>;
-    jest.spyOn(create_integration_helpers, 'checkDataSourceName').mockReturnValue({ ok: true });
-    jest.spyOn(create_integration_helpers, 'fetchDataSourceMappings').mockResolvedValue(null);
-    jest
-      .spyOn(create_integration_helpers, 'fetchIntegrationMappings')
-      .mockResolvedValue({ test: { template: { mappings: {} } } });
+    coreStartMock.http.post = jest.fn(() =>
+      Promise.resolve(({
+        mock: 'resp',
+      } as unknown) as HttpResponse)
+    );
 
-    const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
+    coreStartMock.http.get = jest.fn(() =>
+      Promise.resolve(({
+        data: { mappings: { logs: { template: { mappings: { properties: { test: true } } } } } },
+        statusCode: 200,
+      } as unknown) as HttpResponse)
+    );
 
-    await expect(result).resolves.toHaveProperty('ok', false);
+    const result = await doExistingDataSourceValidation('ss4o_logs-test-test', 'target', 'logs');
+    expect(result).toHaveProperty('ok', false);
   });
 
   it('Catches integration fetch errors', async () => {
-    const mockHttp = {} as Partial<HttpSetup>;
-    jest.spyOn(create_integration_helpers, 'checkDataSourceName').mockReturnValue({ ok: true });
-    jest
-      .spyOn(create_integration_helpers, 'fetchDataSourceMappings')
-      .mockResolvedValue({ test: { properties: {} } });
-    jest.spyOn(create_integration_helpers, 'fetchIntegrationMappings').mockResolvedValue(null);
+    coreStartMock.http.post = jest.fn(() =>
+      Promise.resolve(({
+        logs: { mappings: { properties: { test: true } } },
+      } as unknown) as HttpResponse)
+    );
+    coreStartMock.http.get = jest.fn(() =>
+      Promise.resolve(({
+        mock: 'resp',
+      } as unknown) as HttpResponse)
+    );
 
-    const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
-
-    await expect(result).resolves.toHaveProperty('ok', false);
+    const result = await doExistingDataSourceValidation('ss4o_logs-test-test', 'target', 'logs');
+    expect(result).toHaveProperty('ok', false);
   });
 
   it('Catches type validation issues', async () => {
-    const mockHttp = {} as Partial<HttpSetup>;
-    jest.spyOn(create_integration_helpers, 'checkDataSourceName').mockReturnValue({ ok: true });
-    jest
-      .spyOn(create_integration_helpers, 'fetchDataSourceMappings')
-      .mockResolvedValue({ test: { properties: {} } });
-    jest
-      .spyOn(create_integration_helpers, 'fetchIntegrationMappings')
-      .mockResolvedValue({ test: { template: { mappings: {} } } });
-    jest
-      .spyOn(create_integration_helpers, 'doPropertyValidation')
-      .mockReturnValue({ ok: false, errors: ['mock'] });
+    coreStartMock.http.post = jest.fn(() =>
+      Promise.resolve(({
+        logs: { mappings: { properties: { test: true } } },
+      } as unknown) as HttpResponse)
+    );
+    coreStartMock.http.get = jest.fn(() =>
+      Promise.resolve(({
+        data: { mappings: { template: { mappings: { properties: { test: true } } } } },
+        statusCode: 200,
+      } as unknown) as HttpResponse)
+    );
 
-    const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
-
-    await expect(result).resolves.toHaveProperty('ok', false);
+    const result = await doExistingDataSourceValidation('ss4o_logs-test-test', 'target', 'logs');
+    expect(result).toHaveProperty('ok', false);
   });
 
   it('Returns no errors if everything passes', async () => {
-    const mockHttp = {} as Partial<HttpSetup>;
-    jest.spyOn(create_integration_helpers, 'checkDataSourceName').mockReturnValue({ ok: true });
-    jest
-      .spyOn(create_integration_helpers, 'fetchDataSourceMappings')
-      .mockResolvedValue({ test: { properties: {} } });
-    jest
-      .spyOn(create_integration_helpers, 'fetchIntegrationMappings')
-      .mockResolvedValue({ test: { template: { mappings: {} } } });
-    jest.spyOn(create_integration_helpers, 'doPropertyValidation').mockReturnValue({ ok: true });
+    coreStartMock.http.post = jest.fn(() =>
+      Promise.resolve(({
+        logs: { mappings: { properties: { test: true } } },
+      } as unknown) as HttpResponse)
+    );
+    coreStartMock.http.get = jest.fn(() =>
+      Promise.resolve(({
+        data: { mappings: { logs: { template: { mappings: { properties: { test: true } } } } } },
+        statusCode: 200,
+      } as unknown) as HttpResponse)
+    );
 
-    const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
-
-    await expect(result).resolves.toHaveProperty('ok', true);
+    const result = await doExistingDataSourceValidation('ss4o_logs-test-test', 'target', 'logs');
+    expect(result).toHaveProperty('ok', true);
   });
 });

@@ -4,7 +4,7 @@
  */
 
 import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { QueryAssistInput } from '../../event_analytics/explorer/query_assist/input';
 import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
@@ -29,11 +29,13 @@ export function QueryArea({
   });
 
   // use effect that sets the editor text and populates sidebar field for a particular index upon initialization
+  const memoizedGetAvailableFields = useMemo(() => getAvailableFields, []);
+  const memoizedHandleQueryChange = useMemo(() => handleQueryChange, []);
   useEffect(() => {
     const indexQuery = `source = ${selectedIndex[0].label}`;
-    handleQueryChange(indexQuery);
-    getAvailableFields(indexQuery);
-  }, [selectedIndex[0]]);
+    memoizedHandleQueryChange(indexQuery);
+    memoizedGetAvailableFields(indexQuery);
+  }, [selectedIndex, memoizedGetAvailableFields, memoizedHandleQueryChange]);
 
   return (
     <EuiPanel paddingSize="m">
