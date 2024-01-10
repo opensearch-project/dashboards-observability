@@ -82,7 +82,7 @@ export const DataGridContainer = (
         endTime="now"
         storedSelectedColumns={[]}
         formatGridColumn={formatGridColumn}
-        OUIDataGridProps={{
+        OuiDataGridProps={{
           gridStyle: isFullScreen
             ? {}
             : {

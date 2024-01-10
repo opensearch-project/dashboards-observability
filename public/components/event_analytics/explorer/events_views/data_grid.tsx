@@ -60,7 +60,7 @@ export function DataGrid(props: DataGridProps) {
     startTime,
     endTime,
     formatGridColumn = defaultFormatGrid,
-    OUIDataGridProps,
+    OuiDataGridProps,
   } = props;
   const { fetchEvents } = useFetchEvents({
     pplService,
@@ -265,7 +265,7 @@ export function DataGrid(props: DataGridProps) {
             showStyleSelector: false,
           }}
           rowHeightsOptions={rowHeightsOptions()}
-          {...OUIDataGridProps}
+          {...OuiDataGridProps}
         />
       </div>
     </EuiPanel>
