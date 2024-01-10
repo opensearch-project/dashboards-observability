@@ -14,7 +14,7 @@ import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
  * @param results The list of results to fold.
  * @returns A single result object with values in an array, or an error result.
  */
-const foldResults = <T>(results: Array<Result<T>>) =>
+export const foldResults = <T>(results: Array<Result<T>>) =>
   results.reduce(
     (result, currentValue) => {
       if (!result.ok) {
@@ -395,7 +395,7 @@ export class IntegrationReader {
       mappings: { [key: string]: unknown };
     }>
   > {
-    const configResult = await this.getConfig(version);
+    const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
     }
