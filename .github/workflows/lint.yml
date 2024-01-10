@@ -54,20 +54,19 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Changed Files
-        id: files
         run: |
           files_modified=$(cat ${HOME}/files_modified.json)
           files_added=$(cat ${HOME}/files_added.json)
           files_renamed=$(cat ${HOME}/files_renamed.json)
           files_deleted=$(cat ${HOME}/files_deleted.json)
-          echo "::set-output name=files_modified::$files_modified"
-          echo "::set-output name=files_added::$files_added"
-          echo "::set-output name=files_renamed::$files_renamed"
-          echo "::set-output name=files_deleted::$files_deleted"
+          echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)" >> $GITHUB_ENV
+          echo "FILES_ADDED=$(cat ${HOME}/files_added.json)" >> $GITHUB_ENV
+          echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)" >> $GITHUB_ENV
+          echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)" >> $GITHUB_ENV
 
       - name: Lint Changed Files
         run: |
-          CHANGED_FILES="${{ steps.files.outputs.files_modified }}"
+          CHANGED_FILES="${{ env.FILES_MODIFIED }}"
           echo "These are the files to be lint: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
