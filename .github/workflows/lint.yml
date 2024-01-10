@@ -50,21 +50,24 @@ jobs:
 
       - name: Get list of changed files using GitHub Action
         uses: lots0logs/gh-action-get-changed-files@2.2.2
-        id: files
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Changed Files
-        id: check_changed_files
+        id: files
         run: |
           files_modified=$(cat ${HOME}/files_modified.json)
           files_added=$(cat ${HOME}/files_added.json)
+          files_renamed=$(cat ${HOME}/files_renamed.json)
+          files_deleted=$(cat ${HOME}/files_deleted.json)
           echo "here are the modified files $files_modified"
           echo "here are the added files $files_added"
+          echo "here are the renamed files $files_renamed"
+          echo "here are the renamed files $files_deleted"
 
       - name: Lint Changed Files
         run: |
-          CHANGED_FILES="${{ steps.files.outputs.all }}"
+          CHANGED_FILES="${{ steps.files.outputs.files_modified }}"
           echo "These are the files to be lint: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
