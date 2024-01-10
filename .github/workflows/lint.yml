@@ -63,12 +63,13 @@ jobs:
       - name: Lint Changed Files
         run: |
           CHANGED_FILES=$(cat ${HOME}/files_modified.json)
-          echo "These are the files to be lint: $CHANGED_FILES"
+          echo "These are the changed files: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
             IFS=' ' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
             for file in "${FILES_TO_LINT[@]}"; do
               if [[ $file == *.js || $file == *.ts || $file == *.tsx ]]; then
+                echo "linting file $file"
                 yarn lint "$file"
               fi
             done
