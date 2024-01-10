@@ -53,16 +53,16 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check Changed Files
+      - name: Check Changes of Files
         run: |
-          files_modified=$(cat ${HOME}/files_modified.json)
-          files_added=$(cat ${HOME}/files_added.json)
-          files_renamed=$(cat ${HOME}/files_renamed.json)
-          files_deleted=$(cat ${HOME}/files_deleted.json)
           echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)" >> $GITHUB_ENV
+          echo "Modified files are: ${{ env.FILES_MODIFIED }}"
           echo "FILES_ADDED=$(cat ${HOME}/files_added.json)" >> $GITHUB_ENV
+          echo "Added files are: ${{ env.FILES_ADDED }}"
           echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)" >> $GITHUB_ENV
+          echo "Renamed files are: ${{ env.FILES_RENAMED }}"
           echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)" >> $GITHUB_ENV
+          echo "Deleted files are: ${{ env.FILES_DELETED }}"
 
       - name: Lint Changed Files
         run: |
