@@ -8,6 +8,10 @@ import React, { useEffect } from 'react';
 import { uiSettingsService } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { IDatePickerProps } from './search';
+import {
+  QUERY_ASSISTANT_FIXED_END_TIME,
+  QUERY_ASSISTANT_FIXED_START_TIME,
+} from 'common/constants/shared';
 
 export function DatePicker(props: IDatePickerProps) {
   const {
@@ -17,8 +21,6 @@ export function DatePicker(props: IDatePickerProps) {
     handleTimeRangePickerRefresh,
     isAppAnalytics,
   } = props;
-  const fixedStartTime = 'now-40y';
-  const fixedEndTime = 'now';
 
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
   const allowTimeChanging = !coreRefs.queryAssistEnabled || isAppAnalytics;
@@ -26,7 +28,7 @@ export function DatePicker(props: IDatePickerProps) {
   // set the time range to be 40 years rather than the standard 15 minutes if using query assistant
   useEffect(() => {
     if (!allowTimeChanging) {
-      handleTimePickerChange([fixedStartTime, fixedEndTime]);
+      handleTimePickerChange([QUERY_ASSISTANT_FIXED_START_TIME, QUERY_ASSISTANT_FIXED_END_TIME]);
     }
   }, []);
 
@@ -42,8 +44,8 @@ export function DatePicker(props: IDatePickerProps) {
       >
         <EuiSuperDatePicker
           data-test-subj="pplSearchDatePicker"
-          start={allowTimeChanging ? startTime : fixedStartTime}
-          end={allowTimeChanging ? endTime : fixedEndTime}
+          start={allowTimeChanging ? startTime : QUERY_ASSISTANT_FIXED_START_TIME}
+          end={allowTimeChanging ? endTime : QUERY_ASSISTANT_FIXED_END_TIME}
           dateFormat={uiSettingsService.get('dateFormat')}
           onTimeChange={handleTimeChange}
           onRefresh={handleTimeRangePickerRefresh}
