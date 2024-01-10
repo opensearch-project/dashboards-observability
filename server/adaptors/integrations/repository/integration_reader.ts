@@ -406,7 +406,11 @@ export class IntegrationReader {
     };
     for (const component of config.components) {
       const schemaFile = `${component.name}-${component.version}.mapping.json`;
-      const schema = await this.reader.readFile(schemaFile, 'schemas');
+      const schema = await this.fetchDataOrReadFile(
+        component as { data?: string },
+        { filename: schemaFile, type: 'schemas' },
+        'json'
+      );
       if (!schema.ok) {
         return schema;
       }
