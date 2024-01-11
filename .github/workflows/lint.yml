@@ -48,25 +48,32 @@ jobs:
         working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
         run: yarn osd bootstrap
 
-      - name: Get list of changed files
-        id: files
+      - name: Get list of changed files using GitHub Action
+        uses: lots0logs/gh-action-get-changed-files@2.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Changes of Files
         run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          git fetch origin $BASE_SHA
-          git diff --name-only $BASE_SHA...$HEAD_SHA > changed_files.txt
-          CHANGED_FILES=$(cat changed_files.txt | grep -E '\.(js|ts|tsx)$' || true)
-          echo "::set-output name=changed::${CHANGED_FILES}"
-        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+          echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)"
+          echo "FILES_ADDED=$(cat ${HOME}/files_added.json)"
+          echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)"
+          echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)"
 
       - name: Lint Changed Files
         run: |
-          CHANGED_FILES="${{ steps.files.outputs.changed }}"
+          jq -r '.[]' ${HOME}/files_modified.json ${HOME}/files_added.json | sort | uniq > /tmp/changed_files.txt
+          CHANGED_FILES=$(cat /tmp/changed_files.txt)
+          echo "These are the changed files: $CHANGED_FILES"
           if [[ -n "$CHANGED_FILES" ]]; then
             echo "Linting changed files..."
-            IFS=$'\n' read -r -a FILES_TO_LINT <<< "$CHANGED_FILES"
-            yarn lint "${FILES_TO_LINT[@]}"
+            while IFS= read -r file; do
+              if [[ $file == *.js || $file == *.ts || $file == *.tsx ]]; then
+                echo "linting file $file"
+                yarn lint "$file"
+              fi
+            done < /tmp/changed_files.txt
           else
             echo "No matched files to lint."
           fi
-        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}      
