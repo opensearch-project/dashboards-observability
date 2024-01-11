@@ -63,7 +63,6 @@ import { useToast } from '../../../common/toast';
  * showFlyout: function to show the flyout
  * removeVisualization: function to remove all the visualizations
  * catalogVisualization: boolean pointing if the container is used for catalog metrics
- * metricType: string to mention the type of metric visualization
  * spanParam: Override the span(timestamp, 1h) in visualization to span(timestamp, spanParam)
  */
 
@@ -86,8 +85,6 @@ interface Props {
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
   actionMenuType?: string;
-  metricType?: string;
-  panelVisualization?: any;
 }
 
 export const VisualizationContainer = ({
@@ -109,9 +106,7 @@ export const VisualizationContainer = ({
   catalogVisualization,
   inlineEditor,
   actionMenuType,
-}: // metricType,
-// panelVisualization,
-Props) => {
+}: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
   const [visualizationType, setVisualizationType] = useState('');

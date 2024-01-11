@@ -314,7 +314,6 @@ export const updateMetricQuery = (id, { availableAttributes, aggregation, attrib
   dispatch,
   getState
 ) => {
-  // const state = getState();
   const staticMetric = getState().metrics.metrics[id];
   const metric = {
     ...staticMetric,
