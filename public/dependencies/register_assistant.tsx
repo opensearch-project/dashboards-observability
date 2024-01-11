@@ -12,7 +12,7 @@ import { DataGridContainer } from './components/data_grid_container';
 export const registerAsssitantDependencies = (setup?: AssistantSetup) => {
   if (!setup) return;
 
-  setup.registerContentRenderer('ppl_data_grid', (content, renderProps) => {
+  setup.registerMessageRenderer('ppl_data_grid', (content, renderProps) => {
     const params = content as IMessage;
     return (
       <Provider store={store}>
