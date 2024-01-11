@@ -265,7 +265,6 @@ export const preprocessQuery = ({
   whereClause?: string;
 }) => {
   let finalQuery = '';
-
   if (isEmpty(rawQuery)) return finalQuery;
 
   // convert to moment
