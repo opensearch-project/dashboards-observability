@@ -29,8 +29,6 @@ import {
 } from '../utils';
 import { convertDateTime } from '../../../common/query_utils';
 
-jest.setTimeout(60000);
-
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
 

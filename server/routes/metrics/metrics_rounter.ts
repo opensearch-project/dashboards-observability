@@ -99,11 +99,11 @@ export function registerMetricsRoute(router: IRouter) {
     }
   );
 
-  router.post(
+  router.get(
     {
-      path: `${OBSERVABILITY_BASE}/metrics/otel/documentNames`,
+      path: `${OBSERVABILITY_BASE}/metrics/otel/{index}/documentNames`,
       validate: {
-        body: schema.object({
+        params: schema.object({
           index: schema.string(),
         }),
       },
@@ -120,7 +120,7 @@ export function registerMetricsRoute(router: IRouter) {
       try {
         const resp = await metricsAnalyticsBackend.queryToFetchDocumentNames(
           opensearchNotebooksClient,
-          request.body.index
+          request.params.index
         );
         return response.ok({
           body: resp,
@@ -135,12 +135,12 @@ export function registerMetricsRoute(router: IRouter) {
     }
   );
 
-  router.post(
+  router.get(
     {
-      path: `${OBSERVABILITY_BASE}/metrics/otel/histogramSampleDocument`,
+      path: `${OBSERVABILITY_BASE}/metrics/otel/{index}/{histogramSampleDocument}`,
       validate: {
-        body: schema.object({
-          documentName: schema.string(),
+        params: schema.object({
+          histogramSampleDocument: schema.string(),
           index: schema.string(),
         }),
       },
@@ -157,8 +157,8 @@ export function registerMetricsRoute(router: IRouter) {
       try {
         const resp = await metricsAnalyticsBackend.queryToFetchSampleDocument(
           opensearchNotebooksClient,
-          request.body.documentName,
-          request.body.index
+          request.params.histogramSampleDocument,
+          request.params.index
         );
         return response.ok({
           body: resp.hits,

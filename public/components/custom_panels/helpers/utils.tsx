@@ -455,12 +455,9 @@ export const fetchAggregatedBinCount = async (
 export const fetchSampleOTDocument = async (selectedOtelIndex: string, documentName: string) => {
   const http = getOSDHttp();
   try {
-    const response = await http.post(`${OBSERVABILITY_BASE}/metrics/otel/histogramSampleDocument`, {
-      body: JSON.stringify({
-        documentName,
-        index: selectedOtelIndex,
-      }),
-    });
+    const response = await http.get(
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/${documentName}`
+    );
     return response;
   } catch (error) {
     console.error(error);

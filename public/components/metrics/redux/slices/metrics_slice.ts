@@ -186,11 +186,7 @@ export const fetchOpenTelemetryIndices = async () => {
 export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => async () => {
   const http = getOSDHttp();
   return http
-    .post(`${OBSERVABILITY_BASE}/metrics/otel/documentNames`, {
-      body: JSON.stringify({
-        index: selectedOtelIndex,
-      }),
-    })
+    .get(`${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/documentNames`)
     .catch((error) => console.error(error));
 };
 
