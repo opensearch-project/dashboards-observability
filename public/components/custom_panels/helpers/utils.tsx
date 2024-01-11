@@ -531,8 +531,8 @@ export const renderOpenTelemetryVisualization = async ({
 
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
-      const formattedStartTime = convertDateTime(startTime, false, false, false, true);
-      const formattedEndTime = convertDateTime(endTime, false, false, false, true);
+      const formattedStartTime = convertDateTime(startTime, false, false, OTEL_METRIC_SUBTYPE);
+      const formattedEndTime = convertDateTime(endTime, false, false, OTEL_METRIC_SUBTYPE);
       const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
         bucket.min.toString(),
         bucket.max.toString(),

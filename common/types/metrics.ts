@@ -5,6 +5,7 @@
 
 import { VisualizationType } from './custom_panels';
 import { OTEL_METRIC_SUBTYPE } from '../constants/shared';
+type AllMetricTypes = 'savedCustomMetric' | 'prometheusMetric' | typeof OTEL_METRIC_SUBTYPE;
 
 export interface MetricType extends VisualizationType {
   id: string;
@@ -14,7 +15,7 @@ export interface MetricType extends VisualizationType {
   w: number;
   h: number;
   query: {
-    type: 'savedCustomMetric' | 'prometheusMetric' | typeof OTEL_METRIC_SUBTYPE;
+    type: AllMetricTypes;
     aggregation: string;
     attributesGroupBy: string[];
     catalog: string;

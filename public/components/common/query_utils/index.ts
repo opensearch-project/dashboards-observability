@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import _, { isEmpty } from 'lodash';
-import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
+import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
@@ -19,6 +19,8 @@ import {
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
   OTEL_DATE_FORMAT,
+  OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
@@ -63,8 +65,7 @@ export const convertDateTime = (
   datetime: string,
   isStart = true,
   formatted = true,
-  isPromqlMetrics: boolean = false,
-  isOtel: boolean = false
+  metricType: string = ''
 ) => {
   let returnTime: Moment = '';
 
@@ -74,14 +75,14 @@ export const convertDateTime = (
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
 
-  if (isOtel) {
+  if (metricType === OTEL_METRIC_SUBTYPE) {
     const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
     const milliseconds = returnTime!.millisecond();
     const formattedMilliseconds = String(milliseconds).padEnd(6, '0');
     return `${formattedDate}.${formattedMilliseconds}Z`;
   }
 
-  if (isPromqlMetrics) {
+  if (metricType === PROMQL_METRIC_SUBTYPE) {
     const myDate = new Date(returnTime._d); // Your timezone!
     const epochTime = myDate.getTime() / 1000.0;
     return Math.round(epochTime);
@@ -112,8 +113,8 @@ export const updateCatalogVisualizationQuery = ({
   resolution: string;
 }) => {
   const attributesGroupString = attributesGroupBy.join(',');
-  const startEpochTime = convertDateTime(start, true, false, true);
-  const endEpochTime = convertDateTime(end, false, false, true);
+  const startEpochTime = convertDateTime(start, true, false, PROMQL_METRIC_SUBTYPE);
+  const endEpochTime = convertDateTime(end, false, false, PROMQL_METRIC_SUBTYPE);
   const promQuery =
     attributesGroupBy.length === 0
       ? `${aggregation} (${catalogTableName})`
@@ -201,8 +202,8 @@ export const updatePromQLQueryFilters = (
     attributesGroupBy: attributesGroupBy.split(','),
     aggregation,
   });
-  const start = convertDateTime(startTime, true, false, true);
-  const end = convertDateTime(endTime, false, false, true);
+  const start = convertDateTime(startTime, true, false, PROMQL_METRIC_SUBTYPE);
+  const end = convertDateTime(endTime, false, false, PROMQL_METRIC_SUBTYPE);
   return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
 };
 
