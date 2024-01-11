@@ -4312,7 +4312,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 size="s"
                                 type="visBarVerticalStacked"
                               >
-                                <EuiIconBeaker
+                                <EuiIconEmpty
                                   aria-hidden={true}
                                   className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
                                   focusable="false"
@@ -4329,12 +4329,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     viewBox="0 0 16 16"
                                     width={16}
                                     xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                    />
-                                  </svg>
-                                </EuiIconBeaker>
+                                  />
+                                </EuiIconEmpty>
                               </EuiIcon>
                             </span>
                           </span>
@@ -4437,7 +4433,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             size="m"
                             type="arrowDown"
                           >
-                            <EuiIconBeaker
+                            <EuiIconEmpty
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                               focusable="false"
@@ -4454,12 +4450,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 viewBox="0 0 16 16"
                                 width={16}
                                 xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                />
-                              </svg>
-                            </EuiIconBeaker>
+                              />
+                            </EuiIconEmpty>
                           </EuiIcon>
                         </button>
                       </EuiFormControlLayoutCustomIcon>
@@ -8062,7 +8054,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconBeaker
+                                        <EuiIconEmpty
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -8079,12 +8071,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                            />
-                                          </svg>
-                                        </EuiIconBeaker>
+                                          />
+                                        </EuiIconEmpty>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -9046,7 +9034,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconBeaker
+                                        <EuiIconEmpty
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -9063,12 +9051,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                            />
-                                          </svg>
-                                        </EuiIconBeaker>
+                                          />
+                                        </EuiIconEmpty>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -10528,7 +10512,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconBeaker
+                                        <EuiIconEmpty
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -10545,12 +10529,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                            />
-                                          </svg>
-                                        </EuiIconBeaker>
+                                          />
+                                        </EuiIconEmpty>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -12031,7 +12011,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconBeaker
+                                        <EuiIconEmpty
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -12048,12 +12028,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                            />
-                                          </svg>
-                                        </EuiIconBeaker>
+                                          />
+                                        </EuiIconEmpty>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -12494,7 +12470,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconBeaker
+                                                  <EuiIconEmpty
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -12515,12 +12491,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
+                                                    />
+                                                  </EuiIconEmpty>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13458,7 +13430,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconBeaker
+                                                  <EuiIconEmpty
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13479,12 +13451,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
+                                                    />
+                                                  </EuiIconEmpty>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13703,7 +13671,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconBeaker
+                                                  <EuiIconEmpty
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13724,12 +13692,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
+                                                    />
+                                                  </EuiIconEmpty>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13948,7 +13912,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconBeaker
+                                                  <EuiIconEmpty
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13969,12 +13933,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
+                                                    />
+                                                  </EuiIconEmpty>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -14193,7 +14153,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconBeaker
+                                                  <EuiIconEmpty
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -14214,12 +14174,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
+                                                    />
+                                                  </EuiIconEmpty>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -15119,7 +15075,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconBeaker
+                                        <EuiIconEmpty
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -15136,12 +15092,8 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                            />
-                                          </svg>
-                                        </EuiIconBeaker>
+                                          />
+                                        </EuiIconEmpty>
                                       </EuiIcon>
                                     </span>
                                     <span
