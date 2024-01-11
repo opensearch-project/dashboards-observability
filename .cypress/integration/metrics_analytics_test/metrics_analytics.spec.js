@@ -100,7 +100,7 @@ describe('Metrics Analytics', () => {
           .contains(PPL_METRICS_NAMES[1])
           .trigger('mouseover')
           .click();
-        cy.wait(50);
+        cy.wait(delay/2);
         cy.get('[data-test-subj="metricsListItems_selectedMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .should('exist');
@@ -115,7 +115,7 @@ describe('Metrics Analytics', () => {
           .contains(PPL_METRICS_NAMES[1])
           .trigger('mouseover')
           .click();
-        cy.wait(50);
+        cy.wait(delay/2);
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mouseover')
@@ -142,7 +142,6 @@ describe('Metrics Analytics', () => {
           .contains(PPL_METRICS_NAMES[1])
           .trigger('mouseover')
           .click();
-        cy.wait(delay);
         cy.get('h5')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mousedown', { which: 1, force: true })
@@ -153,7 +152,6 @@ describe('Metrics Analytics', () => {
           .eq(1)
           .invoke('attr', 'style')
           .should('match', new RegExp('(.*)transform: translate((.*)10px)(.*)'));
-        cy.wait(delay);
       });
 
       it('Change date filter of the Metrics home page', () => {
@@ -165,7 +163,6 @@ describe('Metrics Analytics', () => {
         cy.get('.euiSuperDatePicker__prettyFormat[data-test-subj="superDatePickerShowDatesButton"]')
           .contains('This year')
           .should('exist');
-        cy.wait(delay);
       });
 
       it('Saves metrics to an existing panel', () => {
@@ -218,7 +215,6 @@ const createCustomMetric = ({ testMetricIndex }) => {
     delay: 50,
   });
   cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-  cy.wait(delay);
   suppressResizeObserverIssue();
   cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
   cy.wait(delay * 2);
@@ -229,11 +225,10 @@ const createCustomMetric = ({ testMetricIndex }) => {
     .focus()
     .type(PPL_METRICS_NAMES[metricIndex], { force: true });
   cy.get('[data-test-subj="eventExplorer__metricSaveName"]').click({ force: true });
-  cy.wait(1000);
+  cy.wait(delay * 10);
   cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
     timeout: COMMAND_TIMEOUT_LONG,
   }).click();
-  cy.wait(delay);
   cy.get('.euiToastHeader__title').contains('successfully').should('exist');
 };
 
