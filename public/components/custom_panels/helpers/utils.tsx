@@ -9,7 +9,6 @@ import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
-import { CoreStart } from '../../../../../../src/core/public';
 import {
   OBSERVABILITY_BASE,
   OTEL_METRIC_SUBTYPE,
@@ -24,7 +23,7 @@ import {
   VizContainerError,
 } from '../../../../common/types/custom_panels';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { removeBacktick } from '../../../../common/utils';
+import { removeBacktick, getOSDHttp } from '../../../../common/utils';
 import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
 import PPLService from '../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
@@ -33,7 +32,7 @@ import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
 import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
-import { coreRefs } from '../../../framework/core_refs';
+import { INDEX_DOCUMENT_NAME_PATTERN } from '../../../../common/constants/metrics';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -137,7 +136,6 @@ const queryAccumulator = (
 
 // Fetched Saved Visualization By Id
 export const fetchVisualizationById = async (
-  http: CoreStart['http'],
   savedVisualizationId: string,
   setIsError: (error: VizContainerError) => void
 ) => {
@@ -409,10 +407,6 @@ const createOtelVisualizationMetaData = (
       end: endTime,
       text: '',
     },
-    selected_timestamp: {
-      name: 'timestamp',
-      type: 'timestamp',
-    },
     selected_fields: {
       text: '',
       tokens: [],
@@ -423,19 +417,19 @@ const createOtelVisualizationMetaData = (
   };
 };
 
-export const fetchAggregatedBinCount = (
+export const fetchAggregatedBinCount = async (
   minimumBound: string,
   maximumBound: string,
   startTime: string,
   endTime: string,
   documentName: string,
-  http: CoreStart['http'],
   selectedOtelIndex: string,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-) => async () => {
-  return http
-    .post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
+) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
       body: JSON.stringify({
         min: minimumBound,
         max: maximumBound,
@@ -444,38 +438,38 @@ export const fetchAggregatedBinCount = (
         documentName,
         index: selectedOtelIndex,
       }),
-    })
-    .catch((error: Error) => {
-      const errorMessage = JSON.parse(error.body.message);
-      setIsError({
-        errorMessage: errorMessage.error.reason || 'Issue in fetching bucket count',
-        errorDetails: errorMessage.error.details,
-      });
-      console.error(error.body);
-    })
-    .finally(() => {
-      setIsLoading(false);
     });
+    return response;
+  } catch (error) {
+    const errorMessage = JSON.parse(error.body.message);
+    setIsError({
+      errorMessage: errorMessage.error.reason || 'Issue in fetching bucket count',
+      errorDetails: errorMessage.error.details,
+    });
+    console.error(error.body);
+  } finally {
+    setIsLoading(false);
+  }
 };
 
-export const fetchSampleOTDocument = (
-  selectedOtelIndex: string,
-  http: CoreStart['http'],
-  documentName: string
-) => async () => {
-  return http
-    .post(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
+export const fetchSampleOTDocument = async (selectedOtelIndex: string, documentName: string) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.post(`${OBSERVABILITY_BASE}/metrics/otel/histogramSampleDocument`, {
       body: JSON.stringify({
         documentName,
         index: selectedOtelIndex,
       }),
-    })
-    .catch((error) => console.error(error));
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
-  const pattern = /\[Otel Metric\]\s(\S+?-\S+?)\.(\S+)/;
-  const match = metricString.match(pattern);
+  const match = metricString.match(INDEX_DOCUMENT_NAME_PATTERN);
 
   if (match) {
     const index = match[1];
@@ -496,6 +490,7 @@ export const renderOpenTelemetryVisualization = async ({
   setIsLoading,
   setIsError,
   visualization,
+  setToast,
 }: {
   startTime: string;
   endTime: string;
@@ -506,11 +501,16 @@ export const renderOpenTelemetryVisualization = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   visualization: any;
+  setToast: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  const { http } = coreRefs;
   const visualizationType = 'bar';
   let index = visualization?.index;
   let documentName = visualization?.name;
@@ -519,8 +519,11 @@ export const renderOpenTelemetryVisualization = async ({
     const indexAndDocumentName = extractIndexAndDocumentName(visualization.name);
     index = indexAndDocumentName[0];
     documentName = indexAndDocumentName[1];
+    if (documentName === undefined)
+      setToast('Document name is undefined', 'danger', undefined, 'right');
   }
-  const fetchSampleDocument = await fetchSampleOTDocument(index, http, documentName)();
+
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName);
   const source = fetchSampleDocument.hits[0]._source;
 
   setVisualizationType(visualizationType);
@@ -536,11 +539,10 @@ export const renderOpenTelemetryVisualization = async ({
         formattedStartTime,
         formattedEndTime,
         documentName,
-        http,
         index,
         setIsError,
         setIsLoading
-      )();
+      );
 
       return {
         xAxis: bucket.min + ' - ' + bucket.max,
@@ -552,10 +554,8 @@ export const renderOpenTelemetryVisualization = async ({
     }
   });
   const jsonData = await Promise.all(dataBinsPromises);
-  const formatDataBinsName = () => {
-    return { dataBins: { jsonData } };
-  };
-  const formatedJsonData = formatDataBinsName().dataBins;
+  const formatedJsonData = { jsonData };
+
   const visualizationMetaData = createOtelVisualizationMetaData(
     documentName,
     visualizationType,

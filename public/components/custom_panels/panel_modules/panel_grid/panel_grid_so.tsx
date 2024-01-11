@@ -88,30 +88,27 @@ export const PanelGridSO = (props: PanelGridProps) => {
   };
 
   const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      (panelVisualization: VisualizationType, index) => (
-        <VisualizationContainer
-          key={panelVisualization.id}
-          http={coreRefs.http!}
-          editMode={editMode}
-          visualizationId={panelVisualization.id}
-          savedVisualizationId={panelVisualization.savedVisualizationId}
-          pplService={coreRefs.pplService!}
-          fromTime={startTime}
-          toTime={endTime}
-          onRefresh={onRefresh}
-          onEditClick={onEditClick}
-          cloneVisualization={cloneVisualization}
-          pplFilterValue={pplFilterValue}
-          showFlyout={showFlyout}
-          removeVisualization={removeVisualization}
-          contextMenuId="visualization"
-          metricType={panelVisualization?.metricType ? panelVisualization.metricType : ''}
-          panelVisualization={panelVisualization}
-        />
-      )
-    );
+    const gridDataComps = panelVisualizations.map((panelVisualization: VisualizationType) => (
+      <VisualizationContainer
+        key={panelVisualization.id}
+        http={coreRefs.http!}
+        editMode={editMode}
+        visualizationId={panelVisualization.id}
+        savedVisualizationId={panelVisualization.savedVisualizationId}
+        pplService={coreRefs.pplService!}
+        fromTime={startTime}
+        toTime={endTime}
+        onRefresh={onRefresh}
+        onEditClick={onEditClick}
+        cloneVisualization={cloneVisualization}
+        pplFilterValue={pplFilterValue}
+        showFlyout={showFlyout}
+        removeVisualization={removeVisualization}
+        contextMenuId="visualization"
+        metricType={panelVisualization?.metricType || ''}
+        panelVisualization={panelVisualization}
+      />
+    ));
     setGridData(gridDataComps);
   };
 

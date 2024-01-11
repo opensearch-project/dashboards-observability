@@ -113,7 +113,6 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
             >
               <div
                 className="metrics-data-source-picker"
-                data-test-subj="metricsDataSourcePicker"
               >
                 <EuiTitle
                   size="xxxs"
@@ -127,6 +126,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                 <EuiComboBox
                   async={false}
                   compressed={false}
+                  data-test-subj="metricsDataSourcePicker"
                   fullWidth={false}
                   isClearable={true}
                   onChange={[Function]}
@@ -155,6 +155,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                     aria-expanded={false}
                     aria-haspopup="listbox"
                     className="euiComboBox"
+                    data-test-subj="metricsDataSourcePicker"
                     onKeyDown={[Function]}
                     role="combobox"
                   >

@@ -43,6 +43,7 @@ import {
   observabilityMetricsID,
   OTEL_METRIC_SUBTYPE,
 } from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -121,6 +122,7 @@ Props) => {
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
   const { http, pplService } = coreRefs;
+  const { setToast } = useToast();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
@@ -243,14 +245,9 @@ Props) => {
   }
 
   const fetchVisualization = async () => {
-    try {
-      return savedVisualizationId
-        ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
-        : inputMetaData;
-    } catch (error) {
-      setIsError({ error });
-      return null;
-    }
+    return savedVisualizationId
+      ? await fetchVisualizationById(savedVisualizationId, setIsError)
+      : inputMetaData;
   };
 
   const loadVisaulization = async () => {
@@ -270,6 +267,7 @@ Props) => {
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
+        setToast,
       });
     else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
       renderCatalogVisualization({

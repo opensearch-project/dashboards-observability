@@ -4,12 +4,7 @@
  */
 
 import { VisualizationType } from './custom_panels';
-
-// export interface MetricData {
-//   metricId: string;
-//   metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
-//   metricName: string;
-// }
+import { OTEL_METRIC_SUBTYPE } from '../constants/shared';
 
 export interface MetricType extends VisualizationType {
   id: string;
@@ -19,18 +14,15 @@ export interface MetricType extends VisualizationType {
   w: number;
   h: number;
   query: {
-    type: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
+    type: 'savedCustomMetric' | 'prometheusMetric' | typeof OTEL_METRIC_SUBTYPE;
     aggregation: string;
     attributesGroupBy: string[];
     catalog: string;
     availableAttributes?: string[];
   };
-  // metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
 }
 
 export interface OptionType {
   label: string;
   'data-test-subj': string;
 }
-// selectedDataSource: React.SetStateAction<Array<{ label: string; 'data-test-subj': string }>>;
-//   setSelectedDataSource: React.Dispatch<React.SetStateAction<unknown>>;

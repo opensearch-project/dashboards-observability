@@ -216,7 +216,7 @@ export const calculateAvailability = async (
   for (let i = 0; i < savedVisualizationsIds.length; i++) {
     const visualizationId = savedVisualizationsIds[i];
     // Fetches data for visualization
-    const visData = await fetchVisualizationById(http, visualizationId, (value: string) =>
+    const visData = await fetchVisualizationById(visualizationId, (value: string) =>
       console.error(value)
     );
 

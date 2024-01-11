@@ -60,17 +60,6 @@ describe('Side Bar Component', () => {
         },
       ],
     });
-    // SavedObjectsActions.getBulk = jest
-    //   .fn()
-    //   .mockResolvedValue({ observabilityObjectList: [{ savedVisualization: sampleSavedMetric }] });
-
-    // coreRefs = mockCoreRefs;
-    // coreRefs.pplService.fetch = jest.fn(() =>
-    //   Promise.resolve({
-    //     data: { DATA_SOURCES: ['datasource1', 'datasource2'] },
-    //     then: () => Promise.resolve(),
-    //   })
-    // );
 
     const wrapper = mount(
       <Provider store={store}>

@@ -5,19 +5,13 @@
 
 import React from 'react';
 import { EuiFacetButton, EuiIcon } from '@elastic/eui';
-import { useSelector } from 'react-redux';
-import { metricIconsSelector } from '../redux/slices/metrics_slice';
-import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
+import { OBSERVABILITY_CUSTOM_METRIC, OPEN_TELEMETRY } from '../../../../common/constants/metrics';
 
 const MetricIcon = ({ metric }) => {
-  const metricIcons = useSelector(metricIconsSelector);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const iconMeta = metricIcons[metric?.catalog];
   const metricCatalog = metric?.catalog;
-  if (metricCatalog === OBSERVABILITY_CUSTOM_METRIC || metricCatalog === 'OpenTelemetry') {
+  if ([OBSERVABILITY_CUSTOM_METRIC, OPEN_TELEMETRY].includes(metricCatalog)) {
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   } else return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
-  // } else return <EuiAvatar name={metricCatalog} size="s" type="space" {...iconMeta} />;
 };
 
 interface IMetricNameProps {
@@ -29,7 +23,10 @@ export const MetricName = (props: IMetricNameProps) => {
   const { metric, handleClick } = props;
 
   const name = (metricDetails: any) => {
-    if (metricDetails?.catalog === 'CUSTOM_METRICS' || metricDetails?.catalog === 'OpenTelemetry')
+    if (
+      metricDetails?.catalog === OBSERVABILITY_CUSTOM_METRIC ||
+      metricDetails?.catalog === OPEN_TELEMETRY
+    )
       return metricDetails?.name;
     else return metricDetails?.name.split('.')[1].replace(/^prometheus_/, 'p.._');
   };

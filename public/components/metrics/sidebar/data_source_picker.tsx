@@ -17,31 +17,22 @@ export const DataSourcePicker = ({
   selectedDataSource,
   setSelectedDataSource,
 }: DataSourcePickerMenuProps) => {
-  // const { selectedDataSource, setSelectedDataSource } = DataSourcePickerMenuProps;
-
-  const onChange = (
-    // eslint-disable-next-line no-shadow
-    selectedDataSource
-  ) => {
-    const selectedArray = Array.isArray(selectedDataSource)
-      ? selectedDataSource
-      : [selectedDataSource];
-
-    setSelectedDataSource(selectedArray);
+  const onChange = (selectedDataSource) => {
+    setSelectedDataSource(selectedDataSource);
   };
 
   return (
-    <div className="metrics-data-source-picker" data-test-subj="metricsDataSourcePicker">
+    <div className="metrics-data-source-picker">
       <EuiTitle size="xxxs">
         <h5>Data source</h5>
       </EuiTitle>
       <EuiComboBox
-        // aria-label="Accessible screen reader label"
         placeholder="Select a data source"
         singleSelection={{ asPlainText: true }}
         options={DATASOURCE_OPTIONS}
         selectedOptions={selectedDataSource || []}
         onChange={onChange}
+        data-test-subj="metricsDataSourcePicker"
       />
     </div>
   );

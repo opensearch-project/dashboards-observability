@@ -2,8 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-prototype-builtins */
 
 import { v4 as uuidv4 } from 'uuid';
 import { PanelType, VisualizationType } from '../../../common/types/custom_panels';

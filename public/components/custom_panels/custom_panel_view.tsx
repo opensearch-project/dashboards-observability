@@ -391,7 +391,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       const visualizationId = panelVisualizations[i].savedVisualizationId;
       // TODO: create route to get list of visualizations in one call
       const visData: SavedVisualizationType = await fetchVisualizationById(
-        http,
         visualizationId,
         (error: VizContainerError) => setToast(error.errorMessage, 'danger')
       );

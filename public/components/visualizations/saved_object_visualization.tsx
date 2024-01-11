@@ -18,6 +18,7 @@ import { OTEL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../common/cons
 import { fetchOtelMetric, getMetricVisConfig } from '../event_analytics/utils/utils';
 import { preprocessMetricQuery } from '../common/query_utils';
 import { constructOtelMetricsMetaData } from '../custom_panels/helpers/utils';
+import { useToast } from '../common/toast';
 
 interface SavedObjectVisualizationProps {
   savedVisualization: SavedVisualization;
@@ -34,6 +35,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
   const [visContainerProps, setVisContainerProps] = useState<IVisualizationContainerProps>();
   const [isError, setIsError] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { setToast } = useToast();
 
   useEffect(() => {
     const pplService = getPPLService();
@@ -120,6 +122,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
         endTime,
         setIsError,
         setIsLoading,
+        setToast,
       })
         .then((jsonData) => {
           const container = getVizContainerProps({

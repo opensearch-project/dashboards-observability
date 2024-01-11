@@ -322,8 +322,7 @@ const MetricsExportPopOver = () => {
 
     try {
       savedMetrics = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        metricsToExport.map(async (metric, index) => {
+        metricsToExport.map(async (metric) => {
           if (metric.savedVisualizationId === undefined) {
             return createSavedVisualization(metric);
           } else {

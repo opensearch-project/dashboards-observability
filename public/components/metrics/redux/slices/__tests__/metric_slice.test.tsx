@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../../../common/constants/metrics';
 import { metricsReducers, mergeMetrics, clearSelectedMetrics, metricSlice } from '../metrics_slice';
 import { sampleSavedMetric } from '../../../../../../test/metrics_constants';
-// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { Sidebar } from '../../../sidebar/sidebar';
 import { setOSDHttp, setPPLService } from '../../../../../../common/utils';
@@ -180,26 +179,6 @@ describe('metricsSlice actions and reducers', () => {
 
     const newState = store.getState().metrics;
     expect(newState.selectedIds).toEqual([]);
-  });
-
-  // eslint-disable-next-line jest/expect-expect
-  it('should handle updateMetricQuery', () => {
-    // const metricsState = {
-    //   ...defaultInitialState,
-    //   metrics: { metric1: { name: 'metricName' }, metric2: { name: 'metric2' } },
-    // };
-    // const store = configureStore( { metrics: metricsReducers },
-    //   preloadedState: { metrics: metricsState },
-    // });
-    // const dispatchedAction = store.dispatch(
-    //   updateMetricQuery('metric1', { availableAttributes: ['label1'] })
-    // );
-    // expect(dispatchedAction.type).toEqual('metrics/setMetric');
-    // expect(dispatchedAction.payload).toMatchObject({
-    //   aggregation: 'avg',
-    //   attributesGroupBy: [],
-    //   availableAttributes: ['label1'],
-    // });
   });
 
   describe('loadMetrics', () => {

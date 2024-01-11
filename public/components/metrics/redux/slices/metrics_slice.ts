@@ -22,7 +22,7 @@ import {
   PROMQL_METRIC_SUBTYPE,
   OBSERVABILITY_BASE,
 } from '../../../../../common/constants/shared';
-import { getPPLService } from '../../../../../common/utils';
+import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
   color: string;
@@ -173,7 +173,7 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
   );
 
 export const fetchOpenTelemetryIndices = async () => {
-  const { http } = coreRefs;
+  const http = getOSDHttp();
   return http
     .get(`${OBSERVABILITY_BASE}/search/indices`, {
       query: {
@@ -184,7 +184,7 @@ export const fetchOpenTelemetryIndices = async () => {
 };
 
 export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => async () => {
-  const { http } = coreRefs;
+  const http = getOSDHttp();
   return http
     .post(`${OBSERVABILITY_BASE}/metrics/otel/documentNames`, {
       body: JSON.stringify({

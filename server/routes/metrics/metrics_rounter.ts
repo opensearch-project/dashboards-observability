@@ -5,7 +5,6 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
-import { RequestParams } from '@opensearch-project/opensearch';
 import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
@@ -14,6 +13,7 @@ import {
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
 import { MetricsAnalyticsAdaptor } from '../../adaptors/metrics/metrics_analytics_adaptor';
+import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/metrics';
 
 export function registerMetricsRoute(router: IRouter) {
   const metricsAnalyticsBackend = new MetricsAnalyticsAdaptor();
@@ -77,10 +77,9 @@ export function registerMetricsRoute(router: IRouter) {
       validate: {},
     },
     async (context, request, response) => {
-      const indexPattern = 'ss4o_metrics-*-*';
       const params = {
         format: 'json',
-        index: indexPattern,
+        index: DATA_PREPPER_INDEX_NAME,
       };
       try {
         const resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
@@ -138,7 +137,7 @@ export function registerMetricsRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`,
+      path: `${OBSERVABILITY_BASE}/metrics/otel/histogramSampleDocument`,
       validate: {
         body: schema.object({
           documentName: schema.string(),

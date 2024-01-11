@@ -21,13 +21,21 @@ import {
 } from '../../../../../test/panels_constants';
 import {
   displayVisualization,
+  fetchAggregatedBinCount,
+  fetchSampleOTDocument,
+  // fetchSampleOTDocument,
   isDateValid,
   isNameValid,
   isPPLFilterValid,
   mergeLayoutAndVisualizations,
   onTimeChange,
+  renderOpenTelemetryVisualization,
 } from '../utils';
 import { convertDateTime } from '../../../common/query_utils';
+import { setOSDHttp } from '../../../../../common/utils';
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
+
+jest.setTimeout(60000);
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });

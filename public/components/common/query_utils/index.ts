@@ -21,6 +21,7 @@ import {
   OTEL_DATE_FORMAT,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
+import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -62,7 +63,7 @@ export const convertDateTime = (
   datetime: string,
   isStart = true,
   formatted = true,
-  isMetrics: boolean = false,
+  isPromqlMetrics: boolean = false,
   isOtel: boolean = false
 ) => {
   let returnTime: Moment = '';
@@ -80,7 +81,7 @@ export const convertDateTime = (
     return `${formattedDate}.${formattedMilliseconds}Z`;
   }
 
-  if (isMetrics) {
+  if (isPromqlMetrics) {
     const myDate = new Date(returnTime._d); // Your timezone!
     const epochTime = myDate.getTime() / 1000.0;
     return Math.round(epochTime);
@@ -220,10 +221,8 @@ export const getIndexPatternFromRawQuery = (query: string): string => {
 function extractSpanAndResolution(query: string) {
   if (!query) return;
 
-  const regex = /'(\d+)([smhdwMy])'/;
-  const match = query.match(regex);
-  // eslint-disable-next-line radix
-  return match ? { span: parseInt(match[1]), resolution: match[2] } : null;
+  const match = query.match(SPAN_RESOLUTION_REGEX);
+  return match ? { span: parseInt(match[1], 10), resolution: match[2] } : null;
 }
 
 export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {

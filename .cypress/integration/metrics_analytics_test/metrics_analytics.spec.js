@@ -55,8 +55,22 @@ describe('Metrics Analytics', () => {
       suppressResizeObserverIssue();
     });
 
+    describe('Check data source picker', () => {
+      it('Index picker should be only available under Otel metric datasource', () => {
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').click();
+        cy.get('[data-test-subj="metricsIndexPicker"]').should('not.exist');
+
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="openTelemetryOption"]').click();
+        cy.get('[data-test-subj="metricsIndexPicker"]').should('exist');
+      });
+    });
+
     describe('Search for metrics in search bar', () => {
       it('Search for metrics in search bar from available metrics', () => {
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsSearch"]').type('metric', { wait: 50 });
 
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
@@ -76,6 +90,8 @@ describe('Metrics Analytics', () => {
 
     describe('Select and unselect metrics in sidebar', () => {
       it('Select and unselect metrics in sidebar', () => {
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mouseover')
@@ -113,37 +129,17 @@ describe('Metrics Analytics', () => {
 
     describe('Test Metric Visualizations', () => {
       beforeEach(() => {
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mouseover')
           .click();
       });
 
-      it.only('Resize a Metric visualization in edit mode', () => {
-        cy.get('[data-test-subj="metrics__editView"]')
-          .contains('Edit view')
-          .trigger('mouseover')
-          .click();
-        cy.wait(delay);
-        cy.get('.react-resizable-handle-se')
-          // .eq(1)
-          .trigger('mousedown', { which: 1 })
-          .trigger('mousemove', { clientX: 2000, clientY: 800 })
-          .trigger('mouseup', { force: true });
-        cy.wait(delay);
-        cy.get('[data-test-subj="metrics__saveView"]').trigger('mouseover').click();
-        cy.wait(delay * 3);
-        cy.get('div.react-grid-layout>div').invoke('height').should('match', new RegExp('790'));
-        cy.wait(delay);
-      });
-
       it('Drag and drop a Metric visualization in edit mode', () => {
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[1])
-          .trigger('mouseover')
-          .click();
-        cy.get('[data-test-subj="metrics__editView"]')
-          .contains('Edit view')
           .trigger('mouseover')
           .click();
         cy.wait(delay);
@@ -152,18 +148,12 @@ describe('Metrics Analytics', () => {
           .trigger('mousedown', { which: 1, force: true })
           .trigger('mousemove', { clientX: 415, clientY: 500 })
           .trigger('mouseup', { force: true });
+        cy.wait(delay * 3);
+        cy.get('div.react-grid-layout>div')
+          .eq(1)
+          .invoke('attr', 'style')
+          .should('match', new RegExp('(.*)transform: translate((.*)10px)(.*)'));
         cy.wait(delay);
-        cy.get('[data-test-subj="metrics__saveView"]')
-          .trigger('mouseover')
-          .click({ force: true })
-          .then(() => {
-            cy.wait(delay * 3);
-            cy.get('div.react-grid-layout>div')
-              .eq(1)
-              .invoke('attr', 'style')
-              .should('match', new RegExp('(.*)transform: translate((.*)10px)(.*)'));
-            cy.wait(delay);
-          });
       });
 
       it('Change date filter of the Metrics home page', () => {

@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-unused-vars */
 
 import { has, isArray, isEmpty } from 'lodash';
 import { HttpStart } from '../../../../../../../src/core/public';
