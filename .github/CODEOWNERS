@@ -1,8 +1,7 @@
-# Global Mask
-# This should match the owning team set up in https://github.com/orgs/opensearch-project/teams
-*   @pjfitzgibbons @ps48 @kavithacm @derek-ho @joshuali925 @dai-chen @YANG-DB @rupal-bq @mengweieric @vamsi-amazon @swiddis @penghuo @seankao-az @anirudha @paulstn @sumukhswamy
+# Global Mask: Every repo owner
+*   @pjfitzgibbons @swiddis @mengweieric @kavithacm @paulstn
 
 # Integrations
-server/adaptors/integrations @Swiddis @YANG-DB
-server/routes/integrations @Swiddis @YANG-DB
-public/components/integrations @Swiddis
+server/adaptors/integrations @Swiddis @RyanL1997 @YANG-DB
+server/routes/integrations @Swiddis @RyanL1997 @YANG-DB
+public/components/integrations @Swiddis @RyanL1997
