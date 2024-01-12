@@ -26,6 +26,8 @@ import { applyMiddleware, createStore } from 'redux';
 import { rootReducer } from '../../../../../framework/redux/reducers';
 import thunk from 'redux-thunk';
 import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../../../common/constants/data_sources';
+import { IField } from 'common/types/explorer';
+import { initialTabId } from '../../../../../../public/framework/redux/store/shared_state';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -62,6 +64,13 @@ describe('Siderbar component', () => {
           handleOverrideTimestamp={handleOverrideTimestamp}
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
+          query={''}
+          selectedPattern={''}
+          isOverridingPattern={false}
+          handleOverridePattern={function (pattern: IField): void {
+            throw new Error('Function not implemented.');
+          }}
+          tabId={initialTabId}
         />
       </Provider>
     );
@@ -97,8 +106,13 @@ describe('Siderbar component', () => {
           handleOverrideTimestamp={handleOverrideTimestamp}
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
-          storedExplorerFields={explorerFields}
-          tabId={DEFAULT_DATA_SOURCE_TYPE}
+          tabId={initialTabId}
+          query={''}
+          selectedPattern={''}
+          isOverridingPattern={false}
+          handleOverridePattern={function (pattern: IField): void {
+            throw new Error('Function not implemented.');
+          }}
         />
       </Provider>
     );
