@@ -20,6 +20,7 @@ import {
 } from '../types';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
+import { QueryManager } from '../../../../../common/query_manager/ppl_query_manager';
 
 interface CommonParams {
   query: string;
@@ -36,6 +37,7 @@ interface CommonParams {
   selectedLabels: string;
   dataSources: string; // list of type SelectedDataSources that is stringified
   queryLang: string;
+  queryMetaData: object;
 }
 
 type CreateParams = CommonParams & { applicationId: string };
@@ -66,6 +68,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
       queryLang: params.queryLang,
+      queryMetaData: params.queryMetaData,
     });
 
     const response = await this.client.create<VisualizationSavedObjectAttributes>(

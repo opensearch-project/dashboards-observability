@@ -21,9 +21,6 @@ module.exports = {
     '<rootDir>/test/',
     '<rootDir>/public/requests/',
   ],
-  transform: {
-    '^.+\\.tsx?$': ['ts-jest', { diagnostics: false }],
-  },
   transformIgnorePatterns: ['<rootDir>/node_modules'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',

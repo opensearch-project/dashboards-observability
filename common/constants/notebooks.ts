@@ -4,7 +4,6 @@
  */
 
 export const NOTEBOOKS_API_PREFIX = '/api/observability/notebooks';
-export const NOTEBOOKS_SELECTED_BACKEND: 'ZEPPELIN' | 'DEFAULT' = 'DEFAULT';
 export const NOTEBOOKS_FETCH_SIZE = 1000;
 export const CREATE_NOTE_MESSAGE = 'Enter a name to describe the purpose of this notebook.';
 export const NOTEBOOKS_DOCUMENTATION_URL =

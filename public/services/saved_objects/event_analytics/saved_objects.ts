@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { has, isEmpty, isArray } from 'lodash';
+import { has, isArray, isEmpty } from 'lodash';
 import { IField } from 'common/types/explorer';
 import {
-  OBSERVABILITY_BASE,
   EVENT_ANALYTICS,
+  OBSERVABILITY_BASE,
   SAVED_OBJECTS,
   SAVED_QUERY,
   SAVED_VISUALIZATION,
@@ -91,11 +91,11 @@ export default class SavedObjects {
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {
-      objRequest.object.sub_type = subType;
+      objRequest.object.subType = subType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

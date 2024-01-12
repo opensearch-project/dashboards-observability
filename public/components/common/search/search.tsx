@@ -323,9 +323,13 @@ export const Search = (props: any) => {
                   }
                   curVisId={curVisId}
                   setSubType={setSubType}
-                  isSaveAsMetricEnabled={
-                    isEqual(curVisId, 'line') && tempQuery.match(PPL_SPAN_REGEX) !== null
-                  }
+                  isSaveAsMetricEnabled={() => {
+                    return (
+                      isEqual(curVisId, 'line') &&
+                      tempQuery &&
+                      tempQuery.match(PPL_SPAN_REGEX) !== null
+                    );
+                  }}
                 />
                 <EuiPopoverFooter>
                   <EuiFlexGroup justifyContent="flexEnd">

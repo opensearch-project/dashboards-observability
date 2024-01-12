@@ -12,7 +12,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
     }
   }
 >
-  <Component>
+  <Sidebar>
     <I18nProvider>
       <IntlProvider
         defaultLocale="en"
@@ -99,10 +99,10 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
         textComponent={Symbol(react.fragment)}
       >
         <PseudoLocaleWrapper>
-          <section
-            className="sidebarHeight"
+          <div
+            id="sidebar"
           >
-            <Component>
+            <SearchBar>
               <div
                 className="metrics-search-bar-input"
                 data-test-subj="metricsSearch"
@@ -111,7 +111,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   box={
                     Object {
                       "incremental": true,
-                      "placeholder": "Search for metrics",
+                      "placeholder": "Search to filter Available Metrics",
                     }
                   }
                   defaultQuery=""
@@ -137,7 +137,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                             incremental={true}
                             isInvalid={false}
                             onSearch={[Function]}
-                            placeholder="Search for metrics"
+                            placeholder="Search to filter Available Metrics"
                             query=""
                           >
                             <EuiFieldSearch
@@ -151,7 +151,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                               isInvalid={false}
                               isLoading={false}
                               onSearch={[Function]}
-                              placeholder="Search for metrics"
+                              placeholder="Search to filter Available Metrics"
                             >
                               <EuiFormControlLayout
                                 compressed={false}
@@ -173,7 +173,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                                         className="euiFieldSearch euiFieldSearch--fullWidth"
                                         defaultValue=""
                                         onKeyUp={[Function]}
-                                        placeholder="Search for metrics"
+                                        placeholder="Search to filter Available Metrics"
                                         type="search"
                                       />
                                     </EuiValidatableControl>
@@ -198,7 +198,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                                               size="m"
                                               type="search"
                                             >
-                                              <EuiIconEmpty
+                                              <EuiIconBeaker
                                                 aria-hidden={true}
                                                 className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
@@ -215,8 +215,12 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                                                   viewBox="0 0 16 16"
                                                   width={16}
                                                   xmlns="http://www.w3.org/2000/svg"
-                                                />
-                                              </EuiIconEmpty>
+                                                >
+                                                  <path
+                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                  />
+                                                </svg>
+                                              </EuiIconBeaker>
                                             </EuiIcon>
                                           </span>
                                         </EuiFormControlLayoutCustomIcon>
@@ -233,7 +237,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   </EuiFlexGroup>
                 </EuiSearchBar>
               </div>
-            </Component>
+            </SearchBar>
             <EuiSpacer
               size="s"
             >
@@ -241,243 +245,255 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
-            <Component
-              dataTestSubj="metricsListItems_selectedMetrics"
-              handleClick={[Function]}
-              headerName="Selected Metrics"
-              metricsList={Array []}
+            <section
+              className="sidebar"
             >
-              <EuiAccordion
-                arrowDisplay="left"
-                buttonContent={
-                  <EuiTitle
-                    size="xxxs"
-                  >
-                    <span>
-                      Selected Metrics
-                       
-                      0
-                       of 
-                      0
-                    </span>
-                  </EuiTitle>
-                }
-                id="Selected MetricsSelector"
-                initialIsOpen={true}
-                isLoading={false}
-                isLoadingMessage={false}
-                paddingSize="none"
+              <MetricsAccordion
+                dataTestSubj="metricsListItems_selectedMetrics"
+                handleClick={[Function]}
+                headerName="Selected Metrics"
+                metricsList={Array []}
               >
-                <div
-                  className="euiAccordion euiAccordion-isOpen"
+                <EuiAccordion
+                  arrowDisplay="left"
+                  buttonContent={
+                    <EuiTitle
+                      size="xxxs"
+                    >
+                      <span>
+                        Selected Metrics
+                         
+                        0
+                         of 
+                        0
+                      </span>
+                    </EuiTitle>
+                  }
+                  id="Selected MetricsSelector"
+                  initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
+                  paddingSize="none"
                 >
                   <div
-                    className="euiAccordion__triggerWrapper"
+                    className="euiAccordion euiAccordion-isOpen"
                   >
-                    <button
-                      aria-controls="Selected MetricsSelector"
-                      aria-expanded={true}
-                      className="euiAccordion__button"
-                      id="random_html_id"
-                      onClick={[Function]}
-                      type="button"
+                    <div
+                      className="euiAccordion__triggerWrapper"
                     >
-                      <span
-                        className="euiAccordion__iconWrapper"
+                      <button
+                        aria-controls="Selected MetricsSelector"
+                        aria-expanded={true}
+                        className="euiAccordion__button"
+                        id="random_html_id"
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
+                        <span
+                          className="euiAccordion__iconWrapper"
                         >
-                          <EuiIconEmpty
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            className="euiAccordion__icon euiAccordion__icon-isOpen"
+                            size="m"
+                            type="arrowRight"
                           >
-                            <svg
+                            <EuiIconBeaker
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
-                      >
-                        <EuiTitle
-                          size="xxxs"
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                        <span
+                          className="euiIEFlexWrapFix"
                         >
-                          <span
-                            className="euiTitle euiTitle--xxxsmall"
+                          <EuiTitle
+                            size="xxxs"
                           >
-                            Selected Metrics
-                             
-                            0
-                             of 
-                            0
-                          </span>
-                        </EuiTitle>
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    aria-labelledby="random_html_id"
-                    className="euiAccordion__childWrapper"
-                    id="Selected MetricsSelector"
-                    role="region"
-                    tabIndex={-1}
-                  >
-                    <EuiResizeObserver
-                      onResize={[Function]}
+                            <span
+                              className="euiTitle euiTitle--xxxsmall"
+                            >
+                              Selected Metrics
+                               
+                              0
+                               of 
+                              0
+                            </span>
+                          </EuiTitle>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      aria-labelledby="random_html_id"
+                      className="euiAccordion__childWrapper"
+                      id="Selected MetricsSelector"
+                      role="region"
+                      tabIndex={-1}
                     >
-                      <div>
-                        <div
-                          className=""
-                        >
-                          <ul
-                            className="metricsList"
-                          />
+                      <EuiResizeObserver
+                        onResize={[Function]}
+                      >
+                        <div>
+                          <div
+                            className=""
+                          >
+                            <ul
+                              className="metricsList"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </EuiResizeObserver>
+                      </EuiResizeObserver>
+                    </div>
                   </div>
-                </div>
-              </EuiAccordion>
-            </Component>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <Component
-              dataTestSubj="metricsListItems_availableMetrics"
-              handleClick={[Function]}
-              headerName="Available Metrics"
-              metricsList={Array []}
-            >
-              <EuiAccordion
-                arrowDisplay="left"
-                buttonContent={
-                  <EuiTitle
-                    size="xxxs"
-                  >
-                    <span>
-                      Available Metrics
-                       
-                      0
-                       of 
-                      0
-                    </span>
-                  </EuiTitle>
-                }
-                id="Available MetricsSelector"
-                initialIsOpen={true}
-                isLoading={false}
-                isLoadingMessage={false}
-                paddingSize="none"
+                </EuiAccordion>
+              </MetricsAccordion>
+              <EuiSpacer
+                size="s"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen"
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <MetricsAccordion
+                dataTestSubj="metricsListItems_availableMetrics"
+                handleClick={[Function]}
+                headerName="Available Metrics"
+                metricsList={Array []}
+              >
+                <EuiAccordion
+                  arrowDisplay="left"
+                  buttonContent={
+                    <EuiTitle
+                      size="xxxs"
+                    >
+                      <span>
+                        Available Metrics
+                         
+                        0
+                         of 
+                        0
+                      </span>
+                    </EuiTitle>
+                  }
+                  id="Available MetricsSelector"
+                  initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
+                  paddingSize="none"
                 >
                   <div
-                    className="euiAccordion__triggerWrapper"
+                    className="euiAccordion euiAccordion-isOpen"
                   >
-                    <button
-                      aria-controls="Available MetricsSelector"
-                      aria-expanded={true}
-                      className="euiAccordion__button"
-                      id="random_html_id"
-                      onClick={[Function]}
-                      type="button"
+                    <div
+                      className="euiAccordion__triggerWrapper"
                     >
-                      <span
-                        className="euiAccordion__iconWrapper"
+                      <button
+                        aria-controls="Available MetricsSelector"
+                        aria-expanded={true}
+                        className="euiAccordion__button"
+                        id="random_html_id"
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
+                        <span
+                          className="euiAccordion__iconWrapper"
                         >
-                          <EuiIconEmpty
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            className="euiAccordion__icon euiAccordion__icon-isOpen"
+                            size="m"
+                            type="arrowRight"
                           >
-                            <svg
+                            <EuiIconBeaker
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
-                      >
-                        <EuiTitle
-                          size="xxxs"
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                        <span
+                          className="euiIEFlexWrapFix"
                         >
-                          <span
-                            className="euiTitle euiTitle--xxxsmall"
+                          <EuiTitle
+                            size="xxxs"
                           >
-                            Available Metrics
-                             
-                            0
-                             of 
-                            0
-                          </span>
-                        </EuiTitle>
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    aria-labelledby="random_html_id"
-                    className="euiAccordion__childWrapper"
-                    id="Available MetricsSelector"
-                    role="region"
-                    tabIndex={-1}
-                  >
-                    <EuiResizeObserver
-                      onResize={[Function]}
+                            <span
+                              className="euiTitle euiTitle--xxxsmall"
+                            >
+                              Available Metrics
+                               
+                              0
+                               of 
+                              0
+                            </span>
+                          </EuiTitle>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      aria-labelledby="random_html_id"
+                      className="euiAccordion__childWrapper"
+                      id="Available MetricsSelector"
+                      role="region"
+                      tabIndex={-1}
                     >
-                      <div>
-                        <div
-                          className=""
-                        >
-                          <ul
-                            className="metricsList"
-                          />
+                      <EuiResizeObserver
+                        onResize={[Function]}
+                      >
+                        <div>
+                          <div
+                            className=""
+                          >
+                            <ul
+                              className="metricsList"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </EuiResizeObserver>
+                      </EuiResizeObserver>
+                    </div>
                   </div>
-                </div>
-              </EuiAccordion>
-            </Component>
-          </section>
+                </EuiAccordion>
+              </MetricsAccordion>
+            </section>
+          </div>
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Component>
+  </Sidebar>
 </Provider>
 `;

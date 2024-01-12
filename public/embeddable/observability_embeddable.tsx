@@ -14,10 +14,11 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
 import {
-  VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
+  VisualizationSavedObjectAttributes,
 } from '../../common/types/observability_saved_object_attributes';
 import { ObservabilityEmbeddableComponent } from './observability_embeddable_component';
+import { observabilityMetricsID, PROMQL_METRIC_SUBTYPE } from '../../common/constants/shared';
 
 // this needs to match the saved object type for the clone and replace panel actions to work
 export const OBSERVABILITY_EMBEDDABLE = VISUALIZATION_SAVED_OBJECT;
@@ -26,6 +27,8 @@ export const OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME = 'PPL';
 export const OBSERVABILITY_EMBEDDABLE_DESCRIPTION =
   'Create a visualization with Piped Processing Language (PPL). PPL can query data in your indices and also supports federated data sources like Prometheus.';
 export const OBSERVABILITY_EMBEDDABLE_ICON = 'visQueryPPL';
+
+export const OBSERVABILITY_EMBEDDABLE_METRIC_DISPLAY_NAME = 'PPL Metric';
 
 export interface ObservabilityOutput extends EmbeddableOutput {
   /**
@@ -78,11 +81,26 @@ export class ObservabilityEmbeddable extends Embeddable<
   public async reload() {
     this.attributes = await this.attributeService.unwrapAttributes(this.input);
 
-    this.updateOutput({
-      attributes: this.attributes,
-      title: this.input.title || this.attributes.title,
-      defaultTitle: this.attributes.title,
-    });
+    const isMetric = this.attributes?.savedVisualization?.subType === PROMQL_METRIC_SUBTYPE;
+    if (isMetric) {
+      const editPath = `#/${VISUALIZATION_SAVED_OBJECT}:${this.savedObjectId}`;
+      const editUrl = `/app/${observabilityMetricsID}${editPath}`;
+
+      this.updateOutput({
+        attributes: this.attributes,
+        title: this.input.title || this.attributes.title,
+        defaultTitle: this.attributes.title,
+        editPath,
+        editUrl,
+        editApp: observabilityMetricsID,
+      });
+    } else {
+      this.updateOutput({
+        attributes: this.attributes,
+        title: this.input.title || this.attributes.title,
+        defaultTitle: this.attributes.title,
+      });
+    }
   }
 
   public destroy() {

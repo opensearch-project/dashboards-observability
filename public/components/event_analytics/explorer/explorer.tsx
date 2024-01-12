@@ -10,15 +10,15 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPage,
+  EuiPageBody,
+  EuiPageSideBar,
   EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
-  EuiPage,
-  EuiSplitPanel,
-  EuiPageSideBar,
-  EuiPageBody,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import _, { isEmpty, isEqual, reduce } from 'lodash';
@@ -57,6 +57,7 @@ import {
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
+  PPL_METRIC_SUBTYPE,
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
@@ -70,8 +71,8 @@ import {
 import {
   buildQuery,
   getIndexPatternFromRawQuery,
-  uiSettingsService,
   getSavingCommonParams,
+  uiSettingsService,
 } from '../../../../common/utils';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -91,8 +92,8 @@ import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -102,8 +103,8 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
@@ -120,10 +121,12 @@ import { DataSourceSelection } from './datasources/datasources_selection';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
+import { processMetricsData } from '../../custom_panels/helpers/utils';
 import {
   DEFAULT_DATA_SOURCE_TYPE,
   QUERY_LANGUAGE,
 } from '../../../../common/constants/data_sources';
+import { findMinInterval } from '../../common/query_utils';
 
 export const Explorer = ({
   pplService,
@@ -206,8 +209,10 @@ export const Explorer = ({
       explorerSearchMeta.lang || QUERY_LANGUAGE.SQL
     ) || {};
   const SearchBar = ui?.SearchBar || Search;
-  const isDefaultDataSourceType =
-    explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
+  const isDefaultDataSourceType = [DEFAULT_DATA_SOURCE_TYPE, 'prometheus'].includes(
+    explorerSearchMeta.datasources?.[0]?.type
+  );
+
   const selectedIntervalRef = useRef<{
     text: string;
     value: string;
@@ -233,25 +238,7 @@ export const Explorer = ({
   liveTailNameRef.current = liveTailName;
 
   const findAutoInterval = (start: string = '', end: string = '') => {
-    const momentStart = dateMath.parse(start)!;
-    const momentEnd = dateMath.parse(end, { roundUp: true })!;
-    const diffSeconds = momentEnd.unix() - momentStart.unix();
-    let minInterval = 'y';
-
-    // less than 1 second
-    if (diffSeconds <= 1) minInterval = 'ms';
-    // less than 2 minutes
-    else if (diffSeconds <= 60 * 2) minInterval = 's';
-    // less than 2 hours
-    else if (diffSeconds <= 3600 * 2) minInterval = 'm';
-    // less than 2 days
-    else if (diffSeconds <= 86400 * 2) minInterval = 'h';
-    // less than 1 month
-    else if (diffSeconds <= 86400 * 31) minInterval = 'd';
-    // less than 3 months
-    else if (diffSeconds <= 86400 * 93) minInterval = 'w';
-    // less than 1 year
-    else if (diffSeconds <= 86400 * 366) minInterval = 'M';
+    const minInterval = findMinInterval(start, end);
 
     setTimeIntervalOptions([
       { text: 'Auto', value: 'auto_' + minInterval },
@@ -608,17 +595,22 @@ export const Explorer = ({
     isQueryRunning,
   ]);
 
+  const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
+    ? { ...userVizConfigs[curVisId] }
+    : {
+        dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
+      };
+
   const visualizations: IVisualizationContainerProps = useMemo(() => {
     return getVizContainerProps({
       vizId: curVisId,
       rawVizData: explorerVisualizations,
       query,
       indexFields: explorerFields,
-      userConfigs: !isEmpty(userVizConfigs[curVisId])
-        ? { ...userVizConfigs[curVisId] }
-        : {
-            dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
-          },
+      userConfigs: {
+        ...visualizationSettings,
+        ...processMetricsData(explorerData.schema, visualizationSettings),
+      },
       appData: { fromApp: appLogEvents },
       explorer: { explorerData, explorerFields, query, http, pplService },
     });
@@ -740,7 +732,7 @@ export const Explorer = ({
         );
       }
     } else {
-      if (isTabHasObjID && isObjTypeMatchVis) {
+      if (isTabHasObjID && isObjTypeMatchVis && subType !== PPL_METRIC_SUBTYPE) {
         soClient = new SaveAsCurrentVisualization(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const METRIC_EXPLORER_BASE_PATH = 'observability-metrics#/';
+
 // requests constants
 export const VISUALIZATION = 'viz';
 export const SAVED_VISUALIZATION = 'savedVisualization';
@@ -24,13 +26,10 @@ export const resolutionOptions = [
   { value: 'y', text: 'years' },
 ];
 
-export const DEFAULT_METRIC_HEIGHT = 2;
-export const DEFAULT_METRIC_WIDTH = 12;
-
 export const AGGREGATION_OPTIONS = [
-  { label: 'avg' },
-  { label: 'sum' },
-  { label: 'count' },
-  { label: 'min' },
-  { label: 'max' },
+  { value: 'avg', text: 'avg()' },
+  { value: 'sum', text: 'sum()' },
+  { value: 'count', text: 'count()' },
+  { value: 'min', text: 'min()' },
+  { value: 'max', text: 'max()' },
 ];

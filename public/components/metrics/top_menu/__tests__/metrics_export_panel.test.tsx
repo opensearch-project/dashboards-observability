@@ -8,7 +8,12 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
-import { sampleSavedMetric, sampleSortedMetricsLayout } from '../../../../../test/metrics_contants';
+import {
+  sampleAvailableDashboards,
+  sampleMetricsToExport,
+  sampleSavedMetric,
+  sampleSortedMetricsLayout,
+} from '../../../../../test/metrics_constants';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
@@ -40,12 +45,8 @@ describe('Export Metrics Panel Component', () => {
     const wrapper = mount(
       <Provider store={store}>
         <MetricsExportPanel
-          http={http}
-          visualizationsMetaData={visualizationsMetaData}
-          setVisualizationsMetaData={setVisualizationsMetaData}
-          sortedMetricsLayout={sortedMetricsLayout}
-          selectedPanelOptions={[]}
-          setSelectedPanelOptions={setSelectedPanelOptions}
+          metricsToExport={sampleMetricsToExport}
+          availableDashboards={sampleAvailableDashboards}
         />
       </Provider>
     );

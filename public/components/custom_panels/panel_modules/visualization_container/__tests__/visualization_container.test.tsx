@@ -15,6 +15,9 @@ import {
   sampleSavedVisualization,
   samplePPLResponse,
 } from '../../../../../../test/panels_constants';
+import { createStore } from '@reduxjs/toolkit';
+import { rootReducer } from '../../../../../framework/redux/reducers';
+import { Provider } from 'react-redux';
 
 describe('Visualization Container Component', () => {
   configure({ adapter: new Adapter() });
@@ -27,6 +30,9 @@ describe('Visualization Container Component', () => {
     httpClientMock.post = jest.fn(() =>
       Promise.resolve((samplePPLResponse as unknown) as HttpResponse)
     );
+
+    // configure({ adapter: new Adapter() });
+    const store = createStore(rootReducer);
 
     const editMode = true;
     const visualizationId = 'panel_viz_9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -44,21 +50,24 @@ describe('Visualization Container Component', () => {
     };
 
     const wrapper = mount(
-      <VisualizationContainer
-        http={httpClientMock}
-        editMode={editMode}
-        visualizationId={visualizationId}
-        savedVisualizationId={savedVisualizationId}
-        pplService={pplService}
-        fromTime={fromTime}
-        toTime={toTime}
-        onRefresh={onRefresh}
-        cloneVisualization={cloneVisualization}
-        pplFilterValue={pplFilterValue}
-        showFlyout={showFlyout}
-        removeVisualization={removeVisualization}
-        onEditClick={onEditClick}
-      />
+      <Provider store={store}>
+        <VisualizationContainer
+          http={httpClientMock}
+          editMode={editMode}
+          visualizationId={visualizationId}
+          savedVisualizationId={savedVisualizationId}
+          pplService={pplService}
+          fromTime={fromTime}
+          toTime={toTime}
+          onRefresh={onRefresh}
+          cloneVisualization={cloneVisualization}
+          pplFilterValue={pplFilterValue}
+          showFlyout={showFlyout}
+          removeVisualization={removeVisualization}
+          onEditClick={onEditClick}
+          contextMenuId="visualization"
+        />
+      </Provider>
     );
     wrapper.update();
 
