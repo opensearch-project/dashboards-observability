@@ -12,7 +12,9 @@ exports[`Explorer Search component renders basic component 1`] = `
     }
   }
 >
-  <Search>
+  <Search
+    tabId="OBSERVABILITY_DEFAULT_TAB"
+  >
     <div
       className="globalQueryBar"
     >
@@ -385,7 +387,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                         baseQuery=""
                         handleQuerySearch={[Function]}
                         key="autocomplete-search-bar"
-                        tabId=""
+                        tabId="OBSERVABILITY_DEFAULT_TAB"
                       >
                         <div
                           aria-expanded={false}

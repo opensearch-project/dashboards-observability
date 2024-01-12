@@ -272,8 +272,8 @@ export const Search = (props: any) => {
 
   useEffect(() => {
     // set index and olly query assistant question if changed elsewhere
-    if (!queryRedux?.ollyQueryAssistant) return;
-    if (queryRedux?.index.length > 0) {
+    if (!queryRedux.ollyQueryAssistant) return;
+    if (queryRedux.index.length > 0) {
       const reduxIndex = [{ label: queryRedux.index }];
       setSelectedIndex(reduxIndex);
       // sets the editor text and populates sidebar field for a particular index upon initialization
@@ -281,7 +281,7 @@ export const Search = (props: any) => {
       handleQueryChange(indexQuery);
       getAvailableFields(indexQuery);
     }
-    if (queryRedux?.ollyQueryAssistant.length > 0) {
+    if (queryRedux.ollyQueryAssistant.length > 0) {
       setNlqInput(queryRedux.ollyQueryAssistant);
       // remove index and olly query assistant
       dispatch(
@@ -294,7 +294,7 @@ export const Search = (props: any) => {
         })
       );
     }
-  }, [queryRedux?.index, queryRedux?.ollyQueryAssistant]);
+  }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
     batch(() => {
