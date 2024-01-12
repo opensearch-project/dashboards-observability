@@ -17,9 +17,9 @@ const observabilityConfig = {
   schema: schema.object({
     query_assist: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      ppl_agent_id: schema.maybe(schema.string()),
-      response_summary_agent_id: schema.maybe(schema.string()),
-      error_summary_agent_id: schema.maybe(schema.string()),
+      ppl_agent_name: schema.maybe(schema.string()),
+      response_summary_agent_name: schema.maybe(schema.string()),
+      error_summary_agent_name: schema.maybe(schema.string()),
     }),
   }),
 };

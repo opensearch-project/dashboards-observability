@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApiResponse } from '@opensearch-project/opensearch';
 import { schema } from '@osd/config-schema';
 import { ObservabilityConfig } from '../..';
 import {
@@ -11,32 +10,15 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { ML_COMMONS_API_PREFIX, QUERY_ASSIST_API } from '../../../common/constants/query_assist';
+import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-
-const AGENT_REQUEST_OPTIONS = {
-  /**
-   * It is time-consuming for LLM to generate final answer
-   * Give it a large timeout window
-   */
-  requestTimeout: 5 * 60 * 1000,
-  /**
-   * Do not retry
-   */
-  maxRetries: 0,
-};
-
-type AgentResponse = ApiResponse<{
-  inference_results: Array<{
-    output: Array<{ name: string; result?: string }>;
-  }>;
-}>;
+import { agentIdMap, searchAgentIdByName, requestWithRetryAgentSearch } from './utils/agents';
 
 export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
   const {
-    ppl_agent_id: pplAgentId,
-    response_summary_agent_id: responseSummaryAgentId,
-    error_summary_agent_id: ErrorSummaryAgentId,
+    ppl_agent_name: pplAgentName,
+    response_summary_agent_name: responseSummaryAgentName,
+    error_summary_agent_name: errorSummaryAgentName,
   } = config.query_assist;
 
   router.post(
@@ -54,28 +36,32 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!pplAgentId)
+      if (!pplAgentName)
         return response.custom({
           statusCode: 400,
           body:
-            'PPL agent not found in opensearch_dashboards.yml. Expected observability.query_assist.ppl_agent_id',
+            'PPL agent name not found in opensearch_dashboards.yml. Expected observability.query_assist.ppl_agent_name',
         });
 
       const client = context.core.opensearch.client.asCurrentUser;
+      let shouldRetryAgentSearch = true;
+      if (!agentIdMap[pplAgentName]) {
+        await searchAgentIdByName(client, pplAgentName);
+        shouldRetryAgentSearch = false;
+      }
+
       try {
-        const pplRequest = (await client.transport.request(
-          {
-            method: 'POST',
-            path: `${ML_COMMONS_API_PREFIX}/agents/${pplAgentId}/_execute`,
-            body: {
-              parameters: {
-                index: request.body.index,
-                question: request.body.question,
-              },
+        const pplRequest = await requestWithRetryAgentSearch({
+          client,
+          agentName: pplAgentName,
+          shouldRetryAgentSearch,
+          body: {
+            parameters: {
+              index: request.body.index,
+              question: request.body.question,
             },
           },
-          AGENT_REQUEST_OPTIONS
-        )) as AgentResponse;
+        });
         if (!pplRequest.body.inference_results[0].output[0].result)
           throw new Error('Generated PPL query not found.');
         const result = JSON.parse(pplRequest.body.inference_results[0].output[0].result) as {
@@ -116,45 +102,51 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!responseSummaryAgentId || !ErrorSummaryAgentId)
+      if (!responseSummaryAgentName || !errorSummaryAgentName)
         return response.custom({
           statusCode: 400,
           body:
-            'Summary agent not found in opensearch_dashboards.yml. Expected observability.query_assist.response_summary_agent_id and observability.query_assist.error_summary_agent_id',
+            'Summary agent name not found in opensearch_dashboards.yml. Expected observability.query_assist.response_summary_agent_name and observability.query_assist.error_summary_agent_name',
         });
 
       const client = context.core.opensearch.client.asCurrentUser;
       const { index, question, query, response: _response, isError } = request.body;
       const queryResponse = JSON.stringify(_response);
-      let summaryRequest: AgentResponse;
+      let summaryRequest;
+      let shouldRetryAgentSearch = true;
+
       try {
         if (!isError) {
-          summaryRequest = (await client.transport.request(
-            {
-              method: 'POST',
-              path: `${ML_COMMONS_API_PREFIX}/agents/${responseSummaryAgentId}/_execute`,
-              body: {
-                parameters: { index, question, query, response: queryResponse },
-              },
+          if (!agentIdMap[responseSummaryAgentName]) {
+            await searchAgentIdByName(client, responseSummaryAgentName);
+            shouldRetryAgentSearch = false;
+          }
+          summaryRequest = await requestWithRetryAgentSearch({
+            client,
+            agentName: responseSummaryAgentName,
+            shouldRetryAgentSearch,
+            body: {
+              parameters: { index, question, query, response: queryResponse },
             },
-            AGENT_REQUEST_OPTIONS
-          )) as AgentResponse;
+          });
         } else {
+          if (!agentIdMap[errorSummaryAgentName]) {
+            await searchAgentIdByName(client, errorSummaryAgentName);
+            shouldRetryAgentSearch = false;
+          }
           const [mappings, sampleDoc] = await Promise.all([
             client.indices.getMapping({ index }),
             client.search({ index, size: 1 }),
           ]);
           const fields = generateFieldContext(mappings, sampleDoc);
-          summaryRequest = (await client.transport.request(
-            {
-              method: 'POST',
-              path: `${ML_COMMONS_API_PREFIX}/agents/${ErrorSummaryAgentId}/_execute`,
-              body: {
-                parameters: { index, question, query, response: queryResponse, fields },
-              },
+          summaryRequest = await requestWithRetryAgentSearch({
+            client,
+            agentName: errorSummaryAgentName,
+            shouldRetryAgentSearch,
+            body: {
+              parameters: { index, question, query, response: queryResponse, fields },
             },
-            AGENT_REQUEST_OPTIONS
-          )) as AgentResponse;
+          });
         }
         const summary = summaryRequest.body.inference_results[0].output[0].result;
         if (!summary) throw new Error('Generated summary not found.');
