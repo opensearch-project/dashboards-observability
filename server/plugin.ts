@@ -134,7 +134,7 @@ export class ObservabilityPlugin
       },
     }));
 
-    // assistantDashboards?.registerMessageParser(PPLParsers);
+    assistantDashboards?.registerMessageParser(PPLParsers);
 
     return {};
   }
