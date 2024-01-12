@@ -3,28 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useState, useRef } from 'react';
+import { batch } from 'react-redux';
 import { isEmpty } from 'lodash';
-import { useRef, useState } from 'react';
-import { batch, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { IField } from 'common/types/explorer';
 import {
-  AVAILABLE_FIELDS,
   FINAL_QUERY,
-  QUERIED_FIELDS,
   SELECTED_FIELDS,
   UNSELECTED_FIELDS,
+  AVAILABLE_FIELDS,
+  QUERIED_FIELDS,
 } from '../../../../common/constants/explorer';
-import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
-import PPLService from '../../../services/requests/ppl';
-import { selectFields, sortFields, updateFields } from '../redux/slices/field_slice';
+import { fetchSuccess, reset as queryResultReset } from '../redux/slices/query_result_slice';
 import { reset as patternsReset } from '../redux/slices/patterns_slice';
-import { setResponseForSummaryStatus } from '../redux/slices/query_assistant_summarization_slice';
-import {
-  fetchFailure,
-  fetchSuccess,
-  reset as queryResultReset,
-} from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { reset as visualizationReset } from '../redux/slices/visualization_slice';
+import { updateFields, sortFields, selectFields } from '../redux/slices/field_slice';
+import PPLService from '../../../services/requests/ppl';
+import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
 
 interface IFetchEventsParams {
   pplService: PPLService;
@@ -193,57 +190,23 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     );
   };
 
-  const getEvents = (
-    query: string = '',
-    errorHandler?: (error: any) => void,
-    setSummaryStatus?: boolean
-  ) => {
+  const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
     if (isEmpty(query)) return;
     const cur = queriesRef.current;
     const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
     fetchEvents(
       { query: searchQuery },
       'jdbc',
-      async (res: any) => {
+      (res: any) => {
         if (!isEmpty(res.jsonData)) {
-          await dispatchOnGettingHis(res, searchQuery);
+          return dispatchOnGettingHis(res, searchQuery);
         } else if (!isEmpty(res.data?.resp)) {
-          await dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
-        } else {
-          // when no hits and needs to get available fields to override default timestamp
-          dispatchOnNoHis(res);
+          return dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
         }
-        if (setSummaryStatus)
-          dispatch(
-            setResponseForSummaryStatus({
-              tabId: requestParams.tabId,
-              responseForSummaryStatus: 'success',
-            })
-          );
+        // when no hits and needs to get available fields to override default timestamp
+        dispatchOnNoHis(res);
       },
-      (error) => {
-        errorHandler?.(error);
-        batch(() => {
-          dispatch(
-            queryResultReset({
-              tabId: requestParams.tabId,
-            })
-          );
-          dispatch(
-            fetchFailure({
-              tabId: requestParams.tabId,
-              error,
-            })
-          );
-          if (setSummaryStatus)
-            dispatch(
-              setResponseForSummaryStatus({
-                tabId: requestParams.tabId,
-                responseForSummaryStatus: 'failure',
-              })
-            );
-        });
-      }
+      errorHandler
     );
   };
 

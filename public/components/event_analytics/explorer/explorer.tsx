@@ -34,10 +34,6 @@ import React, {
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { LogExplorerRouterContext } from '..';
 import {
-  DEFAULT_DATA_SOURCE_TYPE,
-  QUERY_LANGUAGE,
-} from '../../../../common/constants/data_sources';
-import {
   CREATE_TAB_PARAM,
   CREATE_TAB_PARAM_KEY,
   DATE_PICKER_FORMAT,
@@ -78,13 +74,11 @@ import {
   getSavingCommonParams,
   uiSettingsService,
 } from '../../../../common/utils';
-import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
-import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
+import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
 import { PanelSavedObjectClient } from '../../../services/saved_objects/saved_object_client/ppl';
-import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
 import {
   SaveAsCurrentQuery,
   SaveAsCurrentVisualization,
@@ -92,41 +86,47 @@ import {
 } from '../../../services/saved_objects/saved_object_savers';
 import { SaveAsNewQuery } from '../../../services/saved_objects/saved_object_savers/ppl/save_as_new_query';
 import { sleep } from '../../common/live_tail/live_tail_button';
-import { findMinInterval } from '../../common/query_utils';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
-import { processMetricsData } from '../../custom_panels/helpers/utils';
 import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
-import { changeData, changeQuery, selectQueries } from '../redux/slices/query_slice';
+import { changeDateRange, changeQuery, selectQueries } from '../redux/slices/query_slice';
 import { updateTabName } from '../redux/slices/query_tab_slice';
 import { selectExplorerVisualization } from '../redux/slices/visualization_slice';
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
-import { getDefaultVisConfig } from '../utils';
+import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
-import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { NoResults } from './no_results';
-import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { initialTabId } from '../../../framework/redux/store/shared_state';
+import { ObservabilitySideBar } from './sidebar/observability_sidebar';
+import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
+import { processMetricsData } from '../../custom_panels/helpers/utils';
+import {
+  DEFAULT_DATA_SOURCE_TYPE,
+  QUERY_LANGUAGE,
+} from '../../../../common/constants/data_sources';
+import { findMinInterval } from '../../common/query_utils';
 
 export const Explorer = ({
   pplService,
@@ -144,6 +144,10 @@ export const Explorer = ({
   appId = '',
   appBaseQuery = '',
   addVisualizationToPanel,
+  startTime,
+  endTime,
+  setStartTime,
+  setEndTime,
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
@@ -226,18 +230,12 @@ export const Explorer = ({
   const liveTailNameRef = useRef('Live');
   const savedObjectLoader = useRef<ExplorerSavedObjectLoader | undefined>(undefined);
   const isObjectIdUpdatedFromSave = useRef(false); // Flag to prevent reload when the current search's objectId changes due to a save operation.
-  const tempQueryRef = useRef('');
   queryRef.current = query;
   selectedPanelNameRef.current = selectedPanelName;
   explorerFieldsRef.current = explorerFields;
   isLiveTailOnRef.current = isLiveTailOn;
   liveTailTabIdRef.current = liveTailTabId;
   liveTailNameRef.current = liveTailName;
-  tempQueryRef.current = tempQuery;
-
-  const dateRange = getDateRange(undefined, undefined, query);
-  const [startTime, setStartTime] = useState(dateRange[0]);
-  const [endTime, setEndTime] = useState(dateRange[1]);
 
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
@@ -246,16 +244,11 @@ export const Explorer = ({
       { text: 'Auto', value: 'auto_' + minInterval },
       ...TIME_INTERVAL_OPTIONS,
     ]);
-    selectedIntervalRef.current = {
-      text: 'Auto',
-      value: 'auto_' + minInterval,
-    };
+    selectedIntervalRef.current = { text: 'Auto', value: 'auto_' + minInterval };
     dispatch(
       updateCountDistribution({
         tabId,
-        data: {
-          selectedInterval: selectedIntervalRef.current.value.replace(/^auto_/, ''),
-        },
+        data: { selectedInterval: selectedIntervalRef.current.value.replace(/^auto_/, '') },
       })
     );
   };
@@ -273,18 +266,14 @@ export const Explorer = ({
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
-      // const formattedError = formatError(error.name, error.message, error.body.message);
-      // notifications.toasts.addError(formattedError, {
-      //   title,
-      // });
+      const formattedError = formatError(error.name, error.message, error.body.message);
+      notifications.toasts.addError(formattedError, {
+        title,
+      });
     };
   };
 
-  const fetchData = async (
-    startingTime?: string,
-    endingTime?: string,
-    setSummaryStatus?: boolean
-  ) => {
+  const fetchData = async (startingTime?: string, endingTime?: string) => {
     const curQuery: IQuery = queryRef.current!;
     new PPLDataFetcher(
       { ...curQuery },
@@ -304,7 +293,6 @@ export const Explorer = ({
         queryManager,
         getDefaultVisConfig,
         getAvailableFields,
-        setSummaryStatus,
       },
       {
         appBaseQuery,
@@ -410,9 +398,9 @@ export const Explorer = ({
       setEndTime(timeRange[1]);
     }
     await dispatch(
-      changeData({
+      changeDateRange({
         tabId: requestParams.tabId,
-        data: { [SELECTED_DATE_RANGE]: timeRange },
+        data: { [RAW_QUERY]: queryRef.current![RAW_QUERY], [SELECTED_DATE_RANGE]: timeRange },
       })
     );
   };
@@ -427,11 +415,8 @@ export const Explorer = ({
     );
   };
 
-  const handleTimeRangePickerRefresh = async (
-    availability?: boolean,
-    setSummaryStatus?: boolean
-  ) => {
-    handleQuerySearch(availability, setSummaryStatus);
+  const handleTimeRangePickerRefresh = async (availability?: boolean) => {
+    handleQuerySearch(availability);
     if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
       let currQuery = query.rawQuery;
       const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
@@ -453,12 +438,7 @@ export const Explorer = ({
 
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' },
-      })
-    );
+    await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' } }));
     setIsOverridingTimestamp(false);
     handleQuerySearch();
   };
@@ -478,59 +458,55 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const dateRange = getDateRange(startTime, endTime, query);
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
             {(isDefaultDataSourceType || appLogEvents) && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    {countDistribution?.data && !isLiveTailOnRef.current && (
-                      <EuiPanel>
-                        <HitsCounter
-                          hits={_.sum(countDistribution.data?.['count()'])}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                        <TimechartHeader
-                          options={timeIntervalOptions}
-                          onChangeInterval={(selectedIntrv) => {
-                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                              (item) => item.value === selectedIntrv
-                            );
-                            const intrv = selectedIntrv.replace(/^auto_/, '');
-                            dispatch(
-                              updateCountDistribution({
-                                tabId,
-                                data: { selectedInterval: intrv },
-                              })
-                            );
-                            getCountVisualizations(intrv);
-                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                          }}
-                          stateInterval={
-                            countDistribution.selectedInterval || selectedIntervalRef.current?.value
-                          }
-                          startTime={startTime}
-                          endTime={endTime}
-                        />
-                        <EuiSpacer size="s" />
-                        <CountDistribution
-                          countDistribution={countDistribution}
-                          selectedInterval={
-                            countDistribution.selectedInterval || selectedIntervalRef.current?.value
-                          }
-                          startTime={startTime}
-                          endTime={endTime}
-                        />
-                      </EuiPanel>
-                    )}
-                  </EuiPanel>
-                </EuiFlexItem>
-              </>
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                  {countDistribution?.data && !isLiveTailOnRef.current && (
+                    <EuiPanel>
+                      <HitsCounter
+                        hits={_.sum(countDistribution.data?.['count()'])}
+                        showResetButton={false}
+                        onResetQuery={() => {}}
+                      />
+                      <TimechartHeader
+                        options={timeIntervalOptions}
+                        onChangeInterval={(selectedIntrv) => {
+                          const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                            (item) => item.value === selectedIntrv
+                          );
+                          const intrv = selectedIntrv.replace(/^auto_/, '');
+                          dispatch(
+                            updateCountDistribution({ tabId, data: { selectedInterval: intrv } })
+                          );
+                          getCountVisualizations(intrv);
+                          selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                          getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                        }}
+                        stateInterval={
+                          countDistribution.selectedInterval || selectedIntervalRef.current?.value
+                        }
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                      <EuiSpacer size="s" />
+                      <CountDistribution
+                        countDistribution={countDistribution}
+                        selectedInterval={
+                          countDistribution.selectedInterval || selectedIntervalRef.current?.value
+                        }
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    </EuiPanel>
+                  )}
+                </EuiPanel>
+              </EuiFlexItem>
             )}
             {(isDefaultDataSourceType || appLogEvents) && (
               <EuiFlexItem grow={false}>
@@ -590,8 +566,8 @@ export const Explorer = ({
                             : explorerData.datarows.length
                         }
                         requestParams={requestParams}
-                        startTime={startTime}
-                        endTime={endTime}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
@@ -603,7 +579,7 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults tabId={tabId} />
+          <NoResults />
         )}
       </div>
     );
@@ -695,35 +671,24 @@ export const Explorer = ({
 
   const updateQueryInStore = async (updateQuery: string) => {
     await dispatch(
-      changeQuery({
-        tabId,
-        query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') },
-      })
+      changeQuery({ tabId, query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
     );
   };
 
-  const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
-    // clear previous selected timestamp when index pattern changes
-    const searchedQuery = tempQueryRef.current;
-    if (
-      isIndexPatternChanged(searchedQuery, query[RAW_QUERY]) &&
-      query[SELECTED_TIMESTAMP] !== ''
-    ) {
-      await dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [SELECTED_TIMESTAMP]: '',
-          },
-        })
-      );
-      await setDefaultPatternsField('', '');
-    }
-    if (availability !== true) {
-      await updateQueryInStore(searchedQuery);
-    }
-    await fetchData(undefined, undefined, setSummaryStatus);
-  };
+  const handleQuerySearch = useCallback(
+    async (availability?: boolean) => {
+      // clear previous selected timestamp when index pattern changes
+      if (isIndexPatternChanged(tempQuery, query[RAW_QUERY])) {
+        await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: '' } }));
+        await setDefaultPatternsField('', '');
+      }
+      if (availability !== true) {
+        await updateQueryInStore(tempQuery);
+      }
+      await fetchData(startTime, endTime);
+    },
+    [tempQuery, query]
+  );
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
 
@@ -953,10 +918,8 @@ export const Explorer = ({
                   handleQueryChange={handleQueryChange}
                   handleQuerySearch={handleQuerySearch}
                   dslService={dslService}
-                  startTime={startTime}
-                  endTime={endTime}
-                  setStartTime={setStartTime}
-                  setEndTime={setEndTime}
+                  startTime={appLogEvents ? startTime : dateRange[0]}
+                  endTime={appLogEvents ? endTime : dateRange[1]}
                   handleTimePickerChange={(timeRange: string[]) =>
                     handleTimePickerChange(timeRange)
                   }
@@ -986,8 +949,6 @@ export const Explorer = ({
                   setSubType={setSubType}
                   http={http}
                   setIsQueryRunning={setIsQueryRunning}
-                  isAppAnalytics={appLogEvents}
-                  pplService={pplService}
                 />
                 {explorerSearchMeta.isPolling ? (
                   <DirectQueryRunning tabId={tabId} />

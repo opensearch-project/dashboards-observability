@@ -11,10 +11,7 @@ import {
   SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
 } from '../../../../common/constants/explorer';
-import {
-  render as renderCountDis,
-  reset as resetCountDis,
-} from '../redux/slices/count_distribution_slice';
+import { render as renderCountDis } from '../redux/slices/count_distribution_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { render as renderExplorerVis } from '../redux/slices/visualization_slice';
 import { updateFields, sortFields } from '../redux/slices/field_slice';
@@ -82,13 +79,7 @@ export const useFetchVisualizations = ({
           })
         );
       },
-      (error: Error) => {
-        dispatch(
-          resetCountDis({
-            tabId: requestParams.tabId,
-          })
-        );
-      }
+      (error: Error) => {}
     );
   };
 

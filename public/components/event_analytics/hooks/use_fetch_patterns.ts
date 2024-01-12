@@ -125,13 +125,7 @@ export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsPa
         }));
         dispatchOnPatterns({ patternTableData: formatToTableData });
       })
-      .catch((error) => {
-        dispatch(
-          resetPatterns({
-            tabId: requestParams.tabId,
-          })
-        );
-      });
+      .catch(errorHandler);
   };
 
   const setDefaultPatternsField = async (

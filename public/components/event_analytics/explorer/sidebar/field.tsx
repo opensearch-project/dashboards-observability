@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { isEqual, toUpper, upperFirst } from 'lodash';
 import {
@@ -82,13 +82,6 @@ export const Field = (props: IFieldProps) => {
   const toggleField = (fields: IField) => {
     onToggleField(fields);
   };
-
-  // hardcoded for demo purposes - remove afterwards
-  useEffect(() => {
-    if (field.name === 'order_date') {
-      handleOverrideTimestamp(field);
-    }
-  }, []);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">
