@@ -257,6 +257,6 @@ export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
 
 export const DIRECT_DUMMY_QUERY = 'select 1';
 
-export const NON_QUERY_ASSISTANT_START_TIME = 'now-15m';
-export const QUERY_ASSISTANT_FIXED_START_TIME = 'now-40y';
-export const QUERY_ASSISTANT_FIXED_END_TIME = 'now';
+export const DEFAULT_START_TIME = 'now-15m';
+export const QUERY_ASSIST_START_TIME = 'now-40y';
+export const QUERY_ASSIST_END_TIME = 'now';

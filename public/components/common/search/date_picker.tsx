@@ -9,8 +9,8 @@ import { uiSettingsService } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { IDatePickerProps } from './search';
 import {
-  QUERY_ASSISTANT_FIXED_END_TIME,
-  QUERY_ASSISTANT_FIXED_START_TIME,
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
 } from '../../../../common/constants/shared';
 
 export function DatePicker(props: IDatePickerProps) {
@@ -37,8 +37,8 @@ export function DatePicker(props: IDatePickerProps) {
       >
         <EuiSuperDatePicker
           data-test-subj="pplSearchDatePicker"
-          start={allowTimeChanging ? startTime : QUERY_ASSISTANT_FIXED_START_TIME}
-          end={allowTimeChanging ? endTime : QUERY_ASSISTANT_FIXED_END_TIME}
+          start={allowTimeChanging ? startTime : QUERY_ASSIST_START_TIME}
+          end={allowTimeChanging ? endTime : QUERY_ASSIST_END_TIME}
           dateFormat={uiSettingsService.get('dateFormat')}
           onTimeChange={handleTimeChange}
           onRefresh={handleTimeRangePickerRefresh}

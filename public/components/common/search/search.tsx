@@ -33,9 +33,9 @@ import {
   RAW_QUERY,
 } from '../../../../common/constants/explorer';
 import {
-  NON_QUERY_ASSISTANT_START_TIME,
+  DEFAULT_START_TIME,
   PPL_SPAN_REGEX,
-  QUERY_ASSISTANT_FIXED_START_TIME,
+  QUERY_ASSIST_START_TIME,
 } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
@@ -138,7 +138,7 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [timeRange, setTimeRange] = useState([
-    coreRefs.queryAssistEnabled ? QUERY_ASSISTANT_FIXED_START_TIME : NON_QUERY_ASSISTANT_START_TIME,
+    coreRefs.queryAssistEnabled ? QUERY_ASSIST_START_TIME : DEFAULT_START_TIME,
     'now',
   ]); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);

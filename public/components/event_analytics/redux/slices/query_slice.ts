@@ -20,7 +20,7 @@ import {
 } from '../../../../../common/constants/explorer';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { coreRefs } from '../../../../framework/core_refs';
-import { NON_QUERY_ASSISTANT_START_TIME, QUERY_ASSISTANT_FIXED_START_TIME } from '../../../../../common/constants/shared';
+import { DEFAULT_START_TIME, QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
 
 const initialQueryState = {
   [RAW_QUERY]: '',
@@ -30,7 +30,7 @@ const initialQueryState = {
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,
   [FILTERED_PATTERN]: '',
   [SELECTED_TIMESTAMP]: '',
-  [SELECTED_DATE_RANGE]: [coreRefs.queryAssistEnabled ? QUERY_ASSISTANT_FIXED_START_TIME : NON_QUERY_ASSISTANT_START_TIME, 'now'],
+  [SELECTED_DATE_RANGE]: [coreRefs.queryAssistEnabled ? QUERY_ASSIST_START_TIME : DEFAULT_START_TIME, 'now'],
   [OLLY_QUERY_ASSISTANT]: '',
 };
 
