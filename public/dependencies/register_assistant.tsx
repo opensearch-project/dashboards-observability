@@ -15,7 +15,7 @@ import { PPLVisualizationModal } from './components/ppl_visualization_model';
 export const registerAsssitantDependencies = (setup?: AssistantSetup) => {
   if (!setup) return;
 
-  setup.registerContentRenderer('ppl_visualization', (content) => {
+  setup.registerMessageRenderer('ppl_visualization', (content) => {
     const params = content as Partial<SavedVisualization>;
     const savedVisualization = createSavedVisualization(params);
     return (
