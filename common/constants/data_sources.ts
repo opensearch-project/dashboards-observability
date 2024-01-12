@@ -5,6 +5,8 @@
 
 export const DATA_SOURCE_NAME_URL_PARAM_KEY = 'datasourceName';
 export const DATA_SOURCE_TYPE_URL_PARAM_KEY = 'datasourceType';
+export const OLLY_QUESTION_URL_PARAM_KEY = 'olly_q';
+export const INDEX_URL_PARAM_KEY = 'indexPattern';
 export const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
 export const DEFAULT_DATA_SOURCE_NAME = 'Default cluster';
 export const DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME = 'OpenSearch';

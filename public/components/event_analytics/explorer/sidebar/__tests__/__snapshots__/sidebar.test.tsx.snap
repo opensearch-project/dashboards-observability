@@ -22,10 +22,15 @@ exports[`Siderbar component Renders empty sidebar component 1`] = `
         "unselectedFields": Array [],
       }
     }
+    handleOverridePattern={[Function]}
     handleOverrideTimestamp={[MockFunction]}
     isFieldToggleButtonDisabled={false}
+    isOverridingPattern={false}
     isOverridingTimestamp={false}
+    query=""
+    selectedPattern=""
     selectedTimestamp="timestamp"
+    tabId="OBSERVABILITY_DEFAULT_TAB"
   >
     <I18nProvider>
       <IntlProvider
@@ -587,125 +592,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
         "unselectedFields": Array [],
       }
     }
+    handleOverridePattern={[Function]}
     handleOverrideTimestamp={[MockFunction]}
     isFieldToggleButtonDisabled={false}
+    isOverridingPattern={false}
     isOverridingTimestamp={false}
+    query=""
+    selectedPattern=""
     selectedTimestamp="timestamp"
-    storedExplorerFields={
-      Object {
-        "availableFields": Array [
-          Object {
-            "name": "agent",
-            "type": "string",
-          },
-          Object {
-            "name": "bytes",
-            "type": "long",
-          },
-          Object {
-            "name": "clientip",
-            "type": "ip",
-          },
-          Object {
-            "name": "event",
-            "type": "struct",
-          },
-          Object {
-            "name": "extension",
-            "type": "string",
-          },
-          Object {
-            "name": "geo",
-            "type": "struct",
-          },
-          Object {
-            "name": "host",
-            "type": "string",
-          },
-          Object {
-            "name": "index",
-            "type": "string",
-          },
-          Object {
-            "name": "ip",
-            "type": "ip",
-          },
-          Object {
-            "name": "machine",
-            "type": "struct",
-          },
-          Object {
-            "name": "memory",
-            "type": "double",
-          },
-          Object {
-            "name": "message",
-            "type": "string",
-          },
-          Object {
-            "name": "phpmemory",
-            "type": "long",
-          },
-          Object {
-            "name": "referer",
-            "type": "string",
-          },
-          Object {
-            "name": "request",
-            "type": "string",
-          },
-          Object {
-            "name": "response",
-            "type": "string",
-          },
-          Object {
-            "name": "tags",
-            "type": "string",
-          },
-          Object {
-            "name": "timestamp",
-            "type": "timestamp",
-          },
-          Object {
-            "name": "url",
-            "type": "string",
-          },
-          Object {
-            "name": "utc_time",
-            "type": "timestamp",
-          },
-        ],
-        "queriedFields": Array [
-          Object {
-            "name": "double_per_ip_bytes",
-            "type": "long",
-          },
-          Object {
-            "name": "host",
-            "type": "text",
-          },
-          Object {
-            "name": "ip_count",
-            "type": "integer",
-          },
-          Object {
-            "name": "per_ip_bytes",
-            "type": "long",
-          },
-          Object {
-            "name": "resp_code",
-            "type": "text",
-          },
-          Object {
-            "name": "sum_bytes",
-            "type": "long",
-          },
-        ],
-        "selectedFields": Array [],
-        "unselectedFields": Array [],
-      }
-    }
-    tabId="DEFAULT_INDEX_PATTERNS"
+    tabId="OBSERVABILITY_DEFAULT_TAB"
   >
     <I18nProvider>
       <IntlProvider
@@ -1150,14 +1045,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "long",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -1296,7 +1195,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -1323,14 +1222,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -1552,14 +1451,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "text",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -1698,7 +1601,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -1725,14 +1628,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -1954,14 +1857,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "integer",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -2100,7 +2007,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -2127,14 +2034,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -2356,14 +2263,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "long",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -2502,7 +2413,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -2529,14 +2440,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -2758,14 +2669,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "text",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -2904,7 +2819,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -2931,14 +2846,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -3160,14 +3075,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "long",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={true}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={true}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={false}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -3306,7 +3225,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -3333,14 +3252,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -3720,14 +3639,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -3840,15 +3763,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -3926,7 +3849,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -3953,14 +3876,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -4183,14 +4106,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "long",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -4329,7 +4256,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -4356,14 +4283,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -4586,14 +4513,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "ip",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -4732,7 +4663,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -4759,14 +4690,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -4989,14 +4920,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "struct",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -5135,7 +5070,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -5162,14 +5097,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -5392,14 +5327,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -5512,15 +5451,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -5598,7 +5537,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -5625,14 +5564,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -5855,14 +5794,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "struct",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -6001,7 +5944,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -6028,14 +5971,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -6258,14 +6201,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -6378,15 +6325,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -6464,7 +6411,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -6491,14 +6438,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -6721,14 +6668,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -6841,15 +6792,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -6927,7 +6878,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -6954,14 +6905,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -7184,14 +7135,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "ip",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -7330,7 +7285,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -7357,14 +7312,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -7587,14 +7542,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "struct",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -7733,7 +7692,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -7760,14 +7719,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -7990,14 +7949,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "double",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -8136,7 +8099,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -8163,14 +8126,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -8393,14 +8356,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -8513,15 +8480,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -8599,7 +8566,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -8626,14 +8593,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -8856,14 +8823,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "long",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -9002,7 +8973,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -9029,14 +9000,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -9259,14 +9230,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -9379,15 +9354,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -9465,7 +9440,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -9492,14 +9467,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -9722,14 +9697,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -9842,15 +9821,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -9928,7 +9907,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -9955,14 +9934,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -10185,14 +10164,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -10305,15 +10288,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -10391,7 +10374,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -10418,14 +10401,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -10648,14 +10631,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -10768,15 +10755,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -10854,7 +10841,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -10881,14 +10868,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -11111,14 +11098,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "timestamp",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -11298,7 +11289,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -11325,14 +11316,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -11555,14 +11546,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "string",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -11675,15 +11670,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultPattern"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_pattern"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultPattern"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -11761,7 +11756,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -11788,14 +11783,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
@@ -12018,14 +12013,18 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                               "type": "timestamp",
                                                             }
                                                           }
+                                                          handleOverridePattern={[Function]}
                                                           handleOverrideTimestamp={[MockFunction]}
                                                           isFieldToggleButtonDisabled={false}
+                                                          isOverridingPattern={false}
                                                           isOverridingTimestamp={false}
                                                           onToggleField={[Function]}
+                                                          query=""
                                                           selected={false}
+                                                          selectedPattern=""
                                                           selectedTimestamp="timestamp"
                                                           showTimestampOverrideButton={true}
-                                                          tabId="DEFAULT_INDEX_PATTERNS"
+                                                          tabId="OBSERVABILITY_DEFAULT_TAB"
                                                         >
                                                           <EuiFlexGroup
                                                             alignItems="center"
@@ -12151,15 +12150,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         color="text"
                                                                         data-test-subj="eventExplorer__overrideDefaultTimestamp"
                                                                         iconType="inputOutput"
-                                                                        isDisabled={true}
+                                                                        isDisabled={false}
                                                                         onClick={[Function]}
                                                                         size="xs"
                                                                       >
                                                                         <button
                                                                           aria-labelledby="override_timestamp"
-                                                                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                                                                           data-test-subj="eventExplorer__overrideDefaultTimestamp"
-                                                                          disabled={true}
+                                                                          disabled={false}
                                                                           onClick={[Function]}
                                                                           type="button"
                                                                         >
@@ -12224,7 +12223,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
                                                                             iconType="inspect"
-                                                                            isDisabled={true}
+                                                                            isDisabled={false}
                                                                             onClick={[Function]}
                                                                             size="xs"
                                                                           />
@@ -12251,14 +12250,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
                                                                               iconType="inspect"
-                                                                              isDisabled={true}
+                                                                              isDisabled={false}
                                                                               onClick={[Function]}
                                                                               size="xs"
                                                                             >
                                                                               <button
                                                                                 aria-label="inspect"
-                                                                                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                                                                                disabled={true}
+                                                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
                                                                               >
