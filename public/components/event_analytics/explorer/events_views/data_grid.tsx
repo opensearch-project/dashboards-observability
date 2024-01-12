@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useRef, Fragment, useCallback } from 'react';
+import React, { useMemo, useState, useRef, Fragment, useCallback, useEffect } from 'react';
 import {
   EuiDataGrid,
   EuiDescriptionList,
@@ -72,6 +72,10 @@ export function DataGrid(props: DataGridProps) {
 
   const [data, setData] = useState(rows);
 
+  useEffect(() => {
+    setData(rows);
+  }, [rows]);
+
   // setSort and setPage are used to change the query and send a direct request to get data
   const setSort = (sort: EuiDataGridSorting['columns']) => {
     sortingFields.current = sort;
@@ -103,7 +107,7 @@ export function DataGrid(props: DataGridProps) {
   };
 
   // creates the header for each column listing what that column is
-  const dataGridColumns = useMemo(() => {
+  const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
     selectedColumns.map(({ name, type }) => {
       if (name === 'timestamp') {
@@ -119,10 +123,10 @@ export function DataGrid(props: DataGridProps) {
       }
     });
     return columns;
-  }, [explorerFields, totalHits]);
+  };
 
   // used for which columns are visible and their order
-  const dataGridColumnVisibility = useMemo(() => {
+  const dataGridColumnVisibility = () => {
     if (selectedColumns.length > 0) {
       const columns: string[] = [];
       selectedColumns.map(({ name }) => {
@@ -137,10 +141,10 @@ export function DataGrid(props: DataGridProps) {
     }
     // default shown fields
     throw new Error('explorer data grid stored columns empty');
-  }, [explorerFields, totalHits]);
+  };
 
   // sets the very first column, which is the button used for the flyout of each row
-  const dataGridLeadingColumns = useMemo(() => {
+  const dataGridLeadingColumns = () => {
     return [
       {
         id: 'inspectCollapseColumn',
@@ -171,70 +175,58 @@ export function DataGrid(props: DataGridProps) {
         width: 40,
       },
     ];
-  }, [rows, http, explorerFields, pplService, rawQuery, timeStampField, totalHits]);
+  };
 
   // renders what is shown in each cell, i.e. the content of each row
-  const dataGridCellRender = useCallback(
-    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const trueIndex = rowIndex % pageFields.current[1];
-      if (trueIndex < data.length) {
-        if (columnId === '_source') {
-          return (
-            <EuiDescriptionList type="inline" compressed>
-              {Object.keys(data[trueIndex]).map((key) => (
-                <Fragment key={key}>
-                  <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
-                    {key}
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    {data[trueIndex][key]}
-                  </EuiDescriptionListDescription>
-                </Fragment>
-              ))}
-            </EuiDescriptionList>
-          );
-        }
-        if (columnId === 'timestamp') {
-          return `${moment(data[trueIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
-        }
-        return `${data[trueIndex][columnId]}`;
+  const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    const trueIndex = rowIndex % pageFields.current[1];
+    if (trueIndex < data.length) {
+      if (columnId === '_source') {
+        return (
+          <EuiDescriptionList type="inline" compressed>
+            {Object.keys(data[trueIndex]).map((key) => (
+              <Fragment key={key}>
+                <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
+                  {key}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {data[trueIndex][key]}
+                </EuiDescriptionListDescription>
+              </Fragment>
+            ))}
+          </EuiDescriptionList>
+        );
       }
-      return null;
-    },
-    [data, rows, pageFields, explorerFields, totalHits]
-  );
+      if (columnId === 'timestamp') {
+        return `${moment(data[trueIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+      }
+      return `${data[trueIndex][columnId]}`;
+    }
+    return null;
+  };
 
   // ** Pagination config
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
   // changing the number of items per page, reset index and modify page size
-  const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
-      setPagination(() => {
-        setPage([0, pageSize]);
-        return { pageIndex: 0, pageSize };
-      }),
-    [setPagination, setPage, totalHits]
-  );
+  const onChangeItemsPerPage = (pageSize) =>
+    setPagination(() => {
+      setPage([0, pageSize]);
+      return { pageIndex: 0, pageSize };
+    });
   // changing the page index, keep page size constant
-  const onChangePage = useCallback(
-    (pageIndex) => {
-      setPagination(({ pageSize }) => {
-        setPage([pageIndex, pageSize]);
-        return { pageSize, pageIndex };
-      });
-    },
-    [setPagination, setPage, totalHits]
-  );
+  const onChangePage = (pageIndex) => {
+    setPagination(({ pageSize }) => {
+      setPage([pageIndex, pageSize]);
+      return { pageSize, pageIndex };
+    });
+  };
 
-  const rowHeightsOptions = useMemo(
-    () => ({
-      defaultHeight: {
-        // if source is listed as a column, add extra space
-        lineCount: selectedColumns.some((obj) => obj.name === '_source') ? 3 : 1,
-      },
-    }),
-    [explorerFields, totalHits]
-  );
+  const rowHeightsOptions = () => ({
+    defaultHeight: {
+      // if source is listed as a column, add extra space
+      lineCount: selectedColumns.some((obj) => obj.name === '_source') ? 3 : 1,
+    },
+  });
 
   // TODO: memoize the expensive table below
 
@@ -244,9 +236,9 @@ export function DataGrid(props: DataGridProps) {
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
           data-test-subj="docTable"
-          columns={dataGridColumns}
-          columnVisibility={dataGridColumnVisibility}
-          leadingControlColumns={dataGridLeadingColumns}
+          columns={dataGridColumns()}
+          columnVisibility={dataGridColumnVisibility()}
+          leadingControlColumns={dataGridLeadingColumns()}
           rowCount={totalHits}
           renderCellValue={dataGridCellRender}
           pagination={{
@@ -267,7 +259,7 @@ export function DataGrid(props: DataGridProps) {
             showFullScreenSelector: false,
             showStyleSelector: false,
           }}
-          rowHeightsOptions={rowHeightsOptions}
+          rowHeightsOptions={rowHeightsOptions()}
         />
       </div>
     </EuiPanel>

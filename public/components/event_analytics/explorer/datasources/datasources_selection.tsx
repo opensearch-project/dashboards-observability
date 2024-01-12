@@ -20,9 +20,9 @@ import { reset as resetCountDistribution } from '../../redux/slices/count_distri
 import { reset as resetFields } from '../../redux/slices/field_slice';
 import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
+import { changeData, reset as resetQuery } from '../../redux/slices/query_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
-import { reset as resetQuery } from '../../redux/slices/query_slice';
 import { DirectQueryRequest, SelectedDataSource } from '../../../../../common/types/explorer';
 import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
 import {
@@ -34,6 +34,8 @@ import {
   DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
   DATA_SOURCE_TYPES,
   QUERY_LANGUAGE,
+  OLLY_QUESTION_URL_PARAM_KEY,
+  INDEX_URL_PARAM_KEY,
 } from '../../../../../common/constants/data_sources';
 import { SQLService } from '../../../../services/requests/sql';
 import { get as getObjValue } from '../../../../../common/utils/shared';
@@ -42,6 +44,11 @@ import {
   getAsyncSessionId,
 } from '../../../../../common/utils/query_session_utils';
 import { DIRECT_DUMMY_QUERY } from '../../../../../common/constants/shared';
+import {
+  INDEX,
+  OLLY_QUERY_ASSISTANT,
+  SELECTED_TIMESTAMP,
+} from '../../../../../common/constants/explorer';
 
 const getDataSourceState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
@@ -69,6 +76,9 @@ const removeDataSourceFromURLParams = (currURL: string) => {
     // Remove the data source redirection parameters
     hashParams.delete(DATA_SOURCE_NAME_URL_PARAM_KEY);
     hashParams.delete(DATA_SOURCE_TYPE_URL_PARAM_KEY);
+    hashParams.delete(OLLY_QUESTION_URL_PARAM_KEY);
+    hashParams.delete(INDEX_URL_PARAM_KEY);
+    hashParams.delete('timestamp');
 
     // Reconstruct the hash
     currentURL.hash = hashParams.toString() ? `${hashBase}?${hashParams.toString()}` : hashBase;
@@ -178,6 +188,10 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   useEffect(() => {
     const datasourceName = routerContext?.searchParams.get(DATA_SOURCE_NAME_URL_PARAM_KEY);
     const datasourceType = routerContext?.searchParams.get(DATA_SOURCE_TYPE_URL_PARAM_KEY);
+    const idxPattern = routerContext?.searchParams.get(INDEX_URL_PARAM_KEY);
+    const ollyQuestion = routerContext?.searchParams.get(OLLY_QUESTION_URL_PARAM_KEY) || '';
+    const decodedOllyQ = decodeURIComponent(ollyQuestion);
+    const parsedTimeStamp = routerContext?.searchParams.get('timestamp') || '';
     if (datasourceName && datasourceType) {
       // remove datasourceName and datasourceType from URL for a clean search state
       removeDataSourceFromURLParams(window.location.href);
@@ -190,6 +204,18 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
           })
         );
       });
+      if (idxPattern && decodedOllyQ) {
+        dispatch(
+          changeData({
+            tabId,
+            data: {
+              [INDEX]: idxPattern,
+              [OLLY_QUERY_ASSISTANT]: decodedOllyQ,
+              [SELECTED_TIMESTAMP]: parsedTimeStamp,
+            },
+          })
+        );
+      }
     }
   }, []);
 
