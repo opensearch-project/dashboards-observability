@@ -58,7 +58,6 @@ export const searchAgentIdByName = async (
       throw new Error('cannot find any agent by name: ' + name);
     }
     const id = response.body.hits.hits[0]._id;
-    agentIdMap[name] = id;
     return id;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
@@ -69,22 +68,29 @@ export const searchAgentIdByName = async (
 export const requestWithRetryAgentSearch = async (options: {
   client: OpenSearchClient;
   agentName: string;
-  shouldRetryAgentSearch: boolean;
+  shouldRetryAgentSearch?: boolean;
   body: RequestBody;
-}): Promise<AgentResponse> =>
-  options.client.transport
+}): Promise<AgentResponse> => {
+  const { client, agentName, shouldRetryAgentSearch = true, body } = options;
+  let retry = shouldRetryAgentSearch;
+  if (!agentIdMap[agentName]) {
+    agentIdMap[agentName] = await searchAgentIdByName(client, agentName);
+    retry = false;
+  }
+  return client.transport
     .request(
       {
         method: 'POST',
-        path: `${ML_COMMONS_API_PREFIX}/agents/${agentIdMap[options.agentName]}/_execute`,
-        body: options.body,
+        path: `${ML_COMMONS_API_PREFIX}/agents/${agentIdMap[agentName]}/_execute`,
+        body,
       },
       AGENT_REQUEST_OPTIONS
     )
-    .catch((error) =>
-      options.shouldRetryAgentSearch && isResponseError(error) && error.statusCode === 404
-        ? searchAgentIdByName(options.client, options.agentName).then(() =>
-            requestWithRetryAgentSearch({ ...options, shouldRetryAgentSearch: false })
-          )
-        : Promise.reject(error)
-    ) as Promise<AgentResponse>;
+    .catch(async (error) => {
+      if (retry && isResponseError(error) && error.statusCode === 404) {
+        agentIdMap[agentName] = await searchAgentIdByName(client, agentName);
+        return requestWithRetryAgentSearch({ ...options, shouldRetryAgentSearch: false });
+      }
+      return Promise.reject(error);
+    }) as Promise<AgentResponse>;
+};

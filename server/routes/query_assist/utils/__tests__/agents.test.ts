@@ -83,7 +83,27 @@ describe('Agents helper functions', () => {
     expect(response.body.inference_results[0].output[0].result).toEqual('test response');
   });
 
-  it('searches for agent id if not found', async () => {
+  it('searches for agent id if id is undefined', async () => {
+    mockedTransport
+      .mockResolvedValueOnce({ body: { hits: { total: { value: 1 }, hits: [{ _id: 'new-id' }] } } })
+      .mockResolvedValueOnce({
+        body: { inference_results: [{ output: [{ result: 'test response' }] }] },
+      });
+    const response = await requestWithRetryAgentSearch({
+      client,
+      agentName: 'new agent',
+      shouldRetryAgentSearch: true,
+      body: { parameters: { param1: 'value1' } },
+    });
+    expect(mockedTransport).toBeCalledWith(
+      expect.objectContaining({ path: '/_plugins/_ml/agents/new-id/_execute' }),
+      expect.anything()
+    );
+    expect(response.body.inference_results[0].output[0].result).toEqual('test response');
+  });
+
+  it('searches for agent id if id is not found', async () => {
+    agentIdMap['test agent'] = 'non-exist-agent';
     mockedTransport
       .mockRejectedValueOnce({ statusCode: 404, body: {}, headers: {} })
       .mockResolvedValueOnce({ body: { hits: { total: { value: 1 }, hits: [{ _id: 'new-id' }] } } })
@@ -92,7 +112,7 @@ describe('Agents helper functions', () => {
       });
     const response = await requestWithRetryAgentSearch({
       client,
-      agentName: 'new agent',
+      agentName: 'test agent',
       shouldRetryAgentSearch: true,
       body: { parameters: { param1: 'value1' } },
     });

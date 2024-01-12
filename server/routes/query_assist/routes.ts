@@ -12,7 +12,7 @@ import {
 } from '../../../../../src/core/server';
 import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-import { agentIdMap, searchAgentIdByName, requestWithRetryAgentSearch } from './utils/agents';
+import { requestWithRetryAgentSearch } from './utils/agents';
 
 export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
   const {
@@ -44,17 +44,10 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
         });
 
       const client = context.core.opensearch.client.asCurrentUser;
-      let shouldRetryAgentSearch = true;
-      if (!agentIdMap[pplAgentName]) {
-        await searchAgentIdByName(client, pplAgentName);
-        shouldRetryAgentSearch = false;
-      }
-
       try {
         const pplRequest = await requestWithRetryAgentSearch({
           client,
           agentName: pplAgentName,
-          shouldRetryAgentSearch,
           body: {
             parameters: {
               index: request.body.index,
@@ -113,27 +106,17 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       const { index, question, query, response: _response, isError } = request.body;
       const queryResponse = JSON.stringify(_response);
       let summaryRequest;
-      let shouldRetryAgentSearch = true;
 
       try {
         if (!isError) {
-          if (!agentIdMap[responseSummaryAgentName]) {
-            await searchAgentIdByName(client, responseSummaryAgentName);
-            shouldRetryAgentSearch = false;
-          }
           summaryRequest = await requestWithRetryAgentSearch({
             client,
             agentName: responseSummaryAgentName,
-            shouldRetryAgentSearch,
             body: {
               parameters: { index, question, query, response: queryResponse },
             },
           });
         } else {
-          if (!agentIdMap[errorSummaryAgentName]) {
-            await searchAgentIdByName(client, errorSummaryAgentName);
-            shouldRetryAgentSearch = false;
-          }
           const [mappings, sampleDoc] = await Promise.all([
             client.indices.getMapping({ index }),
             client.search({ index, size: 1 }),
@@ -142,7 +125,6 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
           summaryRequest = await requestWithRetryAgentSearch({
             client,
             agentName: errorSummaryAgentName,
-            shouldRetryAgentSearch,
             body: {
               parameters: { index, question, query, response: queryResponse, fields },
             },
