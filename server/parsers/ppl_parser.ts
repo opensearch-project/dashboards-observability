@@ -44,7 +44,7 @@ export const PPLParsers: MessageParser = {
         type: 'output',
         content: finalQuery,
         contentType: 'ppl_data_grid',
-        isVisualization: true,
+        fullWidth: true,
       };
     });
   },
