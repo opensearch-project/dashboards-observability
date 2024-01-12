@@ -4,7 +4,7 @@
  */
 
 import { EuiSuperDatePicker, EuiToolTip } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { uiSettingsService } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { IDatePickerProps } from './search';
@@ -24,13 +24,6 @@ export function DatePicker(props: IDatePickerProps) {
 
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
   const allowTimeChanging = !coreRefs.queryAssistEnabled || isAppAnalytics;
-
-  // set the time range to be 40 years rather than the standard 15 minutes if using query assistant
-  useEffect(() => {
-    if (!allowTimeChanging) {
-      handleTimePickerChange([QUERY_ASSISTANT_FIXED_START_TIME, QUERY_ASSISTANT_FIXED_END_TIME]);
-    }
-  }, []);
 
   return (
     <>

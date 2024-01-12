@@ -19,6 +19,7 @@ import {
   SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
+import { coreRefs } from '../../../../framework/core_refs';
 
 const initialQueryState = {
   [RAW_QUERY]: '',
@@ -28,7 +29,7 @@ const initialQueryState = {
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,
   [FILTERED_PATTERN]: '',
   [SELECTED_TIMESTAMP]: '',
-  [SELECTED_DATE_RANGE]: ['now-40y', 'now'],
+  [SELECTED_DATE_RANGE]: [coreRefs.queryAssistEnabled ? 'now-40y' : 'now-15m', 'now'],
   [OLLY_QUERY_ASSISTANT]: '',
 };
 

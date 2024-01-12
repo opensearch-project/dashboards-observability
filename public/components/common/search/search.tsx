@@ -5,11 +5,9 @@
 
 import '@algolia/autocomplete-theme-classic';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
@@ -17,12 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
-  EuiMarkdownFormat,
-  EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
-  EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiText,
@@ -139,7 +133,10 @@ export const Search = (props: any) => {
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
-  const [timeRange, setTimeRange] = useState(['now-15m', 'now']); // default time range
+  const [timeRange, setTimeRange] = useState([
+    coreRefs.queryAssistEnabled ? 'now-40y' : 'now-15m',
+    'now',
+  ]); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
