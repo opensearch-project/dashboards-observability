@@ -1,7 +1,47 @@
-# Global Mask: Every repo owner
+# Global Mask: All primary repository owners
 *   @pjfitzgibbons @swiddis @mengweieric @kavithacm @paulstn
 
+# Logs Explorer
+server/routes/event_analytics @mengweieric
+public/components/event_analytics @mengweieric
+.cypress/integration/event_analytics_test @mengweieric
+
+# Panels
+server/adaptors/custom_panels @pjfitzgibbons
+server/routes/custom_panels @pjfitzgibbons
+public/components/custom_panels @pjfitzgibbons
+.cypress/integration/panels_test @pjfitzgibbons
+
+# App Analytics
+server/adaptors/application_analytics @paulstn
+server/routes/application_analytics @paulstn
+public/components/application_analytics @paulstn
+.cypress/integration/app_analytics_test @paulstn
+
+# Notebooks
+server/adaptors/notebooks @ps48
+server/routes/notebooks @ps48
+server/common/helpers/notebooks @ps48
+public/components/notebooks @ps48
+.cypress/integration/notebooks_test @ps48
+
+# Metrics
+server/routes/metrics @kavithacm
+server/common/metrics @kavithacm
+public/components/metrics @kavithacm
+.cypress/integration/metrics_analytics_test @kavithacm
+
+# Trace Analytics
+public/components/trace_analytics @RyanL1997
+.cypress/integration/trace_analytics_test @RyanL1997
+
 # Integrations
-server/adaptors/integrations @Swiddis @RyanL1997 @YANG-DB
-server/routes/integrations @Swiddis @RyanL1997 @YANG-DB
-public/components/integrations @Swiddis @RyanL1997
+server/adaptors/integrations @Swiddis @YANG-DB
+server/routes/integrations @Swiddis @YANG-DB
+public/components/integrations @Swiddis
+.cypress/integration/integrations_test @Swiddis
+
+# Data Sources
+server/routes/datasources @RyanL1997
+public/components/datasources @RyanL1997
+.cypress/integration/datasources_test @RyanL1997
