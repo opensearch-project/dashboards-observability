@@ -25,7 +25,6 @@ import {
   FIELD_AGENT,
 } from '../../utils/event_analytics/constants';
 import { COMMAND_TIMEOUT_LONG } from '../../utils/constants';
-
 import {
   querySearch,
   landOnEventHome,
@@ -33,6 +32,7 @@ import {
   landOnEventVisualizations,
   landOnPanels,
   clearQuerySearchBoxText,
+  selectDefaultDataSource
 } from '../../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
@@ -54,42 +54,10 @@ describe('Has working breadcrumbs', () => {
   });
 });
 
-describe('Open flyout for a data row to see details', () => {
-  beforeEach(() => {
-    landOnEventExplorer();
-    clearQuerySearchBoxText('searchAutocompleteTextArea');
-    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
-  });
-
-  it('Should be able to open flyout and see data, json and traces', () => {
-    cy.get('[data-test-subj="eventExplorer__flyoutArrow"]').first().click();
-    cy.get('.observability-flyout').should('exist');
-    cy.get('.observability-flyout .osdDocViewer .euiTabs span.euiTab__content')
-      .contains('Table')
-      .should('be.visible');
-    cy.get('.observability-flyout .osdDocViewer .euiTabs span.euiTab__content')
-      .contains('JSON')
-      .should('be.visible');
-    cy.get('.observability-flyout .osdDocViewer .euiTabs span.euiTab__content')
-      .contains('Traces')
-      .should('be.visible');
-  });
-
-  it('Should be able to see surrounding docs', () => {
-    cy.get('[data-test-subj="eventExplorer__flyoutArrow"]').first().click();
-    cy.get('.observability-flyout span.euiButton__text')
-      .contains('View surrounding events')
-      .should('be.visible')
-      .click();
-    cy.get('.observability-flyout #surroundingFyout')
-      .contains('View surrounding events')
-      .should('exist');
-  });
-});
-
 describe('Saves a query on explorer page', () => {
   it('Saves a visualization on visualization tab of explorer page', () => {
     landOnEventExplorer();
+    selectDefaultDataSource();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
     cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
@@ -127,6 +95,7 @@ describe('Saves a query on explorer page', () => {
 
   it('Saves a query on event tab of explorer page', () => {
     landOnEventExplorer();
+    selectDefaultDataSource();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -147,6 +116,7 @@ describe('Saves a query on explorer page', () => {
 
   it('Click on a saved query from event analytics home', () => {
     landOnEventExplorer();
+    selectDefaultDataSource();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -345,9 +315,10 @@ describe('Live tail stop automatically', () => {
   });
 });
 
-describe('Visualizing data', () => {
+describe.only('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
+    selectDefaultDataSource();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 

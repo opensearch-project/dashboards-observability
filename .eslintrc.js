@@ -17,7 +17,6 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:prettier/recommended',
   ],
-  
   rules: {
     '@typescript-eslint/no-unused-vars': [
       'error',

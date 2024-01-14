@@ -65,7 +65,6 @@ export const SurroundingFlyout = ({
   setToggleSize,
   dataGridColumns,
   dataGridColumnVisibility,
-  sortingFields,
   rowHeightsOptions,
 }: Props) => {
   const [numNewEvents, setNumNewEvents] = useState(5);
@@ -220,6 +219,7 @@ export const SurroundingFlyout = ({
             className="header-button"
             iconType="sortRight"
             iconSide="right"
+            data-test-subj="dataGrid__FlyoutSurroundingDocs"
           >
             View event details
           </EuiButton>

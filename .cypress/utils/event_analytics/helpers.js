@@ -44,7 +44,7 @@ export const landOnPanels = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
   );
-  cy.wait(delay);
+  // cy.wait(delay);
 };
 
 const vis_name_sub_string = Math.floor(Math.random() * 100);
@@ -58,7 +58,7 @@ export const saveVisualizationAndVerify = () => {
     .eq(1)
     .type(`Test visualization` + vis_name_sub_string, { force: true });
   cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
-  cy.wait(delay);
+  // cy.wait(delay);
   cy.get('.euiHeaderBreadcrumbs a').eq(1).click({ force: true });
   cy.get('.euiFlexGroup .euiFormControlLayout__childrenWrapper input')
     .eq(0)
@@ -79,4 +79,11 @@ export const deleteVisualization = () => {
   cy.get('input[placeholder = "delete"]').clear().type('delete');
   cy.get('button[data-test-subj = "popoverModal__deleteButton"]').click();
   cy.get('.euiToastHeader').should('exist');
+};
+
+export const selectDefaultDataSource = () => {
+  cy.get('[data-test-subj="dataExplorerDSSelect"] input').type('Default cluster', {
+    force: true,
+  });
+  cy.contains('.euiComboBoxOption__content', 'Default cluster').click();
 };

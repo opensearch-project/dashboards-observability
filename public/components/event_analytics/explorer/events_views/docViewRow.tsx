@@ -196,10 +196,6 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
     return cols;
   };
 
-  const memorizedTds = useMemo(() => {
-    return getTds(doc, selectedCols, false);
-  }, [doc, selectedCols, detailsOpen, surroundingEventsOpen]);
-
   const memorizedDocFlyout = useMemo(() => {
     return (
       <DocFlyout
@@ -292,6 +288,7 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
         onClick={() => toggleDetailOpen()}
         iconType={detailsOpen || surroundingEventsOpen ? 'minimize' : 'inspect'}
         aria-label="inspect document details"
+        data-test-subj="dataGrid__openFlyoutBtn"
       />
       {flyout}
     </>
