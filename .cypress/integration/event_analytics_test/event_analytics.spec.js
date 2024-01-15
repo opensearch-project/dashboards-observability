@@ -256,66 +256,12 @@ describe('Live tail stop automatically', () => {
     landOnEventExplorer();
   });
 
-  it.skip('Moving to other tab should stop live tail automatically', () => {
-    clearQuerySearchBoxText('searchAutocompleteTextArea');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
-    cy.get('[data-test-subj=eventLiveTail]').click();
-    cy.get('[data-test-subj=eventLiveTail__delay10s]').click();
-    cy.get('.euiToastHeader__title').contains('On').should('exist');
-  });
-
-  it.skip('Add a new tab', () => {
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength + 1);
-      });
-  });
-
-  it.skip('Click to switch to another tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]', { timeout: COMMAND_TIMEOUT_LONG })
-      .find('button.euiTab')
-      .first()
-      .click();
-
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .first()
-      .should('have.class', 'euiTab-isSelected');
-  });
-
-  it.skip('Close current selected tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-      .find('button.euiTab')
-      .then((lists) => {
-        const initialLength = Cypress.$(lists).length;
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab').eq(1).click();
-        cy.get('button.euiTab-isSelected [data-test-subj="eventExplorer__tabClose"]').click();
-        cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
-          .find('button.euiTab')
-          .should('have.length', initialLength - 1);
-      });
-  });
-
   it('Live tail should be stopped', () => {
     cy.get('.euiButton__text').contains('Live');
   });
 });
 
-describe.only('Visualizing data', () => {
+describe('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
     selectDefaultDataSource();
