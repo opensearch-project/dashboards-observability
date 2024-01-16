@@ -48,7 +48,7 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
       const parsed = JSON.parse(content);
       return { ok: true, value: parsed };
     } catch (err) {
-      const parsed = tryParseNDJson(content);
+      const parsed = await tryParseNDJson(content);
       if (parsed) {
         return { ok: true, value: parsed };
       }

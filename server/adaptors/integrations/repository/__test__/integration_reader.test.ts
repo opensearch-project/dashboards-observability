@@ -113,7 +113,7 @@ describe('Integration', () => {
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(true);
-      expect((result as { value: { savedObjects: unknown } }).value.savedObjects).toStrictEqual([
+      expect((result as { value: { savedObjects: unknown } }).value.savedObjects).toEqual([
         { name: 'asset1' },
         { name: 'asset2' },
       ]);

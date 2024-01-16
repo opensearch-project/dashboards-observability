@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export function tryParseNDJson(content: string): object[] | null {
+import { Readable } from 'stream';
+import { createSavedObjectsStreamFromNdJson } from '../../../../../../src/core/server/saved_objects/routes/utils';
+
+export async function tryParseNDJson(content: string): Promise<object[] | null> {
   try {
-    const objects = [];
-    for (const line of content.split('\n')) {
-      if (line.trim() === '') {
-        // Other OSD ndjson parsers skip whitespace lines
-        continue;
-      }
-      objects.push(JSON.parse(line));
-    }
-    return objects;
+    const objects = await createSavedObjectsStreamFromNdJson(Readable.from(content));
+    return await objects.toArray();
   } catch (err) {
     return null;
   }
