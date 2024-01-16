@@ -9,7 +9,7 @@ import { min } from 'lodash';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {
-  metricsList: [];
+  metricsList: any;
   headerName: string;
   handleClick: (props: any) => void;
   dataTestSubj: string;

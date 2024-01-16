@@ -19,6 +19,7 @@ import {
   TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
 import {
+  OTEL_METRIC_SUBTYPE,
   PPL_DATE_FORMAT,
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
@@ -38,6 +39,13 @@ import {
   StatsAggregationChunk,
   statsChunk,
 } from '../../../../common/query_manager/ast/types';
+import {
+  extractIndexAndDocumentName,
+  fetchSampleOTDocument,
+  fetchAggregatedBinCount,
+} from '../../custom_panels/helpers/utils';
+import { convertDateTime } from '../../common/query_utils';
+import { VizContainerError } from '../../../../common/types/custom_panels';
 
 /* Builds Final Query for the surrounding events
  * -> Final Query is as follows:
@@ -267,6 +275,7 @@ export const getMetricVisConfig = (metric) => {
     [BREAKDOWNS]: [],
     queryMetaData: metric.queryMetaData,
     subType: metric.subType,
+    metricType: metric.metricType,
     legend: { showLegend: 'hidden' }, // force no-legend in dashboard displays
   };
 };
@@ -299,6 +308,65 @@ export const getDefaultVisConfig = (statsToken: statsChunk) => {
     })),
     span,
   };
+};
+
+export const fetchOtelMetric = async ({
+  visualizationName,
+  startTime,
+  endTime,
+  setIsError,
+  setIsLoading,
+  setToast,
+}: {
+  visualizationName: string;
+  startTime: string;
+  endTime: string;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  setToast: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
+}) => {
+  const indexAndDocumentName = extractIndexAndDocumentName(visualizationName);
+  const index = indexAndDocumentName[0];
+  const documentName = indexAndDocumentName[1];
+  if (documentName === undefined)
+    setToast('Document name is undefined', 'danger', undefined, 'right');
+
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName);
+  const source = fetchSampleDocument.hits[0]._source;
+
+  const dataBinsPromises = source.buckets.map(async (bucket: any) => {
+    try {
+      const formattedStartTime = convertDateTime(startTime, false, false, OTEL_METRIC_SUBTYPE);
+      const formattedEndTime = convertDateTime(endTime, false, false, OTEL_METRIC_SUBTYPE);
+      const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+        bucket.min.toString(),
+        bucket.max.toString(),
+        formattedStartTime,
+        formattedEndTime,
+        documentName,
+        index,
+        setIsError,
+        setIsLoading
+      );
+
+      return {
+        xAxis: bucket.min + ' - ' + bucket.max,
+        'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+      };
+    } catch (error) {
+      console.error('Error processing bucket:', error);
+      return null;
+    }
+  });
+  const jsonData = await Promise.all(dataBinsPromises);
+  const formatedJsonData = { jsonData };
+
+  return formatedJsonData;
 };
 
 const getSpanValue = (groupByToken: GroupByChunk) => {

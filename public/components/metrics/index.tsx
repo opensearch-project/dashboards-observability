@@ -5,12 +5,13 @@
 
 import './index.scss';
 import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, StaticContext } from 'react-router-dom';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { Sidebar } from './sidebar/sidebar';
 import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
+import { OptionType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 
@@ -23,6 +24,10 @@ interface MetricsProps {
 }
 
 export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
+  // Side bar constants
+  const [selectedDataSource, setSelectedDataSource] = useState<OptionType[]>([]);
+  const [selectedOTIndex, setSelectedOTIndex] = useState([]);
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
@@ -49,7 +54,13 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                       {(EuiResizablePanel, EuiResizableButton) => (
                         <>
                           <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar additionalSelectedMetricId={routerProps.match.params.id} />
+                            <Sidebar
+                              additionalSelectedMetricId={routerProps.match.params.id}
+                              selectedDataSource={selectedDataSource}
+                              setSelectedDataSource={setSelectedDataSource}
+                              selectedOTIndex={selectedOTIndex}
+                              setSelectedOTIndex={setSelectedOTIndex}
+                            />
                           </EuiResizablePanel>
 
                           <EuiResizableButton />
