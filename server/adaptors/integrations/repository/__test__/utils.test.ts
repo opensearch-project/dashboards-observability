@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { foldResults } from '../integration_reader';
+import { foldResults } from '../utils';
 
 describe('foldResults', () => {
   it('should return an empty array result if input array is empty', () => {

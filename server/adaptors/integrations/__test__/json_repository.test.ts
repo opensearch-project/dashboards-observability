@@ -8,11 +8,11 @@
  */
 
 import { TemplateManager } from '../repository/repository';
-import { IntegrationReader, foldResults } from '../repository/integration_reader';
+import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
 import { JsonCatalogDataAdaptor } from '../repository/json_data_adaptor';
-import { deepCheck } from '../repository/utils';
+import { deepCheck, foldResults } from '../repository/utils';
 
 const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegration[], Error>> => {
   const directory = path.join(__dirname, '../__data__/repository');
