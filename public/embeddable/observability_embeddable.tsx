@@ -18,7 +18,11 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../../common/types/observability_saved_object_attributes';
 import { ObservabilityEmbeddableComponent } from './observability_embeddable_component';
-import { observabilityMetricsID, PROMQL_METRIC_SUBTYPE } from '../../common/constants/shared';
+import {
+  observabilityMetricsID,
+  PROMQL_METRIC_SUBTYPE,
+  OTEL_METRIC_SUBTYPE,
+} from '../../common/constants/shared';
 
 // this needs to match the saved object type for the clone and replace panel actions to work
 export const OBSERVABILITY_EMBEDDABLE = VISUALIZATION_SAVED_OBJECT;
@@ -80,8 +84,9 @@ export class ObservabilityEmbeddable extends Embeddable<
 
   public async reload() {
     this.attributes = await this.attributeService.unwrapAttributes(this.input);
-
-    const isMetric = this.attributes?.savedVisualization?.subType === PROMQL_METRIC_SUBTYPE;
+    const isMetric =
+      this.attributes?.savedVisualization?.metricType ===
+      (PROMQL_METRIC_SUBTYPE || OTEL_METRIC_SUBTYPE);
     if (isMetric) {
       const editPath = `#/${VISUALIZATION_SAVED_OBJECT}:${this.savedObjectId}`;
       const editUrl = `/app/${observabilityMetricsID}${editPath}`;

@@ -775,7 +775,6 @@ const createSavedObjectPanel = (newName = TEST_PANEL) => {
 };
 
 const addVisualizationsToPanel = (panel, additionalVisualizationIds: string[]) => {
-  console.log('addVisualizationsToPanel', additionalVisualizationIds);
   const additionalVisualizations = additionalVisualizationIds.map((id, idx) => {
     return {
       savedVisualizationId: `observability-visualization:${id}`,
@@ -791,7 +790,6 @@ const addVisualizationsToPanel = (panel, additionalVisualizationIds: string[]) =
     ...panel.attributes.visualizations,
     ...additionalVisualizations,
   ];
-  console.log(panel.attributes);
   cy.request({
     method: 'PUT',
     failOnStatusCode: false,
