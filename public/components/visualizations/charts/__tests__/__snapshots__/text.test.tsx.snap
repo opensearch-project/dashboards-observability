@@ -672,6 +672,7 @@ exports[`Text component Renders text component 1`] = `
       >
         <div>
           <h2
+            id="text"
             key="h-2"
           >
             Text
