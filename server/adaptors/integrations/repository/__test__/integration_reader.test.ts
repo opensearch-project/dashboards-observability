@@ -57,7 +57,7 @@ describe('Integration', () => {
       const result = await integration.getConfig();
 
       expect(spy).toHaveBeenCalled();
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toContain('not a valid integration directory');
     });
 
     it('should return the parsed config template if it is valid', async () => {
@@ -75,7 +75,7 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toBe('data/version must be string');
     });
 
     it('should return an error if the config file has syntax errors', async () => {
@@ -83,7 +83,7 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
     });
 
     it('should return an error if the integration config does not exist', async () => {
@@ -99,7 +99,7 @@ describe('Integration', () => {
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
       expect(readFileMock).toHaveBeenCalled();
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toContain('File not found');
     });
   });
 
@@ -120,20 +120,21 @@ describe('Integration', () => {
     });
 
     it('should return an error if the provided version has no config', async () => {
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: false, error: new Error() });
+      jest.spyOn(fs, 'readFile').mockRejectedValueOnce(new Error('ENOENT: File not found'));
+      const result = await integration.getAssets();
 
-      await expect(integration.getAssets()).resolves.toHaveProperty('ok', false);
+      expect(result.error?.message).toContain('File not found');
     });
 
     it('should return an error if the saved object assets are invalid', async () => {
-      integration.getConfig = jest
-        .fn()
-        .mockResolvedValue({ ok: true, value: TEST_INTEGRATION_CONFIG });
-      jest.spyOn(fs, 'readFile').mockResolvedValue('{"unclosed":');
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(JSON.stringify(TEST_INTEGRATION_CONFIG))
+        .mockResolvedValue('{"unclosed":');
 
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
     });
   });
 
@@ -165,19 +166,25 @@ describe('Integration', () => {
     });
 
     it('should reject with an error if the config is invalid', async () => {
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: false, error: new Error() });
+      jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+        JSON.stringify({
+          ...TEST_INTEGRATION_CONFIG,
+          name: undefined,
+        })
+      );
+      const result = await integration.getSchemas();
 
-      await expect(integration.getSchemas()).resolves.toHaveProperty('ok', false);
+      expect(result.error?.message).toBe("data must have required property 'name'");
     });
 
     it('should reject with an error if a mapping file is invalid', async () => {
-      const sampleConfig = {
-        components: [{ name: 'component1', version: '1.0.0' }],
-      };
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleConfig });
-      jest.spyOn(fs, 'readFile').mockRejectedValueOnce(new Error('Could not load schema'));
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(JSON.stringify(TEST_INTEGRATION_CONFIG))
+        .mockRejectedValueOnce(new Error('Could not load schema'));
 
-      await expect(integration.getSchemas()).resolves.toHaveProperty('ok', false);
+      const result = await integration.getSchemas();
+      expect(result.error?.message).toBe('Could not load schema');
     });
   });
 
@@ -200,7 +207,8 @@ describe('Integration', () => {
         (error as { code?: string }).code = 'ENOENT';
         return Promise.reject(error);
       });
-      await expect(integration.getStatic('/logo.png')).resolves.toHaveProperty('ok', false);
+      const result = await integration.getStatic('/logo.png');
+      await expect(result.error?.message).toContain('File not found');
     });
   });
 
@@ -240,13 +248,21 @@ describe('Integration', () => {
     });
 
     it('should catch and fail gracefully on invalid sample data', async () => {
-      const sampleConfig = { sampleData: { path: 'sample.json' } };
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleConfig });
-      jest.spyOn(fs, 'readFile').mockResolvedValue('[{"closingBracket": false]');
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            ...TEST_INTEGRATION_CONFIG,
+            sampleData: {
+              path: 'sample.json',
+            },
+          })
+        )
+        .mockResolvedValue('[{"closingBracket": false]');
 
       const result = await integration.getSampleData();
 
-      expect(result.ok).toBe(false);
+      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
     });
   });
 });

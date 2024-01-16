@@ -105,7 +105,10 @@ export class IntegrationReader {
     version?: string
   ): Promise<Result<IntegrationConfig | SerializedIntegration>> {
     if ((await this.reader.getDirectoryType()) !== 'integration') {
-      return { ok: false, error: new Error(`${this.directory} is not a valid integration`) };
+      return {
+        ok: false,
+        error: new Error(`${this.directory} is not a valid integration directory`),
+      };
     }
 
     const maybeVersion: string | null = version ? version : await this.getLatestVersion();

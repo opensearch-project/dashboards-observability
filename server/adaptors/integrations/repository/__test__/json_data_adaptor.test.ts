@@ -86,20 +86,26 @@ describe('JSON Data Adaptor', () => {
 
   it('Should reject any attempts to read a file with a type', async () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
-    await expect(adaptor.readFile('logs-1.0.0.json', 'schemas')).resolves.toHaveProperty(
-      'ok',
-      false
+    const result = await adaptor.readFile('logs-1.0.0.json', 'schemas');
+    await expect(result.error?.message).toBe(
+      'JSON adaptor does not support subtypes (isConfigLocalized: true)'
     );
   });
 
   it('Should reject any attempts to read a raw file', async () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
-    await expect(adaptor.readFileRaw('logo.svg', 'static')).resolves.toHaveProperty('ok', false);
+    const result = await adaptor.readFileRaw('logo.svg', 'static');
+    await expect(result.error?.message).toBe(
+      'JSON adaptor does not support raw files (isConfigLocalized: true)'
+    );
   });
 
   it('Should reject nested directory searching', async () => {
     const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
-    await expect(adaptor.findIntegrations('sample1')).resolves.toHaveProperty('ok', false);
+    const result = await adaptor.findIntegrations('sample1');
+    await expect(result.error?.message).toBe(
+      'Finding integrations for custom dirs not supported for JSONreader'
+    );
   });
 
   it('Should report unknown directory type if integration list is empty', async () => {
