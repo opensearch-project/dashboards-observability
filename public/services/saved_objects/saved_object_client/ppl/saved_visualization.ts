@@ -25,6 +25,7 @@ interface CommonParams {
   userConfigs: any;
   description: string;
   subType: string;
+  metricType: string;
   unitsOfMeasure: string;
   selectedLabels: string;
 }
@@ -51,6 +52,7 @@ export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
             userConfigs: params.userConfigs,
             description: params.description,
             subType: params.subType,
+            metricType: params.metricType,
             unitsOfMeasure: params.unitsOfMeasure,
             selectedLabels: params.selectedLabels,
           })
@@ -74,6 +76,7 @@ export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
             userConfigs: params.userConfigs,
             description: params.description,
             subType: params.subType,
+            metricType: params.metricType,
             unitsOfMeasure: params.unitsOfMeasure,
             selectedLabels: params.selectedLabels,
             objectId: params.objectId,

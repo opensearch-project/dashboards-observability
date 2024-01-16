@@ -19,9 +19,22 @@ import { sampleSavedMetric } from '../../../../../test/metrics_constants';
 
 jest.mock('../../../../services/requests/ppl');
 
+// Mocked http object
+const mockHttpObject = {
+  get: jest.fn().mockResolvedValue({}),
+};
+
+// Mocked coreRefs object with the mocked http
+const mockCoreRefs = {
+  http: mockHttpObject,
+  pplService: new PPLService(mockHttpObject),
+};
+
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
+  const setSelectedDataSource = jest.fn();
+  const setSelectedOTIndex = jest.fn();
 
   beforeAll(() => {
     PPLService.mockImplementation(() => {
@@ -50,7 +63,12 @@ describe('Side Bar Component', () => {
 
     const wrapper = mount(
       <Provider store={store}>
-        <Sidebar />
+        <Sidebar
+          selectedDataSource={''}
+          setSelectedDataSource={setSelectedDataSource}
+          selectedOTIndex={''}
+          setSelectedOTIndex={setSelectedOTIndex}
+        />
       </Provider>
     );
 

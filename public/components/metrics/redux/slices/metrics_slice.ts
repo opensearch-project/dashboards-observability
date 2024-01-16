@@ -12,9 +12,9 @@ import {
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
-import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import { OBSERVABILITY_BASE, PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 import { MetricType } from '../../../../../common/types/metrics';
-import { getPPLService } from '../../../../../common/utils';
+import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -50,8 +50,8 @@ export interface DateSpanFilter {
 
 const initialState = {
   metrics: {},
-  selectedIds: [],
-  sortedIds: [],
+  selectedIds: [], // selected IDs
+  sortedIds: [], // all avaliable metrics
   search: '',
   metricsLayout: [],
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
@@ -65,6 +65,9 @@ const initialState = {
     recentlyUsedRanges: [],
   },
   refresh: 0, // set to new Date() to trigger
+  selectedDataSource: '',
+  otelIndices: [],
+  otelDocumentNames: [],
 };
 
 const mergeMetricCustomizer = function (objValue, srcValue) {
@@ -89,22 +92,27 @@ export const loadMetrics = () => async (dispatch) => {
   const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
-
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
   dispatch(
-    setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]))
+    setDataSourceIcons(
+      coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources, 'OpenTelemetry'])
+    )
   );
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
-
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
   dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  dispatch(setSortedIds(sortedIds));
+  await dispatch(setSortedIds(sortedIds));
+};
+
+export const loadOTIndices = () => async (dispatch) => {
+  const fetchOTindices = await fetchOpenTelemetryIndices();
+  dispatch(setOtelIndices(fetchOTindices));
 };
 
 const fetchCustomMetrics = async () => {
@@ -114,7 +122,6 @@ const fetchCustomMetrics = async () => {
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
     [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.subType)
   );
-
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     savedVisualizationId: obj.objectId,
@@ -123,6 +130,7 @@ const fetchCustomMetrics = async () => {
     catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
     subType: obj.savedVisualization.subType,
+    metricType: 'customMetric',
     aggregation: obj.savedVisualization.queryMetaData?.aggregation ?? 'avg',
     availableAttributes: [],
     attributesGroupBy: obj.savedVisualization.queryMetaData?.attributesGroupBy ?? [],
@@ -155,11 +163,30 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
         attributesGroupBy: [],
         availableAttributes: [],
         type: 'line',
-        subType: PROMQL_METRIC_SUBTYPE,
+        subType: PPL_METRIC_SUBTYPE,
+        metricType: PROMQL_METRIC_SUBTYPE,
         recentlyCreated: false,
       }))
     )
   );
+
+export const fetchOpenTelemetryIndices = async () => {
+  const http = getOSDHttp();
+  return http
+    .get(`${OBSERVABILITY_BASE}/search/indices`, {
+      query: {
+        format: 'json',
+      },
+    })
+    .catch((error) => console.error(error));
+};
+
+export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => async () => {
+  const http = getOSDHttp();
+  return http
+    .get(`${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/documentNames`)
+    .catch((error) => console.error(error));
+};
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
@@ -215,6 +242,15 @@ export const metricSlice = createSlice({
     setRefresh: (state) => {
       state.refresh = Date.now();
     },
+    setSelectedDataSource: (state, { payload }) => {
+      state.selectedDataSource = payload;
+    },
+    setOtelIndices: (state, { payload }) => {
+      state.otelIndices = payload;
+    },
+    setOtelDocumentNames: (state, { payload }) => {
+      state.otelDocumentNames = payload;
+    },
   },
 });
 
@@ -229,13 +265,16 @@ export const {
   setDataSourceTitles,
   setDataSourceIcons,
   updateMetric,
+  setSelectedDataSource,
+  setOtelIndices,
+  setOtelDocumentNames,
 } = metricSlice.actions;
 
 /** private actions */
 
-const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
+export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
-const getAvailableAttributes = (id, metricIndex) => async (dispatch, _getState) => {
+const getAvailableAttributes = (id, metricIndex) => async (dispatch) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
 
@@ -259,13 +298,13 @@ export const addSelectedMetric = (metric: MetricType) => async (dispatch, getSta
   const currentSelectedIds = getState().metrics.selectedIds;
   if (currentSelectedIds.includes(metric.id)) return;
 
-  if (metric.subType === PROMQL_METRIC_SUBTYPE) {
+  if (metric.metricType === PROMQL_METRIC_SUBTYPE) {
     await dispatch(getAvailableAttributes(metric.id, metric.index));
   }
   await dispatch(selectMetric(metric));
 };
 
-export const removeSelectedMetric = ({ id }) => async (dispatch, _getState) => {
+export const removeSelectedMetric = ({ id }) => async (dispatch) => {
   dispatch(deSelectMetric(id));
 };
 
@@ -321,5 +360,11 @@ export const metricQuerySelector = (id) => (state) =>
     attributesGroupBy: [],
     availableAttributes: [],
   };
+
+export const selectedDataSourcesSelector = (state) => state.metrics.selectedDataSource;
+
+export const otelIndexSelector = (state) => state.metrics.otelIndices;
+
+export const otelDocumentNamesSelector = (state) => state.metrics.otelDocumentNames;
 
 export const metricsReducers = metricSlice.reducer;

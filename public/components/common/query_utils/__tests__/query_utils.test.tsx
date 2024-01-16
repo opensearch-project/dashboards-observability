@@ -109,6 +109,7 @@ describe('Query Utils', () => {
       span: '1',
       resolution: 'h',
     };
+
     describe('updateCatalogVisualizationQuery', () => {
       it('should build plain promQL series query', () => {
         const query = updateCatalogVisualizationQuery(defaultQueryMetaData);
@@ -126,12 +127,14 @@ describe('Query Utils', () => {
       it('should set timestamps and default resolution', () => {
         const [startDate, endDate] = ['2023-11-11', '2023-12-11'];
         const [start, end] = [1699660800, 1702252800]; // 2023-11-11 to 2023-12-11
-        const query = preprocessMetricQuery({
-          metaData: { queryMetaData: defaultQueryMetaData },
+        const currentQuery =
+          "source = test_catalog.query_range('count by(one,two) (metric)', 1699660800, 1702252800, '1d')";
+        const expectedQuery = preprocessMetricQuery({
+          metaData: { query: currentQuery, queryMetaData: defaultQueryMetaData },
           startTime: startDate,
           endTime: endDate,
         });
-        expect(query).toMatch(new RegExp(`, ${start}, ${end}, '1d'`));
+        expect(expectedQuery).toMatch(new RegExp(`, ${start}, ${end}, '1d'`));
       });
     });
   });
