@@ -16,7 +16,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   /**
    * Creates a new FileSystemCatalogDataAdaptor instance.
    *
-   * @param directory The base directory from which to read files. This is not sanitized.
+   * @param integrationsList The list of JSON-serialized integrations to use as a pseudo-directory.
    */
   constructor(integrationsList: SerializedIntegration[]) {
     this.integrationsList = integrationsList;
