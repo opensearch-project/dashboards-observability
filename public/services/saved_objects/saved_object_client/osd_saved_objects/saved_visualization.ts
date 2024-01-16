@@ -33,6 +33,7 @@ interface CommonParams {
   userConfigs: any;
   description: string;
   subType: string;
+  metricType: string;
   unitsOfMeasure: string;
   selectedLabels: string;
   dataSources: string; // list of type SelectedDataSources that is stringified
@@ -64,6 +65,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
@@ -104,6 +106,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
@@ -160,6 +163,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
           createdTimeMs: o.attributes.createdTimeMs,
           lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(o.updated_at),
           savedVisualization: o.attributes.savedVisualization,
+          metricType: o.attributes.metricType,
         }))
       );
     return { totalHits: observabilityObjectList.length, observabilityObjectList };

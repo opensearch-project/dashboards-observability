@@ -633,7 +633,7 @@ export const Explorer = ({
       indexFields: explorerFields,
       userConfigs: {
         ...visualizationSettings,
-        ...processMetricsData(explorerData.schema, visualizationSettings),
+        ...processMetricsData(explorerData.schema),
       },
       appData: { fromApp: appLogEvents },
       explorer: { explorerData, explorerFields, query, http, pplService },

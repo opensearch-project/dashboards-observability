@@ -4,7 +4,7 @@
  */
 
 import { isEmpty, last } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import _ from 'lodash';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
@@ -57,7 +57,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
         availabilityConfig = {},
       } = {},
     },
-    vis: { icontype, name },
+    vis: { name },
   }: IVisualizationContainerProps = visualizations;
 
   const tooltipMode =
@@ -160,7 +160,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
 
     visConfig = {
       ...visConfig,
-      ...processMetricsData(schema, visConfig),
+      ...processMetricsData(schema),
     };
 
     const traceStyles = {

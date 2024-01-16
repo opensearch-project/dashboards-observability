@@ -82,6 +82,7 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     applicationId = '',
     userConfigs = '',
     subType = '',
+    metricType = '',
     unitsOfMeasure = '',
     selectedLabels,
     objectId = '',
@@ -121,6 +122,10 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
 
     if (!isEmpty(subType)) {
       objRequest.object.subType = subType;
+    }
+
+    if (!isEmpty(metricType)) {
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

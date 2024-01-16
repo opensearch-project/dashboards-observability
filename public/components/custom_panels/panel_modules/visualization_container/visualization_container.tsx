@@ -32,6 +32,7 @@ import {
   fetchVisualizationById,
   renderCatalogVisualization,
   renderSavedVisualization,
+  renderOpenTelemetryVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
@@ -40,7 +41,9 @@ import { coreRefs } from '../../../../framework/core_refs';
 import {
   PROMQL_METRIC_SUBTYPE,
   observabilityMetricsID,
+  OTEL_METRIC_SUBTYPE,
 } from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -114,6 +117,7 @@ export const VisualizationContainer = ({
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
   const { http, pplService } = coreRefs;
+  const { setToast } = useToast();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
@@ -180,7 +184,7 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+        if (visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE) {
           window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
         } else {
           onEditClick(savedVisualizationId);
@@ -227,7 +231,7 @@ export const VisualizationContainer = ({
   ];
 
   if (
-    visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE &&
+    visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE &&
     actionMenuType === 'metricsGrid'
   ) {
     popoverPanel = [showPPLQueryPanel];
@@ -237,7 +241,7 @@ export const VisualizationContainer = ({
 
   const fetchVisualization = async () => {
     return savedVisualizationId
-      ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+      ? await fetchVisualizationById(savedVisualizationId, setIsError)
       : inputMetaData;
   };
 
@@ -247,10 +251,22 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
-    if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
+    if (visualization.metricType === OTEL_METRIC_SUBTYPE)
+      await renderOpenTelemetryVisualization({
+        visualization,
+        startTime: fromTime,
+        endTime: toTime,
+        setVisualizationTitle,
+        setVisualizationType,
+        setVisualizationData,
+        setVisualizationMetaData,
+        setIsLoading,
+        setIsError,
+        setToast,
+      });
+    else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
       renderCatalogVisualization({
         visualization,
-        http,
         pplService,
         catalogSource: visualizationId,
         startTime: fromTime,
@@ -266,7 +282,7 @@ export const VisualizationContainer = ({
         setIsError,
         queryMetaData,
       });
-    } else
+    else
       await renderSavedVisualization({
         visualization,
         http,

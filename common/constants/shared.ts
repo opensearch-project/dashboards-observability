@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import CSS from 'csstype';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -77,9 +76,11 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
+export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export const SPAN_REGEX = /span/;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const OTEL_METRIC_SUBTYPE = 'openTelemetryMetric';
 export const PPL_METRIC_SUBTYPE = 'metric';
 
 export const PPL_SPAN_REGEX = /by\s*span/i;
@@ -131,6 +132,7 @@ export enum VIS_CHART_TYPES {
   Pie = 'pie',
   HeatMap = 'heatmap',
   Text = 'text',
+  Histogram = 'histogram',
 }
 
 export const NUMERICAL_FIELDS = ['short', 'integer', 'long', 'float', 'double'];
