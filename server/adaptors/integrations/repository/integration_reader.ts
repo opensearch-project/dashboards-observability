@@ -4,6 +4,7 @@
  */
 
 import path from 'path';
+import semver from 'semver';
 import { validateTemplate } from '../validators';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
@@ -62,33 +63,6 @@ const pruneConfig = (rawConfig: IntegrationConfig | SerializedIntegration): Inte
 
   return prunePart(rawConfig);
 };
-
-/**
- * Helper function to compare version numbers.
- * Assumes that the version numbers are valid, produces undefined behavior otherwise.
- *
- * @param a Left-hand number
- * @param b Right-hand number
- * @returns -1 if a < b, 1 if a > b, 0 otherwise.
- */
-export function compareVersions(a: string, b: string): number {
-  const aParts = a.split('.').map((part) => Number.parseInt(part, 10));
-  const bParts = b.split('.').map((part) => Number.parseInt(part, 10));
-
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const aValue = i < aParts.length ? aParts[i] : 0;
-    const bValue = i < bParts.length ? bParts[i] : 0;
-
-    if (aValue > bValue) {
-      return 1;
-    }
-    if (aValue < bValue) {
-      return -1;
-    }
-  }
-
-  return 0;
-}
 
 /**
  * The Integration class represents the data for Integration Templates.
@@ -196,7 +170,7 @@ export class IntegrationReader {
       return null;
     }
     // Sort descending
-    versions.value.sort((a, b) => -compareVersions(a, b));
+    versions.value.sort(semver.rcompare);
     return versions.value[0];
   }
 
