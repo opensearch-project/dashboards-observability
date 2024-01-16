@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Matches the subdirectories of the File System serialization, used in the shipped catalog.
+// Generally corresponds to each section of linked assets in the Integration Config format.
+// This is helpful for asset location in non-localized config formats.
 export type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
 export interface CatalogDataAdaptor {
