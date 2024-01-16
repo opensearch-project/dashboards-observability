@@ -135,26 +135,6 @@ export class IntegrationReader {
   }
 
   /**
-   * Like getConfig(), but thoroughly checks all nested integration dependencies for validity.
-   *
-   * @returns a Result indicating whether the integration is valid.
-   */
-  async deepCheck(): Promise<Result<IntegrationConfig>> {
-    const configResult = await this.getConfig();
-    if (!configResult.ok) {
-      return configResult;
-    }
-
-    // Some other checks are included in getConfig validation.
-    const assets = await this.getAssets();
-    if (!assets.ok || Object.keys(assets.value).length === 0) {
-      return { ok: false, error: new Error('An integration must have at least one asset') };
-    }
-
-    return configResult;
-  }
-
-  /**
    * Get the latest version of the integration available.
    * This method relies on the fact that integration configs have their versions in their name.
    * Any files that don't match the config naming convention will be ignored.

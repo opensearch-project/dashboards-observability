@@ -12,6 +12,7 @@ import { IntegrationReader, foldResults } from '../repository/integration_reader
 import path from 'path';
 import * as fs from 'fs/promises';
 import { JsonCatalogDataAdaptor } from '../repository/json_data_adaptor';
+import { deepCheck } from '../repository/utils';
 
 const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegration[], Error>> => {
   const directory = path.join(__dirname, '../__data__/repository');
@@ -47,7 +48,7 @@ describe('The Local Serialized Catalog', () => {
     );
 
     for (const integ of await repository.getIntegrationList()) {
-      const validationResult = await integ.deepCheck();
+      const validationResult = await deepCheck(integ);
       await expect(validationResult).toHaveProperty('ok', true);
     }
   });
@@ -152,7 +153,7 @@ describe('Integration validation', () => {
       new JsonCatalogDataAdaptor(transformedSerialized)
     );
 
-    await expect(integration.deepCheck()).resolves.toHaveProperty('ok', false);
+    await expect(deepCheck(integration)).resolves.toHaveProperty('ok', false);
   });
 
   it('Should correctly fail an integration without assets', async () => {
@@ -171,7 +172,7 @@ describe('Integration validation', () => {
       new JsonCatalogDataAdaptor(transformedSerialized)
     );
 
-    await expect(integration.deepCheck()).resolves.toHaveProperty('ok', false);
+    await expect(deepCheck(integration)).resolves.toHaveProperty('ok', false);
   });
 });
 

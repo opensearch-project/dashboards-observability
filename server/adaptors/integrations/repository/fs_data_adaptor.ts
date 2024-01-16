@@ -6,7 +6,7 @@
 import * as fs from 'fs/promises';
 import path from 'path';
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
-import { tryParseNDJson } from './parse_ndjson';
+import { tryParseNDJson } from './utils';
 
 // Check if a location is a directory without an exception if location not found
 const safeIsDirectory = async (maybeDirectory: string): Promise<boolean> => {

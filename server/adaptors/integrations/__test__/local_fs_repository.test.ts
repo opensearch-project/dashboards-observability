@@ -11,6 +11,7 @@ import { TemplateManager } from '../repository/repository';
 import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
+import { deepCheck } from '../repository/utils';
 
 describe('The local repository', () => {
   it('Should only contain valid integration directories or files.', async () => {
@@ -37,7 +38,7 @@ describe('The local repository', () => {
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
     await Promise.all(
       integrations.map(async (i) => {
-        const result = await i.deepCheck();
+        const result = await deepCheck(i);
         if (!result.ok) {
           console.error(result.error);
         }

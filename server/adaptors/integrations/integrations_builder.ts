@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { IntegrationReader } from './repository/integration_reader';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
+import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
@@ -28,8 +29,7 @@ export class IntegrationInstanceBuilder {
   }
 
   build(integration: IntegrationReader, options: BuilderOptions): Promise<IntegrationInstance> {
-    const instance = integration
-      .deepCheck()
+    const instance = deepCheck(integration)
       .then((result) => {
         if (!result.ok) {
           return Promise.reject(result.error);
