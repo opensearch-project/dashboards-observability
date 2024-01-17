@@ -310,20 +310,13 @@ export const Search = (props: any) => {
   ]);
   const { data: indices, loading: indicesLoading } = useCatIndices();
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
-  const data =
+  const indicesAndIndexPatterns =
     indexPatterns && indices
       ? [...indexPatterns, ...indices].filter(
           (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
         )
       : undefined;
   const loading = indicesLoading || indexPatternsLoading;
-  // HARDCODED INDEXES BELOW
-  const filteredData = [
-    { label: 'opensearch_dashboards_sample_data_ecommerce' },
-    { label: 'opensearch_dashboards_sample_data_logs' },
-    { label: 'opensearch_dashboards_sample_data_flights' },
-    { label: 'sso_logs-*.*' },
-  ];
 
   return (
     <div className="globalQueryBar">
@@ -402,7 +395,7 @@ export const Search = (props: any) => {
                     prepend={<EuiText>Index</EuiText>}
                     singleSelection={true}
                     isLoading={loading}
-                    options={filteredData}
+                    options={indicesAndIndexPatterns}
                     selectedOptions={selectedIndex}
                     onChange={(index) => {
                       // clear previous state
