@@ -238,20 +238,20 @@ describe('<NoteTable /> spec', () => {
 
   it('closes the action panel', async () => {
     const { getByText, queryByTestId } = renderNoteTable({ notebooks: [] });
-    expect(queryByTestId('rename-notebook-btn')).not.toBeInTheDocument();
+    expect(queryByTestId('renameNotebookBtn')).not.toBeInTheDocument();
 
     // Open Actions dropdown
     fireEvent.click(getByText('Actions'));
 
     // Ensure the action panel is open
-    expect(queryByTestId('rename-notebook-btn')).toBeInTheDocument();
+    expect(queryByTestId('renameNotebookBtn')).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(getByText('Actions'));
     });
 
     // Ensure the action panel is closed
-    expect(queryByTestId('rename-notebook-btn')).not.toBeInTheDocument();
+    expect(queryByTestId('renameNotebookBtn')).not.toBeInTheDocument();
   });
 
   it('closes the delete modal', () => {
