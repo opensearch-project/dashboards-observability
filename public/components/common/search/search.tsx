@@ -293,6 +293,7 @@ export const Search = (props: any) => {
   }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
+    console.log(tempQuery);
     batch(() => {
       dispatch(reset({ tabId }));
       dispatch(resetSummary({ tabId }));
