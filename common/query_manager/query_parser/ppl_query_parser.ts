@@ -19,7 +19,12 @@ export class PPLQueryParser {
   }
 
   getStats() {
-    this.visitor = new StatsAstBuilder();
-    return this.visitor.visitRoot(this.parser!.root()).getTokens();
+    try {
+      this.visitor = new StatsAstBuilder();
+      return this.visitor.visitRoot(this.parser!.root()).getTokens();
+    } catch (e: unknown) {
+      console.error(`ast building error: ${e}`);
+      return null;
+    }
   }
 }
