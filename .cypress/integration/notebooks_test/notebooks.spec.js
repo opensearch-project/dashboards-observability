@@ -272,9 +272,9 @@ describe('Testing paragraphs', () => {
     cy.get('textarea[data-test-subj="editorArea-3"]').type(SQL_QUERY_TEXT);
     cy.get('button[data-test-subj="runRefreshBtn-3"]').click();
 
-    cy.get('div[data-test-subj="queryOutputText"]').contains(
-      'select * from opensearch_dashboards_sample_data_flights limit 20'
-    );
+    cy.get('div[data-test-subj="queryOutputText"]')
+      .contains('select * from opensearch_dashboards_sample_data_flights limit 20')
+      .should('exist');
 
     cy.get('.euiDataGrid__overflow').should('exist');
   });
@@ -304,6 +304,7 @@ describe('Testing paragraphs', () => {
     cy.get('textarea[data-test-subj="editorArea-5"]').type(`%sql\nSELECT 1 AS ${testWord}`);
     cy.get('button[data-test-subj="runRefreshBtn-5"]').click();
 
+    cy.get('div[data-test-subj="queryOutputText"]').contains(testWord).should('exist');
     cy.get('div[data-test-subj="queryOutputText"]')
       .contains(testWord)
       .then((element) => {
