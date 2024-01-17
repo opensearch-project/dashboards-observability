@@ -34,9 +34,8 @@ const moveToTestNotebook = () => {
     timeout: 6000,
   });
 
-  cy.get('div[data-test-subj="notebookEmptyTableText"]')
-    .should('exist')
-    .then(() => cy.reload());
+  // Mandatory reload page to load new notebooks if they are not flushed in OpenSearch index yet.
+  cy.reload();
 
   cy.get('.euiTableCellContent')
     .contains(TEST_NOTEBOOK, {
@@ -138,17 +137,17 @@ describe('Testing notebooks table', () => {
   });
 
   it('Deletes all notebooks', () => {
-    cy.get('.euiCheckbox__input[data-test-subj="checkboxSelectAll"]').click();
+    cy.get('input[data-test-subj="checkboxSelectAll"]').click();
     cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
     cy.get('button[data-test-subj="deleteNotebookBtn"]').click();
-
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should('be.disabled');
-    cy.get('input[data-test-subj="delete-notebook-modal-input"').type('delete');
+    cy.get('input[data-test-subj="delete-notebook-modal-input"]').type('delete');
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should(
       'not.be.disabled'
     );
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').click();
-    cy.get('div[data-test-subj="notebookEmptyTableText"]').contains('No notebooks').should('exist');
+    moveToNotebookHome();
+    cy.get('div[data-test-subj="notebookEmptyTableText"]').should('exist');
   });
 });
 
@@ -446,6 +445,7 @@ describe('clean up all test data', () => {
       'not.be.disabled'
     );
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').click();
+    moveToNotebookHome();
     cy.get('div[data-test-subj="notebookEmptyTableText"]').should('exist');
   });
 
