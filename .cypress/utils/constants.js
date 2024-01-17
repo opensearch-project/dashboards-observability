@@ -122,12 +122,12 @@ POST _plugins/_sql/_explain
 | a3 | b3 | c3 | d3 |
 `;
 
-export const SQL_QUERY_TEXT = `%sql
-select * from opensearch_dashboards_sample_data_flights limit 20
+export const SQL_QUERY_TEXT = `%sql 
+select * from opensearch_dashboards_sample_data_flights limit 20 {enter}
 `;
 
 export const PPL_QUERY_TEXT = `%ppl
-source=opensearch_dashboards_sample_data_flights
+source=opensearch_dashboards_sample_data_flights {enter}
 `;
 
 export const suppressResizeObserverIssue = () => {
