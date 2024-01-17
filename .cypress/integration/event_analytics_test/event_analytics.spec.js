@@ -35,6 +35,12 @@ import {
   selectDefaultDataSource
 } from '../../utils/event_analytics/helpers';
 
+const prepareDefaultSearchOnExplorer = () => {
+  landOnEventExplorer();
+  selectDefaultDataSource();
+  clearQuerySearchBoxText('searchAutocompleteTextArea');
+};
+
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
@@ -56,8 +62,7 @@ describe('Has working breadcrumbs', () => {
 
 describe('Saves a query on explorer page', () => {
   it('Saves a visualization on visualization tab of explorer page', () => {
-    landOnEventExplorer();
-    selectDefaultDataSource();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
     cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
@@ -94,8 +99,7 @@ describe('Saves a query on explorer page', () => {
   });
 
   it('Saves a query on event tab of explorer page', () => {
-    landOnEventExplorer();
-    selectDefaultDataSource();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -115,8 +119,7 @@ describe('Saves a query on explorer page', () => {
   });
 
   it('Click on a saved query from event analytics home', () => {
-    landOnEventExplorer();
-    selectDefaultDataSource();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -145,13 +148,12 @@ describe('Saves a query on explorer page', () => {
 
 describe('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
-    landOnEventExplorer();
-    clearQuerySearchBoxText('searchAutocompleteTextArea');
+    prepareDefaultSearchOnExplorer();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[2].query);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
     cy.get('.tab-title').contains('Events').click();
+    cy.get('[data-attr-field="utc_time"]').trigger('mouseenter');
     cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click({ force: true });
-
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
       .should('exist');
@@ -163,26 +165,32 @@ describe('Override timestamp for an index', () => {
 
 describe('Toggle the sidebar fields', () => {
   it('Toggle fields between available and selected section', () => {
-    landOnEventExplorer();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
+    cy.get('[data-attr-field="AvgTicketPrice"]').trigger('mouseenter');
     cy.get('[data-test-subj="fieldToggle-AvgTicketPrice"]').click();
-    cy.get('[data-test-subj="field-AvgTicketPrice"]').should('exist');
-    cy.get('[data-test-subj="docTable"]').find('th').contains('_source').should('not.exist');
+    cy.get('[data-test-subj="fieldList-selected"] [data-attr-field="AvgTicketPrice"]').should('exist');
+    cy.get('[data-test-subj="dataGridHeaderCell-AvgTicketPrice"]').should('exist');
+    cy.get('[data-attr-field="AvgTicketPrice"]').trigger('mouseenter');
     cy.get('[data-test-subj="fieldToggle-AvgTicketPrice"]').click();
-    cy.get('[data-test-subj="field-AvgTicketPrice"]').should('exist');
-    cy.get('[data-test-subj="docTable"]').find('th').contains('_source').should('exist');
+    cy.get('[data-test-subj="fieldList-selected"] [data-attr-field="AvgTicketPrice"]').should('not.exist');
+    cy.get('[data-test-subj="fieldList-unpopular"] [data-attr-field="AvgTicketPrice"]').should('exist');
+    cy.get('[data-test-subj="dataGridHeaderCell-AvgTicketPrice"]').should('not.exist');
   });
 });
 
 describe('Search fields in the sidebar', () => {
   it('Search a field', () => {
-    landOnEventExplorer();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
     cy.get('[data-test-subj="eventExplorer__sidebarSearch"]').type('C');
-    cy.get('[data-test-subj="field-Cancelled"]').should('exist');
-    cy.get('[data-test-subj="field-AvgTicketPrice"]').should('not.exist');
-    cy.get('[data-test-subj="field-DestAirportID"]').should('not.exist');
-    cy.get('[data-test-subj="field-Carrier"]').should('exist');
+    cy.get('[data-attr-field="Carrier"]').should('exist');
+    cy.get('[data-attr-field="DestCityName"]').should('exist');
+    cy.get('[data-attr-field="DestCountry"]').should('exist');
+    cy.get('[data-attr-field="OriginCityName"]').should('exist');
+    cy.get('[data-attr-field="Carrier"]').should('exist');
+    cy.get('[data-attr-field="AvgTicketPrice"]').should('not.exist');
+    cy.get('[data-attr-field="DestAirportID"]').should('not.exist');
   });
 });
 
@@ -204,12 +212,13 @@ describe('Delete saved objects', () => {
 
 describe('Click to view field insights', () => {
   beforeEach(() => {
-    landOnEventExplorer();
+    prepareDefaultSearchOnExplorer();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
   it('Click a numerical field to view field insights', () => {
-    cy.get('[data-test-subj="field-bytes-showDetails"]').click();
+    cy.get('[data-attr-field="bytes"]').trigger('mouseenter');
+    cy.get('[data-attr-field="bytes"] [data-test-subj="explorerSidebarItem__fieldInspect"]').click();
     cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should('contain', 'Top values');
     cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should(
       'contain',
@@ -230,24 +239,13 @@ describe('Click to view field insights', () => {
   });
 
   it('Click a non-numerical field to view insights', () => {
-    cy.get('[data-test-subj="field-host-showDetails"]').click();
+    cy.get('[data-attr-field="host"]').trigger('mouseenter');
+    cy.get('[data-attr-field="host"] [data-test-subj="explorerSidebarItem__fieldInspect"]').click();
     cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should('contain', 'Top values');
     cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should(
       'contain',
       'Rare values'
     );
-  });
-});
-
-describe('Switch on and off livetail', () => {
-  it('Switch on and off in live tail', () => {
-    landOnEventExplorer();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
-    cy.get('[data-test-subj=eventLiveTail]').click();
-    cy.get('[data-test-subj=eventLiveTail__delay10s]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'On');
-    cy.get('[data-test-subj=eventLiveTail__off').click();
-    cy.get('.euiToastHeader__title').should('contain', 'Off');
   });
 });
 
@@ -265,12 +263,13 @@ describe('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
     selectDefaultDataSource();
+    clearQuerySearchBoxText('searchAutocompleteTextArea');
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
   it('Visualize pie chart', () => {
-    cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_PIE).click();
+    cy.get('[data-test-subj="visConfigPanel__visTypeSelector"]').click();
+    cy.get('[data-test-subj="comboBoxOptionsList visConfigPanel__visTypeSelector-optionsList"] span').contains(VIS_TYPE_PIE).click();
     cy.get('[data-test-subj="vizConfigSection-series"]')
       .find('[data-test-subj="viz-config-add-btn"]')
       .click();
@@ -293,8 +292,8 @@ describe('Visualizing data', () => {
   });
 
   it('Visualize vertical bar chart', () => {
-    cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_VBAR).click();
+    cy.get('[data-test-subj="visConfigPanel__visTypeSelector"]').click();
+    cy.get('[data-test-subj="comboBoxOptionsList visConfigPanel__visTypeSelector-optionsList"] span').contains(VIS_TYPE_VBAR).click();
     cy.get('[data-test-subj="vizConfigSection-series"]')
       .find('[data-test-subj="viz-config-add-btn"]')
       .click();

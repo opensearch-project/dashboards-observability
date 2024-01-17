@@ -201,6 +201,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
           fullWidth
           renderOption={vizSelectableItemRenderer}
           isClearable={false}
+          data-test-subj="visConfigPanel__visTypeSelector"
         />
       </div>
       <div className="cp__rightSettings">
