@@ -41,8 +41,16 @@ export class IndexDataAdaptor implements CatalogDataAdaptor {
     return { ok: false, error: new Error('Not implemented') };
   }
 
-  async getDirectoryType(_dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
-    return 'unknown';
+  async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
+    // Assume filter-zero-times is repo, once is integration, twice is invalid
+    // Not sure how safe that assumption is
+    if (this.directory && dirname) {
+      return 'unknown';
+    }
+    if (this.directory || dirname) {
+      return 'integration';
+    }
+    return 'repository';
   }
 
   join(filename: string): IndexDataAdaptor {
