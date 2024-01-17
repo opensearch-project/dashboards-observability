@@ -339,9 +339,9 @@ describe('Testing paragraphs', () => {
     cy.get('textarea[data-test-subj="editorArea-7"]').type(PPL_QUERY_TEXT);
     cy.get('button[data-test-subj="runRefreshBtn-7"]').click();
 
-    cy.get('div[data-test-subj="queryOutputText"]').contains(
-      'source=opensearch_dashboards_sample_data_flights'
-    );
+    cy.get('div[data-test-subj="queryOutputText"]')
+      .contains('source=opensearch_dashboards_sample_data_flights')
+      .should('exist');
 
     cy.get('.euiDataGrid__overflow').should('exist');
   });
