@@ -8,20 +8,17 @@ export const headCmd = `## head
 
 ### Description
 
-The \`head\` command returns the first N number of specified results in
-search order.
+Use the \`head\` command to return the first N number of lines from a search result.
 
 ### Syntax
 
 head \[N\]
 
--   N: optional. number of results to return. **Default:** 10
+-   \`N\`: Optional. The number of results you want to return. Default is 10.
 
-### Example 1: Get first 10 results
+#### Example 1: Get the first 10 results
 
-The example show first 10 results from accounts index.
-
-PPL query:
+The following example PPL query shows how to use \`head\` to return the first 10 search results:
 
     os> source=accounts | fields firstname, age | head;
     fetched rows / total rows = 10/10
@@ -40,11 +37,9 @@ PPL query:
     | Fulton        | 23        |
     +---------------+-----------+
 
-### Example 2: Get first N results
+#### Example 2: Get the first N results
 
-The example show first N results from accounts index.
-
-PPL query:
+The following example PPL query shows how to use \`head\` to get a specified number of search results. In this example, N is equal to 3: 
 
     os> source=accounts | fields firstname, age | head 3;
     fetched rows / total rows = 3/3
@@ -57,5 +52,5 @@ PPL query:
     +---------------+-----------+
 
 #### Limitation
-The \`head\` command is not rewritten to OpenSearch DSL, it is only executed on the coordination node.
+The \`head\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;

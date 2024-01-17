@@ -5,12 +5,10 @@
 
 export const syntaxCmd = `## Syntax
 ---
-### Command Order
+### Command order
 
-The PPL query started with \`search\` command to reference a table search
-from. All the following command could be in any order. In the following
-example, \`search\` command refer the accounts index as the source, then
-using fields and where command to do the further processing.
+The PPL query starts with a \`search\` command to reference a table to search.
+Commands can be in any order. For example, in the following query, the \`search\` command references the \`accounts\` index as the source and then uses fields and a \`where\` command to perform further processing. 
 
 \`\`\` 
 search source=accounts
@@ -18,10 +16,7 @@ search source=accounts
 | fields firstname, lastname
 \`\`\`
 
-### Required arguments
+### Required and optional arguments
 
-Required arguments are shown in angle brackets \< \>.
-
-### Optional arguments
-
-Optional arguments are enclosed in square brackets \[ \].`;
+Required arguments are enclosed in angle brackets \< \>, and optional arguments are enclosed in square brackets \[ \]`.
+;

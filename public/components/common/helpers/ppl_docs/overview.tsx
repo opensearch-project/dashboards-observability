@@ -5,33 +5,20 @@
 
 export const overview = `## Overview
 ---
-Piped Processing Language (PPL), powered by OpenSearch, enables
-OpenSearch users with exploration and discovery of, and finding search
-patterns in data stored in OpenSearch, using a set of commands delimited
-by pipes (\|). These are essentially read-only requests to process data
-and return results.
+Piped Processing Language (PPL) is a query language that processes data in a sequential, step-by-step manner. PPL uses a set of commands, connected by pipes (|), to process data and return results (note that the requests and results are read-only in OpenSearch). 
 
-Currently, OpenSearch users can query data using either Query DSL or
-SQL. Query DSL is powerful and fast. However, it has a steep learning
-curve, and was not designed as a human interface to easily create ad hoc
-queries and explore user data. SQL allows users to extract and analyze
-data in OpenSearch in a declarative manner. OpenSearch now makes its
-search and query engine robust by introducing Piped Processing Language
-(PPL). It enables users to extract insights from OpenSearch with a
-sequence of commands delimited by pipes () syntax. It enables
-developers, DevOps engineers, support engineers, site reliability
-engineers (SREs), and IT managers to effectively discover and explore
-log, monitoring and observability data stored in OpenSearch.
+You can query data in OpenSearch using [PPL](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/), [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/), or [SQL](https://opensearch.org/docs/latest/search-plugins/sql/sql/index/). 
 
-We expand the capabilities of our Workbench, a comprehensive and
-integrated visual query tool currently supporting only SQL, to run
-on-demand PPL commands, and view and save results as text and JSON. We
-also add a new interactive standalone command line tool, the PPL CLI, to
-run on-demand PPL commands, and view and save results as text and JSON.
+PPL is the primary language used for observability tasks in OpenSearch. Developers, DevOps engineers, support engineers, site reliability engineers, and IT managers find it useful for exploring and discovering log, monitoring, and observability data. For example, you can use PPL to:
 
-The query start with search command and then flowing a set of command
-delimited by pipe ( for example, the following query retrieve firstname
-and lastname from accounts if age large than 18.
+- Find all log messages that contain a specific error code. 
+- Identify trends in your data over time. 
+- Group similar data points.
+- Calculate statistics for your data.
+
+PPL is available in OpenSearch Dashboards and as a standalone command-line tool. Within OpenSearch Dashboards, you can use [Query Workbench](https://opensearch.org/docs/latest/dashboards/query-workbench/) to run on-demand PPL commands and view and save the results as both text and JSON. The [PPL command line interface (CLI)](https://opensearch.org/docs/latest/search-plugins/sql/cli/) is a standalone Python application that you can launch with the \`opensearchsql\` command and then run on-demand PPL commands and view and save the results as both text and JSON.
+
+Here is an example of a PPL query. This query retrieves the first and last names of all accounts for which the age is greater than 18.
 
 \`\`\` 
 source=accounts
