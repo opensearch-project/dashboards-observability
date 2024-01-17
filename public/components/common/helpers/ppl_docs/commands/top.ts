@@ -7,38 +7,20 @@ export const topCmd = `## top
 ---
 ### Description
 
-Using \`top\` command to find the most common tuple of values of all
+Use the \`top\` command to find the most common tuple of values for all
 fields in the field list.
 
 ### Syntax
 
 top \[N\] &lt;field-list&gt; \[by-clause\]
 
--   N: number of results to return. **Default**: 10
--   field-list: mandatory. comma-delimited list of field names.
--   by-clause: optional. one or more fields to group the results by.
+-   \`N\`: The number of results you want to return. Default is 10.
+-   \`field-list\`: Required. The comma-delimited field list.
+-   \`by-clause\`: Optional. One or more fields to group by.
 
-### Example 1: Find the most common values in a field
+#### Example 1: Find the most common values in a field
 
-The example finds most common gender of all the accounts.
-
-PPL query:
-
-    os> source=accounts | top gender;
-    fetched rows / total rows = 2/2
-    +------------+
-    | gender     |
-    |------------|
-    | M          |
-    |------------|
-    | F          |
-    +------------+
-
-### Example 2: Find the most common values in a field
-
-The example finds most common gender of all the accounts.
-
-PPL query:
+The following example PPL query finds the most common gender.
 
     os> source=accounts | top 1 gender;
     fetched rows / total rows = 1/1
@@ -48,11 +30,9 @@ PPL query:
     | M          |
     +------------+
 
-### Example 3: Find the most common values organized by gender
+#### Example 2: Find the most common values grouped by gender
 
-The example finds most common age of all the accounts group by gender.
-
-PPL query:
+The following example PPL query finds the most common age grouped by gender.
 
     os> source=accounts | top 1 age by gender;
     fetched rows / total rows = 2/2
@@ -64,5 +44,5 @@ PPL query:
     +----------+----------+
 
 #### Limitation
-The \`top\` command is not rewritten to OpenSearch DSL, it is only executed on the coordination node.
+The \`top\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;

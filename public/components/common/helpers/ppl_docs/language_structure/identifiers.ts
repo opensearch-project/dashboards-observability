@@ -6,44 +6,26 @@
 export const pplIdentifiers = `## Indentifiers
 ---
 
-### **Introduction**
+### Identifiers
 
-Identifiers are used for naming your database objects, such as index
-name, field name, customLabel etc. Basically there are two types of
-identifiers: regular identifiers and delimited identifiers.
+Identifiers are used for naming database objects, such as an index name, a field name, or a custom label. The two types of identifiers are _regular identifiers_ and _delimited identifiers_.
 
-### **Regular Identifiers**
+#### Regular identifiers
 
-**Description**
+A regular identifier is a string of characters that starts with an ASCII letter (lowercase or uppercase). The subsequent characters can be a combination of letters, digits, or underscores (\`_\`). A regular identifier cannot be a reversed keyword, and white space or other special characters are not allowed.
 
-A regular identifier is a string of characters that must start with
-ASCII letter (lower or upper case). The subsequent character can be a
-combination of letter, digit, underscore (\`_\`). It cannot be a reversed
-key word. And whitespace and other special characters are not allowed.
+The following identifiers are supported by OpenSearch extensions:
 
-For OpenSearch, the following identifiers are supported extensionally:
+- **Identifiers prefixed by dot \`.\`:** This is called a hidden index. An example is \`.opensearch_dashboards\`.
+- **Identifiers prefixed by the \`@\` symbol:** This is common in meta fields generated for data ingestion.
+- **Identifiers with \`-\` in the middle:** This is common in index naming conventions with date information.
+- **Identifiers with the \`*\` symbol:** This is common in wildcard matches in an index pattern.
 
-1.  Identifiers prefixed by dot \`.\`: this is called hidden index in
-    OpenSearch, for example \`.opensearch_dashboards\`.
-2.  Identifiers prefixed by at sign \`@\`: this is common for meta fields
-    generated in Logstash ingestion.
-3.  Identifiers with \`-\` in the middle: this is mostly the case for
-    index name with date information.
-4.  Identifiers with star \`*\` present: this is mostly an index pattern
-    for wildcard match.
+Index names with a date suffix separated by dashes or dots, such as \`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\`, are common in data ingestion. Identifiers used as index names do not need to be enclosed in quotation marks. Additionally, wildcards within date patterns are accepted, enabling data retrieval across indexes covering different date ranges. For example, you can use \`logs-2020.1*\` to search in indexes for October, November, and December 2020.
 
-Index name with date suffix separated by dash or dots, such as
-\`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\`, is common for those created
-by Logstash or FileBeat ingestion. So, this kind of identifier used as
-index name is also supported without the need of being quoted for user
-convenience. In this case, wildcard within date pattern is also allowed
-to search for data across indices of different date range. For example,
-you can use \`logs-2020.1*\` to search in indices for October, November
-and December 2020.
+#### Example 1: Index pattern without quotes 
 
-#### **Examples**
-
-Here are examples for using index pattern directly without quotes:
+The following example PPL query uses an index pattern directly without quotes:
 
     os> source=accounts | fields account_number, firstname, lastname;
     fetched rows / total rows = 4/4
@@ -56,30 +38,21 @@ Here are examples for using index pattern directly without quotes:
     | 18               | Dale        | Adams      |
     +------------------+-------------+------------+
 
-### **Delimited Identifiers**
+### Delimited identifiers
 
-**Description**
+A delimited identifier is an identifier enclosed in backticks \`\` that contains special characters not permitted in regular identifiers. This allows for the use of characters that would otherwise violate the naming rules for identifiers.
 
-A delimited identifier is an identifier enclosed in back ticks \`\`. In
-this case, the identifier enclosed is not necessarily a regular
-identifier. In other words, it can contain any special character not
-allowed by regular identifier.
+#### Use cases
 
-#### **Use Cases**
+Common use cases for delimited identifiers include the following:
 
-Here are typical examples of the use of delimited identifiers:
+- Identifiers that coincide with reserved keywords.
+- Identifiers that contain a dot \`.\` or a dash \`-\` need to be distinguished from regular identifiers with qualifiers. Enclosing such identifiers in backticks \`\` allows for the parser to differentiate them from qualified identifiers and enables date information within index names.
+- Identifiers with special characters in index names. Note that OpenSearch permits the use of special characters, including Unicode characters.
 
-1.  Identifiers of reserved key word name
-2.  Identifiers with dot \`.\` present: similarly as \`-\` in index name to
-    include date information, it is required to be quoted so parser can
-    differentiate it from identifier with qualifiers.
-3.  Identifiers with other special character: OpenSearch has its own
-    rule which allows more special character, for example Unicode
-    character is supported in index name.
+#### Example 2: Index name enclosed in backticks
 
-#### **Examples**
-
-Here are examples for quoting an index name by back ticks:
+The following example PPL query uses an index name enclosed in backticks \`\`:
 
     os> source=\`accounts\` | fields \`account_number\`;
     fetched rows / total rows = 4/4
@@ -92,16 +65,7 @@ Here are examples for quoting an index name by back ticks:
     | 18               |
     +------------------+
 
-### **Case Sensitivity**
+### Case sensitivity
 
-**Description**
-
-Identifiers are treated in case sensitive manner. So it must be exactly
-same as what is stored in OpenSearch.
-
-### **Examples**
-
-For example, if you run \`source=Accounts\`, it will end up with an index
-not found exception from our plugin because the actual index name is
-under lower case.
+Identifiers are case sensitive and must match what is stored in OpenSearch. For example, if you run \`source=Accounts\`, an error \`index not found\` occurs \` because the index name \`accounts\` is lowercase.
 `;
