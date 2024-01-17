@@ -161,7 +161,7 @@ export const Search = (props: any) => {
     requestParams,
   });
   const { getAvailableFields } = useFetchEvents({
-    pplService: pplService,
+    pplService,
     requestParams,
   });
 
@@ -312,9 +312,9 @@ export const Search = (props: any) => {
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const indicesAndIndexPatterns =
     indexPatterns && indices
-      ? [...indexPatterns, ...indices].filter(
-          (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
-        )
+      ? [...indexPatterns, ...indices]
+          .filter((v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index)
+          .filter((index) => !index.label.startsWith('.'))
       : undefined;
   const loading = indicesLoading || indexPatternsLoading;
 
