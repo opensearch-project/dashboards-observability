@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
+// Matches the subdirectories of the File System serialization, used in the shipped catalog.
+// Generally corresponds to each section of linked assets in the Integration Config format.
+// This is helpful for asset location in non-localized config formats.
+export type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
-interface CatalogDataAdaptor {
+export interface CatalogDataAdaptor {
+  // Indicates whether the config for this type of adaptor should be localized.
+  // If true, the catalog supports reading serialized integrations.
+  isConfigLocalized: boolean;
+
   /**
    * Reads a Json or NDJson file from the data source.
    *
@@ -33,7 +40,7 @@ interface CatalogDataAdaptor {
   findIntegrations: (dirname?: string) => Promise<Result<string[]>>;
 
   /**
-   * Reads the contents of an integration version to find available versions.
+   * Reads the contents of an integration directory to find available versions.
    *
    * @param dirname The name of the directory to read.
    * @returns A Promise that resolves with an array of filenames within the directory.

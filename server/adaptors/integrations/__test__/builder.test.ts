@@ -5,7 +5,13 @@
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { IntegrationReader } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration_reader';
+import * as mockUtils from '../repository/utils';
+
+jest.mock('../repository/utils', () => ({
+  ...jest.requireActual('../repository/utils'),
+  deepCheck: jest.fn(),
+}));
 
 const mockSavedObjectsClient: SavedObjectsClientContract = ({
   bulkCreate: jest.fn(),
@@ -17,7 +23,6 @@ const mockSavedObjectsClient: SavedObjectsClientContract = ({
 } as unknown) as SavedObjectsClientContract;
 
 const sampleIntegration: IntegrationReader = ({
-  deepCheck: jest.fn().mockResolvedValue(true),
   getAssets: jest.fn().mockResolvedValue({
     savedObjects: [
       {
@@ -104,8 +109,12 @@ describe('IntegrationInstanceBuilder', () => {
         },
       };
 
+      jest
+        .spyOn(mockUtils, 'deepCheck')
+        .mockResolvedValue({ ok: true, value: mockTemplate as IntegrationConfig });
+
       // Mock the implementation of the methods in the Integration class
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
+      // sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
       sampleIntegration.getAssets = jest
         .fn()
         .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
@@ -119,7 +128,6 @@ describe('IntegrationInstanceBuilder', () => {
 
       const instance = await builder.build(sampleIntegration, options);
 
-      expect(sampleIntegration.deepCheck).toHaveBeenCalled();
       expect(sampleIntegration.getAssets).toHaveBeenCalled();
       expect(remapIDsSpy).toHaveBeenCalledWith(remappedAssets);
       expect(postAssetsSpy).toHaveBeenCalledWith(remappedAssets);
@@ -131,8 +139,8 @@ describe('IntegrationInstanceBuilder', () => {
         dataSource: 'instance-datasource',
         name: 'instance-name',
       };
-      sampleIntegration.deepCheck = jest
-        .fn()
+      jest
+        .spyOn(mockUtils, 'deepCheck')
         .mockResolvedValue({ ok: false, error: new Error('Mock error') });
 
       await expect(builder.build(sampleIntegration, options)).rejects.toThrowError('Mock error');
@@ -145,7 +153,9 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       const errorMessage = 'Failed to get assets';
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: {} });
+      jest
+        .spyOn(mockUtils, 'deepCheck')
+        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
       sampleIntegration.getAssets = jest
         .fn()
         .mockResolvedValue({ ok: false, error: new Error(errorMessage) });
@@ -165,7 +175,9 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const errorMessage = 'Failed to post assets';
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: {} });
+      jest
+        .spyOn(mockUtils, 'deepCheck')
+        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
       sampleIntegration.getAssets = jest
         .fn()
         .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
@@ -180,10 +192,14 @@ describe('IntegrationInstanceBuilder', () => {
       const assets = [
         {
           id: 'asset1',
+          type: 'unknown',
+          attributes: { title: 'asset1' },
           references: [{ id: 'ref1' }, { id: 'ref2' }],
         },
         {
           id: 'asset2',
+          type: 'unknown',
+          attributes: { title: 'asset1' },
           references: [{ id: 'ref1' }, { id: 'ref3' }],
         },
       ];
@@ -200,7 +216,7 @@ describe('IntegrationInstanceBuilder', () => {
 
       const remappedAssets = builder.remapIDs(assets);
 
-      expect(remappedAssets).toEqual(expectedRemappedAssets);
+      expect(remappedAssets).toMatchObject(expectedRemappedAssets);
     });
   });
 

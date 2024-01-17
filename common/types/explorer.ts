@@ -6,7 +6,7 @@
 import { History } from 'history';
 import Plotly from 'plotly.js-dist';
 import { QueryManager } from 'common/query_manager';
-import { VIS_CHART_TYPES } from '../../common/constants/shared';
+import { OTEL_METRIC_SUBTYPE, VIS_CHART_TYPES } from '../../common/constants/shared';
 import {
   AGGREGATIONS,
   AVAILABLE_FIELDS,
@@ -174,12 +174,13 @@ export interface SavedVisualization extends SavedObjectAttributes {
   selected_fields: { text: string; tokens: [] };
   selected_timestamp: IField;
   type: string;
-  subType?: 'metric' | 'visualization' | typeof PROMQL_METRIC_SUBTYPE; // exists if sub type is metric
+  subType?: 'metric' | 'visualization'; // exists if sub type is metric
   user_configs?: string;
   units_of_measure?: string;
   application_id?: string;
   dataSources: string; // list of type SelectedDataSources that is stringified
   queryLang: string;
+  metricType?: typeof PROMQL_METRIC_SUBTYPE | typeof OTEL_METRIC_SUBTYPE; // exists if sub type is metric
 }
 
 export interface ExplorerDataType {
