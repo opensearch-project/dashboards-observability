@@ -131,13 +131,6 @@ describe('Testing notebooks table', () => {
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').should('exist');
   });
 
-  it('"Learn more" link under Notebooks header', () => {
-    cy.get('h3[data-test-subj="notebookTableTitle"]').should('exist');
-    cy.get('div[data-test-subj="notebookTableDescription"]').contains(NOTEBOOK_TEXT);
-    cy.get('a.euiLink.euiLink--primary').contains('Learn more').click();
-    cy.get(`a[href="${OPENSEARCH_URL}"]`).should('exist');
-  });
-
   it('Deletes all notebooks', () => {
     cy.get('input[data-test-subj="checkboxSelectAll"]').click();
     cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
@@ -473,5 +466,15 @@ describe('clean up all test data', () => {
     cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', { delay: 50 });
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('.euiButton__text').contains('Delete').trigger('mouseover').click();
+  });
+});
+
+describe('link check ', () => {
+  it('"Learn more" link under Notebooks header', () => {
+    moveToNotebookHome();
+    cy.get('h3[data-test-subj="notebookTableTitle"]').should('exist');
+    cy.get('div[data-test-subj="notebookTableDescription"]').contains(NOTEBOOK_TEXT);
+    cy.get('a.euiLink.euiLink--primary').contains('Learn more').click();
+    cy.get(`a[href="${OPENSEARCH_URL}"]`).should('exist');
   });
 });
