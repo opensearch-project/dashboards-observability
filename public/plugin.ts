@@ -56,7 +56,6 @@ import { Search } from './components/common/search/search';
 import { DirectSearch } from './components/common/search/sql_search';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -79,10 +78,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { S3DataSource } from './framework/datasources/s3_datasource';
-import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
-import { DirectSearch } from './components/common/search/sql_search';
-import { Search } from './components/common/search/search';
 
 interface PublicConfig {
   query_assist: {
