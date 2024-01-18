@@ -33,7 +33,7 @@ exports[`<DataGridContainer /> should render when all props are provided 1`] = `
   "startTime": "",
   "endTime": "now",
   "storedSelectedColumns": [],
-  "OUIDataGridProps": {
+  "OuiDataGridProps": {
     "gridStyle": {
       "fontSize": "s",
       "cellPadding": "s"
@@ -96,7 +96,7 @@ exports[`<DataGridContainer /> should switch props when in full screen mode 1`] 
   "startTime": "",
   "endTime": "now",
   "storedSelectedColumns": [],
-  "OUIDataGridProps": {
+  "OuiDataGridProps": {
     "gridStyle": {},
     "minSizeForControls": 300,
     "rowHeightsOptions": {}
