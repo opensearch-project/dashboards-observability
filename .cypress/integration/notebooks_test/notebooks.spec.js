@@ -263,9 +263,12 @@ describe('Testing paragraphs', () => {
     cy.get('button[data-test-subj="AddParagraphButton"]').click();
     cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
 
-    cy.get('textarea[data-test-subj="editorArea-3"]').focus().type(SQL_QUERY_TEXT);
+    cy.get('textarea[data-test-subj="editorArea-3"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-3"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-3"]').type(SQL_QUERY_TEXT);
     cy.get('button[data-test-subj="runRefreshBtn-3"]').click();
 
+    cy.get('textarea[data-test-subj="editorArea-3"]').should('not.exist');
     cy.get('div[data-test-subj="queryOutputText"]')
       .contains('select * from opensearch_dashboards_sample_data_flights limit 20')
       .should('exist');
@@ -278,9 +281,12 @@ describe('Testing paragraphs', () => {
     cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
 
     const testWord = uuid4().replace(/-/gi, '').repeat(10);
-    cy.get('textarea[data-test-subj="editorArea-4"]').focus().type(`%md\n${testWord}`);
+    cy.get('textarea[data-test-subj="editorArea-4"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-4"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-4"]').type(`%md\n${testWord}`);
     cy.get('button[data-test-subj="runRefreshBtn-4"]').click();
 
+    cy.get('textarea[data-test-subj="editorArea-4"]').should('not.exist');
     cy.get('div[data-test-subj="markdownOutputText"]')
       .contains(testWord)
       .then((element) => {
@@ -295,9 +301,12 @@ describe('Testing paragraphs', () => {
     cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
 
     const testWord = 'randomText' + uuid4().replace(/-/gi, '').repeat(10);
-    cy.get('textarea[data-test-subj="editorArea-5"]').focus().type(`%sql\nSELECT 1 AS ${testWord}`);
+    cy.get('textarea[data-test-subj="editorArea-5"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-5"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-5"]').type(`%sql\nSELECT 1 AS ${testWord}`);
     cy.get('button[data-test-subj="runRefreshBtn-5"]').click();
 
+    cy.get('textarea[data-test-subj="editorArea-5"]').should('not.exist');
     cy.get('div[data-test-subj="queryOutputText"]').contains(testWord).should('exist');
     cy.get('div[data-test-subj="queryOutputText"]')
       .contains(testWord)
@@ -330,9 +339,12 @@ describe('Testing paragraphs', () => {
     cy.get('button[data-test-subj="AddParagraphButton"]').click();
     cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
 
-    cy.get('textarea[data-test-subj="editorArea-7"]').focus().type(PPL_QUERY_TEXT);
+    cy.get('textarea[data-test-subj="editorArea-7"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-7"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-7"]').type(PPL_QUERY_TEXT);
     cy.get('button[data-test-subj="runRefreshBtn-7"]').click();
 
+    cy.get('textarea[data-test-subj="editorArea-7"]').should('not.exist');
     cy.get('div[data-test-subj="queryOutputText"]')
       .contains('source=opensearch_dashboards_sample_data_flights')
       .should('exist');
