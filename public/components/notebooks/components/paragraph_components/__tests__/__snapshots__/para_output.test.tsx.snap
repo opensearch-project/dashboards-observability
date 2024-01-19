@@ -12,6 +12,7 @@ exports[`<ParaOutput /> spec renders dashboards visualization outputs 1`] = `
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
 <div
   class="euiText euiText--medium wrapAll markdown-output-text"
+  data-test-subj="markdownOutputText"
 >
   <div
     class="markdown-body "
@@ -46,6 +47,7 @@ exports[`<ParaOutput /> spec renders query outputs 1`] = `
 <div>
   <div
     class="euiText euiText--medium wrapAll"
+    data-test-subj="queryOutputText"
   >
     <b>
        select * from opensearch_dashboards_sample_data_flights limit 2

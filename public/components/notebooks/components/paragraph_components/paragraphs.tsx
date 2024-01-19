@@ -106,7 +106,10 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     http,
   } = props;
 
-  const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([]); // options for loading saved visualizations
+  const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([
+    { label: 'Dashboards Visualizations', options: [] },
+    { label: 'Observability Visualizations', options: [] },
+  ]); // options for loading saved visualizations
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [runParaError, setRunParaError] = useState(false);
   const [selectedVisOption, setSelectedVisOption] = useState<EuiComboBoxOptionOption[]>([]);
@@ -333,6 +336,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               setIsPopoverOpen(false);
               props.clonePara(para, idx + 1);
             },
+            'data-test-subj': 'duplicateParagraphBtn',
           },
           {
             name: 'Delete',
@@ -392,6 +396,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             <EuiText style={{ fontSize: 17 }}>
               {`[${idx + 1}] ${type} `}
               <EuiButtonIcon
+                data-test-subj="paragraphToggleInputBtn"
                 aria-label="Toggle show input"
                 iconType={para.isInputExpanded ? 'arrowUp' : 'arrowDown'}
                 onClick={() => {
@@ -437,7 +442,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText color="subdued">
+            <EuiText color="subdued" data-test-subj="lastRunText">
               {`Last successful run ${moment(props.dateModified).format(UI_DATE_FORMAT)}.`}
             </EuiText>
           </EuiFlexItem>
@@ -458,7 +463,10 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <EuiLink onClick={() => props.setSelectedViewId('view_both', index)}>
+              <EuiLink
+                data-test-subj="viewBothLink"
+                onClick={() => props.setSelectedViewId('view_both', index)}
+              >
                 View both
               </EuiLink>
             </EuiText>
@@ -542,14 +550,18 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                 />
               </EuiFormRow>
               {runParaError && (
-                <EuiText color="danger" size="s">{`${
+                <EuiText color="danger" size="s" data-test-subj="paragraphInputErrorText">{`${
                   para.isVizualisation ? 'Visualization' : 'Input'
                 } is required.`}</EuiText>
               )}
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => onRunPara()} fill>
+                  <EuiButton
+                    data-test-subj={`runRefreshBtn-${index}`}
+                    onClick={() => onRunPara()}
+                    fill
+                  >
                     {isOutputAvailable ? 'Refresh' : 'Run'}
                   </EuiButton>
                 </EuiFlexItem>
