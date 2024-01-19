@@ -99,7 +99,8 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
             },
           })
         );
-        if (explorerData.total > 0) generateSummary();
+        if (explorerData.total > 0 || summaryData.responseForSummaryStatus === 'failure')
+          generateSummary();
       })();
     }
   }, [summaryData.responseForSummaryStatus]);
