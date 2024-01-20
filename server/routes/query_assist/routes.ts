@@ -16,11 +16,11 @@ import { generateFieldContext } from '../../common/helpers/query_assist/generate
 import { requestWithRetryAgentSearch } from './utils/agents';
 
 export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
+  const { ppl_agent_name: pplAgentName } = config.query_assist;
   const {
-    ppl_agent_name: pplAgentName,
     response_summary_agent_name: responseSummaryAgentName,
     error_summary_agent_name: errorSummaryAgentName,
-  } = config.query_assist;
+  } = config.summarize;
 
   router.post(
     {

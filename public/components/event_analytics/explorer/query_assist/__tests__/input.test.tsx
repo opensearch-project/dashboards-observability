@@ -85,7 +85,23 @@ describe('<QueryAssistInput /> spec', () => {
     );
   });
 
+  it('should not call summarize if disabled', async () => {
+    coreRefs.summarizeEnabled = false;
+    httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } });
+
+    const { component } = renderQueryAssistInput();
+    await waitFor(() => {
+      fireEvent.click(component.getByTestId('query-assist-generate-and-run-button'));
+    });
+
+    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+      body: '{"question":"test-input","index":"selected-test-index"}',
+    });
+    expect(httpMock.post).not.toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, expect.anything());
+  });
+
   it('should call summarize for generate and run errors', async () => {
+    coreRefs.summarizeEnabled = true;
     httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } }).mockResolvedValueOnce({
       summary: 'too many requests',
       suggestedQuestions: ['1', '2'],
