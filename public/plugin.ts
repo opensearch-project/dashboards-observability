@@ -83,6 +83,9 @@ interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
+  summarize: {
+    enabled: boolean;
+  };
 }
 
 export class ObservabilityPlugin
@@ -332,6 +335,7 @@ export class ObservabilityPlugin
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
+    coreRefs.summarizeEnabled = this.config.summarize.enabled;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 

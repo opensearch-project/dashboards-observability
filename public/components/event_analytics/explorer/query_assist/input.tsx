@@ -23,6 +23,7 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
+import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -34,7 +35,6 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 
 interface SummarizationContext {
   question: string;
@@ -87,22 +87,23 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (
-      summaryData.responseForSummaryStatus === 'success' ||
-      summaryData.responseForSummaryStatus === 'failure'
-    ) {
-      void (async () => {
-        await dispatch(
-          changeSummary({
-            tabId: props.tabId,
-            data: {
-              summaryLoading: false,
-            },
-          })
-        );
-        if (explorerData.total > 0 || summaryData.responseForSummaryStatus === 'failure')
-          generateSummary();
-      })();
-    }
+      props.nlqInput.trim().length === 0 ||
+      (summaryData.responseForSummaryStatus !== 'success' &&
+        summaryData.responseForSummaryStatus !== 'failure')
+    )
+      return;
+    void (async () => {
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summaryLoading: false,
+          },
+        })
+      );
+      if (explorerData.total > 0 || summaryData.responseForSummaryStatus === 'failure')
+        generateSummary();
+    })();
   }, [summaryData.responseForSummaryStatus]);
 
   const [barSelected, setBarSelected] = useState(false);
@@ -174,6 +175,11 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
+    if (!coreRefs.summarizeEnabled) {
+      if (summaryData.responseForSummaryStatus === 'failure')
+        coreRefs.toasts?.addError(explorerData.error.body, { title: 'Invalid query' });
+      return;
+    }
     try {
       const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
@@ -334,7 +340,9 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                   <EuiButton
                     isLoading={generating}
                     onClick={generatePPL}
-                    isDisabled={generating || generatingOrRunning}
+                    isDisabled={
+                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
+                    }
                     iconSide="right"
                     fill={false}
                     data-test-subj="query-assist-generate-button"
@@ -347,7 +355,9 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                   <EuiButton
                     isLoading={generatingOrRunning}
                     onClick={runAndSummarize}
-                    isDisabled={generating || generatingOrRunning}
+                    isDisabled={
+                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
+                    }
                     iconType="returnKey"
                     iconSide="right"
                     type="submit"
