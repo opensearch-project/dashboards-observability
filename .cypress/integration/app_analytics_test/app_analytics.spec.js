@@ -43,7 +43,7 @@ describe('Creating application', () => {
   });
   
   it('Suggests correct autocompletion', () => {
-    cy.get('[data-test-subj="createPageTitle"').should('contain', 'Create bapplication');
+    cy.get('[data-test-subj="createPageTitle"').should('contain', 'Create application');
     cy.get('[data-test-subj="logSourceAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
     cy.get('.aa-List').find('.aa-Item').should('have.length', 1);
