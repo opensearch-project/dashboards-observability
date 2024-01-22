@@ -265,7 +265,7 @@ export const addSelectedMetric = (metric: MetricType) => async (dispatch, getSta
   await dispatch(selectMetric(metric));
 };
 
-export const removeSelectedMetric = ({ id }) => async (dispatch, getState) => {
+export const removeSelectedMetric = ({ id }) => async (dispatch, _getState) => {
   dispatch(deSelectMetric(id));
 };
 
@@ -273,7 +273,6 @@ export const updateMetricQuery = (id, { availableAttributes, aggregation, attrib
   dispatch,
   getState
 ) => {
-  const state = getState();
   const staticMetric = getState().metrics.metrics[id];
   const metric = {
     ...staticMetric,

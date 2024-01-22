@@ -6,7 +6,6 @@
 import {
   ApplicationStart,
   ChromeStart,
-  CoreStart,
   HttpStart,
   IToasts,
   SavedObjectsClientContract,

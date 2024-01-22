@@ -31,13 +31,7 @@ export class ObservabilityPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: {
-      assistantDashboards?: AssistantPluginSetup;
-    }
-  ) {
-    const { assistantDashboards } = deps;
+  public async setup(core: CoreSetup) {
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
     const config = await this.initializerContext.config

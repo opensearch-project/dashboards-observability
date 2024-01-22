@@ -47,7 +47,6 @@ export function DataGrid(props: DataGridProps) {
     http,
     pplService,
     rows,
-    rowsAll,
     explorerFields,
     timeStampField,
     rawQuery,
@@ -108,7 +107,7 @@ export function DataGrid(props: DataGridProps) {
   // creates the header for each column listing what that column is
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
-    selectedColumns.map(({ name, type }) => {
+    selectedColumns.map(({ name }) => {
       if (name === 'timestamp') {
         columns.push(DEFAULT_TIMESTAMP_COLUMN);
       } else if (name === '_source') {
@@ -133,7 +132,7 @@ export function DataGrid(props: DataGridProps) {
       });
       return {
         visibleColumns: columns,
-        setVisibleColumns: (visibleColumns: string[]) => {
+        setVisibleColumns: () => {
           // TODO: implement with sidebar field order (dragability) changes
         },
       };
