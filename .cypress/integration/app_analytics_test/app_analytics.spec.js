@@ -202,6 +202,8 @@ describe('Setting availability', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 1);
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiBreadcrumb[href="#/"]').click();
+    cy.intercept('**').as('requests');
+    cy.wait('@requests');
     cy.get('[data-test-subj="setAvailabilityHomePageLink"]').first().click();
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });

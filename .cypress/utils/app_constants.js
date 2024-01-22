@@ -14,7 +14,9 @@ export const moveToHomePage = () => {
 };
 
 export const moveToCreatePage = () => {
+  cy.intercept('**').as('requests');
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
+  cy.wait('@requests');
   cy.get('.euiButton[href="#/create"]').eq(0).click();
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Create application');
 };
