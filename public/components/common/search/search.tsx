@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -91,7 +90,6 @@ export const Search = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
-    handleQuerySearch,
     handleTimePickerChange,
     dslService,
     startTime,
@@ -134,7 +132,7 @@ export const Search = (props: any) => {
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
-  const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
+  const [_isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [timeRange, setTimeRange] = useState([
@@ -151,9 +149,9 @@ export const Search = (props: any) => {
 
   const {
     data: pollingResult,
-    loading: pollingLoading,
+    loading: _pollingLoading,
     error: pollingError,
-    startPolling,
+    startPolling: _startPolling,
     stopPolling,
   } = usePolling<any, any>((params) => {
     return sqlService.fetchWithJobId(params);
@@ -222,10 +220,6 @@ export const Search = (props: any) => {
     closeLanguagePopover();
   };
 
-  const onLanguagePopoverClick = () => {
-    setLanguagePopoverOpen(!isLanguagePopoverOpen);
-  };
-
   const closeLanguagePopover = () => {
     setLanguagePopoverOpen(false);
   };
@@ -235,28 +229,7 @@ export const Search = (props: any) => {
     { value: QUERY_LANGUAGE.DQL, inputDisplay: <EuiText>DQL</EuiText> },
   ];
 
-  const languagePopOverItems = [
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.PPL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
-    >
-      PPL
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.DQL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
-    >
-      DQL
-    </EuiContextMenuItem>,
-  ];
-
-  const languagePopOverButton = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
-      {queryLang}
-    </EuiButton>
-  );
-
-  const onQuerySearch = (lang) => {
+  const onQuerySearch = () => {
     handleTimeRangePickerRefresh();
   };
 

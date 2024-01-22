@@ -3,36 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './sidebar.scss';
-
-import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import { batch, useDispatch, useSelector } from 'react-redux';
 import { keyBy, sortBy } from 'lodash';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { batch, useDispatch, useSelector } from 'react-redux';
+import { OTEL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { OptionType } from '../../../../common/types/metrics';
 import {
   addSelectedMetric,
   availableMetricsSelector,
   clearSelectedMetrics,
+  coloredIconsFrom,
+  fetchOpenTelemetryDocumentNames,
   loadMetrics,
+  loadOTIndices,
+  mergeMetrics,
+  otelIndexSelector,
   removeSelectedMetric,
   selectedMetricsIdsSelector,
   selectedMetricsSelector,
   selectMetricByIdSelector,
-  otelIndexSelector,
   setDataSourceIcons,
-  coloredIconsFrom,
-  loadOTIndices,
-  fetchOpenTelemetryDocumentNames,
-  mergeMetrics,
   setSortedIds,
 } from '../redux/slices/metrics_slice';
-import { MetricsAccordion } from './metrics_accordion';
-import { SearchBar } from './search_bar';
 import { DataSourcePicker } from './data_source_picker';
 import { IndexPicker } from './index_picker';
-import { OptionType } from '../../../../common/types/metrics';
-import { OTEL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { MetricsAccordion } from './metrics_accordion';
+import { SearchBar } from './search_bar';
+import './sidebar.scss';
 
 interface SideBarMenuProps {
   selectedDataSource: OptionType[];
