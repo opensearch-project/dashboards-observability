@@ -78,6 +78,7 @@ import {
   getSavingCommonParams,
   uiSettingsService,
 } from '../../../../common/utils';
+import { coreRefs } from '../../../framework/core_refs';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -115,7 +116,7 @@ import {
   change as updateVizConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
-import { getContentTabTitle, getDateRange } from '../utils/utils';
+import { formatError, getContentTabTitle, getDateRange } from '../utils/utils';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -161,7 +162,7 @@ export const Explorer = ({
     requestParams,
   });
   const {
-    isEventsLoading: isPatternLoading,
+    isEventsLoading: _isPatternLoading,
     getPatterns,
     setDefaultPatternsField,
   } = useFetchPatterns({
@@ -181,7 +182,7 @@ export const Explorer = ({
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
   const [curVisId, setCurVisId] = useState('bar');
-  const [isPanelTextFieldInvalid, setIsPanelTextFieldInvalid] = useState(false);
+  const [isPanelTextFieldInvalid, _setIsPanelTextFieldInvalid] = useState(false);
   const [timeIntervalOptions, setTimeIntervalOptions] = useState(TIME_INTERVAL_OPTIONS);
   const [isOverridingTimestamp, setIsOverridingTimestamp] = useState(false);
   const [tempQuery, setTempQuery] = useState(query[RAW_QUERY]);
@@ -214,8 +215,8 @@ export const Explorer = ({
     value: string;
   }>();
   const [subType, setSubType] = useState('visualization');
-  const [metricMeasure, setMetricMeasure] = useState('');
-  const [metricChecked, setMetricChecked] = useState(false);
+  const [_metricMeasure, setMetricMeasure] = useState('');
+  const [_metricChecked, setMetricChecked] = useState(false);
   const queryRef = useRef();
   const appBasedRef = useRef('');
   appBasedRef.current = appBaseQuery;
@@ -273,10 +274,11 @@ export const Explorer = ({
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
-      // const formattedError = formatError(error.name, error.message, error.body.message);
-      // notifications.toasts.addError(formattedError, {
-      //   title,
-      // });
+      if (coreRefs.summarizeEnabled) return;
+      const formattedError = formatError(error.name, error.message, error.body.message);
+      notifications.toasts.addError(formattedError, {
+        title,
+      });
     };
   };
 

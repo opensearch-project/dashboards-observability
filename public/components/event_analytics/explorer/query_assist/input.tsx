@@ -175,11 +175,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
-    if (!coreRefs.summarizeEnabled) {
-      if (summaryData.responseForSummaryStatus === 'failure')
-        coreRefs.toasts?.addError(explorerData.error.body, { title: 'Invalid query' });
-      return;
-    }
+    if (!coreRefs.summarizeEnabled) return;
     try {
       const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
