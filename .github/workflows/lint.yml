@@ -62,18 +62,12 @@ jobs:
 
       - name: Lint Changed Files
         run: |
-          jq -r '.[]' ${HOME}/files_modified.json ${HOME}/files_added.json | sort | uniq > /tmp/changed_files.txt
-          CHANGED_FILES=$(cat /tmp/changed_files.txt)
-          echo "These are the changed files: $CHANGED_FILES"
+          CHANGED_FILES=($(jq -r '.[]' ${HOME}/files_modified.json ${HOME}/files_added.json | grep '.\+.\(js\|ts\|tsx\)$' | sort -u))
           if [[ -n "$CHANGED_FILES" ]]; then
-            echo "Linting changed files..."
-            while IFS= read -r file; do
-              if [[ $file == *.js || $file == *.ts || $file == *.tsx ]]; then
-                echo "linting file $file"
-                yarn lint "$file"
-              fi
-            done < /tmp/changed_files.txt
+            echo 'These are the changed files:'
+            printf '%s\n' "${CHANGED_FILES[@]}"
+            yarn lint "${CHANGED_FILES[@]}"
           else
             echo "No matched files to lint."
           fi
-        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}      
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
