@@ -9,7 +9,6 @@ import {
   EuiCodeBlock,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -22,16 +21,17 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import { Input, Prompt } from '@nteract/presentational-components';
-import { uiSettingsService } from '../../../../../common/utils';
 import React, { useState } from 'react';
-import { ParaType } from '../../../../../common/types/notebooks';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { ParaType } from '../../../../../common/types/notebooks';
+import { uiSettingsService } from '../../../../../common/utils';
 
 /*
  * "ParaInput" component is used by notebook to populate paragraph inputs for an open notebook.
@@ -67,12 +67,13 @@ export const ParaInput = (props: {
   const inputPlaceholderString =
     'Type %md, %sql or %ppl on the first line to define the input type. \nCode block starts here.';
 
-  const renderParaInput = () => {
+  const RenderParaInput = () => {
     return (
       <div style={{ width: '100%' }}>
         {/* If the para is selected show the editor else display the code in the paragraph */}
         {para.isSelected ? (
           <EuiTextArea
+            data-test-subj={`editorArea-${index}`}
             placeholder={inputPlaceholderString}
             id="editorArea"
             className="editorArea"
@@ -88,6 +89,7 @@ export const ParaInput = (props: {
           />
         ) : (
           <EuiCodeBlock
+            data-test-subj={`paraInputCodeBlock-${index}`}
             language={para.inp.match(/^%(sql|md)/)?.[1]}
             overflowHeight={200}
             paddingSize="s"
@@ -99,7 +101,7 @@ export const ParaInput = (props: {
     );
   };
 
-  const renderVisInput = () => {
+  const RenderVisInput = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
     const [selectableError, setSelectableError] = useState(false);
@@ -236,7 +238,7 @@ export const ParaInput = (props: {
   return (
     <Input hidden={para.isInputHidden}>
       <Prompt blank={true} running={para.isRunning} queued={para.inQueue} />
-      {para.isVizualisation ? renderVisInput() : renderParaInput()}
+      {para.isVizualisation ? RenderVisInput() : RenderParaInput()}
     </Input>
   );
 };

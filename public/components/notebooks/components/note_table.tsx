@@ -205,6 +205,7 @@ export function NoteTable({
 
   const popoverButton = (
     <EuiButton
+      data-test-subj="notebookTableActionBtn"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
@@ -221,7 +222,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         renameNote();
       }}
-      data-test-subj="rename-notebook-btn"
+      data-test-subj="renameNotebookBtn"
     >
       Rename
     </EuiContextMenuItem>,
@@ -232,7 +233,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         cloneNote();
       }}
-      data-test-subj="duplicate-notebook-btn"
+      data-test-subj="duplicateNotebookBtn"
     >
       Duplicate
     </EuiContextMenuItem>,
@@ -243,7 +244,7 @@ export function NoteTable({
         setIsActionsPopoverOpen(false);
         deleteNote();
       }}
-      data-test-subj="delete-notebook-btn"
+      data-test-subj="deleteNotebookBtn"
     >
       Delete
     </EuiContextMenuItem>,
@@ -304,13 +305,13 @@ export function NoteTable({
           <EuiPageContent id="notebookArea">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle size="s">
+                <EuiTitle size="s" data-test-subj="notebookTableTitle">
                   <h3>
                     Notebooks<span className="panel-header-count"> ({notebooks.length})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
+                <EuiText size="s" color="subdued" data-test-subj="notebookTableDescription">
                   Use Notebooks to interactively and collaboratively develop rich reports backed by
                   live data. Common use cases for notebooks includes creating postmortem reports,
                   designing run books, building live infrastructure reports, or even documentation.{' '}
@@ -332,7 +333,7 @@ export function NoteTable({
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/create">
+                    <EuiButton fill href="#/create" data-test-subj="createNotebookPrimaryBtn">
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
@@ -381,7 +382,7 @@ export function NoteTable({
             ) : (
               <>
                 <EuiSpacer size="xxl" />
-                <EuiText textAlign="center">
+                <EuiText textAlign="center" data-test-subj="notebookEmptyTableText">
                   <h2>No notebooks</h2>
                   <EuiSpacer size="m" />
                   <EuiText color="subdued">
@@ -395,14 +396,18 @@ export function NoteTable({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       href="#/create"
-                      data-test-subj="note-table-empty-state-create-notebook-button"
+                      data-test-subj="notebookEmptyTableCreateBtn"
                       fullWidth={false}
                     >
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fullWidth={false} onClick={() => addSampleNotebooksModal()}>
+                    <EuiButton
+                      data-test-subj="notebookEmptyTableAddSamplesBtn"
+                      fullWidth={false}
+                      onClick={() => addSampleNotebooksModal()}
+                    >
                       Add samples
                     </EuiButton>
                   </EuiFlexItem>

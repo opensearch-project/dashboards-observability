@@ -89,7 +89,7 @@ const OutputBody = ({
           const data = getQueryOutputData(queryObject);
           return (
             <div>
-              <EuiText key={'query-input-key'} className="wrapAll">
+              <EuiText key={'query-input-key'} className="wrapAll" data-test-subj="queryOutputText">
                 <b>{inputQuery}</b>
               </EuiText>
               <EuiSpacer />
@@ -104,7 +104,11 @@ const OutputBody = ({
         }
       case 'MARKDOWN':
         return (
-          <EuiText key={key} className="wrapAll markdown-output-text">
+          <EuiText
+            key={key}
+            className="wrapAll markdown-output-text"
+            data-test-subj="markdownOutputText"
+          >
             <MarkdownRender source={val} />
           </EuiText>
         );
