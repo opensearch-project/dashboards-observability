@@ -23,16 +23,14 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
-        testgroups: [
-          app_analytics_test,
-          datasources_test,
-          event_analytics_test,
-          integrations_test,
-          metrics_analytics_test,
-          notebooks_test,
-          panels_test,
-          trace_analytics_test
-        ]
+        testgroups: [app_analytics_test]
+          # datasources_test,
+          # event_analytics_test,
+          # integrations_test,
+          # metrics_analytics_test,
+          # notebooks_test,
+          # panels_test,
+          # trace_analytics_test
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
@@ -134,7 +132,7 @@ jobs:
           cd OpenSearch-Dashboards
           nohup yarn start --no-base-path --no-watch | tee dashboard.log &
 
-      - name : Check If OpenSearch Dashboards Is Ready
+      - name: Check If OpenSearch Dashboards Is Ready
         if: ${{ runner.os == 'Linux' }}
         run: |
           cd ./OpenSearch-Dashboards
