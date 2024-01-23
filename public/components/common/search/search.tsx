@@ -514,6 +514,7 @@ export const Search = (props: any) => {
               <QueryArea
                 tabId={tabId}
                 handleQueryChange={handleQueryChange}
+                handleTimePickerChange={handleTimePickerChange}
                 handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
                 runQuery={query}
                 tempQuery={tempQuery}
