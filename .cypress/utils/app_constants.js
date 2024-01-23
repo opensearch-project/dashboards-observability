@@ -7,6 +7,38 @@ export const delay = 1000;
 export const timeoutDelay = 30000;
 export const TYPING_DELAY = 150;
 
+export const loadAllData = () => {
+  // flights and web logs, not using ecommerce currently
+  loadAllSampleData();
+
+  // otel and jaeger
+  // TODO: import those ones
+}
+
+export const loadAllSampleData = () => {
+  // Deleting all indices, cypress doesn't support conditionals in any way so to create a single
+  //  line of execution, need to start from a clean slate
+  cy.request(
+    'DELETE',
+    `${Cypress.env('opensearch')}/index*,sample*,opensearch_dashboards*,test*,cypress*`
+  );
+
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory`);
+
+  // Load sample flights data
+  cy.get(`button[data-test-subj="addSampleDataSetflights"]`).click({
+    force: true,
+  });
+  // Load sample logs data
+  cy.get(`button[data-test-subj="addSampleDataSetlogs"]`).click({
+    force: true,
+  });
+
+  // Verify that sample data is add by checking toast notification
+  cy.contains('Sample flight data installed', { timeout: 60000 });
+  cy.contains('Sample web logs installed', { timeout: 60000 });
+}
+
 export const moveToHomePage = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
   cy.wait(delay * 3);
@@ -14,9 +46,7 @@ export const moveToHomePage = () => {
 };
 
 export const moveToCreatePage = () => {
-  cy.intercept('**').as('requests');
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  cy.wait('@requests');
   cy.get('.euiButton[href="#/create"]').eq(0).click();
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Create application');
 };
@@ -34,7 +64,7 @@ export const moveToEditPage = () => {
   moveToApplication(nameOne);
   cy.get('[data-test-subj="app-analytics-configTab"]').click();
   cy.get('[data-test-subj="editApplicationButton"]').click();
-  cy.wait(delay);
+  // cy.wait(delay);
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Edit application');
 };
 
