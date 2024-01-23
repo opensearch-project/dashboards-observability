@@ -56,6 +56,7 @@ import { Search } from './components/common/search/search';
 import { DirectSearch } from './components/common/search/sql_search';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
+import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -319,6 +320,8 @@ export class ObservabilityPlugin
       },
     });
 
+    registerAsssitantDependencies(setupDeps.assistantDashboards);
+
     // Return methods that should be available to other plugins
     return {};
   }
@@ -326,6 +329,7 @@ export class ObservabilityPlugin
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
+    coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;

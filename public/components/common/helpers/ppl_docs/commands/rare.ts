@@ -8,24 +8,18 @@ export const rareCmd = `## rare
 
 ### Description
 
-Using \`rare\` command to find the least common tuple of values of all
-fields in the field list.
-
-**Note**: A maximum of 10 results is returned for each distinct tuple of
-values of the group-by fields.
+Use the \`rare\` command to find the least common tuple of values across all fields in the \`field-list\` field. A maximum of 10 results is returned for each distinct tuple of group-by field values.
 
 ### Syntax
 
 rare &lt;field-list&gt; \[by-clause\]
 
--   field-list: mandatory. comma-delimited list of field names.
--   by-clause: optional. one or more fields to group the results by.
+-   \`field-list\`: Required. A comma-separated list of field names.
+-   \`by-clause\`: Optional. One or more fields to group by.
 
-### Example 1: Find the least common values in a field
+#### Example 1: Find a field's least common values
 
-The example finds least common gender of all the accounts.
-
-PPL query:
+The following example PPL query shows how to find a least common value in the \`gender\` field:
 
     os> source=accounts | rare gender;
     fetched rows / total rows = 2/2
@@ -37,11 +31,9 @@ PPL query:
     | M          |
     +------------+
 
-### Example 2: Find the least common values organized by gender
+#### Example 2: Find least common values in group-by fields
 
-The example finds least common age of all the accounts group by gender.
-
-PPL query:
+The following example PPL query shows how to find a least common value in the \`age\` field that is grouped by \`gender\`:
 
     os> source=accounts | rare age by gender;
     fetched rows / total rows = 20/20
@@ -71,5 +63,5 @@ PPL query:
     +----------+----------+
 
 #### Limitation
-The \`rare\` command is not rewritten to OpenSearch DSL, it is only executed on the coordination node.
+The \`rare\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;

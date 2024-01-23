@@ -25,6 +25,11 @@
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
+.wrapAll {
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
 .notebooks-paragraph button[aria-label='Expand'] {
   display: none;
 }

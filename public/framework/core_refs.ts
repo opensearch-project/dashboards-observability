@@ -6,6 +6,7 @@
 import {
   ApplicationStart,
   ChromeStart,
+  CoreStart,
   HttpStart,
   IToasts,
   SavedObjectsClientContract,
@@ -16,6 +17,7 @@ import PPLService from '../services/requests/ppl';
 class CoreRefs {
   private static _instance: CoreRefs;
 
+  public core?: CoreStart;
   public http?: HttpStart;
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;

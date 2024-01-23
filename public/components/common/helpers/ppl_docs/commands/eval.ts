@@ -8,26 +8,21 @@ export const evalCmd = `## eval
 
 ### Description
 
-The \'eval\' command evaluate the expression and append the result to the
-search result.
+Use the \'eval\' command to evaluate the expression and append the result to the search result.
 
 ### Syntax
 
 eval &lt;field&gt;=&lt;expression&gt; \[","
 &lt;field&gt;=&lt;expression&gt; \]...
 
--   field: mandatory. If the field name not exist, a new field is added.
-    If the field name already exists, it will be overrided.
--   expression: mandatory. Any expression support by the system.
+-   \`field\`: Required. If the field name does not exist, a new field is created. If the field name exists, the value of the existing field is replaced.
+-   \`expression\`: Required. Any expression that is supported by the system.
 
-### Example 1: Create the new field
+#### Example 1: Create new fields
 
-The example show to create new field doubleAge for each document. The
-new doubleAge is the evaluation result of age multiply by 2.
+The following example PPL query shows how to use \`eval\` to create a new field for each document. In this example, the new field is \`doubleAge\`.
 
-PPL query:
-
-    os> source=accounts | eval doubleAge = age * 2 | fields age, doubleAge ;
+    os> source=accounts | eval doubleAge = age * 2 | fields age, doubleAge;
     fetched rows / total rows = 4/4
     +-------+-------------+
     | age   | doubleAge   |
@@ -38,13 +33,11 @@ PPL query:
     | 33    | 66          |
     +-------+-------------+
 
-### Example 2: Override the existing field
+#### Example 2: Override existing fields
 
-The example show to override the exist age field with age plus 1.
+The following example PPL query shows how to use \`eval\` to override an existing field. In this example, the existing field \`age\` is overridden by the \`age\` field plus 1.
 
-PPL query:
-
-    os> source=accounts | eval age = age + 1 | fields age ;
+    os> source=accounts | eval age = age + 1 | fields age;
     fetched rows / total rows = 4/4
     +-------+
     | age   |
@@ -55,15 +48,11 @@ PPL query:
     | 34    |
     +-------+
 
-### Example 3: Create the new field with field defined in eval
+#### Example 3: Create new fields based on the fields defined in the \`eval\` expression
 
-The example show to create a new field ddAge with field defined in eval
-command. The new field ddAge is the evaluation result of doubleAge
-multiply by 2, the doubleAge is defined in the eval command.
+The following example PPL query shows how to use \`eval\` to create a new field based on the fields defined in the \`eval\` expression. In this example, the new field \`ddAge\` is the evaluation result of the \`doubleAge\` field multiplied by 2. \`doubleAge\` is defined in the \`eval\` command.
 
-PPL query:
-
-    os> source=accounts | eval doubleAge = age * 2, ddAge = doubleAge * 2 | fields age, doubleAge, ddAge ;
+    os> source=accounts | eval doubleAge = age * 2, ddAge = doubleAge * 2 | fields age, doubleAge, ddAge;
     fetched rows / total rows = 4/4
     +-------+-------------+---------+
     | age   | doubleAge   | ddAge   |
@@ -74,6 +63,6 @@ PPL query:
     | 33    | 66          | 132     |
     +-------+-------------+---------+
 
-#### Limitation
-The \`eval\` command is not rewritten to OpenSearch DSL, it is only executed on the coordination node.
+### Limitation
+The \`eval\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;

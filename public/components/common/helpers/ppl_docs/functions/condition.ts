@@ -6,15 +6,21 @@
 export const conditionFunction = `## Condition
 ---
 
-### Description
+### Condition functions
 
-Usage: isnull(field) return true if field is null.
+PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitate the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause. 
 
-Argument type: all the supported data type.
+The following sections describe the condition PPL functions.
 
-Return type: BOOLEAN
+### ISNULL
 
-Example:
+The \`isnull(field)\` function checks a specific field and returns \`true\` if the field contains no data, that is, it's null.
+
+**Argument type:** All supported data types
+
+**Return type:** \`BOOLEAN\`
+
+#### Example
 
     os> source=accounts | eval result = isnull(employer) | fields result, employer, firstname
     fetched rows / total rows = 4/4
@@ -27,17 +33,15 @@ Example:
     | True     | null       | Dale        |
     +----------+------------+-------------+
 
-### **ISNOTNULL**
+### ISNOTNULL
 
-**Description**
+The \`isnotnull(field)\` function is the opposite of \`isnull(field)\`. Instead of checking for null values, it checks a specific field and returns \`true\` if the field contains data, that is, it is not null.
 
-Usage: isnotnull(field) return true if field is not null.
+**Argument type:** All supported data types
 
-Argument type: all the supported data type.
+**Return type:** \`BOOLEAN\`
 
-Return type: BOOLEAN
-
-Example:
+#### Example
 
     os> source=accounts | where not isnotnull(employer) | fields account_number, employer
     fetched rows / total rows = 1/1
@@ -47,14 +51,11 @@ Example:
     | 18               | null       |
     +------------------+------------+
 
-### **EXISTS**
+### EXISTS
 
-[Because OpenSearch doesn't differentiate null and
-missing](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html).
-so we can't provide function like ismissing/isnotmissing to test field
-exist or not. But you can still use isnull/isnotnull for such purpose.
+OpenSearch does not differentiate between null and missing. Thus, a function such as \`ismissing\` or \`isnotmissing\` cannot be used to test if a field exists or not. The \`isnull\` or \`isnotnull\` functions can be used for this purpose.
 
-Example, the account 13 doesn't have email field:
+#### Example
 
     os> source=accounts | where isnull(email) | fields account_number, email
     fetched rows / total rows = 1/1
@@ -64,18 +65,15 @@ Example, the account 13 doesn't have email field:
     | 13               | null    |
     +------------------+---------+
 
-### **IFNULL**
+### IFNULL
 
-**Description**
+The \`ifnull(field1, field2)\` function returns the value in the first field if it is not null; otherwise, it returns the value in the second field.
 
-Usage: ifnull(field1, field2) return field2 if field1 is null.
+**Argument type:** All supported data types (Note that the semantic check will fail if the parameters are different types.)
 
-Argument type: all the supported data type, (NOTE : if two parameters
-has different type, you will fail semantic check.)
+**Return type:** Any
 
-Return type: any
-
-Example:
+#### Example
 
     os> source=accounts | eval result = ifnull(employer, 'default') | fields result, employer, firstname
     fetched rows / total rows = 4/4
@@ -88,20 +86,15 @@ Example:
     | default  | null       | Dale        |
     +----------+------------+-------------+
 
-### **NULLIF**
+### NULLIF
 
-**Description**
+The \`nullif(field1, field2)\` function returns \`null\` if the values in both fields are identical. If the values differ, the function returns the value in the first field (field1).
 
-Usage: nullif(field1, field2) return null if two parameters are same,
-otherwiser return field1.
+**Argument type:** All supported data types (Note that the semantic check will fail if the parameters are different types.)
 
-Argument type: all the supported data type, (NOTE : if two parameters
-has different type, if two parameters has different type, you will fail
-semantic check)
+**Return type:** Any
 
-Return type: any
-
-Example:
+#### Example
 
     os> source=accounts | eval result = nullif(employer, 'Pyrami') | fields result, employer, firstname
     fetched rows / total rows = 4/4
@@ -114,18 +107,15 @@ Example:
     | null     | null       | Dale        |
     +----------+------------+-------------+
 
-### **ISNULL**
+### ISNULL
 
-**Description**
+The \`isnull(field1, field2)\` function checks for null values and returns \`null\` if the values in both fields are identical. If the values differ, the function returns the value in the first field (field1).
 
-Usage: isnull(field1, field2) return null if two parameters are same,
-otherwise return field1.
+**Argument type:** All supported data types
 
-Argument type: all the supported data type
+**Return type:** Any
 
-Return type: any
-
-Example:
+#### Example
 
     os> source=accounts | eval result = isnull(employer) | fields result, employer, firstname
     fetched rows / total rows = 4/4
@@ -138,17 +128,13 @@ Example:
     | True     | null       | Dale        |
     +----------+------------+-------------+
 
-### **IF**
+### IF
 
-**Description**
+The \`if(condition, expr1, expr2)\` function returns \`expr1\` if \`condition\` is \`true\`, and \`expr2\` otherwise.
 
-Usage: if(condition, expr1, expr2) return expr1 if condition is true,
-otherwiser return expr2.
+**Argument type:** All supported data types (Note that the semantic check will fail if \`expr1\` and \`expr2\` have different types.)
 
-Argument type: all the supported data type, (NOTE : if expr1 and expr2
-are different type, you will fail semantic check
-
-Return type: any
+**Return type:** Any
 
 Example:
 
