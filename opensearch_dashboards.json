@@ -19,6 +19,7 @@
     "visualizations"
   ],
   "optionalPlugins": [
-    "managementOverview"
+    "managementOverview",
+    "assistantDashboards"
   ]
 }
