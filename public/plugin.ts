@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   AppCategory,
@@ -12,37 +11,38 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
+  PluginInitializerContext,
+  SavedObject,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
-
 import {
+  DATACONNECTIONS_BASE,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityTracesTitle,
+  observabilityDataConnectionsID,
+  observabilityDataConnectionsPluginOrder,
+  observabilityDataConnectionsTitle,
+  observabilityIntegrationsID,
+  observabilityIntegrationsPluginOrder,
+  observabilityIntegrationsTitle,
+  observabilityLogsID,
+  observabilityLogsPluginOrder,
+  observabilityLogsTitle,
   observabilityMetricsID,
   observabilityMetricsPluginOrder,
   observabilityMetricsTitle,
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityPanelsID,
+  observabilityPanelsPluginOrder,
+  observabilityPanelsTitle,
+  observabilityPluginOrder,
   observabilityTracesID,
   observabilityTracesPluginOrder,
-  observabilityPanelsID,
-  observabilityPanelsTitle,
-  observabilityPanelsPluginOrder,
-  observabilityLogsID,
-  observabilityLogsTitle,
-  observabilityLogsPluginOrder,
-  observabilityIntegrationsID,
-  observabilityIntegrationsTitle,
-  observabilityIntegrationsPluginOrder,
-  observabilityPluginOrder,
-  DATACONNECTIONS_BASE,
+  observabilityTracesTitle,
   S3_DATASOURCE_TYPE,
-  observabilityDataConnectionsID,
-  observabilityDataConnectionsPluginOrder,
-  observabilityDataConnectionsTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -52,10 +52,11 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
+import { Search } from './components/common/search/search';
+import { DirectSearch } from './components/common/search/sql_search';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-import { SavedObject } from '../../../src/core/public';
-import { coreRefs } from './framework/core_refs';
+import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -64,6 +65,9 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
+import { coreRefs } from './framework/core_refs';
+import { S3DataSource } from './framework/datasources/s3_datasource';
+import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import './index.scss';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
@@ -75,15 +79,24 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { S3DataSource } from './framework/datasources/s3_datasource';
-import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
-import { DirectSearch } from './components/common/search/sql_search';
-import { Search } from './components/common/search/search';
-import { registerAsssitantDependencies } from './dependencies/register_assistant';
+
+interface PublicConfig {
+  query_assist: {
+    enabled: boolean;
+  };
+  summarize: {
+    enabled: boolean;
+  };
+}
 
 export class ObservabilityPlugin
   implements
     Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+  private config: PublicConfig;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<PublicConfig>();
+  }
+
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
@@ -325,6 +338,8 @@ export class ObservabilityPlugin
     coreRefs.dataSources = startDeps.data.dataSources;
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
+    coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
+    coreRefs.summarizeEnabled = this.config.summarize.enabled;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 

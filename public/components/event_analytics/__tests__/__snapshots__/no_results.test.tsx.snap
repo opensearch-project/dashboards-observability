@@ -1,142 +1,156 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`No result component Renders No result component 1`] = `
-<NoResults>
-  <EuiPage
-    paddingSize="s"
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(Symbol.observable): [Function],
+    }
+  }
+>
+  <NoResults
+    tabId="OBSERVABILITY_DEFAULT_TAB"
   >
-    <div
-      className="euiPage euiPage--paddingSmall euiPage--grow"
+    <EuiPage
+      paddingSize="s"
     >
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="center"
+      <div
+        className="euiPage euiPage--paddingSmall euiPage--grow"
       >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="center"
         >
-          <EuiFlexItem
-            grow={false}
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
           >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+            <EuiFlexItem
+              grow={false}
             >
-              <EuiCallOut
-                color="warning"
-                data-test-subj="observabilityNoResultsCallout"
-                iconType="help"
-                title={
-                  <FormattedMessage
-                    defaultMessage="No results match your search criteria"
-                    id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                    values={Object {}}
-                  />
-                }
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
-                  className="euiCallOut euiCallOut--warning"
+                <EuiCallOut
+                  color="warning"
                   data-test-subj="observabilityNoResultsCallout"
+                  iconType="help"
+                  title={
+                    <FormattedMessage
+                      defaultMessage="No results match your search criteria"
+                      id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                      values={Object {}}
+                    />
+                  }
                 >
                   <div
-                    className="euiCallOutHeader"
+                    className="euiCallOut euiCallOut--warning"
+                    data-test-subj="observabilityNoResultsCallout"
                   >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiCallOutHeader__icon"
-                      color="inherit"
-                      size="m"
-                      type="help"
+                    <div
+                      className="euiCallOutHeader"
                     >
-                      <EuiIconBeaker
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiCallOutHeader__icon"
+                        color="inherit"
+                        size="m"
+                        type="help"
                       >
-                        <svg
+                        <EuiIconBeaker
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                      </EuiIconBeaker>
-                    </EuiIcon>
-                    <span
-                      className="euiCallOutHeader__title"
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </EuiIconBeaker>
+                      </EuiIcon>
+                      <span
+                        className="euiCallOutHeader__title"
+                      >
+                        <FormattedMessage
+                          defaultMessage="No results match your search criteria"
+                          id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                          values={Object {}}
+                        >
+                          <span>
+                            No results match your search criteria
+                          </span>
+                        </FormattedMessage>
+                      </span>
+                    </div>
+                  </div>
+                </EuiCallOut>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+                <EuiText>
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <h2
+                      data-test-subj="obsNoResultsTimefilter"
                     >
                       <FormattedMessage
-                        defaultMessage="No results match your search criteria"
-                        id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                        defaultMessage="Select a data source, expand your time range, or modify the query"
+                        id="observability.noResults.expandYourTimeRangeTitle"
                         values={Object {}}
                       >
                         <span>
-                          No results match your search criteria
+                          Select a data source, expand your time range, or modify the query
                         </span>
                       </FormattedMessage>
-                    </span>
+                    </h2>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="After selection, check the time range, query filters, fields, and query"
+                        id="observability.noResults.queryMayNotMatchTitle"
+                        values={Object {}}
+                      >
+                        <span>
+                          After selection, check the time range, query filters, fields, and query
+                        </span>
+                      </FormattedMessage>
+                    </p>
                   </div>
-                </div>
-              </EuiCallOut>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiText>
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <h2
-                    data-test-subj="obsNoResultsTimefilter"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Select a data source, expand your time range, or modify the query"
-                      id="observability.noResults.expandYourTimeRangeTitle"
-                      values={Object {}}
-                    >
-                      <span>
-                        Select a data source, expand your time range, or modify the query
-                      </span>
-                    </FormattedMessage>
-                  </h2>
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="After selection, check the time range, query filters, fields, and query"
-                      id="observability.noResults.queryMayNotMatchTitle"
-                      values={Object {}}
-                    >
-                      <span>
-                        After selection, check the time range, query filters, fields, and query
-                      </span>
-                    </FormattedMessage>
-                  </p>
-                </div>
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-    </div>
-  </EuiPage>
-</NoResults>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </EuiPage>
+  </NoResults>
+</Provider>
 `;

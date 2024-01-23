@@ -125,7 +125,13 @@ export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsPa
         }));
         dispatchOnPatterns({ patternTableData: formatToTableData });
       })
-      .catch(errorHandler);
+      .catch(() => {
+        dispatch(
+          resetPatterns({
+            tabId: requestParams.tabId,
+          })
+        );
+      });
   };
 
   const setDefaultPatternsField = async (
@@ -144,7 +150,7 @@ export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsPa
           // Loop through array and find field with longest value
           let defaultPatternField = '';
           let maxLength = 0;
-          textFields.forEach((field: IField, i: number) => {
+          textFields.forEach((field: IField) => {
             const curLength = res.jsonData[0][field.name].length;
             if (curLength > maxLength) {
               maxLength = curLength;

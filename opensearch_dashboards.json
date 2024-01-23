@@ -18,8 +18,6 @@
     "urlForwarding",
     "visualizations"
   ],
-  "optionalPlugins": [
-    "managementOverview",
-    "assistantDashboards"
-  ]
+  "optionalPlugins": ["managementOverview", "assistantDashboards"],
+  "configPath": ["observability"]
 }

@@ -3,28 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@osd/i18n';
-import { isEqual, toUpper, upperFirst } from 'lodash';
 import {
-  EuiPopover,
+  EuiBadge,
   EuiButtonIcon,
-  EuiToolTip,
-  EuiMark,
-  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiLoadingSpinner,
+  EuiPopover,
   EuiText,
-  EuiBadge,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { isEqual, toUpper, upperFirst } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FieldButton } from '../../../common/field_button';
-import { FieldIcon } from '../../../common/field_icon';
-import { IField } from '../../../../../common/types/explorer';
-import { FieldInsights } from './field_insights';
 import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../../common/constants/data_sources';
+import { IField } from '../../../../../common/types/explorer';
+import { FieldIcon } from '../../../common/field_icon';
 import { selectSearchMetaData } from '../../../event_analytics/redux/slices/search_meta_data_slice';
+import { FieldInsights } from './field_insights';
 
 interface IFieldProps {
   query: string;
@@ -82,6 +80,13 @@ export const Field = (props: IFieldProps) => {
   const toggleField = (fields: IField) => {
     onToggleField(fields);
   };
+
+  // hardcoded for demo purposes - remove afterwards
+  useEffect(() => {
+    if (field.name === 'order_date') {
+      handleOverrideTimestamp(field);
+    }
+  }, []);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">

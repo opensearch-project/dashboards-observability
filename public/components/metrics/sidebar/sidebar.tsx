@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './sidebar.scss';
-
-import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
+import React, { useEffect, useMemo } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
   addSelectedMetric,
@@ -21,6 +19,7 @@ import {
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
+import './sidebar.scss';
 
 export const Sidebar = ({
   additionalSelectedMetricId,

@@ -49,9 +49,9 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
         });
       }
     } catch (error) {
-      this.notifications.toasts.addError(error, {
+      /* this.notifications.toasts.addError(error, {
         title: 'Unable to get default timestamp',
-      });
+      }); */
     }
   }
 
@@ -80,6 +80,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
       getErrorHandler,
       getPatterns,
       getAvailableFields,
+      setSummaryStatus,
     } = this.searchContext;
     const { dispatch, changeQuery } = this.storeContext;
 
@@ -113,7 +114,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     if (isLiveTailOn) {
       getLiveTail(finalQuery, getErrorHandler('Error fetching events'));
     } else {
-      getEvents(finalQuery, getErrorHandler('Error fetching events'));
+      getEvents(finalQuery, getErrorHandler('Error fetching events'), setSummaryStatus);
     }
     // still need all fields when query contains stats
     if (finalQuery.match(PPL_STATS_REGEX)) getAvailableFields(`search source=${this.queryIndex}`);
@@ -137,7 +138,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     }
   }
 
-  async setLogPattern(query: IQuery, index: string, finalQuery: string) {
+  async setLogPattern(query: IQuery, index: string, _finalQuery: string) {
     const { getErrorHandler, setDefaultPatternsField } = this.searchContext;
     // set pattern
     if (isEmpty(query[SELECTED_PATTERN_FIELD])) {

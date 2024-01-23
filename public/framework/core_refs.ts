@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApplicationStart, ChromeStart, CoreStart, HttpStart, IToasts } from '../../../../src/core/public';
-import { SavedObjectsClientContract } from '../../../../src/core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  CoreStart,
+  HttpStart,
+  IToasts,
+  SavedObjectsClientContract,
+} from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import PPLService from '../services/requests/ppl';
 
@@ -18,6 +24,8 @@ class CoreRefs {
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
+  public queryAssistEnabled?: boolean;
+  public summarizeEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   private constructor() {
