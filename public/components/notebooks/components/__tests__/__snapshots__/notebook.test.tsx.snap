@@ -154,6 +154,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
       />
       <h1
         class="euiTitle euiTitle--large"
+        data-test-subj="notebookTitle"
       >
         sample-notebook-1
       </h1>
@@ -261,6 +262,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 >
                   <button
                     class="euiButton euiButton--primary"
+                    data-test-subj="emptyNotebookAddCodeBlockBtn"
                     style="margin-bottom: 17px;"
                     type="button"
                   >
@@ -469,6 +471,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
       />
       <h1
         class="euiTitle euiTitle--large"
+        data-test-subj="notebookTitle"
       />
       <div
         class="euiSpacer euiSpacer--m"
@@ -574,6 +577,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
                 >
                   <button
                     class="euiButton euiButton--primary"
+                    data-test-subj="emptyNotebookAddCodeBlockBtn"
                     style="margin-bottom: 17px;"
                     type="button"
                   >
@@ -823,6 +827,7 @@ exports[`<Notebook /> spec test reporting action button 1`] = `
       />
       <h1
         class="euiTitle euiTitle--large"
+        data-test-subj="notebookTitle"
       >
         sample-notebook-1
       </h1>
@@ -930,6 +935,7 @@ exports[`<Notebook /> spec test reporting action button 1`] = `
                 >
                   <button
                     class="euiButton euiButton--primary"
+                    data-test-subj="emptyNotebookAddCodeBlockBtn"
                     style="margin-bottom: 17px;"
                     type="button"
                   >
