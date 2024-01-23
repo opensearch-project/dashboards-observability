@@ -235,7 +235,7 @@ export const {
 
 const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
-const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
+const getAvailableAttributes = (id, metricIndex) => async (dispatch, _getState) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
 
