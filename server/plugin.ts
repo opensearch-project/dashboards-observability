@@ -53,7 +53,7 @@ export class ObservabilityPlugin
     );
 
     // @ts-ignore
-    core.http.registerRouteHandlerContext('observability_plugin', (context, request) => {
+    core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
       return {
         logger: this.logger,
         observabilityClient: openSearchObservabilityClient,
@@ -139,7 +139,7 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     this.logger.debug('Observability: Started');
     return {};
   }

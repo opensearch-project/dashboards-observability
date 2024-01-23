@@ -79,7 +79,7 @@ export const queriesSlice = createSlice({
       };
     },
   },
-  extraReducers: (builder) => {},
+  extraReducers: () => {},
 });
 
 export const { changeQuery, changeData, remove, init, reset } = queriesSlice.actions;

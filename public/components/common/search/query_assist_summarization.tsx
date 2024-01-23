@@ -16,8 +16,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import React from 'react';
+import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 
 export function QueryAssistSummarization({
   queryAssistantSummarization,

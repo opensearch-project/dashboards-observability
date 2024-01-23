@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount, shallow } from 'enzyme';
+import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
@@ -13,7 +13,7 @@ import { Search } from '../search';
 import thunk from 'redux-thunk';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 
-describe.only('Explorer Search component', () => {
+describe('Explorer Search component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
 

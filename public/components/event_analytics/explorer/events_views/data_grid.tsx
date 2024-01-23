@@ -3,31 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useRef, Fragment, useCallback, useEffect } from 'react';
 import {
   EuiDataGrid,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiDataGridColumn,
-  EuiDataGridSorting,
   EuiPanel,
   EuiDataGridProps,
 } from '@elastic/eui';
 import moment from 'moment';
-import { MutableRefObject } from 'react';
-import { IExplorerFields, IField } from '../../../../../common/types/explorer';
+import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { HttpSetup } from '../../../../../../../src/core/public';
 import {
   DATE_DISPLAY_FORMAT,
   DEFAULT_EMPTY_EXPLORER_FIELDS,
   DEFAULT_SOURCE_COLUMN,
   DEFAULT_TIMESTAMP_COLUMN,
 } from '../../../../../common/constants/explorer';
-import { HttpSetup } from '../../../../../../../src/core/public';
+import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import PPLService from '../../../../services/requests/ppl';
-import { FlyoutButton } from './docViewRow';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
+import { FlyoutButton } from './docViewRow';
 
 export interface DataGridProps {
   http: HttpSetup;
