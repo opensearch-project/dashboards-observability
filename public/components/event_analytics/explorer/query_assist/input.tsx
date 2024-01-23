@@ -24,6 +24,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
+import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -47,6 +48,7 @@ interface SummarizationContext {
 interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: (availability?: boolean, setSummaryStatus?: boolean) => void;
+  handleTimePickerChange: (timeRange: string[]) => Promise<void>;
   tabId: string;
   setNeedsUpdate: any;
   selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
@@ -246,6 +248,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     try {
       setGeneratingOrRunning(true);
       await request();
+      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
       generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
