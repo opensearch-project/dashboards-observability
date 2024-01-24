@@ -40,6 +40,7 @@ suppressResizeObserverIssue();//needs to be in file once
 describe('Creating application', () => {
   before(() => {
     loadAllData();
+    // TODO: include a delete all indices section here, just in case
   });
 
   beforeEach(() => {
@@ -100,7 +101,7 @@ describe('Creating application', () => {
     cy.get('[data-test-subj="traceGroupsCountBadge"]').should('contain', '2');
     cy.get('[data-test-subj="createButton"]').should('not.be.disabled');
     cy.get('[data-test-subj="createButton"]').click();
-    cy.get('.euiTableRow').should('have.length.lessThan', 2);//Replaces Wait
+    cy.get('.euiTableRow').should('have.length.lessThan', 2);
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameOne);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[data-test-subj="addFirstVisualizationText"]').should('exist');
@@ -123,7 +124,7 @@ describe('Creating application', () => {
     cy.get('[data-test-subj="servicesEntitiesAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="servicesEntitiesComboBox"]').scrollIntoView();
     cy.get('[data-test-subj="servicesEntitiesComboBox"]').trigger('mouseover').click();
-    cy.get('.euiFilterSelectItem').contains(service_one).click({ force: true });
+    cy.get('.euiFilterSelectItem').contains(service_one).trigger('click');
     cy.get('[data-test-subj="servicesEntitiesCountBadge"]').should('contain', '1');
     cy.get('[data-test-subj="traceGroupsAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="traceGroupsComboBox"]').scrollIntoView().type('http');
@@ -206,6 +207,7 @@ describe('Setting availability', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 1);
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiBreadcrumb[href="#/"]').click();
+    cy.get(`[data-test-subj="${nameThree}ApplicationLink"]`);
     cy.get('[data-test-subj="setAvailabilityHomePageLink"]').first().click();
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });
@@ -390,37 +392,28 @@ describe('Viewing application', () => {
     cy.get('[id="explorerPlotComponent"]', { timeout: timeoutDelay }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click().type(query_two, {delay: TYPING_DELAY}).should('have.value', query_two);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="main-content-visTab"]').click();
     cy.get('.euiTab[id="availability-panel"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="comboBoxInput"]').click();
     cy.get('[data-test-subj="comboBoxOptionsList "] button span').contains('Time series').click({ force: true });
     cy.get('[data-test-subj="addAvailabilityButton"]').click();
     cy.get('[data-test-subj="euiColorPickerAnchor"]').click();
     cy.get('[aria-label="Select #9170B8 as the color"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="nameFieldText"]').click().type('Super');
     cy.get('[data-test-subj="expressionSelect"]').select('<');
     cy.get('[data-test-subj="valueFieldNumber"]').clear().type('5.5');
     cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="addAvailabilityButton"]').click();
     cy.get('[data-test-subj="euiColorPickerAnchor"]').first().click();
     cy.get('[aria-label="Select #CA8EAE as the color"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="nameFieldText"]').first().click().type('Cool');
     cy.get('[data-test-subj="expressionSelect"]').first().select('>');
     cy.get('[data-test-subj="valueFieldNumber"]').first().clear().type('0');
     cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').click().type(visTwoName);
-    // cy.wait(delay);
     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
-    // cy.wait(delay);
     cy.get('[id="explorerPlotComponent"]').should('have.length', 2);
     moveToHomePage();
     cy.get('[data-test-subj="SuperAvailabilityBadge"][style="background-color: rgb(145, 112, 184); color: rgb(0, 0, 0);"]').should('contain', 'Super');
@@ -428,7 +421,6 @@ describe('Viewing application', () => {
 
   it('Configuration tab shows details', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
-    // cy.wait(delay);
     cy.get('[data-test-subj="configBaseQueryCode"]').should('contain', baseQuery);
     cy.get('[aria-label="List of services and entities"]').find('li').should('have.length', 1);
     cy.get('[aria-label="List of trace groups"]').find('li').should('have.length', 2);
@@ -438,14 +430,11 @@ describe('Viewing application', () => {
 
   it('Changes availability visualization', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
-    // cy.wait(delay);
     cy.get('select').select(visOneName);
-    // cy.wait(delay);
     moveToHomePage();
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
     moveToApplication(nameOne);
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
-    // cy.wait(delay);
     cy.get('select').find('option:selected').should('have.text', visOneName);
   })
 });
@@ -453,31 +442,30 @@ describe('Viewing application', () => {
 describe('Separate from other plugins', () => {
   it('Hides application visualizations in Event Analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics`);
-    cy.wait(delay * 3);
     // When there are saved queries or visualizations there are two buttons
     cy.get('body').then(($body) => {
       if ($body.find('.euiButton').length == 2) {
         cy.get('input.euiFieldSearch').type(visOneName, {delay: TYPING_DELAY});
-        // cy.wait(delay);
+  
         cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
         cy.get('input.euiFieldSearch').clear().type(visTwoName, {delay: TYPING_DELAY});
-        // cy.wait(delay);
+  
         cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
         cy.get('[class="euiFormControlLayoutClearButton"]').click();
-        // cy.wait(delay);
+  
         cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
         cy.get('.euiContextMenuItem__text').contains('50 rows').click();
         cy.get('.euiCheckbox__input[data-test-subj="checkboxSelectAll"]').click();
-        // cy.wait(delay);
+  
         cy.get('[data-test-subj="eventHomeAction"]').click();
-        // cy.wait(delay);
+  
         cy.get('[data-test-subj="eventHomeAction__delete"]').click();
-        // cy.wait(delay);
+  
         cy.get('[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
         cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
         cy.get('[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
         cy.get('[data-test-subj="popoverModal__deleteButton"]').click();
-        // cy.wait(delay);
+  
       }
     })
   });
@@ -489,9 +477,7 @@ describe('Separate from other plugins', () => {
     cy.get('[data-test-subj="operationalPanelsActionsButton"]', { timeout: timeoutDelay }).click();
     cy.get('[data-test-subj="addSampleContextMenuItem"]', { timeout: timeoutDelay }).click();
     cy.get('[data-test-subj="confirmModalConfirmButton"]', { timeout: timeoutDelay }).click();
-    cy.wait(delay * 2);
     cy.get('.euiLink').contains('[Logs] Web traffic Panel').first().click();
-    cy.wait(delay * 2);
     cy.get('[data-test-subj="addVisualizationButton"]').click();
     cy.get('.euiContextMenuItem__text').contains('Select existing visualization').click();
     cy.get('option').contains(visOneName).should('not.exist');
@@ -562,12 +548,10 @@ describe('Application Analytics home page', () => {
     cy.get('.euiTableRow').first().within(($row) => {
       cy.get('.euiCheckbox').click();
     });
-    // cy.wait(delay);
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
     cy.get('[data-test-subj="renameApplicationContextMenuItem"]').click();
     cy.get('[data-test-subj="customModalFieldText"]').clear().click().type(newName);
     cy.get('[data-test-subj="runModalButton"]').click();
-    // cy.wait(delay);
     cy.get('.euiToast').contains(`Application successfully renamed to "${newName}"`);
     cy.get('.euiTableRow').first().within(($row) => {
       cy.get('.euiLink').contains(newName).should('exist');
