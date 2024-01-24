@@ -50,7 +50,7 @@ export const loadAllSampleData = () => {
 const dumpDataSet = (mapping_url, data_url, index) => {
   cy.request({
     method: 'PUT',
-    failOnStatusCode: true,
+    failOnStatusCode: false,
     url: `${Cypress.env('opensearch')}/${index}`,
     headers: {
       'content-type': 'application/json;charset=UTF-8',
@@ -99,6 +99,13 @@ const testIndexDataSet = [
     data_url:
       'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001.json',
     index: 'otel-v1-apm-span-000001',
+  },
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000002.json',
+    index: 'otel-v1-apm-span-000002',
   },
 ];
 
