@@ -97,7 +97,7 @@ export const DirectSearch = (props: any) => {
 
   const {
     data: pollingResult,
-    loading: pollingLoading,
+    loading: _pollingLoading,
     error: pollingError,
     startPolling,
     stopPolling,
@@ -139,7 +139,7 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
-  const handleQueryLanguageChange = (lang: string) => {
+  const handleQueryLanguageChange = (lang: QUERY_LANGUAGE) => {
     if (lang === 'DQL') {
       application!.navigateToUrl('../app/data-explorer/discover');
       return;

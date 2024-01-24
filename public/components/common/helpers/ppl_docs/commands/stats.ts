@@ -8,10 +8,9 @@ export const statsCmd = `## stats
 
 ### Description
 
-Using \`stats\` command to calculate the aggregation from search result.
+Use the \`stats\` command to calculate the aggregation from the search results.
 
-The following table catalogs the aggregation functions and also
-indicates how the NULL/MISSING values is handled:
+The following table catalogs the aggregation functions and defines how the null and missing values are handled.
 
 |          |             |             |
 |----------|-------------|-------------|
@@ -26,23 +25,14 @@ indicates how the NULL/MISSING values is handled:
 
 stats &lt;aggregation&gt;... \[by-clause\]...
 
--   aggregation: mandatory. A aggregation function. The argument of
-    aggregation must be field.
--   by-clause: optional. The one or more fields to group the results by.
-    **Default**: If no &lt;by-clause&gt; is specified, the stats command
-    returns only one row, which is the aggregation over the entire
-    result set.
+-   \`aggregation\`: Required. The aggregation function that must be applied to the field.
+-   \`by-clause\`: Optional. One or more fields to group by. Default: If \`&lt;by-clause&gt;\` is not specified, the \`stats\` command returns one row, which is the aggregation for the entire result set.
 
-### **Aggregation Functions**
+### Aggregation functions
 ---
-### **COUNT**
+#### COUNT
 
-**Description**
-
-Usage: Returns a count of the number of expr in the rows retrieved by a
-SELECT statement.
-
-Example:
+The \`count\` function returns the number of rows in the result set. The following is an example PPL query:
 
     os> source=accounts | stats count();
     fetched rows / total rows = 1/1
@@ -52,13 +42,9 @@ Example:
     | 4         |
     +-----------+
 
-### **SUM**
+#### SUM
 
-**Description**
-
-Usage: SUM(expr). Returns the sum of expr.
-
-Example:
+The \`SUM(expr)\` function returns the sum of the values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats sum(age) by gender;
     fetched rows / total rows = 2/2
@@ -69,13 +55,9 @@ Example:
     | 101        | M        |
     +------------+----------+
 
-### **AVG**
+#### AVG
 
-**Description**
-
-Usage: AVG(expr). Returns the average value of expr.
-
-Example:
+The \`AVG(expr)\` function returns the average of the values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats avg(age) by gender;
     fetched rows / total rows = 2/2
@@ -86,13 +68,9 @@ Example:
     | 33.666666666666664 | M        |
     +--------------------+----------+
 
-### **MAX**
+#### MAX
 
-**Description**
-
-Usage: MAX(expr). Returns the maximum value of expr.
-
-Example:
+The \`MAX(expr)\` function returns the largest value in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats max(age);
     fetched rows / total rows = 1/1
@@ -102,13 +80,9 @@ Example:
     | 36         |
     +------------+
 
-### **MIN**
+#### MIN
 
-**Description**
-
-Usage: MIN(expr). Returns the minimum value of expr.
-
-Example:
+The \`MIN(expr)\` function returns the smallest value in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats min(age);
     fetched rows / total rows = 1/1
@@ -118,13 +92,9 @@ Example:
     | 28         |
     +------------+
 
-### **VAR\_SAMP**
+#### VAR\_SAMP
 
-**Description**
-
-Usage: VAR\_SAMP(expr). Returns the sample variance of expr.
-
-Example:
+The \`VAR\_SAMP(expr)\` function returns the sample variance of a selection of data in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats var_samp(age);
     fetched rows / total rows = 1/1
@@ -134,13 +104,9 @@ Example:
     | 10.916666666666666 |
     +--------------------+
 
-### **VAR\_POP**
+#### VAR\_POP
 
-**Description**
-
-Usage: VAR\_POP(expr). Returns the population standard variance of expr.
-
-Example:
+The \`VAR\_POP(expr)\` function returns the population variance of a selection of data in the expression \`expr\`. See the following example.
 
     os> source=accounts | stats var_pop(age);
     fetched rows / total rows = 1/1
@@ -150,13 +116,9 @@ Example:
     | 8.1875         |
     +----------------+
 
-### **STDDEV\_SAMP**
+#### STDDEV\_SAMP
 
-**Description**
-
-Usage: STDDEV\_SAMP(expr). Return the sample standard deviation of expr.
-
-Example:
+The \`STDDEV\_SAMP(expr)\` function returns the sample standard deviation of a set of values in the expression \`expr\`. The following is an example PPL query: 
 
     os> source=accounts | stats stddev_samp(age);
     fetched rows / total rows = 1/1
@@ -166,14 +128,9 @@ Example:
     | 3.304037933599835  |
     +--------------------+
 
-### **STDDEV\_POP**
+#### STDDEV\_POP
 
-**Description**
-
-Usage: STDDEV\_POP(expr). Return the population standard deviation of
-expr.
-
-Example:
+The \`STDDEV\_POP(expr)\` function returns the population standard deviation of a set of values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats stddev_pop(age);
     fetched rows / total rows = 1/1
@@ -183,23 +140,13 @@ Example:
     | 2.8613807855648994 |
     +--------------------+
 
-### **By Clause**
+### By clause
 
-The by clause could be the fields and expressions like scalar functions
-and aggregation functions. Besides, the span clause can also be used in
-the by clause to split specific field into buckets in the same interval,
-the stats then does the aggregation by these span buckets.
+The \`by\` clause can contain fields, expressions, scalar functions, or aggregation functions. The \`span\` clause can be used in the \`by\` clause to split specific fields into buckets of the same interval. The \`stats\` command then performs the aggregation on these buckets.
 
-The span syntax is \`span(field_expr, interval_expr)\`, the unit of the
-interval expression is the natural unit by default. If the field is a
-date and time type field, and the interval is in date/time units, you
-will need to specify the unit in the interval expression. For example,
-to split the field \`age\` into buckets by 10 years, it looks like
-\`span(age, 10)\`. And here is another example of time span, the span to
-split a \`timestamp\` field into hourly intervals, it looks like
-\`span(timestamp, 1h)\`.
+The span syntax is \`span(field_expr, interval_expr)\`. By default, the interval expression in the \`span\` clause is interpreted in natural units. If the field is a date and time type field and the interval is in date and time units, you must specify the unit in the interval expression. For example, to split the \`age\` field into buckets of 10 years, you would use \`span(age, 10y). To split a timestamp field into hourly intervals, you would use \`span(timestamp, 1h)\`.
 
-Available time unit:
+The following table lists the available time units.
 
 | Span Interval Units        |
 |----------------------------|
@@ -213,11 +160,13 @@ Available time unit:
 | quarter (q)                |
 | year (y)                   |
 
-### Example 1: Calculate the count of events
+### PPL queries using the stats command
 
-The example show calculate the count of events in the accounts.
+The following example PPL queries show ways you can use the \`stats\` command in your queries.
 
-PPL query:
+#### Example 1: Calculate event counts
+
+The following example PPL query calculates event counts:
 
     os> source=accounts | stats count();
     fetched rows / total rows = 1/1
@@ -227,11 +176,9 @@ PPL query:
     | 4         |
     +-----------+
 
-### Example 2: Calculate the average of a field
+#### Example 2: Calculate a field's average
 
-The example show calculate the average age of all the accounts.
-
-PPL query:
+The following example PPL query calculates the average age:
 
     os> source=accounts | stats avg(age);
     fetched rows / total rows = 1/1
@@ -241,12 +188,9 @@ PPL query:
     | 32.25      |
     +------------+
 
-### Example 3: Calculate the average of a field by group
+#### Example 3: Calculate the average of a field by group
 
-The example show calculate the average age of all the accounts group by
-gender.
-
-PPL query:
+The following example PPL query calculates the average age grouped by gender:
 
     os> source=accounts | stats avg(age) by gender;
     fetched rows / total rows = 2/2
@@ -257,14 +201,11 @@ PPL query:
     | 33.666666666666664 | M        |
     +--------------------+----------+
 
-### Example 4: Calculate the average, sum and count of a field by group
+#### Example 4: Calculate the average, sum, and count of a field by group
 
-The example show calculate the average age, sum age and count of events
-of all the accounts group by gender.
+The following example PPL query calculates the average age, sum age, and count of events by gender.
 
-PPL query:
-
-    os> source=accounts | stats avg(age), sum(age), count() by gender;
+    os> source=accounts | stats avg(age), sum(age), count() grouped by gender;
     fetched rows / total rows = 2/2
     +--------------------+------------+-----------+----------+
     | avg(age)           | sum(age)   | count()   | gender   |
@@ -273,11 +214,9 @@ PPL query:
     | 33.666666666666664 | 101        | 3         | M        |
     +--------------------+------------+-----------+----------+
 
-### Example 5: Calculate the maximum of a field
+#### Example 5: Calculate a field's maximum
 
-The example calculates the max age of all the accounts.
-
-PPL query:
+The following example PPL query calculates the maximum age:
 
     os> source=accounts | stats max(age);
     fetched rows / total rows = 1/1
@@ -287,12 +226,9 @@ PPL query:
     | 36         |
     +------------+
 
-### Example 6: Calculate the maximum and minimum of a field by group
+#### Example 6: Calculate a field's min/max by group
 
-The example calculates the max and min age values of all the accounts
-group by gender.
-
-PPL query:
+The following example PPL query calculates the min/max age grouped by gender:
 
     os> source=accounts | stats max(age), min(age) by gender;
     fetched rows / total rows = 2/2
@@ -303,14 +239,11 @@ PPL query:
     | 36         | 32         | M        |
     +------------+------------+----------+
 
-### Example 7: Calculate the distinct count of a field
+#### Example 7: Calculate a field's distinct count
 
-To get the count of distinct values of a field, you can use
-\`DISTINCT_COUNT\` (or \`DC\`) function instead of \`COUNT\`. The example
-calculates both the count and the distinct count of gender field of all
-the accounts.
+To count the number of distinct values in a field, you can use the \`DISTINCT_COUNT\` or \`DC\` function instead of the \`COUNT\` funtion.
 
-PPL query:
+The following PPL query calculates both the count and distinct count of the \`gender\` field for all accounts.
 
     os> source=accounts | stats count(gender), distinct_count(gender);
     fetched rows / total rows = 1/1
@@ -320,11 +253,9 @@ PPL query:
     | 4               | 2                        |
     +-----------------+--------------------------+
 
-### Example 8: Calculate the count by a span
+#### Example 8: Calculate count by span
 
-The example gets the count of age by the interval of 10 years.
-
-PPL query:
+The following PPL query calculates age by span of 10 years.
 
     os> source=accounts | stats count(age) by span(age, 10) as age_span
     fetched rows / total rows = 2/2
@@ -335,11 +266,9 @@ PPL query:
     | 3            | 30         |
     +--------------+------------+
 
-### Example 9: Calculate the count by a gender and span
+#### Example 9: Calculate count by gender and span
 
-The example gets the count of age by the interval of 10 years and group by gender.
-
-PPL query::
+The following PPL query calculates age by span of 10 years and groups by gender.
 
     os> source=accounts | stats count() as cnt by span(age, 5) as age_span, gender
     fetched rows / total rows = 3/3

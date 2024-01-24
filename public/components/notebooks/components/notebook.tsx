@@ -29,10 +29,7 @@ import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
-import {
-  CREATE_NOTE_MESSAGE,
-  NOTEBOOKS_API_PREFIX,
-} from '../../../../common/constants/notebooks';
+import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
 import PPLService from '../../../services/requests/ppl';
@@ -136,9 +133,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // parse paragraphs based on backend
   parseParagraphs = (paragraphs: any[]): ParaType[] => {
     try {
-      let parsedPara;
-      // @ts-ignore
-      parsedPara = defaultParagraphParser(paragraphs);
+      const parsedPara = defaultParagraphParser(paragraphs);
       parsedPara.forEach((para: ParaType) => {
         para.isInputExpanded = this.state.selectedViewId === 'input_only';
         para.paraRef = React.createRef();
@@ -723,6 +718,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               this.setState({ isAddParaPopoverOpen: false });
               this.addPara(this.state.paragraphs.length, '', 'CODE');
             },
+            'data-test-subj': 'AddCodeBlockBtn',
           },
           {
             name: 'Visualization',
@@ -730,6 +726,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               this.setState({ isAddParaPopoverOpen: false });
               this.addPara(this.state.paragraphs.length, '', 'VISUALIZATION');
             },
+            'data-test-subj': 'AddVisualizationBlockBtn',
           },
         ],
       },
@@ -990,7 +987,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <EuiTitle size="l">
+            <EuiTitle size="l" data-test-subj="notebookTitle">
               <h1>{this.state.path}</h1>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -1042,6 +1039,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       panelPaddingSize="none"
                       button={
                         <EuiButton
+                          data-test-subj="AddParagraphButton"
                           iconType="arrowDown"
                           iconSide="right"
                           onClick={() => this.setState({ isAddParaPopoverOpen: true })}
@@ -1079,6 +1077,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                         description="Write contents directly using markdown, SQL or PPL."
                         footer={
                           <EuiButton
+                            data-test-subj="emptyNotebookAddCodeBlockBtn"
                             onClick={() => this.addPara(0, '', 'CODE')}
                             style={{ marginBottom: 17 }}
                           >
