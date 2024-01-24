@@ -31,7 +31,7 @@ export const PPLParsers: MessageParser = {
 
     if (!ppls.length) return [];
 
-    const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+[^|]+\sby\s/i.test(ppl));
+    const statsPPLs = ppls;
     if (!statsPPLs.length) {
       return [];
     }
