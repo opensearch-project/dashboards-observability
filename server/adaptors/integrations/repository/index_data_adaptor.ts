@@ -5,55 +5,52 @@
 
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/types';
+import { JsonCatalogDataAdaptor } from './json_data_adaptor';
 
 export class IndexDataAdaptor implements CatalogDataAdaptor {
   isConfigLocalized = true;
-  directory: string;
+  directory?: string;
   client: SavedObjectsClientContract;
 
-  constructor(directory: string, client: SavedObjectsClientContract) {
+  constructor(client: SavedObjectsClientContract, directory?: string) {
     this.directory = directory;
     this.client = client;
   }
 
-  async findIntegrationVersions(dirname?: string | undefined): Promise<Result<string[], Error>> {
+  private async asJsonAdaptor(): Promise<JsonCatalogDataAdaptor> {
     const results = await this.client.find({ type: 'integration-template' });
-    const versions: string[] = [];
-    for (const result of results.saved_objects) {
-      const config = result.attributes as IntegrationConfig;
-      if (dirname && config.name !== dirname) {
-        continue;
-      }
-      versions.push(config.version);
-    }
-    return { ok: true, value: versions };
+    const filteredIntegrations: SerializedIntegration[] = results.saved_objects
+      .map((obj) => obj.attributes as SerializedIntegration)
+      .filter((obj) => this.directory === undefined || this.directory === obj.name);
+    return new JsonCatalogDataAdaptor(filteredIntegrations);
   }
 
-  async readFile(_filename: string, _type?: IntegrationPart): Promise<Result<object[] | object>> {
-    return { ok: false, error: new Error('Not implemented') };
+  async findIntegrationVersions(dirname?: string | undefined): Promise<Result<string[], Error>> {
+    const adaptor = await this.asJsonAdaptor();
+    return await adaptor.findIntegrationVersions(dirname);
   }
 
-  async readFileRaw(_filename: string, _type?: IntegrationPart): Promise<Result<Buffer>> {
-    return { ok: false, error: new Error('Not implemented') };
+  async readFile(filename: string, type?: IntegrationPart): Promise<Result<object[] | object>> {
+    const adaptor = await this.asJsonAdaptor();
+    return await adaptor.readFile(filename, type);
   }
 
-  async findIntegrations(_dirname: string = '.'): Promise<Result<string[]>> {
-    return { ok: false, error: new Error('Not implemented') };
+  async readFileRaw(filename: string, type?: IntegrationPart): Promise<Result<Buffer>> {
+    const adaptor = await this.asJsonAdaptor();
+    return await adaptor.readFileRaw(filename, type);
+  }
+
+  async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
+    const adaptor = await this.asJsonAdaptor();
+    return await adaptor.findIntegrations(dirname);
   }
 
   async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
-    // Assume filter-zero-times is repo, once is integration, twice is invalid
-    // Not sure how safe that assumption is
-    if (this.directory && dirname) {
-      return 'unknown';
-    }
-    if (this.directory || dirname) {
-      return 'integration';
-    }
-    return 'repository';
+    const adaptor = await this.asJsonAdaptor();
+    return await adaptor.getDirectoryType(dirname);
   }
 
   join(filename: string): IndexDataAdaptor {
-    return new IndexDataAdaptor(filename, this.client);
+    return new IndexDataAdaptor(this.client, filename);
   }
 }
