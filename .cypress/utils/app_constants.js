@@ -12,7 +12,14 @@ export const loadAllData = () => {
   loadAllSampleData();
 
   // otel and jaeger
-  // TODO: import those ones
+  loadOtelData();
+  // TODO: import jaeger
+}
+
+export const loadOtelData = () => {
+  testIndexDataSet.forEach(({ mapping_url, data_url, index }) =>
+    dumpDataSet(mapping_url, data_url, index)
+  );
 }
 
 export const loadAllSampleData = () => {
@@ -39,6 +46,81 @@ export const loadAllSampleData = () => {
   cy.contains('Sample web logs installed', { timeout: 60000 });
 }
 
+// took dumpDataSet and testIndexDataSet from https://github.com/opensearch-project/opensearch-dashboards-functional-test/blob/main/cypress/integration/plugins/observability-dashboards/0_before.spec.js
+const dumpDataSet = (mapping_url, data_url, index) => {
+  cy.request({
+    method: 'POST',
+    failOnStatusCode: false,
+    url: 'api/console/proxy',
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+    },
+    qs: {
+      path: `${index}`,
+      method: 'PUT',
+    },
+  });
+
+  cy.request(mapping_url).then((response) => {
+    cy.request({
+      method: 'POST',
+      form: false,
+      url: 'api/console/proxy',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      qs: {
+        path: `${index}/_mapping`,
+        method: 'POST',
+      },
+      body: response.body,
+    });
+  });
+
+  cy.request(data_url).then((response) => {
+    cy.request({
+      method: 'POST',
+      form: false,
+      url: 'api/console/proxy',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      qs: {
+        path: `${index}/_bulk`,
+        method: 'POST',
+      },
+      body: response.body,
+    });
+  });
+};
+
+const testIndexDataSet = [
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-service-map-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-service-map.json',
+    index: 'otel-v1-apm-service-map',
+  },
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001.json',
+    index: 'otel-v1-apm-span-000001',
+  },
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000002.json',
+    index: 'otel-v1-apm-span-000002',
+  },
+];
+
 export const moveToHomePage = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
   cy.wait(delay * 3);
@@ -64,7 +146,6 @@ export const moveToEditPage = () => {
   moveToApplication(nameOne);
   cy.get('[data-test-subj="app-analytics-configTab"]').click();
   cy.get('[data-test-subj="editApplicationButton"]').click();
-  // cy.wait(delay);
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Edit application');
 };
 
