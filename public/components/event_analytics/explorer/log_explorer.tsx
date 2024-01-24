@@ -4,7 +4,6 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { isEmpty } from 'lodash';
-import { EuiPage } from '@elastic/eui';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -20,6 +19,7 @@ import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs } from '../redux/slices/query_tab_slice';
 import { Explorer } from './explorer';
+import { getDateRange } from '../utils/utils';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -73,6 +73,10 @@ export const LogExplorer = ({
     });
   };
 
+  const dateRange = getDateRange(undefined, undefined, queries[tabIds[0]]);
+  const [startTime, setStartTime] = useState(dateRange[0]);
+  const [endTime, setEndTime] = useState(dateRange[1]);
+
   useEffect(() => {
     if (!isEmpty(savedObjectId)) {
       dispatchSavedObjectId();
@@ -105,6 +109,10 @@ export const LogExplorer = ({
         curSelectedTabId={curSelectedTabIdRef}
         http={http}
         searchBarConfigs={searchBarConfigs}
+        startTime={startTime}
+        endTime={endTime}
+        setStartTime={setStartTime}
+        setEndTime={setEndTime}
         queryManager={queryManager}
         dataSourcePluggables={dataSourcePluggables}
       />

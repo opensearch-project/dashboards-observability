@@ -429,6 +429,7 @@ export const Search = (props: any) => {
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
                   fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
                   onClick={runChanges}
+                  data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
                 >
                   {needsUpdate ? 'Update' : 'Run'}
                 </EuiButton>
