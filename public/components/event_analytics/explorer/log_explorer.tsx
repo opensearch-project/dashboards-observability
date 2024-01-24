@@ -20,6 +20,11 @@ import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs } from '../redux/slices/query_tab_slice';
 import { Explorer } from './explorer';
 import { getDateRange } from '../utils/utils';
+import {
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../common/constants/shared';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -73,7 +78,9 @@ export const LogExplorer = ({
     });
   };
 
-  const dateRange = getDateRange(undefined, undefined, queries[tabIds[0]]);
+  const dateRange = coreRefs.queryAssistEnabled
+    ? [QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]
+    : getDateRange(undefined, undefined, queries[tabIds[0]]);
   const [startTime, setStartTime] = useState(dateRange[0]);
   const [endTime, setEndTime] = useState(dateRange[1]);
 
