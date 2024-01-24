@@ -49,16 +49,12 @@ export const loadAllSampleData = () => {
 // took dumpDataSet and testIndexDataSet from https://github.com/opensearch-project/opensearch-dashboards-functional-test/blob/main/cypress/integration/plugins/observability-dashboards/0_before.spec.js
 const dumpDataSet = (mapping_url, data_url, index) => {
   cy.request({
-    method: 'POST',
-    failOnStatusCode: false,
-    url: 'api/console/proxy',
+    method: 'PUT',
+    failOnStatusCode: true,
+    url: `${Cypress.env('opensearch')}/${index}`,
     headers: {
       'content-type': 'application/json;charset=UTF-8',
       'osd-xsrf': true,
-    },
-    qs: {
-      path: `${index}`,
-      method: 'PUT',
     },
   });
 
@@ -66,14 +62,10 @@ const dumpDataSet = (mapping_url, data_url, index) => {
     cy.request({
       method: 'POST',
       form: false,
-      url: 'api/console/proxy',
+      url: `${Cypress.env('opensearch')}/${index}/_mapping`,
       headers: {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
-      },
-      qs: {
-        path: `${index}/_mapping`,
-        method: 'POST',
       },
       body: response.body,
     });
@@ -83,14 +75,10 @@ const dumpDataSet = (mapping_url, data_url, index) => {
     cy.request({
       method: 'POST',
       form: false,
-      url: 'api/console/proxy',
+      url: `${Cypress.env('opensearch')}/${index}/_bulk`,
       headers: {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
-      },
-      qs: {
-        path: `${index}/_bulk`,
-        method: 'POST',
       },
       body: response.body,
     });
@@ -111,13 +99,6 @@ const testIndexDataSet = [
     data_url:
       'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001.json',
     index: 'otel-v1-apm-span-000001',
-  },
-  {
-    mapping_url:
-      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
-    data_url:
-      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000002.json',
-    index: 'otel-v1-apm-span-000002',
   },
 ];
 
