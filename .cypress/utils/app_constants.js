@@ -5,7 +5,7 @@
 
 export const delay = 1000;
 export const timeoutDelay = 30000;
-export const TYPING_DELAY = 150;
+export const TYPING_DELAY = 450;
 
 export const loadAllData = () => {
   // flights and web logs, not using ecommerce currently

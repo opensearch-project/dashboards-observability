@@ -96,8 +96,8 @@ describe('Creating application', () => {
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click().type('      ' + baseQuery);
     cy.get('[data-test-subj="traceGroupsAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="traceGroupsComboBox"]').scrollIntoView().type('http');
-    cy.get('.euiFilterSelectItem').contains(trace_one).trigger('click');
-    cy.get('.euiFilterSelectItem').contains(trace_two).trigger('click');
+    cy.get('.euiFilterSelectItem').contains(trace_one).trigger('mouseover').click();
+    cy.get('.euiFilterSelectItem').contains(trace_two).trigger('mouseover').click();
     cy.get('[data-test-subj="traceGroupsCountBadge"]').should('contain', '2');
     cy.get('[data-test-subj="createButton"]').should('not.be.disabled');
     cy.get('[data-test-subj="createButton"]').click();
@@ -274,16 +274,13 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
     cy.get('.euiLink').contains('authentication').click();
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
-    cy.get('[data-test-subj="serviceDetailFlyout"]').within(($flyout) => {
-      cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
-      cy.get('[data-text="Errors"]').click();
-      cy.get('.ytitle').contains('Error rate').should('exist');
-    });
+    cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
+    cy.get('[data-text="Errors"]').eq(1).click(); // Selecting errors tab within flyout
+    cy.get('.ytitle').contains('Error rate').should('exist');
+    cy.wait(3000);
     cy.get('button[data-test-subj="spanId-link"]').eq(0)
-      .scrollIntoView()
       .should('be.visible')
-      .should('be.enabled')
-      .click();
+      .click({timeout: 120000});
     cy.get('[data-test-subj="spanDetailFlyout"]').contains('Span detail').should('be.visible');
     cy.get('[data-test-subj="ServiceDescriptionList"]').should('contain', 'authentication');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
@@ -339,12 +336,14 @@ describe('Viewing application', () => {
     cy.get('[id="explorerPlotComponent"]').should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
     cy.get('.aa-List').find('.aa-Item').should('have.length', 11);
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus().type(query_one, {delay: TYPING_DELAY}).should('have.value', query_one);;
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus()
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(query_one, {delay: 300}).should('have.value', query_one);
     changeTimeTo24('months');
     cy.get('[data-test-subj="main-content-visTab"]').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').click().type(visOneName);
     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+    cy.get('.euiToast').contains(`Saved successfully`);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[data-test-subj="Flights to VeniceVisualizationPanel"]').should('exist');
     cy.get('[id="explorerPlotComponent"]').should('exist');
@@ -389,6 +388,7 @@ describe('Viewing application', () => {
   it('Saves visualization #2 to panel with availability level', () => {
     changeTimeTo24('months');
     cy.get('[data-test-subj="app-analytics-logTab"]').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[id="explorerPlotComponent"]', { timeout: timeoutDelay }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click().type(query_two, {delay: TYPING_DELAY}).should('have.value', query_two);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
