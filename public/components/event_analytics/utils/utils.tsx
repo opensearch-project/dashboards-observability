@@ -422,10 +422,11 @@ export const redoQuery = (
   const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
   const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
   const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
+  const timeRange = timeStampField
+    ? `| where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`
+    : '';
 
-  finalQuery = `${tokens![1]}=${
-    tokens![2]
-  } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
+  finalQuery = `${tokens![1]}=${tokens![2]} ${timeRange}`;
 
   finalQuery += tokens![3];
 

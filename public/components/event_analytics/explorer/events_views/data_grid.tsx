@@ -11,6 +11,7 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiPanel,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
@@ -27,11 +28,10 @@ import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
 
-interface DataGridProps {
+export interface DataGridProps {
   http: HttpSetup;
   pplService: PPLService;
   rows: any[];
-  rowsAll: any[];
   explorerFields: IExplorerFields;
   timeStampField: string;
   rawQuery: string;
@@ -40,7 +40,11 @@ interface DataGridProps {
   startTime: string;
   endTime: string;
   storedSelectedColumns: IField[];
+  formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
+  OuiDataGridProps?: Partial<EuiDataGridProps>;
 }
+
+const defaultFormatGrid = (columns: EuiDataGridColumn[]) => columns;
 
 export function DataGrid(props: DataGridProps) {
   const {
@@ -54,6 +58,8 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    formatGridColumn = defaultFormatGrid,
+    OuiDataGridProps,
   } = props;
   const { fetchEvents } = useFetchEvents({
     pplService,
@@ -120,7 +126,7 @@ export function DataGrid(props: DataGridProps) {
         });
       }
     });
-    return columns;
+    return formatGridColumn(columns);
   };
 
   // used for which columns are visible and their order
@@ -258,6 +264,7 @@ export function DataGrid(props: DataGridProps) {
             showStyleSelector: false,
           }}
           rowHeightsOptions={rowHeightsOptions()}
+          {...OuiDataGridProps}
         />
       </div>
     </EuiPanel>
