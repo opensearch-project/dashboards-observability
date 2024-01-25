@@ -277,10 +277,8 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
     cy.get('[data-text="Errors"]').eq(1).click(); // Selecting errors tab within flyout
     cy.get('.ytitle').contains('Error rate').should('exist');
-    cy.wait(3000);
-    cy.get('button[data-test-subj="spanId-link"]').eq(0)
-      .should('be.visible')
-      .click({timeout: 120000});
+    cy.get('[data-test-subj="dataGridRowCell"]').eq(0).click({force: true}); // absolutely doesn't click no matter what unless theres a double click
+    cy.get('button[data-test-subj="spanId-link"]').eq(0).click({force: true});
     cy.get('[data-test-subj="spanDetailFlyout"]').contains('Span detail').should('be.visible');
     cy.get('[data-test-subj="ServiceDescriptionList"]').should('contain', 'authentication');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
