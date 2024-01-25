@@ -31,12 +31,7 @@ export const PPLParsers: MessageParser = {
 
     if (!ppls.length) return [];
 
-    const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+[^|]+\sby\s/i.test(ppl));
-    if (!statsPPLs.length) {
-      return [];
-    }
-
-    return statsPPLs.map((query) => {
+    return ppls.map((query) => {
       const finalQuery = query
         .replace(/`/g, '') // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
         .replace(/\bSPAN\(/g, 'span('); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
