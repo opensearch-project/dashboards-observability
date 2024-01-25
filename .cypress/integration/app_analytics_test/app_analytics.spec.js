@@ -353,6 +353,7 @@ describe('Viewing application', () => {
     cy.get('[aria-label="actionMenuButton"]').click();
     cy.get('[data-test-subj="editVizContextMenuItem"]').click();
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTab[id="availability-panel"]').click();
 
     cy.get('[data-test-subj="comboBoxInput"]').click();
