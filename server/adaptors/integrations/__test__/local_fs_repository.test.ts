@@ -12,10 +12,10 @@ import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
 import { deepCheck } from '../repository/utils';
-import { FileSystemCatalogDataAdaptor } from '../repository/fs_data_adaptor';
+import { FileSystemDataAdaptor } from '../repository/fs_data_adaptor';
 
 const repository: TemplateManager = new TemplateManager([
-  new FileSystemCatalogDataAdaptor(path.join(__dirname, '../__data__/repository')),
+  new FileSystemDataAdaptor(path.join(__dirname, '../__data__/repository')),
 ]);
 
 describe('The local repository', () => {

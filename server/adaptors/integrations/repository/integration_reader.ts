@@ -6,7 +6,7 @@
 import path from 'path';
 import semver from 'semver';
 import { validateTemplate } from '../validators';
-import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
+import { FileSystemDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 import { foldResults, pruneConfig } from './utils';
 
@@ -23,7 +23,7 @@ export class IntegrationReader {
   constructor(directory: string, reader?: CatalogDataAdaptor) {
     this.directory = directory;
     this.name = path.basename(directory);
-    this.reader = reader ?? new FileSystemCatalogDataAdaptor(directory);
+    this.reader = reader ?? new FileSystemDataAdaptor(directory);
   }
 
   /**
