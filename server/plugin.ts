@@ -53,7 +53,7 @@ export class ObservabilityPlugin
     );
 
     // @ts-ignore
-    core.http.registerRouteHandlerContext('observability_plugin', (context, request) => {
+    core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
       return {
         logger: this.logger,
         observabilityClient: openSearchObservabilityClient,
@@ -90,7 +90,10 @@ export class ObservabilityPlugin
       migrations: {
         '3.0.0': (doc) => ({ ...doc, description: '' }),
         '3.0.1': (doc) => ({ ...doc, description: 'Some Description Text' }),
-        '3.0.2': (doc) => ({ ...doc, dateCreated: parseInt(doc.dateCreated || '0', 10) }),
+        '3.0.2': (doc) => ({
+          ...doc,
+          dateCreated: parseInt((doc as { dateCreated?: string }).dateCreated || '0', 10),
+        }),
       },
     };
 
@@ -120,8 +123,59 @@ export class ObservabilityPlugin
       },
     };
 
+    const integrationTemplateType: SavedObjectsType = {
+      name: 'integration-template',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {
+          name: {
+            type: 'text',
+          },
+          version: {
+            type: 'text',
+          },
+          displayName: {
+            type: 'text',
+          },
+          license: {
+            type: 'text',
+          },
+          type: {
+            type: 'text',
+          },
+          labels: {
+            type: 'nested',
+          },
+          author: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+          sourceUrl: {
+            type: 'text',
+          },
+          statics: {
+            type: 'nested',
+          },
+          components: {
+            type: 'nested',
+          },
+          assets: {
+            type: 'nested',
+          },
+          sampleData: {
+            type: 'nested',
+          },
+        },
+      },
+    };
+
     core.savedObjects.registerType(obsPanelType);
     core.savedObjects.registerType(integrationInstanceType);
+    core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient, config });
@@ -139,7 +193,7 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     this.logger.debug('Observability: Started');
     return {};
   }
