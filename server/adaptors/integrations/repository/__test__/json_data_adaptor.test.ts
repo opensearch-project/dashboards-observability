@@ -8,6 +8,7 @@ import { IntegrationReader } from '../integration_reader';
 import path from 'path';
 import { JsonCatalogDataAdaptor } from '../json_data_adaptor';
 import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';
+import { FileSystemCatalogDataAdaptor } from '../fs_data_adaptor';
 
 // Simplified catalog for integration searching -- Do not use for full deserialization tests.
 const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
@@ -28,9 +29,9 @@ const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
 
 describe('JSON Data Adaptor', () => {
   it('Should be able to deserialize a serialized integration', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../../__data__/repository')
-    );
+    const repository: TemplateManager = new TemplateManager([
+      new FileSystemCatalogDataAdaptor(path.join(__dirname, '../../__data__/repository')),
+    ]);
     const fsIntegration: IntegrationReader = (await repository.getIntegration('nginx'))!;
     const fsConfig = await fsIntegration.getConfig();
     const serialized = await fsIntegration.serialize();
