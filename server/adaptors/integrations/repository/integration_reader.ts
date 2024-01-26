@@ -178,17 +178,7 @@ export class IntegrationReader {
    * @param version The version of the integration to retrieve assets for.
    * @returns An object containing the different types of assets.
    */
-  async getAssets(
-    version?: string
-  ): Promise<
-    Result<{
-      savedObjects?: object[];
-      queries?: Array<{
-        query: string;
-        language: string;
-      }>;
-    }>
-  > {
+  async getAssets(version?: string): Promise<Result<ParsedIntegrationAssets>> {
     const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
