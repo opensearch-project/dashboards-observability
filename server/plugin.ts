@@ -146,7 +146,7 @@ export class ObservabilityPlugin
             type: 'text',
           },
           labels: {
-            type: 'nested',
+            type: 'text',
           },
           author: {
             type: 'text',
