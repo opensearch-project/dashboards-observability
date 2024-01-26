@@ -14,8 +14,8 @@ import {
   EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { coreRefs } from '../../../framework/core_refs';
 import { useSelector } from 'react-redux';
+import { coreRefs } from '../../../framework/core_refs';
 import { selectQueries } from '../redux/slices/query_slice';
 
 export const NoResults = ({ tabId }: any) => {
