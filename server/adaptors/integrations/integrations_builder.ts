@@ -4,14 +4,21 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { uuidRx } from 'public/components/custom_panels/redux/panel_slice';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
-import { IntegrationReader } from './repository/integration';
+import { IntegrationReader } from './repository/integration_reader';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
+import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
   dataSource: string;
+}
+
+interface SavedObject {
+  id: string;
+  type: string;
+  attributes: { title: string };
+  references: Array<{ id: string }>;
 }
 
 export class IntegrationInstanceBuilder {
@@ -22,8 +29,7 @@ export class IntegrationInstanceBuilder {
   }
 
   build(integration: IntegrationReader, options: BuilderOptions): Promise<IntegrationInstance> {
-    const instance = integration
-      .deepCheck()
+    const instance = deepCheck(integration)
       .then((result) => {
         if (!result.ok) {
           return Promise.reject(result.error);
@@ -36,14 +42,17 @@ export class IntegrationInstanceBuilder {
         }
         return assets.value;
       })
-      .then((assets) => this.remapIDs(assets.savedObjects!))
+      .then((assets) => this.remapIDs(assets.savedObjects! as SavedObject[]))
       .then((assets) => this.remapDataSource(assets, options.dataSource))
       .then((assets) => this.postAssets(assets))
       .then((refs) => this.buildInstance(integration, refs, options));
     return instance;
   }
 
-  remapDataSource(assets: any[], dataSource: string | undefined): any[] {
+  remapDataSource(
+    assets: SavedObject[],
+    dataSource: string | undefined
+  ): Array<{ type: string; attributes: { title: string } }> {
     if (!dataSource) return assets;
     assets = assets.map((asset) => {
       if (asset.type === 'index-pattern') {
@@ -54,7 +63,7 @@ export class IntegrationInstanceBuilder {
     return assets;
   }
 
-  remapIDs(assets: any[]): any[] {
+  remapIDs(assets: SavedObject[]): SavedObject[] {
     const toRemap = assets.filter((asset) => asset.id);
     const idMap = new Map<string, string>();
     return toRemap.map((item) => {
@@ -73,20 +82,22 @@ export class IntegrationInstanceBuilder {
     });
   }
 
-  async postAssets(assets: any[]): Promise<AssetReference[]> {
+  async postAssets(assets: SavedObjectsBulkCreateObject[]): Promise<AssetReference[]> {
     try {
-      const response = await this.client.bulkCreate(assets as SavedObjectsBulkCreateObject[]);
-      const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
-        return {
-          assetType: obj.type,
-          assetId: obj.id,
-          status: 'available', // Assuming a successfully created object is available
-          isDefaultAsset: obj.type === 'dashboard', // Assuming for now that dashboards are default
-          description: obj.attributes?.title,
-        };
-      });
+      const response = await this.client.bulkCreate(assets);
+      const refs: AssetReference[] = (response.saved_objects as SavedObject[]).map(
+        (obj: SavedObject) => {
+          return {
+            assetType: obj.type,
+            assetId: obj.id,
+            status: 'available', // Assuming a successfully created object is available
+            isDefaultAsset: obj.type === 'dashboard', // Assuming for now that dashboards are default
+            description: obj.attributes?.title,
+          };
+        }
+      );
       return Promise.resolve(refs);
-    } catch (err: any) {
+    } catch (err) {
       return Promise.reject(err);
     }
   }

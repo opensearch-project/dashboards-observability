@@ -25,6 +25,7 @@ class CoreRefs {
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
   public queryAssistEnabled?: boolean;
+  public summarizeEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   private constructor() {

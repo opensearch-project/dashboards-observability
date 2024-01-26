@@ -10,16 +10,17 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
+import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
 import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
 import { requestWithRetryAgentSearch } from './utils/agents';
 
 export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
+  const { ppl_agent_name: pplAgentName } = config.query_assist;
   const {
-    ppl_agent_name: pplAgentName,
     response_summary_agent_name: responseSummaryAgentName,
     error_summary_agent_name: errorSummaryAgentName,
-  } = config.query_assist;
+  } = config.summarize;
 
   router.post(
     {
@@ -69,10 +70,13 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
           .replace(/\bSPAN\(/g, 'span('); // https://github.com/opensearch-project/dashboards-observability/issues/759
         return response.ok({ body: ppl });
       } catch (error) {
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
-        });
+        // parse PPL query from error response if exists
+        // TODO remove after https://github.com/opensearch-project/skills/issues/138
+        if (isResponseError(error) && error.body.error?.reason) {
+          const pplMatch = error.body.error.reason.match(/execute ppl:(.+), get error:/);
+          if (pplMatch[1]) return response.ok({ body: pplMatch[1] });
+        }
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
   );

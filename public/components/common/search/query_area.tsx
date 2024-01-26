@@ -12,6 +12,7 @@ import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
 export function QueryArea({
   tabId,
   handleQueryChange,
+  handleTimePickerChange,
   handleTimeRangePickerRefresh,
   runQuery,
   tempQuery,
@@ -66,6 +67,7 @@ export function QueryArea({
           <EuiFlexItem>
             <QueryAssistInput
               tabId={tabId}
+              handleTimePickerChange={handleTimePickerChange}
               handleQueryChange={handleQueryChange}
               handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
               setNeedsUpdate={setNeedsUpdate}
