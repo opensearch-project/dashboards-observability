@@ -23,7 +23,6 @@ export class TemplateManager {
   private async getReaderIntegrationList(reader: CatalogDataAdaptor): Promise<IntegrationReader[]> {
     const folders = await reader.findIntegrations();
     if (!folders.ok) {
-      console.error(`Error reading integrations in: ${reader}`, folders.error);
       return [];
     }
     const integrations = await Promise.all(
@@ -49,13 +48,11 @@ export class TemplateManager {
     integrationName: string
   ): Promise<IntegrationReader | null> {
     if ((await reader.getDirectoryType(integrationName)) !== 'integration') {
-      console.error(`Requested integration '${integrationName}' does not exist`);
       return null;
     }
     const integ = new IntegrationReader(integrationName, reader.join(integrationName));
     const checkResult = await integ.getConfig();
     if (!checkResult.ok) {
-      console.error(`Integration '${integrationName}' is invalid:`, checkResult.error);
       return null;
     }
     return integ;

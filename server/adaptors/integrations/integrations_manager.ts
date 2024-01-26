@@ -10,6 +10,7 @@ import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { TemplateManager } from './repository/repository';
 import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
+import { IndexDataAdaptor } from './repository/index_data_adaptor';
 
 export class IntegrationsManager implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
@@ -20,7 +21,10 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     this.client = client;
     this.repository =
       repository ??
-      new TemplateManager([new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository'))]);
+      new TemplateManager([
+        new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository')),
+        new IndexDataAdaptor(this.client),
+      ]);
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
