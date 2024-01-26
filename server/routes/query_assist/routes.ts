@@ -23,8 +23,7 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
   } = config.summarize;
 
   /**
-   * The query assist feature is configured if the config is enabled and the PPL agent is configured.
-   * UI should only show when the feature is configured.
+   * Returns whether the PPL agent is configured.
    */
   router.get(
     {
@@ -36,16 +35,13 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!config.query_assist.enabled) {
-        return response.ok({ body: { enabled: false } });
-      }
       const client = context.core.opensearch.client.asCurrentUser;
       try {
-        // if the call does not throw any error, then agent is properly configured
+        // if the call does not throw any error, then the agent is properly configured
         await searchAgentIdByName(client, pplAgentName!);
-        return response.ok({ body: { enabled: true } });
+        return response.ok({ body: { configured: true } });
       } catch (error) {
-        return response.ok({ body: { enabled: false, error: error.message } });
+        return response.ok({ body: { configured: false, error: error.message } });
       }
     }
   );

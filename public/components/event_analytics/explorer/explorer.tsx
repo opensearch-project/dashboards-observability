@@ -58,6 +58,7 @@ import {
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
+import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
@@ -100,7 +101,6 @@ import { processMetricsData } from '../../custom_panels/helpers/utils';
 import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
-import { QueryAssistContextProvider, useQueryAssistContext } from '../hooks/use_query_assist';
 import {
   render as updateCountDistribution,
   selectCountDistribution,
@@ -274,21 +274,21 @@ export const Explorer = ({
     };
   }, []);
 
-  console.count('rerender');
-  // useEffect(() => {
-  //   if (coreRefs.queryAssistEnabled) {
-  //     http
-  //       .get<{ enabled: boolean; error?: string }>(QUERY_ASSIST_API.CONFIGURED)
-  //       .catch(() => {
-  //         console.warn('Failed to check if query assist is configured');
-  //         return { enabled: false };
-  //       })
-  //       .then((response) => {
-  //         coreRefs.queryAssistEnabled = response.enabled;
-  //         setRefresh({});
-  //       });
-  //   }
-  // }, []);
+  useEffect(() => {
+    // query assist UI should only be enabled when the feature is enabled and configured.
+    if (coreRefs.queryAssistEnabled) {
+      http
+        .get<{ configured: boolean; error?: string }>(QUERY_ASSIST_API.CONFIGURED)
+        .catch(() => {
+          console.warn('Failed to check if query assist is configured');
+          return { configured: false };
+        })
+        .then((response) => {
+          coreRefs.queryAssistEnabled = response.configured;
+          setRefresh({});
+        });
+    }
+  }, []);
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
@@ -941,95 +941,93 @@ export const Explorer = ({
         handleQueryChange,
       }}
     >
-      <QueryAssistContextProvider>
-        <EuiPage className="deLayout" paddingSize="none">
-          <EuiPageSideBar className="deSidebar" sticky>
-            <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-              {!appLogEvents && (
-                <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-                  <DataSourceSelection tabId={initialTabId} />
-                </EuiSplitPanel.Inner>
-              )}
-              <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
-                <ObservabilitySideBar
-                  tabId={initialTabId}
-                  pplService={pplService}
-                  notifications={notifications}
-                />
+      <EuiPage className="deLayout" paddingSize="none">
+        <EuiPageSideBar className="deSidebar" sticky>
+          <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
+            {!appLogEvents && (
+              <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+                <DataSourceSelection tabId={initialTabId} />
               </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
-          </EuiPageSideBar>
-          <EuiPageBody className="deLayout__canvas">
-            <div
-              className={`obsExplorer dscAppContainer${
-                uiSettingsService.get('theme:darkMode') && ' explorer-dark'
-              }`}
-            >
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem>
-                  <SearchBar
-                    key="search-component"
-                    query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-                    tempQuery={tempQuery}
-                    handleQueryChange={handleQueryChange}
-                    handleQuerySearch={handleQuerySearch}
-                    dslService={dslService}
-                    startTime={startTime}
-                    endTime={endTime}
-                    setStartTime={setStartTime}
-                    setEndTime={setEndTime}
-                    handleTimePickerChange={(timeRange: string[]) =>
-                      handleTimePickerChange(timeRange)
+            )}
+            <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+              <ObservabilitySideBar
+                tabId={initialTabId}
+                pplService={pplService}
+                notifications={notifications}
+              />
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiPageSideBar>
+        <EuiPageBody className="deLayout__canvas">
+          <div
+            className={`obsExplorer dscAppContainer${
+              uiSettingsService.get('theme:darkMode') && ' explorer-dark'
+            }`}
+          >
+            <EuiFlexGroup direction="row">
+              <EuiFlexItem>
+                <SearchBar
+                  key="search-component"
+                  query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+                  tempQuery={tempQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={handleQuerySearch}
+                  dslService={dslService}
+                  startTime={startTime}
+                  endTime={endTime}
+                  setStartTime={setStartTime}
+                  setEndTime={setEndTime}
+                  handleTimePickerChange={(timeRange: string[]) =>
+                    handleTimePickerChange(timeRange)
+                  }
+                  selectedPanelName={selectedPanelNameRef.current}
+                  selectedCustomPanelOptions={selectedCustomPanelOptions}
+                  setSelectedPanelName={setSelectedPanelName}
+                  setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+                  handleSavingObject={handleSavingObject}
+                  isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+                  savedObjects={savedObjects}
+                  showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+                  handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                  isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+                  closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+                  popoverItems={popoverItems}
+                  isLiveTailOn={isLiveTailOnRef.current}
+                  selectedSubTabId={selectedContentTabId}
+                  searchBarConfigs={searchBarConfigs}
+                  getSuggestions={parseGetSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
+                  baseQuery={appBaseQuery}
+                  stopLive={stopLive}
+                  setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+                  liveTailName={liveTailNameRef.current}
+                  curVisId={curVisId}
+                  setSubType={setSubType}
+                  http={http}
+                  setIsQueryRunning={setIsQueryRunning}
+                  isAppAnalytics={appLogEvents}
+                  pplService={pplService}
+                />
+                {explorerSearchMeta.isPolling ? (
+                  <DirectQueryRunning tabId={tabId} />
+                ) : (
+                  <EuiTabbedContent
+                    className="mainContentTabs"
+                    initialSelectedTab={contentTabs[0]}
+                    selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                    onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                      handleContentTabClick(selectedTab)
                     }
-                    selectedPanelName={selectedPanelNameRef.current}
-                    selectedCustomPanelOptions={selectedCustomPanelOptions}
-                    setSelectedPanelName={setSelectedPanelName}
-                    setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-                    handleSavingObject={handleSavingObject}
-                    isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-                    savedObjects={savedObjects}
-                    showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-                    handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                    isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-                    closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-                    popoverItems={popoverItems}
-                    isLiveTailOn={isLiveTailOnRef.current}
-                    selectedSubTabId={selectedContentTabId}
-                    searchBarConfigs={searchBarConfigs}
-                    getSuggestions={parseGetSuggestions}
-                    onItemSelect={onItemSelect}
-                    tabId={tabId}
-                    baseQuery={appBaseQuery}
-                    stopLive={stopLive}
-                    setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-                    liveTailName={liveTailNameRef.current}
-                    curVisId={curVisId}
-                    setSubType={setSubType}
-                    http={http}
-                    setIsQueryRunning={setIsQueryRunning}
-                    isAppAnalytics={appLogEvents}
-                    pplService={pplService}
+                    tabs={contentTabs}
+                    size="s"
                   />
-                  {explorerSearchMeta.isPolling ? (
-                    <DirectQueryRunning tabId={tabId} />
-                  ) : (
-                    <EuiTabbedContent
-                      className="mainContentTabs"
-                      initialSelectedTab={contentTabs[0]}
-                      selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-                      onTabClick={(selectedTab: EuiTabbedContentTab) =>
-                        handleContentTabClick(selectedTab)
-                      }
-                      tabs={contentTabs}
-                      size="s"
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </EuiPageBody>
-        </EuiPage>
-      </QueryAssistContextProvider>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiPageBody>
+      </EuiPage>
     </TabContext.Provider>
   );
 };
