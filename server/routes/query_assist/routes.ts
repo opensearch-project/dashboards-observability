@@ -13,7 +13,7 @@ import {
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
 import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-import { requestWithRetryAgentSearch } from './utils/agents';
+import { requestWithRetryAgentSearch, searchAgentIdByName } from './utils/agents';
 
 export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
   const { ppl_agent_name: pplAgentName } = config.query_assist;
@@ -21,6 +21,34 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
     response_summary_agent_name: responseSummaryAgentName,
     error_summary_agent_name: errorSummaryAgentName,
   } = config.summarize;
+
+  /**
+   * The query assist feature is configured if the config is enabled and the PPL agent is configured.
+   * UI should only show when the feature is configured.
+   */
+  router.get(
+    {
+      path: QUERY_ASSIST_API.CONFIGURED,
+      validate: {},
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      if (!config.query_assist.enabled) {
+        return response.ok({ body: { enabled: false } });
+      }
+      const client = context.core.opensearch.client.asCurrentUser;
+      try {
+        // if the call does not throw any error, then agent is properly configured
+        await searchAgentIdByName(client, pplAgentName!);
+        return response.ok({ body: { enabled: true } });
+      } catch (error) {
+        return response.ok({ body: { enabled: false, error: error.message } });
+      }
+    }
+  );
 
   router.post(
     {
