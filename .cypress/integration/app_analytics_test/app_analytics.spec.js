@@ -433,7 +433,10 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
     moveToHomePage();
+    cy.intercept('GET', 'http://localhost:5601/api/observability/operational_panels/panels/**').as('loadingPanels')
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
+    cy.wait('@loadingPanels');
+    cy.wait('@loadingPanels');
     moveToApplication(nameOne);
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').find('option:selected').should('have.text', visOneName);

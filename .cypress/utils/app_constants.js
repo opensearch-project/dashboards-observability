@@ -111,7 +111,6 @@ const testIndexDataSet = [
 
 export const moveToHomePage = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  cy.wait(delay * 3);
   cy.get('.euiTitle').contains('Applications').should('exist');
 };
 
