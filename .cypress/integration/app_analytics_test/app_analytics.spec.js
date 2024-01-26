@@ -335,7 +335,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
     cy.get('.aa-List').find('.aa-Item').should('have.length', 11);
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(query_one, {delay: TYPING_DELAY})
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type('      ' + query_one, {delay: TYPING_DELAY})
     changeTimeTo24('months');
     cy.get('[data-test-subj="main-content-visTab"]').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
@@ -390,7 +390,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[id="explorerPlotComponent"]', { timeout: timeoutDelay }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(query_two, {delay: TYPING_DELAY})
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').type('      ' + query_two, {delay: TYPING_DELAY})
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[data-test-subj="main-content-visTab"]').click();
     cy.get('.euiTab[id="availability-panel"]').click();
@@ -413,6 +413,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').click().type(visTwoName);
     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+    cy.get('.euiToast').contains(`Saved successfully`);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[id="explorerPlotComponent"]').should('have.length', 2);
     moveToHomePage();
