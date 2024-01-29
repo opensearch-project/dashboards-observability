@@ -40,7 +40,6 @@ suppressResizeObserverIssue();//needs to be in file once
 describe('Creating application', () => {
   before(() => {
     loadAllData();
-    // TODO: include a delete all indices section here, just in case
   });
 
   beforeEach(() => {
@@ -434,7 +433,6 @@ describe('Viewing application', () => {
     cy.get('select').select(visOneName);
     moveToHomePage();
     cy.intercept('GET', 'http://localhost:5601/api/observability/operational_panels/panels/**').as('loadingPanels')
-    cy.wait('@loadingPanels');
     cy.wait('@loadingPanels');
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
     moveToApplication(nameOne);
