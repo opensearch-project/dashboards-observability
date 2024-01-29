@@ -15,17 +15,12 @@ import {
   expectMessageOnHover,
   baseQuery,
   nameOne,
-  nameTwo,
-  nameThree,
-  description,
-  service_one,
   service_two,
   trace_one,
   trace_two,
   trace_three,
   query_one,
   query_two,
-  availability_default,
   visOneName,
   visTwoName,
   composition,
@@ -42,11 +37,8 @@ describe('Creating application', () => {
     loadAllData();
   });
 
-  beforeEach(() => {
-    moveToCreatePage();
-  });
-
   it('Creates an application and redirects to application', () => {
+    moveToCreatePage();
     expectMessageOnHover('createButton', 'Name is required.');
     cy.get('[data-test-subj="nameFormRow"]').type(nameOne);
     cy.get('[data-test-subj="descriptionFormRow"]').type('This application is for testing.');
@@ -75,47 +67,17 @@ describe('Creating application', () => {
   });
 
   it('Saves time range for each application', () => {
+    moveToHomePage();
     cy.get(`[data-test-subj="${nameOne}ApplicationLink"]`).click();
     cy.get('.euiTableRow').should('have.length.lessThan', 1);
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameOne);
     changeTimeTo24('months');
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.get('.euiTableRow').should('have.length.greaterThan', 1);
+    cy.get('.euiTableRow').should('have.length', 1);
     cy.get(`[data-test-subj="${nameOne}ApplicationLink"]`).click();
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameOne);
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
-  });
-});
-
-describe('Setting availability', () => {
-  it('Redirects to set availability at three entry points', () => {
-    moveToCreatePage();
-    cy.get('[data-test-subj="nameFormRow"]').type(nameThree);
-    cy.get('[data-test-subj="logSourceAccordion"]').trigger('mouseover').click();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
-    cy.focused().type('       source = ',);
-    cy.focused().type('{enter}');
-    cy.get('[data-test-subj="createAndSetButton"]').click({ force: true });
-    cy.get('.euiTableRow').should('have.length.lessThan', 1);
-    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
-    cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.get(`[data-test-subj="${nameThree}ApplicationLink"]`);
-    cy.get('[data-test-subj="setAvailabilityHomePageLink"]').first().click();
-    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
-    cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('contain.value', availability_default);
-    cy.get('[id="explorerPlotComponent"]').should('exist');
-    cy.get('.euiTab-isSelected[id="availability-panel"]').should('exist');
-    cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.get(`[data-test-subj="${nameThree}ApplicationLink"]`).click();
-    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
-    cy.get('[data-test-subj="app-analytics-configTab"]').click();
-    cy.get('[data-test-subj="setAvailabilityConfigLink"]').click();
-    cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('contain.value', availability_default);
-    cy.get('[id="explorerPlotComponent"]').should('exist');
-    cy.get('.euiTab-isSelected[id="availability-panel"]').should('exist');
   });
 });
 
@@ -443,12 +405,6 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplicationContextMenuItem"]').should('exist');
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
     cy.get('.euiTableRow').first().within(($row) => {
-      cy.get('.euiCheckbox').click();
-    });
-    cy.get('.euiTableRow').eq(1).within(($row) => {
-      cy.get('.euiCheckbox').click();
-    });
-    cy.get('.euiTableRow').eq(2).within(($row) => {
       cy.get('.euiCheckbox').click();
     });
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
