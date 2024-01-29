@@ -39,8 +39,7 @@ suppressResizeObserverIssue();//needs to be in file once
 
 describe('Creating application', () => {
   before(() => {
-    // loadAllData();
-    // TODO: include a delete all indices section here, just in case
+    loadAllData();
   });
 
   beforeEach(() => {
