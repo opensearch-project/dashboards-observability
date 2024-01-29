@@ -12,6 +12,7 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObject,
   SavedObjectsType,
 } from '../../../src/core/server';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
@@ -101,6 +102,18 @@ export class ObservabilityPlugin
       name: 'integration-instance',
       hidden: false,
       namespaceType: 'single',
+      management: {
+        importableAndExportable: true,
+        getInAppUrl(obj: SavedObject<IntegrationInstance>) {
+          return {
+            path: `/app/integrations#/installed/${obj.id}`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj: SavedObject<IntegrationInstance>) {
+          return obj.attributes.name;
+        },
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -127,6 +140,18 @@ export class ObservabilityPlugin
       name: 'integration-template',
       hidden: false,
       namespaceType: 'single',
+      management: {
+        importableAndExportable: true,
+        getInAppUrl(obj: SavedObject<SerializedIntegration>) {
+          return {
+            path: `/app/integrations#/available/${obj.attributes.name}`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj: SavedObject<SerializedIntegration>) {
+          return obj.attributes.displayName ?? obj.attributes.name;
+        },
+      },
       mappings: {
         dynamic: false,
         properties: {
