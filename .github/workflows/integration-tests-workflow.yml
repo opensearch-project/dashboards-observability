@@ -24,7 +24,7 @@ jobs:
         os: [ubuntu-latest]
         java: [11]
         testgroups:
-          [app_analytics_test]
+          [app_analytics_test, bapp_analytics_test]
           # datasources_test,
           # event_analytics_test,
           # integrations_test,
@@ -164,7 +164,7 @@ jobs:
       - name: Run Cypress tests for test group of ${{ matrix.testgroups }}
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn cypress:run --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
+          yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v1
