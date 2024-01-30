@@ -12,7 +12,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
     }
   }
 >
-  <Component
+  <SearchBar
     setSearch={[MockFunction]}
   >
     <div
@@ -23,7 +23,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
         box={
           Object {
             "incremental": true,
-            "placeholder": "Search for metrics",
+            "placeholder": "Search to filter Available Metrics",
           }
         }
         defaultQuery=""
@@ -49,7 +49,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
                   incremental={true}
                   isInvalid={false}
                   onSearch={[Function]}
-                  placeholder="Search for metrics"
+                  placeholder="Search to filter Available Metrics"
                   query=""
                 >
                   <EuiFieldSearch
@@ -63,7 +63,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
                     isInvalid={false}
                     isLoading={false}
                     onSearch={[Function]}
-                    placeholder="Search for metrics"
+                    placeholder="Search to filter Available Metrics"
                   >
                     <EuiFormControlLayout
                       compressed={false}
@@ -85,7 +85,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
                               className="euiFieldSearch euiFieldSearch--fullWidth"
                               defaultValue=""
                               onKeyUp={[Function]}
-                              placeholder="Search for metrics"
+                              placeholder="Search to filter Available Metrics"
                               type="search"
                             />
                           </EuiValidatableControl>
@@ -149,7 +149,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
         </EuiFlexGroup>
       </EuiSearchBar>
     </div>
-  </Component>
+  </SearchBar>
 </Provider>
 `;
 
@@ -165,7 +165,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
     }
   }
 >
-  <Component
+  <SearchBar
     setSearch={[MockFunction]}
   >
     <div
@@ -176,7 +176,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
         box={
           Object {
             "incremental": true,
-            "placeholder": "Search for metrics",
+            "placeholder": "Search to filter Available Metrics",
           }
         }
         defaultQuery=""
@@ -202,7 +202,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
                   incremental={true}
                   isInvalid={false}
                   onSearch={[Function]}
-                  placeholder="Search for metrics"
+                  placeholder="Search to filter Available Metrics"
                   query=""
                 >
                   <EuiFieldSearch
@@ -216,7 +216,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
                     isInvalid={false}
                     isLoading={false}
                     onSearch={[Function]}
-                    placeholder="Search for metrics"
+                    placeholder="Search to filter Available Metrics"
                   >
                     <EuiFormControlLayout
                       compressed={false}
@@ -238,7 +238,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
                               className="euiFieldSearch euiFieldSearch--fullWidth"
                               defaultValue=""
                               onKeyUp={[Function]}
-                              placeholder="Search for metrics"
+                              placeholder="Search to filter Available Metrics"
                               type="search"
                             />
                           </EuiValidatableControl>
@@ -263,7 +263,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
                                     size="m"
                                     type="search"
                                   >
-                                    <EuiIconEmpty
+                                    <EuiIconBeaker
                                       aria-hidden={true}
                                       className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
@@ -280,8 +280,12 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
                                         viewBox="0 0 16 16"
                                         width={16}
                                         xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </EuiIconBeaker>
                                   </EuiIcon>
                                 </span>
                               </EuiFormControlLayoutCustomIcon>
@@ -298,6 +302,6 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
         </EuiFlexGroup>
       </EuiSearchBar>
     </div>
-  </Component>
+  </SearchBar>
 </Provider>
 `;

@@ -5,8 +5,8 @@
 
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
-import { isEmpty } from 'lodash';
-import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
+import _, { isEmpty } from 'lodash';
+import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
@@ -18,8 +18,12 @@ import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
+  OTEL_DATE_FORMAT,
+  OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
+import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -35,25 +39,89 @@ const escapeQuotes = (literal: string) => {
   return literal.replaceAll("'", "''");
 };
 
+export const findMinInterval = (start: string = '', end: string = '') => {
+  const momentStart = dateMath.parse(start)!;
+  const momentEnd = dateMath.parse(end, { roundUp: true })!;
+  const diffSeconds = momentEnd.unix() - momentStart.unix();
+  let minInterval = 'y';
+
+  // less than 1 second
+  if (diffSeconds <= 1) minInterval = 'ms';
+  // less than 2 minutes
+  else if (diffSeconds <= 60 * 2) minInterval = 's';
+  // less than 2 hours
+  else if (diffSeconds <= 3600 * 2) minInterval = 'm';
+  // less than 2 days
+  else if (diffSeconds <= 86400 * 2) minInterval = 'h';
+  // less than 1 month
+  else if (diffSeconds <= 86400 * 31) minInterval = 'd';
+  // less than 2 year
+  else if (diffSeconds <= 86400 * 366 * 2) minInterval = 'w';
+
+  return minInterval;
+};
+
 export const convertDateTime = (
   datetime: string,
   isStart = true,
   formatted = true,
-  isMetrics: boolean = false
+  metricType: string = ''
 ) => {
-  let returnTime: undefined | Moment;
+  let returnTime: Moment = '';
+
   if (isStart) {
     returnTime = dateMath.parse(datetime);
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-  if (isMetrics) {
+
+  if (metricType === OTEL_METRIC_SUBTYPE) {
+    const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
+    const milliseconds = returnTime!.millisecond();
+    const formattedMilliseconds = String(milliseconds).padEnd(6, '0');
+    return `${formattedDate}.${formattedMilliseconds}Z`;
+  }
+
+  if (metricType === PROMQL_METRIC_SUBTYPE) {
     const myDate = new Date(returnTime._d); // Your timezone!
     const epochTime = myDate.getTime() / 1000.0;
     return Math.round(epochTime);
   }
-  if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
+  if (formatted === true) return returnTime?.utc()?.format(PPL_DATE_FORMAT);
+  if (formatted) return returnTime?.utc()?.format(formatted);
+
   return returnTime;
+};
+
+export const updateCatalogVisualizationQuery = ({
+  catalogSourceName,
+  catalogTableName,
+  aggregation,
+  attributesGroupBy,
+  start,
+  end,
+  span = '1',
+  resolution = 'h',
+}: {
+  catalogSourceName: string;
+  catalogTableName: string;
+  aggregation: string;
+  attributesGroupBy: string[];
+  start: string;
+  end: string;
+  span: string;
+  resolution: string;
+}) => {
+  const attributesGroupString = attributesGroupBy.join(',');
+  const startEpochTime = convertDateTime(start, true, false, PROMQL_METRIC_SUBTYPE);
+  const endEpochTime = convertDateTime(end, false, false, PROMQL_METRIC_SUBTYPE);
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? `${aggregation} (${catalogTableName})`
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
+  return newQuery;
 };
 
 const PROMQL_DEFAULT_AGGREGATION = 'avg';
@@ -128,20 +196,14 @@ export const updatePromQLQueryFilters = (
   const { connection, metric, aggregation, attributesGroupBy } = parsePromQLIntoKeywords(
     promQLQuery
   );
-  console.log('updatePromQLQueryFilters', {
-    connection,
-    metric,
-    aggregation,
-    attributesGroupBy,
-    promQLQuery,
-  });
+
   const promQLPart = buildPromQLFromMetricQuery({
     metric,
     attributesGroupBy: attributesGroupBy.split(','),
     aggregation,
   });
-  const start = convertDateTime(startTime, true, false, true);
-  const end = convertDateTime(endTime, false, false, true);
+  const start = convertDateTime(startTime, true, false, PROMQL_METRIC_SUBTYPE);
+  const end = convertDateTime(endTime, false, false, PROMQL_METRIC_SUBTYPE);
   return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
 };
 
@@ -155,6 +217,30 @@ const getPPLIndex = (query: string): string => {
 
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
+};
+
+function extractSpanAndResolution(query: string) {
+  if (!query) return;
+
+  const match = query.match(SPAN_RESOLUTION_REGEX);
+  return match ? { span: parseInt(match[1], 10), resolution: match[2] } : null;
+}
+
+export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
+  // convert to moment
+  const start = convertDateTime(startTime, true);
+  const end = convertDateTime(endTime, false);
+  const spanResolution = extractSpanAndResolution(metaData?.query);
+
+  const visualizationQuery = updateCatalogVisualizationQuery({
+    ...metaData.queryMetaData,
+    start,
+    end,
+    span: spanResolution?.span || 1,
+    resolution: spanResolution?.resolution || 'h',
+  });
+
+  return visualizationQuery;
 };
 
 // insert time filter command and additional commands based on raw query
@@ -180,7 +266,6 @@ export const preprocessQuery = ({
   whereClause?: string;
 }) => {
   let finalQuery = '';
-
   if (isEmpty(rawQuery)) return finalQuery;
 
   // convert to moment

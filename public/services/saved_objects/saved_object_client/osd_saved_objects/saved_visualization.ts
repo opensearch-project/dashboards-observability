@@ -20,6 +20,7 @@ import {
 } from '../types';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
+import { QueryManager } from '../../../../../common/query_manager/ppl_query_manager';
 
 interface CommonParams {
   query: string;
@@ -32,10 +33,12 @@ interface CommonParams {
   userConfigs: any;
   description: string;
   subType: string;
+  metricType: string;
   unitsOfMeasure: string;
   selectedLabels: string;
   dataSources: string; // list of type SelectedDataSources that is stringified
   queryLang: string;
+  queryMetaData: object;
 }
 
 type CreateParams = CommonParams & { applicationId: string };
@@ -62,10 +65,12 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
       queryLang: params.queryLang,
+      queryMetaData: params.queryMetaData,
     });
 
     const response = await this.client.create<VisualizationSavedObjectAttributes>(
@@ -101,6 +106,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
@@ -157,6 +163,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
           createdTimeMs: o.attributes.createdTimeMs,
           lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(o.updated_at),
           savedVisualization: o.attributes.savedVisualization,
+          metricType: o.attributes.metricType,
         }))
       );
     return { totalHits: observabilityObjectList.length, observabilityObjectList };

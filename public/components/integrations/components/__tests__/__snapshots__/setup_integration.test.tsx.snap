@@ -128,6 +128,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 className="euiFormRow__fieldWrapper"
                               >
                                 <EuiFieldText
+                                  data-test-subj="new-instance-name"
                                   id="random_html_id"
                                   isInvalid={false}
                                   onBlur={[Function]}
@@ -151,6 +152,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                         >
                                           <input
                                             className="euiFieldText"
+                                            data-test-subj="new-instance-name"
                                             id="random_html_id"
                                             onBlur={[Function]}
                                             onChange={[Function]}
@@ -286,7 +288,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                   size="m"
                                                   type="arrowDown"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                     focusable="false"
@@ -303,8 +305,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiFormControlLayoutCustomIcon>
@@ -368,6 +374,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   async={false}
                                   compressed={false}
                                   customOptionText="Select {searchValue} as your index"
+                                  data-test-subj="data-source-name"
                                   fullWidth={false}
                                   id="random_html_id"
                                   isClearable={true}
@@ -396,6 +403,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                     aria-expanded={false}
                                     aria-haspopup="listbox"
                                     className="euiComboBox"
+                                    data-test-subj="data-source-name"
                                     onKeyDown={[Function]}
                                     role="combobox"
                                   >
@@ -586,7 +594,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                         className="euiFormControlLayoutClearButton__icon"
                                                         type="cross"
                                                       >
-                                                        <EuiIconEmpty
+                                                        <EuiIconBeaker
                                                           aria-hidden={true}
                                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
                                                           focusable="false"
@@ -603,8 +611,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                             viewBox="0 0 16 16"
                                                             width={16}
                                                             xmlns="http://www.w3.org/2000/svg"
-                                                          />
-                                                        </EuiIconEmpty>
+                                                          >
+                                                            <path
+                                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                            />
+                                                          </svg>
+                                                        </EuiIconBeaker>
                                                       </EuiIcon>
                                                     </button>
                                                   </EuiI18n>
@@ -637,7 +649,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                       size="m"
                                                       type="arrowDown"
                                                     >
-                                                      <EuiIconEmpty
+                                                      <EuiIconBeaker
                                                         aria-hidden={true}
                                                         className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                         focusable="false"
@@ -654,8 +666,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                           viewBox="0 0 16 16"
                                                           width={16}
                                                           xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
                                                     </EuiIcon>
                                                   </button>
                                                 </EuiFormControlLayoutCustomIcon>
@@ -747,7 +763,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   viewBox="0 0 16 16"
                                   width="16"
                                   xmlns="http://www.w3.org/2000/svg"
-                                />
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
                                 <span
                                   class="euiButtonEmpty__text"
                                 >
@@ -761,6 +781,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           >
                             <button
                               class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                              data-test-subj="create-instance-button"
                               disabled=""
                               type="button"
                             >
@@ -776,7 +797,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   viewBox="0 0 16 16"
                                   width="16"
                                   xmlns="http://www.w3.org/2000/svg"
-                                />
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
                                 <span
                                   class="euiButton__text"
                                 >
@@ -863,7 +888,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                         size="m"
                                         type="cross"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                           focusable="false"
@@ -880,8 +905,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                       <span
                                         className="euiButtonEmpty__text"
@@ -901,6 +930,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButton
+                                data-test-subj="create-instance-button"
                                 disabled={true}
                                 fill={true}
                                 iconSide="right"
@@ -910,6 +940,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
+                                  data-test-subj="create-instance-button"
                                   disabled={true}
                                   element="button"
                                   fill={true}
@@ -922,6 +953,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 >
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    data-test-subj="create-instance-button"
                                     disabled={true}
                                     onClick={[Function]}
                                     style={
@@ -951,7 +983,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                           size="m"
                                           type="arrowRight"
                                         >
-                                          <EuiIconEmpty
+                                          <EuiIconBeaker
                                             aria-hidden={true}
                                             className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                             focusable="false"
@@ -968,8 +1000,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                               viewBox="0 0 16 16"
                                               width={16}
                                               xmlns="http://www.w3.org/2000/svg"
-                                            />
-                                          </EuiIconEmpty>
+                                            >
+                                              <path
+                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                              />
+                                            </svg>
+                                          </EuiIconBeaker>
                                         </EuiIcon>
                                         <span
                                           className="euiButton__text"
@@ -1125,6 +1161,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <EuiFieldText
+              data-test-subj="new-instance-name"
               id="random_html_id"
               isInvalid={false}
               onBlur={[Function]}
@@ -1148,6 +1185,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                     >
                       <input
                         className="euiFieldText"
+                        data-test-subj="new-instance-name"
                         id="random_html_id"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1384,6 +1422,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               async={false}
               compressed={false}
               customOptionText="Select {searchValue} as your index"
+              data-test-subj="data-source-name"
               fullWidth={false}
               id="random_html_id"
               isClearable={true}
@@ -1412,6 +1451,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                 aria-expanded={false}
                 aria-haspopup="listbox"
                 className="euiComboBox"
+                data-test-subj="data-source-name"
                 onKeyDown={[Function]}
                 role="combobox"
               >

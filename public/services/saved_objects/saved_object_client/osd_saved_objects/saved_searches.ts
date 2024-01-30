@@ -32,6 +32,7 @@ interface CommonParams {
   userConfigs: any;
   description: string;
   subType: string;
+  metricType: string;
   unitsOfMeasure: string;
   selectedLabels: string;
   dataSources: string; // list of type SelectedDataSources that is stringified

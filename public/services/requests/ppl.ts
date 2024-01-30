@@ -6,8 +6,10 @@
 import { CoreStart } from '../../../../../src/core/public';
 import { PPL_BASE, PPL_SEARCH } from '../../../common/constants/shared';
 
+/* eslint-disable import/no-default-export */
 export default class PPLService {
   private http;
+
   constructor(http: CoreStart['http']) {
     this.http = http;
   }

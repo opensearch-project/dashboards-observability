@@ -74,9 +74,11 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     applicationId = '',
     userConfigs = '',
     subType = '',
+    metricType = '',
     unitsOfMeasure = '',
     selectedLabels,
     objectId = '',
+    queryMetaData = {},
   }: any) {
     const objRequest: any = {
       object: {
@@ -110,11 +112,15 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {
-      objRequest.object.sub_type = subType;
+      objRequest.object.subType = subType;
+    }
+
+    if (!isEmpty(metricType)) {
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {
@@ -127,6 +133,10 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
 
     if (!isEmpty(objectId)) {
       objRequest.object_id = objectId;
+    }
+
+    if (!isEmpty(queryMetaData)) {
+      objRequest.object.queryMetaData = queryMetaData;
     }
 
     return objRequest;

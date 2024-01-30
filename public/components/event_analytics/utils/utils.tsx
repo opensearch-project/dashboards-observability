@@ -5,21 +5,21 @@
 
 /* eslint-disable no-bitwise */
 
-import { uniqueId, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { MutableRefObject } from 'react';
 import { EuiDataGridSorting, EuiText } from '@elastic/eui';
 import datemath from '@elastic/datemath';
-import { HttpStart } from '../../../../../../src/core/public';
 import {
-  CUSTOM_LABEL,
-  TIME_INTERVAL_OPTIONS,
-  GROUPBY,
   AGGREGATIONS,
   BREAKDOWNS,
+  CUSTOM_LABEL,
   DATE_PICKER_FORMAT,
+  GROUPBY,
+  TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
 import {
+  OTEL_METRIC_SUBTYPE,
   PPL_DATE_FORMAT,
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
@@ -28,13 +28,10 @@ import {
 import {
   ConfigListEntry,
   GetTooltipHoverInfoType,
-  IExplorerFields,
-  IField,
   IQuery,
   MOMENT_UNIT_OF_TIME,
 } from '../../../../common/types/explorer';
 import PPLService from '../../../services/requests/ppl';
-import { DocViewRow, IDocType } from '../explorer/events_views';
 import { ConfigTooltip } from '../explorer/visualizations/config_panel/config_panes/config_controls';
 import {
   GroupByChunk,
@@ -42,6 +39,13 @@ import {
   StatsAggregationChunk,
   statsChunk,
 } from '../../../../common/query_manager/ast/types';
+import {
+  extractIndexAndDocumentName,
+  fetchSampleOTDocument,
+  fetchAggregatedBinCount,
+} from '../../custom_panels/helpers/utils';
+import { convertDateTime } from '../../common/query_utils';
+import { VizContainerError } from '../../../../common/types/custom_panels';
 
 /* Builds Final Query for the surrounding events
  * -> Final Query is as follows:
@@ -76,16 +80,6 @@ const composeFinalQuery = (
   return indexPartOfQuery + timeQueryFilter + filterPartOfQuery + sortFilter;
 };
 
-const createTds = (
-  docs: IDocType[],
-  selectedCols: IField[],
-  getTds: (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => JSX.Element[]
-) => {
-  return docs.map((doc: IDocType) => (
-    <tr className="osdDocTable__row"> {getTds(doc, selectedCols, true).slice(1)}</tr>
-  ));
-};
-
 // fetches Surrounding events based on a timestamp
 export const fetchSurroundingData = async (
   pplService: PPLService,
@@ -96,9 +90,7 @@ export const fetchSurroundingData = async (
   typeOfDocs: 'new' | 'old',
   setEventsData: React.Dispatch<React.SetStateAction<JSX.Element[]>>,
   setIsError: React.Dispatch<React.SetStateAction<string>>,
-  setLoadingData: React.Dispatch<React.SetStateAction<boolean>>,
-  selectedCols: IField[],
-  getTds: (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => JSX.Element[]
+  setLoadingData: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   let resultCount = 0;
   let isErred = false;
@@ -270,6 +262,24 @@ export const getPropName = (queriedVizObj: {
   }
 };
 
+export const getMetricVisConfig = (metric) => {
+  const { aggregation } = metric;
+  return {
+    [AGGREGATIONS]: [
+      {
+        name: aggregation,
+        aggregation,
+        label: aggregation + '()',
+      },
+    ],
+    [BREAKDOWNS]: [],
+    queryMetaData: metric.queryMetaData,
+    subType: metric.subType,
+    metricType: metric.metricType,
+    legend: { showLegend: 'hidden' }, // force no-legend in dashboard displays
+  };
+};
+
 export const getDefaultVisConfig = (statsToken: statsChunk) => {
   if (statsToken === null) {
     return {
@@ -298,6 +308,65 @@ export const getDefaultVisConfig = (statsToken: statsChunk) => {
     })),
     span,
   };
+};
+
+export const fetchOtelMetric = async ({
+  visualizationName,
+  startTime,
+  endTime,
+  setIsError,
+  setIsLoading,
+  setToast,
+}: {
+  visualizationName: string;
+  startTime: string;
+  endTime: string;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  setToast: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
+}) => {
+  const indexAndDocumentName = extractIndexAndDocumentName(visualizationName);
+  const index = indexAndDocumentName[0];
+  const documentName = indexAndDocumentName[1];
+  if (documentName === undefined)
+    setToast('Document name is undefined', 'danger', undefined, 'right');
+
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName);
+  const source = fetchSampleDocument.hits[0]._source;
+
+  const dataBinsPromises = source.buckets.map(async (bucket: any) => {
+    try {
+      const formattedStartTime = convertDateTime(startTime, false, false, OTEL_METRIC_SUBTYPE);
+      const formattedEndTime = convertDateTime(endTime, false, false, OTEL_METRIC_SUBTYPE);
+      const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+        bucket.min.toString(),
+        bucket.max.toString(),
+        formattedStartTime,
+        formattedEndTime,
+        documentName,
+        index,
+        setIsError,
+        setIsLoading
+      );
+
+      return {
+        xAxis: bucket.min + ' - ' + bucket.max,
+        'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+      };
+    } catch (error) {
+      console.error('Error processing bucket:', error);
+      return null;
+    }
+  });
+  const jsonData = await Promise.all(dataBinsPromises);
+  const formatedJsonData = { jsonData };
+
+  return formatedJsonData;
 };
 
 const getSpanValue = (groupByToken: GroupByChunk) => {
@@ -421,10 +490,11 @@ export const redoQuery = (
   const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
   const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
   const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
+  const timeRange = timeStampField
+    ? `| where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`
+    : '';
 
-  finalQuery = `${tokens![1]}=${
-    tokens![2]
-  } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
+  finalQuery = `${tokens![1]}=${tokens![2]} ${timeRange}`;
 
   finalQuery += tokens![3];
 

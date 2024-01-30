@@ -6,7 +6,7 @@
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
   EuiCard,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -27,16 +27,12 @@ import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
-import {
-  CREATE_NOTE_MESSAGE,
-  NOTEBOOKS_API_PREFIX,
-  NOTEBOOKS_SELECTED_BACKEND,
-} from '../../../../common/constants/notebooks';
+import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
+import PPLService from '../../../services/requests/ppl';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
 import { defaultParagraphParser } from './helpers/default_parser';
 import { DeleteNotebookModal, getCustomModal, getDeleteModal } from './helpers/modal_containers';
@@ -45,7 +41,6 @@ import {
   contextMenuViewReports,
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
-import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
 const panelStyles: CSS.Properties = {
   float: 'left',
@@ -138,14 +133,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // parse paragraphs based on backend
   parseParagraphs = (paragraphs: any[]): ParaType[] => {
     try {
-      let parsedPara;
-      // @ts-ignore
-      if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
-        parsedPara = zeppelinParagraphParser(paragraphs);
-        this.setState({ vizPrefix: '%sh #vizobject:' });
-      } else {
-        parsedPara = defaultParagraphParser(paragraphs);
-      }
+      const parsedPara = defaultParagraphParser(paragraphs);
       parsedPara.forEach((para: ParaType) => {
         para.isInputExpanded = this.state.selectedViewId === 'input_only';
         para.paraRef = React.createRef();
@@ -200,7 +188,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             paragraphId: para.uniqueId,
           },
         })
-        .then((res) => {
+        .then((_res) => {
           const paragraphs = [...this.state.paragraphs];
           paragraphs.splice(index, 1);
           const parsedPara = [...this.state.parsedPara];
@@ -212,6 +200,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             'Error deleting paragraph, please make sure you have the correct permission.',
             'danger'
           );
+          console.error(err);
         });
     }
   };
@@ -253,6 +242,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                 'Error deleting paragraph, please make sure you have the correct permission.',
                 'danger'
               );
+              console.error(err);
             });
         },
         'Delete all paragraphs',
@@ -361,6 +351,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error deleting visualization, please make sure you have the correct permission.',
           'danger'
         );
+        console.error(err);
       });
   };
 
@@ -395,6 +386,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error adding paragraph, please make sure you have the correct permission.',
           'danger'
         );
+        console.error(err);
       });
   };
 
@@ -428,13 +420,14 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       .post(`${NOTEBOOKS_API_PREFIX}/set_paragraphs/`, {
         body: JSON.stringify(moveParaObj),
       })
-      .then((res) => this.setState({ paragraphs, parsedPara }))
-      .then((res) => this.scrollToPara(targetIndex))
+      .then((_res) => this.setState({ paragraphs, parsedPara }))
+      .then((_res) => this.scrollToPara(targetIndex))
       .catch((err) => {
         this.props.setToast(
           'Error moving paragraphs, please make sure you have the correct permission.',
           'danger'
         );
+        console.error(err);
       });
   };
 
@@ -467,6 +460,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error clearing paragraphs, please make sure you have the correct permission.',
           'danger'
         );
+        console.error(err);
       });
   };
 
@@ -537,9 +531,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   };
 
-  runForAllParagraphs = (reducer: (para: ParaType, index: number) => Promise<any>) => {
+  runForAllParagraphs = (reducer: (para: ParaType, _index: number) => Promise<any>) => {
     return this.state.parsedPara
-      .map((para: ParaType, index: number) => () => reducer(para, index))
+      .map((para: ParaType, _index: number) => () => reducer(para, _index))
       .reduce((chain, func) => chain.then(func), Promise.resolve());
   };
 
@@ -595,6 +589,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error fetching notebooks, please make sure you have the correct permission.',
           'danger'
         );
+        console.error(err);
       });
   };
 
@@ -611,6 +606,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       })
       .catch((err) => {
         this.props.setToast('Error getting query output', 'danger');
+        console.error(err);
       });
   };
 
@@ -662,6 +658,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       })
       .catch((error) => {
         this.props.setToast('Error checking Reporting Plugin Installation status.', 'danger');
+        console.error(error);
       });
   }
 
@@ -696,7 +693,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         </p>
       </div>
     );
-    const viewOptions: EuiButtonGroupOption[] = [
+    const viewOptions: EuiButtonGroupOptionProps[] = [
       {
         id: 'view_both',
         label: 'View both',
@@ -721,6 +718,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               this.setState({ isAddParaPopoverOpen: false });
               this.addPara(this.state.paragraphs.length, '', 'CODE');
             },
+            'data-test-subj': 'AddCodeBlockBtn',
           },
           {
             name: 'Visualization',
@@ -728,6 +726,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               this.setState({ isAddParaPopoverOpen: false });
               this.addPara(this.state.paragraphs.length, '', 'VISUALIZATION');
             },
+            'data-test-subj': 'AddVisualizationBlockBtn',
           },
         ],
       },
@@ -750,7 +749,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             disabled: this.state.parsedPara.length === 0,
             onClick: () => {
               this.setState({ isParaActionsPopoverOpen: false });
-              this.runForAllParagraphs((para: ParaType, index: number) => {
+              this.runForAllParagraphs((para: ParaType, _index: number) => {
                 return para.paraRef.current?.runParagraph();
               });
               if (this.state.selectedViewId === 'input_only') {
@@ -854,7 +853,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         items: [
           {
             name: 'Download PDF',
-            icon: <EuiIcon type="download" />,
+            icon: <EuiIcon type="download" data-test-subj="download-notebook-pdf" />,
             onClick: () => {
               this.setState({ isReportingActionsPopoverOpen: false });
               generateInContextReport('pdf', this.props, this.toggleReportingLoadingModal);
@@ -892,13 +891,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       <div>
         <EuiPopover
           panelPaddingSize="none"
-          withTitle
           button={
             <EuiButton
               id="reportingActionsButton"
               iconType="arrowDown"
               iconSide="right"
-              onClick={() => this.setState({ isReportingActionsPopoverOpen: true })}
+              onClick={() =>
+                this.setState({
+                  isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
+                })
+              }
             >
               Reporting actions
             </EuiButton>
@@ -930,6 +932,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     onChange={(id) => {
                       this.updateView(id);
                     }}
+                    legend="notebook view buttons"
                   />
                 </EuiFlexItem>
               )}
@@ -938,13 +941,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
-                  withTitle
                   button={
                     <EuiButton
                       data-test-subj="notebook-paragraph-actions-button"
                       iconType="arrowDown"
                       iconSide="right"
-                      onClick={() => this.setState({ isParaActionsPopoverOpen: true })}
+                      onClick={() =>
+                        this.setState({
+                          isParaActionsPopoverOpen: !this.state.isParaActionsPopoverOpen,
+                        })
+                      }
                     >
                       Paragraph actions
                     </EuiButton>
@@ -959,13 +965,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
-                  withTitle
                   button={
                     <EuiButton
                       data-test-subj="notebook-notebook-actions-button"
                       iconType="arrowDown"
                       iconSide="right"
-                      onClick={() => this.setState({ isNoteActionsPopoverOpen: true })}
+                      onClick={() =>
+                        this.setState({
+                          isNoteActionsPopoverOpen: !this.state.isNoteActionsPopoverOpen,
+                        })
+                      }
                     >
                       Notebook actions
                     </EuiButton>
@@ -978,7 +987,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <EuiTitle size="l">
+            <EuiTitle size="l" data-test-subj="notebookTitle">
               <h1>{this.state.path}</h1>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -1028,9 +1037,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     <EuiSpacer />
                     <EuiPopover
                       panelPaddingSize="none"
-                      withTitle
                       button={
                         <EuiButton
+                          data-test-subj="AddParagraphButton"
                           iconType="arrowDown"
                           iconSide="right"
                           onClick={() => this.setState({ isAddParaPopoverOpen: true })}
@@ -1068,6 +1077,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                         description="Write contents directly using markdown, SQL or PPL."
                         footer={
                           <EuiButton
+                            data-test-subj="emptyNotebookAddCodeBlockBtn"
                             onClick={() => this.addPara(0, '', 'CODE')}
                             style={{ marginBottom: 17 }}
                           >

@@ -6,17 +6,21 @@
 export const mathFunction = `## Math
 ---
 
+### Math functions
+
+PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitate the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause. 
+
+The following sections describe the \`math\` PPL functions.
+
 ### ABS
 
-**Description**
+The \`abs\` function is an absolute value function. 
 
-Usage: abs(x) calculate the abs x.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Return type: INTEGER/LONG/FLOAT/DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`ABS(-1)\` = ABS(-1) | fields \`ABS(-1)\`
     fetched rows / total rows = 1/1
@@ -28,16 +32,13 @@ Example:
 
 ### ACOS
 
-**Description**
+The \`acos(x)\` function is an arc cosine function. The function expects values in the range of \`-1\` to \`1\` and returns \`NULL\` if the values aren't in that range.
 
-Usage: acos(x) calculate the arc cosine of x. Returns NULL if x is not
-in the range -1 to 1.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`ACOS(0)\` = ACOS(0) | fields \`ACOS(0)\`
     fetched rows / total rows = 1/1
@@ -49,16 +50,13 @@ Example:
 
 ### ASIN
 
-**Description**
+The \`asin(x)\` function is an arc sine function. The function expects values in the range of \`-1\` to \`1\` and returns \`NULL\` if the values aren't in that range.
 
-Usage: asin(x) calculate the arc sine of x. Returns NULL if x is not in
-the range -1 to 1.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`ASIN(0)\` = ASIN(0) | fields \`ASIN(0)\`
     fetched rows / total rows = 1/1
@@ -70,17 +68,13 @@ Example:
 
 ### ATAN
 
-**Description**
+The \`atan(x)\` function is an arc tangent function that returns an arc tangent of a value \`x\`.
 
-Usage: atan(x) calculates the arc tangent of x. atan(y, x&#41; calculates
-the arc tangent of y / x, except that the signs of both arguments are
-used to determine the quadrant of the result.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`ATAN(2)\` = ATAN(2), \`ATAN(2, 3)\` = ATAN(2, 3) | fields \`ATAN(2)\`, \`ATAN(2, 3)\`
     fetched rows / total rows = 1/1
@@ -92,17 +86,13 @@ Example:
 
 ### ATAN2
 
-**Description**
+The \`atan2(y, x)\` function is an arc tangent function that calculates the angle from a specified point to the coordinate origin as measured from the positive x-axis.
 
-Usage: atan2(y, x&#41; calculates the arc tangent of y / x, except that the
-signs of both arguments are used to determine the quadrant of the
-result.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`ATAN2(2, 3)\` = ATAN2(2, 3) | fields \`ATAN2(2, 3)\`
     fetched rows / total rows = 1/1
@@ -114,16 +104,13 @@ Example:
 
 ### CEIL
 
-**Description**
+The \`ceil(x)\` function returns the smallest integer value that is greater than or equal to the specified value.
 
-Usage: ceil(x) return the smallest integer value this is greater or
-equal to x.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`INTEGER\`
 
-Return type: INTEGER
-
-Example:
+#### Example
 
     os> source=people | eval \`CEIL(2.75)\` = CEIL(2.75) | fields \`CEIL(2.75)\`
     fetched rows / total rows = 1/1
@@ -135,15 +122,13 @@ Example:
 
 ### CONV
 
-**Description**
+The \`CONV(x, a, b)\` function converts the number \`x\` from \`a\` base to \`b\` base.
 
-Usage: CONV(x, a, b) converts the number x from a base to b base.
+**Argument type:** \`x: STRING, a: INTEGER, b: INTEGER\`
 
-Argument type: x: STRING, a: INTEGER, b: INTEGER
+**Return type:** \`STRING\`
 
-Return type: STRING
-
-Example:
+#### Example
 
     os> source=people | eval \`CONV('12', 10, 16)\` = CONV('12', 10, 16), \`CONV('2C', 16, 10)\` = CONV('2C', 16, 10), \`CONV(12, 10, 2)\` = CONV(12, 10, 2), \`CONV(1111, 2, 10)\` = CONV(1111, 2, 10) | fields \`CONV('12', 10, 16)\`, \`CONV('2C', 16, 10)\`, \`CONV(12, 10, 2)\`, \`CONV(1111, 2, 10)\`
     fetched rows / total rows = 1/1
@@ -155,15 +140,13 @@ Example:
 
 ### COS
 
-**Description**
+The \`cos(x)\` function is a cosine function, with \`x\` in radians.
 
-Usage: cos(x) calculate the cosine of x, where x is given in radians.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`COS(0)\` = COS(0) | fields \`COS(0)\`
     fetched rows / total rows = 1/1
@@ -175,16 +158,13 @@ Example:
 
 ### COT
 
-**Description**
+The \`cot(x)\` function is a cotangent function. An out-of-range error is returned if \`x\` equals \`0\`.
 
-Usage: cot(x) calculate the cotangent of x. Returns out-of-range error
-if x equals to 0.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`COT(1)\` = COT(1) | fields \`COT(1)\`
     fetched rows / total rows = 1/1
@@ -196,16 +176,13 @@ Example:
 
 ### CRC32
 
-**Description**
+The \`crc32\` function calculates the cyclic redundancy check (CRC) value of a given string as a 32-bit unsigned value. 
 
-Usage: Calculates a cyclic redundancy check value and returns a 32-bit
-unsigned value.
+**Argument type:** \`STRING\`
 
-Argument type: STRING
+**Return type:** \`LONG\`
 
-Return type: LONG
-
-Example:
+#### Example
 
     os> source=people | eval \`CRC32('MySQL')\` = CRC32('MySQL') | fields \`CRC32('MySQL')\`
     fetched rows / total rows = 1/1
@@ -217,15 +194,13 @@ Example:
 
 ### DEGREES
 
-**Description**
+The \`degrees(x)\` function converts \`x\` from radians to degrees.
 
-Usage: degrees(x) converts x from radians to degrees.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`DEGREES(1.57)\` = DEGREES(1.57) | fields \`DEGREES(1.57)\`
     fetched rows / total rows  = 1/1
@@ -237,13 +212,11 @@ Example:
 
 ### E
 
-**Description**
+The \`E()\` function returns Euler's number.
 
-Usage: E() returns the Euler's number
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`E()\` = E() | fields \`E()\`
     fetched rows / total rows = 1/1
@@ -255,15 +228,13 @@ Example:
 
 ### EXP
 
-**Description**
+The \`exp(x)\` function returns \`e\` raised to the power of \`x\`.
 
-Usage: exp(x) return e raised to the power of x.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`INTEGER\`
 
-Return type: INTEGER
-
-Example:
+#### Example
 
     os> source=people | eval \`EXP(2)\` = EXP(2) | fields \`EXP(2)\`
     fetched rows / total rows = 1/1
@@ -275,16 +246,13 @@ Example:
 
 ### FLOOR
 
-**Description**
+The \`floor(x)\` function returns the largest integer less than or equal to the specified value.
 
-Usage: floor(x) return the largest integer value this is smaller or
-equal to x.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`INTEGER\`
 
-Return type: INTEGER
-
-Example:
+#### Example
 
     os> source=people | eval \`FLOOR(2.75)\` = FLOOR(2.75) | fields \`FLOOR(2.75)\`
     fetched rows / total rows = 1/1
@@ -296,15 +264,13 @@ Example:
 
 ### LN
 
-**Description**
+The \`ln(x)\` function returns the natural logarithm of \`x\`.
 
-Usage: ln(x) return the the natural logarithm of x.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`LN(2)\` = LN(2) | fields \`LN(2)\`
     fetched rows / total rows = 1/1
@@ -316,18 +282,13 @@ Example:
 
 ### LOG
 
-**Description**
+The \`log(x)\` function returns the natural logarithm of \`x\`.
 
-Specifications:
+**Argument type: \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Usage: log(x) returns the natural logarithm of x that is the base e
-logarithm of the x. log(B, x&#41; is equivalent to log(x)/log(B).
+**Return type:** \`DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
-
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`LOG(2)\` = LOG(2), \`LOG(2, 8)\` = LOG(2, 8) | fields \`LOG(2)\`, \`LOG(2, 8)\`
     fetched rows / total rows = 1/1
@@ -339,17 +300,13 @@ Example:
 
 ### LOG2
 
-**Description**
+The \`log2(x)\` function calculates the base-2 logarithm of \`x\`.
 
-Specifications:
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Usage: log2(x) is equivalent to log(x)/log(2).
+**Return type:** \`DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
-
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`LOG2(8)\` = LOG2(8) | fields \`LOG2(8)\`
     fetched rows / total rows = 1/1
@@ -361,17 +318,13 @@ Example:
 
 ### LOG10
 
-**Description**
+The \`log10(x)\` function calculates the base-10 logarithm of \`x\`.
 
-Specifications:
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Usage: log10(x) is equivalent to log(x)/log(10).
+**Return type:** \`DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
-
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`LOG10(100)\` = LOG10(100) | fields \`LOG10(100)\`
     fetched rows / total rows = 1/1
@@ -383,16 +336,13 @@ Example:
 
 ### MOD
 
-**Description**
+The \`MOD(n, m)\` function calculates the remainder of the number \`n\` divided by \`m\`.
 
-Usage: MOD(n, m) calculates the remainder of the number n divided by m.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** If \`m\` is a nonzero value, a type greater in size between types \`n\` and \`m\` is returned. If \`m\` equals \`0\`, \`NULL\` is returned.
 
-Return type: Wider type between types of n and m if m is nonzero value.
-If m equals to 0, then returns NULL.
-
-Example:
+#### Example
 
     os> source=people | eval \`MOD(3, 2)\` = MOD(3, 2), \`MOD(3.1, 2)\` = MOD(3.1, 2) | fields \`MOD(3, 2)\`, \`MOD(3.1, 2)\`
     fetched rows / total rows = 1/1
@@ -404,13 +354,11 @@ Example:
 
 ### PI
 
-**Description**
+The \`PI()\` function returns the constant pi.
 
-Usage: PI() returns the constant pi
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`PI()\` = PI() | fields \`PI()\`
     fetched rows / total rows = 1/1
@@ -422,18 +370,15 @@ Example:
 
 ### POW
 
-**Description**
+The \`POW(x, y)\` function calculates the value of \`x\` raised to the power of \`y\`. Bad inputs return \`NULL\` results.
 
-Usage: POW(x, y) calculates the value of x raised to the power of y. Bad
-inputs return NULL result.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
+**Synonyms:** \`[POWER](#power)\`
 
-Synonyms: [POWER](#power)
-
-Example:
+#### Example
 
     os> source=people | eval \`POW(3, 2)\` = POW(3, 2), \`POW(-3, 2)\` = POW(-3, 2), \`POW(3, -2)\` = POW(3, -2) | fields \`POW(3, 2)\`, \`POW(-3, 2)\`, \`POW(3, -2)\`
     fetched rows / total rows = 1/1
@@ -445,18 +390,15 @@ Example:
 
 ### POWER
 
-**Description**
+The \`POWER(x, y)\` function calculates the value of \`x\` raised to the power of \`y\`. Bad inputs return \`NULL\` results.
 
-Usage: POWER(x, y) calculates the value of x raised to the power of y.
-Bad inputs return NULL result.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
+**Synonyms:** \`[POW](#pow)\`
 
-Synonyms: [POW](#pow)
-
-Example:
+#### Example
 
     os> source=people | eval \`POWER(3, 2)\` = POWER(3, 2), \`POWER(-3, 2)\` = POWER(-3, 2), \`POWER(3, -2)\` = POWER(3, -2) | fields \`POWER(3, 2)\`, \`POWER(-3, 2)\`, \`POWER(3, -2)\`
     fetched rows / total rows = 1/1
@@ -468,15 +410,13 @@ Example:
 
 ### RADIANS
 
-**Description**
+The \`radians(x)\` function converts \`x\` from degrees to radians.
 
-Usage: radians(x) converts x from degrees to radians.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`RADIANS(90)\` = RADIANS(90) | fields \`RADIANS(90)\`
     fetched rows / total rows  = 1/1
@@ -488,19 +428,13 @@ Example:
 
 ### RAND
 
-**Description**
+The \`RAND()/RAND(N)\` function returns a random floating-point value in the range \`0 &lt;= value &lt; 1.0\`. If integer \`N\` is specified, the seed is initialized prior to execution. One implication of this behavior is that with identical argument \`N\`, \`rand(N)\` returns the same value each time and thus produces a repeatable sequence of column values.
 
-Usage: RAND()/RAND(N) returns a random floating-point value in the range
-0 &lt;= value &lt; 1.0. If integer N is specified, the seed is
-initialized prior to execution. One implication of this behavior is with
-identical argument N, rand(N) returns the same value each time, and thus
-produces a repeatable sequence of column values.
+**Argument type:** \`INTEGER\`
 
-Argument type: INTEGER
+**Return type:** \`FLOAT\`
 
-Return type: FLOAT
-
-Example:
+#### Example
 
     os> source=people | eval \`RAND(3)\` = RAND(3) | fields \`RAND(3)\`
     fetched rows / total rows = 1/1
@@ -512,19 +446,13 @@ Example:
 
 ### ROUND
 
-**Description**
+The \`ROUND(x, d)\` function rounds the argument \`x\` to \`d\` decimal places. \`d\` defaults to \`0\` if a value is not specified.
 
-Usage: ROUND(x, d) rounds the argument x to d decimal places, d defaults
-to 0 if not specified
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`(INTEGER/LONG \[,INTEGER\]) -&gt; LONG (FLOAT/DOUBLE \[,INTEGER\]) -&gt;LONG\`
 
-Return type map:
-
-(INTEGER/LONG \[,INTEGER\]) -&gt; LONG (FLOAT/DOUBLE \[,INTEGER\]) -&gt;
-LONG
-
-Example:
+#### Example
 
     os> source=people | eval \`ROUND(12.34)\` = ROUND(12.34), \`ROUND(12.34, 1)\` = ROUND(12.34, 1), \`ROUND(12.34, -1)\` = ROUND(12.34, -1), \`ROUND(12, 1)\` = ROUND(12, 1) | fields \`ROUND(12.34)\`, \`ROUND(12.34, 1)\`, \`ROUND(12.34, -1)\`, \`ROUND(12, 1)\`
     fetched rows / total rows = 1/1
@@ -536,16 +464,13 @@ Example:
 
 ### SIGN
 
-**Description**
+The \`sign\` function returns the sign of the argument as -1, 0, or 1, depending on whether the number is negative, zero, or positive.
 
-Usage: Returns the sign of the argument as -1, 0, or 1, depending on
-whether the number is negative, zero, or positive
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`INTEGER\`
 
-Return type: INTEGER
-
-Example:
+#### Example
 
     os> source=people | eval \`SIGN(1)\` = SIGN(1), \`SIGN(0)\` = SIGN(0), \`SIGN(-1.1)\` = SIGN(-1.1) | fields \`SIGN(1)\`, \`SIGN(0)\`, \`SIGN(-1.1)\`
     fetched rows / total rows = 1/1
@@ -557,15 +482,13 @@ Example:
 
 ### SIN
 
-**Description**
+The \`sin(x)\` function is a sine function, with \`x\` in radians.
 
-Usage: sin(x) calculate the sine of x, where x is given in radians.
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** \`DOUBLE\`
 
-Return type: DOUBLE
-
-Example:
+#### Example
 
     os> source=people | eval \`SIN(0)\` = SIN(0) | fields \`SIN(0)\`
     fetched rows / total rows = 1/1
@@ -577,18 +500,13 @@ Example:
 
 ### SQRT
 
-**Description**
+The \`sqrt\` function calculates the square root of a non-negative value \`x\`.
 
-Usage: Calculates the square root of a non-negative number
+**Argument type:** \`INTEGER/LONG/FLOAT/DOUBLE\`
 
-Argument type: INTEGER/LONG/FLOAT/DOUBLE
+**Return type:** (Non-negative) \`INTEGER/LONG/FLOAT/DOUBLE -&gt; DOUBLE\` (Negative) \`INTEGER/LONG/FLOAT/DOUBLE -&gt; NULL\`
 
-Return type map:
-
-(Non-negative) INTEGER/LONG/FLOAT/DOUBLE -&gt; DOUBLE (Negative)
-INTEGER/LONG/FLOAT/DOUBLE -&gt; NULL
-
-Example:
+#### Example
 
     os> source=people | eval \`SQRT(4)\` = SQRT(4), \`SQRT(4.41)\` = SQRT(4.41) | fields \`SQRT(4)\`, \`SQRT(4.41)\`
     fetched rows / total rows = 1/1

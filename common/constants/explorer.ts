@@ -9,7 +9,7 @@ import { VIS_CHART_TYPES } from './shared';
 
 // URLs
 export const EVENT_ANALYTICS_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/observability-plugin/event-analytics/';
+  'https://opensearch.org/docs/latest/observing-your-data/event-analytics/';
 export const OPEN_TELEMETRY_LOG_CORRELATION_LINK =
   'https://opentelemetry.io/docs/reference/specification/logs/overview/#log-correlation';
 export const LOG_EXPLORER_BASE_PATH = 'observability-logs#/explorer/';
@@ -18,6 +18,7 @@ export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
 export const INDEX = 'index';
+export const OLLY_QUERY_ASSISTANT = 'ollyQueryAssistant';
 export const SELECTED_PATTERN_FIELD = 'selectedPatternField';
 export const PATTERN_REGEX = 'patternRegex';
 export const FILTERED_PATTERN = 'filteredPattern';

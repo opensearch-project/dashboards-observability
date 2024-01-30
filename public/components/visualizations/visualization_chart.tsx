@@ -5,13 +5,10 @@
 
 import React, { useMemo } from 'react';
 
-interface IVisualizationChart {}
-
-export const VisualizationChart = ({ visualizations }: IVisualizationChart) => {
+export const VisualizationChart = ({ visualizations }) => {
   const { vis } = visualizations;
   const { layout = {}, config = {} } = visualizations?.data?.userConfigs;
   const Visualization = visualizations?.vis?.component;
-
   const finalFigureConfig = useMemo(() => {
     return {
       ...vis.visconfig?.config,
@@ -29,7 +26,7 @@ export const VisualizationChart = ({ visualizations }: IVisualizationChart) => {
   return (
     <Visualization
       visualizations={visualizations}
-      layout={finalFigureLayout}
+      layout={finalFigureLayout()}
       config={finalFigureConfig}
     />
   );

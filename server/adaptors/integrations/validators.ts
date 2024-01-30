@@ -12,6 +12,7 @@ const staticAsset: JSONSchemaType<StaticAsset> = {
   properties: {
     path: { type: 'string' },
     annotation: { type: 'string', nullable: true },
+    data: { type: 'string', nullable: true },
   },
   required: ['path'],
   additionalProperties: false,
@@ -48,6 +49,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
         properties: {
           name: { type: 'string' },
           version: { type: 'string' },
+          data: { type: 'string', nullable: true },
         },
         required: ['name', 'version'],
       },
@@ -60,6 +62,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
           properties: {
             name: { type: 'string' },
             version: { type: 'string' },
+            data: { type: 'string', nullable: true },
           },
           required: ['name', 'version'],
           nullable: true,
@@ -73,6 +76,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
               name: { type: 'string' },
               version: { type: 'string' },
               language: { type: 'string' },
+              data: { type: 'string', nullable: true },
             },
             required: ['name', 'version', 'language'],
           },
@@ -84,9 +88,8 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     sampleData: {
       type: 'object',
       properties: {
-        path: {
-          type: 'string',
-        },
+        path: { type: 'string' },
+        data: { type: 'string', nullable: true },
       },
       required: ['path'],
       additionalProperties: false,
