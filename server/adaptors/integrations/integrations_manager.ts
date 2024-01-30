@@ -3,13 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'path';
 import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { TemplateManager } from './repository/repository';
-import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
 import { IndexDataAdaptor } from './repository/index_data_adaptor';
 
 export class IntegrationsManager implements IntegrationsAdaptor {
@@ -19,12 +17,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
 
   constructor(client: SavedObjectsClientContract, repository?: TemplateManager) {
     this.client = client;
-    this.repository =
-      repository ??
-      new TemplateManager([
-        new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository')),
-        new IndexDataAdaptor(this.client),
-      ]);
+    this.repository = repository ?? new TemplateManager([new IndexDataAdaptor(this.client)]);
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
