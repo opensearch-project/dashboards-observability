@@ -4,48 +4,105 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiSpacer,
+  EuiText,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
+import { useSelector } from 'react-redux';
+import { coreRefs } from '../../../framework/core_refs';
+import { selectQueries } from '../redux/slices/query_slice';
 
-export const NoResults = () => {
+export const NoResults = ({ tabId }: any) => {
+  // get the queries isLoaded, if it exists AND is true = show no res
+  const queryInfo = useSelector(selectQueries)[tabId];
+
   return (
-    <I18nProvider>
-      <>
-        <EuiSpacer size="xl" />
-
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false} className="dscNoResults">
+    <EuiPage paddingSize="s">
+      {coreRefs.queryAssistEnabled ? (
+        <>
+          {/* check to see if the rawQuery is empty or not */}
+          {queryInfo?.rawQuery ? (
+            <EuiFlexGroup justifyContent="center" direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                      defaultMessage="No results match your search criteria"
+                    />
+                  }
+                  color="warning"
+                  iconType="help"
+                  data-test-subj="observabilityNoResultsCallout"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiEmptyPrompt
+                  iconType={'editorCodeBlock'}
+                  title={<h2>No results</h2>}
+                  body={
+                    <p>
+                      Try selecting a different data source, expanding your time range or modifying
+                      the query & filters. You may also use the Query Assistant to fine-tune your
+                      query using simple conversational prompts.
+                    </p>
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiEmptyPrompt
+              iconType={'editorCodeBlock'}
+              title={<h2>Get started</h2>}
+              body={
+                <p>
+                  Run a query to view results, or use the Query Assistant to automatically generate
+                  complex queries using simple conversational prompts.
+                </p>
+              }
+            />
+          )}
+        </>
+      ) : (
+        <EuiFlexGroup justifyContent="center" direction="column">
+          <EuiFlexItem grow={false}>
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                  id="observability.noResults.noResultsMatchSearchCriteriaTitle"
                   defaultMessage="No results match your search criteria"
                 />
               }
               color="warning"
               iconType="help"
-              data-test-subj="discoverNoResults"
+              data-test-subj="observabilityNoResultsCallout"
             />
-            <>
-              <EuiSpacer size="xl" />
-              <EuiText>
-                <h2 data-test-subj="discoverNoResultsTimefilter">
-                  <FormattedMessage
-                    id="discover.noResults.expandYourTimeRangeTitle"
-                    defaultMessage="Expand your time range or modify your query"
-                  />
-                </h2>
-                <p>
-                  <FormattedMessage
-                    id="discover.noResults.queryMayNotMatchTitle"
-                    defaultMessage="Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. Try change time range, query filters or choose different time fields"
-                  />
-                </p>
-              </EuiText>
-            </>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <h2 data-test-subj="obsNoResultsTimefilter">
+                <FormattedMessage
+                  id="observability.noResults.expandYourTimeRangeTitle"
+                  defaultMessage="Select a data source, expand your time range, or modify the query"
+                />
+              </h2>
+              <p>
+                <FormattedMessage
+                  id="observability.noResults.queryMayNotMatchTitle"
+                  defaultMessage="After selection, check the time range, query filters, fields, and query"
+                />
+              </p>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
-    </I18nProvider>
+      )}
+    </EuiPage>
   );
 };

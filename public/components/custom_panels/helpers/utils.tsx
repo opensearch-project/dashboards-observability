@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { castArray, forEach, isEmpty } from 'lodash';
+import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
-import { CoreStart } from '../../../../../../src/core/public';
 import {
-  PPL_DATE_FORMAT,
+  OBSERVABILITY_BASE,
+  OTEL_METRIC_SUBTYPE,
   PPL_INDEX_REGEX,
+  PPL_METRIC_SUBTYPE,
   PPL_WHERE_CLAUSE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
@@ -23,7 +23,7 @@ import {
   VizContainerError,
 } from '../../../../common/types/custom_panels';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { removeBacktick } from '../../../../common/utils';
+import { removeBacktick, getOSDHttp } from '../../../../common/utils';
 import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
 import PPLService from '../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
@@ -31,46 +31,34 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
+import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
+import { INDEX_DOCUMENT_NAME_PATTERN } from '../../../../common/constants/metrics';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
  *
- * isNameValid - Validates string to length > 0 and < 50
- * convertDateTime - Converts input datetime string to required format
- * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
- * getQueryResponse - Get response of PPL query to load visualizations
- * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse
- * onTimeChange - Function to store recently used time filters and set start and end time.
- * isDateValid - Function to check date validity
- * isPPLFilterValid - Validate if the panel PPL query doesn't contain any Index/Time/Field filters
+ * checkIndexExists - Function to test if query string includes an index
+ * checkWhereClauseExists - Function to test if query string includes where clause
+ * createCatalogVisualizationMetaData - create Visualization metaData from visualization, query details
  * displayVisualization - Function to render the visualzation based of its type
+ * fetchVisualizationById - Fetch visualization from SavedObject store by id
+ * getQueryResponse - Get response of PPL query to load visualizations
+ * isDateValid - Function to check date validity
+ * isNameValid - Validates string to length > 0 and < 50
+ * isPPLFilterValid - Validate if the panel PPL query doesn't contain any Index/Time/Field filters
+ * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
+ * onTimeChange - Function to store recently used time filters and set start and end time.
+ * parseSavedVisualizations - Transform SavedObject visualization into mapped record object
+ * prepareMetricsData - Create visualization schema metadata from jsonData scheama list
+ * prependRecentlyUsedRange - Maintain MRU list of datePicker selected ranges
+ * processMetricsData - validate and transform jsonData schema into visualization schema metadata
+ * renderCatalogVisualization - Query OS for visualization Data from PromQL metric schema
+ * renderSavedVisualization - Query OS for visualization Data from PPL metric schema
  */
 
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
   return !(name.length >= 50 || name.length === 0);
-};
-
-// DateTime convertor to required format
-export const convertDateTime = (
-  datetime: string,
-  isStart = true,
-  formatted = true,
-  isMetrics: boolean = false
-) => {
-  let returnTime: undefined | Moment;
-  if (isStart) {
-    returnTime = dateMath.parse(datetime);
-  } else {
-    returnTime = dateMath.parse(datetime, { roundUp: true });
-  }
-  if (isMetrics) {
-    const myDate = new Date(returnTime._d); // Your timezone!
-    const epochTime = myDate.getTime() / 1000.0;
-    return Math.round(epochTime);
-  }
-  if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
-  return returnTime;
 };
 
 // Merges new layout into visualizations
@@ -104,14 +92,15 @@ export const mergeLayoutAndVisualizations = (
  * Updates the span command interval
  * Returns -> source = opensearch_dashboards_sample_data_logs | stats avg(bytes) by span(timestamp,1M)
  */
-export const updateQuerySpanInterval = (
+const updateQuerySpanInterval = (
   query: string,
   timestampField: string,
-  spanParam: string
+  span: number | string = '1',
+  resolution: string = 'h'
 ) => {
   return query.replace(
     new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`),
-    `span(${timestampField},${spanParam})`
+    `span(${timestampField},${span}${resolution})`
   );
 };
 
@@ -145,38 +134,8 @@ const queryAccumulator = (
   return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
 };
 
-// PPL Service requestor
-const pplServiceRequestor = async (
-  pplService: PPLService,
-  finalQuery: string,
-  type: string,
-  setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
-  await pplService
-    .fetch({ query: finalQuery, format: 'jdbc' })
-    .then((res) => {
-      if (res === undefined)
-        setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
-      setVisualizationData(res);
-    })
-    .catch((error: Error) => {
-      const errorMessage = JSON.parse(error.body.message);
-      setIsError({
-        errorMessage: errorMessage.error.reason || 'Issue in fetching visualization',
-        errorDetails: errorMessage.error.details,
-      });
-      console.error(error.body);
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-};
-
 // Fetched Saved Visualization By Id
 export const fetchVisualizationById = async (
-  http: CoreStart['http'],
   savedVisualizationId: string,
   setIsError: (error: VizContainerError) => void
 ) => {
@@ -202,63 +161,59 @@ export const fetchVisualizationById = async (
 };
 
 // Get PPL Query Response
-export const getQueryResponse = (
+export const getQueryResponse = async (
   pplService: PPLService,
   query: string,
   type: string,
   startTime: string,
   endTime: string,
-  setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   filterQuery = '',
   timestampField = 'timestamp',
   metricVisualization = false
 ) => {
-  setIsLoading(true);
-  setIsError({} as VizContainerError);
+  const finalQuery = metricVisualization
+    ? query
+    : queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
 
-  let finalQuery = '';
-  try {
-    if (!metricVisualization) {
-      finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
-    } else {
-      finalQuery = query;
-    }
-  } catch (error) {
-    const errorMessage = 'Issue in building final query';
-    setIsError({ errorMessage });
-    console.error(errorMessage, error);
-    setIsLoading(false);
-    return;
-  }
+  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' });
 
-  pplServiceRequestor(pplService, finalQuery, type, setVisualizationData, setIsLoading, setIsError);
+  if (res === undefined) throw new Error('Please check the validity of PPL Filter');
+
+  return res;
 };
 
 // Fetches savedVisualization by Id and runs getQueryResponse
-export const renderSavedVisualization = async (
-  http: CoreStart['http'],
-  pplService: PPLService,
-  savedVisualizationId: string,
-  startTime: string,
-  endTime: string,
-  filterQuery: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
+export const renderSavedVisualization = async ({
+  pplService,
+  startTime,
+  endTime,
+  filterQuery,
+  span = '1',
+  resolution = 'h',
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+}: {
+  pplService: PPLService;
+  startTime: string;
+  endTime: string;
+  filterQuery: string;
+  span?: number | string;
+  resolution?: string;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: SavedVisualizationType;
+}) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
-
-  let visualization: SavedVisualizationType = {};
-  let updatedVisualizationQuery = '';
-
-  visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
 
   if (_.isEmpty(visualization)) {
     setIsLoading(false);
@@ -273,120 +228,117 @@ export const renderSavedVisualization = async (
     setVisualizationType(visualization.type);
   }
 
-  if (spanParam !== undefined) {
-    updatedVisualizationQuery = updateQuerySpanInterval(
-      visualization.query,
-      visualization.timeField,
-      spanParam
-    );
-  } else {
-    updatedVisualizationQuery = visualization.query;
-  }
+  const updatedVisualizationQuery =
+    span !== undefined
+      ? updateQuerySpanInterval(visualization.query, visualization.timeField, span, resolution)
+      : visualization.query;
 
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
-  getQueryResponse(
-    pplService,
-    updatedVisualizationQuery,
-    visualization.type,
-    startTime,
-    endTime,
-    setVisualizationData,
-    setIsLoading,
-    setIsError,
-    filterQuery,
-    visualization.timeField
-  );
+  try {
+    const queryData = await getQueryResponse(
+      pplService,
+      updatedVisualizationQuery,
+      visualization.type,
+      startTime,
+      endTime,
+      filterQuery,
+      visualization.timeField
+    );
+    setVisualizationData(queryData);
+  } catch (error) {
+    setIsError({ error });
+  }
+  setIsLoading(false);
 };
 
-const createCatalogVisualizationMetaData = (
-  catalogSource: string,
-  visualizationQuery: string,
-  visualizationType: string,
-  visualizationTimeField: string
-) => {
+const dynamicLayoutFromQueryData = (queryData) => {
+  const labelCount = queryData.jsonData.length;
+  const legendLines = min([labelCount, 10]);
+
+  const height = 230 + legendLines * 30;
+  const y = -0.35 + -0.15 * legendLines;
+  return {
+    height,
+    legend: { orientation: 'h', x: 0, y },
+  };
+};
+
+const createCatalogVisualizationMetaData = ({
+  catalogSource,
+  query,
+  type,
+  subType,
+  metricType,
+  timeField,
+  queryData,
+}: {
+  catalogSource: string;
+  query: string;
+  type: string;
+  subType: string;
+  metricType: string;
+  timeField: string;
+  queryData: object;
+}) => {
   return {
     name: catalogSource,
     description: '',
-    query: visualizationQuery,
-    type: visualizationType,
+    query,
+    type,
+    subType,
+    metricType,
     selected_date_range: {
       start: 'now/y',
       end: 'now',
       text: '',
     },
     selected_timestamp: {
-      name: visualizationTimeField,
+      name: timeField,
       type: 'timestamp',
     },
     selected_fields: {
       text: '',
       tokens: [],
     },
+    userConfigs: {
+      layout: dynamicLayoutFromQueryData(queryData),
+    },
   };
-};
-
-const updateCatalogVisualizationQuery = ({
-  catalogSourceName,
-  catalogTableName,
-  aggregation,
-  attributesGroupBy,
-  startTime,
-  endTime,
-  spanParam,
-}: {
-  catalogSourceName: string;
-  catalogTableName: string;
-  aggregation: string;
-  attributesGroupBy: string[];
-  startTime: string;
-  endTime: string;
-  spanParam: string | undefined;
-}) => {
-  const attributesGroupString = attributesGroupBy.toString();
-  const startEpochTime = convertDateTime(startTime, true, false, true);
-  const endEpochTime = convertDateTime(endTime, false, false, true);
-  const promQuery =
-    attributesGroupBy.length === 0
-      ? catalogTableName
-      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
-
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
-  http,
   pplService,
   catalogSource,
   startTime,
   endTime,
   filterQuery,
-  spanParam,
+  span,
+  resolution,
   setVisualizationTitle,
   setVisualizationType,
   setVisualizationData,
   setVisualizationMetaData,
   setIsLoading,
   setIsError,
-  spanResolution,
-  queryMetaData,
+  visualization,
 }: {
-  http: CoreStart['http'];
   pplService: PPLService;
   catalogSource: string;
   startTime: string;
   endTime: string;
   filterQuery: string;
-  spanParam: string | undefined;
+  span?: number | string;
+  resolution?: string;
   setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
-  spanResolution?: string;
   queryMetaData?: MetricType;
+  visualization: SavedVisualizationType;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -394,55 +346,222 @@ export const renderCatalogVisualization = async ({
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
 
-  const catalogSourceName = catalogSource.split('.')[0];
-  const catalogTableName = catalogSource.split('.')[1];
-
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  const attributes: string[] = [];
-
   const visualizationQuery = updateCatalogVisualizationQuery({
-    catalogSourceName,
-    catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
-    startTime,
-    endTime,
-    spanParam,
+    ...visualization.queryMetaData,
+    start: startTime,
+    end: endTime,
+    span,
+    resolution,
   });
 
-  const visualizationMetaData = createCatalogVisualizationMetaData(
-    catalogSource,
-    visualizationQuery,
-    visualizationType,
-    visualizationTimeField
-  );
-
-  visualizationMetaData.user_configs = {
-    layoutConfig: {
-      height: 390,
-      margin: { t: 5 },
-      legend: { orientation: 'h', yanchor: 'top', x: 0.0, y: -0.4 },
-    },
-  };
-
-  setVisualizationTitle(catalogSource);
+  setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
+  try {
+    const queryData = await getQueryResponse(
+      pplService,
+      visualizationQuery,
+      visualizationType,
+      startTime,
+      endTime,
+      filterQuery,
+      visualizationTimeField,
+      true
+    );
+    setVisualizationData(queryData);
 
-  getQueryResponse(
-    pplService,
-    visualizationQuery,
+    const visualizationMetaData = createCatalogVisualizationMetaData({
+      catalogSource,
+      query: visualizationQuery,
+      type: visualizationType,
+      subType: visualization.subType,
+      metricType: visualization.metricType,
+      timeField: visualizationTimeField,
+      queryData,
+    });
+
+    setVisualizationMetaData(visualizationMetaData);
+  } catch (error) {
+    setIsError({ error });
+  }
+
+  setIsLoading(false);
+};
+
+const createOtelVisualizationMetaData = (
+  documentName: string,
+  visualizationType: string,
+  startTime: string,
+  endTime: string,
+  queryData: object
+) => {
+  return {
+    name: documentName,
+    description: '',
+    query: '',
+    type: visualizationType,
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: OTEL_METRIC_SUBTYPE,
+    selected_date_range: {
+      start: startTime,
+      end: endTime,
+      text: '',
+    },
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+    userConfigs: {
+      layout: dynamicLayoutFromQueryData(queryData),
+    },
+  };
+};
+
+export const fetchAggregatedBinCount = async (
+  minimumBound: string,
+  maximumBound: string,
+  startTime: string,
+  endTime: string,
+  documentName: string,
+  selectedOtelIndex: string,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
+      body: JSON.stringify({
+        min: minimumBound,
+        max: maximumBound,
+        startTime,
+        endTime,
+        documentName,
+        index: selectedOtelIndex,
+      }),
+    });
+    return response;
+  } catch (error) {
+    const errorMessage = JSON.parse(error.body.message);
+    setIsError({
+      errorMessage: errorMessage.error.reason || 'Issue in fetching bucket count',
+      errorDetails: errorMessage.error.details,
+    });
+    console.error(error.body);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+export const fetchSampleOTDocument = async (selectedOtelIndex: string, documentName: string) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.get(
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/${documentName}`
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
+  const match = metricString.match(INDEX_DOCUMENT_NAME_PATTERN);
+
+  if (match) {
+    const index = match[1];
+    const documentName = match[2];
+    return [index, documentName];
+  } else {
+    return null;
+  }
+};
+
+export const renderOpenTelemetryVisualization = async ({
+  startTime,
+  endTime,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+  setToast,
+}: {
+  startTime: string;
+  endTime: string;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: any;
+  setToast: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
+}) => {
+  setIsLoading(true);
+  setIsError({} as VizContainerError);
+
+  const visualizationType = 'bar';
+  let index = visualization?.index;
+  let documentName = visualization?.name;
+
+  if (index === undefined) {
+    const indexAndDocumentName = extractIndexAndDocumentName(visualization.name);
+    index = indexAndDocumentName[0];
+    documentName = indexAndDocumentName[1];
+    if (documentName === undefined)
+      setToast('Document name is undefined', 'danger', undefined, 'right');
+  }
+
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName);
+  const source = fetchSampleDocument.hits[0]._source;
+
+  setVisualizationType(visualizationType);
+  setVisualizationTitle(source.name);
+
+  const dataBinsPromises = source.buckets.map(async (bucket: any) => {
+    try {
+      const formattedStartTime = convertDateTime(startTime, false, false, OTEL_METRIC_SUBTYPE);
+      const formattedEndTime = convertDateTime(endTime, false, false, OTEL_METRIC_SUBTYPE);
+      const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+        bucket.min.toString(),
+        bucket.max.toString(),
+        formattedStartTime,
+        formattedEndTime,
+        documentName,
+        index,
+        setIsError,
+        setIsLoading
+      );
+
+      return {
+        xAxis: bucket.min + ' - ' + bucket.max,
+        'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+      };
+    } catch (error) {
+      console.error('Error processing bucket:', error);
+      return null;
+    }
+  });
+  const jsonData = await Promise.all(dataBinsPromises);
+  const formatedJsonData = { jsonData };
+
+  const visualizationMetaData = createOtelVisualizationMetaData(
+    documentName,
     visualizationType,
     startTime,
     endTime,
-    setVisualizationData,
-    setIsLoading,
-    setIsError,
-    filterQuery,
-    visualizationTimeField,
-    true
+    formatedJsonData
   );
+  setVisualizationData(formatedJsonData);
+  setVisualizationMetaData(visualizationMetaData);
 };
 
 // Function to store recently used time filters and set start and end time.
@@ -474,9 +593,12 @@ export const parseSavedVisualizations = (
     timeField: visualization.savedVisualization.selected_timestamp.name,
     selected_date_range: visualization.savedVisualization.selected_date_range,
     selected_fields: visualization.savedVisualization.selected_fields,
-    user_configs: visualization.savedVisualization.user_configs || {},
-    sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
-      ? visualization.savedVisualization.sub_type
+    userConfigs: visualization.savedVisualization.userConfigs || {},
+    subType: visualization.savedVisualization.hasOwnProperty('subType')
+      ? visualization.savedVisualization.subType
+      : '',
+    metricType: visualization.savedVisualization.hasOwnProperty('metricType')
+      ? visualization.savedVisualization.metricType
       : '',
     units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
       ? visualization.savedVisualization.units_of_measure
@@ -537,18 +659,18 @@ export const isPPLFilterValid = (
   return true;
 };
 
-export const processMetricsData = (schema: any, dataConfig: any) => {
+export const processMetricsData = (schema: any) => {
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
     schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
-    return prepareMetricsData(schema, dataConfig);
+    return prepareMetricsData(schema);
   }
   return {};
 };
 
-export const prepareMetricsData = (schema: any, dataConfig: any) => {
+export const prepareMetricsData = (schema: any) => {
   const metricBreakdown: any[] = [];
   const metricSeries: any[] = [];
   const metricDimension: any[] = [];
@@ -568,13 +690,27 @@ export const prepareMetricsData = (schema: any, dataConfig: any) => {
   };
 };
 
+export const constructOtelMetricsMetaData = () => {
+  const otelMetricSeries: any[] = [];
+  const otelMetricDimension: any[] = [];
+
+  otelMetricDimension.push({ name: 'xAxis', label: 'xAxis', customLabel: '' });
+  otelMetricSeries.push({ name: '', label: '', aggregation: 'count', customLabel: '' });
+
+  return {
+    series: otelMetricSeries,
+    dimensions: otelMetricDimension,
+    span: {},
+  };
+};
+
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
 
-  const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
+  const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
@@ -597,17 +733,22 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   };
 
   // add metric specific overriding
-  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
+  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema) };
+
+  // add otel metric specific overriding
+  if (metaData?.metricType === OTEL_METRIC_SUBTYPE) {
+    finalDataConfig = { ...finalDataConfig, ...constructOtelMetricsMetaData() };
+  }
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(metaData.user_configs?.availabilityConfig || {}),
+      ...(metaData.userConfigs?.availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
     },
-    layoutConfig: {
-      ...(metaData.user_configs?.layoutConfig || {}),
+    layout: {
+      ...(metaData.userConfigs?.layout || {}),
     },
   };
 

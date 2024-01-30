@@ -25,17 +25,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { batch, connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
-import {
-  EVENT_ANALYTICS_DOCUMENTATION_URL,
-  NEW_TAB,
-  RAW_QUERY,
-  SELECTED_DATE_RANGE,
-  TAB_CREATED_TYPE,
-} from '../../../../common/constants/explorer';
+import { EVENT_ANALYTICS_DOCUMENTATION_URL } from '../../../../common/constants/explorer';
 import {
   EVENT_ANALYTICS,
   OBSERVABILITY_BASE,
@@ -51,11 +45,9 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedObject } from '../../../services/saved_objects/saved_object_client/types';
 import { getSampleDataModal } from '../../common/helpers/add_sample_modal';
 import { DeleteModal } from '../../common/helpers/delete_modal';
-import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
-import { Search } from '../../common/search/search';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
-import { changeQuery, selectQueries } from '../redux/slices/query_slice';
-import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
+import { selectQueries } from '../redux/slices/query_slice';
+import { selectQueryTabs } from '../redux/slices/query_tab_slice';
 import { SavedQueryTable } from './saved_objects_table';
 
 interface IHomeProps {
@@ -76,20 +68,9 @@ interface IHomeProps {
 }
 
 const EventAnalyticsHome = (props: IHomeProps) => {
-  const {
-    pplService,
-    dslService,
-    setToast,
-    getExistingEmptyTab,
-    http,
-    queries,
-    explorerData,
-    tabsState,
-  } = props;
+  const { setToast, http } = props;
   const history = useHistory();
-  const dispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedDateRange, setSelectedDateRange] = useState<string[]>(['now-15m', 'now']);
+  const [selectedDateRange, _setSelectedDateRange] = useState<string[]>(['now-40y', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -143,40 +124,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   useEffect(() => {
     fetchHistories();
   }, []);
-
-  const dispatchInitialData = (tabId: string) => {
-    batch(() => {
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: searchQuery,
-            [SELECTED_DATE_RANGE]: selectedDateRangeRef.current,
-            [TAB_CREATED_TYPE]: NEW_TAB,
-          },
-        })
-      );
-      dispatch(setSelectedQueryTab({ tabId }));
-    });
-  };
-
-  const handleQuerySearch = async () => {
-    const emptyTabId = getExistingEmptyTab({
-      tabIds: tabsState.queryTabIds,
-      queries,
-      explorerData,
-    });
-
-    // update this new tab with data
-    await dispatchInitialData(emptyTabId);
-
-    // redirect to explorer
-    history.push('/explorer');
-  };
-
-  const handleQueryChange = async (query: string) => setSearchQuery(query);
-
-  const handleTimePickerChange = async (timeRange: string[]) => setSelectedDateRange(timeRange);
 
   const addSampledata = async () => {
     setModalLayout(
@@ -283,16 +230,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       Delete
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      key="redirect"
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        history.push(`/explorer`);
-      }}
-      data-test-subj="eventHomeAction__explorer"
-    >
-      Event Explorer
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
       key="addSample"
       onClick={() => {
         setIsActionsPopoverOpen(false);
@@ -315,31 +252,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
-          <EuiPageContent className="event-home">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <Search
-                  query={queries[RAW_QUERY]}
-                  tempQuery={searchQuery}
-                  handleQueryChange={handleQueryChange}
-                  handleQuerySearch={handleQuerySearch}
-                  handleTimePickerChange={handleTimePickerChange}
-                  handleTimeRangePickerRefresh={handleQuerySearch}
-                  pplService={pplService}
-                  dslService={dslService}
-                  startTime={selectedDateRange[0]}
-                  endTime={selectedDateRange[1]}
-                  setStartTime={() => {}}
-                  setEndTime={() => {}}
-                  showSaveButton={false}
-                  runButtonText="New Query"
-                  getSuggestions={parseGetSuggestions}
-                  onItemSelect={onItemSelect}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </EuiPageContent>
           <EuiSpacer size="m" />
           <EuiPageContent className="event-home">
             <EuiPageContentHeader>
@@ -371,6 +283,19 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                     >
                       <EuiContextMenuPanel items={popoverItems} />
                     </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      key="redirect"
+                      onClick={() => {
+                        setIsActionsPopoverOpen(false);
+                        history.push(`/explorer`);
+                      }}
+                      data-test-subj="eventHomeAction__explorer"
+                      fill
+                    >
+                      Event Explorer
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>

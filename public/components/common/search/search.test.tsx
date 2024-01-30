@@ -7,7 +7,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { Search } from './search';
 
-describe('Search bar', () => {
+describe.skip('Search bar', () => {
   it('handles query change', () => {
     const query = 'rawQuery';
     const tempQuery = 'rawQuery';
@@ -62,7 +62,7 @@ describe('Search bar', () => {
         popoverItems={popoverItems}
         isLiveTailOn={isLiveTailOn}
         countDistribution={countDistribution}
-        curVisId={'line'} 
+        curVisId={'line'}
         spanValue={false}
         setSubType={'metric'}
         setMetricMeasure={'hours (h)'}

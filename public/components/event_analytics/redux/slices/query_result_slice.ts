@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice, createSelector } from '@reduxjs/toolkit';
-import { fetchSuccess as fetchSuccessReducer } from '../reducers';
-import { initialTabId } from '../../../../framework/redux/store/shared_state';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { REDUX_EXPL_SLICE_QUERY_RESULT } from '../../../../../common/constants/explorer';
+import { initialTabId } from '../../../../framework/redux/store/shared_state';
+import {
+  fetchFailure as fetchFailureReducer,
+  fetchSuccess as fetchSuccessReducer,
+} from '../reducers';
 
 const initialState = {
   [initialTabId]: {},
@@ -17,6 +20,7 @@ export const queryResultSlice = createSlice({
   initialState,
   reducers: {
     fetchSuccess: fetchSuccessReducer,
+    fetchFailure: fetchFailureReducer,
     reset: (state, { payload }) => {
       state[payload.tabId] = {};
     },
@@ -29,7 +33,7 @@ export const queryResultSlice = createSlice({
   },
 });
 
-export const { fetchSuccess, remove, reset, init } = queryResultSlice.actions;
+export const { fetchSuccess, fetchFailure, remove, reset, init } = queryResultSlice.actions;
 
 export const selectQueryResult = createSelector(
   (state) => state.queryResults,

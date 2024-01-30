@@ -3,25 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef } from 'react';
-import { batch } from 'react-redux';
 import { isEmpty } from 'lodash';
-import { useDispatch, useSelector } from 'react-redux';
-import { IField } from 'common/types/explorer';
+import { useRef, useState } from 'react';
+import { batch, useDispatch, useSelector } from 'react-redux';
 import {
+  AVAILABLE_FIELDS,
   FINAL_QUERY,
+  QUERIED_FIELDS,
   SELECTED_FIELDS,
   UNSELECTED_FIELDS,
-  AVAILABLE_FIELDS,
-  QUERIED_FIELDS,
 } from '../../../../common/constants/explorer';
-import { fetchSuccess, reset as queryResultReset } from '../redux/slices/query_result_slice';
+import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
+import PPLService from '../../../services/requests/ppl';
+import { selectFields, sortFields, updateFields } from '../redux/slices/field_slice';
 import { reset as patternsReset } from '../redux/slices/patterns_slice';
+import { setResponseForSummaryStatus } from '../redux/slices/query_assistant_summarization_slice';
+import {
+  fetchFailure,
+  fetchSuccess,
+  reset as queryResultReset,
+} from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { reset as visualizationReset } from '../redux/slices/visualization_slice';
-import { updateFields, sortFields, selectFields } from '../redux/slices/field_slice';
-import PPLService from '../../../services/requests/ppl';
-import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
 
 interface IFetchEventsParams {
   pplService: PPLService;
@@ -58,11 +61,37 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       .finally(() => setIsEventsLoading(false));
   };
 
+  const addSchemaRowMapping = (queryResult) => {
+    const pplRes = queryResult;
+
+    const data: any[] = [];
+
+    _.forEach(pplRes.datarows, (row) => {
+      const record: any = {};
+
+      for (let i = 0; i < pplRes.schema.length; i++) {
+        const cur = pplRes.schema[i];
+
+        if (typeof row[i] === 'object') {
+          record[cur.name] = JSON.stringify(row[i]);
+        } else if (typeof row[i] === 'boolean') {
+          record[cur.name] = row[i].toString();
+        } else {
+          record[cur.name] = row[i];
+        }
+      }
+
+      data.push(record);
+    });
+    return {
+      ...queryResult,
+      jsonData: data,
+    };
+  };
+
   const dispatchOnGettingHis = (res: any, query: string) => {
-    const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
-      (field: IField) => field.name
-    );
-    setResponse(res);
+    const processedRes = addSchemaRowMapping(res);
+    setResponse(processedRes);
     batch(() => {
       dispatch(
         queryResultReset({
@@ -73,7 +102,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         fetchSuccess({
           tabId: requestParams.tabId,
           data: {
-            ...res,
+            ...processedRes,
           },
         })
       );
@@ -81,9 +110,9 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         updateFields({
           tabId: requestParams.tabId,
           data: {
-            [UNSELECTED_FIELDS]: res?.schema ? [...res.schema] : [],
-            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...res.schema] : [], // when query contains stats, need populate this
-            [AVAILABLE_FIELDS]: res?.schema ? [...res.schema] : [],
+            [UNSELECTED_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
+            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...processedRes.schema] : [], // when query contains stats, need populate this
+            [AVAILABLE_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
             [SELECTED_FIELDS]: [],
           },
         })
@@ -164,20 +193,57 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     );
   };
 
-  const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
+  const getEvents = (
+    query: string = '',
+    errorHandler?: (error: any) => void,
+    setSummaryStatus?: boolean
+  ) => {
+    if (isEmpty(query)) return;
     const cur = queriesRef.current;
     const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
     fetchEvents(
       { query: searchQuery },
       'jdbc',
-      (res: any) => {
+      async (res: any) => {
         if (!isEmpty(res.jsonData)) {
-          return dispatchOnGettingHis(res, searchQuery);
+          await dispatchOnGettingHis(res, searchQuery);
+        } else if (!isEmpty(res.data?.resp)) {
+          await dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
+        } else {
+          // when no hits and needs to get available fields to override default timestamp
+          dispatchOnNoHis(res);
         }
-        // when no hits and needs to get available fields to override default timestamp
-        dispatchOnNoHis(res);
+        if (setSummaryStatus)
+          dispatch(
+            setResponseForSummaryStatus({
+              tabId: requestParams.tabId,
+              responseForSummaryStatus: 'success',
+            })
+          );
       },
-      errorHandler
+      (error) => {
+        errorHandler?.(error);
+        batch(() => {
+          dispatch(
+            queryResultReset({
+              tabId: requestParams.tabId,
+            })
+          );
+          dispatch(
+            fetchFailure({
+              tabId: requestParams.tabId,
+              error,
+            })
+          );
+          if (setSummaryStatus)
+            dispatch(
+              setResponseForSummaryStatus({
+                tabId: requestParams.tabId,
+                responseForSummaryStatus: 'failure',
+              })
+            );
+        });
+      }
     );
   };
 
@@ -208,5 +274,6 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     getEvents,
     getAvailableFields,
     fetchEvents,
+    dispatchOnGettingHis,
   };
 };

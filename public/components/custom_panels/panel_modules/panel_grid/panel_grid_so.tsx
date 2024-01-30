@@ -5,9 +5,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import _, { forEach } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { VisualizationContainer } from '../visualization_container';
@@ -82,32 +82,33 @@ export const PanelGridSO = (props: PanelGridProps) => {
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   // Reset Size of Visualizations when layout is changed
-  const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
+  const layoutChanged = (currLayouts: Layout[]) => {
     window.dispatchEvent(new Event('resize'));
     setPostEditLayout(currLayouts);
   };
 
   const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map(
-      (panelVisualization: VisualizationType, index) => (
-        <VisualizationContainer
-          key={panelVisualization.id}
-          http={coreRefs.http!}
-          editMode={editMode}
-          visualizationId={panelVisualization.id}
-          savedVisualizationId={panelVisualization.savedVisualizationId}
-          pplService={coreRefs.pplService!}
-          fromTime={startTime}
-          toTime={endTime}
-          onRefresh={onRefresh}
-          onEditClick={onEditClick}
-          cloneVisualization={cloneVisualization}
-          pplFilterValue={pplFilterValue}
-          showFlyout={showFlyout}
-          removeVisualization={removeVisualization}
-        />
-      )
-    );
+    const gridDataComps = panelVisualizations.map((panelVisualization: VisualizationType) => (
+      <VisualizationContainer
+        key={panelVisualization.id}
+        http={coreRefs.http!}
+        editMode={editMode}
+        visualizationId={panelVisualization.id}
+        savedVisualizationId={panelVisualization.savedVisualizationId}
+        pplService={coreRefs.pplService!}
+        fromTime={startTime}
+        toTime={endTime}
+        onRefresh={onRefresh}
+        onEditClick={onEditClick}
+        cloneVisualization={cloneVisualization}
+        pplFilterValue={pplFilterValue}
+        showFlyout={showFlyout}
+        removeVisualization={removeVisualization}
+        contextMenuId="visualization"
+        metricType={panelVisualization?.metricType || ''}
+        panelVisualization={panelVisualization}
+      />
+    ));
     setGridData(gridDataComps);
   };
 
@@ -210,6 +211,7 @@ export const PanelGridSO = (props: PanelGridProps) => {
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
       cols={{ lg: 12, md: 12, sm: 12, xs: 1, xxs: 1 }}
       onLayoutChange={layoutChanged}
+      draggableHandle=".mouseGrabber"
     >
       {panelVisualizations.map((panelVisualization: VisualizationType, index) => (
         <div key={panelVisualization.id}>{gridData[index]}</div>

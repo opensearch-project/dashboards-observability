@@ -6,25 +6,25 @@
 import { History } from 'history';
 import Plotly from 'plotly.js-dist';
 import { QueryManager } from 'common/query_manager';
-import { VIS_CHART_TYPES } from '../../common/constants/shared';
+import { OTEL_METRIC_SUBTYPE, VIS_CHART_TYPES } from '../../common/constants/shared';
 import {
-  RAW_QUERY,
-  SELECTED_FIELDS,
-  UNSELECTED_FIELDS,
-  AVAILABLE_FIELDS,
-  QUERIED_FIELDS,
-  INDEX,
-  FINAL_QUERY,
-  SELECTED_TIMESTAMP,
-  SELECTED_DATE_RANGE,
-  GROUPBY,
   AGGREGATIONS,
-  CUSTOM_LABEL,
+  AVAILABLE_FIELDS,
   BREAKDOWNS,
+  CUSTOM_LABEL,
+  FINAL_QUERY,
+  GROUPBY,
+  INDEX,
+  QUERIED_FIELDS,
+  RAW_QUERY,
+  SELECTED_DATE_RANGE,
+  SELECTED_FIELDS,
+  SELECTED_TIMESTAMP,
+  UNSELECTED_FIELDS,
 } from '../constants/explorer';
 import {
-  CoreStart,
   CoreSetup,
+  CoreStart,
   HttpSetup,
   HttpStart,
   NotificationsStart,
@@ -38,6 +38,8 @@ import {
   SavedObjectsStart,
 } from '../../../../src/core/public/saved_objects';
 import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
+import { DataSourceType } from '../../../../src/plugins/data/public';
+import { PROMQL_METRIC_SUBTYPE } from '../constants/shared';
 
 export interface IQueryTab {
   id: string;
@@ -145,13 +147,23 @@ export interface IExplorerProps {
   queryManager?: QueryManager;
 }
 
-export interface SavedQuery {
+export interface SelectedDataSource {
+  label: string;
+  name: string;
+  value: string;
+  type: string;
+  ds?: DataSourceType;
+}
+
+export interface SavedQuery extends SavedObjectAttributes {
   description: string;
   name: string;
   query: string;
   selected_date_range: { start: string; end: string; text: string };
   selected_fields: { text: string; tokens: IField[] };
   selected_timestamp: IField;
+  dataSources: string; // list of type SelectedDataSources that is stringified
+  queryLang: string;
 }
 
 export interface SavedVisualization extends SavedObjectAttributes {
@@ -162,10 +174,13 @@ export interface SavedVisualization extends SavedObjectAttributes {
   selected_fields: { text: string; tokens: [] };
   selected_timestamp: IField;
   type: string;
-  sub_type?: 'metric' | 'visualization'; // exists if sub type is metric
+  subType?: 'metric' | 'visualization'; // exists if sub type is metric
   user_configs?: string;
   units_of_measure?: string;
   application_id?: string;
+  dataSources: string; // list of type SelectedDataSources that is stringified
+  queryLang: string;
+  metricType?: typeof PROMQL_METRIC_SUBTYPE | typeof OTEL_METRIC_SUBTYPE; // exists if sub type is metric
 }
 
 export interface ExplorerDataType {
@@ -333,6 +348,7 @@ export interface DataConfigPanelProps {
   visualizations: IVisualizationContainerProps;
   queryManager?: QueryManager;
 }
+
 export interface GetTooltipHoverInfoType {
   tooltipMode: string;
   tooltipText: string;
@@ -401,3 +417,23 @@ export type MOMENT_UNIT_OF_TIME =
   | 's'
   | 'milliseconds'
   | 'ms';
+
+export interface GridSortingColumn {
+  id: string;
+  direction: 'asc' | 'desc';
+}
+
+export enum DirectQueryLoadingStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  RUNNING = 'RUNNING',
+  SCHEDULED = 'SCHEDULED',
+  CANCELED = 'CANCELED',
+}
+
+export interface DirectQueryRequest {
+  query: string;
+  lang: string;
+  datasource: string;
+  sessionId?: string;
+}

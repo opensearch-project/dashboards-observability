@@ -1,387 +1,381 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Field component Renders a sidebar field 1`] = `
-<Component
-  field={
+<Provider
+  store={
     Object {
-      "name": "agent",
-      "type": "string",
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(Symbol.observable): [Function],
     }
   }
-  handleOverrideTimestamp={[MockFunction]}
-  isFieldToggleButtonDisabled={false}
-  isOverridingTimestamp={false}
-  onToggleField={[MockFunction]}
-  selected={true}
-  selectedTimestamp="timestamp"
-  showTimestampOverrideButton={true}
-  showToggleButton={true}
 >
-  <EuiPopover
-    anchorPosition="rightUp"
-    button={
-      <FieldButton
-        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
-        dataTestSubj="field-agent-showDetails"
-        fieldAction={
-          <React.Fragment>
-            <EuiToolTip
-              content="Override default pattern"
-              delay="long"
-              id="override-pattern"
-              position="top"
+  <Field
+    field={
+      Object {
+        "name": "agent",
+        "type": "string",
+      }
+    }
+    handleOverrideTimestamp={[MockFunction]}
+    isFieldToggleButtonDisabled={false}
+    isOverridingTimestamp={false}
+    onToggleField={[MockFunction]}
+    selected={true}
+    selectedTimestamp="timestamp"
+    showTimestampOverrideButton={true}
+    showToggleButton={true}
+    tabId="DEFAULT_INDEX_PATTERNS"
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      className="dscSidebarField"
+      gutterSize="s"
+      responsive={false}
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscSidebarField"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <FieldIcon
+              type="string"
             >
-              <React.Fragment>
+              <EuiToken
+                aria-label="string"
+                className="osdFieldIcon"
+                iconType="tokenString"
+                size="s"
+                title="string"
+              >
+                <span
+                  className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small osdFieldIcon"
+                  style={Object {}}
+                >
+                  <EuiIcon
+                    aria-label="string"
+                    size="m"
+                    title="string"
+                    type="tokenString"
+                  >
+                    <EuiIconBeaker
+                      aria-hidden={true}
+                      aria-label="string"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                      title="string"
+                    >
+                      <svg
+                        aria-hidden={true}
+                        aria-label="string"
+                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <title>
+                          string
+                        </title>
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </EuiIconBeaker>
+                  </EuiIcon>
+                </span>
+              </EuiToken>
+            </FieldIcon>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+        >
+          <div
+            className="euiFlexItem"
+          >
+            <EuiText
+              size="xs"
+            >
+              <div
+                className="euiText euiText--extraSmall"
+              >
+                agent
+              </div>
+            </EuiText>
+          </div>
+        </EuiFlexItem>
+        <EuiToolTip
+          content="Override default pattern"
+          delay="long"
+          id="override-pattern"
+          position="top"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="explorerSidebarItem__action"
+                  className="dscSidebarField__actionButton"
                   color="text"
                   data-test-subj="eventExplorer__overrideDefaultPattern"
                   iconType="inputOutput"
+                  isDisabled={true}
                   onClick={[Function]}
-                  size="s"
+                  size="xs"
                 >
-                  Override
+                  <button
+                    aria-labelledby="override_pattern"
+                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                    data-test-subj="eventExplorer__overrideDefaultPattern"
+                    disabled={true}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="inputOutput"
+                    >
+                      <EuiIconBeaker
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        role="img"
+                        style={null}
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </EuiIconBeaker>
+                    </EuiIcon>
+                  </button>
                 </EuiButtonIcon>
-              </React.Fragment>
-            </EuiToolTip>
+              </div>
+            </EuiFlexItem>
+          </span>
+        </EuiToolTip>
+        <EuiToolTip
+          content="Override default timestamp"
+          delay="long"
+          id="override-timestamp"
+          position="top"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          />
+        </EuiToolTip>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
             <EuiToolTip
-              content="Override default timestamp"
+              content="inspect"
               delay="long"
-              id="override-timestamp"
               position="top"
             >
-              <React.Fragment />
+              <span
+                className="euiToolTipAnchor"
+                onKeyUp={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <EuiPopover
+                  anchorPosition="rightUp"
+                  button={
+                    <EuiButtonIcon
+                      aria-label="inspect"
+                      className="dscSidebarField__actionButton"
+                      iconType="inspect"
+                      isDisabled={true}
+                      onClick={[Function]}
+                      size="xs"
+                    />
+                  }
+                  closePopover={[Function]}
+                  display="block"
+                  hasArrow={true}
+                  isOpen={false}
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  ownFocus={true}
+                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
+                  panelPaddingSize="m"
+                >
+                  <div
+                    className="euiPopover euiPopover--anchorRightUp euiPopover--displayBlock"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      className="euiPopover__anchor"
+                    >
+                      <EuiButtonIcon
+                        aria-label="inspect"
+                        className="dscSidebarField__actionButton"
+                        iconType="inspect"
+                        isDisabled={true}
+                        onClick={[Function]}
+                        size="xs"
+                      >
+                        <button
+                          aria-label="inspect"
+                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                          disabled={true}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiIcon
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            size="m"
+                            type="inspect"
+                          >
+                            <EuiIconBeaker
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                              focusable="false"
+                              role="img"
+                              style={null}
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </button>
+                      </EuiButtonIcon>
+                    </div>
+                  </div>
+                </EuiPopover>
+              </span>
             </EuiToolTip>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
             <EuiToolTip
               content="Remove field from table"
               delay="long"
               position="top"
             >
-              <React.Fragment>
+              <span
+                className="euiToolTipAnchor"
+                onKeyUp={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
                 <EuiButtonIcon
                   aria-label="Remove agent from table"
-                  className="explorerSidebarItem__action"
+                  className="dscSidebarField__actionButton"
                   color="danger"
                   data-test-subj="fieldToggle-agent"
                   iconType="cross"
                   onClick={[Function]}
-                />
-              </React.Fragment>
+                >
+                  <button
+                    aria-label="Remove agent from table"
+                    className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                    data-test-subj="fieldToggle-agent"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="cross"
+                    >
+                      <EuiIconBeaker
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        role="img"
+                        style={null}
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </EuiIconBeaker>
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </span>
             </EuiToolTip>
-          </React.Fragment>
-        }
-        fieldIcon={
-          <FieldIcon
-            type="string"
-          />
-        }
-        fieldName={
-          <span
-            className="dscSidebarField__name"
-            data-test-subj="field-agent"
-            title="agent"
-          >
-            agent
-          </span>
-        }
-        isActive={false}
-        onClick={[Function]}
-        size="s"
-      />
-    }
-    closePopover={[Function]}
-    display="block"
-    hasArrow={true}
-    isOpen={false}
-    ownFocus={true}
-    panelClassName="explorerSidebarItem__fieldPopoverPanel"
-    panelPaddingSize="m"
-  >
-    <div
-      className="euiPopover euiPopover--anchorRightUp euiPopover--displayBlock"
-    >
-      <div
-        className="euiPopover__anchor"
-      >
-        <FieldButton
-          className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
-          dataTestSubj="field-agent-showDetails"
-          fieldAction={
-            <React.Fragment>
-              <EuiToolTip
-                content="Override default pattern"
-                delay="long"
-                id="override-pattern"
-                position="top"
-              >
-                <React.Fragment>
-                  <EuiButtonIcon
-                    aria-labelledby="override_pattern"
-                    className="explorerSidebarItem__action"
-                    color="text"
-                    data-test-subj="eventExplorer__overrideDefaultPattern"
-                    iconType="inputOutput"
-                    onClick={[Function]}
-                    size="s"
-                  >
-                    Override
-                  </EuiButtonIcon>
-                </React.Fragment>
-              </EuiToolTip>
-              <EuiToolTip
-                content="Override default timestamp"
-                delay="long"
-                id="override-timestamp"
-                position="top"
-              >
-                <React.Fragment />
-              </EuiToolTip>
-              <EuiToolTip
-                content="Remove field from table"
-                delay="long"
-                position="top"
-              >
-                <React.Fragment>
-                  <EuiButtonIcon
-                    aria-label="Remove agent from table"
-                    className="explorerSidebarItem__action"
-                    color="danger"
-                    data-test-subj="fieldToggle-agent"
-                    iconType="cross"
-                    onClick={[Function]}
-                  />
-                </React.Fragment>
-              </EuiToolTip>
-            </React.Fragment>
-          }
-          fieldIcon={
-            <FieldIcon
-              type="string"
-            />
-          }
-          fieldName={
-            <span
-              className="dscSidebarField__name"
-              data-test-subj="field-agent"
-              title="agent"
-            >
-              agent
-            </span>
-          }
-          isActive={false}
-          onClick={[Function]}
-          size="s"
-        >
-          <div
-            className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
-          >
-            <button
-              className="osd-resetFocusState osdFieldButton__button"
-              data-test-subj="field-agent-showDetails"
-              onClick={[Function]}
-            >
-              <span
-                className="osdFieldButton__fieldIcon"
-              >
-                <FieldIcon
-                  type="string"
-                >
-                  <EuiToken
-                    aria-label="string"
-                    className="osdFieldIcon"
-                    iconType="tokenString"
-                    size="l"
-                    title="string"
-                  >
-                    <span
-                      className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--large osdFieldIcon"
-                      style={Object {}}
-                    >
-                      <EuiIcon
-                        aria-label="string"
-                        size="l"
-                        title="string"
-                        type="tokenString"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          aria-label="string"
-                          className="euiIcon euiIcon--large euiIcon-isLoading"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                          title="string"
-                        >
-                          <svg
-                            aria-hidden={true}
-                            aria-label="string"
-                            className="euiIcon euiIcon--large euiIcon-isLoading"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                    </span>
-                  </EuiToken>
-                </FieldIcon>
-              </span>
-              <span
-                className="osdFieldButton__name"
-              >
-                <span
-                  className="dscSidebarField__name"
-                  data-test-subj="field-agent"
-                  title="agent"
-                >
-                  agent
-                </span>
-              </span>
-            </button>
-            <div
-              className="osdFieldButton__fieldAction"
-            >
-              <EuiToolTip
-                content="Override default pattern"
-                delay="long"
-                id="override-pattern"
-                position="top"
-              >
-                <span
-                  className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
-                >
-                  <EuiButtonIcon
-                    aria-labelledby="override_pattern"
-                    className="explorerSidebarItem__action"
-                    color="text"
-                    data-test-subj="eventExplorer__overrideDefaultPattern"
-                    iconType="inputOutput"
-                    onClick={[Function]}
-                    size="s"
-                  >
-                    <button
-                      aria-labelledby="override_pattern"
-                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
-                      data-test-subj="eventExplorer__overrideDefaultPattern"
-                      disabled={false}
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <EuiIcon
-                        aria-hidden="true"
-                        className="euiButtonIcon__icon"
-                        color="inherit"
-                        size="m"
-                        type="inputOutput"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                    </button>
-                  </EuiButtonIcon>
-                </span>
-              </EuiToolTip>
-              <EuiToolTip
-                content="Override default timestamp"
-                delay="long"
-                id="override-timestamp"
-                position="top"
-              >
-                <span
-                  className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
-                />
-              </EuiToolTip>
-              <EuiToolTip
-                content="Remove field from table"
-                delay="long"
-                position="top"
-              >
-                <span
-                  className="euiToolTipAnchor"
-                  onKeyUp={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
-                >
-                  <EuiButtonIcon
-                    aria-label="Remove agent from table"
-                    className="explorerSidebarItem__action"
-                    color="danger"
-                    data-test-subj="fieldToggle-agent"
-                    iconType="cross"
-                    onClick={[Function]}
-                  >
-                    <button
-                      aria-label="Remove agent from table"
-                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
-                      data-test-subj="fieldToggle-agent"
-                      disabled={false}
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <EuiIcon
-                        aria-hidden="true"
-                        className="euiButtonIcon__icon"
-                        color="inherit"
-                        size="m"
-                        type="cross"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                    </button>
-                  </EuiButtonIcon>
-                </span>
-              </EuiToolTip>
-            </div>
           </div>
-        </FieldButton>
+        </EuiFlexItem>
       </div>
-    </div>
-  </EuiPopover>
-</Component>
+    </EuiFlexGroup>
+  </Field>
+</Provider>
 `;

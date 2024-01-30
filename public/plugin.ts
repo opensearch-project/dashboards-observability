@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
-
 import { i18n } from '@osd/i18n';
 import {
   AppCategory,
@@ -13,32 +11,38 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
+  PluginInitializerContext,
+  SavedObject,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
-
 import {
+  DATACONNECTIONS_BASE,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityTracesTitle,
+  observabilityDataConnectionsID,
+  observabilityDataConnectionsPluginOrder,
+  observabilityDataConnectionsTitle,
+  observabilityIntegrationsID,
+  observabilityIntegrationsPluginOrder,
+  observabilityIntegrationsTitle,
+  observabilityLogsID,
+  observabilityLogsPluginOrder,
+  observabilityLogsTitle,
   observabilityMetricsID,
   observabilityMetricsPluginOrder,
   observabilityMetricsTitle,
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityPanelsID,
+  observabilityPanelsPluginOrder,
+  observabilityPanelsTitle,
+  observabilityPluginOrder,
   observabilityTracesID,
   observabilityTracesPluginOrder,
-  observabilityPanelsID,
-  observabilityPanelsTitle,
-  observabilityPanelsPluginOrder,
-  observabilityLogsID,
-  observabilityLogsTitle,
-  observabilityLogsPluginOrder,
-  observabilityIntegrationsID,
-  observabilityIntegrationsTitle,
-  observabilityIntegrationsPluginOrder,
-  observabilityPluginOrder,
+  observabilityTracesTitle,
+  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -48,11 +52,11 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
+import { Search } from './components/common/search/search';
+import { DirectSearch } from './components/common/search/sql_search';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-import { SavedObject } from '../../../src/core/public';
-import { coreRefs } from './framework/core_refs';
-
+import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -61,6 +65,9 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
+import { coreRefs } from './framework/core_refs';
+import { S3DataSource } from './framework/datasources/s3_datasource';
+import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import './index.scss';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
@@ -73,9 +80,23 @@ import {
   SetupDependencies,
 } from './types';
 
+interface PublicConfig {
+  query_assist: {
+    enabled: boolean;
+  };
+  summarize: {
+    enabled: boolean;
+  };
+}
+
 export class ObservabilityPlugin
   implements
     Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+  private config: PublicConfig;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<PublicConfig>();
+  }
+
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
@@ -121,13 +142,63 @@ export class ObservabilityPlugin
       },
     });
 
+    // Adding a variation entails associating a key-value pair, where a change in the key results in
+    // a switch of UI/services to its corresponding context. In the following cases, for an S3 datasource,
+    // selecting SQL will render SQL-specific UI components or services, while selecting PPL will
+    // render a set of UI components or services specific to PPL.
+    const openSearchLocalDataSourcePluggable = new DataSourcePluggable().addVariationSet(
+      'languages',
+      'PPL',
+      {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: Search,
+        },
+        services: {},
+      }
+    );
+
+    const s3DataSourcePluggable = new DataSourcePluggable()
+      .addVariationSet('languages', 'SQL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: DirectSearch,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      })
+      .addVariationSet('languages', 'PPL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: DirectSearch,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      });
+
+    // below datasource types is referencing:
+    // https://github.com/opensearch-project/sql/blob/feature/job-apis/core/src/main/java/org/opensearch/sql/datasource/model/DataSourceType.java
+    const dataSourcePluggables = {
+      DEFAULT_INDEX_PATTERNS: openSearchLocalDataSourcePluggable,
+      spark: s3DataSourcePluggable,
+      s3glue: s3DataSourcePluggable,
+      // prometheus: openSearchLocalDataSourcePluggable
+    };
+
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
-
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -137,7 +208,8 @@ export class ObservabilityPlugin
         savedObjects,
         timestampUtils,
         qm,
-        startPage
+        startPage,
+        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
       );
     };
 
@@ -197,6 +269,23 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
+    core.application.register({
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityDataConnectionsPluginOrder,
+      mount: appMountWithStartPage('dataconnections'),
+    });
+
+    setupDeps.managementOverview?.register({
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
+      order: 9070,
+      description: i18n.translate('observability.dataconnectionsDescription', {
+        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
+      }),
+    });
+
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
@@ -231,17 +320,42 @@ export class ObservabilityPlugin
       },
     });
 
+    registerAsssitantDependencies(setupDeps.assistantDashboards);
+
     // Return methods that should be available to other plugins
     return {};
   }
 
-  public start(core: CoreStart): ObservabilityStart {
+  public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
+    coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
+    coreRefs.chrome = core.chrome;
+    coreRefs.dataSources = startDeps.data.dataSources;
+    coreRefs.application = core.application;
+    coreRefs.dashboard = startDeps.dashboard;
+    coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
+    coreRefs.summarizeEnabled = this.config.summarize.enabled;
+
+    const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
+
+    // register all s3 datasources
+    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+      s3DataSources.map((s3ds) => {
+        dataSourceService.registerDataSource(
+          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+            name: s3ds.name,
+            type: s3ds.connector.toLowerCase(),
+            metadata: s3ds,
+          })
+        );
+      });
+    });
 
     return {};
   }

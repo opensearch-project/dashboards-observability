@@ -47,7 +47,7 @@ describe('renders autocomplete', function () {
     />
   );
 
-  const searchBar = utils.getByPlaceholderText('Enter PPL query');
+  const searchBar = utils.getByPlaceholderText('Enter query');
 
   it('handles query change', () => {
     act(() => {

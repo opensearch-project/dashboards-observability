@@ -4,6 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { isEmpty } from 'lodash';
+import { EuiPage } from '@elastic/eui';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -14,7 +15,7 @@ import {
   TAB_CHART_ID,
   TAB_EVENT_ID,
 } from '../../../../common/constants/explorer';
-import { ILogExplorerProps } from '../../../../common/types/explorer';
+import { EmptyTabParams, ILogExplorerProps } from '../../../../common/types/explorer';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs } from '../redux/slices/query_tab_slice';
@@ -31,6 +32,8 @@ const searchBarConfigs = {
   },
 };
 
+const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
+
 export const LogExplorer = ({
   pplService,
   dslService,
@@ -38,10 +41,10 @@ export const LogExplorer = ({
   timestampUtils,
   setToast,
   savedObjectId,
-  getExistingEmptyTab,
   notifications,
   http,
   queryManager,
+  dataSourcePluggables,
 }: ILogExplorerProps) => {
   const history = useHistory();
   const routerContext = useContext(LogExplorerRouterContext);
@@ -103,6 +106,7 @@ export const LogExplorer = ({
         http={http}
         searchBarConfigs={searchBarConfigs}
         queryManager={queryManager}
+        dataSourcePluggables={dataSourcePluggables}
       />
     </>
   );

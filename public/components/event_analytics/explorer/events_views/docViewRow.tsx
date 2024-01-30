@@ -24,7 +24,7 @@ export interface IDocType {
   [key: string]: string;
 }
 
-interface IDocViewRowProps {
+interface FlyoutButtonProps {
   http: HttpStart;
   doc: IDocType;
   docId: string;
@@ -34,9 +34,15 @@ interface IDocViewRowProps {
   pplService: PPLService;
   rawQuery: string;
   onFlyoutOpen: (docId: string) => void;
+  dataGridColumns: any;
+  dataGridColumnVisibility: any;
+  selectedIndex: any;
+  sortingFields: any;
+  rowHeightsOptions: any;
+  rows: any;
 }
 
-export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
+export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
   const {
     http,
     doc,
@@ -47,6 +53,12 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
     pplService,
     rawQuery,
     onFlyoutOpen,
+    dataGridColumns,
+    dataGridColumnVisibility,
+    selectedIndex,
+    sortingFields,
+    rowHeightsOptions,
+    rows,
   } = props;
 
   const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
@@ -237,6 +249,12 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
         getTds={getTds}
         toggleSize={flyoutToggleSize}
         setToggleSize={setFlyoutToggleSize}
+        dataGridColumns={dataGridColumns}
+        dataGridColumnVisibility={dataGridColumnVisibility}
+        selectedIndex={selectedIndex}
+        sortingFields={sortingFields}
+        rowHeightsOptions={rowHeightsOptions}
+        rows={rows}
       />
     );
   }, [
@@ -270,15 +288,11 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
 
   return (
     <>
-      <tr
-        className={
-          detailsOpen || surroundingEventsOpen
-            ? 'osdDocTable__row selected-event-row'
-            : 'osdDocTable__row'
-        }
-      >
-        {memorizedTds}
-      </tr>
+      <EuiButtonIcon
+        onClick={() => toggleDetailOpen()}
+        iconType={detailsOpen || surroundingEventsOpen ? 'minimize' : 'inspect'}
+        aria-label="inspect document details"
+      />
       {flyout}
     </>
   );

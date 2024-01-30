@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Config panel component Renders config panel with visualization data 1`] = `
-<Component
+<ConfigPanel
   changeIsValidConfigOptionState={[MockFunction]}
   setCurVisId={[MockFunction]}
   visualizations={
@@ -1602,7 +1602,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -1835,7 +1835,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -2333,7 +2333,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -4312,7 +4312,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 size="s"
                                 type="visBarVerticalStacked"
                               >
-                                <EuiIconEmpty
+                                <EuiIconBeaker
                                   aria-hidden={true}
                                   className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
                                   focusable="false"
@@ -4329,8 +4329,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     viewBox="0 0 16 16"
                                     width={16}
                                     xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </EuiIconBeaker>
                               </EuiIcon>
                             </span>
                           </span>
@@ -4433,7 +4437,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             size="m"
                             type="arrowDown"
                           >
-                            <EuiIconEmpty
+                            <EuiIconBeaker
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                               focusable="false"
@@ -4450,8 +4454,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 viewBox="0 0 16 16"
                                 width={16}
                                 xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </EuiIconEmpty>
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
                           </EuiIcon>
                         </button>
                       </EuiFormControlLayoutCustomIcon>
@@ -4473,7 +4481,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         onTabClick={[Function]}
         selectedTab={
           Object {
-            "content": <Unknown
+            "content": <VizDataPanel
               curVisId="bar"
               onConfigChange={[Function]}
               tabProps={
@@ -5415,7 +5423,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         tabs={
           Array [
             Object {
-              "content": <Unknown
+              "content": <VizDataPanel
                 curVisId="bar"
                 onConfigChange={[Function]}
                 tabProps={
@@ -6398,7 +6406,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
             id="random_html_id"
             role="tabpanel"
           >
-            <Component
+            <VizDataPanel
               curVisId="bar"
               onConfigChange={[Function]}
               tabProps={
@@ -7357,7 +7365,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigPanelOptions
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -8054,7 +8062,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -8071,8 +8079,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -8259,7 +8271,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigPanelOptions>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -8269,6 +8281,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="tooltip_options"
                       labelType="label"
                     >
                       <div
@@ -8278,7 +8291,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigTooltip
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -9033,7 +9046,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -9050,8 +9063,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -9078,7 +9095,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         <div
                                           id="random_html_id"
                                         >
-                                          <Component
+                                          <ButtonGroupItem
                                             defaultSelections={
                                               Array [
                                                 Object {
@@ -9345,7 +9362,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 </fieldset>
                                               </EuiButtonGroup>
                                             </div>
-                                          </Component>
+                                          </ButtonGroupItem>
                                           <EuiSpacer
                                             size="s"
                                           >
@@ -9357,7 +9374,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         <div
                                           id="random_html_id"
                                         >
-                                          <Component
+                                          <ButtonGroupItem
                                             defaultSelections={
                                               Array [
                                                 Object {
@@ -9718,7 +9735,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 </fieldset>
                                               </EuiButtonGroup>
                                             </div>
-                                          </Component>
+                                          </ButtonGroupItem>
                                           <EuiSpacer
                                             size="s"
                                           >
@@ -9733,7 +9750,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigTooltip>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -9743,6 +9760,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="legend"
                       labelType="label"
                     >
                       <div
@@ -9752,7 +9770,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigLegend
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -10510,7 +10528,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -10527,8 +10545,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -10552,7 +10574,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       <div
                                         className="euiAccordion__padding--s"
                                       >
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -10818,7 +10840,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -10826,7 +10848,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -11092,7 +11114,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -11100,7 +11122,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <InputFieldItem
                                           currentValue=""
                                           handleInputChange={[Function]}
                                           numValue=""
@@ -11164,7 +11186,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiFormControlLayout>
                                           </EuiFieldNumber>
-                                        </Component>
+                                        </InputFieldItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -11178,7 +11200,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigLegend>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -11188,6 +11210,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="chart_styles"
                       labelType="label"
                     >
                       <div
@@ -11197,7 +11220,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigBarChartStyles
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -12008,7 +12031,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -12025,8 +12048,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -12050,7 +12077,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       <div
                                         className="euiAccordion__padding--s"
                                       >
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -12316,7 +12343,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -12324,7 +12351,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <InputFieldItem
                                           handleInputChange={[Function]}
                                           numValue=""
                                           title="Label size"
@@ -12387,7 +12414,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiFormControlLayout>
                                           </EuiFieldNumber>
-                                        </Component>
+                                        </InputFieldItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -12395,7 +12422,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0}
                                           handleSliderChange={[Function]}
                                           max={90}
@@ -12467,7 +12494,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -12488,8 +12515,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13372,7 +13403,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13380,7 +13411,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0.7}
                                           handleSliderChange={[Function]}
                                           max={1}
@@ -13427,7 +13458,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13448,8 +13479,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13613,7 +13648,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13621,7 +13656,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0.97}
                                           handleSliderChange={[Function]}
                                           max={1}
@@ -13668,7 +13703,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13689,8 +13724,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -13854,7 +13893,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13862,7 +13901,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0}
                                           handleSliderChange={[Function]}
                                           max={10}
@@ -13909,7 +13948,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -13930,8 +13969,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -14095,7 +14138,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -14103,7 +14146,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={100}
                                           handleSliderChange={[Function]}
                                           max={100}
@@ -14150,7 +14193,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   size="m"
                                                   type="iInCircle"
                                                 >
-                                                  <EuiIconEmpty
+                                                  <EuiIconBeaker
                                                     aria-hidden={true}
                                                     className="euiIcon euiIcon--medium euiIcon--text euiIcon-isLoading info-icon"
                                                     focusable="false"
@@ -14171,8 +14214,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       viewBox="0 0 16 16"
                                                       width={16}
                                                       xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
                                                 </EuiIcon>
                                               </span>
                                             </EuiToolTip>
@@ -14336,7 +14383,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -14350,7 +14397,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigBarChartStyles>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -14360,6 +14407,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="color-theme"
                       labelType="label"
                     >
                       <div
@@ -14369,7 +14417,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigColorTheme
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -15071,7 +15119,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         size="m"
                                         type="arrowRight"
                                       >
-                                        <EuiIconEmpty
+                                        <EuiIconBeaker
                                           aria-hidden={true}
                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
                                           focusable="false"
@@ -15088,8 +15136,12 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             viewBox="0 0 16 16"
                                             width={16}
                                             xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
                                       </EuiIcon>
                                     </span>
                                     <span
@@ -15174,18 +15226,18 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigColorTheme>
                         </div>
                       </div>
                     </EuiFormRow>
                   </div>
                 </EuiForm>
               </div>
-            </Component>
+            </VizDataPanel>
           </div>
         </div>
       </EuiTabbedContent>
     </div>
   </div>
-</Component>
+</ConfigPanel>
 `;

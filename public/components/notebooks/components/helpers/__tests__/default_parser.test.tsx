@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defaultParagraphParser } from '../default_parser';
 import {
   sampleNotebook1,
   sampleNotebook2,
@@ -12,18 +11,18 @@ import {
   sampleNotebook5,
   sampleParsedParagraghs1,
   sampleParsedParagraghs2,
-} from './sampleDefaultNotebooks';
+} from '../../../../../../test/notebooks_constants';
+import { defaultParagraphParser } from '../default_parser';
 
 // Perfect schema
 describe('Testing default backend parser function with perfect schema', () => {
-  test('defaultParagraphParserTest1', (done) => {
+  it('defaultParagraphParserTest1', () => {
     const parsedParagraphs1 = defaultParagraphParser(sampleNotebook1.paragraphs);
     const parsedParagraphs2 = defaultParagraphParser(sampleNotebook2.paragraphs);
     const parsedParagraphs3 = defaultParagraphParser([]);
     expect(parsedParagraphs1).toEqual(sampleParsedParagraghs1);
     expect(parsedParagraphs2).toEqual(sampleParsedParagraghs2);
     expect(parsedParagraphs3).toEqual([]);
-    done();
   });
 
   it('returns parsed paragraphs', () => {
@@ -82,16 +81,15 @@ describe('Testing default backend parser function with perfect schema', () => {
 
 // Issue in schema
 describe('Testing default backend parser function with wrong schema', () => {
-  test('defaultParagraphParserTest2', (done) => {
+  it('defaultParagraphParserTest2', () => {
     expect(() => {
-      const parsedParagraphs1 = defaultParagraphParser(sampleNotebook3.paragraphs);
+      const _parsedParagraphs1 = defaultParagraphParser(sampleNotebook3.paragraphs);
     }).toThrow(Error);
     expect(() => {
-      const parsedParagraphs2 = defaultParagraphParser(sampleNotebook4.paragraphs);
+      const _parsedParagraphs2 = defaultParagraphParser(sampleNotebook4.paragraphs);
     }).toThrow(Error);
     expect(() => {
-      const parsedParagraphs3 = defaultParagraphParser(sampleNotebook5.paragraphs);
+      const _parsedParagraphs3 = defaultParagraphParser(sampleNotebook5.paragraphs);
     }).toThrow(Error);
-    done();
   });
 });

@@ -9,7 +9,7 @@ import { VIS_CHART_TYPES } from './shared';
 
 // URLs
 export const EVENT_ANALYTICS_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/observability-plugin/event-analytics/';
+  'https://opensearch.org/docs/latest/observing-your-data/event-analytics/';
 export const OPEN_TELEMETRY_LOG_CORRELATION_LINK =
   'https://opentelemetry.io/docs/reference/specification/logs/overview/#log-correlation';
 export const LOG_EXPLORER_BASE_PATH = 'observability-logs#/explorer/';
@@ -18,6 +18,7 @@ export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
 export const INDEX = 'index';
+export const OLLY_QUERY_ASSISTANT = 'ollyQueryAssistant';
 export const SELECTED_PATTERN_FIELD = 'selectedPatternField';
 export const PATTERN_REGEX = 'patternRegex';
 export const FILTERED_PATTERN = 'filteredPattern';
@@ -93,6 +94,7 @@ export const REDUX_EXPL_SLICE_QUERY_TABS = 'queryTabs';
 export const REDUX_EXPL_SLICE_VISUALIZATION = 'explorerVisualization';
 export const REDUX_EXPL_SLICE_COUNT_DISTRIBUTION = 'countDistributionVisualization';
 export const REDUX_EXPL_SLICE_PATTERNS = 'patterns';
+export const REDUX_EXPL_SLICE_SEARCH_META_DATA = 'searchMetaData';
 export const PLOTLY_GAUGE_COLUMN_NUMBER = 4;
 export const APP_ANALYTICS_TAB_ID_REGEX = /application-analytics-tab.+/;
 export const DEFAULT_AVAILABILITY_QUERY = 'stats count() by span( timestamp, 1h )';
@@ -323,4 +325,24 @@ export const sampleLogPatternData = {
 export const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
   [SAVED_VISUALIZATION]: TAB_CHART_ID,
+};
+
+export const DEFAULT_EMPTY_EXPLORER_FIELDS = [
+  { name: 'timestamp', type: 'timestamp' },
+  { name: '_source', type: 'string' },
+];
+
+export const DEFAULT_TIMESTAMP_COLUMN = {
+  id: 'timestamp',
+  isSortable: true,
+  display: 'Time',
+  schema: 'datetime',
+  initialWidth: 200,
+};
+
+export const DEFAULT_SOURCE_COLUMN = {
+  id: '_source',
+  isSortable: false,
+  display: 'Source',
+  schema: '_source',
 };

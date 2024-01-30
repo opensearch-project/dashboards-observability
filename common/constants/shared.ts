@@ -2,8 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import CSS from 'csstype';
-import { IField } from '../../common/types/explorer';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -14,15 +12,23 @@ export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
+export const JOBS_BASE = '/query/jobs';
+export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const EDIT = '/edit';
+export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
 export const SAVED_VISUALIZATION = '/vis';
+export const CONSOLE_PROXY = '/api/console/proxy';
 
 // Server route
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
+export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
+export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
+export const JOB_RESULT_ENDPOINT = '/result';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
@@ -56,6 +62,12 @@ export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 
+export const observabilityDataConnectionsID = 'datasources';
+export const observabilityDataConnectionsTitle = 'Data sources';
+export const observabilityDataConnectionsPluginOrder = 9030;
+
+export const queryWorkbenchPluginID = 'opensearch-query-workbench';
+
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
@@ -64,7 +76,13 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
+export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export const SPAN_REGEX = /span/;
+
+export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const OTEL_METRIC_SUBTYPE = 'openTelemetryMetric';
+export const PPL_METRIC_SUBTYPE = 'metric';
+
 export const PPL_SPAN_REGEX = /by\s*span/i;
 export const PPL_STATS_REGEX = /\|\s*stats/i;
 export const PPL_INDEX_INSERT_POINT_REGEX = /(search source|source|index)\s*=\s*([^|\s]+)(.*)/i;
@@ -74,9 +92,12 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
-const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
+const BASE_DATACONNECTIONS_URI = '/_plugins/_query/_datasources';
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
+};
+export const OPENSEARCH_DATACONNECTIONS_API = {
+  DATACONNECTION: `${BASE_DATACONNECTIONS_URI}`,
 };
 
 // Saved Objects
@@ -85,7 +106,7 @@ export const SAVED_OBJECT = '/object';
 // Color Constants
 export const PLOTLY_COLOR = [
   '#3CA1C7',
-  '#8C55A3',
+  '#54B399',
   '#DB748A',
   '#F2BE4B',
   '#68CCC2',
@@ -111,6 +132,7 @@ export enum VIS_CHART_TYPES {
   Pie = 'pie',
   HeatMap = 'heatmap',
   Text = 'text',
+  Histogram = 'histogram',
 }
 
 export const NUMERICAL_FIELDS = ['short', 'integer', 'long', 'float', 'double'];
@@ -174,6 +196,7 @@ export const LIVE_OPTIONS = [
 ];
 
 export const LIVE_END_TIME = 'now';
+
 export interface DefaultChartStylesProps {
   DefaultModeLine: string;
   Interpolation: string;
@@ -226,4 +249,16 @@ export const WAITING_TIME_ON_USER_ACTIONS = 300;
 export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
+  NO_SERIES: 'Add a field to start',
+  NO_METRIC: 'Invalid Metric MetaData',
 };
+
+export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
+
+export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
+
+export const DIRECT_DUMMY_QUERY = 'select 1';
+
+export const DEFAULT_START_TIME = 'now-15m';
+export const QUERY_ASSIST_START_TIME = 'now-40y';
+export const QUERY_ASSIST_END_TIME = 'now';

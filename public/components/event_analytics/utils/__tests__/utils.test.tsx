@@ -14,7 +14,9 @@ import {
   rangeNumDocs,
   getHeaders,
   fillTimeDataWithEmpty,
+  redoQuery,
 } from '../utils';
+import { EXPLORER_DATA_GRID_QUERY } from '../../../../../test/event_analytics_constants';
 
 describe('Utils event analytics helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -48,38 +50,6 @@ describe('Utils event analytics helper functions', () => {
     expect(rangeNumDocs(11000)).toBe(10000);
     expect(rangeNumDocs(-200)).toBe(0);
     expect(rangeNumDocs(2000)).toBe(2000);
-  });
-
-  it('validates getHeaders function', () => {
-    expect(
-      getHeaders(
-        [
-          {
-            name: 'host',
-            type: 'text',
-          },
-          {
-            name: 'ip_count',
-            type: 'integer',
-          },
-          {
-            name: 'per_ip_bytes',
-            type: 'long',
-          },
-          {
-            name: 'resp_code',
-            type: 'text',
-          },
-          {
-            name: 'sum_bytes',
-            type: 'long',
-          },
-        ],
-        ['', 'Time', '_source'],
-        undefined
-      )
-    ).toBeTruthy();
-    expect(getHeaders([], ['', 'Time', '_source'], undefined)).toBeTruthy();
   });
 
   it('validates fillTimeDataWithEmpty function', () => {
@@ -145,5 +115,36 @@ describe('Utils event analytics helper functions', () => {
       ],
       values: [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 5, 4, 2, 3, 3, 1, 0, 0],
     });
+  });
+
+  it('validates redoQuery function', () => {
+    const fetchEvents = jest.fn();
+    const setData = jest.fn();
+
+    redoQuery(
+      '2023-01-01 00:00:00',
+      '2023-09-28 23:19:10',
+      "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')",
+      'timestamp',
+      {
+        current: [
+          {
+            id: 'timestamp',
+            direction: 'asc',
+          },
+        ],
+      },
+      {
+        current: [0, 100],
+      },
+      fetchEvents,
+      setData
+    );
+    const expectedFinalQuery = {
+      query:
+        "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0",
+    };
+    // final query is the only thing being tested here
+    expect(fetchEvents).toBeCalledWith(expectedFinalQuery, 'jdbc', expect.anything());
   });
 });

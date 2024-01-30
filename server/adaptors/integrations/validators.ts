@@ -12,6 +12,7 @@ const staticAsset: JSONSchemaType<StaticAsset> = {
   properties: {
     path: { type: 'string' },
     annotation: { type: 'string', nullable: true },
+    data: { type: 'string', nullable: true },
   },
   required: ['path'],
   additionalProperties: false,
@@ -26,6 +27,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     license: { type: 'string' },
     type: { type: 'string' },
     labels: { type: 'array', items: { type: 'string' }, nullable: true },
+    tags: { type: 'array', items: { type: 'string' }, nullable: true },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
     sourceUrl: { type: 'string', nullable: true },
@@ -47,6 +49,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
         properties: {
           name: { type: 'string' },
           version: { type: 'string' },
+          data: { type: 'string', nullable: true },
         },
         required: ['name', 'version'],
       },
@@ -59,10 +62,25 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
           properties: {
             name: { type: 'string' },
             version: { type: 'string' },
+            data: { type: 'string', nullable: true },
           },
           required: ['name', 'version'],
           nullable: true,
           additionalProperties: false,
+        },
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              version: { type: 'string' },
+              language: { type: 'string' },
+              data: { type: 'string', nullable: true },
+            },
+            required: ['name', 'version', 'language'],
+          },
+          nullable: true,
         },
       },
       additionalProperties: false,
@@ -70,9 +88,8 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     sampleData: {
       type: 'object',
       properties: {
-        path: {
-          type: 'string',
-        },
+        path: { type: 'string' },
+        data: { type: 'string', nullable: true },
       },
       required: ['path'],
       additionalProperties: false,

@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Histogram component Renders histogram component 1`] = `
-<Component
+<Histogram
   config={true}
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -694,7 +694,7 @@ exports[`Histogram component Renders histogram component 1`] = `
             },
           },
           "name": "count()",
-          "type": undefined,
+          "type": "histogram",
           "x": Array [
             154,
             1753,
@@ -711,7 +711,7 @@ exports[`Histogram component Renders histogram component 1`] = `
       Object {
         "barmode": "group",
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "legend": Object {
@@ -747,7 +747,7 @@ exports[`Histogram component Renders histogram component 1`] = `
               },
             },
             "name": "count()",
-            "type": undefined,
+            "type": "histogram",
             "x": Array [
               154,
               1753,
@@ -767,7 +767,7 @@ exports[`Histogram component Renders histogram component 1`] = `
           "autosize": true,
           "barmode": "group",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",
@@ -818,5 +818,5 @@ exports[`Histogram component Renders histogram component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</Histogram>
 `;

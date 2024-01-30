@@ -5,7 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
+import { EventAnalyticsProps } from 'common/types/explorer';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import '../../variables.scss';
@@ -31,18 +31,24 @@ export const EventAnalytics = ({
   ...props
 }: EventAnalyticsProps) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toastLifeTime, setToastLifeTime] = useState(6000);
 
   const eventAnalyticsBreadcrumb = {
     text: 'Logs',
     href: '#/',
   };
 
-  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+  const setToast = (
+    title: string,
+    color = 'success',
+    text?: ReactChild,
+    side?: string,
+    toastLifeTimeMs?: number
+  ) => {
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+    if (toastLifeTimeMs) setToastLifeTime(toastLifeTimeMs);
   };
-
-  const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
 
   return (
     <>
@@ -51,7 +57,7 @@ export const EventAnalytics = ({
         dismissToast={(removedToast) => {
           setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
         }}
-        toastLifeTimeMs={6000}
+        toastLifeTimeMs={toastLifeTime}
       />
       <HashRouter>
         <Switch>
@@ -81,9 +87,9 @@ export const EventAnalytics = ({
                     timestampUtils={timestampUtils}
                     http={http}
                     setToast={setToast}
-                    getExistingEmptyTab={getExistingEmptyTab}
                     notifications={notifications}
                     queryManager={queryManager}
+                    dataSourcePluggables={props.dataSourcePluggables}
                   />
                 </LogExplorerRouterContext.Provider>
               );
@@ -108,7 +114,7 @@ export const EventAnalytics = ({
                   dslService={dslService}
                   pplService={pplService}
                   setToast={setToast}
-                  getExistingEmptyTab={getExistingEmptyTab}
+                  dataSourcePluggables={props.dataSourcePluggables}
                 />
               );
             }}

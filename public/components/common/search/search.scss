@@ -5,14 +5,14 @@
 
 .globalQueryBar {
   margin: 0;
-  padding: .5rem;
+  padding: 0.5rem;
 }
 .aa-Autocomplete {
   width: 100%;
   position: relative;
   --aa-search-input-height: 38px;
-  --aa-panel-border-color-rgb: rgba(227,230,238,255);
-  --aa-input-background-color-rbg: rgba(250,251,253,255);
+  --aa-panel-border-color-rgb: rgba(227, 230, 238, 255);
+  --aa-input-background-color-rbg: rgba(250, 251, 253, 255);
 }
 .styling {
   font-weight: bold;
@@ -26,7 +26,7 @@
 #autocomplete-textarea {
   width: 100%;
   outline: none;
-  min-height: 48px;
+  min-height: 40px;
   max-width: unset;
   height: 45px;
   resize: vertical;
@@ -40,12 +40,12 @@
 }
 
 .aa-Panel--scrollable-dark {
-  background-color: #1D1E24;
+  background-color: #1d1e24;
   border: 2px groove #383444;
 }
 
 .aa-Item-dark {
-  color: #DFE5EF;
+  color: #dfe5ef;
 }
 
 .event-date-picker {
@@ -60,11 +60,11 @@
   background-color: transparent;
 }
 .ppl-link-light {
-  color: #006BB4;
+  color: #006bb4;
 }
 
 .ppl-link-dark {
-  color: #1BA9F5;
+  color: #1ba9f5;
 }
 
 .base-query-popover {

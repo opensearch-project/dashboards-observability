@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Line component Renders line component 1`] = `
-<Component
+<Line
   config={Object {}}
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -697,7 +697,7 @@ exports[`Line component Renders line component 1`] = `
       Object {
         "autosize": true,
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "legend": Object {
@@ -749,7 +749,7 @@ exports[`Line component Renders line component 1`] = `
           "autosize": true,
           "barmode": "stack",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",
@@ -796,5 +796,5 @@ exports[`Line component Renders line component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</Line>
 `;

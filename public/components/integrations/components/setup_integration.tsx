@@ -3,313 +3,352 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as Eui from '@elastic/eui';
-import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/steps/steps';
-import React, { useState } from 'react';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiComboBox,
+  EuiEmptyPrompt,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiLoadingLogo,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { Color } from '../../../../common/constants/integrations';
+import { coreRefs } from '../../../framework/core_refs';
+import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
+import {
+  CONSOLE_PROXY,
+  INTEGRATIONS_BASE,
+  DATACONNECTIONS_BASE,
+} from '../../../../common/constants/shared';
 
-interface IntegrationConfig {
-  instanceName: string;
-  useExisting: boolean;
-  dataSourceName: string;
-  dataSourceDescription: string;
-  dataSourceFileType: string;
-  dataSourceLocation: string;
-  existingDataSourceName: string;
+export interface IntegrationSetupInputs {
+  displayName: string;
+  connectionType: string;
+  connectionDataSource: string;
+  connectionLocation: string;
+  connectionTableName: string;
 }
 
-const STEPS: EuiContainedStepProps[] = [
-  { title: 'Name Integration', children: <Eui.EuiText /> },
-  { title: 'Select index or data source for integration', children: <Eui.EuiText /> },
+type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
+
+interface IntegrationConfigProps {
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
+  integration: IntegrationTemplate;
+  setupCallout: SetupCallout;
+}
+
+// TODO support localization
+const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
+  string,
+  {
+    title: string;
+    lower: string;
+    help: string;
+  }
+> = new Map([
+  [
+    's3',
+    {
+      title: 'Catalog',
+      lower: 'catalog',
+      help: 'Select a catalog to pull the data from.',
+    },
+  ],
+  [
+    'index',
+    {
+      title: 'Index',
+      lower: 'index',
+      help: 'Select an index to pull the data from.',
+    },
+  ],
+]);
+
+const integrationConnectionSelectorItems = [
+  {
+    value: 's3',
+    text: 'S3 Connection',
+  },
+  {
+    value: 'index',
+    text: 'OpenSearch Index',
+  },
 ];
 
-const ALLOWED_FILE_TYPES: Eui.EuiSelectOption[] = [
-  { value: 'parquet', text: 'parquet' },
-  { value: 'json', text: 'json' },
-];
-
-const INTEGRATION_DATA_TABLE_COLUMNS = [
-  {
-    field: 'field',
-    name: 'Field Name',
-  },
-  {
-    field: 'type',
-    name: 'Field Type',
-  },
-  {
-    field: 'isTimestamp',
-    name: 'Timestamp',
-  },
-];
-
-const integrationDataTableData = [
-  {
-    field: 'spanId',
-    type: 'string',
-    isTimestamp: false,
-  },
-  {
-    field: 'severity.number',
-    type: 'long',
-    isTimestamp: false,
-  },
-  {
-    field: '@timestamp',
-    type: 'date',
-    isTimestamp: true,
-  },
-];
-
-const getSetupStepStatus = (activeStep: number): EuiContainedStepProps[] => {
-  return STEPS.map((step, idx) => {
-    let status: string = '';
-    if (idx < activeStep) {
-      status = 'complete';
+const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
+  const http = coreRefs.http!;
+  try {
+    if (type === 'index') {
+      const result = await http.post(CONSOLE_PROXY, {
+        body: '{}',
+        query: {
+          path: '_data_stream/ss4o_*',
+          method: 'GET',
+        },
+      });
+      return (
+        result.data_streams?.map((item: { name: string }) => {
+          return { label: item.name };
+        }) ?? []
+      );
+    } else if (type === 's3') {
+      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
+        name: string;
+        connector: string;
+      }>;
+      return (
+        result
+          ?.filter((item) => item.connector === 'S3GLUE')
+          .map((item) => {
+            return { label: item.name };
+          }) ?? []
+      );
+    } else {
+      console.error(`Unknown connection type: ${type}`);
+      return [];
     }
-    if (idx > activeStep) {
-      status = 'disabled';
-    }
-    return Object.assign({}, step, { status });
-  });
+  } catch (err) {
+    console.error(err.message);
+    return [];
+  }
 };
 
-export function SetupIntegrationMetadata({
-  name,
-  setName,
-}: {
-  name: string;
-  setName: (name: string) => void;
-}) {
+const runQuery = async (
+  query: string,
+  datasource: string,
+  sessionId: string | null
+): Promise<Result<{ poll: object; sessionId: string }>> => {
+  // Used for polling
+  const sleep = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  try {
+    const http = coreRefs.http!;
+    const queryResponse: { queryId: string; sessionId: string } = await http.post(CONSOLE_PROXY, {
+      body: JSON.stringify({ query, datasource, lang: 'sql', sessionId }),
+      query: {
+        path: '_plugins/_async_query',
+        method: 'POST',
+      },
+    });
+    let poll: { status: string; error?: string } = { status: 'undefined' };
+    const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
+    while (!poll.error) {
+      poll = await http.post(CONSOLE_PROXY, {
+        body: '{}',
+        query: {
+          path: '_plugins/_async_query/' + queryId,
+          method: 'GET',
+        },
+      });
+      if (poll.status.toLowerCase() === 'success') {
+        return {
+          ok: true,
+          value: {
+            poll,
+            sessionId: newSessionId,
+          },
+        };
+        // Fail status can inconsistently be "failed" or "failure"
+      } else if (poll.status.toLowerCase().startsWith('fail')) {
+        return {
+          ok: false,
+          error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
+        };
+      }
+      await sleep(3000);
+    }
+    return { ok: false, error: new Error(poll.error) };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, error: err };
+  }
+};
+
+export function SetupIntegrationForm({
+  config,
+  updateConfig,
+  integration,
+  setupCallout,
+}: IntegrationConfigProps) {
+  const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
+
+  const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
+    [] as Array<{ label: string }>
+  );
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
+  const [isBlurred, setIsBlurred] = useState(false);
+  useEffect(() => {
+    const updateDataSources = async () => {
+      const data = await suggestDataSources(config.connectionType);
+      setDataSourceSuggestions(data);
+      setIsSuggestionsLoading(false);
+    };
+
+    setIsSuggestionsLoading(true);
+    updateDataSources();
+  }, [config.connectionType]);
+
   return (
-    <Eui.EuiForm>
-      <Eui.EuiTitle>
-        <h1>{STEPS[0].title}</h1>
-      </Eui.EuiTitle>
-      <Eui.EuiFormRow
-        label="Name"
-        helpText="The name will be used to label the newly added integration"
+    <EuiForm>
+      <EuiTitle>
+        <h1>Set Up Integration</h1>
+      </EuiTitle>
+      <EuiSpacer />
+      {setupCallout.show ? (
+        <EuiCallOut title={setupCallout.title} color="danger">
+          <p>{setupCallout.text}</p>
+        </EuiCallOut>
+      ) : null}
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Details</h3>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFormRow
+        label="Display Name"
+        error={['Must be at least 1 character.']}
+        isInvalid={config.displayName.length === 0}
       >
-        <Eui.EuiFieldText value={name} onChange={(evt) => setName(evt.target.value)} />
-      </Eui.EuiFormRow>
-    </Eui.EuiForm>
+        <EuiFieldText
+          value={config.displayName}
+          onChange={(event) => updateConfig({ displayName: event.target.value })}
+          placeholder={`${integration.name} Integration`}
+          isInvalid={config.displayName.length === 0}
+          data-test-subj="new-instance-name"
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Connection</h3>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
+        <EuiSelect
+          options={integrationConnectionSelectorItems.filter((item) => {
+            if (item.value === 's3') {
+              return Object.hasOwn(integration.assets ?? {}, 'queries');
+            } else if (item.value === 'index') {
+              return Object.hasOwn(integration.assets ?? {}, 'savedObjects');
+            } else {
+              return false;
+            }
+          })}
+          value={config.connectionType}
+          onChange={(event) =>
+            updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
+          }
+        />
+      </EuiFormRow>
+      <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
+        <EuiComboBox
+          options={dataSourceSuggestions}
+          isLoading={isSuggestionsLoading}
+          onChange={(selected) => {
+            if (selected.length === 0) {
+              updateConfig({ connectionDataSource: '' });
+            } else {
+              updateConfig({ connectionDataSource: selected[0].label });
+            }
+          }}
+          selectedOptions={[{ label: config.connectionDataSource }]}
+          singleSelection={{ asPlainText: true }}
+          onCreateOption={(searchValue) => {
+            const normalizedSearchValue = searchValue.trim();
+            if (!normalizedSearchValue) {
+              return;
+            }
+            const newOption = { label: normalizedSearchValue };
+            setDataSourceSuggestions((ds) => ds.concat([newOption]));
+            updateConfig({ connectionDataSource: newOption.label });
+          }}
+          customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
+          data-test-subj="data-source-name"
+        />
+      </EuiFormRow>
+      {config.connectionType === 's3' ? (
+        <>
+          <EuiFormRow
+            label="Flint Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Bucket Location"
+            isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+        </>
+      ) : null}
+    </EuiForm>
   );
-}
-
-export function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
-  return (
-    <Eui.EuiModal onClose={close}>
-      <Eui.EuiModalHeader>
-        <h2>Data Table</h2>
-      </Eui.EuiModalHeader>
-      <Eui.EuiModalBody>
-        <Eui.EuiBasicTable
-          items={integrationDataTableData}
-          columns={INTEGRATION_DATA_TABLE_COLUMNS}
-        />
-        <Eui.EuiSpacer />
-        <Eui.EuiButton onClick={close} size="s">
-          Close
-        </Eui.EuiButton>
-      </Eui.EuiModalBody>
-    </Eui.EuiModal>
-  );
-}
-
-export function SetupIntegrationNewTable({
-  config,
-  updateConfig,
-}: {
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
-}) {
-  return (
-    <div>
-      <Eui.EuiFormRow label="Title">
-        <Eui.EuiFieldText
-          value={config.dataSourceName}
-          onChange={(evt) => updateConfig({ dataSourceName: evt.target.value })}
-        />
-      </Eui.EuiFormRow>
-      <Eui.EuiFormRow label="Description (optional)">
-        <Eui.EuiFieldText
-          value={config.dataSourceDescription}
-          onChange={(evt) => updateConfig({ dataSourceDescription: evt.target.value })}
-        />
-      </Eui.EuiFormRow>
-      <Eui.EuiFormRow label="File Type">
-        <Eui.EuiSelect
-          options={ALLOWED_FILE_TYPES}
-          value={config.dataSourceFileType}
-          onChange={(evt) => updateConfig({ dataSourceFileType: evt.target.value })}
-        />
-      </Eui.EuiFormRow>
-      <Eui.EuiFormRow label="Location to store table">
-        <Eui.EuiFieldText
-          value={config.dataSourceLocation}
-          onChange={(evt) => updateConfig({ dataSourceLocation: evt.target.value })}
-        />
-      </Eui.EuiFormRow>
-    </div>
-  );
-}
-
-export function SetupIntegrationExistingTable({
-  config,
-  updateConfig,
-  showDataModal,
-  setShowDataModal,
-}: {
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
-  showDataModal: boolean;
-  setShowDataModal: (visible: boolean) => void;
-}) {
-  const dataModal = showDataModal ? (
-    <IntegrationDataModal close={() => setShowDataModal(false)} />
-  ) : null;
-  return (
-    <div>
-      <Eui.EuiFormRow label="Data Source" helpText="Manage data associated with this data source">
-        <Eui.EuiSelect
-          options={[
-            { value: 'test_s3', text: 'S3 connection name' },
-            { value: 'logs_idx', text: 'SS4O Logs Index' },
-          ]}
-          value={config.existingDataSourceName}
-          onChange={(evt) => updateConfig({ existingDataSourceName: evt.target.value })}
-        />
-      </Eui.EuiFormRow>
-      <Eui.EuiSpacer />
-      <Eui.EuiLink onClick={() => setShowDataModal(true)}>View table</Eui.EuiLink>
-      {dataModal}
-    </div>
-  );
-}
-
-export function SetupIntegrationDataSource({
-  config,
-  updateConfig,
-  showDataModal,
-  setShowDataModal,
-  tableDetected,
-  setTableDetected,
-}: {
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
-  showDataModal: boolean;
-  setShowDataModal: (show: boolean) => void;
-  tableDetected: boolean;
-  setTableDetected: (detected: boolean) => void;
-}) {
-  let tableForm;
-  if (tableDetected && config.useExisting) {
-    tableForm = (
-      <SetupIntegrationExistingTable
-        config={config}
-        updateConfig={updateConfig}
-        showDataModal={showDataModal}
-        setShowDataModal={(x) => setShowDataModal(x)}
-      />
-    );
-  } else {
-    tableForm = <SetupIntegrationNewTable config={config} updateConfig={updateConfig} />;
-  }
-
-  let tablesNotFoundMessage = null;
-  if (!tableDetected) {
-    tablesNotFoundMessage = (
-      <>
-        <Eui.EuiCallOut title="No tables were found" iconType="iInCircle">
-          <p>No problem, we can help. Tell us about your data.</p>
-        </Eui.EuiCallOut>
-        <Eui.EuiSpacer />
-      </>
-    );
-  }
-
-  return (
-    <div>
-      <Eui.EuiSwitch
-        label="(debug) Table detected"
-        checked={tableDetected}
-        onChange={(event) => setTableDetected(event.target.checked)}
-      />
-      <Eui.EuiSpacer size="xxl" />
-      <Eui.EuiForm>
-        <Eui.EuiTitle>
-          <h1>{STEPS[1].title}</h1>
-        </Eui.EuiTitle>
-        <Eui.EuiSpacer />
-        {tablesNotFoundMessage}
-        <Eui.EuiSwitch
-          label="Use existing Data Source"
-          checked={config.useExisting && tableDetected}
-          onChange={(evt) => updateConfig({ useExisting: evt.target.checked })}
-          disabled={!tableDetected}
-        />
-        <Eui.EuiSpacer />
-        {tableForm}
-      </Eui.EuiForm>
-    </div>
-  );
-}
-
-export function SetupIntegrationStep({
-  activeStep,
-  config,
-  updateConfig,
-}: {
-  activeStep: number;
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
-}) {
-  const [isDataModalVisible, setDataModalVisible] = useState(false);
-  const [tableDetected, setTableDetected] = useState(false);
-
-  switch (activeStep) {
-    case 0:
-      return (
-        <SetupIntegrationMetadata
-          name={config.instanceName}
-          setName={(name) => updateConfig({ instanceName: name })}
-        />
-      );
-    case 1:
-      return (
-        <SetupIntegrationDataSource
-          config={config}
-          updateConfig={updateConfig}
-          showDataModal={isDataModalVisible}
-          setShowDataModal={(show: boolean) => setDataModalVisible(show)}
-          tableDetected={tableDetected}
-          setTableDetected={(detected: boolean) => setTableDetected(detected)}
-        />
-      );
-    default:
-      return (
-        <Eui.EuiHeader>
-          Attempted to access integration setup step that doesn&apos;t exist. This is a bug.
-        </Eui.EuiHeader>
-      );
-  }
 }
 
 export function SetupBottomBar({
-  step,
-  setStep,
   config,
+  integration,
+  loading,
+  setLoading,
+  setSetupCallout,
 }: {
-  step: number;
-  setStep: (step: number) => void;
-  config: IntegrationConfig;
+  config: IntegrationSetupInputs;
+  integration: IntegrationTemplate;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  setSetupCallout: (setupCallout: SetupCallout) => void;
 }) {
+  // Drop-in replacement for setToast
+  const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
+    setSetupCallout({
+      show: true,
+      title,
+      color,
+      text,
+    });
+
   return (
-    <Eui.EuiBottomBar>
-      <Eui.EuiFlexGroup justifyContent="flexEnd">
-        <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton
-            color="danger"
-            iconType={'cross'}
+    <EuiBottomBar>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="text"
+            iconType="cross"
             onClick={() => {
               // TODO evil hack because props aren't set up
               let hash = window.location.hash;
@@ -317,76 +356,170 @@ export function SetupBottomBar({
               hash = hash.substring(0, hash.lastIndexOf('/setup'));
               window.location.hash = hash;
             }}
+            disabled={loading}
           >
-            Cancel
-          </Eui.EuiButton>
-        </Eui.EuiFlexItem>
-        <Eui.EuiFlexItem>
-          <Eui.EuiSpacer />
-        </Eui.EuiFlexItem>
-        {step > 0 ? (
-          <Eui.EuiFlexItem grow={false}>
-            <Eui.EuiButton iconType={'returnKey'} onClick={() => setStep(step - 1)}>
-              Back
-            </Eui.EuiButton>
-          </Eui.EuiFlexItem>
-        ) : null}
-        <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton
+            Discard
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
             fill
-            iconType={'check'}
-            onClick={() => {
-              if (step < STEPS.length - 1) {
-                setStep(step + 1);
+            iconType="arrowRight"
+            iconSide="right"
+            isLoading={loading}
+            disabled={
+              config.displayName.length < 1 ||
+              config.connectionDataSource.length < 1 ||
+              (config.connectionType === 's3' &&
+                (config.connectionTableName.length < 1 ||
+                  !config.connectionLocation.startsWith('s3://')))
+            }
+            onClick={async () => {
+              setLoading(true);
+              let sessionId: string | null = null;
+
+              if (config.connectionType === 'index') {
+                const res = await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setCalloutLikeToast,
+                  config.displayName,
+                  config.connectionDataSource
+                );
+                if (!res) {
+                  setLoading(false);
+                }
+              } else if (config.connectionType === 's3') {
+                const http = coreRefs.http!;
+
+                const assets = await http.get(
+                  `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+                );
+
+                // Queries must exist because we disable s3 if they're not present
+                for (const query of assets.data.queries!) {
+                  let queryStr = (query.query as string).replaceAll(
+                    '{table_name}',
+                    `${config.connectionDataSource}.default.${config.connectionTableName}`
+                  );
+                  // We append to this URI in internal queries, so we normalize it to have no trailing slash
+                  let trimmedLocation = config.connectionLocation.trim();
+                  trimmedLocation = trimmedLocation.endsWith('/')
+                    ? trimmedLocation.slice(0, trimmedLocation.length - 1)
+                    : trimmedLocation;
+
+                  queryStr = queryStr.replaceAll('{s3_bucket_location}', trimmedLocation);
+                  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+                  queryStr = queryStr.replaceAll(/\s+/g, ' ');
+                  const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
+                  if (!result.ok) {
+                    setLoading(false);
+                    setCalloutLikeToast(
+                      'Failed to add integration',
+                      'danger',
+                      result.error.message
+                    );
+                    return;
+                  }
+                  sessionId = result.value.sessionId ?? sessionId;
+                }
+                // Once everything is ready, add the integration to the new datasource as usual
+                // TODO determine actual values here after more about queries is known
+                const res = await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setCalloutLikeToast,
+                  config.displayName,
+                  `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
+                );
+                if (!res) {
+                  setLoading(false);
+                }
               } else {
-                console.log(config);
+                console.error('Invalid data source type');
               }
             }}
+            data-test-subj="create-instance-button"
           >
-            {step === STEPS.length - 1 ? 'Save' : 'Next'}
-          </Eui.EuiButton>
-        </Eui.EuiFlexItem>
-      </Eui.EuiFlexGroup>
-    </Eui.EuiBottomBar>
+            Add Integration
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 }
 
-export function SetupIntegrationStepsPage() {
-  const [integConfig, setConfig] = useState({
-    instanceName: '',
-    useExisting: true,
-    dataSourceName: '',
-    dataSourceDescription: '',
-    dataSourceFileType: 'parquet',
-    dataSourceLocation: '',
-    existingDataSourceName: '',
-  } as IntegrationConfig);
-  const [step, setStep] = useState(0);
+export function LoadingPage() {
+  return (
+    <>
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoOpenSearch" size="xl" />}
+        title={<h2>Setting Up the Integration</h2>}
+        body={<p>This can take several minutes.</p>}
+      />
+    </>
+  );
+}
 
-  const updateConfig = (updates: Partial<IntegrationConfig>) =>
+export function SetupIntegrationPage({ integration }: { integration: string }) {
+  const [integConfig, setConfig] = useState({
+    displayName: `${integration} Integration`,
+    connectionType: 'index',
+    connectionDataSource: '',
+    connectionLocation: '',
+    connectionTableName: integration,
+  } as IntegrationSetupInputs);
+
+  const [template, setTemplate] = useState({
+    name: integration,
+    type: '',
+    assets: {},
+  } as IntegrationTemplate);
+
+  const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    const getTemplate = async () => {
+      const http = coreRefs.http!;
+      const value = await http.get(INTEGRATIONS_BASE + `/repository/${integration}`);
+      setTemplate(value.data);
+    };
+    getTemplate();
+  }, [integration]);
+
+  const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
   return (
-    <Eui.EuiPage>
-      <Eui.EuiPageBody>
-        <Eui.EuiFlexGroup>
-          <Eui.EuiFlexItem>
-            <Eui.EuiSteps steps={getSetupStepStatus(step)} />
-          </Eui.EuiFlexItem>
-          <Eui.EuiFlexItem>
-            <SetupIntegrationStep
-              activeStep={step}
-              config={integConfig}
-              updateConfig={updateConfig}
-            />
-          </Eui.EuiFlexItem>
-        </Eui.EuiFlexGroup>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentBody>
+            {showLoading ? (
+              <LoadingPage />
+            ) : (
+              <SetupIntegrationForm
+                config={integConfig}
+                updateConfig={updateConfig}
+                integration={template}
+                setupCallout={setupCallout}
+              />
+            )}
+          </EuiPageContentBody>
+        </EuiPageContent>
         <SetupBottomBar
-          step={step}
-          setStep={(x) => setStep(Math.min(Math.max(x, 0), STEPS.length - 1))}
           config={integConfig}
+          integration={template}
+          loading={showLoading}
+          setLoading={setShowLoading}
+          setSetupCallout={setSetupCallout}
         />
-      </Eui.EuiPageBody>
-    </Eui.EuiPage>
+      </EuiPageBody>
+    </EuiPage>
   );
 }

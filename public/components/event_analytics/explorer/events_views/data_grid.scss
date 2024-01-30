@@ -61,7 +61,7 @@
       dt {
         background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
         color: $euiTextColor;
-        padding: ($euiSizeXS / 2) $euiSizeXS;
+        padding: calc($euiSizeXS / 2) $euiSizeXS;
         margin-right: $euiSizeXS;
         word-break: normal;
         border-radius: $euiBorderRadius;
@@ -225,9 +225,6 @@
 
   // SASSTODO: replace the z-index value with a variable
   .dscWrapper {
-    padding-left: $euiSizeXL;
-    padding-right: $euiSizeS;
-    margin-top: $euiSizeM;
     z-index: 1;
     @include euiBreakpoint('xs', 's', 'm') {
       padding-left: $euiSizeS;
@@ -488,4 +485,8 @@
   .osdDocViewer__warning {
     margin-right: $euiSizeS;
   }
+
+  .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__title.osdDescriptionListFieldTitle {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }  
 }

@@ -5,7 +5,7 @@
   "description": "AWS RDS",
   "license": "Apache-2.0",
   "type": "logs_rds",
-  "labels": ["log", "aws", "s3", "cloud", "rds"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_rds/info",
   "statics": {

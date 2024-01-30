@@ -18,14 +18,12 @@ module.exports = defineConfig({
   env: {
     opensearch: 'localhost:9200',
     opensearchDashboards: 'localhost:5601',
-    security_enabled: true,
+    security_enabled: false,
   },
   'cypress-watch-and-reload': {
     watch: ['common/**', 'public/**', 'server/**'],
   },
   e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
       return require('./.cypress/plugins/index.js')(on, config);
     },

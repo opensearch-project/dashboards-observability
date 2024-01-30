@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice, createSelector } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
   FILTERED_PATTERN,
   FINAL_QUERY,
   INDEX,
+  OLLY_QUERY_ASSISTANT,
   PATTERN_REGEX,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   RAW_QUERY,
@@ -28,6 +29,7 @@ const initialQueryState = {
   [FILTERED_PATTERN]: '',
   [SELECTED_TIMESTAMP]: '',
   [SELECTED_DATE_RANGE]: ['now-15m', 'now'],
+  [OLLY_QUERY_ASSISTANT]: '',
 };
 
 const appBaseQueryState = {
@@ -57,7 +59,7 @@ export const queriesSlice = createSlice({
         ...payload.query,
       };
     },
-    changeDateRange: (state, { payload }) => {
+    changeData: (state, { payload }) => {
       state[payload.tabId] = {
         ...state[payload.tabId],
         ...payload.data,
@@ -71,11 +73,16 @@ export const queriesSlice = createSlice({
     remove: (state, { payload }) => {
       delete state[payload.tabId];
     },
+    reset: (state, { payload }) => {
+      state[payload.tabId] = {
+        ...initialQueryState,
+      };
+    },
   },
-  extraReducers: (builder) => {},
+  extraReducers: () => {},
 });
 
-export const { changeQuery, changeDateRange, remove, init } = queriesSlice.actions;
+export const { changeQuery, changeData, remove, init, reset } = queriesSlice.actions;
 
 export const selectQueries = createSelector(
   (state) => state.queries,

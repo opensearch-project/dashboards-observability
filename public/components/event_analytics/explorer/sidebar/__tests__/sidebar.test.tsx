@@ -3,25 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import { useDispatch, Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { waitFor } from '@testing-library/react';
+import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { Sidebar } from '../sidebar';
+import { Provider, useDispatch } from 'react-redux';
+import { applyMiddleware, createStore } from 'redux';
+import thunk from 'redux-thunk';
 import {
-  SELECTED_FIELDS,
   AVAILABLE_FIELDS,
-  UNSELECTED_FIELDS,
   QUERIED_FIELDS,
+  SELECTED_FIELDS,
+  UNSELECTED_FIELDS,
 } from '../../../../../../common/constants/explorer';
+import { initialTabId } from '../../../../../../public/framework/redux/store/shared_state';
 import {
   AVAILABLE_FIELDS as SIDEBAR_AVAILABLE_FIELDS,
-  QUERY_FIELDS,
   JSON_DATA,
   JSON_DATA_ALL,
+  QUERY_FIELDS,
 } from '../../../../../../test/event_analytics_constants';
+import { rootReducer } from '../../../../../framework/redux/reducers';
+import { Sidebar } from '../sidebar';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -58,6 +62,13 @@ describe('Siderbar component', () => {
           handleOverrideTimestamp={handleOverrideTimestamp}
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
+          query={''}
+          selectedPattern={''}
+          isOverridingPattern={false}
+          handleOverridePattern={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+          tabId={initialTabId}
         />
       </Provider>
     );
@@ -82,9 +93,10 @@ describe('Siderbar component', () => {
       jsonData: JSON_DATA,
       jsonDataAll: JSON_DATA_ALL,
     };
+    const astore = createStore(rootReducer, applyMiddleware(thunk));
 
     const wrapper = mount(
-      <Provider store={store}>
+      <Provider store={astore}>
         <Sidebar
           explorerFields={explorerFields}
           explorerData={explorerData}
@@ -92,6 +104,13 @@ describe('Siderbar component', () => {
           handleOverrideTimestamp={handleOverrideTimestamp}
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
+          tabId={initialTabId}
+          query={''}
+          selectedPattern={''}
+          isOverridingPattern={false}
+          handleOverridePattern={function (): void {
+            throw new Error('Function not implemented.');
+          }}
         />
       </Provider>
     );

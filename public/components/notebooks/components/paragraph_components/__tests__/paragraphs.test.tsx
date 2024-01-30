@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { sampleParsedParagraghs1 } from '../../helpers/__tests__/sampleDefaultNotebooks';
+import { getOSDHttp } from '../../../../../../common/utils';
+import { sampleParsedParagraghs1 } from '../../../../../../test/notebooks_constants';
 import { Paragraphs } from '../paragraphs';
 
 jest.mock('../../../../../../../../src/plugins/embeddable/public', () => ({
@@ -41,7 +41,7 @@ describe('<Paragraphs /> spec', () => {
         ref={jest.fn()}
         para={para}
         setPara={setPara}
-        dateModified={'modified-date'}
+        dateModified="2023-11-01 01:02:03"
         index={0}
         paraCount={2}
         paragraphSelector={paragraphSelector}
@@ -50,7 +50,7 @@ describe('<Paragraphs /> spec', () => {
         addPara={addPara}
         DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
         deleteVizualization={deleteVizualization}
-        http={httpClientMock}
+        http={getOSDHttp()}
         selectedViewId="view_both"
         setSelectedViewId={setSelectedViewId}
         deletePara={deletePara}
@@ -63,11 +63,11 @@ describe('<Paragraphs /> spec', () => {
     );
     expect(utils.container.firstChild).toMatchSnapshot();
 
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Run input').click()
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Duplicate').click()
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Delete').click()
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Run input').click();
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Duplicate').click();
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Delete').click();
   });
 });

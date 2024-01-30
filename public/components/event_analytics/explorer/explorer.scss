@@ -4,7 +4,7 @@
  */
 
 .liveStream {
-  margin : 8px;
+  margin: 8px;
   height: 40px;
   align-items: center;
   justify-content: center;
@@ -15,5 +15,15 @@
 }
 
 .mainContentTabs .euiResizableContainer {
-  height: calc(100vh - 298px);
+  height: calc(100vh - 194px);
+}
+
+.explorer-loading-spinner {
+  position: relative;
+  left: 50%;
+  top: 50vh;
+  width: 20px;
+  height: 20px;
+  margin-left: -5vw;
+  margin-top: -20vh;
 }

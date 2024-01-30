@@ -5,7 +5,7 @@
   "description": "Kubernetes web logs collector",
   "license": "Apache-2.0",
   "type": "logs-k8s",
-  "labels": ["log", "k8s", "cloud", "container"],
+  "labels": ["Observability", "Logs", "Cloud"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/k8s/info",
   "statics": {

@@ -2,12 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-unused-vars */
 
-import { has, isEmpty, isArray } from 'lodash';
-import { IField } from 'common/types/explorer';
+import { has, isArray, isEmpty } from 'lodash';
+import { IField } from '../../../../common/types/explorer';
 import {
-  OBSERVABILITY_BASE,
   EVENT_ANALYTICS,
+  OBSERVABILITY_BASE,
   SAVED_OBJECTS,
   SAVED_QUERY,
   SAVED_VISUALIZATION,
@@ -58,6 +59,7 @@ export default class SavedObjects {
     applicationId = '',
     userConfigs = '',
     subType = '',
+    metricType = '',
     unitsOfMeasure = '',
     selectedLabels,
   }: any) {
@@ -91,11 +93,15 @@ export default class SavedObjects {
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {
-      objRequest.object.sub_type = subType;
+      objRequest.object.subType = subType;
+    }
+
+    if (!isEmpty(metricType)) {
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {
@@ -161,6 +167,7 @@ export default class SavedObjects {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
     });
@@ -224,6 +231,7 @@ export default class SavedObjects {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
     });

@@ -17,5 +17,7 @@
     "uiActions",
     "urlForwarding",
     "visualizations"
-  ]
+  ],
+  "optionalPlugins": ["managementOverview", "assistantDashboards"],
+  "configPath": ["observability"]
 }

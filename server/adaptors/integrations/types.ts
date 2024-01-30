@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+type Result<T, E = Error> =
+  | { ok: true; value: T; error?: undefined }
+  | { ok: false; error: E; value?: undefined };
 
 interface IntegrationConfig {
   name: string;
@@ -15,22 +17,63 @@ interface IntegrationConfig {
   author?: string;
   description?: string;
   sourceUrl?: string;
-  statics?: {
-    logo?: StaticAsset;
-    gallery?: StaticAsset[];
-    darkModeLogo?: StaticAsset;
-    darkModeGallery?: StaticAsset[];
-  };
+  statics?: IntegrationStatics;
   components: IntegrationComponent[];
-  assets: {
-    savedObjects?: {
-      name: string;
-      version: string;
-    };
-  };
+  assets: IntegrationAssets;
   sampleData?: {
     path: string;
   };
+}
+
+// IntegrationConfig extended with local copies of all data
+interface SerializedIntegration extends IntegrationConfig {
+  statics?: SerializedIntegrationStatics;
+  components: SerializedIntegrationComponent[];
+  assets: SerializedIntegrationAssets;
+  sampleData?: {
+    path: string;
+    data: string;
+  };
+}
+
+interface IntegrationStatics {
+  logo?: StaticAsset;
+  gallery?: StaticAsset[];
+  darkModeLogo?: StaticAsset;
+  darkModeGallery?: StaticAsset[];
+}
+
+interface SerializedIntegrationStatics {
+  logo?: SerializedStaticAsset;
+  gallery?: SerializedStaticAsset[];
+  darkModeLogo?: SerializedStaticAsset;
+  darkModeGallery?: SerializedStaticAsset[];
+}
+
+interface IntegrationAssets {
+  savedObjects?: {
+    name: string;
+    version: string;
+  };
+  queries?: Array<{
+    name: string;
+    version: string;
+    language: string;
+  }>;
+}
+
+interface SerializedIntegrationAssets extends IntegrationAssets {
+  savedObjects?: {
+    name: string;
+    version: string;
+    data: string;
+  };
+  queries?: Array<{
+    name: string;
+    version: string;
+    language: string;
+    data: string;
+  }>;
 }
 
 interface StaticAsset {
@@ -38,9 +81,17 @@ interface StaticAsset {
   path: string;
 }
 
+interface SerializedStaticAsset extends StaticAsset {
+  data: string;
+}
+
 interface IntegrationComponent {
   name: string;
   version: string;
+}
+
+interface SerializedIntegrationComponent extends IntegrationComponent {
+  data: string;
 }
 
 interface DisplayAsset {

@@ -119,14 +119,6 @@ $vis-editor-sidebar-min-width: 350px;
   }
 }
 
-.euiComboBoxOptionsList__rowWrap {
-  max-height: 250px;
-}
-
-.euiComboBoxOptionsList__rowWrap>div {
-  height: 250px !important;
-}
-
 .cp__rightContainer {
   display: grid;
   
@@ -158,6 +150,7 @@ $vis-editor-sidebar-min-width: 350px;
 
 #vis__mainContent .vis__leftPanel {
   overflow-y: unset; // unset default setting
+  margin-right: 8px;
 }
 
 .panelItem_button {
@@ -166,6 +159,15 @@ $vis-editor-sidebar-min-width: 350px;
   grid-gap: $euiSizeS;
   padding: $euiSizeS $euiSizeM;
   align-items: center;
+}
+
+.panelItem_box {
+  color: #5A6875;
+  display: grid;
+  grid-gap: 4px;
+  padding: 8px 8px 8px 8px;
+  background-color: #D6D9DD;
+  border-radius: 4px;
 }
 
 .field_text {
@@ -193,5 +195,10 @@ $vis-editor-sidebar-min-width: 350px;
 .explorer-dark {
   .panel_section, .cp__rightHeader {
     border-bottom: 1px solid $border-color-on-dark;
+  }
+
+  .panelItem_box {
+    color: #8D98A3;
+    background-color: #293847;
   }
 }

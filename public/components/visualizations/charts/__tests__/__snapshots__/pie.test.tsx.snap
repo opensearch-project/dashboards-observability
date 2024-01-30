@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Pie component Renders pie component 1`] = `
-<Component
+<Pie
   config={Object {}}
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -686,7 +686,7 @@ exports[`Pie component Renders pie component 1`] = `
     layout={
       Object {
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "grid": Object {
           "columns": 0,
@@ -733,7 +733,7 @@ exports[`Pie component Renders pie component 1`] = `
           "autosize": true,
           "barmode": "stack",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "grid": Object {
             "columns": 0,
@@ -799,5 +799,5 @@ exports[`Pie component Renders pie component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</Pie>
 `;

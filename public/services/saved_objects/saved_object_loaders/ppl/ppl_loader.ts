@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { has, isEmpty } from 'lodash';
-import { updateFields as updateFieldsAction } from 'public/components/event_analytics/redux/slices/field_slice';
-import { changeQuery as changeQueryAction } from 'public/components/event_analytics/redux/slices/query_slice';
-import { updateTabName as updateTabNameAction } from 'public/components/event_analytics/redux/slices/query_tab_slice';
-import { change as updateVizConfigAction } from 'public/components/event_analytics/redux/slices/viualization_config_slice';
+import { isEmpty } from 'lodash';
 import { batch as Batch } from 'react-redux';
+import { updateFields as updateFieldsAction } from '../../../../components/event_analytics/redux/slices/field_slice';
+import { changeQuery as changeQueryAction } from '../../../../components/event_analytics/redux/slices/query_slice';
+import { updateTabName as updateTabNameAction } from '../../../../components/event_analytics/redux/slices/query_tab_slice';
+import { change as updateVizConfigAction } from '../../../../components/event_analytics/redux/slices/viualization_config_slice';
+import { update as updateSearchMetaData } from '../../../../components/event_analytics/redux/slices/search_meta_data_slice';
 import { NotificationsStart } from '../../../../../../../src/core/public';
 import {
   AGGREGATIONS,
@@ -27,6 +28,7 @@ import {
 import { QueryManager } from '../../../../../common/query_manager';
 import { statsChunk } from '../../../../../common/query_manager/ast/types/stats';
 import { IField, SavedQuery, SavedVisualization } from '../../../../../common/types/explorer';
+import { getUserConfigFrom } from '../../../../common/utils/helpers';
 import { AppDispatch } from '../../../../framework/redux/store';
 import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
 import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../../saved_object_client/types';
@@ -59,6 +61,7 @@ interface LoadContext {
   setSubType: (type: string) => void;
   setSelectedContentTab: (curTab: string) => void;
   fetchData: () => void;
+  dataSources: SelectedDataSource[];
 }
 
 interface Dispatchers {
@@ -179,6 +182,15 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
           tabName: objectData.name,
         })
       );
+      await dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            datasources: [JSON.parse(objectData.data_sources)],
+            lang: objectData.query_lang,
+          },
+        })
+      );
       if (isInnerObjectSavedVisualization(objectData)) {
         await this.updateVisualizationConfig(objectData);
       }
@@ -190,7 +202,8 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
+    const customConfig = getUserConfigFrom(objectData);
+
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {
@@ -223,11 +236,11 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
       return objectData?.query || staleTempQuery;
     });
     if (isInnerObjectSavedVisualization(objectData)) {
-      if (objectData.sub_type === 'metric') {
+      if (objectData.subType === 'metric') {
         setMetricChecked(true);
         setMetricMeasure(objectData.units_of_measure || '');
       }
-      setSubType(objectData.sub_type);
+      setSubType(objectData.subType);
     }
     const tabToBeFocused = isInnerObjectSavedVisualization(objectData)
       ? TYPE_TAB_MAPPING[SAVED_VISUALIZATION]

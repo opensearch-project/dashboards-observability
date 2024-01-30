@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OPENSEARCH_PANELS_API } from '../../common/constants/shared';
+import { JOBS_ENDPOINT_BASE, OPENSEARCH_PANELS_API } from '../../common/constants/shared';
 
 export function OpenSearchObservabilityPlugin(Client: any, config: any, components: any) {
   const clientAction = components.clientAction.factory;
@@ -115,5 +115,42 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
       },
     },
     method: 'DELETE',
+  });
+
+  // Get async job status
+  observability.getJobStatus = clientAction({
+    url: {
+      fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
+      req: {
+        queryId: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'GET',
+  });
+
+  // Delete async job
+  observability.deleteJob = clientAction({
+    url: {
+      fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
+      req: {
+        queryId: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'DELETE',
+  });
+
+  // Run async job
+  observability.runDirectQuery = clientAction({
+    url: {
+      fmt: `${JOBS_ENDPOINT_BASE}`,
+    },
+    method: 'POST',
+    needBody: true,
   });
 }
