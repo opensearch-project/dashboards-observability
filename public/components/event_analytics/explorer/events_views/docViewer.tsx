@@ -103,7 +103,7 @@ export function DocViewer(props: IDocViewerProps) {
       setTracesLink(
         <EuiLink
           className="trace-link"
-          href={`${observabilityTracesID}#/${traceId}`}
+          href={`${observabilityTracesID}#/traces/${traceId}`}
           target="_blank"
           external
         />
