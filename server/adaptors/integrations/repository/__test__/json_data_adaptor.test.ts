@@ -113,4 +113,13 @@ describe('JSON Data Adaptor', () => {
     const adaptor = new JsonCatalogDataAdaptor([]);
     await expect(adaptor.getDirectoryType()).resolves.toBe('unknown');
   });
+
+  // Bug: a previous regex for version finding counted the `8` in `k8s-1.0.0.json` as the version
+  it('Should correctly read a config with a number in the name', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    await expect(adaptor.readFile('sample2-2.1.0.json')).resolves.toMatchObject({
+      ok: true,
+      value: TEST_CATALOG_NO_SERIALIZATION[2],
+    });
+  });
 });
