@@ -24,14 +24,16 @@ jobs:
         os: [ubuntu-latest]
         java: [11]
         testgroups:
-          [app_analytics_test]
-          # datasources_test,
-          # event_analytics_test,
-          # integrations_test,
-          # metrics_analytics_test,
-          # notebooks_test,
-          # panels_test,
-          # trace_analytics_test
+          [
+            app_analytics_test,
+            datasources_test,
+            event_analytics_test,
+            integrations_test,
+            metrics_analytics_test,
+            notebooks_test,
+            panels_test,
+            trace_analytics_test,
+          ]
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
