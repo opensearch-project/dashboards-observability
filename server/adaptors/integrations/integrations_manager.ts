@@ -22,8 +22,8 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     this.repository =
       repository ??
       new TemplateManager([
-        new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository')),
         new IndexDataAdaptor(this.client),
+        new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository')),
       ]);
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }

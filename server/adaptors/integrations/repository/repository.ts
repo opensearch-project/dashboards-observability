@@ -17,7 +17,17 @@ export class TemplateManager {
     const lists = await Promise.all(
       this.readers.map((reader) => this.getReaderIntegrationList(reader))
     );
-    return lists.flat();
+    const flattened = lists.flat();
+
+    // If there are collisions by name, prioritize earlier readers over later ones.
+    const seen = new Set();
+    return flattened.filter((item) => {
+      if (seen.has(item.name)) {
+        return false;
+      }
+      seen.add(item.name);
+      return true;
+    });
   }
 
   private async getReaderIntegrationList(reader: CatalogDataAdaptor): Promise<IntegrationReader[]> {
