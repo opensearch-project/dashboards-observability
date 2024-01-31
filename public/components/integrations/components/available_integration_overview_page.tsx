@@ -21,7 +21,6 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
-import { useToast } from '../../../../public/components/common/toast';
 import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
@@ -57,6 +56,7 @@ export interface AvailableIntegrationsCardViewProps {
   setQuery: (input: string) => void;
   renderCateogryFilters: () => React.JSX.Element;
   http: HttpStart;
+  loading: boolean;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
@@ -64,8 +64,8 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
 
   const [query, setQuery] = useState('');
   const [isCardView, setCardView] = useState(true);
-  const { setToast } = useToast();
   const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -116,6 +116,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   async function handleDataRequest() {
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setData(exists.data);
+      setLoading(false);
 
       let newItems = exists.data.hits.flatMap(
         (hit: { labels?: string[] }) => hit.labels?.sort() ?? []
@@ -128,24 +129,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       });
       setItems(newItems);
     });
-  }
-
-  async function addIntegrationRequest(name: string) {
-    http
-      .post(`${INTEGRATIONS_BASE}/store`)
-      .then((res) => {
-        setToast(
-          `${name} integration successfully added!`,
-          'success',
-          `View the added assets from ${name} in the Added Integrations list`
-        );
-      })
-      .catch((err) =>
-        setToast(
-          'Failed to load integration. Check Added Integrations table for more details',
-          'danger'
-        )
-      );
   }
 
   const renderCateogryFilters = () => {
@@ -180,7 +163,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   return (
     <EuiPage>
       <EuiPageBody>
-        {IntegrationHeader()}
+        <IntegrationHeader />
         {isCardView
           ? AvailableIntegrationsCardView({
               data: {
@@ -192,6 +175,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               setQuery,
               renderCateogryFilters,
               http,
+              loading,
             })
           : AvailableIntegrationsTable({
               loading: false,

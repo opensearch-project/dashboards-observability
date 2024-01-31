@@ -11,6 +11,8 @@ import {
   EuiSpacer,
   EuiFieldSearch,
   EuiButtonGroup,
+  EuiText,
+  EuiLoadingDashboards,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
@@ -20,11 +22,47 @@ import {
 } from './available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
+import { HttpSetup } from '../../../../../../src/core/public';
 
-export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const http = props.http;
-  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
+function NoIntegrationsAvailable() {
+  return (
+    <>
+      <EuiSpacer size="xxl" />
+      <EuiText textAlign="center">
+        <h2>No Integrations Available</h2>
+        <p>
+          You can get bundles from{' '}
+          <a href="https://github.com/opensearch-project/opensearch-catalog">
+            the OpenSearch Catalog.
+          </a>
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+    </>
+  );
+}
 
+function LoadingIntegrations() {
+  return (
+    <>
+      <EuiSpacer size="xxl" />
+      <EuiText textAlign="center">
+        <EuiLoadingDashboards size="xxl" />
+        <p>Loading Integrations...</p>
+      </EuiText>
+    </>
+  );
+}
+
+function RenderRows({
+  loading,
+  integrations,
+  http,
+}: {
+  loading: boolean;
+  integrations: AvailableIntegrationType[];
+  http: HttpSetup;
+}) {
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
@@ -34,6 +72,39 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     }
     return optionalImg;
   };
+
+  if (loading) return <LoadingIntegrations />;
+  if (!integrations.length) return <NoIntegrationsAvailable />;
+  return (
+    <>
+      <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
+        {integrations.map((i, v) => {
+          return (
+            <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
+              <EuiCard
+                icon={getImage(
+                  http.basePath.prepend(
+                    `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                  )
+                )}
+                title={i.displayName ? i.displayName : i.name}
+                description={i.description}
+                data-test-subj={`integration_card_${i.name.toLowerCase()}`}
+                titleElement="span"
+                onClick={() => (window.location.hash = `#/available/${i.name}`)}
+                footer={badges(i.labels ?? [])}
+              />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+      <EuiSpacer />
+    </>
+  );
+}
+
+export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const toggleButtonsIcons = [
     {
@@ -55,36 +126,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     } else {
       props.setCardView(true);
     }
-  };
-
-  const renderRows = (integrations: AvailableIntegrationType[]) => {
-    if (!integrations || !integrations.length) return null;
-    return (
-      <>
-        <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
-          {integrations.map((i, v) => {
-            return (
-              <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
-                <EuiCard
-                  icon={getImage(
-                    http.basePath.prepend(
-                      `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
-                    )
-                  )}
-                  title={i.displayName ? i.displayName : i.name}
-                  description={i.description}
-                  data-test-subj={`integration_card_${i.name.toLowerCase()}`}
-                  titleElement="span"
-                  onClick={() => (window.location.hash = `#/available/${i.name}`)}
-                  footer={badges(i.labels ?? [])}
-                />
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </>
-    );
   };
 
   return (
@@ -113,7 +154,11 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {renderRows(props.data.hits.filter((x) => x.name.includes(props.query)))}
+      <RenderRows
+        loading={props.loading}
+        integrations={props.data.hits.filter((x) => x.name.includes(props.query))}
+        http={props.http}
+      />
     </EuiPanel>
   );
 }

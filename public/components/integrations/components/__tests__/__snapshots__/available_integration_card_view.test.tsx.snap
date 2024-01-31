@@ -444,6 +444,54 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           className="euiSpacer euiSpacer--l"
         />
       </EuiSpacer>
+      <RenderRows
+        integrations={Array []}
+      >
+        <NoIntegrationsAvailable>
+          <EuiSpacer
+            size="xxl"
+          >
+            <div
+              className="euiSpacer euiSpacer--xxl"
+            />
+          </EuiSpacer>
+          <EuiText
+            textAlign="center"
+          >
+            <div
+              className="euiText euiText--medium"
+            >
+              <EuiTextAlign
+                textAlign="center"
+              >
+                <div
+                  className="euiTextAlign euiTextAlign--center"
+                >
+                  <h2>
+                    No Integrations Available
+                  </h2>
+                  <p>
+                    You can get bundles from
+                     
+                    <a
+                      href="https://github.com/opensearch-project/opensearch-catalog"
+                    >
+                      the OpenSearch Catalog.
+                    </a>
+                  </p>
+                </div>
+              </EuiTextAlign>
+            </div>
+          </EuiText>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+        </NoIntegrationsAvailable>
+      </RenderRows>
     </div>
   </EuiPanel>
 </AvailableIntegrationsCardView>
