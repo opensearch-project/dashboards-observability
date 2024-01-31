@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Trace Detail Render Flyout component render trace detail 1`] = `
-<Component
+<TraceDetailRender
   http={[MockFunction]}
   mode="jaeger"
   openSpanFlyout={[Function]}
@@ -1148,5 +1148,5 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
       className="euiSpacer euiSpacer--s"
     />
   </EuiSpacer>
-</Component>
+</TraceDetailRender>
 `;
