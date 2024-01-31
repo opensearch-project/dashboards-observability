@@ -7,7 +7,7 @@ import { IntegrationsManager } from '../integrations_manager';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../../src/core/server/types';
 import { TemplateManager } from '../repository/repository';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { IntegrationReader } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration_reader';
 import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 
 describe('IntegrationsKibanaBackend', () => {
