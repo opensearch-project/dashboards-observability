@@ -551,6 +551,7 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="renameApplicationContextMenuItem"]').should('be.disabled');
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
     cy.get('.euiTableRow').first().find('.euiCheckbox').click();
+    cy.wait(2000); // checkbox being clicked has a small delay before enabling action button
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
     cy.get('[data-test-subj="renameApplicationContextMenuItem"]').click();
     cy.get('[data-test-subj="customModalFieldText"]').clear().click().type(newName);
