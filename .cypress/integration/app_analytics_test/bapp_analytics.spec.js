@@ -274,7 +274,6 @@ describe('Viewing application', () => {
     moveToHomePage();
     cy.intercept('GET', 'http://localhost:5601/api/observability/operational_panels/panels/**').as('loadingPanels')
     cy.wait('@loadingPanels');
-    cy.wait('@loadingPanels');
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
     moveToApplication(nameOne);
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
@@ -412,7 +411,7 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplicationContextMenuItem"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('.euiToast').contains(`Applications successfully deleted!`);
+    cy.get('.euiToast').contains(`Application "${nameOne}" successfully deleted!`);
     cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
   });
 });
