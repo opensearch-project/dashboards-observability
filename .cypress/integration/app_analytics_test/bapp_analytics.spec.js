@@ -413,7 +413,7 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplicationContextMenuItem"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('.euiToast').contains(`Application "${nameOne}" successfully deleted!`);
+    cy.get('.euiToast').contains(`Application "${newName}" successfully deleted!`);
     cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
   });
 });
