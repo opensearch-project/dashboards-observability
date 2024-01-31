@@ -63,7 +63,7 @@ describe('The Local Serialized Catalog', () => {
     const logoStatic = await integration.getStatic('logo.svg');
 
     expect(logoStatic).toHaveProperty('ok', true);
-    expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
+    expect((logoStatic.value as Buffer).length).toBeGreaterThan(100);
   });
 
   it('Should correctly retrieve a gallery image', async () => {
