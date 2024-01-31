@@ -433,6 +433,7 @@ describe('Viewing application', () => {
     cy.get('select').select(visOneName);
     cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
     cy.wait('@selectUpdate')
+    cy.wait(2000);
     moveToHomePage();
     cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.wait('@loadingPanels');
