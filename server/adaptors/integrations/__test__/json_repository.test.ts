@@ -15,7 +15,7 @@ import { JsonCatalogDataAdaptor } from '../repository/json_data_adaptor';
 import { deepCheck, foldResults } from '../repository/utils';
 
 const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegration[], Error>> => {
-  const directory = path.join(__dirname, '../__data__/repository');
+  const directory = path.join(__dirname, '../__test__/__data__/repository');
   const folders = await fs.readdir(directory);
   const readers = await Promise.all(
     folders.map(async (folder) => {

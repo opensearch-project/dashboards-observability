@@ -30,7 +30,7 @@ const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
 describe('JSON Data Adaptor', () => {
   it('Should be able to deserialize a serialized integration', async () => {
     const repository: TemplateManager = new TemplateManager([
-      new FileSystemDataAdaptor(path.join(__dirname, '../../__data__/repository')),
+      new FileSystemDataAdaptor(path.join(__dirname, '../../__test__/__data__/repository')),
     ]);
     const fsIntegration: IntegrationReader = (await repository.getIntegration('nginx'))!;
     const fsConfig = await fsIntegration.getConfig();

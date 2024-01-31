@@ -15,12 +15,12 @@ import { deepCheck } from '../repository/utils';
 import { FileSystemDataAdaptor } from '../repository/fs_data_adaptor';
 
 const repository: TemplateManager = new TemplateManager([
-  new FileSystemDataAdaptor(path.join(__dirname, '../__data__/repository')),
+  new FileSystemDataAdaptor(path.join(__dirname, './__data__/repository')),
 ]);
 
 describe('The local repository', () => {
   it('Should only contain valid integration directories or files.', async () => {
-    const directory = path.join(__dirname, '../__data__/repository');
+    const directory = path.join(__dirname, './__data__/repository');
     const folders = await fs.readdir(directory);
     await Promise.all(
       folders.map(async (folder) => {
