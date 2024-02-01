@@ -5,6 +5,7 @@
 
 const QUERY_ASSIST_API_PREFIX = '/api/observability/query_assist';
 export const QUERY_ASSIST_API = {
+  CONFIGURED: `${QUERY_ASSIST_API_PREFIX}/configured`,
   GENERATE_PPL: `${QUERY_ASSIST_API_PREFIX}/generate_ppl`,
   SUMMARIZE: `${QUERY_ASSIST_API_PREFIX}/summarize`,
 };
