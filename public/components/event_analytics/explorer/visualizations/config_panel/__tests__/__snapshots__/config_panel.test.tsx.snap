@@ -675,6 +675,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         aria-label="config chart selector"
         async={false}
         compressed={false}
+        data-test-subj="visConfigPanel__visTypeSelector"
         fullWidth={true}
         isClearable={false}
         onChange={[Function]}
@@ -2692,6 +2693,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
           aria-haspopup="listbox"
           aria-label="config chart selector"
           className="euiComboBox euiComboBox--fullWidth"
+          data-test-subj="visConfigPanel__visTypeSelector"
           onKeyDown={[Function]}
           role="combobox"
         >

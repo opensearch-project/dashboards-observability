@@ -1194,6 +1194,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -1221,6 +1222,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -1229,6 +1231,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -1600,6 +1603,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -1627,6 +1631,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -1635,6 +1640,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -2006,6 +2012,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -2033,6 +2040,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -2041,6 +2049,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -2412,6 +2421,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -2439,6 +2449,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -2447,6 +2458,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -2818,6 +2830,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -2845,6 +2858,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -2853,6 +2867,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -3224,6 +3239,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -3251,6 +3267,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -3259,6 +3276,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -3848,6 +3866,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -3875,6 +3894,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -3883,6 +3903,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -4255,6 +4276,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -4282,6 +4304,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -4290,6 +4313,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -4662,6 +4686,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -4689,6 +4714,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -4697,6 +4723,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -5069,6 +5096,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -5096,6 +5124,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -5104,6 +5133,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -5536,6 +5566,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -5563,6 +5594,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -5571,6 +5603,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -5943,6 +5976,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -5970,6 +6004,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -5978,6 +6013,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -6410,6 +6446,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -6437,6 +6474,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -6445,6 +6483,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -6877,6 +6916,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -6904,6 +6944,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -6912,6 +6953,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -7284,6 +7326,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -7311,6 +7354,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -7319,6 +7363,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -7691,6 +7736,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -7718,6 +7764,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -7726,6 +7773,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -8098,6 +8146,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -8125,6 +8174,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -8133,6 +8183,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -8565,6 +8616,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -8592,6 +8644,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -8600,6 +8653,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -8972,6 +9026,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -8999,6 +9054,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -9007,6 +9063,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -9439,6 +9496,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -9466,6 +9524,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -9474,6 +9533,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -9906,6 +9966,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -9933,6 +9994,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -9941,6 +10003,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -10373,6 +10436,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -10400,6 +10464,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -10408,6 +10473,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -10840,6 +10906,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -10867,6 +10934,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -10875,6 +10943,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -11288,6 +11357,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -11315,6 +11385,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -11323,6 +11394,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -11755,6 +11827,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -11782,6 +11855,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -11790,6 +11864,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"
@@ -12222,6 +12297,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           <EuiButtonIcon
                                                                             aria-label="inspect"
                                                                             className="dscSidebarField__actionButton"
+                                                                            data-test-subj="explorerSidebarItem__fieldInspect"
                                                                             iconType="inspect"
                                                                             isDisabled={false}
                                                                             onClick={[Function]}
@@ -12249,6 +12325,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                             <EuiButtonIcon
                                                                               aria-label="inspect"
                                                                               className="dscSidebarField__actionButton"
+                                                                              data-test-subj="explorerSidebarItem__fieldInspect"
                                                                               iconType="inspect"
                                                                               isDisabled={false}
                                                                               onClick={[Function]}
@@ -12257,6 +12334,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               <button
                                                                                 aria-label="inspect"
                                                                                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                                                                                data-test-subj="explorerSidebarItem__fieldInspect"
                                                                                 disabled={false}
                                                                                 onClick={[Function]}
                                                                                 type="button"

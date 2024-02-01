@@ -19,12 +19,14 @@ exports[`Datagrid Doc viewer row component Renders Doc viewer row component 1`] 
 >
   <EuiButtonIcon
     aria-label="inspect document details"
+    data-test-subj="dataGrid__openFlyoutBtn"
     iconType="inspect"
     onClick={[Function]}
   >
     <button
       aria-label="inspect document details"
       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+      data-test-subj="dataGrid__openFlyoutBtn"
       disabled={false}
       onClick={[Function]}
       type="button"

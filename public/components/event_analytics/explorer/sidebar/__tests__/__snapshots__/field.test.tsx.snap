@@ -225,6 +225,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                     <EuiButtonIcon
                       aria-label="inspect"
                       className="dscSidebarField__actionButton"
+                      data-test-subj="explorerSidebarItem__fieldInspect"
                       iconType="inspect"
                       isDisabled={true}
                       onClick={[Function]}
@@ -252,6 +253,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                       <EuiButtonIcon
                         aria-label="inspect"
                         className="dscSidebarField__actionButton"
+                        data-test-subj="explorerSidebarItem__fieldInspect"
                         iconType="inspect"
                         isDisabled={true}
                         onClick={[Function]}
@@ -260,6 +262,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                         <button
                           aria-label="inspect"
                           className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                          data-test-subj="explorerSidebarItem__fieldInspect"
                           disabled={true}
                           onClick={[Function]}
                           type="button"
