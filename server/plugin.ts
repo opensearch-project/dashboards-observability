@@ -12,6 +12,7 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObject,
   SavedObjectsType,
 } from '../../../src/core/server';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
@@ -85,7 +86,10 @@ export class ObservabilityPlugin
       migrations: {
         '3.0.0': (doc) => ({ ...doc, description: '' }),
         '3.0.1': (doc) => ({ ...doc, description: 'Some Description Text' }),
-        '3.0.2': (doc) => ({ ...doc, dateCreated: parseInt(doc.dateCreated || '0', 10) }),
+        '3.0.2': (doc) => ({
+          ...doc,
+          dateCreated: parseInt((doc as { dateCreated?: string }).dateCreated || '0', 10),
+        }),
       },
     };
 
@@ -93,6 +97,18 @@ export class ObservabilityPlugin
       name: 'integration-instance',
       hidden: false,
       namespaceType: 'single',
+      management: {
+        importableAndExportable: true,
+        getInAppUrl(obj: SavedObject<IntegrationInstance>) {
+          return {
+            path: `/app/integrations#/installed/${obj.id}`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj: SavedObject<IntegrationInstance>) {
+          return obj.attributes.name;
+        },
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -115,8 +131,71 @@ export class ObservabilityPlugin
       },
     };
 
+    const integrationTemplateType: SavedObjectsType = {
+      name: 'integration-template',
+      hidden: false,
+      namespaceType: 'single',
+      management: {
+        importableAndExportable: true,
+        getInAppUrl(obj: SavedObject<SerializedIntegration>) {
+          return {
+            path: `/app/integrations#/available/${obj.attributes.name}`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj: SavedObject<SerializedIntegration>) {
+          return obj.attributes.displayName ?? obj.attributes.name;
+        },
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          name: {
+            type: 'text',
+          },
+          version: {
+            type: 'text',
+          },
+          displayName: {
+            type: 'text',
+          },
+          license: {
+            type: 'text',
+          },
+          type: {
+            type: 'text',
+          },
+          labels: {
+            type: 'text',
+          },
+          author: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+          sourceUrl: {
+            type: 'text',
+          },
+          statics: {
+            type: 'nested',
+          },
+          components: {
+            type: 'nested',
+          },
+          assets: {
+            type: 'nested',
+          },
+          sampleData: {
+            type: 'nested',
+          },
+        },
+      },
+    };
+
     core.savedObjects.registerType(obsPanelType);
     core.savedObjects.registerType(integrationInstanceType);
+    core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient, config });

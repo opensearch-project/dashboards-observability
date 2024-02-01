@@ -21,7 +21,7 @@ const safeIsDirectory = async (maybeDirectory: string): Promise<boolean> => {
  * A CatalogDataAdaptor that reads from the local filesystem.
  * Used to read default Integrations shipped in the in-product catalog at `__data__`.
  */
-export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
+export class FileSystemDataAdaptor implements CatalogDataAdaptor {
   isConfigLocalized = false;
   directory: string;
 
@@ -131,7 +131,7 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
     return hasSchemas ? 'integration' : 'repository';
   }
 
-  join(filename: string): FileSystemCatalogDataAdaptor {
-    return new FileSystemCatalogDataAdaptor(path.join(this.directory, filename));
+  join(filename: string): FileSystemDataAdaptor {
+    return new FileSystemDataAdaptor(path.join(this.directory, filename));
   }
 }
