@@ -11,6 +11,7 @@ import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
 import {
   OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
 import { IntegrationsManager } from '../../adaptors/integrations/integrations_manager';
@@ -29,19 +30,19 @@ import { IntegrationsManager } from '../../adaptors/integrations/integrations_ma
  * @callback callback A callback that will invoke a request on a provided adaptor.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
-export const handleWithCallback = async (
+export const handleWithCallback = async <T>(
   adaptor: IntegrationsAdaptor,
   response: OpenSearchDashboardsResponseFactory,
-  callback: (a: IntegrationsAdaptor) => any
-): Promise<any> => {
+  callback: (a: IntegrationsAdaptor) => Promise<T>
+): Promise<OpenSearchDashboardsResponse<{ data: T } | string>> => {
   try {
     const data = await callback(adaptor);
     return response.ok({
       body: {
         data,
       },
-    });
-  } catch (err: any) {
+    }) as OpenSearchDashboardsResponse<{ data: T }>;
+  } catch (err) {
     console.error(`handleWithCallback: callback failed with error "${err.message}"`);
     return response.custom({
       statusCode: err.statusCode || 500,
@@ -63,7 +64,7 @@ export function registerIntegrationsRoute(router: IRouter) {
       path: `${INTEGRATIONS_BASE}/repository`,
       validate: false,
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getIntegrationTemplates()
@@ -84,7 +85,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return a.loadIntegrationInstance(
@@ -105,7 +106,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(
         adaptor,
@@ -130,7 +131,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       try {
         const requestPath = sanitize(request.params.path);
@@ -141,7 +142,7 @@ export function registerIntegrationsRoute(router: IRouter) {
           },
           body: result,
         });
-      } catch (err: any) {
+      } catch (err) {
         return response.custom({
           statusCode: err.statusCode ? err.statusCode : 500,
           body: err.message,
@@ -159,7 +160,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getSchemas(request.params.id)
@@ -176,7 +177,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getAssets(request.params.id)
@@ -193,7 +194,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getSampleData(request.params.id)
@@ -206,7 +207,7 @@ export function registerIntegrationsRoute(router: IRouter) {
       path: `${INTEGRATIONS_BASE}/store`,
       validate: false,
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getIntegrationInstances({})
@@ -223,7 +224,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.deleteIntegrationInstance(request.params.id)
@@ -240,7 +241,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
         a.getIntegrationInstance({
