@@ -80,11 +80,14 @@ import {
   SetupDependencies,
 } from './types';
 
-interface PublicConfig {
+export interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
   summarize: {
+    enabled: boolean;
+  };
+  multitenancy: {
     enabled: boolean;
   };
 }
@@ -209,7 +212,8 @@ export class ObservabilityPlugin
         timestampUtils,
         qm,
         startPage,
-        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
+        dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
+        this.config
       );
     };
 

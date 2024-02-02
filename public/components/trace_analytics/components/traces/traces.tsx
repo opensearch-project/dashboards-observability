@@ -13,6 +13,7 @@ export interface TracesProps extends TraceAnalyticsComponentDeps {
   page: 'traces' | 'app';
   childBreadcrumbs: EuiBreadcrumb[];
   traceIdColumnAction: any;
+  tenant?: string;
 }
 
 export function Traces(props: TracesProps) {

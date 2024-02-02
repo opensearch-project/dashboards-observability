@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
   handleServiceViewRequest,
@@ -38,7 +38,7 @@ interface ServiceViewProps extends TraceAnalyticsComponentDeps {
 }
 
 export function ServiceView(props: ServiceViewProps) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const [fields, setFields] = useState<any>({});
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
@@ -54,9 +54,9 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    handleServiceViewRequest(props.serviceName, props.http, DSL, setFields, mode);
+    handleServiceViewRequest(props.serviceName, props.http, DSL, setFields, mode, tenant);
     if (mode === 'data_prepper') {
-      handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName);
+      handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName, tenant);
     }
   };
 
@@ -87,8 +87,7 @@ export function ServiceView(props: ServiceViewProps) {
     startTime: SearchBarProps['startTime'],
     setStartTime: SearchBarProps['setStartTime'],
     endTime: SearchBarProps['endTime'],
-    setEndTime: SearchBarProps['setEndTime'],
-    addFilter: (filter: FilterType) => void
+    setEndTime: SearchBarProps['setEndTime']
   ) => {
     return (
       <>

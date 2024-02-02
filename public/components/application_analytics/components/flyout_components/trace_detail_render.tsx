@@ -20,10 +20,17 @@ interface TraceDetailRenderProps {
   traceId: string;
   http: HttpStart;
   openSpanFlyout: (spanId: string) => void;
-  mode : TraceAnalyticsMode
+  mode: TraceAnalyticsMode;
+  tenant?: string;
 }
 
-export const TraceDetailRender = ({ traceId, http, openSpanFlyout, mode }: TraceDetailRenderProps) => {
+export const TraceDetailRender = ({
+  traceId,
+  http,
+  openSpanFlyout,
+  mode,
+  tenant,
+}: TraceDetailRenderProps) => {
   const [fields, setFields] = useState<any>({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
   const [payloadData, setPayloadData] = useState('');
@@ -86,9 +93,16 @@ export const TraceDetailRender = ({ traceId, http, openSpanFlyout, mode }: Trace
   }, [traceId, fields, serviceBreakdownData, colorMap, payloadData]);
 
   useEffect(() => {
-    handleTraceViewRequest(traceId, http, fields, setFields, mode);
-    handleServicesPieChartRequest(traceId, http, setServiceBreakdownData, setColorMap, mode);
-    handlePayloadRequest(traceId, http, payloadData, setPayloadData, mode);
+    handleTraceViewRequest(traceId, http, fields, setFields, mode, tenant);
+    handleServicesPieChartRequest(
+      traceId,
+      http,
+      setServiceBreakdownData,
+      setColorMap,
+      mode,
+      tenant
+    );
+    handlePayloadRequest(traceId, http, payloadData, setPayloadData, mode, tenant);
   }, [traceId]);
 
   return renderContent;

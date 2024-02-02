@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
-  handleTraceGroupsRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -19,7 +18,6 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
-import { OptionType } from '../../../../../common/types/application_analytics';
 import { DashboardContent } from '../dashboard/dashboard_content';
 
 export function ServicesContent(props: ServicesProps) {
@@ -43,6 +41,7 @@ export function ServicesContent(props: ServicesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
@@ -107,13 +106,14 @@ export function ServicesContent(props: ServicesProps) {
       (must: any) => must?.term?.serviceName == null
     );
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode),
+      handleServicesRequest(http, DSL, setTableItems, mode, undefined, tenant),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
         setServiceMap,
-        currService || filteredService
+        currService || filteredService,
+        tenant
       ),
     ]);
     setLoading(false);
@@ -165,6 +165,7 @@ export function ServicesContent(props: ServicesProps) {
         traceColumnAction={traceColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        tenant={tenant}
       />
       <EuiSpacer size="m" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (

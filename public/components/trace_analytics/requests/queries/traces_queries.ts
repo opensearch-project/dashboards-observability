@@ -8,8 +8,9 @@ import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics'
 import { SpanSearchParams } from '../../components/traces/span_detail_table';
 import { TraceAnalyticsMode } from '../../home';
 
-export const getTraceGroupPercentilesQuery = () => {
+export const getTraceGroupPercentilesQuery = (tenant?: string) => {
   const query: any = {
+    tenant,
     size: 0,
     query: {
       bool: {
@@ -47,7 +48,11 @@ export const getTraceGroupPercentilesQuery = () => {
   return query;
 };
 
-export const getTracesQuery = (mode: TraceAnalyticsMode, traceId: string = '', sort?: PropertySort) => {
+export const getTracesQuery = (
+  mode: TraceAnalyticsMode,
+  traceId: string = '',
+  sort?: PropertySort
+) => {
   const field = sort?.field || '_key';
   const direction = sort?.direction || 'asc';
   const jaegerQuery: any = {
@@ -173,7 +178,7 @@ export const getTracesQuery = (mode: TraceAnalyticsMode, traceId: string = '', s
   if (traceId) {
     jaegerQuery.query.bool.must.push({
       term: {
-        "traceID": traceId,
+        traceID: traceId,
       },
     });
     dataPrepperQuery.query.bool.must.push({
@@ -193,7 +198,7 @@ export const getServiceBreakdownQuery = (traceId: string, mode: TraceAnalyticsMo
         must: [
           {
             term: {
-              "traceID": traceId,
+              traceID: traceId,
             },
           },
         ],
@@ -276,7 +281,7 @@ export const getServiceBreakdownQuery = (traceId: string, mode: TraceAnalyticsMo
       },
     },
   };
-  return mode === 'jaeger'? jaegerQuery : dataPrepperQuery;
+  return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
 export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, size = 3000) => {
@@ -288,7 +293,7 @@ export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, si
           must: [
             {
               term: {
-                "traceID": traceId,
+                traceID: traceId,
               },
             },
             {
@@ -318,11 +323,11 @@ export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, si
           'spanID',
           'tag',
           'duration',
-          'references'
-        ]
+          'references',
+        ],
       },
     };
-  } 
+  }
   return {
     size,
     query: {
@@ -374,7 +379,7 @@ export const getPayloadQuery = (mode: TraceAnalyticsMode, traceId: string, size 
           must: [
             {
               term: {
-                "traceID": traceId,
+                traceID: traceId,
               },
             },
           ],
@@ -413,7 +418,7 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
           must: [
             {
               term: {
-                "spanID": spanId,
+                spanID: spanId,
               },
             },
           ],
@@ -425,6 +430,7 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
     };
   }
   return {
+    tenant,
     size,
     query: {
       bool: {
@@ -443,8 +449,9 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
   };
 };
 
-export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
+export const getSpansQuery = (spanSearchParams: SpanSearchParams, tenant?: string) => {
   const query: any = {
+    tenant,
     size: spanSearchParams.size,
     from: spanSearchParams.from,
     query: {
@@ -460,8 +467,9 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
   return query;
 };
 
-export const getValidTraceIdsQuery = (DSL) => {
+export const getValidTraceIdsQuery = (DSL, tenant?: string) => {
   const query: any = {
+    tenant,
     size: 0,
     query: {
       bool: {

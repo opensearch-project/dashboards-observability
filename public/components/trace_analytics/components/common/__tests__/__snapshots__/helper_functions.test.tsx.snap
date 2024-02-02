@@ -116,6 +116,33 @@ exports[`Helper functions renders no match and missing configuration messages 2`
 </Fragment>
 `;
 
+exports[`Helper functions renders no match and missing configuration messages 3`] = `
+<Fragment>
+  <EuiEmptyPrompt
+    actions={
+      <EuiButton
+        color="primary"
+        iconSide="right"
+        iconType="popout"
+        onClick={[Function]}
+      >
+        Learn more
+      </EuiButton>
+    }
+    body={
+      <EuiText>
+        The indices required for trace analytics (otel-v1-apm-span-test* and otel-v1-apm-service-map-test*) do not exist or you do not have permission to access them.
+      </EuiText>
+    }
+    title={
+      <h2>
+        Trace Analytics not set up
+      </h2>
+    }
+  />
+</Fragment>
+`;
+
 exports[`Helper functions renders panel title 1`] = `
 <EuiText
   size="m"

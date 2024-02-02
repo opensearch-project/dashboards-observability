@@ -20,6 +20,7 @@ import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as DataConnectionsHome } from './datasources/home';
+import { PublicConfig } from '../plugin';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -27,6 +28,7 @@ interface ObservabilityAppDeps {
   pplService: any;
   dslService: any;
   savedObjects: any;
+  config: PublicConfig;
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
@@ -54,12 +56,13 @@ export const App = ({
   pplService,
   dslService,
   savedObjects,
+  config,
   timestampUtils,
   queryManager,
   startPage,
   dataSourcePluggables,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
+  const { chrome, http, notifications } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
@@ -83,6 +86,7 @@ export const App = ({
             pplService={pplService}
             dslService={dslService}
             savedObjects={savedObjects}
+            config={config}
             timestampUtils={timestampUtils}
             queryManager={queryManager}
             parentBreadcrumb={parentBreadcrumb}
