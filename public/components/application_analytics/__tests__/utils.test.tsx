@@ -36,26 +36,6 @@ describe('Utils application analytics helper functions', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  // in progress
-  // it('validates fetchAppById function', () => {
-  //   const core = coreStartMock;
-  //   const pplService = ({
-  //     http: jest.fn(),
-  //     fetch: jest.fn(),
-  //   } as unknown) as PPLService;
-  //   expect(
-  //     fetchAppById(
-  //       core.http,
-  //       pplService,
-  //       'example',
-  //       () => {},
-  //       () => {},
-  //       () => {},
-  //       () => {}
-  //     )
-  //   ).toBeCalled();
-  // });
-
   it('validates calculateAvailability function', () => {
     const client = httpClientMock;
     client.get = jest.fn(() => {
