@@ -11,9 +11,7 @@ export const loadAllData = () => {
   // flights and web logs, not using ecommerce currently
   loadAllSampleData();
 
-  // otel and jaeger
   loadOtelData();
-  // TODO: import jaeger
 }
 
 export const loadOtelData = () => {
