@@ -39,6 +39,9 @@ const observabilityConfig = {
         schema.maybe(schema.string())
       ),
     }),
+    multitenancy: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 
@@ -49,5 +52,6 @@ export const config: PluginConfigDescriptor<ObservabilityConfig> = {
   exposeToBrowser: {
     query_assist: true,
     summarize: true,
+    multitenancy: true,
   },
 };
