@@ -16,16 +16,25 @@ import {
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
 } from '../../common/constants/trace_analytics';
 import { addRequestToMetric } from '../common/metrics/metrics_helper';
+import { getTenantIndexName } from '../../common/utils/tenant_index_name';
 
 export function registerTraceAnalyticsDslRouter(router: IRouter) {
   router.post(
     {
       path: TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,
-      validate: false,
+      validate: {
+        body: schema.object({
+          tenant: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (context, request, response) => {
+      const { tenant } = request.body;
       const params: RequestParams.IndicesExists = {
-        index: [DATA_PREPPER_INDEX_NAME, DATA_PREPPER_SERVICE_INDEX_NAME],
+        index: [
+          getTenantIndexName(DATA_PREPPER_INDEX_NAME, tenant),
+          getTenantIndexName(DATA_PREPPER_SERVICE_INDEX_NAME, tenant),
+        ],
         allow_no_indices: false,
       };
       try {
@@ -48,11 +57,19 @@ export function registerTraceAnalyticsDslRouter(router: IRouter) {
   router.post(
     {
       path: TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
-      validate: false,
+      validate: {
+        body: schema.object({
+          tenant: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (context, request, response) => {
+      const { tenant } = request.body;
       const params: RequestParams.IndicesExists = {
-        index: [JAEGER_INDEX_NAME, JAEGER_SERVICE_INDEX_NAME],
+        index: [
+          getTenantIndexName(JAEGER_INDEX_NAME, tenant),
+          getTenantIndexName(JAEGER_SERVICE_INDEX_NAME, tenant),
+        ],
         allow_no_indices: false,
       };
       try {
@@ -78,6 +95,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter) {
       validate: {
         body: schema.object({
           index: schema.maybe(schema.string()),
+          tenant: schema.maybe(schema.string()),
           from: schema.maybe(schema.number()),
           size: schema.number(),
           query: schema.maybe(
@@ -109,7 +127,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter) {
       addRequestToMetric('trace_analytics', 'get', 'count');
       const { index, size, ...rest } = request.body;
       const params: RequestParams.Search = {
-        index: index || DATA_PREPPER_INDEX_NAME,
+        index: index || getTenantIndexName(DATA_PREPPER_INDEX_NAME, tenant),
         size,
         body: rest,
       };
