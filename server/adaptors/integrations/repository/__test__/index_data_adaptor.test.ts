@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TemplateManager } from '../repository';
 import { IntegrationReader } from '../integration_reader';
-import path from 'path';
 import { JsonCatalogDataAdaptor } from '../json_data_adaptor';
 import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';
-import { FileSystemDataAdaptor } from '../fs_data_adaptor';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { IndexDataAdaptor } from '../index_data_adaptor';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
 
 // Simplified catalog for integration searching -- Do not use for full deserialization tests.
 const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
@@ -27,33 +27,22 @@ const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
   },
 ];
 
-describe('JSON Data Adaptor', () => {
-  it('Should be able to deserialize a serialized integration', async () => {
-    const repository: TemplateManager = new TemplateManager([
-      new FileSystemDataAdaptor(path.join(__dirname, '../../__data__/repository')),
-    ]);
-    const fsIntegration: IntegrationReader = (await repository.getIntegration('nginx'))!;
-    const fsConfig = await fsIntegration.getConfig();
-    const serialized = await fsIntegration.serialize();
+// Copy of json_data_adaptor.test.ts with new reader type
+// Since implementation at time of writing is to defer to json adaptor
+describe('Index Data Adaptor', () => {
+  let mockClient: SavedObjectsClientContract;
 
-    expect(serialized.ok).toBe(true);
-
-    const adaptor: JsonCatalogDataAdaptor = new JsonCatalogDataAdaptor([
-      (serialized as { value: SerializedIntegration }).value,
-    ]);
-    const jsonIntegration = new IntegrationReader('nginx', adaptor);
-
-    await expect(jsonIntegration.getConfig()).resolves.toMatchObject(fsConfig);
-  });
-
-  it('Should filter its list on join', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
-    const joined = await adaptor.join('sample1');
-    expect(joined.integrationsList).toHaveLength(1);
+  beforeEach(() => {
+    mockClient = savedObjectsClientMock.create();
+    mockClient.find = jest.fn().mockResolvedValue({
+      saved_objects: TEST_CATALOG_NO_SERIALIZATION.map((item) => ({
+        attributes: item,
+      })),
+    });
   });
 
   it('Should correctly identify repository type', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const adaptor = new IndexDataAdaptor(mockClient);
     await expect(adaptor.getDirectoryType()).resolves.toBe('repository');
   });
 
@@ -64,20 +53,20 @@ describe('JSON Data Adaptor', () => {
   });
 
   it('Should correctly retrieve integration versions', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const adaptor = new IndexDataAdaptor(mockClient);
     const versions = await adaptor.findIntegrationVersions('sample2');
     expect((versions as { value: string[] }).value).toHaveLength(2);
   });
 
   it('Should correctly supply latest integration version for IntegrationReader', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const adaptor = new IndexDataAdaptor(mockClient);
     const reader = new IntegrationReader('sample2', adaptor.join('sample2'));
     const version = await reader.getLatestVersion();
     expect(version).toBe('2.1.0');
   });
 
   it('Should find integration names', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const adaptor = new IndexDataAdaptor(mockClient);
     const integResult = await adaptor.findIntegrations();
     const integs = (integResult as { value: string[] }).value;
     integs.sort();
@@ -86,7 +75,7 @@ describe('JSON Data Adaptor', () => {
   });
 
   it('Should reject any attempts to read a file with a type', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    const adaptor = new IndexDataAdaptor(mockClient);
     const result = await adaptor.readFile('logs-1.0.0.json', 'schemas');
     await expect(result.error?.message).toBe(
       'JSON adaptor does not support subtypes (isConfigLocalized: true)'
@@ -112,14 +101,5 @@ describe('JSON Data Adaptor', () => {
   it('Should report unknown directory type if integration list is empty', async () => {
     const adaptor = new JsonCatalogDataAdaptor([]);
     await expect(adaptor.getDirectoryType()).resolves.toBe('unknown');
-  });
-
-  // Bug: a previous regex for version finding counted the `8` in `k8s-1.0.0.json` as the version
-  it('Should correctly read a config with a number in the name', async () => {
-    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
-    await expect(adaptor.readFile('sample2-2.1.0.json')).resolves.toMatchObject({
-      ok: true,
-      value: TEST_CATALOG_NO_SERIALIZATION[2],
-    });
   });
 });

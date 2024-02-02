@@ -3,44 +3,66 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as path from 'path';
 import { IntegrationReader } from './integration_reader';
-import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor } from './catalog_data_adaptor';
 
 export class TemplateManager {
-  reader: CatalogDataAdaptor;
-  directory: string;
+  readers: CatalogDataAdaptor[];
 
-  constructor(directory: string, reader?: CatalogDataAdaptor) {
-    this.directory = directory;
-    this.reader = reader ?? new FileSystemCatalogDataAdaptor(directory);
+  constructor(readers: CatalogDataAdaptor[]) {
+    this.readers = readers;
   }
 
   async getIntegrationList(): Promise<IntegrationReader[]> {
-    // TODO in the future, we want to support traversing nested directory structures.
-    const folders = await this.reader.findIntegrations();
+    const lists = await Promise.all(
+      this.readers.map((reader) => this.getReaderIntegrationList(reader))
+    );
+    const flattened = lists.flat();
+
+    // If there are collisions by name, prioritize earlier readers over later ones.
+    const seen = new Set();
+    return flattened.filter((item) => {
+      if (seen.has(item.name)) {
+        return false;
+      }
+      seen.add(item.name);
+      return true;
+    });
+  }
+
+  private async getReaderIntegrationList(reader: CatalogDataAdaptor): Promise<IntegrationReader[]> {
+    const folders = await reader.findIntegrations();
     if (!folders.ok) {
-      console.error(`Error reading integration directories in: ${this.directory}`, folders.error);
       return [];
     }
     const integrations = await Promise.all(
-      folders.value.map((i) =>
-        this.getIntegration(path.relative(this.directory, path.join(this.directory, i)))
-      )
+      folders.value.map((integrationName) => this.getReaderIntegration(reader, integrationName))
     );
     return integrations.filter((x) => x !== null) as IntegrationReader[];
   }
 
-  async getIntegration(integPath: string): Promise<IntegrationReader | null> {
-    if ((await this.reader.getDirectoryType(integPath)) !== 'integration') {
-      console.error(`Requested integration '${integPath}' does not exist`);
+  async getIntegration(integrationName: string): Promise<IntegrationReader | null> {
+    const maybeIntegrations = await Promise.all(
+      this.readers.map((reader) => this.getReaderIntegration(reader, integrationName))
+    );
+    for (const maybeIntegration of maybeIntegrations) {
+      if (maybeIntegration !== null) {
+        return maybeIntegration;
+      }
+    }
+    return null;
+  }
+
+  private async getReaderIntegration(
+    reader: CatalogDataAdaptor,
+    integrationName: string
+  ): Promise<IntegrationReader | null> {
+    if ((await reader.getDirectoryType(integrationName)) !== 'integration') {
       return null;
     }
-    const integ = new IntegrationReader(integPath, this.reader.join(integPath));
+    const integ = new IntegrationReader(integrationName, reader.join(integrationName));
     const checkResult = await integ.getConfig();
     if (!checkResult.ok) {
-      console.error(`Integration '${integPath}' is invalid:`, checkResult.error);
       return null;
     }
     return integ;

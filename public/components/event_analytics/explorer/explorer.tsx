@@ -58,6 +58,7 @@ import {
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
+import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
@@ -101,8 +102,8 @@ import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -112,8 +113,8 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle, getDateRange } from '../utils/utils';
@@ -217,6 +218,7 @@ export const Explorer = ({
   const [subType, setSubType] = useState('visualization');
   const [_metricMeasure, setMetricMeasure] = useState('');
   const [_metricChecked, setMetricChecked] = useState(false);
+  const [_refresh, setRefresh] = useState({});
   const queryRef = useRef();
   const appBasedRef = useRef('');
   appBasedRef.current = appBaseQuery;
@@ -270,6 +272,22 @@ export const Explorer = ({
     return () => {
       document.removeEventListener('visibilitychange', handleSetBrowserTabFocus);
     };
+  }, []);
+
+  useEffect(() => {
+    // query assist UI should only be enabled when the feature is enabled and configured.
+    if (coreRefs.queryAssistEnabled) {
+      http
+        .get<{ configured: boolean; error?: string }>(QUERY_ASSIST_API.CONFIGURED)
+        .catch(() => {
+          console.warn('Failed to check if query assist is configured');
+          return { configured: false };
+        })
+        .then((response) => {
+          coreRefs.queryAssistEnabled = response.configured;
+          setRefresh({});
+        });
+    }
   }, []);
 
   const getErrorHandler = (title: string) => {

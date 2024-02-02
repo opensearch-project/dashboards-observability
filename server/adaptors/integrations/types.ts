@@ -62,6 +62,14 @@ interface IntegrationAssets {
   }>;
 }
 
+interface ParsedIntegrationAssets {
+  savedObjects?: object[];
+  queries?: Array<{
+    query: string;
+    language: string;
+  }>;
+}
+
 interface SerializedIntegrationAssets extends IntegrationAssets {
   savedObjects?: {
     name: string;

@@ -12,6 +12,11 @@ import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
 import { deepCheck } from '../repository/utils';
+import { FileSystemDataAdaptor } from '../repository/fs_data_adaptor';
+
+const repository: TemplateManager = new TemplateManager([
+  new FileSystemDataAdaptor(path.join(__dirname, '../__data__/repository')),
+]);
 
 describe('The local repository', () => {
   it('Should only contain valid integration directories or files.', async () => {
@@ -32,9 +37,6 @@ describe('The local repository', () => {
   });
 
   it('Should pass deep validation for all local integrations.', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../__data__/repository')
-    );
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
     await Promise.all(
       integrations.map(async (i) => {
@@ -50,18 +52,12 @@ describe('The local repository', () => {
 
 describe('Local Nginx Integration', () => {
   it('Should serialize without errors', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../__data__/repository')
-    );
     const integration = await repository.getIntegration('nginx');
 
     await expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
   });
 
   it('Should serialize to include the config', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../__data__/repository')
-    );
     const integration = await repository.getIntegration('nginx');
     const config = await integration!.getConfig();
     const serialized = await integration!.serialize();
