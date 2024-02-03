@@ -16,7 +16,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   /**
    * Creates a new FileSystemCatalogDataAdaptor instance.
    *
-   * @param directory The base directory from which to read files. This is not sanitized.
+   * @param integrationsList The list of JSON-serialized integrations to use as a pseudo-directory.
    */
   constructor(integrationsList: SerializedIntegration[]) {
     this.integrationsList = integrationsList;
@@ -41,10 +41,9 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
       };
     }
 
-    const name = filename.split('-')[0];
-    const version = filename.match(/\d+(\.\d+)*/);
+    const filenameParts = filename.match(/([\w]+)-(\d+(\.\d+)*)\.json/);
     for (const integ of this.integrationsList) {
-      if (integ.name === name && integ.version === version?.[0]) {
+      if (integ.name === filenameParts?.[1] && integ.version === filenameParts?.[2]) {
         return { ok: true, value: integ };
       }
     }

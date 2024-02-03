@@ -9,6 +9,8 @@ import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { TemplateManager } from './repository/repository';
+import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
+import { IndexDataAdaptor } from './repository/index_data_adaptor';
 
 export class IntegrationsManager implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
@@ -18,21 +20,25 @@ export class IntegrationsManager implements IntegrationsAdaptor {
   constructor(client: SavedObjectsClientContract, repository?: TemplateManager) {
     this.client = client;
     this.repository =
-      repository ?? new TemplateManager(path.join(__dirname, '__data__/repository'));
+      repository ??
+      new TemplateManager([
+        new IndexDataAdaptor(this.client),
+        new FileSystemDataAdaptor(path.join(__dirname, '__data__/repository')),
+      ]);
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
   deleteIntegrationInstance = async (id: string): Promise<string[]> => {
-    let children: any;
+    let children: SavedObject<IntegrationInstance>;
     try {
       children = await this.client.get('integration-instance', id);
-    } catch (err: any) {
+    } catch (err) {
       return err.output?.statusCode === 404 ? Promise.resolve([id]) : Promise.reject(err);
     }
 
     const toDelete = children.attributes.assets
-      .filter((i: any) => i.assetId)
-      .map((i: any) => {
+      .filter((i: AssetReference) => i.assetId)
+      .map((i: AssetReference) => {
         return { id: i.assetId, type: i.assetType };
       });
     toDelete.push({ id, type: 'integration-instance' });
@@ -43,7 +49,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
           try {
             await this.client.delete(asset.type, asset.id);
             return Promise.resolve(asset.id);
-          } catch (err: any) {
+          } catch (err) {
             addRequestToMetric('integrations', 'delete', err);
             return err.output?.statusCode === 404 ? Promise.resolve(asset.id) : Promise.reject(err);
           }
@@ -101,20 +107,22 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceResult> => {
     addRequestToMetric('integrations', 'get', 'count');
-    const result = await this.client.get('integration-instance', `${query!.id}`);
+    const result = (await this.client.get('integration-instance', `${query!.id}`)) as SavedObject<
+      IntegrationInstance
+    >;
     return Promise.resolve(this.buildInstanceResponse(result));
   };
 
   buildInstanceResponse = async (
-    savedObj: SavedObject<unknown>
+    savedObj: SavedObject<IntegrationInstance>
   ): Promise<IntegrationInstanceResult> => {
-    const assets: AssetReference[] | undefined = (savedObj.attributes as any)?.assets;
+    const assets: AssetReference[] | undefined = savedObj.attributes.assets;
     const status: string = assets ? await this.getAssetStatus(assets) : 'available';
 
     return {
       id: savedObj.id,
       status,
-      ...(savedObj.attributes as any),
+      ...savedObj.attributes,
     };
   };
 
@@ -124,7 +132,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
         try {
           await this.client.get(asset.assetType, asset.assetId);
           return { id: asset.assetId, status: 'available' };
-        } catch (err: any) {
+        } catch (err) {
           const statusCode = err.output?.statusCode;
           if (statusCode && 400 <= statusCode && statusCode < 500) {
             return { id: asset.assetId, status: 'unavailable' };
@@ -166,7 +174,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
       });
       const test = await this.client.create('integration-instance', result);
       return Promise.resolve({ ...result, id: test.id });
-    } catch (err: any) {
+    } catch (err) {
       addRequestToMetric('integrations', 'create', err);
       return Promise.reject({
         message: err.message,
@@ -213,7 +221,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     });
   };
 
-  getAssets = async (templateName: string): Promise<{ savedObjects?: any }> => {
+  getAssets = async (templateName: string): Promise<ParsedIntegrationAssets> => {
     const integration = await this.repository.getIntegration(templateName);
     if (integration === null) {
       return Promise.reject({
