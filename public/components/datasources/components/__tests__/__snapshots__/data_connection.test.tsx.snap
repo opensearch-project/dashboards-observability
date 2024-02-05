@@ -352,7 +352,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                     <div
                       class="euiText euiText--small overview-content"
                     >
-                      Everyone
+                      Admin only
                     </div>
                   </div>
                 </div>
@@ -894,7 +894,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                     <div
                       class="euiText euiText--small overview-content"
                     >
-                      Everyone
+                      Admin only
                     </div>
                   </div>
                 </div>
