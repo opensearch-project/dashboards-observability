@@ -70,6 +70,7 @@ describe('Panels View SO Component', () => {
   coreRefs.savedObjectsClient.delete = jest.fn();
   coreRefs.http.post = jest.fn();
   coreRefs.http.delete = jest.fn();
+  jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   afterEach(() => {
     cleanup();
@@ -122,9 +123,9 @@ describe('Panels View SO Component', () => {
 
   it('render panel view container and refresh panel', async () => {
     const utils = renderPanelView(sampleSavedObjectPanelWithVisualization);
-    expect(utils.container.firstChild).toMatchSnapshot();
-
     fireEvent.click(utils.getByTestId('superDatePickerApplyTimeButton'));
+
+    expect(utils.container.firstChild).toMatchSnapshot();
   });
 
   it('render panel view so container and duplicate dashboard', async () => {

@@ -68,7 +68,7 @@ export const sampleSavedObjectPanelWithVisualization = {
   id: 'L8Sx53wBDp0rvEg3yoLb',
   type: 'observability-panel',
   title: 'Dummy Saved Object Panel 2',
-  dateCreate: 1636053619774,
+  dateCreated: 1636053619774,
   dateModified: 1636053619774,
   visualizations: [
     sampleSavedVisualization,
