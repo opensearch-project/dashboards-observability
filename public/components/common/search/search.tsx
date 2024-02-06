@@ -135,10 +135,6 @@ export const Search = (props: any) => {
   const [_isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
-  const [timeRange, setTimeRange] = useState([
-    coreRefs.queryAssistEnabled ? QUERY_ASSIST_START_TIME : DEFAULT_START_TIME,
-    'now',
-  ]); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
@@ -276,7 +272,7 @@ export const Search = (props: any) => {
       dispatch(changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery } }));
     });
     onQuerySearch(queryLang);
-    handleTimePickerChange(timeRange);
+    handleTimePickerChange([startTime, endTime]);
     setNeedsUpdate(false);
   };
 
@@ -411,7 +407,6 @@ export const Search = (props: any) => {
                         !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
                     );
                     // keeps the time range change local, to be used when update pressed
-                    setTimeRange(tRange);
                     setStartTime(tRange[0]);
                     setEndTime(tRange[1]);
                   }}
@@ -429,6 +424,7 @@ export const Search = (props: any) => {
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
                   fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
                   onClick={runChanges}
+                  data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
                 >
                   {needsUpdate ? 'Update' : 'Run'}
                 </EuiButton>
