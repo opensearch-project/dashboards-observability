@@ -243,6 +243,9 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       if (dsOption.label === DEFAULT_DATA_SOURCE_TYPE_NAME) {
         dsOption.label = DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME;
       }
+      if (dsOption.label === 'Index patterns') {
+        dsOption.label = 'Data connections';
+      }
       return dsOption;
     });
   }, [dataSourceOptionList]);
