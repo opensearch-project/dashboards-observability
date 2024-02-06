@@ -146,6 +146,10 @@ export const Explorer = ({
   appId = '',
   appBaseQuery = '',
   addVisualizationToPanel,
+  startTime,
+  endTime,
+  setStartTime,
+  setEndTime,
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
@@ -237,10 +241,6 @@ export const Explorer = ({
   liveTailTabIdRef.current = liveTailTabId;
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
-
-  const dateRange = getDateRange(undefined, undefined, query);
-  const [startTime, setStartTime] = useState(dateRange[0]);
-  const [endTime, setEndTime] = useState(dateRange[1]);
 
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
