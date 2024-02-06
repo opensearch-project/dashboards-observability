@@ -16,10 +16,14 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiText,
   EuiToolTip,
+  EuiContextMenuItem,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalHeaderTitle,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -140,6 +144,9 @@ export const Search = (props: any) => {
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = () => setIsModalVisible(true);
 
   const showQueryArea = !appLogEvents && coreRefs.queryAssistEnabled;
 
@@ -203,7 +210,7 @@ export const Search = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === QUERY_LANGUAGE.DQL) {
-      application!.navigateToUrl('../app/data-explorer/discover');
+      showModal();
       return;
     }
     dispatch(
@@ -220,9 +227,19 @@ export const Search = (props: any) => {
     setLanguagePopoverOpen(false);
   };
 
-  const languageOptions: Array<EuiSuperSelectOption<QUERY_LANGUAGE>> = [
-    { value: QUERY_LANGUAGE.PPL, inputDisplay: <EuiText>PPL</EuiText> },
-    { value: QUERY_LANGUAGE.DQL, inputDisplay: <EuiText>DQL</EuiText> },
+  const languagePopOverItems = [
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.SQL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
+    >
+      PPL
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.PPL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
+    >
+      DQL - Opens in Discover
+    </EuiContextMenuItem>,
   ];
 
   const onQuerySearch = () => {
@@ -290,6 +307,50 @@ export const Search = (props: any) => {
       : undefined;
   const loading = indicesLoading || indexPatternsLoading;
 
+  const onLanguagePopoverClick = () => {
+    setLanguagePopoverOpen(!_isLanguagePopoverOpen);
+  };
+
+  const languagePopOverButton = (
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
+      {queryLang}
+    </EuiButton>
+  );
+
+  const redirectToDiscover = () => {
+    application!.navigateToUrl('../app/data-explorer/discover');
+  };
+
+  let redirectionModal = null;
+  if (isModalVisible) {
+    redirectionModal = (
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>Open in Discover</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText>
+            The OpenSearch Dashboards Query Language (DQL) offers a simplified query syntax and
+            support for scripted fields. Selecting this option will open the Discover application.
+          </EuiText>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+          <EuiButton
+            onClick={() => {
+              redirectToDiscover();
+            }}
+            fill
+          >
+            Open in Discover
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -307,14 +368,16 @@ export const Search = (props: any) => {
             {!appLogEvents && (
               <>
                 <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
-                  <EuiSuperSelect
-                    options={languageOptions}
-                    valueOfSelected={queryLang}
-                    onChange={(lang: QUERY_LANGUAGE) => {
-                      handleQueryLanguageChange(lang);
-                      setQueryLang(lang);
-                    }}
-                  />
+                  <EuiPopover
+                    id="smallContextMenuExample"
+                    button={languagePopOverButton}
+                    isOpen={_isLanguagePopoverOpen}
+                    closePopover={closeLanguagePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenuPanel size="m" items={languagePopOverItems} />
+                  </EuiPopover>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIcon
@@ -325,7 +388,6 @@ export const Search = (props: any) => {
                     size="l"
                     onClick={() => showFlyout()}
                     color="#159D8D"
-                    // onClickAriaLabel={'pplLinkShowFlyout'}
                   />
                 </EuiFlexItem>
                 {coreRefs.queryAssistEnabled && (
@@ -535,6 +597,7 @@ export const Search = (props: any) => {
           </>
         )}
       </EuiFlexGroup>
+      {redirectionModal}
       {flyout}
     </div>
   );

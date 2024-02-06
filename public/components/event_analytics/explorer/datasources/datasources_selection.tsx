@@ -50,6 +50,8 @@ import {
   SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 
+const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: '' };
+
 const getDataSourceState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
   return [
@@ -255,6 +257,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       onDataSourceSelect={handleSourceChange}
       onFetchDataSetError={handleDataSetFetchError}
       singleSelection={{ asPlainText: true }}
+      dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
     />
   );
 };
