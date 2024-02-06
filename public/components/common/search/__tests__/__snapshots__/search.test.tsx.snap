@@ -921,6 +921,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                         >
                           <EuiButton
                             color="primary"
+                            data-test-subj="superDatePickerApplyTimeButton"
                             fill={true}
                             iconType="play"
                             onBlur={[Function]}
@@ -930,6 +931,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                             <EuiButtonDisplay
                               baseClassName="euiButton"
                               color="primary"
+                              data-test-subj="superDatePickerApplyTimeButton"
                               disabled={false}
                               element="button"
                               fill={true}
@@ -942,6 +944,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="superDatePickerApplyTimeButton"
                                 disabled={false}
                                 onBlur={[Function]}
                                 onClick={[Function]}
