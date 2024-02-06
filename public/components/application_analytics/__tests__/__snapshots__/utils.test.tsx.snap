@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Utils application analytics helper functions validates and renders getListItem function 1`] = `
+<div>
+  <EuiDescriptionList
+    align="center"
+    compressed={true}
+    data-test-subj="exampleDescriptionList"
+    listItems={
+      Array [
+        Object {
+          "description": <EuiText
+            size="s"
+            style={
+              Object {
+                "whiteSpace": "pre-line",
+                "wordBreak": "break-all",
+                "wordWrap": "break-word",
+              }
+            }
+          >
+            <b>
+              example description
+            </b>
+          </EuiText>,
+          "title": <EuiText
+            color="subdued"
+            size="s"
+            style={
+              Object {
+                "wordBreak": "break-all",
+                "wordWrap": "break-word",
+              }
+            }
+          >
+            example
+          </EuiText>,
+        },
+      ]
+    }
+    type="column"
+  >
+    <dl
+      className="euiDescriptionList euiDescriptionList--column euiDescriptionList--center euiDescriptionList--compressed"
+      data-test-subj="exampleDescriptionList"
+    >
+      <EuiDescriptionListTitle
+        key="title-0"
+      >
+        <dt
+          className="euiDescriptionList__title"
+        >
+          <EuiText
+            color="subdued"
+            size="s"
+            style={
+              Object {
+                "wordBreak": "break-all",
+                "wordWrap": "break-word",
+              }
+            }
+          >
+            <div
+              className="euiText euiText--small"
+              style={
+                Object {
+                  "wordBreak": "break-all",
+                  "wordWrap": "break-word",
+                }
+              }
+            >
+              <EuiTextColor
+                color="subdued"
+                component="div"
+              >
+                <div
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  example
+                </div>
+              </EuiTextColor>
+            </div>
+          </EuiText>
+        </dt>
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription
+        key="description-0"
+      >
+        <dd
+          className="euiDescriptionList__description"
+        >
+          <EuiText
+            size="s"
+            style={
+              Object {
+                "whiteSpace": "pre-line",
+                "wordBreak": "break-all",
+                "wordWrap": "break-word",
+              }
+            }
+          >
+            <div
+              className="euiText euiText--small"
+              style={
+                Object {
+                  "whiteSpace": "pre-line",
+                  "wordBreak": "break-all",
+                  "wordWrap": "break-word",
+                }
+              }
+            >
+              <b>
+                example description
+              </b>
+            </div>
+          </EuiText>
+        </dd>
+      </EuiDescriptionListDescription>
+    </dl>
+  </EuiDescriptionList>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+</div>
+`;
