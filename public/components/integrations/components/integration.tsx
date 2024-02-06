@@ -53,6 +53,11 @@ export function Integration(props: AvailableIntegrationProps) {
   async function handleDataRequest() {
     // TODO fill in ID request here
     http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`).then((exists) => {
+      if (!exists.data) {
+        window.location.hash = '#/available';
+        setToast(`Template '${integrationTemplateId}' not found`, 'danger');
+        return;
+      }
       setIntegration(exists.data);
     });
   }
@@ -70,7 +75,7 @@ export function Integration(props: AvailableIntegrationProps) {
         return parsedResponse.data.mappings[integration.type];
       })
       .then((mapping) => setMapping(mapping))
-      .catch((err: any) => {
+      .catch((err) => {
         console.error(err.message);
       });
   }, [integration]);
@@ -88,7 +93,7 @@ export function Integration(props: AvailableIntegrationProps) {
         return parsedResponse.data;
       })
       .then((assets) => setAssets(assets))
-      .catch((err: any) => {
+      .catch((err) => {
         console.error(err.message);
       });
   }, [integration]);
