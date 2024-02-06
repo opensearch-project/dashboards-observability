@@ -33,6 +33,16 @@ describe('useCatIndices', () => {
     expect(result.current.data).toEqual([{ label: 'test1' }, { label: 'test2' }]);
   });
 
+  it('should hide indices starting with dot', async () => {
+    httpMock.get.mockResolvedValueOnce([{ index: '.test1' }, { index: 'test2' }]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useCatIndices());
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toEqual([{ label: 'test2' }]);
+  });
+
   it('should handle errors', async () => {
     httpMock.get.mockRejectedValueOnce('API failed');
 
