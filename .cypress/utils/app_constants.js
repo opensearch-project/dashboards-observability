@@ -5,11 +5,110 @@
 
 export const delay = 1000;
 export const timeoutDelay = 30000;
-export const TYPING_DELAY = 150;
+export const TYPING_DELAY = 450;
+
+export const loadAllData = () => {
+  // flights and web logs, not using ecommerce currently
+  loadAllSampleData();
+
+  loadOtelData();
+}
+
+export const loadOtelData = () => {
+  testIndexDataSet.forEach(({ mapping_url, data_url, index }) =>
+    dumpDataSet(mapping_url, data_url, index)
+  );
+}
+
+export const loadAllSampleData = () => {
+  // Deleting all indices, cypress doesn't support conditionals in any way so to create a single
+  //  line of execution, need to start from a clean slate
+  cy.request(
+    'DELETE',
+    `${Cypress.env('opensearch')}/index*,sample*,opensearch_dashboards*,test*,cypress*`
+  );
+
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory`);
+
+  // Load sample flights data
+  cy.get(`button[data-test-subj="addSampleDataSetflights"]`).click({
+    force: true,
+  });
+  // Load sample logs data
+  cy.get(`button[data-test-subj="addSampleDataSetlogs"]`).click({
+    force: true,
+  });
+
+  // Verify that sample data is add by checking toast notification
+  cy.contains('Sample flight data installed', { timeout: 60000 });
+  cy.contains('Sample web logs installed', { timeout: 60000 });
+}
+
+// took dumpDataSet and testIndexDataSet from https://github.com/opensearch-project/opensearch-dashboards-functional-test/blob/main/cypress/integration/plugins/observability-dashboards/0_before.spec.js
+const dumpDataSet = (mapping_url, data_url, index) => {
+  cy.request({
+    method: 'PUT',
+    failOnStatusCode: false,
+    url: `${Cypress.env('opensearch')}/${index}`,
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+    },
+  });
+
+  cy.request(mapping_url).then((response) => {
+    cy.request({
+      method: 'POST',
+      form: false,
+      url: `${Cypress.env('opensearch')}/${index}/_mapping`,
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: response.body,
+    });
+  });
+
+  cy.request(data_url).then((response) => {
+    cy.request({
+      method: 'POST',
+      form: false,
+      url: `${Cypress.env('opensearch')}/${index}/_bulk`,
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: response.body,
+    });
+  });
+};
+
+const testIndexDataSet = [
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-service-map-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-service-map.json',
+    index: 'otel-v1-apm-service-map',
+  },
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001.json',
+    index: 'otel-v1-apm-span-000001',
+  },
+  {
+    mapping_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000001-mappings.json',
+    data_url:
+      'https://raw.githubusercontent.com/opensearch-project/dashboards-observability/main/.cypress/utils/otel-v1-apm-span-000002.json',
+    index: 'otel-v1-apm-span-000002',
+  },
+];
 
 export const moveToHomePage = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  cy.wait(delay * 3);
   cy.get('.euiTitle').contains('Applications').should('exist');
 };
 
@@ -32,12 +131,11 @@ export const moveToEditPage = () => {
   moveToApplication(nameOne);
   cy.get('[data-test-subj="app-analytics-configTab"]').click();
   cy.get('[data-test-subj="editApplicationButton"]').click();
-  cy.wait(delay);
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Edit application');
 };
 
 export const changeTimeTo24 = (timeUnit) => {
-  cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').trigger('mouseover').click();
+  cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').trigger('mouseover').click({ force: true });
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();

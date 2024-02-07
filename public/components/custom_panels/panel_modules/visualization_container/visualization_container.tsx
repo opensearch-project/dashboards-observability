@@ -290,7 +290,7 @@ export const VisualizationContainer = ({
         savedVisualizationId,
         startTime: fromTime,
         endTime: toTime,
-        pplFilterValue,
+        filterQuery: pplFilterValue,
         span,
         resolution,
         setVisualizationTitle,
