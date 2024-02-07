@@ -50,6 +50,8 @@ import {
   SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 
+const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: '' };
+
 const getDataSourceState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
   return [
@@ -241,6 +243,9 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       if (dsOption.label === DEFAULT_DATA_SOURCE_TYPE_NAME) {
         dsOption.label = DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME;
       }
+      if (dsOption.label === 'Index patterns') {
+        dsOption.label = 'Data connections';
+      }
       return dsOption;
     });
   }, [dataSourceOptionList]);
@@ -255,6 +260,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       onDataSourceSelect={handleSourceChange}
       onFetchDataSetError={handleDataSetFetchError}
       singleSelection={{ asPlainText: true }}
+      dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
     />
   );
 };
