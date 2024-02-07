@@ -35,11 +35,7 @@ import {
   OLLY_QUERY_ASSISTANT,
   RAW_QUERY,
 } from '../../../../common/constants/explorer';
-import {
-  DEFAULT_START_TIME,
-  PPL_SPAN_REGEX,
-  QUERY_ASSIST_START_TIME,
-} from '../../../../common/constants/shared';
+import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
