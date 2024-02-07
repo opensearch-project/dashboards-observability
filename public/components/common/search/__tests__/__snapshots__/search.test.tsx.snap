@@ -46,274 +46,117 @@ exports[`Explorer Search component renders basic component 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero search-area lang-selector"
                     >
-                      <EuiSuperSelect
-                        compressed={false}
-                        fullWidth={false}
-                        hasDividers={false}
-                        isInvalid={false}
-                        isLoading={false}
-                        onChange={[Function]}
-                        options={
-                          Array [
-                            Object {
-                              "inputDisplay": <EuiText>
-                                PPL
-                              </EuiText>,
-                              "value": "PPL",
-                            },
-                            Object {
-                              "inputDisplay": <EuiText>
-                                DQL
-                              </EuiText>,
-                              "value": "DQL",
-                            },
-                          ]
-                        }
-                        valueOfSelected="PPL"
-                      >
-                        <EuiInputPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          className="euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          fullWidth={false}
-                          input={
-                            <EuiSuperSelectControl
-                              className=""
-                              compressed={false}
-                              fullWidth={false}
-                              isInvalid={false}
-                              isLoading={false}
-                              onClick={[Function]}
-                              onKeyDown={[Function]}
-                              options={
-                                Array [
-                                  Object {
-                                    "inputDisplay": <EuiText>
-                                      PPL
-                                    </EuiText>,
-                                    "value": "PPL",
-                                  },
-                                  Object {
-                                    "inputDisplay": <EuiText>
-                                      DQL
-                                    </EuiText>,
-                                    "value": "DQL",
-                                  },
-                                ]
-                              }
-                              value="PPL"
-                            />
-                          }
-                          isOpen={false}
-                          panelPaddingSize="none"
-                        >
-                          <EuiPopover
-                            anchorPosition="downLeft"
-                            attachToAnchor={true}
-                            button={
-                              <EuiResizeObserver
-                                onResize={[Function]}
-                              >
-                                [Function]
-                              </EuiResizeObserver>
-                            }
-                            buttonRef={[Function]}
-                            className="euiInputPopover euiSuperSelect"
-                            closePopover={[Function]}
-                            display="block"
-                            hasArrow={true}
-                            isOpen={false}
-                            ownFocus={false}
-                            panelPaddingSize="none"
-                            panelRef={[Function]}
+                      <EuiPopover
+                        anchorPosition="downLeft"
+                        button={
+                          <EuiButton
+                            color="text"
+                            iconSide="right"
+                            iconType="arrowDown"
+                            onClick={[Function]}
                           >
-                            <EuiOutsideClickDetector
-                              onOutsideClick={[Function]}
+                            PPL
+                          </EuiButton>
+                        }
+                        closePopover={[Function]}
+                        display="inlineBlock"
+                        hasArrow={true}
+                        id="smallContextMenuExample"
+                        isOpen={false}
+                        ownFocus={true}
+                        panelPaddingSize="none"
+                      >
+                        <div
+                          className="euiPopover euiPopover--anchorDownLeft"
+                          id="smallContextMenuExample"
+                        >
+                          <div
+                            className="euiPopover__anchor"
+                          >
+                            <EuiButton
+                              color="text"
+                              iconSide="right"
+                              iconType="arrowDown"
+                              onClick={[Function]}
                             >
-                              <div
-                                className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                                onKeyDown={[Function]}
-                                onMouseDown={[Function]}
-                                onMouseUp={[Function]}
-                                onTouchEnd={[Function]}
-                                onTouchStart={[Function]}
+                              <EuiButtonDisplay
+                                baseClassName="euiButton"
+                                color="text"
+                                disabled={false}
+                                element="button"
+                                iconSide="right"
+                                iconType="arrowDown"
+                                isDisabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <div
-                                  className="euiPopover__anchor"
+                                <button
+                                  className="euiButton euiButton--text"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
                                 >
-                                  <EuiResizeObserver
-                                    onResize={[Function]}
+                                  <EuiButtonContent
+                                    className="euiButton__content"
+                                    iconSide="right"
+                                    iconType="arrowDown"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButton__text",
+                                      }
+                                    }
                                   >
-                                    <div>
-                                      <EuiSuperSelectControl
-                                        className=""
-                                        compressed={false}
-                                        fullWidth={false}
-                                        isInvalid={false}
-                                        isLoading={false}
-                                        onClick={[Function]}
-                                        onKeyDown={[Function]}
-                                        options={
-                                          Array [
-                                            Object {
-                                              "inputDisplay": <EuiText>
-                                                PPL
-                                              </EuiText>,
-                                              "value": "PPL",
-                                            },
-                                            Object {
-                                              "inputDisplay": <EuiText>
-                                                DQL
-                                              </EuiText>,
-                                              "value": "DQL",
-                                            },
-                                          ]
-                                        }
-                                        value="PPL"
+                                    <span
+                                      className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                    >
+                                      <EuiIcon
+                                        className="euiButtonContent__icon"
+                                        color="inherit"
+                                        size="m"
+                                        type="arrowDown"
                                       >
-                                        <input
-                                          type="hidden"
-                                          value="PPL"
-                                        />
-                                        <EuiFormControlLayout
-                                          compressed={false}
-                                          fullWidth={false}
-                                          icon={
-                                            Object {
-                                              "side": "right",
-                                              "type": "arrowDown",
-                                            }
-                                          }
-                                          isLoading={false}
+                                        <EuiIconBeaker
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                          focusable="false"
+                                          role="img"
+                                          style={null}
                                         >
-                                          <div
-                                            className="euiFormControlLayout"
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
                                           >
-                                            <div
-                                              className="euiFormControlLayout__childrenWrapper"
-                                            >
-                                              <EuiScreenReaderOnly>
-                                                <span
-                                                  className="euiScreenReaderOnly"
-                                                  id="random_html_id"
-                                                >
-                                                  <EuiI18n
-                                                    default="Select an option: {selectedValue}, is selected"
-                                                    token="euiSuperSelectControl.selectAnOption"
-                                                    values={
-                                                      Object {
-                                                        "selectedValue": <EuiText>
-                                                          PPL
-                                                        </EuiText>,
-                                                      }
-                                                    }
-                                                  >
-                                                    <Component
-                                                      selectedValue={
-                                                        <EuiText>
-                                                          PPL
-                                                        </EuiText>
-                                                      }
-                                                    >
-                                                      Select an option: 
-                                                      <EuiText
-                                                        key="1"
-                                                      >
-                                                        <div
-                                                          className="euiText euiText--medium"
-                                                        >
-                                                          PPL
-                                                        </div>
-                                                      </EuiText>
-                                                      , is selected
-                                                    </Component>
-                                                  </EuiI18n>
-                                                </span>
-                                              </EuiScreenReaderOnly>
-                                              <button
-                                                aria-haspopup="true"
-                                                aria-labelledby="undefined random_html_id"
-                                                className="euiSuperSelectControl"
-                                                onClick={[Function]}
-                                                onKeyDown={[Function]}
-                                                type="button"
-                                              >
-                                                <EuiText>
-                                                  <div
-                                                    className="euiText euiText--medium"
-                                                  >
-                                                    PPL
-                                                  </div>
-                                                </EuiText>
-                                              </button>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={false}
-                                                icon={
-                                                  Object {
-                                                    "side": "right",
-                                                    "type": "arrowDown",
-                                                  }
-                                                }
-                                                isLoading={false}
-                                              >
-                                                <div
-                                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                                >
-                                                  <EuiFormControlLayoutCustomIcon
-                                                    size="m"
-                                                    type="arrowDown"
-                                                  >
-                                                    <span
-                                                      className="euiFormControlLayoutCustomIcon"
-                                                    >
-                                                      <EuiIcon
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        size="m"
-                                                        type="arrowDown"
-                                                      >
-                                                        <EuiIconBeaker
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                          focusable="false"
-                                                          role="img"
-                                                          style={null}
-                                                        >
-                                                          <svg
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            height={16}
-                                                            role="img"
-                                                            style={null}
-                                                            viewBox="0 0 16 16"
-                                                            width={16}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                          >
-                                                            <path
-                                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                            />
-                                                          </svg>
-                                                        </EuiIconBeaker>
-                                                      </EuiIcon>
-                                                    </span>
-                                                  </EuiFormControlLayoutCustomIcon>
-                                                </div>
-                                              </EuiFormControlLayoutIcons>
-                                            </div>
-                                          </div>
-                                        </EuiFormControlLayout>
-                                      </EuiSuperSelectControl>
-                                    </div>
-                                  </EuiResizeObserver>
-                                </div>
-                              </div>
-                            </EuiOutsideClickDetector>
-                          </EuiPopover>
-                        </EuiInputPopover>
-                      </EuiSuperSelect>
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
+                                      </EuiIcon>
+                                      <span
+                                        className="euiButton__text"
+                                      >
+                                        PPL
+                                      </span>
+                                    </span>
+                                  </EuiButtonContent>
+                                </button>
+                              </EuiButtonDisplay>
+                            </EuiButton>
+                          </div>
+                        </div>
+                      </EuiPopover>
                     </div>
                   </EuiFlexItem>
                   <EuiFlexItem

@@ -93,7 +93,6 @@ export const DirectSearch = (props: any) => {
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || QUERY_LANGUAGE.SQL);
   const sqlService = new SQLService(coreRefs.http);
-  const { application } = coreRefs;
 
   const {
     data: pollingResult,
@@ -140,10 +139,6 @@ export const DirectSearch = (props: any) => {
   );
 
   const handleQueryLanguageChange = (lang: QUERY_LANGUAGE) => {
-    if (lang === 'DQL') {
-      application!.navigateToUrl('../app/data-explorer/discover');
-      return;
-    }
     dispatch(updateSearchMetaData({ tabId, data: { lang } }));
     setQueryLang(lang);
     closeLanguagePopover();
