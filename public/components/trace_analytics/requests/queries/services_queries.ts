@@ -20,7 +20,6 @@ export const getServicesQuery = (
   DSL?: any
 ) => {
   const query = {
-    tenant,
     size: 0,
     query: {
       bool: {
