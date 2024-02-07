@@ -16,6 +16,7 @@ export const sampleSavedVisualization = {
       'source=opensearch_dashboards_sample_data_flights | fields Carrier,FlightDelayMin | stats sum(FlightDelayMin) as delays by Carrier',
     type: 'bar',
     timeField: 'timestamp',
+    userConfigs: '{}',
   },
 };
 

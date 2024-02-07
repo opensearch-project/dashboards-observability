@@ -5,7 +5,7 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
-import { Reducer, useReducer, useState, useEffect } from 'react';
+import { Reducer, useEffect, useReducer, useState } from 'react';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
@@ -48,7 +48,12 @@ export const useCatIndices = () => {
     getOSDHttp()
       .get(`${DSL_BASE}${DSL_CAT}`, { query: { format: 'json' }, signal: abortController.signal })
       .then((payload: CatIndicesResponse) =>
-        dispatch({ type: 'success', payload: payload.map((meta) => ({ label: meta.index! })) })
+        dispatch({
+          type: 'success',
+          payload: payload
+            .filter((meta) => meta.index && !meta.index.startsWith('.'))
+            .map((meta) => ({ label: meta.index! })),
+        })
       )
       .catch((error) => dispatch({ type: 'failure', error }));
 
