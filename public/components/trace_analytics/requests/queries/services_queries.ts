@@ -93,9 +93,8 @@ export const getServicesQuery = (
   return query;
 };
 
-export const getRelatedServicesQuery = (serviceName: string, tenant?: string) => {
+export const getRelatedServicesQuery = (serviceName: string) => {
   const query = {
-    tenant,
     size: 0,
     query: {
       bool: {

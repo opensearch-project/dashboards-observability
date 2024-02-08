@@ -8,9 +8,8 @@ import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics'
 import { SpanSearchParams } from '../../components/traces/span_detail_table';
 import { TraceAnalyticsMode } from '../../home';
 
-export const getTraceGroupPercentilesQuery = (tenant?: string) => {
+export const getTraceGroupPercentilesQuery = () => {
   const query: any = {
-    tenant,
     size: 0,
     query: {
       bool: {
@@ -430,7 +429,6 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
     };
   }
   return {
-    tenant,
     size,
     query: {
       bool: {
@@ -449,9 +447,8 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
   };
 };
 
-export const getSpansQuery = (spanSearchParams: SpanSearchParams, tenant?: string) => {
+export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
   const query: any = {
-    tenant,
     size: spanSearchParams.size,
     from: spanSearchParams.from,
     query: {
@@ -467,9 +464,8 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams, tenant?: strin
   return query;
 };
 
-export const getValidTraceIdsQuery = (DSL, tenant?: string) => {
+export const getValidTraceIdsQuery = (DSL) => {
   const query: any = {
-    tenant,
     size: 0,
     query: {
       bool: {
