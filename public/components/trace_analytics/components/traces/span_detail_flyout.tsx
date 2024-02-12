@@ -22,20 +22,11 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
+import { SpanField } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
-
-type SpanField =
-  | 'SPAN_ID'
-  | 'PARENT_SPAN_ID'
-  | 'SERVICE'
-  | 'OPERATION'
-  | 'DURATION'
-  | 'START_TIME'
-  | 'END_TIME'
-  | 'ERRORS';
 
 const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
   data_prepper: {
