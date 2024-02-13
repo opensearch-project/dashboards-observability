@@ -37,10 +37,8 @@ import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
 import {
-  PanelType,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
@@ -50,12 +48,12 @@ import { getCustomModal } from './helpers/modal_containers';
 import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
-  convertDateTime,
   onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
   isNameValid,
 } from './helpers/utils';
+import { convertDateTime } from '../common/query_utils/index';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
 import { uiSettingsService } from '../../../common/utils';
@@ -132,7 +130,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     setStartTime,
     setEndTime,
     updateAvailabilityVizId,
-    cloneCustomPanel,
     onEditClick,
     onAddClick,
   } = props;
@@ -211,7 +208,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels/rename`, {
         body: JSON.stringify(renamePanelObject),
       })
-      .then((res) => {
+      .then((_res) => {
         setOpenPanelName(editedCustomPanelName);
         // setOpenPanelName((prevCustomPanelData) => {
         //   const newCustomPanelData = [...prevCustomPanelData];
@@ -270,7 +267,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    deleteCustomPanel(panelId, openPanelName).then((res) => {
+    deleteCustomPanel(panelId, openPanelName).then((_res) => {
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
       }, 1000);
@@ -430,7 +427,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels/filter`, {
         body: JSON.stringify(panelFilterBody),
       })
-      .then((res) => {
+      .then((_res) => {
         setOnRefresh(!onRefresh);
       })
       .catch((err) => {
