@@ -20,6 +20,12 @@ export class PPLQueryParser {
 
   getStats() {
     this.visitor = new StatsAstBuilder();
-    return this.visitor.visitRoot(this.parser!.root()).getTokens();
+    let inter = null;
+    try {
+      inter = this.visitor.visitRoot(this.parser!.root()).getTokens();
+    } catch (e) {
+      console.error(e);
+    }
+    return inter;
   }
 }
