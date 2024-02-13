@@ -26,6 +26,7 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.12.0
 * Correct date pass-through on Notebook Visualizations ([#1327](https://github.com/opensearch-project/dashboards-observability/pull/1327))
 * Fix for Notebook Observability Visualization loading ([#1312](https://github.com/opensearch-project/dashboards-observability/pull/1312))
 * Fix metrics loading loop ([#1309](https://github.com/opensearch-project/dashboards-observability/pull/1309))
+* Fix explorer stats function typing crash ([#1429](https://github.com/opensearch-project/dashboards-observability/pull/1429))
 
 ### Enhancements
 * Updating app analytics jest and cypress tests ([#1417](https://github.com/opensearch-project/dashboards-observability/pull/1417))
