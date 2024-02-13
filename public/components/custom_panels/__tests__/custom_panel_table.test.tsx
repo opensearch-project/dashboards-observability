@@ -4,17 +4,17 @@
  */
 
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
+import { fireEvent, render, waitFor, act, cleanup } from '@testing-library/react';
+import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { CustomPanelListType } from '../../../../common/types/custom_panels';
 import { panelBreadCrumbs, panelsData } from '../../../../test/panels_constants';
 import { coreRefs } from '../../../framework/core_refs';
 import { rootReducer } from '../../../framework/redux/reducers';
 import { CustomPanelTable } from '../custom_panel_table';
+import { setPanelList } from '../redux/panel_slice';
 
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({
@@ -36,108 +36,143 @@ describe('Panels Table Component', () => {
       then: () => Promise.resolve(),
     })
   );
+  coreRefs.savedObjectsClient.create = jest
+    .fn()
+    .mockReturnValue({ operationalPanle: panelsData.panels[0] });
+  coreRefs.savedObjectsClient.delete = jest.fn(() =>
+    Promise.resolve({
+      savedObjects: [],
+      then: () => Promise.resolve(),
+    })
+  );
+  coreRefs.http.get = jest.fn().mockReturnValue({ operationalPanel: panelsData.panels[0] });
+  coreRefs.http.post = jest.fn();
+  coreRefs.http.delete = jest.fn(() =>
+    Promise.resolve({
+      savedObjects: [],
+      then: () => Promise.resolve(),
+    })
+  );
 
-  it('renders empty panel table container', async () => {
-    const loading = false;
-    const fetchCustomPanels = jest.fn();
-    const customPanelData: CustomPanelListType[] = [];
-    const createCustomPanel = jest.fn();
-    const setBreadcrumbs = jest.fn();
-    const parentBreadcrumb = panelBreadCrumbs;
-    const renameCustomPanel = jest.fn();
-    const cloneCustomPanel = jest.fn();
-    const deleteCustomPanelList = jest.fn();
-    const addSamplePanels = jest.fn();
+  const props = {
+    loading: false,
+    setBreadcrumbs: jest.fn(),
+    parentBreadcrumbs: panelBreadCrumbs,
+    addSamplePanels: jest.fn(),
+  };
 
-    const wrapper = mount(
-      <Provider store={store}>
-        <CustomPanelTable
-          loading={loading}
-          fetchCustomPanels={fetchCustomPanels}
-          customPanels={customPanelData}
-          createCustomPanel={createCustomPanel}
-          setBreadcrumbs={setBreadcrumbs}
-          parentBreadcrumbs={parentBreadcrumb}
-          renameCustomPanel={renameCustomPanel}
-          cloneCustomPanel={cloneCustomPanel}
-          deleteCustomPanelList={deleteCustomPanelList}
-          addSamplePanels={addSamplePanels}
-        />
-      </Provider>
-    );
-    wrapper.update();
-
-    await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
-    });
-  });
-
-  it('renders panel table container', async () => {
-    const loading = false;
-    const fetchCustomPanels = jest.fn();
-    const customPanelData: CustomPanelListType[] = panelsData.panels;
-    const createCustomPanel = jest.fn();
-    const setBreadcrumbs = jest.fn();
-    const parentBreadcrumb = panelBreadCrumbs;
-    const renameCustomPanel = jest.fn();
-    const cloneCustomPanel = jest.fn();
-    const deleteCustomPanelList = jest.fn();
-    const addSamplePanels = jest.fn();
-
-    const wrapper = mount(
-      <Provider store={store}>
-        <CustomPanelTable
-          loading={loading}
-          fetchCustomPanels={fetchCustomPanels}
-          customPanels={customPanelData}
-          createCustomPanel={createCustomPanel}
-          setBreadcrumbs={setBreadcrumbs}
-          parentBreadcrumbs={parentBreadcrumb}
-          renameCustomPanel={renameCustomPanel}
-          cloneCustomPanel={cloneCustomPanel}
-          deleteCustomPanelList={deleteCustomPanelList}
-          addSamplePanels={addSamplePanels}
-        />
-      </Provider>
-    );
-    wrapper.update();
-
-    await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
-    });
-  });
-
-  it('create custom panel', async () => {
-    const loading = false;
-    const fetchCustomPanels = jest.fn();
-    const customPanelData: CustomPanelListType[] = [];
-    const createCustomPanel = jest.fn();
-    const setBreadcrumbs = jest.fn();
-    const parentBreadcrumb = panelBreadCrumbs;
-    const renameCustomPanel = jest.fn();
-    const cloneCustomPanel = jest.fn();
-    const deleteCustomPanelList = jest.fn();
-    const addSamplePanels = jest.fn();
-
+  const renderPanelTable = () => {
     const utils = render(
       <Provider store={store}>
-        <CustomPanelTable
-          loading={false}
-          fetchCustomPanels={fetchCustomPanels}
-          customPanels={customPanelData}
-          createCustomPanel={createCustomPanel}
-          setBreadcrumbs={setBreadcrumbs}
-          parentBreadcrumbs={parentBreadcrumb}
-          renameCustomPanel={renameCustomPanel}
-          cloneCustomPanel={cloneCustomPanel}
-          deleteCustomPanelList={deleteCustomPanelList}
-          addSamplePanels={addSamplePanels}
-        />
+        <CustomPanelTable {...props} />
       </Provider>
     );
-    fireEvent.click(screen.getAllByText('Create Dashboard')[0]);
+    return utils;
+  };
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('renders empty dashboard table container', async () => {
+    const utils = renderPanelTable();
+
     await waitFor(() => {
-      expect(global.window.location.href).toContain('/create');
+      expect(utils.container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it('render dashboard table container with panels', async () => {
+    store.dispatch(setPanelList(panelsData.panels));
+    const utils = renderPanelTable();
+
+    await waitFor(() => {
+      expect(utils.container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it('create a custom dashboard from empty table view', async () => {
+    const utils = renderPanelTable();
+
+    fireEvent.click(utils.getByTestId('customPanels__createNewPanels'));
+    await waitFor(() => {
+      expect(global.window.location.href).toContain('create');
+    });
+  });
+
+  it('create a custom dashboard from populated table view', async () => {
+    const utils = renderPanelTable();
+
+    fireEvent.click(utils.getByTestId('customPanels__createNewPanels'));
+    await waitFor(() => {
+      expect(global.window.location.href).toContain('create');
+    });
+  });
+
+  it('clone a custom dashboard', async () => {
+    store.dispatch(setPanelList(panelsData.panels));
+    const utils = renderPanelTable();
+
+    fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
+    fireEvent.click(utils.getByTestId('operationalPanelsActionsButton'));
+    fireEvent.click(utils.getByTestId('duplicateContextMenuItem'));
+    expect(utils.getByTestId('customModalFieldText')).toBeInTheDocument();
+
+    fireEvent.input(utils.getByTestId('customModalFieldText'), {
+      target: { value: 'copy' },
+    });
+    act(() => {
+      fireEvent.click(utils.getByTestId('runModalButton'));
+    });
+    await waitFor(() => {
+      expect(coreRefs.savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('rename a custom panel', async () => {
+    store.dispatch(setPanelList(panelsData.panels));
+    const utils = renderPanelTable();
+
+    fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
+    fireEvent.click(utils.getByTestId('operationalPanelsActionsButton'));
+    fireEvent.click(utils.getByTestId('renameContextMenuItem'));
+    expect(utils.getByTestId('customModalFieldText')).toBeInTheDocument();
+
+    fireEvent.input(utils.getByTestId('customModalFieldText'), {
+      target: { value: 'renamed dashboard' },
+    });
+    act(() => {
+      fireEvent.click(utils.getByTestId('runModalButton'));
+    });
+    await waitFor(() => {
+      expect(coreRefs.http?.post).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('delete a custom panel', async () => {
+    store.dispatch(setPanelList(panelsData.panels));
+    const utils = renderPanelTable();
+
+    fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
+    fireEvent.click(utils.getByTestId('operationalPanelsActionsButton'));
+    fireEvent.click(utils.getByTestId('deleteContextMenuItem'));
+    expect(utils.getByTestId('popoverModal__deleteTextInput')).toBeInTheDocument();
+
+    fireEvent.input(utils.getByTestId('popoverModal__deleteTextInput'), {
+      target: { value: 'delete' },
+    });
+    act(() => {
+      fireEvent.click(utils.getByTestId('popoverModal__deleteButton'));
+    });
+    await waitFor(() => {
+      expect(coreRefs.http.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('renders empty panel table container2', async () => {
+    const utils = renderPanelTable();
+    await waitFor(() => {
+      expect(utils.container.firstChild).toMatchSnapshot();
     });
   });
 });
