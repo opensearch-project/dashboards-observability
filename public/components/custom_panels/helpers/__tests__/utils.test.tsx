@@ -26,8 +26,11 @@ import {
   isPPLFilterValid,
   mergeLayoutAndVisualizations,
   onTimeChange,
+  fetchAggregatedBinCount,
 } from '../utils';
 import { convertDateTime } from '../../../common/query_utils';
+// eslint-disable-next-line jest/no-mocks-import
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
