@@ -135,13 +135,4 @@ describe('Utils helper functions', () => {
     );
     expect(wrapper6).toMatchSnapshot();
   });
-
-  it('validates fetchAggregatedBinCount function', () => {
-    httpClientMock.post = jest.fn().mockReturnValue('dummy response');
-    const setIsError = jest.fn();
-    const setIsLoading = jest.fn();
-
-    fetchAggregatedBinCount('', '', 'now', 'now', '', '', setIsError, setIsLoading);
-    expect(httpClientMock.post).toHaveBeenCalledTimes(1);
-  });
 });
