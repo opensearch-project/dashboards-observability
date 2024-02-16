@@ -26,8 +26,11 @@ import {
   isPPLFilterValid,
   mergeLayoutAndVisualizations,
   onTimeChange,
+  fetchAggregatedBinCount,
 } from '../utils';
 import { convertDateTime } from '../../../common/query_utils';
+// eslint-disable-next-line jest/no-mocks-import
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -131,5 +134,14 @@ describe('Utils helper functions', () => {
       <div>{displayVisualization({}, samplePPLEmptyResponse, 'horizontal_bar')}</div>
     );
     expect(wrapper6).toMatchSnapshot();
+  });
+
+  it('validates fetchAggregatedBinCount function', () => {
+    httpClientMock.post = jest.fn().mockReturnValue('dummy response');
+    const setIsError = jest.fn();
+    const setIsLoading = jest.fn();
+
+    fetchAggregatedBinCount('', '', 'now', 'now', '', '', setIsError, setIsLoading);
+    expect(httpClientMock.post).toHaveBeenCalledTimes(1);
   });
 });
