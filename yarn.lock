@@ -260,10 +260,10 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.4.tgz#fcf7205c25dff795ee79af1e30da2c9790808f11"
   integrity sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==
 
-"@types/react-plotly.js@^2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@types/react-plotly.js/-/react-plotly.js-2.5.0.tgz#bf7793ed16db13a2bd775ff8fa8f9595e82e8597"
-  integrity sha512-bda7N/Y65d1x0FfwhgUXAugGeG9CRIxmkW/yBL8PVFUMvZGpfEnw4bXKjDozBYlOskVfxj6UQ9IKmZI6CZ7/QQ==
+"@types/react-plotly.js@^2.6.3":
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/@types/react-plotly.js/-/react-plotly.js-2.6.3.tgz#49829a5c4f011345d09f6cab692f7ddbf558cbfb"
+  integrity sha512-HBQwyGuu/dGXDsWhnQrhH+xcJSsHvjkwfSRjP+YpOsCCWryIuXF78ZCBjpfgO3sCc0Jo8sYp4NOGtqT7Cn3epQ==
   dependencies:
     "@types/plotly.js" "*"
     "@types/react" "*"
@@ -2278,10 +2278,10 @@ pify@^2.2.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
   integrity sha1-7RQaasBDqEnqWISY59yosVMw6Qw=
 
-plotly.js-dist@^2.2.0:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/plotly.js-dist/-/plotly.js-dist-2.4.1.tgz#0afaf84132427720eda625c5908d9981318ab348"
-  integrity sha512-OsZgXlUJaxib+6HjrEaux61FaqNVLDiotNKF5JdoacigvAWoiTRUAD/K1x560jFR3fDzXaZ4mpXBbJukc5i3HQ==
+plotly.js-dist@^2.29.1:
+  version "2.29.1"
+  resolved "https://registry.yarnpkg.com/plotly.js-dist/-/plotly.js-dist-2.29.1.tgz#8e67dcc3050e732f44cb8a23e063a4e5bcbfe892"
+  integrity sha512-jEdUhk9brzzleuJP1vTxk1ECfm896bld78elG6YRPdywyUYAAO0rd+JUNv56hZu4uqUftvKU6xfjSwjm0R3LUw==
 
 popper.js@^1.14.4, popper.js@^1.16.1:
   version "1.16.1"
@@ -2330,6 +2330,15 @@ prop-types@^15.5.10, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
     loose-envify "^1.4.0"
     object-assign "^4.1.1"
     react-is "^16.8.1"
+
+prop-types@^15.8.1:
+  version "15.8.1"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
+  integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
+  dependencies:
+    loose-envify "^1.4.0"
+    object-assign "^4.1.1"
+    react-is "^16.13.1"
 
 property-information@^5.0.0:
   version "5.6.0"
@@ -2451,12 +2460,12 @@ react-markdown@^4.0.0:
     unist-util-visit "^1.3.0"
     xtend "^4.0.1"
 
-react-plotly.js@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/react-plotly.js/-/react-plotly.js-2.5.1.tgz#11182bf599ef11a0dbfcd171c6f5645535a2b486"
-  integrity sha512-Oya14whSHvPsYXdI0nHOGs1pZhMzV2edV7HAW1xFHD58Y73m/LbG2Encvyz1tztL0vfjph0JNhiwO8cGBJnlhg==
+react-plotly.js@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-plotly.js/-/react-plotly.js-2.6.0.tgz#ad6b68ee64f1b5cfa142ee92c59687f9c2c09209"
+  integrity sha512-g93xcyhAVCSt9kV1svqG1clAEdL6k3U+jjuSzfTV7owaSU9Go6Ph8bl25J+jKfKvIGAEYpe4qj++WHJuc9IaeA==
   dependencies:
-    prop-types "^15.7.2"
+    prop-types "^15.8.1"
 
 react-popper@^1.3.7:
   version "1.3.11"
