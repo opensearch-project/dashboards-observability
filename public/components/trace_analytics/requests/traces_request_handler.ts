@@ -2,12 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
-import { BarOrientation } from '../../../../common/constants/shared';
 import _ from 'lodash';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
+import { BarOrientation } from '../../../../common/constants/shared';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
@@ -38,7 +37,7 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
-  sort?: any,
+  sort?: any
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -73,7 +72,7 @@ export const handleTracesRequest = async (
     .then((response) => {
       return Promise.all(
         response.aggregations.traces.buckets.map((bucket: any) => {
-          if (mode === 'data_prepper') { 
+          if (mode === 'data_prepper') {
             return {
               trace_id: bucket.key,
               trace_group: bucket.trace_group.buckets[0]?.key,
@@ -86,15 +85,14 @@ export const handleTracesRequest = async (
               ),
               actions: '#',
             };
-        }
-        return {
-          trace_id: bucket.key,
-          latency: bucket.latency.value,
-          last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-          error_count: bucket.error_count.doc_count,
-          actions: '#',
-        };
-      
+          }
+          return {
+            trace_id: bucket.key,
+            latency: bucket.latency.value,
+            last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+            error_count: bucket.error_count.doc_count,
+            actions: '#',
+          };
         })
       );
     })
@@ -109,7 +107,7 @@ export const handleTraceViewRequest = (
   http: HttpSetup,
   fields: {},
   setFields: (fields: any) => void,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, null, getTracesQuery(mode, traceId), mode)
     .then(async (response) => {
@@ -138,7 +136,7 @@ export const handleServicesPieChartRequest = async (
   http: HttpSetup,
   setServiceBreakdownData: (serviceBreakdownData: any) => void,
   setColorMap: (colorMap: any) => void,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   const colors = [
     '#7492e7',
@@ -201,7 +199,7 @@ export const handleSpansGanttRequest = (
   setSpanDetailData: (spanDetailData: any) => void,
   colorMap: any,
   spanFiltersDSL: any,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode)
     .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
@@ -213,7 +211,7 @@ export const handleSpansFlyoutRequest = (
   http: HttpSetup,
   spanId: string,
   setItems: (items: any) => void,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, null, getSpanFlyoutQuery(mode, spanId), mode)
     .then((response) => {
@@ -230,15 +228,35 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
   };
   if (hits.length === 0) return data;
 
-  const minStartTime = mode === 'jaeger' ? microToMilliSec(hits[hits.length - 1].sort[0]) : nanoToMilliSec(hits[hits.length - 1].sort[0]);
+  const minStartTime =
+    mode === 'jaeger'
+      ? microToMilliSec(hits[hits.length - 1].sort[0])
+      : nanoToMilliSec(hits[hits.length - 1].sort[0]);
   let maxEndTime = 0;
 
   hits.forEach((hit: any) => {
-    const startTime = mode === 'jaeger' ? microToMilliSec(hit.sort[0]) - minStartTime : nanoToMilliSec(hit.sort[0]) - minStartTime;
-    const duration = mode === 'jaeger' ? _.round(microToMilliSec(hit._source.duration), 2) : _.round(nanoToMilliSec(hit._source.durationInNanos), 2);;
-    const serviceName = mode === 'jaeger'? _.get(hit, ['_source', 'process'])['serviceName'] : _.get(hit, ['_source', 'serviceName']);
-    const name = mode === 'jaeger' ? _.get(hit, '_source.operationName') : _.get(hit, '_source.name');
-    const error = mode === 'jaeger' ? (hit._source['tag']['error'] === true ? ' \u26a0 Error' : '') : (hit._source['status.code'] === 2 ? ' \u26a0 Error' : '');
+    const startTime =
+      mode === 'jaeger'
+        ? microToMilliSec(hit.sort[0]) - minStartTime
+        : nanoToMilliSec(hit.sort[0]) - minStartTime;
+    const duration =
+      mode === 'jaeger'
+        ? _.round(microToMilliSec(hit._source.duration), 2)
+        : _.round(nanoToMilliSec(hit._source.durationInNanos), 2);
+    const serviceName =
+      mode === 'jaeger'
+        ? _.get(hit, ['_source', 'process']).serviceName
+        : _.get(hit, ['_source', 'serviceName']);
+    const name =
+      mode === 'jaeger' ? _.get(hit, '_source.operationName') : _.get(hit, '_source.name');
+    const error =
+      mode === 'jaeger'
+        ? hit._source.tag?.['error'] === true
+          ? ' \u26a0 Error'
+          : ''
+        : hit._source['status.code'] === 2
+        ? ' \u26a0 Error'
+        : '';
     const uniqueLabel = `${serviceName} <br>${name} ` + uuid();
     maxEndTime = Math.max(maxEndTime, startTime + duration);
 
@@ -292,7 +310,7 @@ export const handlePayloadRequest = (
   http: HttpSetup,
   payloadData: any,
   setPayloadData: (payloadData: any) => void,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode)
     .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
@@ -305,7 +323,7 @@ export const handleSpansRequest = (
   setTotal: (total: number) => void,
   spanSearchParams: SpanSearchParams,
   DSL: any,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, DSL, getSpansQuery(spanSearchParams), mode)
     .then((response) => {
