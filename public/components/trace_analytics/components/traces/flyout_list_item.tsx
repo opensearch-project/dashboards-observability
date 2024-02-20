@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 interface FlyoutListItemProps {
   title: React.ReactNode;
   description: React.ReactNode;
-  addSpanFilter: () => void;
+  addSpanFilter?: () => void;
 }
 
 export function FlyoutListItem(props: FlyoutListItemProps) {
@@ -27,12 +27,15 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
     props.description !== '-' ? (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiText size="s" style={{ wordBreak: 'break-all', wordWrap: 'break-word', whiteSpace: 'pre-line' }}>
+          <EuiText
+            size="s"
+            style={{ wordBreak: 'break-all', wordWrap: 'break-word', whiteSpace: 'pre-line' }}
+          >
             <b>{props.description}</b>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {hover && (
+          {hover && props.addSpanFilter && (
             <EuiToolTip position="top" content="Filter spans on this value">
               <EuiButtonIcon
                 aria-label="span-flyout-filter-icon"
