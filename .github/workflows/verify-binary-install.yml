@@ -36,10 +36,11 @@ jobs:
 
       - name: Run Dashboard with Security Dashboards Plugin
         id: setup-dashboards
-        uses: derek-ho/setup-opensearch-dashboards@v1
+        uses: derek-ho/setup-opensearch-dashboards@v2
         with:
           plugin_name: dashboards-observability
           built_plugin_name: observabilityDashboards
+          built_plugin_suffix: ${{ env.OPENSEARCH_VERSION }}
           install_zip: true
           
       - name: Start the binary
