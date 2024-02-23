@@ -39,7 +39,7 @@ jobs:
         uses: derek-ho/setup-opensearch-dashboards@v1
         with:
           plugin_name: dashboards-observability
-          built_plugin_name: observability-dashboards
+          built_plugin_name: observabilityDashboards
           install_zip: true
           
       - name: Start the binary
