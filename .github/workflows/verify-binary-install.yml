@@ -28,13 +28,13 @@ jobs:
           echo "PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
         shell: bash
 
-      - name: Run Opensearch with security
+      - name: Run Opensearch
         uses: derek-ho/start-opensearch@v2
         with:
           opensearch-version: ${{ env.OPENSEARCH_VERSION }}
           security-enabled: false
 
-      - name: Run Dashboard with Security Dashboards Plugin
+      - name: Run Dashboard
         id: setup-dashboards
         uses: derek-ho/setup-opensearch-dashboards@v2
         with:
