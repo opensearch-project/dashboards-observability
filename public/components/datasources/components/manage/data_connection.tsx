@@ -33,6 +33,7 @@ import { AccessControlTab } from './access_control_tab';
 import { ConnectionDetails } from './connection_details';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 import { DatasourceTypeToDisplayName } from '../../../../../common/constants/data_connections';
+import { AssociatedObjectsTab } from './associated_objects_tab';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -139,6 +140,19 @@ export const DataConnection = (props: any) => {
 
   const tabs = [
     {
+      id: 'connection_configuration',
+      name: 'Connection configuration',
+      disabled: false,
+      content: (
+        <ConnectionDetails
+          dataConnection={dataSource}
+          description={datasourceDetails.description}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+        />
+      ),
+    },
+    {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
@@ -153,15 +167,47 @@ export const DataConnection = (props: any) => {
       ),
     },
     {
-      id: 'connection_configuration',
-      name: 'Connection configuration',
+      id: 'accelerations',
+      name: 'Accelerations',
       disabled: false,
       content: (
-        <ConnectionDetails
+        <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
           dataConnection={dataSource}
-          description={datasourceDetails.description}
           connector={datasourceDetails.connector}
           properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
+        />
+      ),
+    },
+    {
+      id: 'ibstalled_integrations',
+      name: 'Installed integrations',
+      disabled: false,
+      content: (
+        <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
+        />
+      ),
+    },
+    {
+      id: 'associated_objects',
+      name: 'Associated Objects',
+      disabled: false,
+      content: (
+        <AssociatedObjectsTab
+          associatedObjects={[{
+            id: '1',
+            name: 'Table_name_1',
+            database: 'db1',
+            type: 'Table',
+            createdByIntegration: 'xx',
+            accelerations: 'xxx_skipping',
+          }]}
         />
       ),
     },
