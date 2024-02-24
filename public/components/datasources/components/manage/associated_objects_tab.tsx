@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -33,6 +33,21 @@ interface AssociatedObjectsTabProps {
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   associatedObjects,
 }) => {
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  // TODO: FINISH THE REFRESH LOGIC
+  const fetchAssociatedObjects = async () => {
+    // Placeholder for data fetching logic
+    // After fetching data:
+    // setAssociatedObjects(fetchedData);
+    const now = new Date();
+    setLastUpdated(now.toUTCString()); // Update last updated time
+  };
+
+  useEffect(() => {
+    fetchAssociatedObjects();
+  }, []);
+
   const AssociatedObjectsHeader = () => {
     return (
       <EuiFlexGroup direction="row">
@@ -43,7 +58,18 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="freshButton" />
+          <EuiText>
+            <p>Last updated at: {lastUpdated}</p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="freshButton"
+            iconType="refresh"
+            onClick={fetchAssociatedObjects}
+          >
+            Refresh
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

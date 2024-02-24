@@ -200,14 +200,16 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <AssociatedObjectsTab
-          associatedObjects={[{
-            id: '1',
-            name: 'Table_name_1',
-            database: 'db1',
-            type: 'Table',
-            createdByIntegration: 'xx',
-            accelerations: 'xxx_skipping',
-          }]}
+          associatedObjects={[
+            {
+              id: '1',
+              name: 'Table_name_1',
+              database: 'db1',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping',
+            },
+          ]}
         />
       ),
     },
