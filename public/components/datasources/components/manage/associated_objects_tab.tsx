@@ -50,9 +50,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>Last updated at: {lastUpdated}</p>
-          </EuiText>
+          <div style={{ textAlign: 'right' }}>
+            <EuiText color="subdued" style={{ fontSize: 'small' }}>
+              Last updated at:
+            </EuiText>
+            <EuiText color="subdued" style={{ fontSize: 'small' }}>
+              {lastUpdated}
+            </EuiText>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
