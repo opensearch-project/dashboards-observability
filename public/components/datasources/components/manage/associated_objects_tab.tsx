@@ -144,13 +144,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
   const pagination = {
     initialPageSize: 10,
-    pageSizeOptions: [5, 10, 20],
+    pageSizeOptions: [10, 25, 50],
   };
 
   const sorting = {
     sort: {
-      field: 'name', // Default sort field
-      direction: 'asc', // Default sort direction
+      field: 'name',
+      direction: 'asc',
     },
   };
 
