@@ -140,19 +140,6 @@ export const DataConnection = (props: any) => {
 
   const tabs = [
     {
-      id: 'connection_configuration',
-      name: 'Connection configuration',
-      disabled: false,
-      content: (
-        <ConnectionDetails
-          dataConnection={dataSource}
-          description={datasourceDetails.description}
-          connector={datasourceDetails.connector}
-          properties={datasourceDetails.properties}
-        />
-      ),
-    },
-    {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
@@ -167,30 +154,15 @@ export const DataConnection = (props: any) => {
       ),
     },
     {
-      id: 'accelerations',
-      name: 'Accelerations',
+      id: 'connection_configuration',
+      name: 'Connection configuration',
       disabled: false,
       content: (
-        <AccessControlTab
-          allowedRoles={datasourceDetails.allowedRoles}
+        <ConnectionDetails
           dataConnection={dataSource}
+          description={datasourceDetails.description}
           connector={datasourceDetails.connector}
           properties={datasourceDetails.properties}
-          key={JSON.stringify(datasourceDetails.allowedRoles)}
-        />
-      ),
-    },
-    {
-      id: 'ibstalled_integrations',
-      name: 'Installed integrations',
-      disabled: false,
-      content: (
-        <AccessControlTab
-          allowedRoles={datasourceDetails.allowedRoles}
-          dataConnection={dataSource}
-          connector={datasourceDetails.connector}
-          properties={datasourceDetails.properties}
-          key={JSON.stringify(datasourceDetails.allowedRoles)}
         />
       ),
     },
@@ -212,6 +184,16 @@ export const DataConnection = (props: any) => {
           ]}
         />
       ),
+    },
+    {
+      id: 'accelerations',
+      name: 'Accelerations',
+      disabled: false,
+    },
+    {
+      id: 'installed_integrations',
+      name: 'Installed integrations',
+      disabled: false,
     },
   ];
 
