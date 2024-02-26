@@ -15,16 +15,8 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
-
-interface AssociatedObject {
-  id: string;
-  name: string;
-  database: string;
-  type: string;
-  createdByIntegration: string;
-  accelerations: string;
-}
 
 interface AssociatedObjectsTabProps {
   associatedObjects: AssociatedObject[];
