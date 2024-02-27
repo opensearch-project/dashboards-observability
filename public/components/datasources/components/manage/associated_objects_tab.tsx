@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiButton,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
@@ -72,6 +73,24 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     );
   };
 
+  const noDataMessage = (
+    <EuiEmptyPrompt
+      title={<h2>You have no associated objects</h2>}
+      body={<p>Add or config tables from your data source or use Query Workbench.</p>}
+      actions={
+        <EuiButton
+          color="primary"
+          fill
+          onClick={() => window.open('https://example.com', '_blank')}
+          iconType="popout"
+          iconSide="left"
+        >
+          Query Workbench
+        </EuiButton>
+      }
+    />
+  );
+
   const columns = [
     {
       field: 'name',
@@ -79,7 +98,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       sortable: true,
       'data-test-subj': 'nameCell',
       render: (name: string) => (
-        <EuiLink href="https://oui.opensearch.org/latest/" target="_blank">
+        <EuiLink href="https://example.com" target="_blank">
           {name}
         </EuiLink>
       ),
@@ -89,7 +108,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       name: 'Database',
       truncateText: true,
       render: (database: string) => (
-        <EuiLink href="https://oui.opensearch.org/latest/" target="_blank">
+        <EuiLink href="https://example.com" target="_blank">
           {database}
         </EuiLink>
       ),
@@ -134,7 +153,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     box: {
       incremental: true,
       schema: {
-        fields: { name: { type: 'string' }, database: { type: 'string' } }, // Adjust according to your data's fields
+        fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
     },
   };
@@ -159,13 +178,18 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
         <EuiHorizontalRule />
         <AccelerationsRecommendationCallout />
         <EuiSpacer />
-        <EuiInMemoryTable
-          items={associatedObjects}
-          columns={columns}
-          search={search}
-          pagination={pagination}
-          sorting={sorting}
-        />
+        {associatedObjects.length > 0 ? (
+          <EuiInMemoryTable
+            items={associatedObjects}
+            columns={columns}
+            search={search}
+            pagination={pagination}
+            sorting={sorting}
+            noItemsMessage={associatedObjects.length === 0 ? noDataMessage : undefined}
+          />
+        ) : (
+          noDataMessage
+        )}
       </EuiPanel>
       <EuiSpacer />
     </>
