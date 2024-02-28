@@ -206,6 +206,14 @@ export const DataConnection = (props: any) => {
               createdByIntegration: 'xx',
               accelerations: 'xxx_skipping3',
             },
+            {
+              id: '6',
+              name: 'Table_name_5',
+              database: 'db3',
+              type: 'CI',
+              createdByIntegration: '',
+              accelerations: 'xxx_skipping4',
+            },
           ]}
         />
       ),

@@ -72,7 +72,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={{ textAlign: 'right' }}>
-            <EuiText color="subdued" style={{ fontSize: 'small' }}>
+            <EuiText color="subdued" style={{ fontSize: 'small', marginBottom: '-5px' }}>
               Last updated at:
             </EuiText>
             <EuiText color="subdued" style={{ fontSize: 'small' }}>
@@ -117,21 +117,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       name: 'Name',
       sortable: true,
       'data-test-subj': 'nameCell',
-      render: (name: string) => (
-        <EuiLink href="https://example.com" target="_blank">
-          {name}
-        </EuiLink>
-      ),
+      render: (name: string) => <EuiLink href="https://example.com">{name}</EuiLink>,
     },
     {
       field: 'database',
       name: 'Database',
-      truncateText: true,
-      render: (database: string) => (
-        <EuiLink href="https://example.com" target="_blank">
-          {database}
-        </EuiLink>
-      ),
+      sortable: true,
     },
     {
       field: 'type',
@@ -142,11 +133,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       field: 'createdByIntegration',
       name: 'Created by Integration',
       sortable: true,
+      render: (createdByIntegration: string) => (createdByIntegration ? createdByIntegration : '-'),
     },
     {
       field: 'accelerations',
       name: 'Accelerations',
       sortable: true,
+      render: (accelerations: string) => (accelerations ? accelerations : '-'),
     },
     {
       name: 'Actions',
@@ -163,6 +156,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           description: 'Accelerate this object',
           type: 'icon',
           icon: 'bolt',
+          available: (item: AssociatedObject) => item.type === 'Table',
           onClick: (item: AssociatedObject) => console.log('Accelerate', item),
         },
       ],
