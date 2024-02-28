@@ -15,6 +15,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiEmptyPrompt,
+  Query,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
@@ -23,10 +24,18 @@ interface AssociatedObjectsTabProps {
   associatedObjects: AssociatedObject[];
 }
 
+interface FilterOption {
+  value: string;
+  text: string;
+}
+
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   associatedObjects,
 }) => {
   const [lastUpdated, setLastUpdated] = useState('');
+  const [databaseFilterOptions, setDatabaseFilterOptions] = useState<FilterOption[]>([]);
+  const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
+  const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
   // TODO: FINISH THE REFRESH LOGIC
   const fetchAssociatedObjects = async () => {
@@ -39,7 +48,19 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
   useEffect(() => {
     fetchAssociatedObjects();
-  }, []);
+
+    const databaseOptions = [...new Set(associatedObjects.map((obj) => obj.database))]
+      .sort()
+      .map((database) => ({ value: database, text: database }));
+    setDatabaseFilterOptions(databaseOptions);
+
+    const accelerationOptions = [...new Set(associatedObjects.map((obj) => obj.accelerations))]
+      .sort()
+      .map((acceleration) => ({ value: acceleration, text: acceleration }));
+    setAccelerationFilterOptions(accelerationOptions);
+
+    setFilteredObjects(associatedObjects);
+  }, [associatedObjects]);
 
   const AssociatedObjectsHeader = () => {
     return (
@@ -132,15 +153,15 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       name: 'Actions',
       actions: [
         {
-          name: 'Edit',
-          description: 'Edit this object',
+          name: 'Discover',
+          description: 'Discover this object',
           type: 'icon',
           icon: 'discoverApp',
           onClick: (item: AssociatedObject) => console.log('Edit', item),
         },
         {
-          name: 'Delete',
-          description: 'Delete this object',
+          name: 'Accelerate',
+          description: 'Accelerate this object',
           type: 'icon',
           icon: 'bolt',
           onClick: (item: AssociatedObject) => console.log('Delete', item),
@@ -149,13 +170,54 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     },
   ];
 
+  const onSearchChange = ({ queryText, error }) => {
+    if (error) {
+      console.log('Search error:', error);
+      return;
+    }
+
+    const parsedQuery = Query.parse(queryText);
+    console.log('Parsed query:', parsedQuery);
+
+    const filtered = associatedObjects.filter((obj) => {
+      // Example filtering logic, adjust based on actual fields and requirements
+      let matches = true;
+      if (parsedQuery.text) {
+        matches = obj.name.toLowerCase().includes(parsedQuery.text.toLowerCase());
+      }
+      // Extend with other conditions based on parsedQuery structure
+      return matches;
+    });
+
+    setFilteredObjects(filtered); // Update the state with the filtered objects
+  };
+
+  const searchFilters = [
+    {
+      type: 'field_value_selection',
+      field: 'database',
+      name: 'Database',
+      multiSelect: false,
+      options: databaseFilterOptions,
+    },
+    {
+      type: 'field_value_selection',
+      field: 'accelerations',
+      name: 'Accelerations',
+      multiSelect: 'or',
+      options: accelerationFilterOptions,
+    },
+  ];
+
   const search = {
+    filters: searchFilters,
     box: {
       incremental: true,
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
     },
+    onChange: onSearchChange,
   };
 
   const pagination = {
@@ -180,7 +242,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
         <EuiSpacer />
         {associatedObjects.length > 0 ? (
           <EuiInMemoryTable
-            items={associatedObjects}
+            items={filteredObjects}
             columns={columns}
             search={search}
             pagination={pagination}

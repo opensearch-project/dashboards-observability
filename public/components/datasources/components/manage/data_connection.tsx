@@ -165,18 +165,48 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <AssociatedObjectsTab
-          associatedObjects={
-            [
-              // {
-              //   id: '1',
-              //   name: 'Table_name_1',
-              //   database: 'db1',
-              //   type: 'Table',
-              //   createdByIntegration: 'xx',
-              //   accelerations: 'xxx_skipping',
-              // },
-            ]
-          }
+          associatedObjects={[
+            {
+              id: '1',
+              name: 'Table_name_1',
+              database: 'db1',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping1',
+            },
+            {
+              id: '2',
+              name: 'Table_name_2',
+              database: 'db1',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping1',
+            },
+            {
+              id: '3',
+              name: 'Table_name_3',
+              database: 'db2',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping2',
+            },
+            {
+              id: '4',
+              name: 'Table_name_4',
+              database: 'db2',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping2',
+            },
+            {
+              id: '5',
+              name: 'Table_name_5',
+              database: 'db3',
+              type: 'Table',
+              createdByIntegration: 'xx',
+              accelerations: 'xxx_skipping3',
+            },
+          ]}
         />
       ),
     },
