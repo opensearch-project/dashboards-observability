@@ -321,7 +321,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                     <div
                       class="euiTextColor euiTextColor--subdued"
                     >
-                      Wed, 28 Feb 2024 19:56:51 GMT
+                      Wed, 28 Feb 2024 20:05:37 GMT
                     </div>
                   </div>
                 </div>
@@ -950,7 +950,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                     <div
                       class="euiTextColor euiTextColor--subdued"
                     >
-                      Wed, 28 Feb 2024 19:56:51 GMT
+                      Wed, 28 Feb 2024 20:05:37 GMT
                     </div>
                   </div>
                 </div>
