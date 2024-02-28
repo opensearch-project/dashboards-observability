@@ -15,7 +15,6 @@ import {
   EuiButton,
   EuiSpacer,
   EuiEmptyPrompt,
-  Query,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
@@ -56,7 +55,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
     const accelerationOptions = [...new Set(associatedObjects.map((obj) => obj.accelerations))]
       .sort()
-      .map((acceleration) => ({ value: acceleration, text: acceleration }));
+      .map((accelerations) => ({ value: accelerations, text: accelerations }));
     setAccelerationFilterOptions(accelerationOptions);
 
     setFilteredObjects(associatedObjects);
@@ -157,39 +156,45 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           description: 'Discover this object',
           type: 'icon',
           icon: 'discoverApp',
-          onClick: (item: AssociatedObject) => console.log('Edit', item),
+          onClick: (item: AssociatedObject) => console.log('Discover', item),
         },
         {
           name: 'Accelerate',
           description: 'Accelerate this object',
           type: 'icon',
           icon: 'bolt',
-          onClick: (item: AssociatedObject) => console.log('Delete', item),
+          onClick: (item: AssociatedObject) => console.log('Accelerate', item),
         },
       ],
     },
   ];
 
-  const onSearchChange = ({ queryText, error }) => {
+  const onSearchChange = ({ query, error }) => {
     if (error) {
       console.log('Search error:', error);
       return;
     }
 
-    const parsedQuery = Query.parse(queryText);
-    console.log('Parsed query:', parsedQuery);
+    const matchesClauses = (obj, clauses) => {
+      return clauses.every((clause) => {
+        if (clause.type === 'field') {
+          switch (clause.operator) {
+            case 'eq':
+              return obj[clause.field] === clause.value;
+            default:
+              return true;
+          }
+        }
+        return true;
+      });
+    };
 
     const filtered = associatedObjects.filter((obj) => {
-      // Example filtering logic, adjust based on actual fields and requirements
-      let matches = true;
-      if (parsedQuery.text) {
-        matches = obj.name.toLowerCase().includes(parsedQuery.text.toLowerCase());
-      }
-      // Extend with other conditions based on parsedQuery structure
-      return matches;
+      const clauses = query.ast._clauses;
+      return matchesClauses(obj, clauses);
     });
 
-    setFilteredObjects(filtered); // Update the state with the filtered objects
+    setFilteredObjects(filtered);
   };
 
   const searchFilters = [
@@ -199,13 +204,17 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       name: 'Database',
       multiSelect: false,
       options: databaseFilterOptions,
+      cache: 60000,
+      onChange: (value) => setSelectedDatabaseFilter(value),
     },
     {
       type: 'field_value_selection',
       field: 'accelerations',
       name: 'Accelerations',
-      multiSelect: 'or',
+      multiSelect: false,
       options: accelerationFilterOptions,
+      cache: 60000,
+      onChange: (value) => setSelectedAccelerationFilter(value),
     },
   ];
 

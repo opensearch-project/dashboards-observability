@@ -185,7 +185,7 @@ export const DataConnection = (props: any) => {
             {
               id: '3',
               name: 'Table_name_3',
-              database: 'db2',
+              database: 'db1',
               type: 'Table',
               createdByIntegration: 'xx',
               accelerations: 'xxx_skipping2',
