@@ -53,9 +53,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       .map((database) => ({ value: database, text: database }));
     setDatabaseFilterOptions(databaseOptions);
 
-    const accelerationOptions = [...new Set(associatedObjects.map((obj) => obj.accelerations))]
+    const accelerationOptions = [
+      ...new Set(
+        associatedObjects.flatMap((obj) => obj.accelerations).filter((acceleration) => acceleration)
+      ),
+    ]
       .sort()
-      .map((accelerations) => ({ value: accelerations, text: accelerations }));
+      .map((acceleration) => ({ value: acceleration, text: acceleration }));
     setAccelerationFilterOptions(accelerationOptions);
 
     setFilteredObjects(associatedObjects);
@@ -188,11 +192,15 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     const matchesClauses = (obj, clauses) => {
       return clauses.every((clause) => {
         if (clause.type === 'field') {
-          switch (clause.operator) {
-            case 'eq':
-              return obj[clause.field] === clause.value;
-            default:
-              return true;
+          if (clause.field === 'accelerations' && Array.isArray(obj[clause.field])) {
+            return obj[clause.field].includes(clause.value);
+          } else {
+            switch (clause.operator) {
+              case 'eq':
+                return obj[clause.field] === clause.value;
+              default:
+                return true;
+            }
           }
         }
         return true;
