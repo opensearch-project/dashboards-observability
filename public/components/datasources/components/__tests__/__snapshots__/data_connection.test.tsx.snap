@@ -241,6 +241,48 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
               Connection configuration
             </span>
           </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="associated_objects"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Associated Objects
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="accelerations"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Accelerations
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="installed_integrations"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Installed integrations
+            </span>
+          </button>
         </div>
         <div
           aria-labelledby="access_control"
@@ -780,6 +822,48 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               class="euiTab__content"
             >
               Connection configuration
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="associated_objects"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Associated Objects
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="accelerations"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Accelerations
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="installed_integrations"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Installed integrations
             </span>
           </button>
         </div>
