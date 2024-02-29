@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -48,16 +49,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   useEffect(() => {
     fetchAssociatedObjects();
 
-    const databaseOptions = [...new Set(associatedObjects.map((obj) => obj.database))]
+    const databaseOptions = _.uniq(associatedObjects.map((obj) => obj.database))
       .sort()
       .map((database) => ({ value: database, text: database }));
     setDatabaseFilterOptions(databaseOptions);
 
-    const accelerationOptions = [
-      ...new Set(
-        associatedObjects.flatMap((obj) => obj.accelerations).filter((acceleration) => acceleration)
-      ),
-    ]
+    const accelerationOptions = _.uniq(
+      associatedObjects.flatMap((obj) => obj.accelerations).filter(Boolean)
+    )
       .sort()
       .map((acceleration) => ({ value: acceleration, text: acceleration }));
     setAccelerationFilterOptions(accelerationOptions);
