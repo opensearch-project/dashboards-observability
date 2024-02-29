@@ -172,7 +172,7 @@ export const DataConnection = (props: any) => {
               database: 'db1',
               type: 'Table',
               createdByIntegration: 'xx',
-              accelerations: 'xxx_skipping1',
+              accelerations: ['xxx_skipping1'],
             },
             {
               id: '2',
@@ -180,7 +180,7 @@ export const DataConnection = (props: any) => {
               database: 'db1',
               type: 'Table',
               createdByIntegration: 'xx',
-              accelerations: 'xxx_skipping1',
+              accelerations: ['xxx_skipping1'],
             },
             {
               id: '3',
@@ -188,7 +188,7 @@ export const DataConnection = (props: any) => {
               database: 'db1',
               type: 'Table',
               createdByIntegration: 'xx',
-              accelerations: 'xxx_skipping2',
+              accelerations: ['xxx_skipping2'],
             },
             {
               id: '4',
@@ -196,7 +196,7 @@ export const DataConnection = (props: any) => {
               database: 'db2',
               type: 'Table',
               createdByIntegration: 'xx',
-              accelerations: 'xxx_skipping2',
+              accelerations: ['xxx_skipping2'],
             },
             {
               id: '5',
@@ -204,7 +204,7 @@ export const DataConnection = (props: any) => {
               database: 'db3',
               type: 'Table',
               createdByIntegration: 'xx',
-              accelerations: 'xxx_skipping3',
+              accelerations: ['xxx_skipping3'],
             },
             {
               id: '6',
@@ -212,7 +212,15 @@ export const DataConnection = (props: any) => {
               database: 'db3',
               type: 'CI',
               createdByIntegration: '',
-              accelerations: 'xxx_skipping4',
+              accelerations: [],
+            },
+            {
+              id: '6',
+              name: 'Table_name_5',
+              database: 'db3',
+              type: 'CI',
+              createdByIntegration: '',
+              accelerations: ['acc1', 'acc2'],
             },
           ]}
         />

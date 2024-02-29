@@ -133,13 +133,29 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       field: 'createdByIntegration',
       name: 'Created by Integration',
       sortable: true,
-      render: (createdByIntegration: string) => (createdByIntegration ? createdByIntegration : '-'),
+      render: (createdByIntegration: string, _item: AssociatedObject) =>
+        createdByIntegration ? (
+          <EuiLink onClick={() => openDetailsPage(createdByIntegration)}>
+            {createdByIntegration}
+          </EuiLink>
+        ) : (
+          '-'
+        ),
     },
     {
       field: 'accelerations',
       name: 'Accelerations',
       sortable: true,
-      render: (accelerations: string) => (accelerations ? accelerations : '-'),
+      render: (accelerations: string[]) => {
+        return accelerations.length > 0
+          ? accelerations.map((acceleration, index) => (
+              <React.Fragment key={index}>
+                <EuiLink onClick={() => openFlyout(acceleration)}>{acceleration}</EuiLink>
+                {index < accelerations.length - 1 ? ', ' : ''}
+              </React.Fragment>
+            ))
+          : '-';
+      },
     },
     {
       name: 'Actions',
