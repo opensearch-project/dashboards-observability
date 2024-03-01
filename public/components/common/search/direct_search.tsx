@@ -85,7 +85,6 @@ export const DirectSearch = (props: any) => {
     curVisId,
     setSubType,
     setIsQueryRunning,
-    notifications,
   } = props;
 
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId] || {};
@@ -241,7 +240,7 @@ export const DirectSearch = (props: any) => {
           'The query failed to execute and the operation could not be complete.',
           e.body.message
         );
-        notifications.toasts.addError(formattedError, {
+        coreRefs.core?.notifications.toasts.addError(formattedError, {
           title: 'Query Failed',
         });
         console.error(e);
@@ -266,7 +265,7 @@ export const DirectSearch = (props: any) => {
         'The query failed to execute and the operation could not be complete.',
         error
       );
-      notifications.toasts.addError(formattedError, {
+      coreRefs.core?.notifications.toasts.addError(formattedError, {
         title: 'Query Failed',
       });
     } else {
