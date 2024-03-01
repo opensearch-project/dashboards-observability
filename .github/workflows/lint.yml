@@ -46,7 +46,7 @@ jobs:
 
       - name: Bootstrap the plugin
         working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
-        run: yarn osd bootstrap
+        run: yarn osd bootstrap --single-version=loose
 
       - name: Get list of changed files using GitHub Action
         uses: lots0logs/gh-action-get-changed-files@2.2.2

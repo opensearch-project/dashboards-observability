@@ -117,7 +117,7 @@ import {
   selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
-import { formatError, getContentTabTitle, getDateRange } from '../utils/utils';
+import { formatError, getContentTabTitle } from '../utils/utils';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -942,7 +942,7 @@ export const Explorer = ({
       }}
     >
       <EuiPage className="deLayout" paddingSize="none">
-        <EuiPageSideBar className="deSidebar" sticky>
+        <EuiPageSideBar className="explorerSidebar" sticky>
           <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
             {!appLogEvents && (
               <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>

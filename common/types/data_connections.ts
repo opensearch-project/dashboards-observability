@@ -13,6 +13,15 @@ export interface PermissionsConfigurationProps {
   hasSecurityAccess: boolean;
 }
 
+export interface AssociatedObject {
+  id: string;
+  name: string;
+  database: string;
+  type: string;
+  createdByIntegration: string;
+  accelerations: string;
+}
+
 export type Role = EuiComboBoxOptionOption;
 
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
