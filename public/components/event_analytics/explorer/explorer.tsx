@@ -977,6 +977,7 @@ export const Explorer = ({
                   endTime={endTime}
                   setStartTime={setStartTime}
                   setEndTime={setEndTime}
+                  notifications={notifications}
                   handleTimePickerChange={(timeRange: string[]) =>
                     handleTimePickerChange(timeRange)
                   }
