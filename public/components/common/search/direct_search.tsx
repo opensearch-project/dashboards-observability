@@ -235,7 +235,15 @@ export const DirectSearch = (props: any) => {
         }
       })
       .catch((e) => {
-        setIsQueryRunning(false);
+        stopPollingWithStatus(DirectQueryLoadingStatus.FAILED);
+        const formattedError = formatError(
+          '',
+          'The query failed to execute and the operation could not be complete.',
+          e.body.message
+        );
+        notifications.toasts.addError(formattedError, {
+          title: 'Query Failed',
+        });
         console.error(e);
       });
   };
