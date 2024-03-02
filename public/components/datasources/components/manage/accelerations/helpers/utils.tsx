@@ -9,7 +9,7 @@ import { EuiHealth } from '@elastic/eui';
 export const AccelerationStatus = (props: { status: string }) => {
   const { status } = props;
   // TODO: actually get status from acceleration
-  console.log(status);
+  console.log('status is', status);
   const label = status === 'ACTIVE' ? 'Active' : 'Paused';
   const color = status === 'ACTIVE' ? 'success' : 'inactive';
   return <EuiHealth color={color}>{label}</EuiHealth>;

@@ -7,14 +7,15 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
-  EuiTabbedContent,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
@@ -25,13 +26,18 @@ import {
   onDeleteButtonClick,
 } from '../accelerations/helpers/utils';
 
-interface AccelerationDetailsFlyoutProps {
+export interface AccelerationDetailsFlyoutProps {
   acceleration: any;
-  setIsFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { acceleration, setIsFlyoutVisible } = props;
+  const { acceleration } = props;
+  const [selectedTab, setSelectedTab] = useState('details');
+  const tabsMap: { [key: string]: any } = {
+    details: AccelerationDetailsTab,
+    schema: AccelerationSchemaTab,
+    sql_definition: AccelerationSqlTab,
+  };
 
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
@@ -58,31 +64,53 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const tabs = [
+  const accelerationDetailsTabs = [
     {
       id: 'details',
       name: 'Details',
       disabled: false,
-      content: <AccelerationDetailsTab acceleration={acceleration} />,
     },
     {
       id: 'schema',
       name: 'Schema',
       disabled: false,
-      content: <AccelerationSchemaTab acceleration={acceleration} />,
     },
     {
       id: 'sql_definition',
       name: 'SQL Definition',
       disabled: false,
-      content: <AccelerationSqlTab acceleration={acceleration} />,
     },
   ];
 
+  const renderTabs = () => {
+    return accelerationDetailsTabs.map((tab, index) => {
+      return (
+        <EuiTab
+          onClick={() => setSelectedTab(tab.id)}
+          isSelected={tab.id === selectedTab}
+          disabled={tab.disabled}
+          key={index}
+        >
+          {tab.name}
+        </EuiTab>
+      );
+    });
+  };
+
+  const renderTabContent = (tab: string, tabAcceleration: any) => {
+    const TabToDisplay = tabsMap[tab];
+    return <TabToDisplay acceleration={tabAcceleration} />;
+  };
+
   return (
-    <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} paddingSize="l">
+    <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+        <EuiFlexGroup
+          direction="row"
+          alignItems="center"
+          gutterSize="m"
+          style={{ marginBottom: '-15px' }}
+        >
           <EuiFlexItem>
             <EuiText>
               <h2 className="panel-title">{acceleration.name}</h2>
@@ -98,10 +126,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
             <DeleteButton />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiTabbedContent tabs={tabs} />
+      <EuiFlyoutBody style={{ marginTop: '-15px' }}>
+        {renderTabContent(selectedTab, acceleration)}
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </>
   );
 };

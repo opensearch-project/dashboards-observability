@@ -65,20 +65,20 @@ export const DataConnection = (props: any) => {
 
   // Dummy accelerations variables for mock purposes
   // Actual accelerations should be retrieved from the backend
-  // const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
+  const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
   const dummyAccelerations = [
-    // {
-    //   name: 'dummy_acceleration_1',
-    //   status: 'ACTIVE',
-    //   type: 'skip',
-    //   database: 'default',
-    //   table: 'table1',
-    //   destination: 'N/A',
-    //   dateCreated: Date.now(),
-    //   dateUpdated: Date.now(),
-    //   index: 'security_logs_2022',
-    //   sql: sampleSql,
-    // },
+    {
+      name: 'dummy_acceleration_1',
+      status: 'ACTIVE',
+      type: 'skip',
+      database: 'default',
+      table: 'table1',
+      destination: 'N/A',
+      dateCreated: 1709339290,
+      dateUpdated: 1709339290,
+      index: 'security_logs_2022',
+      sql: sampleSql,
+    },
   ];
   const queryAccess = 'Everyone';
 

@@ -25,6 +25,7 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
     },
   },
 }));
+jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
 describe('Data Connection Page test', () => {
   configure({ adapter: new Adapter() });

@@ -15,8 +15,7 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { AccelerationDetailsFlyout } from './acceleration_details_flyout';
+import React from 'react';
 import {
   getRefreshButtonIcon,
   onRefreshButtonClick,
@@ -24,6 +23,7 @@ import {
   onDeleteButtonClick,
   AccelerationStatus,
 } from './helpers/utils';
+import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 
 interface AccelerationTableTabProps {
   // TODO: Add acceleration type to plugin types
@@ -32,13 +32,12 @@ interface AccelerationTableTabProps {
 
 export const AccelerationTable = (props: AccelerationTableTabProps) => {
   const { accelerations } = props;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const RefreshButton = () => {
     // TODO: Implement logic for refreshing acceleration
     return (
       <>
-        <EuiButton onClick={() => console.log}>Refresh</EuiButton>
+        <EuiButton onClick={() => console.log('clicked on refresh button')}>Refresh</EuiButton>
       </>
     );
   };
@@ -48,14 +47,14 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     // over from dashboards-query-workbench/public/components/acceleration/create/create_accelerations.tsx
     return (
       <>
-        <EuiButton onClick={() => console.log()} fill>
+        <EuiButton onClick={() => console.log('clicked on create accelerations button')} fill>
           Create acceleration
         </EuiButton>
       </>
     );
   };
 
-  const Header = () => {
+  const AccelerationTableHeader = () => {
     return (
       <>
         <EuiFlexGroup direction="row" alignItems="center">
@@ -101,20 +100,30 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<any>> = [
+  const accelerationTableColumns: Array<EuiBasicTableColumn<any>> = [
     // TODO: fields should be determined by what the acceleration is
     // Show N/A if not applicable
     {
       field: 'name',
       name: 'Name',
       sortable: true,
-      render: (name: string) => <EuiLink onClick={() => setIsFlyoutVisible(true)}>{name}</EuiLink>,
+      render: (name: string) => (
+        <EuiLink
+          onClick={() =>
+            renderAccelerationDetailsFlyout(
+              accelerations.find((acceleration) => acceleration.name === name)
+            )
+          }
+        >
+          {name}
+        </EuiLink>
+      ),
     },
     {
       field: 'status',
       name: 'Status',
       sortable: true,
-      render: AccelerationStatus,
+      render: (status: string) => <AccelerationStatus status={status} />,
     },
     {
       field: 'type',
@@ -133,7 +142,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
             label = 'Covering Index';
             break;
           default:
-            label = 'AAAAAA';
+            label = 'default';
         }
         return <EuiText>{label}</EuiText>;
       },
@@ -155,7 +164,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
       name: 'Destination Index',
       sortable: true,
       render: (destination: string) => (
-        <EuiLink onClick={() => console.log(destination)}>{destination}</EuiLink>
+        <EuiLink onClick={() => console.log('clicked on', destination)}>{destination}</EuiLink>
       ),
     },
     {
@@ -176,22 +185,19 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     },
   };
 
+  // Render flyout using OSD overlay service
+  const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+
   return (
     <>
       <EuiSpacer />
-      {isFlyoutVisible && (
-        <AccelerationDetailsFlyout
-          acceleration={accelerations[0]}
-          setIsFlyoutVisible={setIsFlyoutVisible}
-        />
-      )}
       <EuiPanel>
-        <Header />
+        <AccelerationTableHeader />
         <EuiHorizontalRule />
         <EuiSpacer />
         <EuiInMemoryTable
           items={accelerations}
-          columns={columns}
+          columns={accelerationTableColumns}
           pagination={pagination}
           sorting={sorting}
         />
