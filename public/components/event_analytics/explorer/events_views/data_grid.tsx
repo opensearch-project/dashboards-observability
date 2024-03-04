@@ -21,14 +21,18 @@ import {
   DEFAULT_EMPTY_EXPLORER_FIELDS,
   DEFAULT_SOURCE_COLUMN,
   DEFAULT_TIMESTAMP_COLUMN,
+  SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
+import { useSelector } from 'react-redux';
+import { selectQueries } from '../../redux/slices/query_slice';
 
 export interface DataGridProps {
+  tabId: string;
   http: HttpSetup;
   pplService: PPLService;
   rows: any[];
@@ -48,6 +52,7 @@ const defaultFormatGrid = (columns: EuiDataGridColumn[]) => columns;
 
 export function DataGrid(props: DataGridProps) {
   const {
+    tabId,
     http,
     pplService,
     rows,
@@ -65,14 +70,18 @@ export function DataGrid(props: DataGridProps) {
     pplService,
     requestParams,
   });
+
+  const query = useSelector(selectQueries)[tabId];
+  const defaultTimestamp = query[SELECTED_TIMESTAMP];
+
   const selectedColumns =
     explorerFields.selectedFields.length > 0
       ? explorerFields.selectedFields
-      : DEFAULT_EMPTY_EXPLORER_FIELDS;
+      : [{ name: defaultTimestamp, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS];
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
-  const pageFields = useRef([0, 100]);
+  const pageFields = useRef([0, 100]); // page num, row length
 
   const [data, setData] = useState(rows);
 
@@ -114,8 +123,12 @@ export function DataGrid(props: DataGridProps) {
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
     selectedColumns.map(({ name }) => {
-      if (name === 'timestamp') {
-        columns.push(DEFAULT_TIMESTAMP_COLUMN);
+      if (name === defaultTimestamp) {
+        columns.push({
+          ...DEFAULT_TIMESTAMP_COLUMN,
+          display: `Time (${defaultTimestamp})`,
+          id: defaultTimestamp,
+        });
       } else if (name === '_source') {
         columns.push(DEFAULT_SOURCE_COLUMN);
       } else {
@@ -183,7 +196,7 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const trueIndex = rowIndex % pageFields.current[1];
+    const trueIndex = rowIndex % pageFields.current[1]; // modulo of row length, i.e. pos on current page
     if (trueIndex < data.length) {
       if (columnId === '_source') {
         return (
@@ -202,7 +215,7 @@ export function DataGrid(props: DataGridProps) {
         );
       }
       if (columnId === 'timestamp') {
-        return `${moment(data[trueIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+        return `${moment(data[trueIndex][defaultTimestamp]).format(DATE_DISPLAY_FORMAT)}`;
       }
       return `${data[trueIndex][columnId]}`;
     }
