@@ -219,7 +219,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       type: 'field_value_selection',
       field: 'database',
       name: 'Database',
-      multiSelect: false,
+      multiSelect: true,
       options: databaseFilterOptions,
       cache: 60000,
       onChange: (value) => setSelectedDatabaseFilter(value),
@@ -228,7 +228,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       type: 'field_value_selection',
       field: 'accelerations',
       name: 'Accelerations',
-      multiSelect: false,
+      multiSelect: true,
       options: accelerationFilterOptions,
       cache: 60000,
       onChange: (value) => setSelectedAccelerationFilter(value),
@@ -239,6 +239,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     filters: searchFilters,
     box: {
       incremental: true,
+      placeholder: 'database:database_1 accelerations:skipping_index_1',
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
