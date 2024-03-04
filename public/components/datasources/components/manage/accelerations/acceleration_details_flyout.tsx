@@ -105,12 +105,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup
-          direction="row"
-          alignItems="center"
-          gutterSize="m"
-          style={{ marginBottom: '-15px' }}
-        >
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiText>
               <h2 className="panel-title">{acceleration.name}</h2>
@@ -129,9 +124,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiSpacer size="m" />
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody style={{ marginTop: '-15px' }}>
-        {renderTabContent(selectedTab, acceleration)}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody>{renderTabContent(selectedTab, acceleration)}</EuiFlyoutBody>
     </>
   );
 };
