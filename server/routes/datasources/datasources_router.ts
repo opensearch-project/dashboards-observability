@@ -37,7 +37,7 @@ export function registerDatasourcesRoute(router: IRouter) {
         console.error('Error in running direct query:', error);
         return response.custom({
           statusCode: error.statusCode || 500,
-          body: error.message,
+          body: error.body,
         });
       }
     }

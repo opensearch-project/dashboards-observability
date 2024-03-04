@@ -423,11 +423,11 @@ export interface GridSortingColumn {
 }
 
 export enum DirectQueryLoadingStatus {
-  SUCCESS = 'SUCCESS',
-  FAILED = 'FAILED',
-  RUNNING = 'RUNNING',
-  SCHEDULED = 'SCHEDULED',
-  CANCELED = 'CANCELED',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  RUNNING = 'running',
+  SCHEDULED = 'scheduled',
+  CANCELED = 'canceled',
 }
 
 export interface DirectQueryRequest {
