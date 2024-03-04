@@ -189,7 +189,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     }
 
     const matchesClauses = (obj, clauses) => {
-      return clauses.every((clause) => {
+      if (!clauses.length) {
+        return true;
+      }
+
+      return clauses.some((clause) => {
         if (clause.type === 'field') {
           if (clause.field === 'accelerations' && Array.isArray(obj[clause.field])) {
             return obj[clause.field].includes(clause.value);
