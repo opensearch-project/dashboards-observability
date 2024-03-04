@@ -28,9 +28,9 @@ import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common
 import { uiSettingsService } from '../../../../common/utils';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
-import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
-import { usePolling } from '../../../components/hooks/use_polling';
+import { useFetchEvents } from '../../event_analytics/hooks';
+import { changeQuery } from '../../event_analytics/redux/slices/query_slice';
+import { usePolling } from '../../hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
@@ -38,8 +38,10 @@ import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { reset as resetResults } from '../../event_analytics/redux/slices/query_result_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
+import { formatError } from '../../event_analytics/utils';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -179,13 +181,33 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
+  const stopPollingWithStatus = (status: DirectQueryLoadingStatus | undefined) => {
+    stopPolling();
+    setIsQueryRunning(false);
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: {
+          isPolling: false,
+          status,
+        },
+      })
+    );
+  };
+
   const onQuerySearch = (lang: string) => {
     setIsQueryRunning(true);
     batch(() => {
+      dispatch(resetResults({ tabId })); // reset results
       dispatch(
         changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
       );
-      dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: { isPolling: true, lang, status: DirectQueryLoadingStatus.SCHEDULED },
+        })
+      );
     });
     const sessionId = getAsyncSessionId();
     const requestPayload = {
@@ -212,7 +234,15 @@ export const DirectSearch = (props: any) => {
         }
       })
       .catch((e) => {
-        setIsQueryRunning(false);
+        stopPollingWithStatus(DirectQueryLoadingStatus.FAILED);
+        const formattedError = formatError(
+          '',
+          'The query failed to execute and the operation could not be complete.',
+          e.body.message
+        );
+        coreRefs.core?.notifications.toasts.addError(formattedError, {
+          title: 'Query Failed',
+        });
         console.error(e);
       });
   };
@@ -220,31 +250,32 @@ export const DirectSearch = (props: any) => {
   useEffect(() => {
     // cancel direct query
     if (!pollingResult) return;
-    const { status, datarows } = pollingResult;
+    const { status: anyCaseStatus, datarows, error } = pollingResult;
+    const status = anyCaseStatus?.toLowerCase();
 
     if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
-      // stop polling
-      stopPolling();
-      setIsQueryRunning(false);
+      stopPollingWithStatus(status);
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
+    } else if (status === DirectQueryLoadingStatus.FAILED) {
+      stopPollingWithStatus(status);
+      // send in a toast with error message
+      const formattedError = formatError(
+        '',
+        'The query failed to execute and the operation could not be complete.',
+        error
+      );
+      coreRefs.core?.notifications.toasts.addError(formattedError, {
+        title: 'Query Failed',
+      });
+    } else {
       dispatch(
         updateSearchMetaData({
           tabId,
-          data: {
-            isPolling: false,
-            status: undefined,
-          },
+          data: { status },
         })
       );
-      // update page with data
-      dispatchOnGettingHis(pollingResult, '');
-      return;
     }
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { status },
-      })
-    );
   }, [pollingResult, pollingError]);
 
   useEffect(() => {
