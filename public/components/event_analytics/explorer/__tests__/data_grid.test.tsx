@@ -14,6 +14,7 @@ import {
   UNSELECTED_FIELDS,
   QUERIED_FIELDS,
   DEFAULT_EMPTY_EXPLORER_FIELDS,
+  SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 import {
   AVAILABLE_FIELDS as SIDEBAR_AVAILABLE_FIELDS,
@@ -25,10 +26,9 @@ import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { sampleEmptyPanel } from '../../../../../test/panels_constants';
 import { HttpResponse } from '../../../../../../../src/core/public';
 import PPLService from '../../../../../public/services/requests/ppl';
-import { applyMiddleware, createStore } from 'redux';
-import { rootReducer } from '../../../../../public/framework/redux/reducers';
-import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { queriesReducer } from '../../redux/slices/query_slice';
 
 describe('Datagrid component', () => {
   configure({ adapter: new Adapter() });
@@ -45,13 +45,23 @@ describe('Datagrid component', () => {
       Promise.resolve((sampleEmptyPanel as unknown) as HttpResponse)
     );
 
+    const tabId = 'explorer-tab-_fbef9141-48eb-11ee-a60a-af33302cfb3c';
+
     const http = httpClientMock;
     const pplService = new PPLService(httpClientMock);
-    const store = createStore(rootReducer, applyMiddleware(thunk));
+    const preloadedState = {
+      queries: {
+        [tabId]: {
+          [SELECTED_TIMESTAMP]: 'timestamp',
+        },
+      },
+    };
+    const store = configureStore({ reducer: queriesReducer, preloadedState });
 
     const wrapper = mount(
       <Provider store={store}>
         <DataGrid
+          tabId={tabId}
           http={http}
           pplService={pplService}
           rows={DATA_GRID_ROWS}
@@ -60,9 +70,7 @@ describe('Datagrid component', () => {
           timeStampField={'timestamp'}
           rawQuery={EXPLORER_DATA_GRID_QUERY}
           totalHits={1390}
-          requestParams={{
-            tabId: 'explorer-tab-_fbef9141-48eb-11ee-a60a-af33302cfb3c',
-          }}
+          requestParams={{ tabId }}
           startTime={'now/y'}
           endTime={'now'}
           storedSelectedColumns={DEFAULT_EMPTY_EXPLORER_FIELDS}
