@@ -351,7 +351,6 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                     iconSide="right"
                     fill={false}
                     data-test-subj="query-assist-generate-button"
-                    style={{ width: 160 }}
                   >
                     Generate query
                   </EuiButton>
@@ -368,7 +367,6 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                     type="submit"
                     fill={barSelected}
                     data-test-subj="query-assist-generate-and-run-button"
-                    style={{ width: 175 }}
                   >
                     Generate and run
                   </EuiButton>
