@@ -16,6 +16,8 @@ import {
   EuiButton,
   EuiSpacer,
   EuiEmptyPrompt,
+  Search,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
@@ -28,6 +30,23 @@ interface FilterOption {
   value: string;
   text: string;
 }
+
+interface AssociatedTableFilter {
+  type: string;
+  field: string;
+  operator: string;
+  value: string;
+}
+
+type AssoicatedObjSearchBar = Search | undefined;
+
+function isClauseMatched(record: AssociatedObject, filterObj: AssociatedTableFilter): boolean {
+  const entries = Object.entries(record);
+
+  return entries.some(([key, value]) => key === filterObj.field && filterObj.value === value);
+}
+
+const accelerationColumn = 'accelerations';
 
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   associatedObjects,
@@ -189,24 +208,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     }
 
     const matchesClauses = (obj, clauses) => {
-      if (!clauses.length) {
-        return true;
-      }
-
+      if (clauses.length === 0) return true;
       return clauses.some((clause) => {
-        if (clause.type === 'field') {
-          if (clause.field === 'accelerations' && Array.isArray(obj[clause.field])) {
-            return obj[clause.field].includes(clause.value);
-          } else {
-            switch (clause.operator) {
-              case 'eq':
-                return obj[clause.field] === clause.value;
-              default:
-                return true;
-            }
-          }
-        }
-        return true;
+        if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
+        if (clause.field === accelerationColumn)
+          return obj[accelerationColumn].includes(clause.value);
+        return isClauseMatched(obj, clause);
       });
     };
 
@@ -226,7 +233,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       multiSelect: true,
       options: databaseFilterOptions,
       cache: 60000,
-      onChange: (value) => setSelectedDatabaseFilter(value),
     },
     {
       type: 'field_value_selection',
@@ -235,9 +241,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       multiSelect: true,
       options: accelerationFilterOptions,
       cache: 60000,
-      onChange: (value) => setSelectedAccelerationFilter(value),
     },
-  ];
+  ] as SearchFilterConfig[];
 
   const search = {
     filters: searchFilters,
