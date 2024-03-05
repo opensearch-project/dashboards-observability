@@ -509,12 +509,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Data source description
+                  Connection title
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
-                  -
+                  ya
                 </div>
               </div>
               <div
@@ -523,12 +523,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Query access
+                  Data source description
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
-                  Everyone
+                  -
                 </div>
               </div>
             </div>

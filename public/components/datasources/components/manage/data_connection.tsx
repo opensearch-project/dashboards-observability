@@ -80,7 +80,6 @@ export const DataConnection = (props: any) => {
       sql: sampleSql,
     },
   ];
-  const queryAccess = 'Everyone';
 
   const DefaultDatasourceCards = () => {
     return (
@@ -239,15 +238,15 @@ export const DataConnection = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Data source description</EuiText>
+                <EuiText className="overview-title">Connection title</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.description || '-'}
+                  {datasourceDetails.name || '-'}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query access</EuiText>
+                <EuiText className="overview-title">Data source description</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {queryAccess}
+                  {datasourceDetails.description || '-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
