@@ -25,3 +25,66 @@ export interface AssociatedObject {
 export type Role = EuiComboBoxOptionOption;
 
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+interface AsyncApiDataResponse {
+  status: string;
+  schema?: Array<{ name: string; type: string }>;
+  datarows?: any;
+  total?: number;
+  size?: number;
+  error?: string;
+}
+
+export interface AsyncApiResponse {
+  data: {
+    ok: boolean;
+    resp: AsyncApiDataResponse;
+  };
+}
+
+export type PollingCallback = (statusObj: AsyncApiResponse) => void;
+
+export enum CachedDataSourceStatus {
+  Updated = 'Updated',
+  Failed = 'Failed',
+  Empty = 'Empty',
+  Loading = 'Loading',
+}
+
+export interface CachedColumn {
+  name: string;
+  dataType: string;
+}
+
+export interface CachedIndex {
+  indexName: string;
+}
+
+export interface CachedTable {
+  name: string;
+  columns: CachedColumn[];
+  skippingIndex?: CachedIndex;
+  coveringIndices: CachedIndex[];
+}
+
+export interface CachedMaterializedView {
+  name: string;
+}
+
+export interface CachedDatabase {
+  name: string;
+  materializedViews: CachedMaterializedView[];
+  tables: CachedTable[];
+}
+
+export interface CachedDataSource {
+  name: string;
+  lastUpdated: string; // Assuming date string in UTC format
+  status: CachedDataSourceStatus;
+  databases: CachedDatabase[];
+}
+
+export interface CatalogCacheData {
+  version: string;
+  dataSources: CachedDataSource[];
+}

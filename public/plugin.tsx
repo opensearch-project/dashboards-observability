@@ -15,9 +15,12 @@ import {
   PluginInitializerContext,
   SavedObject,
 } from '../../../src/core/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
+  S3_DATASOURCE_TYPE,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -43,7 +46,6 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -53,8 +55,9 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
-import { Search } from './components/common/search/search';
 import { DirectSearch } from './components/common/search/direct_search';
+import { Search } from './components/common/search/search';
+import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -66,9 +69,10 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
+import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
 import { coreRefs } from './framework/core_refs';
-import { S3DataSource } from './framework/datasources/s3_datasource';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
+import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
@@ -80,9 +84,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
-import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
-import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 
 interface PublicConfig {
   query_assist: {
@@ -364,6 +365,10 @@ export class ObservabilityPlugin
           })
         );
       });
+    });
+
+    core.http.intercept({
+      responseError: catalogCacheInterceptError(),
     });
 
     // Use overlay service to render flyouts

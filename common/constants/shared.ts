@@ -21,6 +21,7 @@ export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
 export const SAVED_VISUALIZATION = '/vis';
 export const CONSOLE_PROXY = '/api/console/proxy';
+export const SECURITY_PLUGIN_ACCOUNT_API = '/api/v1/configuration/account';
 
 // Server route
 export const PPL_ENDPOINT = '/_plugins/_ppl';
@@ -256,6 +257,7 @@ export const VISUALIZATION_ERROR = {
 export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
 
 export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
+export const ASYNC_QUERY_CATALOG_CACHE = 'async-query-catalog-cache';
 
 export const DIRECT_DUMMY_QUERY = 'select 1';
 
