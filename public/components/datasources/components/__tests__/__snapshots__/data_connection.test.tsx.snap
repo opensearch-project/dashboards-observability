@@ -302,62 +302,72 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  style="text-align: right;"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRowReverse euiFlexGroup--responsive"
                 >
                   <div
-                    class="euiText euiText--medium"
-                    style="font-size: small; margin-bottom: -5px;"
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <div
-                      class="euiTextColor euiTextColor--subdued"
+                    <button
+                      class="euiButton euiButton--primary"
+                      data-test-subj="freshButton"
+                      type="button"
                     >
-                      Last updated at:
-                    </div>
+                      <span
+                        class="euiButtonContent euiButton__content"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                        <span
+                          class="euiButton__text"
+                        >
+                          Refresh
+                        </span>
+                      </span>
+                    </button>
                   </div>
                   <div
-                    class="euiText euiText--medium"
-                    style="font-size: small;"
+                    class="euiFlexItem"
                   >
                     <div
-                      class="euiTextColor euiTextColor--subdued"
+                      class="euiText euiText--extraSmall"
                     >
-                      Mon, 01 Jan 2024 00:00:00 GMT
+                      <div
+                        class="euiTextAlign euiTextAlign--right"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Last updated at:
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiText euiText--extraSmall"
+                    >
+                      <div
+                        class="euiTextAlign euiTextAlign--right"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Mon, 01 Jan 2024 00:00:00 GMT
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <button
-                  class="euiButton euiButton--primary"
-                  data-test-subj="freshButton"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonContent euiButton__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                      />
-                    </svg>
-                    <span
-                      class="euiButton__text"
-                    >
-                      Refresh
-                    </span>
-                  </span>
-                </button>
               </div>
             </div>
             <hr
@@ -409,7 +419,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                       <input
                         aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
                         class="euiFieldSearch euiFieldSearch--fullWidth"
-                        placeholder="database:database_1 accelerations:skipping_index_1"
+                        placeholder="database:database_1 database: database_2 accelerations:skipping_index_1"
                         type="search"
                         value=""
                       />
@@ -2490,62 +2500,72 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  style="text-align: right;"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRowReverse euiFlexGroup--responsive"
                 >
                   <div
-                    class="euiText euiText--medium"
-                    style="font-size: small; margin-bottom: -5px;"
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <div
-                      class="euiTextColor euiTextColor--subdued"
+                    <button
+                      class="euiButton euiButton--primary"
+                      data-test-subj="freshButton"
+                      type="button"
                     >
-                      Last updated at:
-                    </div>
+                      <span
+                        class="euiButtonContent euiButton__content"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                          />
+                        </svg>
+                        <span
+                          class="euiButton__text"
+                        >
+                          Refresh
+                        </span>
+                      </span>
+                    </button>
                   </div>
                   <div
-                    class="euiText euiText--medium"
-                    style="font-size: small;"
+                    class="euiFlexItem"
                   >
                     <div
-                      class="euiTextColor euiTextColor--subdued"
+                      class="euiText euiText--extraSmall"
                     >
-                      Mon, 01 Jan 2024 00:00:00 GMT
+                      <div
+                        class="euiTextAlign euiTextAlign--right"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Last updated at:
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiText euiText--extraSmall"
+                    >
+                      <div
+                        class="euiTextAlign euiTextAlign--right"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Mon, 01 Jan 2024 00:00:00 GMT
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <button
-                  class="euiButton euiButton--primary"
-                  data-test-subj="freshButton"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonContent euiButton__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
-                      />
-                    </svg>
-                    <span
-                      class="euiButton__text"
-                    >
-                      Refresh
-                    </span>
-                  </span>
-                </button>
               </div>
             </div>
             <hr
@@ -2598,7 +2618,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                       <input
                         aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
                         class="euiFieldSearch euiFieldSearch--fullWidth"
-                        placeholder="database:database_1 accelerations:skipping_index_1"
+                        placeholder="database:database_1 database: database_2 accelerations:skipping_index_1"
                         type="search"
                         value=""
                       />
