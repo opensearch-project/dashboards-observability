@@ -251,7 +251,13 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
-      generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+      if (coreRefs.summarizeEnabled) {
+        generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+      } else {
+        coreRefs.toasts?.addError(formatError(error as ResponseError), {
+          title: 'Failed to generate results',
+        });
+      }
     } finally {
       setGeneratingOrRunning(false);
     }
