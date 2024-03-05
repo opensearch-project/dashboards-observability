@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiSpacer,
   EuiEmptyPrompt,
-  Search,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
@@ -37,8 +36,6 @@ interface AssociatedTableFilter {
   operator: string;
   value: string;
 }
-
-type AssoicatedObjSearchBar = Search | undefined;
 
 function isClauseMatched(record: AssociatedObject, filterObj: AssociatedTableFilter): boolean {
   const entries = Object.entries(record);
@@ -68,13 +65,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   useEffect(() => {
     fetchAssociatedObjects();
 
-    const databaseOptions = _.uniq(associatedObjects.map((obj) => obj.database))
+    const databaseOptions = Array.from(new Set(associatedObjects.map((obj) => obj.database)))
       .sort()
       .map((database) => ({ value: database, text: database }));
     setDatabaseFilterOptions(databaseOptions);
 
-    const accelerationOptions = _.uniq(
-      associatedObjects.flatMap((obj) => obj.accelerations).filter(Boolean)
+    const accelerationOptions = Array.from(
+      new Set(associatedObjects.flatMap((obj) => obj.accelerations).filter(Boolean))
     )
       .sort()
       .map((acceleration) => ({ value: acceleration, text: acceleration }));
