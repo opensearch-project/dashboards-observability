@@ -30,10 +30,9 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { NoAccess } from '../no_access';
 import { AccessControlTab } from './access_control_tab';
-import { ConnectionDetails } from './connection_details';
 import { DatasourceType } from '../../../../../common/types/data_connections';
-import { DatasourceTypeToDisplayName } from '../../../../../common/constants/data_connections';
-import { AssociatedObjectsTab } from './associated_objects_tab';
+import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
+import { AccelerationTable } from './accelerations/acceleration_table';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -64,47 +63,68 @@ export const DataConnection = (props: any) => {
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
 
+  // Dummy accelerations variables for mock purposes
+  // Actual accelerations should be retrieved from the backend
+  const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
+  const dummyAccelerations = [
+    {
+      name: 'dummy_acceleration_1',
+      status: 'ACTIVE',
+      type: 'skip',
+      database: 'default',
+      table: 'table1',
+      destination: 'N/A',
+      dateCreated: 1709339290,
+      dateUpdated: 1709339290,
+      index: 'security_logs_2022',
+      sql: sampleSql,
+    },
+  ];
+
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCard
-            icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Query your data in Data Explorer or Observability Logs"
-            onClick={() => application!.navigateToApp(observabilityLogsID)}
+            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+            title={'Configure Integrations'}
+            description="Connect to common application log types using integrations"
+            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+            selectable={{
+              onClick: () => {},
+              isDisabled: false,
+              children: 'Add Integrations',
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="bolt" />}
             title={'Accelerate performance'}
-            description="Accelerate performance by using OpenSearch indexing"
+            description="Accelerate query performance through OpenSearch indexing"
             onClick={() =>
               application!.navigateToApp(queryWorkbenchPluginID, {
                 path: `#/accelerate/${dataSource}`,
               })
             }
+            selectable={{
+              onClick: () => {},
+              isDisabled: false,
+              children: 'Accelerate Performance',
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            icon={<EuiIcon size="xxl" type="database" />}
-            title={'Define tables'}
-            description="Manually define tables"
-            onClick={() =>
-              application!.navigateToApp(queryWorkbenchPluginID, {
-                path: `#/${dataSource}`,
-              })
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-            title={'Integrate data'}
-            description="Explore data faster through integrations"
-            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Uncover insights from your data or better understand it"
+            onClick={() => application!.navigateToApp(observabilityLogsID)}
+            selectable={{
+              onClick: () => {},
+              isDisabled: false,
+              children: 'Query in Discover',
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -140,33 +160,6 @@ export const DataConnection = (props: any) => {
 
   const tabs = [
     {
-      id: 'access_control',
-      name: 'Access control',
-      disabled: false,
-      content: (
-        <AccessControlTab
-          allowedRoles={datasourceDetails.allowedRoles}
-          dataConnection={dataSource}
-          connector={datasourceDetails.connector}
-          properties={datasourceDetails.properties}
-          key={JSON.stringify(datasourceDetails.allowedRoles)}
-        />
-      ),
-    },
-    {
-      id: 'connection_configuration',
-      name: 'Connection configuration',
-      disabled: false,
-      content: (
-        <ConnectionDetails
-          dataConnection={dataSource}
-          description={datasourceDetails.description}
-          connector={datasourceDetails.connector}
-          properties={datasourceDetails.properties}
-        />
-      ),
-    },
-    {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
@@ -188,14 +181,30 @@ export const DataConnection = (props: any) => {
       ),
     },
     {
-      id: 'accelerations',
+      id: 'acceleration_table',
       name: 'Accelerations',
+      disabled: false,
+      content: <AccelerationTable accelerations={dummyAccelerations} />,
+    },
+    // TODO: Installed integrations page
+    {
+      id: 'installed_integrations',
+      name: 'Installed Integrations',
       disabled: false,
     },
     {
-      id: 'installed_integrations',
-      name: 'Installed integrations',
+      id: 'access_control',
+      name: 'Access control',
       disabled: false,
+      content: (
+        <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
+        />
+      ),
     },
   ];
 
@@ -336,10 +345,9 @@ export const DataConnection = (props: any) => {
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"
-          buttonContent={`Use cases for ${
-            DatasourceTypeToDisplayName[datasourceDetails.connector]
-          } in OpenSearch Dashboards`}
+          buttonContent={'Get started'}
           initialIsOpen={true}
+          paddingSize="m"
         >
           <QueryOrAccelerateData />
         </EuiAccordion>
