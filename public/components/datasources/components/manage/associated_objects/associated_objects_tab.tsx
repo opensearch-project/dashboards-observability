@@ -90,23 +90,25 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div style={{ textAlign: 'right' }}>
-            <EuiText color="subdued" style={{ fontSize: 'small', marginBottom: '-5px' }}>
-              Last updated at:
-            </EuiText>
-            <EuiText color="subdued" style={{ fontSize: 'small' }}>
-              {lastUpdated}
-            </EuiText>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="freshButton"
-            iconType="refresh"
-            onClick={fetchAssociatedObjects}
-          >
-            Refresh
-          </EuiButton>
+          <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="freshButton"
+                iconType="refresh"
+                onClick={fetchAssociatedObjects}
+              >
+                Refresh
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText textAlign="right" size="xs" color="subdued">
+                Last updated at:
+              </EuiText>
+              <EuiText textAlign="right" color="subdued" size="xs">
+                {lastUpdated}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
