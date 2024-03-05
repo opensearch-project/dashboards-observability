@@ -4,7 +4,6 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
-import { SearchResponse, SearchTotalHits } from '@opensearch-project/opensearch/api/types';
 import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 import { OpenSearchClient } from '../../../../../../src/core/server';
 import { isResponseError } from '../../../../../../src/core/server/opensearch/client/errors';
@@ -30,65 +29,50 @@ type AgentResponse = ApiResponse<{
 
 export const agentIdMap: Record<string, string> = {};
 
-export const searchAgentIdByName = async (
+export const getAgentIdByConfig = async (
   opensearchClient: OpenSearchClient,
-  name: string
+  configName: string
 ): Promise<string> => {
   try {
     const response = (await opensearchClient.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_API_PREFIX}/agents/_search`,
-      body: {
-        query: {
-          term: {
-            'name.keyword': name,
-          },
-        },
-        sort: {
-          created_time: 'desc',
-        },
-      },
-    })) as ApiResponse<SearchResponse>;
+      path: `${ML_COMMONS_API_PREFIX}/config/${configName}`,
+    })) as ApiResponse<{ type: string; configuration: { agent_id?: string } }>;
 
-    if (
-      !response ||
-      (typeof response.body.hits.total === 'number' && response.body.hits.total === 0) ||
-      (response.body.hits.total as SearchTotalHits).value === 0
-    ) {
-      throw new Error('cannot find any agent by name: ' + name);
+    if (!response || response.body.configuration.agent_id === undefined) {
+      throw new Error('cannot find any agent by configuration: ' + configName);
     }
-    const id = response.body.hits.hits[0]._id;
-    return id;
+    return response.body.configuration.agent_id;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
-    throw new Error(`search agent '${name}' failed, reason: ` + errorMessage);
+    throw new Error(`Get agent '${configName}' failed, reason: ` + errorMessage);
   }
 };
 
 export const requestWithRetryAgentSearch = async (options: {
   client: OpenSearchClient;
-  agentName: string;
+  configName: string;
   shouldRetryAgentSearch?: boolean;
   body: RequestBody;
 }): Promise<AgentResponse> => {
-  const { client, agentName, shouldRetryAgentSearch = true, body } = options;
+  const { client, configName, shouldRetryAgentSearch = true, body } = options;
   let retry = shouldRetryAgentSearch;
-  if (!agentIdMap[agentName]) {
-    agentIdMap[agentName] = await searchAgentIdByName(client, agentName);
+  if (!agentIdMap[configName]) {
+    agentIdMap[configName] = await getAgentIdByConfig(client, configName);
     retry = false;
   }
   return client.transport
     .request(
       {
         method: 'POST',
-        path: `${ML_COMMONS_API_PREFIX}/agents/${agentIdMap[agentName]}/_execute`,
+        path: `${ML_COMMONS_API_PREFIX}/agents/${agentIdMap[configName]}/_execute`,
         body,
       },
       AGENT_REQUEST_OPTIONS
     )
     .catch(async (error) => {
       if (retry && isResponseError(error) && error.statusCode === 404) {
-        agentIdMap[agentName] = await searchAgentIdByName(client, agentName);
+        agentIdMap[configName] = await getAgentIdByConfig(client, configName);
         return requestWithRetryAgentSearch({ ...options, shouldRetryAgentSearch: false });
       }
       return Promise.reject(error);
