@@ -20,6 +20,10 @@ import {
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
+import {
+  accelerationColumnName,
+  associatedObjectsSearchBarHint,
+} from './utils/associated_objects_tab_utils';
 
 interface AssociatedObjectsTabProps {
   associatedObjects: AssociatedObject[];
@@ -42,8 +46,6 @@ function isClauseMatched(record: AssociatedObject, filterObj: AssociatedTableFil
 
   return entries.some(([key, value]) => key === filterObj.field && filterObj.value === value);
 }
-
-const accelerationColumn = 'accelerations';
 
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   associatedObjects,
@@ -211,7 +213,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       return clauses.some((clause) => {
         if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
         if (clause.field === accelerationColumn)
-          return obj[accelerationColumn].includes(clause.value);
+          return obj[accelerationColumnName].includes(clause.value);
         return isClauseMatched(obj, clause);
       });
     };
@@ -247,7 +249,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     filters: searchFilters,
     box: {
       incremental: true,
-      placeholder: 'database:database_1 accelerations:skipping_index_1',
+      placeholder: associatedObjectsSearchBarHint,
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
