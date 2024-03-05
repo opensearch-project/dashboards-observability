@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   SearchFilterConfig,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
@@ -200,7 +201,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
         },
       ],
     },
-  ];
+  ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const onSearchChange = ({ query, error }) => {
     if (error) {
@@ -212,7 +213,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       if (clauses.length === 0) return true;
       return clauses.some((clause) => {
         if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
-        if (clause.field === accelerationColumn)
+        if (clause.field === accelerationColumnName)
           return obj[accelerationColumnName].includes(clause.value);
         return isClauseMatched(obj, clause);
       });
