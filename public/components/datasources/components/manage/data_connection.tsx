@@ -238,13 +238,7 @@ export const DataConnection = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Connection title</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {datasourceDetails.name || '-'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Data source description</EuiText>
+                <EuiText className="overview-title">Description</EuiText>
                 <EuiText size="s" className="overview-content">
                   {datasourceDetails.description || '-'}
                 </EuiText>
@@ -254,19 +248,11 @@ export const DataConnection = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Index store region</EuiText>
+                <EuiText className="overview-title">Query Access</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {(datasourceDetails.properties as S3GlueProperties)[
-                    'glue.indexstore.opensearch.region'
-                  ] || '-'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Index store URI</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {(datasourceDetails.properties as S3GlueProperties)[
-                    'glue.indexstore.opensearch.uri'
-                  ] || '-'}
+                  {datasourceDetails.allowedRoles.length > 0
+                    ? `Restricted to ${datasourceDetails.allowedRoles.join(', ')}`
+                    : 'Admin only'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

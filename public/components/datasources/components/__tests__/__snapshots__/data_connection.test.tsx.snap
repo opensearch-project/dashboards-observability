@@ -509,21 +509,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Connection title
-                </div>
-                <div
-                  class="euiText euiText--small overview-content"
-                >
-                  ya
-                </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <div
-                  class="euiText euiText--medium overview-title"
-                >
-                  Data source description
+                  Description
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
@@ -545,26 +531,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Index store region
+                  Query Access
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
-                  us-west-2
-                </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <div
-                  class="euiText euiText--medium overview-title"
-                >
-                  Index store URI
-                </div>
-                <div
-                  class="euiText euiText--small overview-content"
-                >
-                  y
+                  Admin only
                 </div>
               </div>
             </div>
