@@ -167,24 +167,32 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   const columns = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('datasources.associatedObjectsTab.column.name', {
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       'data-test-subj': 'nameCell',
       render: (name: string) => <EuiLink href="https://example.com">{name}</EuiLink>,
     },
     {
       field: 'database',
-      name: 'Database',
+      name: i18n.translate('datasources.associatedObjectsTab.column.database', {
+        defaultMessage: 'Database',
+      }),
       sortable: true,
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('datasources.associatedObjectsTab.column.type', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
     },
     {
       field: 'createdByIntegration',
-      name: 'Created by Integration',
+      name: i18n.translate('datasources.associatedObjectsTab.column.createdByIntegration', {
+        defaultMessage: 'Created by Integration',
+      }),
       sortable: true,
       render: (createdByIntegration: string, _item: AssociatedObject) =>
         createdByIntegration ? (
@@ -197,7 +205,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     },
     {
       field: 'accelerations',
-      name: 'Accelerations',
+      name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
+        defaultMessage: 'Accelerations',
+      }),
       sortable: true,
       render: (accelerations: string[]) => {
         return accelerations.length > 0
@@ -211,18 +221,34 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       },
     },
     {
-      name: 'Actions',
+      name: i18n.translate('datasources.associatedObjectsTab.column.actions', {
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
-          name: 'Discover',
-          description: 'Discover this object',
+          name: i18n.translate('datasources.associatedObjectsTab.action.discover.name', {
+            defaultMessage: 'Discover',
+          }),
+          description: i18n.translate(
+            'datasources.associatedObjectsTab.action.discover.description',
+            {
+              defaultMessage: 'Discover this object',
+            }
+          ),
           type: 'icon',
           icon: 'discoverApp',
           onClick: (item: AssociatedObject) => console.log('Discover', item),
         },
         {
-          name: 'Accelerate',
-          description: 'Accelerate this object',
+          name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
+            defaultMessage: 'Accelerate',
+          }),
+          description: i18n.translate(
+            'datasources.associatedObjectsTab.action.accelerate.description',
+            {
+              defaultMessage: 'Accelerate this object',
+            }
+          ),
           type: 'icon',
           icon: 'bolt',
           available: (item: AssociatedObject) => item.type === 'Table',
