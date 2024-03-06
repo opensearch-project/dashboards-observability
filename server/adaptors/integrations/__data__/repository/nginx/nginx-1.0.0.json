@@ -1,8 +1,8 @@
 {
   "name": "nginx",
   "version": "1.0.0",
-  "displayName": "NginX Dashboard",
-  "description": "Nginx HTTP server collector",
+  "displayName": "Nginx",
+  "description": "Analyze Nginx access logs.",
   "license": "Apache-2.0",
   "type": "logs",
   "labels": ["Observability", "Logs", "Flint S3"],
