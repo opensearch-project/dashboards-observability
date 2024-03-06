@@ -31,6 +31,7 @@ import {
   ASSC_OBJ_NO_DATA_DESCRIPTION,
   ASSC_OBJ_REFRESH_BTN,
   ASSC_OBJ_FRESH_MSG,
+  ASSC_OBJ_TABLE_SUBJ,
 } from './utils/associated_objects_tab_utils';
 
 interface AssociatedObjectsTabProps {
@@ -341,6 +342,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
             pagination={pagination}
             sorting={sorting}
             noItemsMessage={associatedObjects.length === 0 ? noDataMessage : undefined}
+            data-test-subj={ASSC_OBJ_TABLE_SUBJ}
           />
         ) : (
           noDataMessage

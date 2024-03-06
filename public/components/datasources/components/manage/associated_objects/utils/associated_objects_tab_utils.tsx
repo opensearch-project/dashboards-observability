@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// TODO: REMOVE THIS DUMMY DATA
 export const mockAssociatedObjects = [
   {
     id: '1',
@@ -11,7 +10,7 @@ export const mockAssociatedObjects = [
     database: 'db1',
     type: 'Table',
     createdByIntegration: 'xx',
-    accelerations: ['xxx_skipping1'],
+    accelerations: ['skipping_index_1'],
   },
   {
     id: '2',
@@ -19,7 +18,7 @@ export const mockAssociatedObjects = [
     database: 'db1',
     type: 'Table',
     createdByIntegration: 'xx',
-    accelerations: ['xxx_skipping1'],
+    accelerations: ['skipping_index_1'],
   },
   {
     id: '3',
@@ -27,7 +26,7 @@ export const mockAssociatedObjects = [
     database: 'db1',
     type: 'Table',
     createdByIntegration: 'xx',
-    accelerations: ['xxx_skipping2'],
+    accelerations: ['skipping_index_2'],
   },
   {
     id: '4',
@@ -35,7 +34,7 @@ export const mockAssociatedObjects = [
     database: 'db2',
     type: 'Table',
     createdByIntegration: 'xx',
-    accelerations: ['xxx_skipping2'],
+    accelerations: ['skipping_index_2'],
   },
   {
     id: '5',
@@ -43,7 +42,7 @@ export const mockAssociatedObjects = [
     database: 'db3',
     type: 'Table',
     createdByIntegration: 'xx',
-    accelerations: ['xxx_skipping3'],
+    accelerations: ['skipping_index_3'],
   },
   {
     id: '6',
@@ -62,6 +61,8 @@ export const mockAssociatedObjects = [
     accelerations: ['acc1', 'acc2'],
   },
 ];
+
+export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';
 
 export const ASSC_OBJ_TABLE_ACC_COLUMN_NAME = 'accelerations';
 
