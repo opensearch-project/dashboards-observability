@@ -33,6 +33,7 @@ import { AccessControlTab } from './access_control_tab';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
+import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -163,22 +164,7 @@ export const DataConnection = (props: any) => {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
-      content: (
-        <AssociatedObjectsTab
-          associatedObjects={
-            [
-              // {
-              //   id: '1',
-              //   name: 'Table_name_1',
-              //   database: 'db1',
-              //   type: 'Table',
-              //   createdByIntegration: 'xx',
-              //   accelerations: 'xxx_skipping',
-              // },
-            ]
-          }
-        />
-      ),
+      content: <AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />,
     },
     {
       id: 'acceleration_table',

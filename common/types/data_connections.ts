@@ -19,7 +19,7 @@ export interface AssociatedObject {
   database: string;
   type: string;
   createdByIntegration: string;
-  accelerations: string;
+  accelerations: string[];
 }
 
 export type Role = EuiComboBoxOptionOption;
