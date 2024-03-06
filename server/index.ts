@@ -17,27 +17,9 @@ const observabilityConfig = {
   schema: schema.object({
     query_assist: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      ppl_agent_name: schema.conditional(
-        schema.siblingRef('enabled'),
-        true,
-        schema.string(),
-        schema.maybe(schema.string())
-      ),
     }),
     summarize: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      response_summary_agent_name: schema.conditional(
-        schema.siblingRef('enabled'),
-        true,
-        schema.string(),
-        schema.maybe(schema.string())
-      ),
-      error_summary_agent_name: schema.conditional(
-        schema.siblingRef('enabled'),
-        true,
-        schema.string(),
-        schema.maybe(schema.string())
-      ),
     }),
   }),
 };
