@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { i18n } from '@osd/i18n';
+import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
@@ -50,12 +51,6 @@ interface AssociatedTableFilter {
   value: string;
 }
 
-function isClauseMatched(record: AssociatedObject, filterObj: AssociatedTableFilter): boolean {
-  const entries = Object.entries(record);
-
-  return entries.some(([key, value]) => key === filterObj.field && filterObj.value === value);
-}
-
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   associatedObjects,
 }) => {
@@ -82,10 +77,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     setDatabaseFilterOptions(databaseOptions);
 
     const accelerationOptions = Array.from(
-      new Set(associatedObjects.flatMap((obj) => obj.accelerations).filter(Boolean))
+      new Set(
+        associatedObjects
+          .flatMap((obj) => obj.accelerations.map((acceleration) => acceleration.name))
+          .filter(Boolean)
+      )
     )
       .sort()
-      .map((acceleration) => ({ value: acceleration, text: acceleration }));
+      .map((name) => ({ value: name, text: name }));
     setAccelerationFilterOptions(accelerationOptions);
 
     setFilteredObjects(associatedObjects);
@@ -214,7 +213,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
         return accelerations.length > 0
           ? accelerations.map((acceleration, index) => (
               <React.Fragment key={index}>
-                <EuiLink onClick={() => openFlyout(acceleration)}>{acceleration}</EuiLink>
+                <EuiLink onClick={() => renderAccelerationDetailsFlyout(acceleration)}>
+                  {acceleration.name}
+                </EuiLink>
                 {index < accelerations.length - 1 ? ', ' : ''}
               </React.Fragment>
             ))
@@ -267,11 +268,18 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
     const matchesClauses = (obj: AssociatedObject, clauses: AssociatedTableFilter[]): boolean => {
       if (clauses.length === 0) return true;
+
       return clauses.some((clause) => {
-        if (clause.type !== 'field' && clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) return true;
-        if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME)
-          return obj[ASSC_OBJ_TABLE_ACC_COLUMN_NAME].includes(clause.value);
-        return isClauseMatched(obj, clause);
+        if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
+          return obj[clause.field] === clause.value;
+        } else if (
+          clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME &&
+          Array.isArray(obj.accelerations)
+        ) {
+          return obj.accelerations.some((acceleration) => acceleration.name === clause.value);
+        }
+
+        return false;
       });
     };
 
@@ -325,6 +333,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       direction: 'asc',
     },
   };
+
+  const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
 
   return (
     <>

@@ -6,9 +6,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
     Array [
       Object {
         "accelerations": Array [
-          "skipping_index_1",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_1",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db1",
         "id": "1",
         "name": "Table_name_1",
@@ -16,9 +27,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
       Object {
         "accelerations": Array [
-          "skipping_index_1",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db1",
         "id": "2",
         "name": "Table_name_2",
@@ -26,9 +48,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
       Object {
         "accelerations": Array [
-          "skipping_index_2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db1",
         "id": "3",
         "name": "Table_name_3",
@@ -36,9 +69,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
       Object {
         "accelerations": Array [
-          "skipping_index_2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db2",
         "id": "4",
         "name": "Table_name_4",
@@ -46,9 +90,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
       Object {
         "accelerations": Array [
-          "skipping_index_3",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_3",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db3",
         "id": "5",
         "name": "Table_name_5",
@@ -64,8 +119,30 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
       Object {
         "accelerations": Array [
-          "acc1",
-          "acc2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_4",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_5",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
         "createdByIntegration": "",
         "database": "db3",
@@ -403,9 +480,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           Array [
             Object {
               "accelerations": Array [
-                "skipping_index_1",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_1",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db1",
               "id": "1",
               "name": "Table_name_1",
@@ -413,9 +501,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
             },
             Object {
               "accelerations": Array [
-                "skipping_index_1",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db1",
               "id": "2",
               "name": "Table_name_2",
@@ -423,9 +522,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
             },
             Object {
               "accelerations": Array [
-                "skipping_index_2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db1",
               "id": "3",
               "name": "Table_name_3",
@@ -433,9 +543,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
             },
             Object {
               "accelerations": Array [
-                "skipping_index_2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db2",
               "id": "4",
               "name": "Table_name_4",
@@ -443,9 +564,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
             },
             Object {
               "accelerations": Array [
-                "skipping_index_3",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_3",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db3",
               "id": "5",
               "name": "Table_name_5",
@@ -461,8 +593,30 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
             },
             Object {
               "accelerations": Array [
-                "acc1",
-                "acc2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_4",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_5",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
               "createdByIntegration": "",
               "database": "db3",
@@ -528,14 +682,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 "name": "Accelerations",
                 "options": Array [
                   Object {
-                    "text": "acc1",
-                    "value": "acc1",
-                  },
-                  Object {
-                    "text": "acc2",
-                    "value": "acc2",
-                  },
-                  Object {
                     "text": "skipping_index_1",
                     "value": "skipping_index_1",
                   },
@@ -546,6 +692,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   Object {
                     "text": "skipping_index_3",
                     "value": "skipping_index_3",
+                  },
+                  Object {
+                    "text": "skipping_index_4",
+                    "value": "skipping_index_4",
+                  },
+                  Object {
+                    "text": "skipping_index_5",
+                    "value": "skipping_index_5",
                   },
                 ],
                 "type": "field_value_selection",
@@ -612,14 +766,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   "name": "Accelerations",
                   "options": Array [
                     Object {
-                      "text": "acc1",
-                      "value": "acc1",
-                    },
-                    Object {
-                      "text": "acc2",
-                      "value": "acc2",
-                    },
-                    Object {
                       "text": "skipping_index_1",
                       "value": "skipping_index_1",
                     },
@@ -630,6 +776,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "text": "skipping_index_3",
                       "value": "skipping_index_3",
+                    },
+                    Object {
+                      "text": "skipping_index_4",
+                      "value": "skipping_index_4",
+                    },
+                    Object {
+                      "text": "skipping_index_5",
+                      "value": "skipping_index_5",
                     },
                   ],
                   "type": "field_value_selection",
@@ -791,14 +945,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "name": "Accelerations",
                             "options": Array [
                               Object {
-                                "text": "acc1",
-                                "value": "acc1",
-                              },
-                              Object {
-                                "text": "acc2",
-                                "value": "acc2",
-                              },
-                              Object {
                                 "text": "skipping_index_1",
                                 "value": "skipping_index_1",
                               },
@@ -809,6 +955,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                               Object {
                                 "text": "skipping_index_3",
                                 "value": "skipping_index_3",
+                              },
+                              Object {
+                                "text": "skipping_index_4",
+                                "value": "skipping_index_4",
+                              },
+                              Object {
+                                "text": "skipping_index_5",
+                                "value": "skipping_index_5",
                               },
                             ],
                             "type": "field_value_selection",
@@ -1014,14 +1168,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 "name": "Accelerations",
                                 "options": Array [
                                   Object {
-                                    "text": "acc1",
-                                    "value": "acc1",
-                                  },
-                                  Object {
-                                    "text": "acc2",
-                                    "value": "acc2",
-                                  },
-                                  Object {
                                     "text": "skipping_index_1",
                                     "value": "skipping_index_1",
                                   },
@@ -1032,6 +1178,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   Object {
                                     "text": "skipping_index_3",
                                     "value": "skipping_index_3",
+                                  },
+                                  Object {
+                                    "text": "skipping_index_4",
+                                    "value": "skipping_index_4",
+                                  },
+                                  Object {
+                                    "text": "skipping_index_5",
+                                    "value": "skipping_index_5",
                                   },
                                 ],
                                 "type": "field_value_selection",
@@ -1252,9 +1406,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
               Array [
                 Object {
                   "accelerations": Array [
-                    "skipping_index_1",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_1",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db1",
                   "id": "1",
                   "name": "Table_name_1",
@@ -1262,9 +1427,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_1",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db1",
                   "id": "2",
                   "name": "Table_name_2",
@@ -1272,9 +1448,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_2",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db1",
                   "id": "3",
                   "name": "Table_name_3",
@@ -1282,9 +1469,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_2",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db2",
                   "id": "4",
                   "name": "Table_name_4",
@@ -1292,9 +1490,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_3",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_3",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db3",
                   "id": "5",
                   "name": "Table_name_5",
@@ -1310,8 +1519,30 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 },
                 Object {
                   "accelerations": Array [
-                    "acc1",
-                    "acc2",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_4",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_5",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
                   "createdByIntegration": "",
                   "database": "db3",
@@ -2091,7 +2322,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2183,9 +2414,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_1",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_1",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "createdByIntegration": "integration_1",
                                         "database": "db1",
                                         "id": "1",
                                         "name": "Table_name_1",
@@ -2210,9 +2452,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_1",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "1",
                                           "name": "Table_name_1",
@@ -2307,9 +2560,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_1",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "1",
                                           "name": "Table_name_1",
@@ -2558,7 +2822,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2601,7 +2865,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      skipping_index_1
+                                      skipping_index_2
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2650,9 +2914,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_1",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "createdByIntegration": "integration_1",
                                         "database": "db1",
                                         "id": "2",
                                         "name": "Table_name_2",
@@ -2677,9 +2952,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "2",
                                           "name": "Table_name_2",
@@ -2774,9 +3060,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "2",
                                           "name": "Table_name_2",
@@ -3025,7 +3322,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -3117,9 +3414,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_2",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "createdByIntegration": "integration_1",
                                         "database": "db1",
                                         "id": "3",
                                         "name": "Table_name_3",
@@ -3144,9 +3452,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "3",
                                           "name": "Table_name_3",
@@ -3241,9 +3560,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
                                           "id": "3",
                                           "name": "Table_name_3",
@@ -3492,7 +3822,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -3584,9 +3914,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_2",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "createdByIntegration": "integration_1",
                                         "database": "db2",
                                         "id": "4",
                                         "name": "Table_name_4",
@@ -3611,9 +3952,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db2",
                                           "id": "4",
                                           "name": "Table_name_4",
@@ -3708,9 +4060,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db2",
                                           "id": "4",
                                           "name": "Table_name_4",
@@ -3959,7 +4322,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -4051,9 +4414,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_3",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_3",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "createdByIntegration": "integration_1",
                                         "database": "db3",
                                         "id": "5",
                                         "name": "Table_name_5",
@@ -4078,9 +4452,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_3",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_3",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db3",
                                           "id": "5",
                                           "name": "Table_name_5",
@@ -4175,9 +4560,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_3",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_3",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "createdByIntegration": "integration_1",
                                           "database": "db3",
                                           "id": "5",
                                           "name": "Table_name_5",
@@ -4790,7 +5186,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      acc1
+                                      skipping_index_4
                                     </button>
                                   </EuiLink>
                                   , 
@@ -4803,7 +5199,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      acc2
+                                      skipping_index_5
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -4844,8 +5240,30 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "acc1",
-                                          "acc2",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_4",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_5",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
                                         "createdByIntegration": "",
                                         "database": "db3",
@@ -4872,8 +5290,30 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "acc1",
-                                            "acc2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_4",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_5",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
                                           "createdByIntegration": "",
                                           "database": "db3",
