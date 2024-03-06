@@ -34,6 +34,7 @@ import { DatasourceType } from '../../../../../common/types/data_connections';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
+import { dummyAccelerations } from '../../../../../test/datasources';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -63,24 +64,6 @@ export const DataConnection = (props: any) => {
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
-
-  // Dummy accelerations variables for mock purposes
-  // Actual accelerations should be retrieved from the backend
-  const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
-  const dummyAccelerations = [
-    {
-      name: 'dummy_acceleration_1',
-      status: 'ACTIVE',
-      type: 'skip',
-      database: 'default',
-      table: 'table1',
-      destination: 'N/A',
-      dateCreated: 1709339290,
-      dateUpdated: 1709339290,
-      index: 'security_logs_2022',
-      sql: sampleSql,
-    },
-  ];
 
   const DefaultDatasourceCards = () => {
     return (

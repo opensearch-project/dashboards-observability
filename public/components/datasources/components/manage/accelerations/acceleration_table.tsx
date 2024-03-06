@@ -47,7 +47,11 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     // over from dashboards-query-workbench/public/components/acceleration/create/create_accelerations.tsx
     return (
       <>
-        <EuiButton onClick={() => console.log('clicked on create accelerations button')} fill>
+        <EuiButton
+          data-test-subj="createAccelerationButton"
+          onClick={() => console.log('clicked on create accelerations button')}
+          fill
+        >
           Create acceleration
         </EuiButton>
       </>
@@ -59,7 +63,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
       <>
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem>
-            <EuiText>
+            <EuiText data-test-subj="accelerationTableHeaderTitle">
               <h3 className="panel-title">Accelerations</h3>
               <p>
                 Accelerations optimize query performance by indexing external data into OpenSearch.
@@ -164,7 +168,12 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
       name: 'Destination Index',
       sortable: true,
       render: (destination: string) => (
-        <EuiLink onClick={() => console.log('clicked on', destination)}>{destination}</EuiLink>
+        <EuiLink
+          onClick={() => console.log('clicked on', destination)}
+          data-test-subj="accelerationTableDiscoverButton"
+        >
+          {destination}
+        </EuiLink>
       ),
     },
     {
@@ -200,6 +209,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
           columns={accelerationTableColumns}
           pagination={pagination}
           sorting={sorting}
+          data-test-subj="accelerationTable"
         />
       </EuiPanel>
     </>

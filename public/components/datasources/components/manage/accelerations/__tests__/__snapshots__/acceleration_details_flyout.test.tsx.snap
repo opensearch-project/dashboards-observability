@@ -1,0 +1,1127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Acceleration Details Flyout test Render acceleration detail flyout 1`] = `
+<AccelerationDetailsFlyout
+  acceleration={
+    Object {
+      "database": "default",
+      "dateCreated": 1709339290,
+      "dateUpdated": 1709339290,
+      "destination": "N/A",
+      "index": "security_logs_2022",
+      "name": "dummy_acceleration_1",
+      "sql": "select * from \`httplogs\`.\`default\`.\`table2\` limit 10",
+      "status": "ACTIVE",
+      "table": "table1",
+      "type": "skip",
+    }
+  }
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <div
+      className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        direction="row"
+        gutterSize="m"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
+            >
+              <EuiText
+                data-test-subj="accelerationDetailsFlyoutTitle"
+              >
+                <div
+                  className="euiText euiText--medium"
+                  data-test-subj="accelerationDetailsFlyoutTitle"
+                >
+                  <h2
+                    className="panel-title"
+                  >
+                    dummy_acceleration_1
+                  </h2>
+                </div>
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <DiscoverButton>
+                <EuiButtonEmpty
+                  data-test-subj="accelerationDetailsFlyoutDiscoverButton"
+                  onClick={[Function]}
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary"
+                    data-test-subj="accelerationDetailsFlyoutDiscoverButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconSide="left"
+                      iconSize="m"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="discoverApp"
+                          >
+                            <EuiIconBeaker
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading"
+                              focusable="false"
+                              role="img"
+                              style={null}
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </DiscoverButton>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <RefreshButton>
+                <EuiButtonEmpty
+                  data-test-subj="accelerationDetailsFlyoutRefreshButton"
+                  onClick={[Function]}
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary"
+                    data-test-subj="accelerationDetailsFlyoutRefreshButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconSide="left"
+                      iconSize="m"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="inputOutput"
+                          >
+                            <EuiIconBeaker
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              role="img"
+                              style={null}
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </RefreshButton>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <DeleteButton>
+                <EuiButtonEmpty
+                  data-test-subj="accelerationDetailsFlyoutDeleteButton"
+                  onClick={[Function]}
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary"
+                    data-test-subj="accelerationDetailsFlyoutDeleteButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconSide="left"
+                      iconSize="m"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="trash"
+                          >
+                            <EuiIconBeaker
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              role="img"
+                              style={null}
+                            >
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </DeleteButton>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="m"
+      >
+        <div
+          className="euiSpacer euiSpacer--m"
+        />
+      </EuiSpacer>
+      <EuiTabs
+        data-test-subj="accelerationDetailsTabFlyoutTabs"
+        style={
+          Object {
+            "marginBottom": "-25px",
+          }
+        }
+      >
+        <div
+          className="euiTabs"
+          data-test-subj="accelerationDetailsTabFlyoutTabs"
+          role="tablist"
+          style={
+            Object {
+              "marginBottom": "-25px",
+            }
+          }
+        >
+          <EuiTab
+            data-test-subj="accelerationDetailsFlyoutTab_details"
+            disabled={false}
+            isSelected={true}
+            key="0"
+            onClick={[Function]}
+          >
+            <button
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              data-test-subj="accelerationDetailsFlyoutTab_details"
+              disabled={false}
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            data-test-subj="accelerationDetailsFlyoutTab_schema"
+            disabled={false}
+            isSelected={false}
+            key="1"
+            onClick={[Function]}
+          >
+            <button
+              aria-selected={false}
+              className="euiTab"
+              data-test-subj="accelerationDetailsFlyoutTab_schema"
+              disabled={false}
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Schema
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            data-test-subj="accelerationDetailsFlyoutTab_sql_definition"
+            disabled={false}
+            isSelected={false}
+            key="2"
+            onClick={[Function]}
+          >
+            <button
+              aria-selected={false}
+              className="euiTab"
+              data-test-subj="accelerationDetailsFlyoutTab_sql_definition"
+              disabled={false}
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                SQL Definition
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+    </div>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <div
+      className="euiFlyoutBody"
+    >
+      <div
+        className="euiFlyoutBody__overflow"
+        tabIndex={0}
+      >
+        <div
+          className="euiFlyoutBody__overflowContent"
+        >
+          <AccelerationDetailsTab
+            acceleration={
+              Object {
+                "database": "default",
+                "dateCreated": 1709339290,
+                "dateUpdated": 1709339290,
+                "destination": "N/A",
+                "index": "security_logs_2022",
+                "name": "dummy_acceleration_1",
+                "sql": "select * from \`httplogs\`.\`default\`.\`table2\` limit 10",
+                "status": "ACTIVE",
+                "table": "table1",
+                "type": "skip",
+              }
+            }
+          >
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiFlexGroup
+              direction="row"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <DetailComponent
+                  description={
+                    <AccelerationStatus
+                      status="ACTIVE"
+                    />
+                  }
+                  title="Status"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Status
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              <AccelerationStatus
+                                status="ACTIVE"
+                              >
+                                <EuiHealth
+                                  color="success"
+                                >
+                                  <div
+                                    className="euiHealth euiHealth--textSizeS"
+                                  >
+                                    <EuiFlexGroup
+                                      alignItems="center"
+                                      gutterSize="xs"
+                                      responsive={false}
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                      >
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiIcon
+                                              color="success"
+                                              type="dot"
+                                            >
+                                              <EuiIconBeaker
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+                                                focusable="false"
+                                                role="img"
+                                                style={null}
+                                              >
+                                                <svg
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+                                                  focusable="false"
+                                                  height={16}
+                                                  role="img"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width={16}
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                  />
+                                                </svg>
+                                              </EuiIconBeaker>
+                                            </EuiIcon>
+                                          </div>
+                                        </EuiFlexItem>
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            Active
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
+                                  </div>
+                                </EuiHealth>
+                              </AccelerationStatus>
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description="skip"
+                  title="Acceleration Type"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Acceleration Type
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              skip
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description="Tue, 20 Jan 1970 18:48:59 GMT"
+                  title="Creation Date"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Creation Date
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              Tue, 20 Jan 1970 18:48:59 GMT
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+              </div>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <DetailComponent
+                  description="Tue, 20 Jan 1970 18:48:59 GMT"
+                  title="Last Updated"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Last Updated
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              Tue, 20 Jan 1970 18:48:59 GMT
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+              </div>
+            </EuiFlexGroup>
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <TitleComponent
+              title="Data source details"
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h4
+                  className="euiTitle euiTitle--small"
+                >
+                  Data source details
+                </h4>
+              </EuiTitle>
+              <EuiHorizontalRule
+                margin="s"
+              >
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+                />
+              </EuiHorizontalRule>
+            </TitleComponent>
+            <EuiFlexGroup
+              direction="row"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <DetailComponent
+                  description={
+                    <EuiLink
+                      onClick={[Function]}
+                    >
+                      security_logs_2022
+                    </EuiLink>
+                  }
+                  title="Data source connection"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Data source connection
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              <EuiLink
+                                onClick={[Function]}
+                              >
+                                <button
+                                  className="euiLink euiLink--primary"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  type="button"
+                                >
+                                  security_logs_2022
+                                </button>
+                              </EuiLink>
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description="default"
+                  title="Database"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Database
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              default
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description="table1"
+                  title="Table"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Table
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              table1
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+              </div>
+            </EuiFlexGroup>
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <TitleComponent
+              title="Index details"
+            >
+              <EuiTitle
+                size="s"
+              >
+                <h4
+                  className="euiTitle euiTitle--small"
+                >
+                  Index details
+                </h4>
+              </EuiTitle>
+              <EuiHorizontalRule
+                margin="s"
+              >
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+                />
+              </EuiHorizontalRule>
+            </TitleComponent>
+            <EuiFlexGroup>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <DetailComponent
+                  description="security_logs_2022"
+                  title="Index name"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Index name
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              security_logs_2022
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description={
+                    <AccelerationStatus
+                      status="ACTIVE"
+                    />
+                  }
+                  title="Health"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Health
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              <AccelerationStatus
+                                status="ACTIVE"
+                              >
+                                <EuiHealth
+                                  color="success"
+                                >
+                                  <div
+                                    className="euiHealth euiHealth--textSizeS"
+                                  >
+                                    <EuiFlexGroup
+                                      alignItems="center"
+                                      gutterSize="xs"
+                                      responsive={false}
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                      >
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiIcon
+                                              color="success"
+                                              type="dot"
+                                            >
+                                              <EuiIconBeaker
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+                                                focusable="false"
+                                                role="img"
+                                                style={null}
+                                              >
+                                                <svg
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+                                                  focusable="false"
+                                                  height={16}
+                                                  role="img"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width={16}
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                  />
+                                                </svg>
+                                              </EuiIconBeaker>
+                                            </EuiIcon>
+                                          </div>
+                                        </EuiFlexItem>
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            Active
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
+                                  </div>
+                                </EuiHealth>
+                              </AccelerationStatus>
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+                <DetailComponent
+                  description="2s"
+                  title="Refresh interval"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiDescriptionList>
+                        <dl
+                          className="euiDescriptionList euiDescriptionList--row"
+                        >
+                          <EuiDescriptionListTitle>
+                            <dt
+                              className="euiDescriptionList__title"
+                            >
+                              Refresh interval
+                            </dt>
+                          </EuiDescriptionListTitle>
+                          <EuiDescriptionListDescription>
+                            <dd
+                              className="euiDescriptionList__description"
+                            >
+                              2s
+                            </dd>
+                          </EuiDescriptionListDescription>
+                        </dl>
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiFlexItem>
+                </DetailComponent>
+              </div>
+            </EuiFlexGroup>
+          </AccelerationDetailsTab>
+        </div>
+      </div>
+    </div>
+  </EuiFlyoutBody>
+</AccelerationDetailsFlyout>
+`;
+
+exports[`Acceleration Details Flyout test Render acceleration detail flyout and click on schema tab 1`] = `
+<div
+  class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiText euiText--medium"
+        data-test-subj="accelerationDetailsFlyoutTitle"
+      >
+        <h2
+          class="panel-title"
+        >
+          dummy_acceleration_1
+        </h2>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        data-test-subj="accelerationDetailsFlyoutDiscoverButton"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon--app"
+              focusable="false"
+              height="32"
+              role="img"
+              viewBox="0 0 32 32"
+              width="32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                class="euiIcon__fillSecondary"
+                d="m8.33 23.67 4.79-10.55 10.55-4.79-4.79 10.55-10.55 4.79Zm6.3-9-2.28 5 5-2.28 2.28-5-5 2.28Z"
+              />
+              <path
+                d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16A16 16 0 0 0 16 0Zm1 29.95V28h-2v1.95A14 14 0 0 1 2.05 17H4v-2H2.05A14 14 0 0 1 15 2.05V4h2V2.05A14 14 0 0 1 29.95 15H28v2h1.95A14 14 0 0 1 17 29.95Z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        data-test-subj="accelerationDetailsFlyoutRefreshButton"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 13.999v-2.99h1V15H0V1h11v3.999h-1V2.001H1v11.998z"
+              />
+              <path
+                d="M4.5 10V9H11v1zM13 9.5l3-3-3-3z"
+              />
+              <path
+                d="M5.5 6.5v6l-3-3zM7 7V6h6.5v1z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        data-test-subj="accelerationDetailsFlyoutDeleteButton"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 3h5v1H0V3h5V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2Zm-7.056 8H7v1H4.1l.392 2.519c.042.269.254.458.493.458h6.03c.239 0 .451-.189.493-.458l1.498-9.576H14l-1.504 9.73c-.116.747-.74 1.304-1.481 1.304h-6.03c-.741 0-1.365-.557-1.481-1.304l-1.511-9.73H9V5.95H3.157L3.476 8H8v1H3.632l.312 2ZM6 3h4V1H6v2Z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m"
+  />
+  <div
+    class="euiTabs"
+    data-test-subj="accelerationDetailsTabFlyoutTabs"
+    role="tablist"
+    style="margin-bottom: -25px;"
+  >
+    <button
+      aria-selected="false"
+      class="euiTab"
+      data-test-subj="accelerationDetailsFlyoutTab_details"
+      role="tab"
+      type="button"
+    >
+      <span
+        class="euiTab__content"
+      >
+        Details
+      </span>
+    </button>
+    <button
+      aria-selected="true"
+      class="euiTab euiTab-isSelected"
+      data-test-subj="accelerationDetailsFlyoutTab_schema"
+      role="tab"
+      type="button"
+    >
+      <span
+        class="euiTab__content"
+      >
+        Schema
+      </span>
+    </button>
+    <button
+      aria-selected="false"
+      class="euiTab"
+      data-test-subj="accelerationDetailsFlyoutTab_sql_definition"
+      role="tab"
+      type="button"
+    >
+      <span
+        class="euiTab__content"
+      >
+        SQL Definition
+      </span>
+    </button>
+  </div>
+</div>
+`;

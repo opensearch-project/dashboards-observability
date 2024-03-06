@@ -42,7 +42,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
     return (
-      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+      <EuiButtonEmpty
+        onClick={onDiscoverButtonClick}
+        data-test-subj="accelerationDetailsFlyoutDiscoverButton"
+      >
         <EuiIcon type={'discoverApp'} size="m" />
       </EuiButtonEmpty>
     );
@@ -50,7 +53,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const RefreshButton = () => {
     return (
-      <EuiButtonEmpty onClick={onRefreshButtonClick}>
+      <EuiButtonEmpty
+        onClick={onRefreshButtonClick}
+        data-test-subj="accelerationDetailsFlyoutRefreshButton"
+      >
         <EuiIcon type={getRefreshButtonIcon()} size="m" />
       </EuiButtonEmpty>
     );
@@ -58,7 +64,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const DeleteButton = () => {
     return (
-      <EuiButtonEmpty onClick={onDeleteButtonClick}>
+      <EuiButtonEmpty
+        onClick={onDeleteButtonClick}
+        data-test-subj="accelerationDetailsFlyoutDeleteButton"
+      >
         <EuiIcon type="trash" size="m" />
       </EuiButtonEmpty>
     );
@@ -90,6 +99,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
           isSelected={tab.id === selectedTab}
           disabled={tab.disabled}
           key={index}
+          data-test-subj={'accelerationDetailsFlyoutTab_' + tab.id}
         >
           {tab.name}
         </EuiTab>
@@ -107,7 +117,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
-            <EuiText>
+            <EuiText data-test-subj="accelerationDetailsFlyoutTitle">
               <h2 className="panel-title">{acceleration.name}</h2>
             </EuiText>
           </EuiFlexItem>
@@ -122,7 +132,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
+        <EuiTabs
+          style={{ marginBottom: '-25px' }}
+          data-test-subj="accelerationDetailsTabFlyoutTabs"
+        >
+          {renderTabs()}
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderTabContent(selectedTab, acceleration)}</EuiFlyoutBody>
     </>
