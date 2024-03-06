@@ -134,8 +134,20 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
   const noDataMessage = (
     <EuiEmptyPrompt
-      title={<h2>{ASSC_OBJ_NO_DATA_TITLE}</h2>}
-      body={<p>{ASSC_OBJ_NO_DATA_DESCRIPTION}</p>}
+      title={
+        <h2>
+          {i18n.translate('datasources.associatedObjectsTab.noDataTitle', {
+            defaultMessage: ASSC_OBJ_NO_DATA_TITLE,
+          })}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate('datasources.associatedObjectsTab.noDataDescription', {
+            defaultMessage: ASSC_OBJ_NO_DATA_DESCRIPTION,
+          })}
+        </p>
+      }
       actions={
         <EuiButton
           color="primary"
@@ -144,7 +156,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           iconType="popout"
           iconSide="left"
         >
-          Query Workbench
+          {i18n.translate('datasources.associatedObjectsTab.queryWorkbenchButton', {
+            defaultMessage: 'Query Workbench',
+          })}
         </EuiButton>
       }
     />
@@ -227,7 +241,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     const matchesClauses = (obj: AssociatedObject, clauses: AssociatedTableFilter[]): boolean => {
       if (clauses.length === 0) return true;
       return clauses.some((clause) => {
-        if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
+        if (clause.type !== 'field' && clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) return true;
         if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME)
           return obj[ASSC_OBJ_TABLE_ACC_COLUMN_NAME].includes(clause.value);
         return isClauseMatched(obj, clause);
