@@ -209,7 +209,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       return;
     }
 
-    const matchesClauses = (obj, clauses) => {
+    const matchesClauses = (obj: AssociatedObject, clauses: AssociatedTableFilter[]): boolean => {
       if (clauses.length === 0) return true;
       return clauses.some((clause) => {
         if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
