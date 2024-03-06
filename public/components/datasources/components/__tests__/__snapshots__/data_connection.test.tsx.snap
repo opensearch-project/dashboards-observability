@@ -136,7 +136,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             <span
               class="euiIEFlexWrapFix"
             >
-              Use cases for Prometheus in OpenSearch Dashboards
+              Get started
             </span>
           </button>
         </div>
@@ -149,7 +149,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
         >
           <div>
             <div
-              class=""
+              class="euiAccordion__padding--m"
             >
               <div
                 class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -217,34 +217,6 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             aria-controls="random_html_id"
             aria-selected="true"
             class="euiTab euiTab-isSelected"
-            id="access_control"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Access control
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
-            id="connection_configuration"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Connection configuration
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
             id="associated_objects"
             role="tab"
             type="button"
@@ -259,7 +231,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             aria-controls="random_html_id"
             aria-selected="false"
             class="euiTab"
-            id="accelerations"
+            id="acceleration_table"
             role="tab"
             type="button"
           >
@@ -280,54 +252,29 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             <span
               class="euiTab__content"
             >
-              Installed integrations
+              Installed Integrations
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="access_control"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Access control
             </span>
           </button>
         </div>
         <div
-          aria-labelledby="access_control"
+          aria-labelledby="associated_objects"
           id="random_html_id"
           role="tabpanel"
         >
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
-          <div
-            class="euiCallOut euiCallOut--primary"
-          >
-            <div
-              class="euiCallOutHeader"
-            >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                />
-              </svg>
-              <span
-                class="euiCallOutHeader__title"
-              >
-                Configurations may be managed elsewhere.
-              </span>
-            </div>
-            <div
-              class="euiText euiText--small"
-            >
-              <div
-                class="euiTextColor euiTextColor--default"
-              >
-                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
-              </div>
-            </div>
-          </div>
           <div
             class="euiSpacer euiSpacer--l"
           />
@@ -346,9 +293,37 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                   <h2
                     class="panel-title"
                   >
-                    Access control
+                    Associated objects
                   </h2>
-                  Control which OpenSearch users have access to this data source.
+                  Manage objects associated with this data sources.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  style="text-align: right;"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                    style="font-size: small;"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Last updated at:
+                    </div>
+                  </div>
+                  <div
+                    class="euiText euiText--medium"
+                    style="font-size: small;"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Mon, 01 Jan 2024 00:00:00 GMT
+                    </div>
+                  </div>
                 </div>
               </div>
               <div
@@ -356,16 +331,30 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
               >
                 <button
                   class="euiButton euiButton--primary"
-                  data-test-subj="createButton"
+                  data-test-subj="freshButton"
                   type="button"
                 >
                   <span
                     class="euiButtonContent euiButton__content"
                   >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
                     <span
                       class="euiButton__text"
                     >
-                      Edit
+                      Refresh
                     </span>
                   </span>
                 </button>
@@ -375,35 +364,90 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
               class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiCallOut euiCallOut--primary"
             >
               <div
-                class="euiFlexItem"
+                class="euiCallOutHeader"
               >
-                <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <div
-                      class="euiText euiText--medium overview-title"
-                    >
-                      Query access
-                    </div>
-                    <div
-                      class="euiText euiText--small overview-content"
-                    >
-                      Everyone
-                    </div>
-                  </div>
-                </div>
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
+                <span
+                  class="euiCallOutHeader__title"
+                >
+                  Accelerations recommended for tables. Setup acceleration or configure integrations
+                </span>
               </div>
             </div>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiEmptyPrompt"
+            >
+              <h2
+                class="euiTitle euiTitle--medium"
+              >
+                You have no associated objects
+              </h2>
+              <span
+                class="euiTextColor euiTextColor--subdued"
+              >
+                <div
+                  class="euiSpacer euiSpacer--m"
+                />
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <p>
+                    Add or config tables from your data source or use Query Workbench.
+                  </p>
+                </div>
+              </span>
+              <div
+                class="euiSpacer euiSpacer--l"
+              />
+              <button
+                class="euiButton euiButton--primary euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                  <span
+                    class="euiButton__text"
+                  >
+                    Query Workbench
+                  </span>
+                </span>
+              </button>
+            </div>
           </div>
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
           <div
             class="euiSpacer euiSpacer--l"
           />
@@ -568,7 +612,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             <span
               class="euiIEFlexWrapFix"
             >
-              Use cases for Amazon S3 in OpenSearch Dashboards
+              Get started
             </span>
           </button>
         </div>
@@ -581,7 +625,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
         >
           <div>
             <div
-              class=""
+              class="euiAccordion__padding--m"
             >
               <div
                 class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -590,7 +634,139 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                   class="euiFlexItem"
                 >
                   <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon euiCard--isSelectable euiCard--isSelectable--text"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Configure Integrations
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Connect to common application log types using integrations
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      aria-checked="false"
+                      aria-describedby="random_html_idTitle random_html_idDescription"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiCardSelect euiCardSelect--text"
+                      role="switch"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          Add Integrations
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon euiCard--isSelectable euiCard--isSelectable--text"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Accelerate performance
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Accelerate query performance through OpenSearch indexing
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      aria-checked="false"
+                      aria-describedby="random_html_idTitle random_html_idDescription"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiCardSelect euiCardSelect--text"
+                      role="switch"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          Accelerate Performance
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon euiCard--isSelectable euiCard--isSelectable--text"
                   >
                     <div
                       class="euiCard__top"
@@ -633,157 +809,27 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         id="random_html_idDescription"
                       >
                         <p>
-                          Query your data in Data Explorer or Observability Logs
+                          Uncover insights from your data or better understand it
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                  >
-                    <div
-                      class="euiCard__top"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </div>
-                    <div
-                      class="euiCard__content"
+                    <button
+                      aria-checked="false"
+                      aria-describedby="random_html_idTitle random_html_idDescription"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiCardSelect euiCardSelect--text"
+                      role="switch"
+                      type="button"
                     >
                       <span
-                        class="euiTitle euiTitle--small euiCard__title"
-                        id="random_html_idTitle"
+                        class="euiButtonContent euiButtonEmpty__content"
                       >
-                        <button
-                          aria-describedby=" random_html_idDescription"
-                          class="euiCard__titleButton"
+                        <span
+                          class="euiButtonEmpty__text"
                         >
-                          Accelerate performance
-                        </button>
+                          Query in Discover
+                        </span>
                       </span>
-                      <div
-                        class="euiText euiText--small euiCard__description"
-                        id="random_html_idDescription"
-                      >
-                        <p>
-                          Accelerate performance by using OpenSearch indexing
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                  >
-                    <div
-                      class="euiCard__top"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </div>
-                    <div
-                      class="euiCard__content"
-                    >
-                      <span
-                        class="euiTitle euiTitle--small euiCard__title"
-                        id="random_html_idTitle"
-                      >
-                        <button
-                          aria-describedby=" random_html_idDescription"
-                          class="euiCard__titleButton"
-                        >
-                          Define tables
-                        </button>
-                      </span>
-                      <div
-                        class="euiText euiText--small euiCard__description"
-                        id="random_html_idDescription"
-                      >
-                        <p>
-                          Manually define tables
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                  >
-                    <div
-                      class="euiCard__top"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </div>
-                    <div
-                      class="euiCard__content"
-                    >
-                      <span
-                        class="euiTitle euiTitle--small euiCard__title"
-                        id="random_html_idTitle"
-                      >
-                        <button
-                          aria-describedby=" random_html_idDescription"
-                          class="euiCard__titleButton"
-                        >
-                          Integrate data
-                        </button>
-                      </span>
-                      <div
-                        class="euiText euiText--small euiCard__description"
-                        id="random_html_idDescription"
-                      >
-                        <p>
-                          Explore data faster through integrations
-                        </p>
-                      </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -800,34 +846,6 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             aria-controls="random_html_id"
             aria-selected="true"
             class="euiTab euiTab-isSelected"
-            id="access_control"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Access control
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
-            id="connection_configuration"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Connection configuration
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
             id="associated_objects"
             role="tab"
             type="button"
@@ -842,7 +860,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             aria-controls="random_html_id"
             aria-selected="false"
             class="euiTab"
-            id="accelerations"
+            id="acceleration_table"
             role="tab"
             type="button"
           >
@@ -863,55 +881,29 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             <span
               class="euiTab__content"
             >
-              Installed integrations
+              Installed Integrations
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="access_control"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Access control
             </span>
           </button>
         </div>
         <div
-          aria-labelledby="access_control"
+          aria-labelledby="associated_objects"
           id="random_html_id"
           role="tabpanel"
         >
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
-          <div
-            class="euiCallOut euiCallOut--primary"
-          >
-            <div
-              class="euiCallOutHeader"
-            >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
-                  fill-rule="evenodd"
-                />
-              </svg>
-              <span
-                class="euiCallOutHeader__title"
-              >
-                Configurations may be managed elsewhere.
-              </span>
-            </div>
-            <div
-              class="euiText euiText--small"
-            >
-              <div
-                class="euiTextColor euiTextColor--default"
-              >
-                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
-              </div>
-            </div>
-          </div>
           <div
             class="euiSpacer euiSpacer--l"
           />
@@ -930,9 +922,37 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                   <h2
                     class="panel-title"
                   >
-                    Access control
+                    Associated objects
                   </h2>
-                  Control which OpenSearch users have access to this data source.
+                  Manage objects associated with this data sources.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  style="text-align: right;"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                    style="font-size: small;"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Last updated at:
+                    </div>
+                  </div>
+                  <div
+                    class="euiText euiText--medium"
+                    style="font-size: small;"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Mon, 01 Jan 2024 00:00:00 GMT
+                    </div>
+                  </div>
                 </div>
               </div>
               <div
@@ -940,16 +960,30 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               >
                 <button
                   class="euiButton euiButton--primary"
-                  data-test-subj="createButton"
+                  data-test-subj="freshButton"
                   type="button"
                 >
                   <span
                     class="euiButtonContent euiButton__content"
                   >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                      />
+                    </svg>
                     <span
                       class="euiButton__text"
                     >
-                      Edit
+                      Refresh
                     </span>
                   </span>
                 </button>
@@ -959,35 +993,91 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiCallOut euiCallOut--primary"
             >
               <div
-                class="euiFlexItem"
+                class="euiCallOutHeader"
               >
-                <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <div
-                      class="euiText euiText--medium overview-title"
-                    >
-                      Query access
-                    </div>
-                    <div
-                      class="euiText euiText--small overview-content"
-                    >
-                      Everyone
-                    </div>
-                  </div>
-                </div>
+                  <path
+                    d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+                <span
+                  class="euiCallOutHeader__title"
+                >
+                  Accelerations recommended for tables. Setup acceleration or configure integrations
+                </span>
               </div>
             </div>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiEmptyPrompt"
+            >
+              <h2
+                class="euiTitle euiTitle--medium"
+              >
+                You have no associated objects
+              </h2>
+              <span
+                class="euiTextColor euiTextColor--subdued"
+              >
+                <div
+                  class="euiSpacer euiSpacer--m"
+                />
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <p>
+                    Add or config tables from your data source or use Query Workbench.
+                  </p>
+                </div>
+              </span>
+              <div
+                class="euiSpacer euiSpacer--l"
+              />
+              <button
+                class="euiButton euiButton--primary euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M13 8.5a.5.5 0 1 1 1 0V12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h3.5a.5.5 0 0 1 0 1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8.5Zm-5.12.339a.5.5 0 1 1-.706-.707L13.305 2H10.5a.5.5 0 1 1 0-1H14a1 1 0 0 1 1 1v3.5a.5.5 0 1 1-1 0V2.72L7.88 8.838Z"
+                    />
+                  </svg>
+                  <span
+                    class="euiButton__text"
+                  >
+                    Query Workbench
+                  </span>
+                </span>
+              </button>
+            </div>
           </div>
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
           <div
             class="euiSpacer euiSpacer--l"
           />

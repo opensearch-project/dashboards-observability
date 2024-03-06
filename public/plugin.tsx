@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -79,6 +80,9 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 
 interface PublicConfig {
   query_assist: {
@@ -88,6 +92,11 @@ interface PublicConfig {
     enabled: boolean;
   };
 }
+
+export const [
+  getRenderAccelerationDetailsFlyout,
+  setRenderAccelerationDetailsFlyout,
+] = createGetterSetter('renderAccelerationDetailsFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -357,7 +366,17 @@ export class ObservabilityPlugin
       });
     });
 
-    return {};
+    // Use overlay service to render flyouts
+    const renderAccelerationDetailsFlyout = (acceleration: any) =>
+      core.overlays.openFlyout(
+        toMountPoint(<AccelerationDetailsFlyout acceleration={acceleration} />)
+      );
+    setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
+
+    // Export so other plugins can use this flyout
+    return {
+      renderAccelerationDetailsFlyout,
+    };
   }
 
   public stop() {}
