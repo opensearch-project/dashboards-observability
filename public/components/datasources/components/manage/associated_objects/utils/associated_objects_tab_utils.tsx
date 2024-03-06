@@ -63,7 +63,20 @@ export const mockAssociatedObjects = [
   },
 ];
 
-export const accelerationColumnName = 'accelerations';
+export const ASSC_OBJ_TABLE_ACC_COLUMN_NAME = 'accelerations';
 
-export const associatedObjectsSearchBarHint =
+export const ASSC_OBJ_TABLE_SEARCH_HINT =
   'database:database_1 database: database_2 accelerations:skipping_index_1';
+
+export const ASSC_OBJ_PANEL_TITLE = 'Associated objects';
+
+export const ASSC_OBJ_PANEL_DESRIPTION = 'Manage objects associated with this data sources.';
+
+export const ASSC_OBJ_NO_DATA_TITLE = 'You have no associated objects';
+
+export const ASSC_OBJ_NO_DATA_DESCRIPTION =
+  'Add or config tables from your data source or use Query Workbench.';
+
+export const ASSC_OBJ_REFRESH_BTN = 'Refresh';
+
+export const ASSC_OBJ_FRESH_MSG = 'Last updated at:';

@@ -22,8 +22,14 @@ import {
 import { AssociatedObject } from 'common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
-  accelerationColumnName,
-  associatedObjectsSearchBarHint,
+  ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
+  ASSC_OBJ_TABLE_SEARCH_HINT,
+  ASSC_OBJ_PANEL_TITLE,
+  ASSC_OBJ_PANEL_DESRIPTION,
+  ASSC_OBJ_NO_DATA_TITLE,
+  ASSC_OBJ_NO_DATA_DESCRIPTION,
+  ASSC_OBJ_REFRESH_BTN,
+  ASSC_OBJ_FRESH_MSG,
 } from './utils/associated_objects_tab_utils';
 
 interface AssociatedObjectsTabProps {
@@ -88,8 +94,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiText size="m">
-            <h2 className="panel-title">Associated objects</h2>
-            Manage objects associated with this data sources.
+            <h2 className="panel-title">{ASSC_OBJ_PANEL_TITLE}</h2>
+            {ASSC_OBJ_PANEL_DESRIPTION}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -100,12 +106,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
                 iconType="refresh"
                 onClick={fetchAssociatedObjects}
               >
-                Refresh
+                {ASSC_OBJ_REFRESH_BTN}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText textAlign="right" size="xs" color="subdued">
-                Last updated at:
+                {ASSC_OBJ_FRESH_MSG}
               </EuiText>
               <EuiText textAlign="right" color="subdued" size="xs">
                 {lastUpdated}
@@ -119,8 +125,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
 
   const noDataMessage = (
     <EuiEmptyPrompt
-      title={<h2>You have no associated objects</h2>}
-      body={<p>Add or config tables from your data source or use Query Workbench.</p>}
+      title={<h2>{ASSC_OBJ_NO_DATA_TITLE}</h2>}
+      body={<p>{ASSC_OBJ_NO_DATA_DESCRIPTION}</p>}
       actions={
         <EuiButton
           color="primary"
@@ -213,8 +219,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       if (clauses.length === 0) return true;
       return clauses.some((clause) => {
         if (clause.type !== 'field' && clause.field !== 'accelerations') return true;
-        if (clause.field === accelerationColumnName)
-          return obj[accelerationColumnName].includes(clause.value);
+        if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME)
+          return obj[ASSC_OBJ_TABLE_ACC_COLUMN_NAME].includes(clause.value);
         return isClauseMatched(obj, clause);
       });
     };
@@ -250,7 +256,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     filters: searchFilters,
     box: {
       incremental: true,
-      placeholder: associatedObjectsSearchBarHint,
+      placeholder: ASSC_OBJ_TABLE_SEARCH_HINT,
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
