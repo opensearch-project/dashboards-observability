@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApiResponse } from '@opensearch-project/opensearch';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { CoreRouteHandlerContext } from '../../../../../../../src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { agentIdMap, requestWithRetryAgentSearch, searchAgentIdByName } from '../agents';
+import { agentIdMap, getAgentIdByConfig, requestWithRetryAgentSearch } from '../agents';
 
 describe('Agents helper functions', () => {
   const coreContext = new CoreRouteHandlerContext(
@@ -21,56 +23,66 @@ describe('Agents helper functions', () => {
 
   it('searches agent id by name', async () => {
     mockedTransport.mockResolvedValueOnce({
-      body: { hits: { total: { value: 1 }, hits: [{ _id: 'agentId' }] } },
+      body: {
+        type: 'agent',
+        configuration: { agent_id: 'agentId' },
+      },
     });
-    const id = await searchAgentIdByName(client, 'test agent');
+    const id = await getAgentIdByConfig(client, 'test_agent');
     expect(id).toEqual('agentId');
     expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "term": Object {
-                "name.keyword": "test agent",
-              },
-            },
-            "sort": Object {
-              "created_time": "desc",
-            },
-          },
           "method": "GET",
-          "path": "/_plugins/_ml/agents/_search",
+          "path": "/_plugins/_ml/config/test_agent",
         },
       ]
     `);
   });
 
   it('handles not found errors', async () => {
-    mockedTransport.mockResolvedValueOnce({ body: { hits: { total: 0 } } });
+    mockedTransport.mockRejectedValueOnce(
+      new ResponseError(({
+        body: {
+          error: {
+            root_cause: [
+              {
+                type: 'status_exception',
+                reason: 'Failed to find config with the provided config id: test_agent',
+              },
+            ],
+            type: 'status_exception',
+            reason: 'Failed to find config with the provided config id: test_agent',
+          },
+          status: 404,
+        },
+        statusCode: 404,
+      } as unknown) as ApiResponse)
+    );
     await expect(
-      searchAgentIdByName(client, 'test agent')
+      getAgentIdByConfig(client, 'test agent')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"search agent 'test agent' failed, reason: Error: cannot find any agent by name: test agent"`
+      `"Get agent 'test agent' failed, reason: {\\"error\\":{\\"root_cause\\":[{\\"type\\":\\"status_exception\\",\\"reason\\":\\"Failed to find config with the provided config id: test_agent\\"}],\\"type\\":\\"status_exception\\",\\"reason\\":\\"Failed to find config with the provided config id: test_agent\\"},\\"status\\":404}"`
     );
   });
 
   it('handles search errors', async () => {
     mockedTransport.mockRejectedValueOnce('request failed');
     await expect(
-      searchAgentIdByName(client, 'test agent')
+      getAgentIdByConfig(client, 'test agent')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"search agent 'test agent' failed, reason: request failed"`
+      `"Get agent 'test agent' failed, reason: request failed"`
     );
   });
 
   it('requests with valid agent id', async () => {
-    agentIdMap['test agent'] = 'test-id';
+    agentIdMap.test_agent = 'test-id';
     mockedTransport.mockResolvedValueOnce({
       body: { inference_results: [{ output: [{ result: 'test response' }] }] },
     });
     const response = await requestWithRetryAgentSearch({
       client,
-      agentName: 'test agent',
+      configName: 'test_agent',
       shouldRetryAgentSearch: true,
       body: { parameters: { param1: 'value1' } },
     });
@@ -85,13 +97,18 @@ describe('Agents helper functions', () => {
 
   it('searches for agent id if id is undefined', async () => {
     mockedTransport
-      .mockResolvedValueOnce({ body: { hits: { total: { value: 1 }, hits: [{ _id: 'new-id' }] } } })
+      .mockResolvedValueOnce({
+        body: {
+          type: 'agent',
+          configuration: { agent_id: 'new-id' },
+        },
+      })
       .mockResolvedValueOnce({
         body: { inference_results: [{ output: [{ result: 'test response' }] }] },
       });
     const response = await requestWithRetryAgentSearch({
       client,
-      agentName: 'new agent',
+      configName: 'new_agent',
       shouldRetryAgentSearch: true,
       body: { parameters: { param1: 'value1' } },
     });
@@ -103,16 +120,21 @@ describe('Agents helper functions', () => {
   });
 
   it('searches for agent id if id is not found', async () => {
-    agentIdMap['test agent'] = 'non-exist-agent';
+    agentIdMap.test_agent = 'non-exist-agent';
     mockedTransport
       .mockRejectedValueOnce({ statusCode: 404, body: {}, headers: {} })
-      .mockResolvedValueOnce({ body: { hits: { total: { value: 1 }, hits: [{ _id: 'new-id' }] } } })
+      .mockResolvedValueOnce({
+        body: {
+          type: 'agent',
+          configuration: { agent_id: 'new-id' },
+        },
+      })
       .mockResolvedValueOnce({
         body: { inference_results: [{ output: [{ result: 'test response' }] }] },
       });
     const response = await requestWithRetryAgentSearch({
       client,
-      agentName: 'test agent',
+      configName: 'test_agent',
       shouldRetryAgentSearch: true,
       body: { parameters: { param1: 'value1' } },
     });

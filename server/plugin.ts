@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { first } from 'rxjs/operators';
-import { ObservabilityConfig } from '.';
 import {
   CoreSetup,
   CoreStart,
@@ -42,10 +40,6 @@ export class ObservabilityPlugin
     const { assistantDashboards } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
-    const config = await this.initializerContext.config
-      .create<ObservabilityConfig>()
-      .pipe(first())
-      .toPromise();
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
@@ -203,7 +197,7 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
-    setupRoutes({ router, client: openSearchObservabilityClient, config });
+    setupRoutes({ router, client: openSearchObservabilityClient });
 
     core.savedObjects.registerType(visualizationSavedObject);
     core.savedObjects.registerType(searchSavedObject);
