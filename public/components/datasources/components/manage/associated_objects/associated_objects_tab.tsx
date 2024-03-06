@@ -20,6 +20,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
+import { i18n } from '@osd/i18n';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
@@ -90,12 +91,20 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   }, [associatedObjects]);
 
   const AssociatedObjectsHeader = () => {
+    const panelTitle = i18n.translate('datasources.associatedObjectsTab.panelTitle', {
+      defaultMessage: ASSC_OBJ_PANEL_TITLE,
+    });
+
+    const panelDescription = i18n.translate('datasources.associatedObjectsTab.panelDescription', {
+      defaultMessage: ASSC_OBJ_PANEL_DESRIPTION,
+    });
+
     return (
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiText size="m">
-            <h2 className="panel-title">{ASSC_OBJ_PANEL_TITLE}</h2>
-            {ASSC_OBJ_PANEL_DESRIPTION}
+            <h2 className="panel-title">{panelTitle}</h2>
+            {panelDescription}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
