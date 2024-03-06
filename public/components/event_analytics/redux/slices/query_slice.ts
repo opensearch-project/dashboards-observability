@@ -28,7 +28,7 @@ const initialQueryState = {
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,
   [FILTERED_PATTERN]: '',
   [SELECTED_TIMESTAMP]: '',
-  [SELECTED_DATE_RANGE]: ['now-40y', 'now'],
+  [SELECTED_DATE_RANGE]: ['now-15m', 'now'],
   [OLLY_QUERY_ASSISTANT]: '',
 };
 
@@ -79,7 +79,7 @@ export const queriesSlice = createSlice({
       };
     },
   },
-  extraReducers: (builder) => {},
+  extraReducers: () => {},
 });
 
 export const { changeQuery, changeData, remove, init, reset } = queriesSlice.actions;

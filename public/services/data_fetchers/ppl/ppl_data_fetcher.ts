@@ -138,7 +138,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     }
   }
 
-  async setLogPattern(query: IQuery, index: string, finalQuery: string) {
+  async setLogPattern(query: IQuery, index: string, _finalQuery: string) {
     const { getErrorHandler, setDefaultPatternsField } = this.searchContext;
     // set pattern
     if (isEmpty(query[SELECTED_PATTERN_FIELD])) {

@@ -26,12 +26,12 @@ describe('Data wrapper', () => {
     const result = await handleWithCallback(
       adaptorMock as IntegrationsAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
-      callback
+      (callback as unknown) as (a: IntegrationsAdaptor) => Promise<unknown>
     );
 
     expect(callback).toHaveBeenCalled();
     expect(responseMock.ok).toHaveBeenCalled();
-    expect(result.body.data).toEqual({ test: 'data' });
+    expect((result as { body?: unknown }).body).toEqual({ data: { test: 'data' } });
   });
 
   it('passes callback errors through', async () => {
@@ -46,6 +46,6 @@ describe('Data wrapper', () => {
 
     expect(callback).toHaveBeenCalled();
     expect(responseMock.custom).toHaveBeenCalled();
-    expect(result.body).toEqual('test error');
+    expect((result as { body?: unknown }).body).toEqual('test error');
   });
 });

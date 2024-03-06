@@ -5,9 +5,10 @@
 
 import * as fs from 'fs/promises';
 import { TemplateManager } from '../repository';
-import { IntegrationReader } from '../integration';
+import { IntegrationReader } from '../integration_reader';
 import { Dirent, Stats } from 'fs';
 import path from 'path';
+import { FileSystemDataAdaptor } from '../fs_data_adaptor';
 
 jest.mock('fs/promises');
 
@@ -15,7 +16,7 @@ describe('Repository', () => {
   let repository: TemplateManager;
 
   beforeEach(() => {
-    repository = new TemplateManager('path/to/directory');
+    repository = new TemplateManager([new FileSystemDataAdaptor('path/to/directory')]);
   });
 
   afterEach(() => {
@@ -28,7 +29,7 @@ describe('Repository', () => {
       jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
       jest
         .spyOn(IntegrationReader.prototype, 'getConfig')
-        .mockResolvedValue({ ok: true, value: {} as any });
+        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
 
       const integrations = await repository.getIntegrationList();
 
@@ -51,7 +52,7 @@ describe('Repository', () => {
 
       jest
         .spyOn(IntegrationReader.prototype, 'getConfig')
-        .mockResolvedValue({ ok: true, value: {} as any });
+        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
 
       const integrations = await repository.getIntegrationList();
 
@@ -73,7 +74,7 @@ describe('Repository', () => {
       jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
       jest
         .spyOn(IntegrationReader.prototype, 'getConfig')
-        .mockResolvedValue({ ok: true, value: {} as any });
+        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
 
       const integration = await repository.getIntegration('integrationName');
 

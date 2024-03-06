@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -53,7 +54,7 @@ import {
   uiSettingsService,
 } from '../common/utils';
 import { Search } from './components/common/search/search';
-import { DirectSearch } from './components/common/search/sql_search';
+import { DirectSearch } from './components/common/search/direct_search';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -79,12 +80,23 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 
 interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
+  summarize: {
+    enabled: boolean;
+  };
 }
+
+export const [
+  getRenderAccelerationDetailsFlyout,
+  setRenderAccelerationDetailsFlyout,
+] = createGetterSetter('renderAccelerationDetailsFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -336,6 +348,7 @@ export class ObservabilityPlugin
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
+    coreRefs.summarizeEnabled = this.config.summarize.enabled;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
@@ -353,7 +366,17 @@ export class ObservabilityPlugin
       });
     });
 
-    return {};
+    // Use overlay service to render flyouts
+    const renderAccelerationDetailsFlyout = (acceleration: any) =>
+      core.overlays.openFlyout(
+        toMountPoint(<AccelerationDetailsFlyout acceleration={acceleration} />)
+      );
+    setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
+
+    // Export so other plugins can use this flyout
+    return {
+      renderAccelerationDetailsFlyout,
+    };
   }
 
   public stop() {}

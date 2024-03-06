@@ -8,24 +8,20 @@ export const searchCmd = `## search
 
 ### Description
 
-Using \`search\` command to retrieve document from the index. \`search\`
-command could be only used as the first command in the PPL query.
+Use the \`search\` command to retrieve a document from the index. The \`search\`
+command can only be used as the first command in a PPL query.
 
 ### Syntax
 
 search source=&lt;index&gt; \[boolean-expression\]
 
--   search: search keywords, which could be ignore.
--   index: mandatory. search command must specify which index to query
-    from.
--   bool-expression: optional. any expression which could be evaluated
-    to boolean value.
+-   \`search\`: Search keywords, which can be ignored.
+-   \`index\`: Required. Search commands must specify the index to query.
+-   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean value.
 
-### Example 1: Fetch all the data
+#### Example 1: Fetch all data from an index
 
-The example show fetch all the document from accounts index.
-
-PPL query:
+The following example PPL query shows how to fetch all documents from the \`accounts\` index:
 
     os> source=accounts;
     fetched rows / total rows = 4/4
@@ -38,11 +34,9 @@ PPL query:
     | 18             | Dale      | 467 Hutchinson Court | 4180    | M      | Orick  | null     | MD    | 33  | daleadams@boink.com   | Adams    |
     +----------------+-----------+----------------------+---------+--------+--------+----------+-------+-----+-----------------------+----------+
 
-### Example 2: Fetch data with condition
+#### Example 2: Fetch data with a condition
 
-The example show fetch all the document from accounts index with .
-
-PPL query:
+The following example PPL query shows how to fetch all documents from the \`accounts\` index by using the \`or\` condition.
 
     os> source=accounts account_number=1 or gender="F";
     fetched rows / total rows = 2/2

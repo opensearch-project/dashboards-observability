@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DataGridContainer /> should render empty when rawQuery is not provided 1`] = `<div />`;
+
+exports[`<DataGridContainer /> should render when all props are provided 1`] = `
+<div>
+  <div
+    style="overflow-x: hidden;"
+  >
+    <div
+      data-test-subj="test"
+    >
+      {
+  "http": {},
+  "pplService": {},
+  "rows": [
+    {
+      "timestamp": "now",
+      "count": 1
+    }
+  ],
+  "explorerFields": {
+    "selectedFields": [],
+    "unselectedFields": [],
+    "availableFields": [],
+    "queriedFields": []
+  },
+  "timeStampField": "timestamp",
+  "totalHits": 1,
+  "requestParams": {
+    "tabId": "OBSERVABILITY_DEFAULT_TAB"
+  },
+  "startTime": "",
+  "endTime": "now",
+  "storedSelectedColumns": [],
+  "OuiDataGridProps": {
+    "gridStyle": {
+      "fontSize": "s",
+      "cellPadding": "s"
+    },
+    "minSizeForControls": 300,
+    "rowHeightsOptions": {
+      "defaultHeight": 80
+    }
+  },
+  "rawQuery": "source=foo",
+  "columns": [
+    {
+      "id": "timestamp",
+      "isSortable": true,
+      "display": "Time",
+      "schema": "datetime",
+      "initialWidth": 50
+    },
+    {
+      "id": "_source",
+      "isSortable": false,
+      "display": "Source",
+      "schema": "_source"
+    }
+  ]
+}
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<DataGridContainer /> should switch props when in full screen mode 1`] = `
+<div>
+  <div
+    style="overflow-x: hidden;"
+  >
+    <div
+      data-test-subj="test"
+    >
+      {
+  "http": {},
+  "pplService": {},
+  "rows": [
+    {
+      "timestamp": "now",
+      "count": 1
+    }
+  ],
+  "explorerFields": {
+    "selectedFields": [],
+    "unselectedFields": [],
+    "availableFields": [],
+    "queriedFields": []
+  },
+  "timeStampField": "timestamp",
+  "totalHits": 1,
+  "requestParams": {
+    "tabId": "OBSERVABILITY_DEFAULT_TAB"
+  },
+  "startTime": "",
+  "endTime": "now",
+  "storedSelectedColumns": [],
+  "OuiDataGridProps": {
+    "gridStyle": {},
+    "minSizeForControls": 300,
+    "rowHeightsOptions": {}
+  },
+  "rawQuery": "source=foo",
+  "columns": [
+    {
+      "id": "timestamp",
+      "isSortable": true,
+      "display": "Time",
+      "schema": "datetime",
+      "initialWidth": 200
+    },
+    {
+      "id": "_source",
+      "isSortable": false,
+      "display": "Source",
+      "schema": "_source"
+    }
+  ]
+}
+    </div>
+  </div>
+</div>
+`;

@@ -3,10 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * This file is used as integration tests for Integrations Repository functionality.
+ */
+
 import { TemplateManager } from '../repository/repository';
-import { IntegrationReader } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
+import { deepCheck } from '../repository/utils';
+import { FileSystemDataAdaptor } from '../repository/fs_data_adaptor';
+
+const repository: TemplateManager = new TemplateManager([
+  new FileSystemDataAdaptor(path.join(__dirname, '../__data__/repository')),
+]);
 
 describe('The local repository', () => {
   it('Should only contain valid integration directories or files.', async () => {
@@ -21,24 +31,40 @@ describe('The local repository', () => {
         }
         // Otherwise, all directories must be integrations
         const integ = new IntegrationReader(integPath);
-        expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
+        await expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
       })
     );
   });
 
   it('Should pass deep validation for all local integrations.', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../__data__/repository')
-    );
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
     await Promise.all(
       integrations.map(async (i) => {
-        const result = await i.deepCheck();
+        const result = await deepCheck(i);
         if (!result.ok) {
           console.error(result.error);
         }
         expect(result.ok).toBe(true);
       })
+    );
+  });
+});
+
+describe('Local Nginx Integration', () => {
+  it('Should serialize without errors', async () => {
+    const integration = await repository.getIntegration('nginx');
+
+    await expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
+  });
+
+  it('Should serialize to include the config', async () => {
+    const integration = await repository.getIntegration('nginx');
+    const config = await integration!.getConfig();
+    const serialized = await integration!.serialize();
+
+    expect(serialized).toHaveProperty('ok', true);
+    expect((serialized as { value: object }).value).toMatchObject(
+      (config as { value: object }).value
     );
   });
 });

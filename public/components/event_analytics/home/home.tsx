@@ -25,7 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
@@ -70,9 +70,7 @@ interface IHomeProps {
 const EventAnalyticsHome = (props: IHomeProps) => {
   const { setToast, http } = props;
   const history = useHistory();
-  const dispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedDateRange, setSelectedDateRange] = useState<string[]>(['now-40y', 'now']);
+  const [selectedDateRange, _setSelectedDateRange] = useState<string[]>(['now-40y', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);

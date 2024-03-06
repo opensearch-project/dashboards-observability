@@ -8,13 +8,13 @@ import {
   EuiDraggable,
   EuiDroppable,
   EuiFieldSearch,
-  EuiTitle,
-  EuiSplitPanel,
   EuiPanel,
+  EuiSplitPanel,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { batch, useDispatch } from 'react-redux';
 import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
@@ -50,7 +50,7 @@ export const Sidebar = (props: ISidebarProps) => {
     tabId,
   } = props;
   const dispatch = useDispatch();
-  const [showFields, setShowFields] = useState<boolean>(false);
+  const [showFields, _setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   // method to return the type of a field from its name

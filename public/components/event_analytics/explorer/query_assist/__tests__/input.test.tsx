@@ -85,7 +85,30 @@ describe('<QueryAssistInput /> spec', () => {
     );
   });
 
+  it('should call add error toast if summarize is disabled', async () => {
+    coreRefs.summarizeEnabled = false;
+    httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } });
+
+    const { component } = renderQueryAssistInput();
+    await waitFor(() => {
+      fireEvent.click(component.getByTestId('query-assist-generate-and-run-button'));
+    });
+
+    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+      body: '{"question":"test-input","index":"selected-test-index"}',
+    });
+    expect(httpMock.post).not.toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, expect.anything());
+    expect(coreRefs.toasts?.addError).toBeCalledWith(
+      {
+        message: 'Request is throttled. Try again later or contact your administrator',
+        statusCode: 429,
+      },
+      { title: 'Failed to generate results' }
+    );
+  });
+
   it('should call summarize for generate and run errors', async () => {
+    coreRefs.summarizeEnabled = true;
     httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } }).mockResolvedValueOnce({
       summary: 'too many requests',
       suggestedQuestions: ['1', '2'],

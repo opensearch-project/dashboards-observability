@@ -58,6 +58,7 @@ import {
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
 } from '../../../../common/constants/explorer';
+import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
@@ -78,6 +79,7 @@ import {
   getSavingCommonParams,
   uiSettingsService,
 } from '../../../../common/utils';
+import { coreRefs } from '../../../framework/core_refs';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -100,8 +102,8 @@ import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -111,11 +113,11 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
-import { getContentTabTitle, getDateRange } from '../utils/utils';
+import { formatError, getContentTabTitle } from '../utils/utils';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -144,6 +146,10 @@ export const Explorer = ({
   appId = '',
   appBaseQuery = '',
   addVisualizationToPanel,
+  startTime,
+  endTime,
+  setStartTime,
+  setEndTime,
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
@@ -161,7 +167,7 @@ export const Explorer = ({
     requestParams,
   });
   const {
-    isEventsLoading: isPatternLoading,
+    isEventsLoading: _isPatternLoading,
     getPatterns,
     setDefaultPatternsField,
   } = useFetchPatterns({
@@ -181,7 +187,7 @@ export const Explorer = ({
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
   const [curVisId, setCurVisId] = useState('bar');
-  const [isPanelTextFieldInvalid, setIsPanelTextFieldInvalid] = useState(false);
+  const [isPanelTextFieldInvalid, _setIsPanelTextFieldInvalid] = useState(false);
   const [timeIntervalOptions, setTimeIntervalOptions] = useState(TIME_INTERVAL_OPTIONS);
   const [isOverridingTimestamp, setIsOverridingTimestamp] = useState(false);
   const [tempQuery, setTempQuery] = useState(query[RAW_QUERY]);
@@ -214,8 +220,9 @@ export const Explorer = ({
     value: string;
   }>();
   const [subType, setSubType] = useState('visualization');
-  const [metricMeasure, setMetricMeasure] = useState('');
-  const [metricChecked, setMetricChecked] = useState(false);
+  const [_metricMeasure, setMetricMeasure] = useState('');
+  const [_metricChecked, setMetricChecked] = useState(false);
+  const [_refresh, setRefresh] = useState({});
   const queryRef = useRef();
   const appBasedRef = useRef('');
   appBasedRef.current = appBaseQuery;
@@ -234,10 +241,6 @@ export const Explorer = ({
   liveTailTabIdRef.current = liveTailTabId;
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
-
-  const dateRange = getDateRange(undefined, undefined, query);
-  const [startTime, setStartTime] = useState(dateRange[0]);
-  const [endTime, setEndTime] = useState(dateRange[1]);
 
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
@@ -271,12 +274,29 @@ export const Explorer = ({
     };
   }, []);
 
+  useEffect(() => {
+    // query assist UI should only be enabled when the feature is enabled and configured.
+    if (coreRefs.queryAssistEnabled) {
+      http
+        .get<{ configured: boolean; error?: string }>(QUERY_ASSIST_API.CONFIGURED)
+        .catch(() => {
+          console.warn('Failed to check if query assist is configured');
+          return { configured: false };
+        })
+        .then((response) => {
+          coreRefs.queryAssistEnabled = response.configured;
+          setRefresh({});
+        });
+    }
+  }, []);
+
   const getErrorHandler = (title: string) => {
     return (error: any) => {
-      // const formattedError = formatError(error.name, error.message, error.body.message);
-      // notifications.toasts.addError(formattedError, {
-      //   title,
-      // });
+      if (coreRefs.summarizeEnabled) return;
+      const formattedError = formatError(error.name, error.message, error.body.message);
+      notifications.toasts.addError(formattedError, {
+        title,
+      });
     };
   };
 
@@ -922,7 +942,7 @@ export const Explorer = ({
       }}
     >
       <EuiPage className="deLayout" paddingSize="none">
-        <EuiPageSideBar className="deSidebar" sticky>
+        <EuiPageSideBar className="explorerSidebar" sticky>
           <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
             {!appLogEvents && (
               <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>

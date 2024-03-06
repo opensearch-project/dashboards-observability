@@ -23,6 +23,8 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
+import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
+import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -34,7 +36,6 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 
 interface SummarizationContext {
   question: string;
@@ -47,6 +48,7 @@ interface SummarizationContext {
 interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: (availability?: boolean, setSummaryStatus?: boolean) => void;
+  handleTimePickerChange: (timeRange: string[]) => Promise<void>;
   tabId: string;
   setNeedsUpdate: any;
   selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
@@ -87,21 +89,23 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (
-      summaryData.responseForSummaryStatus === 'success' ||
-      summaryData.responseForSummaryStatus === 'failure'
-    ) {
-      void (async () => {
-        await dispatch(
-          changeSummary({
-            tabId: props.tabId,
-            data: {
-              summaryLoading: false,
-            },
-          })
-        );
-        if (explorerData.total > 0) generateSummary();
-      })();
-    }
+      props.nlqInput.trim().length === 0 ||
+      (summaryData.responseForSummaryStatus !== 'success' &&
+        summaryData.responseForSummaryStatus !== 'failure')
+    )
+      return;
+    void (async () => {
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summaryLoading: false,
+          },
+        })
+      );
+      if (explorerData.total > 0 || summaryData.responseForSummaryStatus === 'failure')
+        generateSummary();
+    })();
   }, [summaryData.responseForSummaryStatus]);
 
   const [barSelected, setBarSelected] = useState(false);
@@ -173,6 +177,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
+    if (!coreRefs.summarizeEnabled) return;
     try {
       const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
@@ -243,9 +248,16 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     try {
       setGeneratingOrRunning(true);
       await request();
+      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
-      generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+      if (coreRefs.summarizeEnabled) {
+        generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+      } else {
+        coreRefs.toasts?.addError(formatError(error as ResponseError), {
+          title: 'Failed to generate results',
+        });
+      }
     } finally {
       setGeneratingOrRunning(false);
     }
@@ -333,11 +345,12 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                   <EuiButton
                     isLoading={generating}
                     onClick={generatePPL}
-                    isDisabled={generating || generatingOrRunning}
+                    isDisabled={
+                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
+                    }
                     iconSide="right"
                     fill={false}
                     data-test-subj="query-assist-generate-button"
-                    style={{ width: 160 }}
                   >
                     Generate query
                   </EuiButton>
@@ -346,13 +359,14 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
                   <EuiButton
                     isLoading={generatingOrRunning}
                     onClick={runAndSummarize}
-                    isDisabled={generating || generatingOrRunning}
+                    isDisabled={
+                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
+                    }
                     iconType="returnKey"
                     iconSide="right"
                     type="submit"
                     fill={barSelected}
                     data-test-subj="query-assist-generate-and-run-button"
-                    style={{ width: 175 }}
                   >
                     Generate and run
                   </EuiButton>

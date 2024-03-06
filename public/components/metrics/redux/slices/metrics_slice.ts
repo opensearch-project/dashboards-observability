@@ -3,32 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import { createSlice } from '@reduxjs/toolkit';
 import { keyBy, mergeWith, pick, sortBy } from 'lodash';
-import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
+import {
+  OBSERVABILITY_BASE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../../common/constants/shared';
 import { MetricType } from '../../../../../common/types/metrics';
+import { getOSDHttp, getPPLService } from '../../../../../common/utils';
+import { coreRefs } from '../../../../framework/core_refs';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { pplServiceRequestor } from '../../helpers/utils';
-import { coreRefs } from '../../../../framework/core_refs';
-import {
-  PPL_METRIC_SUBTYPE,
-  PROMQL_METRIC_SUBTYPE,
-  OBSERVABILITY_BASE,
-} from '../../../../../common/constants/shared';
-import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
   color: string;
 }
 
-const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAttributes } => {
+export const coloredIconsFrom = (
+  dataSources: string[]
+): { [dataSource: string]: IconAttributes } => {
   const colorCycle = ouiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const keyedIcons = dataSources.map((dataSource, index) => {
     return [

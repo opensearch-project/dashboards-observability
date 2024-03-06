@@ -21,6 +21,7 @@ exports[`<para_input /> spec renders the markdown component 1`] = `
       >
         <code
           class="euiCodeBlock__code"
+          data-test-subj="paraInputCodeBlock-1"
         >
           # Type your input here
         </code>

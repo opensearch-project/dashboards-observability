@@ -42,4 +42,4 @@ export interface ObservabilityStart {}
  * It will gives an type error when dashboards-assistant is not installed so add a ts-ignore to suppress the error.
  */
 // @ts-ignore
-export type { AssistantSetup } from "../../dashboards-assistant/public";
+export type { AssistantSetup, RenderProps, IMessage } from '../../dashboards-assistant/public';

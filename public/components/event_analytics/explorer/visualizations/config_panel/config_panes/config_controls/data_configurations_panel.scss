@@ -41,7 +41,7 @@
   }
 }
 
-.vbConfig {
+.logExplorerVisConfig {
   @include euiYScrollWithShadows;
 
   background: $euiColorLightestShade;
@@ -82,7 +82,7 @@
     }
   }
 
-  &.showSecondary > .vbConfig__section {
+  &.showSecondary > .logExplorerVisConfig__section {
     transform: translateX(-100%);
   }
 }

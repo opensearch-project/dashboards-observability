@@ -8,11 +8,19 @@ import Adapter from 'enzyme-adapter-react-16';
 import PPLService from '../../../../../services/requests/ppl';
 import React from 'react';
 import { VisaulizationFlyout } from '../visualization_flyout';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { ShortDate } from '@elastic/eui';
+import { cleanup } from '@testing-library/react';
+import { SavedObjectsActions } from '../../../../../../public/services/saved_objects/saved_object_client/saved_objects_actions';
+import { sampleSavedVisualization } from '../../../../../../test/panels_constants';
 
 describe('Visualization Flyout Component', () => {
   configure({ adapter: new Adapter() });
+
+  afterEach(() => {
+    cleanup();
+  });
 
   it('renders add visualization Flyout', () => {
     const panelId = '';
@@ -55,6 +63,13 @@ describe('Visualization Flyout Component', () => {
     const isFlyoutReplacement = true;
     const replaceVisualizationId = '';
 
+    SavedObjectsActions.getBulk = jest.fn(() =>
+      Promise.resolve({
+        observabilityObjectList: [sampleSavedVisualization],
+        then: () => Promise.resolve(),
+      })
+    );
+
     const wrapper = mount(
       <VisaulizationFlyout
         panelId={panelId}
@@ -70,6 +85,8 @@ describe('Visualization Flyout Component', () => {
         replaceVisualizationId={replaceVisualizationId}
       />
     );
+
+    wrapper.find('[data-test-subj="addFlyoutButton"]').first().simulate('click');
 
     expect(wrapper).toMatchSnapshot();
   });

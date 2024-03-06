@@ -82,7 +82,7 @@ export const useFetchVisualizations = ({
           })
         );
       },
-      (error: Error) => {
+      () => {
         dispatch(
           resetCountDis({
             tabId: requestParams.tabId,
