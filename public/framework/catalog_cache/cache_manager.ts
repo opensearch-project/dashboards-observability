@@ -6,6 +6,7 @@
 import { ASYNC_QUERY_CATALOG_CACHE } from '../../../common/constants/shared';
 import {
   CachedDataSource,
+  CachedDataSourceLoadingProgress,
   CachedDataSourceStatus,
   CatalogCacheData,
 } from '../../../common/types/data_connections';
@@ -91,8 +92,45 @@ export class CatalogCacheManager {
   }
 
   /**
+   * Loads/Refreshes a datasource in the catalog cache.
+   * @param dataSource The data source name to be loaded/refreshed
+   */
+  static loadDataSource(dataSourceName: string): boolean {
+    try {
+      // let ds = this.getDataSource(dataSourceName);
+      // // TODO: Initiate loader for datasource
+      // ds.status = CachedDataSourceStatus.Loading;
+      // ds.loadingProgress = CachedDataSourceLoadingProgress.LoadingDatabases;
+      // this.addOrUpdateDataSource(ds);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  /**
+   * Loads/Refreshes a tables of a database in the catalog cache.
+   * @param dataSource The data source name to be loaded/refreshed
+   * @param databaseName The database name to be loaded/refreshed
+   */
+  static loadTables(dataSourceName: string, databaseName: string): boolean {
+    try {
+      let ds = this.getDataSource(dataSourceName);
+      // TODO: Initiate loader for Table
+      ds.status = CachedDataSourceStatus.Loading;
+      ds.loadingProgress = CachedDataSourceLoadingProgress.LoadingDatabases;
+      this.addOrUpdateDataSource(ds);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  /**
    * Adds or updates a data source in the catalog cache.
-   * @param dataSource The data source to add or update.
+   * @param dataSource The data source to be added or updated.
    */
   static addOrUpdateDataSource(dataSource: CachedDataSource): void {
     const cacheData = this.getCatalogCacheData();
@@ -124,6 +162,7 @@ export class CatalogCacheManager {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
+        loadingProgress: '',
         databases: [],
       };
       this.addOrUpdateDataSource(defaultDataSourceObject);

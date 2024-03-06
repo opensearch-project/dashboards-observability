@@ -51,6 +51,16 @@ export enum CachedDataSourceStatus {
   Loading = 'Loading',
 }
 
+export enum CachedDataSourceLoadingProgress {
+  LoadingScheduled = 'Loading Scheduled',
+  LoadingDatabases = 'Loading Databases',
+  LoadingTables = 'Loading Tables',
+  LoadingAccelerations = 'Loading Accelerations',
+  LoadingError = 'Loading cache ran into error',
+  LoadingCompleted = 'Loading Completed',
+  LoadingStopped = 'Loading Stopped',
+}
+
 export interface CachedColumn {
   name: string;
   dataType: string;
@@ -81,6 +91,7 @@ export interface CachedDataSource {
   name: string;
   lastUpdated: string; // Assuming date string in UTC format
   status: CachedDataSourceStatus;
+  loadingProgress: string;
   databases: CachedDatabase[];
 }
 
