@@ -399,7 +399,11 @@ export function SetupBottomBar({
                 );
 
                 // Queries must exist because we disable s3 if they're not present
-                for (const query of assets.data.queries!) {
+                for (const query of assets.data.filter(
+                  (
+                    a: ParsedIntegrationAsset
+                  ): a is { type: 'query'; query: string; language: string } => a.type === 'query'
+                )) {
                   let queryStr = (query.query as string).replaceAll(
                     '{table_name}',
                     `${config.connectionDataSource}.default.${config.connectionTableName}`
