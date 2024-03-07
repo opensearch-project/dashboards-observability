@@ -16,6 +16,11 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiHorizontalRule,
+  EuiTitle,
+  EuiTableFieldDataColumnType,
+  EuiInMemoryTable,
+  EuiLink,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import {
@@ -23,6 +28,8 @@ import {
   onDeleteButtonClick,
   onDiscoverButtonClick,
 } from './utils/associated_objects_tab_utils';
+import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
+import { AccelerationStatus } from '../accelerations/helpers/utils';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -76,6 +83,45 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     );
   };
 
+  const TableTitleComponent = (titleProps: { title: string }) => {
+    const { title } = titleProps;
+    return (
+      <>
+        <EuiTitle size="s">
+          <h4>{title}</h4>
+        </EuiTitle>
+        <EuiHorizontalRule margin="s" />
+      </>
+    );
+  };
+
+  const accelerationData = tableDetail.accelerations.map((acc, index) => ({
+    ...acc,
+    id: index,
+  }));
+
+  const columns = [
+    {
+      field: 'name',
+      name: 'Name',
+      'data-test-subj': 'accelerationName',
+      render: (name: string, item: AssociatedObject) => (
+        <EuiLink onClick={() => renderAccelerationDetailsFlyout(item)}>{name}</EuiLink>
+      ),
+    },
+    {
+      field: 'status',
+      name: 'Status',
+      render: (status) => <AccelerationStatus status={status} />,
+    },
+    {
+      field: 'type',
+      name: 'Type',
+    },
+  ] as Array<EuiTableFieldDataColumnType<any>>;
+
+  const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -99,6 +145,14 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
       <EuiFlyoutBody>
         <ConnectionComponent />
         <EuiSpacer />
+        <TableTitleComponent title="Accelerations" />
+        <TableTitleComponent title="Schema" />
+        <EuiInMemoryTable
+          items={accelerationData}
+          columns={columns}
+          pagination={true}
+          sorting={true}
+        />
       </EuiFlyoutBody>
     </>
   );
