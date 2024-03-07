@@ -1,8 +1,8 @@
 {
   "name": "aws_s3",
   "version": "1.0.0",
-  "displayName": "AWS S3 ",
-  "description": "AWS S3 Object Store",
+  "displayName": "Amazon S3",
+  "description": "Analyze Amazon S3 server logs.",
   "license": "Apache-2.0",
   "type": "logs_s3",
   "labels": ["Observability", "Logs", "AWS", "Cloud"],
