@@ -1,8 +1,8 @@
 {
   "name": "aws_rds",
   "version": "1.0.0",
-  "displayName": "AWS RDS",
-  "description": "AWS RDS",
+  "displayName": "Amazon Relational Database Service",
+  "description": "Analyze RDS database logs files.",
   "license": "Apache-2.0",
   "type": "logs_rds",
   "labels": ["Observability", "Logs", "AWS", "Cloud"],
@@ -10,7 +10,7 @@
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_rds/info",
   "statics": {
     "logo": {
-      "annotation": "AWS RDS Logo",
+      "annotation": "RDS Logo",
       "path": "aws-rds-icon.png"
     },
     "gallery": [

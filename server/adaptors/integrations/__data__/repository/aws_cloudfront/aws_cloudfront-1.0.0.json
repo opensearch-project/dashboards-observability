@@ -1,8 +1,8 @@
 {
   "name": "aws_cloudfront",
   "version": "1.0.0",
-  "displayName": "AWS cloudfront ",
-  "description": "AWS cloudfront Object Store",
+  "displayName": "Amazon CloudFront",
+  "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudfront",
   "labels": ["Observability", "Logs", "AWS", "Cloud"],
@@ -10,7 +10,7 @@
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
   "statics": {
     "logo": {
-      "annotation": "cloudfront Logo",
+      "annotation": "CloudFront Logo",
       "path": "logo.png"
     },
     "gallery": [

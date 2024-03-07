@@ -1,8 +1,8 @@
 {
   "name": "haproxy",
   "version": "1.0.0",
-  "displayName": "HAProxy Dashboard",
-  "description": "HAProxy logs collector",
+  "displayName": "HAProxy",
+  "description": "Analyze HAProxy access logs.",
   "license": "Apache-2.0",
   "type": "logs",
   "labels": ["Observability", "Logs"],
@@ -38,12 +38,14 @@
       "version": "1.0.0"
     }
   ],
-  "assets": [{
-    "name": "haproxy",
-    "version": "1.0.0",
-    "extension": "ndjson",
-    "type": "savedObjectBundle"
-  }],
+  "assets": [
+    {
+      "name": "haproxy",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
+    }
+  ],
   "sampleData": {
     "path": "sample.json"
   }

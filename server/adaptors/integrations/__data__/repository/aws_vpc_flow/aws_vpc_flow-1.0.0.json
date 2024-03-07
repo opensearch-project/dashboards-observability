@@ -1,8 +1,8 @@
 {
   "name": "aws_vpc_flow",
   "version": "1.0.0",
-  "displayName": "AWS VPC Flow",
-  "description": "AWS VPC Flow log collector",
+  "displayName": "Amazon VPC",
+  "description": "Monitor IP traffic with VPC Flow Logs.",
   "license": "Apache-2.0",
   "type": "logs_vpc",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
