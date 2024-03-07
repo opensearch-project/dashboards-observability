@@ -454,7 +454,7 @@ export class IntegrationReader {
       };
     });
 
-    const assetResults = await Promise.all(config.assets.map(this.readAsset));
+    const assetResults = await Promise.all(config.assets.map((asset) => this.readAsset(asset)));
     const assets = foldResults(assetResults);
     if (!assets.ok) {
       return assets;
