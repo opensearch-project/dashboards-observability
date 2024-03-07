@@ -28,7 +28,7 @@ import {
 import React, { useState, useEffect } from 'react';
 import { Color } from '../../../../common/constants/integrations';
 import { coreRefs } from '../../../framework/core_refs';
-import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
+import { addIntegrationRequest } from './create_integration_helpers';
 import {
   CONSOLE_PROXY,
   INTEGRATIONS_BASE,
@@ -48,7 +48,7 @@ type SetupCallout = { show: true; title: string; color?: Color; text?: string } 
 interface IntegrationConfigProps {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
-  integration: IntegrationTemplate;
+  integration: IntegrationConfig;
   setupCallout: SetupCallout;
 }
 
@@ -243,9 +243,9 @@ export function SetupIntegrationForm({
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 's3') {
-              return Object.hasOwn(integration.assets ?? {}, 'queries');
+              return integration.assets.some((asset) => asset.type === 'query');
             } else if (item.value === 'index') {
-              return Object.hasOwn(integration.assets ?? {}, 'savedObjects');
+              return integration.assets.some((asset) => asset.type === 'savedObjectBundle');
             } else {
               return false;
             }
@@ -328,7 +328,7 @@ export function SetupBottomBar({
   setSetupCallout,
 }: {
   config: IntegrationSetupInputs;
-  integration: IntegrationTemplate;
+  integration: IntegrationConfig;
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
@@ -477,8 +477,11 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [template, setTemplate] = useState({
     name: integration,
     type: '',
-    assets: {},
-  } as IntegrationTemplate);
+    assets: [],
+    version: '',
+    license: '',
+    components: [],
+  } as IntegrationConfig);
 
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
   const [showLoading, setShowLoading] = useState(false);
