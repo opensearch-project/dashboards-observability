@@ -6,6 +6,7 @@
 export const mockAssociatedObjects = [
   {
     id: '1',
+    datasource: 'flint_s3',
     name: 'Table_name_1',
     database: 'db1',
     type: 'Table',
@@ -27,6 +28,7 @@ export const mockAssociatedObjects = [
   },
   {
     id: '2',
+    datasource: 'flint_s3',
     name: 'Table_name_2',
     database: 'db1',
     type: 'Table',
@@ -48,6 +50,7 @@ export const mockAssociatedObjects = [
   },
   {
     id: '3',
+    datasource: 'flint_s3',
     name: 'Table_name_3',
     database: 'db1',
     type: 'Table',
@@ -69,6 +72,7 @@ export const mockAssociatedObjects = [
   },
   {
     id: '4',
+    datasource: 'flint_s3',
     name: 'Table_name_4',
     database: 'db2',
     type: 'Table',
@@ -90,6 +94,7 @@ export const mockAssociatedObjects = [
   },
   {
     id: '5',
+    datasource: 'flint_s3',
     name: 'Table_name_5',
     database: 'db3',
     type: 'Table',
@@ -111,6 +116,7 @@ export const mockAssociatedObjects = [
   },
   {
     id: '6',
+    datasource: 'flint_s3',
     name: 'Table_name_5',
     database: 'db3',
     type: 'CI',
@@ -118,8 +124,9 @@ export const mockAssociatedObjects = [
     accelerations: [],
   },
   {
-    id: '6',
-    name: 'Table_name_5',
+    id: '7',
+    datasource: 'flint_s3',
+    name: 'Table_name_6',
     database: 'db3',
     type: 'CI',
     createdByIntegration: '',

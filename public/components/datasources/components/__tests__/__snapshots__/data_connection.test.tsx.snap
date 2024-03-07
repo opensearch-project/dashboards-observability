@@ -1754,7 +1754,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              Table_name_5
+                              Table_name_6
                             </button>
                           </div>
                         </td>
@@ -3946,7 +3946,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              Table_name_5
+                              Table_name_6
                             </button>
                           </div>
                         </td>

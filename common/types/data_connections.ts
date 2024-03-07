@@ -14,6 +14,7 @@ export interface PermissionsConfigurationProps {
 }
 
 export interface AssociatedObject {
+  datasource: string;
   id: string;
   name: string;
   database: string;

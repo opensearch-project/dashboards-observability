@@ -13,6 +13,9 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import {
@@ -51,6 +54,28 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     );
   };
 
+  const DetailComponent = (detailProps: { title: string; description: any }) => {
+    const { title, description } = detailProps;
+    return (
+      <EuiFlexItem>
+        <EuiDescriptionList>
+          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </EuiFlexItem>
+    );
+  };
+
+  const ConnectionComponent = () => {
+    return (
+      <EuiFlexGroup direction="row">
+        <DetailComponent title="Datasource connection" description={tableDetail.datasource} />
+        <DetailComponent title="Database" description={tableDetail.database} />
+        <DetailComponent title="Table" description={tableDetail.name} />
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -72,31 +97,8 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <p>
-            <strong>Database:</strong> {tableDetail.database}
-          </p>
-          <p>
-            <strong>Type:</strong> {tableDetail.type}
-          </p>
-          <p>
-            <strong>ID:</strong> {tableDetail.id}
-          </p>
-          <p>
-            <strong>Created By Integration:</strong> {tableDetail.createdByIntegration || 'N/A'}
-          </p>
-          {tableDetail.accelerations && tableDetail.accelerations.length > 0 && (
-            <>
-              <EuiSpacer />
-              <p>
-                <strong>Accelerations:</strong>
-              </p>
-              {tableDetail.accelerations.map((acceleration, index) => (
-                <p key={index}>{acceleration.name}</p>
-              ))}
-            </>
-          )}
-        </EuiText>
+        <ConnectionComponent />
+        <EuiSpacer />
       </EuiFlyoutBody>
     </>
   );
