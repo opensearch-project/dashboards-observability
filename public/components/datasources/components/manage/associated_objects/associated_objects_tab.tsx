@@ -176,7 +176,17 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       sortable: true,
       'data-test-subj': 'nameCell',
       render: (name: string, item: AssociatedObject) => (
-        <EuiLink onClick={() => renderAssociatedObjectsDetailsFlyout(item)}>{name}</EuiLink>
+        <EuiLink
+          onClick={() => {
+            if (item.type === 'Table') {
+              renderAssociatedObjectsDetailsFlyout(item);
+            } else {
+              renderAccelerationDetailsFlyout(item.accelerations[0]);
+            }
+          }}
+        >
+          {name}
+        </EuiLink>
       ),
     },
     {
