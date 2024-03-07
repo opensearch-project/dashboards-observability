@@ -21,8 +21,11 @@ import {
   EuiTableFieldDataColumnType,
   EuiInMemoryTable,
   EuiLink,
+  EuiButton,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
+import { i18n } from '@osd/i18n';
 import {
   onAccelerateButtonClick,
   onDeleteButtonClick,
@@ -30,6 +33,11 @@ import {
 } from './utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { AccelerationStatus } from '../accelerations/helpers/utils';
+import {
+  ACCE_NO_DATA_TITLE,
+  ACCE_NO_DATA_DESCRIPTION,
+  CREATE_ACCELERATION_DESCRIPTION,
+} from '../associated_objects/utils/associated_objects_tab_utils';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -120,6 +128,38 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
+  const noDataMessage = (
+    <EuiEmptyPrompt
+      title={
+        <h2>
+          {i18n.translate('datasources.associatedObjectsFlyout.noAccelerationTitle', {
+            defaultMessage: ACCE_NO_DATA_TITLE,
+          })}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate('datasources.associatedObjectsFlyout.noAccelerationDescription', {
+            defaultMessage: ACCE_NO_DATA_DESCRIPTION,
+          })}
+        </p>
+      }
+      actions={
+        <EuiButton
+          color="primary"
+          fill
+          onClick={() => window.open('https://example.com', '_blank')}
+          iconType="popout"
+          iconSide="left"
+        >
+          {i18n.translate('datasources.associatedObjectsFlyout.createAccelerationButton', {
+            defaultMessage: CREATE_ACCELERATION_DESCRIPTION,
+          })}
+        </EuiButton>
+      }
+    />
+  );
+
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
 
   return (
@@ -146,13 +186,20 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
         <ConnectionComponent />
         <EuiSpacer />
         <TableTitleComponent title="Accelerations" />
+        {accelerationData.length > 0 ? (
+          <>
+            <EuiInMemoryTable
+              items={accelerationData}
+              columns={columns}
+              pagination={true}
+              sorting={true}
+            />
+          </>
+        ) : (
+          noDataMessage
+        )}
+        <EuiSpacer />
         <TableTitleComponent title="Schema" />
-        <EuiInMemoryTable
-          items={accelerationData}
-          columns={columns}
-          pagination={true}
-          sorting={true}
-        />
       </EuiFlyoutBody>
     </>
   );
