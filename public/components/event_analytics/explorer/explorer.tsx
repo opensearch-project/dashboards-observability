@@ -643,9 +643,9 @@ export const Explorer = ({
     ? { ...userVizConfigs[curVisId] }
     : {
         dataConfig: getDefaultVisConfig(
-          explorerSearchMeta.lang === QUERY_LANGUAGE.PPL
-            ? queryManager.queryParser().parse(tempQuery).getStats()
-            : getGroupBy(tempQuery)
+          explorerSearchMeta.lang === QUERY_LANGUAGE.SQL
+            ? getGroupBy(tempQuery)
+            : queryManager.queryParser().parse(tempQuery).getStats()
         ),
       };
 
