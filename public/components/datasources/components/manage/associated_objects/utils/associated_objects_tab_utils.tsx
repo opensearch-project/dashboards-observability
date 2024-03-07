@@ -171,3 +171,18 @@ export const ASSC_OBJ_NO_DATA_DESCRIPTION =
 export const ASSC_OBJ_REFRESH_BTN = 'Refresh';
 
 export const ASSC_OBJ_FRESH_MSG = 'Last updated at:';
+
+export const onAccelerateButtonClick = (tableDetail: any) => {
+  // TODO: create acceleration of this table
+  console.log('accelerating', tableDetail.name);
+};
+
+export const onDiscoverButtonClick = (tabaleDetail: any) => {
+  // TODO: send user to Discover
+  console.log('sending user to discover for', tabaleDetail.name);
+};
+
+export const onDeleteButtonClick = (tableDetail: any) => {
+  // TODO: delete table
+  console.log('deleting', tableDetail.name);
+};

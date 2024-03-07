@@ -4,21 +4,72 @@
  */
 
 import React from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
+  EuiIcon,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
+import {
+  onAccelerateButtonClick,
+  onDeleteButtonClick,
+  onDiscoverButtonClick,
+} from './utils/associated_objects_tab_utils';
 
-// Assuming the AssociatedObject interface is correctly defined elsewhere
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
 }
 
 export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObjectsFlyoutProps) => {
+  const DiscoverButton = () => {
+    // TODO: display button if can be sent to discover
+    return (
+      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+        <EuiIcon type={'discoverApp'} size="m" />
+      </EuiButtonEmpty>
+    );
+  };
+
+  const AccelerateButton = () => {
+    return (
+      <EuiButtonEmpty onClick={onAccelerateButtonClick}>
+        <EuiIcon type={'bolt'} size="m" />
+      </EuiButtonEmpty>
+    );
+  };
+
+  const DeleteButton = () => {
+    return (
+      <EuiButtonEmpty onClick={onDeleteButtonClick}>
+        <EuiIcon type="trash" size="m" />
+      </EuiButtonEmpty>
+    );
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="flyoutTitle">{tableDetail.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+          <EuiFlexItem>
+            <EuiText size="m">
+              <h2 className="accsDetailFlyoutTitle">{tableDetail.name}</h2>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DiscoverButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AccelerateButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DeleteButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
