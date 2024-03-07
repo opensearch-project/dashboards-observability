@@ -13,6 +13,11 @@ export interface PermissionsConfigurationProps {
   hasSecurityAccess: boolean;
 }
 
+export interface TableColumn {
+  name: string;
+  dataType: string;
+}
+
 export interface Acceleration {
   name: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -34,6 +39,7 @@ export interface AssociatedObject {
   type: string;
   createdByIntegration: string;
   accelerations: Acceleration[];
+  columns: TableColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;

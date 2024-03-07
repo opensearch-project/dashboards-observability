@@ -25,6 +25,24 @@ export const mockAssociatedObjects = [
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
       },
     ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+      {
+        name: 'column3',
+        dataType: 'dataType3',
+      },
+      {
+        name: 'column4',
+        dataType: 'dataType4',
+      },
+    ],
   },
   {
     id: '2',
@@ -47,13 +65,14 @@ export const mockAssociatedObjects = [
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
       },
     ],
+    columns: [],
   },
   {
     id: '3',
     datasource: 'flint_s3',
-    name: 'Table_name_3',
+    name: 'skipping_index_2',
     database: 'db1',
-    type: 'Table',
+    type: 'Skip Index',
     createdByIntegration: 'integration_1',
     accelerations: [
       {
@@ -69,6 +88,7 @@ export const mockAssociatedObjects = [
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
       },
     ],
+    columns: [],
   },
   {
     id: '4',
@@ -91,6 +111,16 @@ export const mockAssociatedObjects = [
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
       },
     ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
   },
   {
     id: '5',
@@ -99,9 +129,28 @@ export const mockAssociatedObjects = [
     database: 'db3',
     type: 'Table',
     createdByIntegration: 'integration_1',
+    accelerations: [],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
+  },
+  {
+    id: '6',
+    datasource: 'flint_s3',
+    name: 'covering_index_3',
+    database: 'db3',
+    type: 'Cover Index',
+    createdByIntegration: '',
     accelerations: [
       {
-        name: 'skipping_index_3',
+        name: 'covering_index_3',
         status: 'ACTIVE',
         type: 'skip',
         database: 'db1',
@@ -113,22 +162,23 @@ export const mockAssociatedObjects = [
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
       },
     ],
-  },
-  {
-    id: '6',
-    datasource: 'flint_s3',
-    name: 'Table_name_5',
-    database: 'db3',
-    type: 'CI',
-    createdByIntegration: '',
-    accelerations: [],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
   },
   {
     id: '7',
     datasource: 'flint_s3',
     name: 'Table_name_6',
     database: 'db3',
-    type: 'CI',
+    type: 'Table',
     createdByIntegration: '',
     accelerations: [
       {
@@ -154,6 +204,16 @@ export const mockAssociatedObjects = [
         dateUpdated: 1709339290,
         index: 'security_logs_2022',
         sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
       },
     ],
   },

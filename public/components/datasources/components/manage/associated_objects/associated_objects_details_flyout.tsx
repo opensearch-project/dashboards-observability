@@ -108,7 +108,12 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     id: index,
   }));
 
-  const columns = [
+  const schemaData = tableDetail.columns.map((column, index) => ({
+    ...column,
+    id: index,
+  }));
+
+  const accelerationColumns = [
     {
       field: 'name',
       name: 'Name',
@@ -160,6 +165,19 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     />
   );
 
+  const schemaColumns = [
+    {
+      field: 'name',
+      name: 'Column Name',
+      'data-test-subj': 'columnName',
+    },
+    {
+      field: 'dataType',
+      name: 'Data Type',
+      'data-test-subj': 'columnDataType',
+    },
+  ] as Array<EuiTableFieldDataColumnType<any>>;
+
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
 
   return (
@@ -190,7 +208,7 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
           <>
             <EuiInMemoryTable
               items={accelerationData}
-              columns={columns}
+              columns={accelerationColumns}
               pagination={true}
               sorting={true}
             />
@@ -200,6 +218,12 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
         )}
         <EuiSpacer />
         <TableTitleComponent title="Schema" />
+        <EuiInMemoryTable
+          items={schemaData}
+          columns={schemaColumns}
+          pagination={true}
+          sorting={true}
+        />
       </EuiFlyoutBody>
     </>
   );
