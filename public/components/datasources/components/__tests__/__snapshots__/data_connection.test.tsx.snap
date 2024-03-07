@@ -789,13 +789,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_1
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -957,13 +956,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_2
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1125,13 +1123,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_3
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1293,13 +1290,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_4
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1461,13 +1457,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1629,13 +1624,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1756,13 +1750,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -2964,13 +2957,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_1
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3136,13 +3128,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_2
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3308,13 +3299,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_3
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3480,13 +3470,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_4
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3652,13 +3641,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3824,13 +3812,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3955,13 +3942,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td

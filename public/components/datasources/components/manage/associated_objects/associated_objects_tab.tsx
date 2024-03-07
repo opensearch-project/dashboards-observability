@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { AssociatedObject } from 'common/types/data_connections';
 import { i18n } from '@osd/i18n';
-import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
+import {
+  getRenderAccelerationDetailsFlyout,
+  getRenderAssociatedObjectsDetailsFlyout,
+} from '../../../../../plugin';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
@@ -35,7 +38,7 @@ import {
   ASSC_OBJ_TABLE_SUBJ,
 } from './utils/associated_objects_tab_utils';
 
-interface AssociatedObjectsTabProps {
+export interface AssociatedObjectsTabProps {
   associatedObjects: AssociatedObject[];
 }
 
@@ -172,7 +175,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
       }),
       sortable: true,
       'data-test-subj': 'nameCell',
-      render: (name: string) => <EuiLink href="https://example.com">{name}</EuiLink>,
+      render: (name: string, item: AssociatedObject) => (
+        <EuiLink onClick={() => renderAssociatedObjectsDetailsFlyout(item)}>{name}</EuiLink>
+      ),
     },
     {
       field: 'database',
@@ -335,6 +340,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
   };
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+  const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
 
   return (
     <>

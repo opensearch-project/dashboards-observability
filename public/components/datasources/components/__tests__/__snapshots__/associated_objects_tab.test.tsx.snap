@@ -2197,16 +2197,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_1
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -2697,16 +2698,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_2
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -3197,16 +3199,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_3
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -3697,16 +3700,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_4
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -4197,16 +4201,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_5
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -4697,16 +4702,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_5
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -5031,16 +5037,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_5
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>

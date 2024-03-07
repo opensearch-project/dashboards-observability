@@ -16,8 +16,12 @@ import ReactDOM from 'react-dom';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 
 jest.mock('../../../../plugin', () => ({
-  getRenderAccelerationDetailsFlyout: () =>
-    jest.fn().mockImplementation(() => console.log('Acceleration Details Flyout Rendered')),
+  getRenderAccelerationDetailsFlyout: jest.fn(() =>
+    jest.fn().mockImplementation(() => console.log('Acceleration Details Flyout Rendered'))
+  ),
+  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() =>
+    jest.fn().mockImplementation(() => console.log('Associated Objects Details Flyout Rendered'))
+  ),
 }));
 
 jest.mock('../../../../../public/framework/core_refs', () => ({
