@@ -684,6 +684,7 @@ export const Explorer = ({
         handleOverrideTimestamp={handleOverrideTimestamp}
         callback={callbackForConfig}
         queryManager={queryManager}
+        shouldShowConfigurationUI={isDefaultDataSourceType}
       />
     ),
     [
