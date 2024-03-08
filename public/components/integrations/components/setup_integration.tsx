@@ -345,6 +345,91 @@ export function SetupIntegrationForm({
   );
 }
 
+const addIntegration = async ({
+  config,
+  integration,
+  setLoading,
+  setCalloutLikeToast,
+}: {
+  config: IntegrationSetupInputs;
+  integration: IntegrationConfig;
+  setLoading: (loading: boolean) => void;
+  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+}) => {
+  setLoading(true);
+  let sessionId: string | null = null;
+
+  if (config.connectionType === 'index') {
+    const res = await addIntegrationRequest(
+      false,
+      integration.name,
+      config.displayName,
+      integration,
+      setCalloutLikeToast,
+      config.displayName,
+      config.connectionDataSource
+    );
+    if (!res) {
+      setLoading(false);
+    }
+  } else if (config.connectionType === 's3') {
+    const http = coreRefs.http!;
+
+    const assets = await http.get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`);
+
+    // Queries must exist because we disable s3 if they're not present
+    for (const query of assets.data.filter(
+      (a: ParsedIntegrationAsset): a is { type: 'query'; query: string; language: string } =>
+        a.type === 'query'
+    )) {
+      let queryStr = (query.query as string).replaceAll(
+        '{table_name}',
+        `${config.connectionDataSource}.default.${config.connectionTableName}`
+      );
+
+      queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+      queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
+      queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+      queryStr = queryStr.replaceAll(/\s+/g, ' ');
+      const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
+      if (!result.ok) {
+        setLoading(false);
+        setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
+        return;
+      }
+      sessionId = result.value.sessionId ?? sessionId;
+    }
+    // Once everything is ready, add the integration to the new datasource as usual
+    // TODO determine actual values here after more about queries is known
+    const res = await addIntegrationRequest(
+      false,
+      integration.name,
+      config.displayName,
+      integration,
+      setCalloutLikeToast,
+      config.displayName,
+      `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
+    );
+    if (!res) {
+      setLoading(false);
+    }
+  } else {
+    console.error('Invalid data source type');
+  }
+};
+
+const isConfigValid = (config: IntegrationSetupInputs): boolean => {
+  if (config.displayName.length < 1 || config.connectionDataSource.length < 1) {
+    return false;
+  }
+  if (config.connectionType === 's3') {
+    return (
+      config.connectionLocation.startsWith('s3://') && config.checkpointLocation.startsWith('s3://')
+    );
+  }
+  return true;
+};
+
 export function SetupBottomBar({
   config,
   integration,
@@ -392,85 +477,10 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={
-              config.displayName.length < 1 ||
-              config.connectionDataSource.length < 1 ||
-              (config.connectionType === 's3' &&
-                (config.connectionTableName.length < 1 ||
-                  !config.connectionLocation.startsWith('s3://')))
+            disabled={!isConfigValid(config)}
+            onClick={async () =>
+              addIntegration({ integration, config, setLoading, setCalloutLikeToast })
             }
-            onClick={async () => {
-              setLoading(true);
-              let sessionId: string | null = null;
-
-              if (config.connectionType === 'index') {
-                const res = await addIntegrationRequest(
-                  false,
-                  integration.name,
-                  config.displayName,
-                  integration,
-                  setCalloutLikeToast,
-                  config.displayName,
-                  config.connectionDataSource
-                );
-                if (!res) {
-                  setLoading(false);
-                }
-              } else if (config.connectionType === 's3') {
-                const http = coreRefs.http!;
-
-                const assets = await http.get(
-                  `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
-                );
-
-                // Queries must exist because we disable s3 if they're not present
-                for (const query of assets.data.filter(
-                  (
-                    a: ParsedIntegrationAsset
-                  ): a is { type: 'query'; query: string; language: string } => a.type === 'query'
-                )) {
-                  let queryStr = (query.query as string).replaceAll(
-                    '{table_name}',
-                    `${config.connectionDataSource}.default.${config.connectionTableName}`
-                  );
-
-                  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-                  queryStr = queryStr.replaceAll(
-                    '{s3_checkpoint_location}',
-                    config.checkpointLocation
-                  );
-                  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
-                  queryStr = queryStr.replaceAll(/\s+/g, ' ');
-                  const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
-                  if (!result.ok) {
-                    setLoading(false);
-                    setCalloutLikeToast(
-                      'Failed to add integration',
-                      'danger',
-                      result.error.message
-                    );
-                    return;
-                  }
-                  sessionId = result.value.sessionId ?? sessionId;
-                }
-                // Once everything is ready, add the integration to the new datasource as usual
-                // TODO determine actual values here after more about queries is known
-                const res = await addIntegrationRequest(
-                  false,
-                  integration.name,
-                  config.displayName,
-                  integration,
-                  setCalloutLikeToast,
-                  config.displayName,
-                  `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
-                );
-                if (!res) {
-                  setLoading(false);
-                }
-              } else {
-                console.error('Invalid data source type');
-              }
-            }}
             data-test-subj="create-instance-button"
           >
             Add Integration
