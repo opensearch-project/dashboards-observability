@@ -5,6 +5,8 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
+export type AccelerationStatus = 'ACTIVE' | 'INACTIVE';
+
 export interface PermissionsConfigurationProps {
   roles: Role[];
   selectedRoles: Role[];
@@ -20,7 +22,7 @@ export interface TableColumn {
 
 export interface Acceleration {
   name: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: AccelerationStatus;
   type: string;
   database: string;
   table: string;
