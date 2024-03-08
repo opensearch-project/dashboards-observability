@@ -40,6 +40,7 @@ export interface IntegrationSetupInputs {
   connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
+  checkpointLocation: string;
   connectionTableName: string;
 }
 
@@ -64,9 +65,9 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   [
     's3',
     {
-      title: 'Catalog',
-      lower: 'catalog',
-      help: 'Select a catalog to pull the data from.',
+      title: 'Data Source',
+      lower: 'data_source',
+      help: 'Select a data source to pull the data from.',
     },
   ],
   [
@@ -193,7 +194,9 @@ export function SetupIntegrationForm({
     [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
-  const [isBlurred, setIsBlurred] = useState(false);
+  const [isBucketBlurred, setIsBucketBlurred] = useState(false);
+  const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
+
   useEffect(() => {
     const updateDataSources = async () => {
       const data = await suggestDataSources(config.connectionType);
@@ -239,7 +242,7 @@ export function SetupIntegrationForm({
         <h3>Integration Connection</h3>
       </EuiText>
       <EuiSpacer />
-      <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
+      <EuiFormRow label="Data Source Type" helpText="Select the type of data source to query.">
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 's3') {
@@ -301,16 +304,35 @@ export function SetupIntegrationForm({
           </EuiFormRow>
           <EuiFormRow
             label="S3 Bucket Location"
-            isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
             error={["Must be a URL starting with 's3://'."]}
           >
             <EuiFieldText
               value={config.connectionLocation}
               onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
               placeholder="s3://"
-              isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
               onBlur={() => {
-                setIsBlurred(true);
+                setIsBucketBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Checkpoint Location"
+            helpText={
+              'This S3 directory will be used to cache intermediary query results. ' +
+              'It typically should not overlap with the bucket location.'
+            }
+            isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.checkpointLocation}
+              onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsCheckpointBlurred(true);
               }}
             />
           </EuiFormRow>
@@ -475,8 +497,9 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionType: 'index',
     connectionDataSource: '',
     connectionLocation: '',
+    checkpointLocation: '',
     connectionTableName: integration,
-  } as IntegrationSetupInputs);
+  });
 
   const [template, setTemplate] = useState({
     name: integration,

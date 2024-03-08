@@ -24,10 +24,25 @@ describe('Integration Setup Page', () => {
     });
   });
 
-  it('Renders the form as expected', async () => {
+  it('Renders the index form as expected', async () => {
     const wrapper = mount(
       <SetupIntegrationForm
         config={TEST_INTEGRATION_SETUP_INPUTS}
+        updateConfig={() => {}}
+        integration={TEST_INTEGRATION_CONFIG}
+        setupCallout={{ show: false }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
+  it('Renders the S3 connector form as expected', async () => {
+    const wrapper = mount(
+      <SetupIntegrationForm
+        config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
         integration={TEST_INTEGRATION_CONFIG}
         setupCallout={{ show: false }}
