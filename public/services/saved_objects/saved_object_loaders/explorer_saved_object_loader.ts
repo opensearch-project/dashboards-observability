@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { isEmpty } from 'lodash';
 import { batch as Batch } from 'react-redux';
-import { updateFields as updateFieldsAction } from '../../../components/event_analytics/redux/slices/field_slice';
-import { changeQuery as changeQueryAction } from '../../../components/event_analytics/redux/slices/query_slice';
-import { updateTabName as updateTabNameAction } from '../../../components/event_analytics/redux/slices/query_tab_slice';
-import { change as updateVizConfigAction } from '../../../components/event_analytics/redux/slices/viualization_config_slice';
-import { update as updateSearchMetaData } from '../../../components/event_analytics/redux/slices/search_meta_data_slice';
 import { NotificationsStart } from '../../../../../../src/core/public';
+import {
+  ASYNC_POLLING_INTERVAL,
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../common/constants/data_sources';
 import {
   AGGREGATIONS,
   BREAKDOWNS,
@@ -35,23 +35,23 @@ import {
   SavedVisualization,
   SelectedDataSource,
 } from '../../../../common/types/explorer';
+import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
+import { get as getObjValue } from '../../../../common/utils/shared';
+import { getUserConfigFrom } from '../../../../common/utils/visualization_helpers';
+import { updateFields as updateFieldsAction } from '../../../components/event_analytics/redux/slices/field_slice';
+import { changeQuery as changeQueryAction } from '../../../components/event_analytics/redux/slices/query_slice';
+import { updateTabName as updateTabNameAction } from '../../../components/event_analytics/redux/slices/query_tab_slice';
+import { update as updateSearchMetaData } from '../../../components/event_analytics/redux/slices/search_meta_data_slice';
+import { change as updateVizConfigAction } from '../../../components/event_analytics/redux/slices/viualization_config_slice';
+import { PollingConfigurations } from '../../../components/hooks';
+import { UsePolling } from '../../../components/hooks/use_polling';
+import { coreRefs } from '../../../framework/core_refs';
 import { AppDispatch } from '../../../framework/redux/store';
+import { SQLService } from '../../requests/sql';
 import { ISavedObjectsClient } from '../saved_object_client/client_interface';
 import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../saved_object_client/types';
 import { SavedObjectLoaderBase } from './loader_base';
 import { ISavedObjectLoader } from './loader_interface';
-import { PollingConfigurations } from '../../../components/hooks';
-import { SQLService } from '../../requests/sql';
-import { coreRefs } from '../../../framework/core_refs';
-import { UsePolling } from '../../../components/hooks/use_polling';
-import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
-import { get as getObjValue } from '../../../../common/utils/shared';
-import {
-  ASYNC_POLLING_INTERVAL,
-  DEFAULT_DATA_SOURCE_NAME,
-  DEFAULT_DATA_SOURCE_TYPE,
-} from '../../../../common/constants/data_sources';
-import { getUserConfigFrom } from '../../../../common/utils/visualization_helpers';
 
 enum DIRECT_DATA_SOURCE_TYPES {
   DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
@@ -293,7 +293,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     setSelectedContentTab(tabToBeFocused);
   }
 
-  handleDirectQuerySuccess = (pollingResult, configurations: PollingConfigurations) => {
+  handleDirectQuerySuccess = (pollingResult, _configurations: PollingConfigurations) => {
     const { tabId, dispatchOnGettingHis } = this.loadContext;
     const { dispatch } = this.dispatchers;
     if (pollingResult && pollingResult.status === 'SUCCESS') {
@@ -357,7 +357,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
   loadSparkGlue = ({ objectData, dataSources, tabId }) => {
     const { dispatch } = this.dispatchers;
     const sqlService = new SQLService(coreRefs.http);
-    const sessionId = getAsyncSessionId();
+    const sessionId = getAsyncSessionId(dataSources[0].label);
     const requestPayload = {
       lang: objectData.query_lang.toLowerCase(),
       query: objectData.query,
@@ -396,7 +396,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     sqlService
       .fetch(requestPayload)
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
+        setAsyncSessionId(dataSources[0].label, getObjValue(result, 'sessionId', null));
         if (result.queryId) {
           dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
           startPolling({ queryId: result.queryId });

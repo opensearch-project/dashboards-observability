@@ -5,14 +5,16 @@
 
 import { CachedDataSourceStatus } from '../../../common/types/data_connections';
 import {
+  mockShowDatabasesPollingResult,
+  mockShowIndexesPollingResult,
+  mockShowTablesPollingResult,
+} from '../../../test/datasources';
+import {
   updateAccelerationsToCache,
   updateDatabasesToCache,
   updateTablesToCache,
 } from './cache_loader';
 import { CatalogCacheManager } from './cache_manager';
-
-// Mock CatalogCacheManager
-// jest.mock('./cache_manager');
 
 interface LooseObject {
   [key: string]: any;
@@ -38,23 +40,6 @@ const localStorageMock = (() => {
 })();
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-
-// // Mock the behavior of CatalogCacheManager
-// const mockAddOrUpdateDataSource = jest.fn();
-// const mockGetOrCreateDataSource = jest.fn().mockImplementation((dataSourceName: string) => ({
-//   name: dataSourceName,
-//   databases: [],
-//   lastUpdated: '', // or use an actual date if needed
-//   status: CachedDataSourceStatus.Empty,
-// }));
-
-// // Mock the methods used by updateDatabasesToCache
-// jest.mock('./cache_manager', () => ({
-//   CatalogCacheManager: {
-//     addOrUpdateDataSource: mockAddOrUpdateDataSource,
-//     getOrCreateDataSource: mockGetOrCreateDataSource,
-//   },
-// }));
 
 describe('loadCacheTests', () => {
   beforeEach(() => {
@@ -88,12 +73,7 @@ describe('loadCacheTests', () => {
 
     it('should update cache with new databases when polling result is not null', () => {
       const dataSourceName = 'TestDataSource';
-      const pollingResult = {
-        schema: [{ name: 'namespace', type: 'string' }],
-        datarows: [['Database1'], ['Database2']],
-      };
-
-      updateDatabasesToCache(dataSourceName, pollingResult);
+      updateDatabasesToCache(dataSourceName, mockShowDatabasesPollingResult);
 
       // Verify that addOrUpdateDataSource is called with the correct parameters
       expect(CatalogCacheManager.addOrUpdateDataSource).toHaveBeenCalledWith({
@@ -144,17 +124,6 @@ describe('loadCacheTests', () => {
     it('should update cache with new tables when polling result is not null', () => {
       const dataSourceName = 'TestDataSource';
       const databaseName = 'TestDatabase';
-      const pollingResult = {
-        schema: [
-          { name: 'namespace', type: 'string' },
-          { name: 'tableName', type: 'string' },
-          { name: 'isTemporary', type: 'boolean' },
-        ],
-        datarows: [
-          ['TestDatabase', 'Table1', false],
-          ['TestDatabase', 'Table2', false],
-        ],
-      };
 
       CatalogCacheManager.addOrUpdateDataSource({
         databases: [
@@ -169,7 +138,7 @@ describe('loadCacheTests', () => {
         lastUpdated: new Date().toUTCString(),
         status: CachedDataSourceStatus.Updated,
       });
-      updateTablesToCache(dataSourceName, databaseName, pollingResult);
+      updateTablesToCache(dataSourceName, databaseName, mockShowTablesPollingResult);
 
       // Verify that updateDatabase is called with the correct parameters
       expect(CatalogCacheManager.updateDatabase).toHaveBeenCalledWith(
@@ -208,51 +177,36 @@ describe('loadCacheTests', () => {
     });
 
     it('should save new accelerations cache when polling result is not null', () => {
-      const pollingResult = {
-        schema: [
-          {
-            flint_index_name: 'Index1',
-            kind: 'mv',
-            database: 'DB1',
-            table: 'Table1',
-            index_name: 'Index1',
-            auto_refresh: false,
-            status: 'Active',
-          },
-          {
-            flint_index_name: 'Index2',
-            kind: 'skipping',
-            database: 'DB2',
-            table: 'Table2',
-            index_name: 'Index2',
-            auto_refresh: true,
-            status: 'Active',
-          },
-        ],
-        datarows: [],
-      };
-
-      updateAccelerationsToCache(pollingResult);
+      updateAccelerationsToCache(mockShowIndexesPollingResult);
 
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
         version: '1.0',
         accelerations: [
           {
-            flintIndexName: 'Index1',
-            type: 'materialized',
-            database: 'DB1',
-            table: 'Table1',
-            indexName: 'Index1',
+            flintIndexName: 'flint_mys3_default_http_logs_skipping_index',
+            type: 'skipping',
+            database: 'default',
+            table: 'http_logs',
+            indexName: 'skipping_index',
             autoRefresh: false,
             status: 'Active',
           },
           {
-            flintIndexName: 'Index2',
-            type: 'skipping',
-            database: 'DB2',
-            table: 'Table2',
-            indexName: 'Index2',
+            flintIndexName: 'flint_mys3_default_http_logs_status_clientip_and_day_index',
+            type: 'covering',
+            database: 'default',
+            table: 'http_logs',
+            indexName: 'status_clientip_and_day',
+            autoRefresh: true,
+            status: 'Active',
+          },
+          {
+            flintIndexName: 'flint_mys3_default_http_count_view',
+            type: 'materialized',
+            database: 'default',
+            table: '',
+            indexName: 'http_count_view',
             autoRefresh: true,
             status: 'Active',
           },

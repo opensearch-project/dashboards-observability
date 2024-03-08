@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { LogExplorerRouterContext } from '../..';
 import {
@@ -11,7 +11,33 @@ import {
   DataSourceSelectable,
   DataSourceType,
 } from '../../../../../../../src/plugins/data/public';
+import {
+  DATA_SOURCE_NAME_URL_PARAM_KEY,
+  DATA_SOURCE_TYPES,
+  DATA_SOURCE_TYPE_URL_PARAM_KEY,
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+  DEFAULT_DATA_SOURCE_TYPE_NAME,
+  INDEX_URL_PARAM_KEY,
+  OLLY_QUESTION_URL_PARAM_KEY,
+  QUERY_LANGUAGE,
+} from '../../../../../common/constants/data_sources';
+import {
+  INDEX,
+  OLLY_QUERY_ASSISTANT,
+  SELECTED_TIMESTAMP,
+} from '../../../../../common/constants/explorer';
+import { DIRECT_DUMMY_QUERY } from '../../../../../common/constants/shared';
+import { DirectQueryRequest, SelectedDataSource } from '../../../../../common/types/explorer';
+import {
+  getAsyncSessionId,
+  setAsyncSessionId,
+} from '../../../../../common/utils/query_session_utils';
+import { get as getObjValue } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
+import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
+import { SQLService } from '../../../../services/requests/sql';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
@@ -23,32 +49,6 @@ import { reset as resetQueryResults } from '../../redux/slices/query_result_slic
 import { changeData, reset as resetQuery } from '../../redux/slices/query_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
-import { DirectQueryRequest, SelectedDataSource } from '../../../../../common/types/explorer';
-import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
-import {
-  DATA_SOURCE_TYPE_URL_PARAM_KEY,
-  DATA_SOURCE_NAME_URL_PARAM_KEY,
-  DEFAULT_DATA_SOURCE_NAME,
-  DEFAULT_DATA_SOURCE_TYPE,
-  DEFAULT_DATA_SOURCE_TYPE_NAME,
-  DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
-  DATA_SOURCE_TYPES,
-  QUERY_LANGUAGE,
-  OLLY_QUESTION_URL_PARAM_KEY,
-  INDEX_URL_PARAM_KEY,
-} from '../../../../../common/constants/data_sources';
-import { SQLService } from '../../../../services/requests/sql';
-import { get as getObjValue } from '../../../../../common/utils/shared';
-import {
-  setAsyncSessionId,
-  getAsyncSessionId,
-} from '../../../../../common/utils/query_session_utils';
-import { DIRECT_DUMMY_QUERY } from '../../../../../common/constants/shared';
-import {
-  INDEX,
-  OLLY_QUERY_ASSISTANT,
-  SELECTED_TIMESTAMP,
-} from '../../../../../common/constants/explorer';
 
 const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: '' };
 
@@ -141,7 +141,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     sqlService
       .fetch(requestPayload)
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
+        setAsyncSessionId(dataSource, getObjValue(result, 'sessionId', null));
       })
       .catch((e) => {
         console.error(e);
@@ -226,7 +226,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     const dsType = explorerSearchMetadata.datasources?.[0]?.type;
     const dsName = explorerSearchMetadata.datasources?.[0]?.label;
     if (
-      !getAsyncSessionId() &&
+      !getAsyncSessionId(dsName) &&
       [DATA_SOURCE_TYPES.SPARK, DATA_SOURCE_TYPES.S3Glue].includes(dsType) &&
       dsName
     ) {
