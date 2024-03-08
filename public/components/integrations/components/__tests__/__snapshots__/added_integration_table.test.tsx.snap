@@ -6,6 +6,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
     Object {
       "hits": Array [
         Object {
+          "addedBy": "admin",
           "assets": Array [
             Object {
               "assetId": "3fc41705-8a23-49f4-926c-2819e0d7306d",
@@ -79,13 +80,15 @@ exports[`Added Integration Table View Test Renders added integration table view 
           },
           "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
           "name": "nginx",
+          "status": "active",
           "templateName": "nginx",
         },
       ],
-      "total": 1,
     }
   }
+  http={[MockFunction]}
   loading={false}
+  setData={[Function]}
 >
   <EuiPageContent
     data-test-subj="addedIntegrationsArea"

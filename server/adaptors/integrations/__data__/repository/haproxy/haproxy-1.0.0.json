@@ -1,50 +1,52 @@
 {
-    "name": "haproxy",
-    "version": "1.0.0",
-    "displayName": "HAProxy",
-    "description": "Analyze HAProxy access logs.",
-    "license": "Apache-2.0",
-    "type": "logs",
-    "labels": ["Observability", "Logs"],
-    "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/haproxy/info",
-    "statics": {
-        "logo": {
-          "annotation": "HAProxy Logo",
-          "path": "logo.svg"
-        },
-        "gallery": [
-          {
-            "annotation": "HAProxy Dashboard",
-            "path": "dashboard1.png"
-          },
-          {
-            "annotation": "HAProxy Dashboard view",
-            "path": "dashboard2.png"
-          }
-        ]
-      },
-    "components": [
-      {
-        "name": "communication",
-        "version": "1.0.0"
-      },
-      {
-        "name": "http",
-        "version": "1.0.0"
-      },
-      {
-        "name": "logs",
-        "version": "1.0.0"
-      }
-    ],
-    "assets": {
-      "savedObjects": {
-        "name": "haproxy",
-        "version": "1.0.0"
-      }
+  "name": "haproxy",
+  "version": "1.0.0",
+  "displayName": "HAProxy",
+  "description": "Analyze HAProxy access logs.",
+  "license": "Apache-2.0",
+  "type": "logs",
+  "labels": ["Observability", "Logs"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/haproxy/info",
+  "statics": {
+    "logo": {
+      "annotation": "HAProxy Logo",
+      "path": "logo.svg"
     },
-    "sampleData": {
-      "path": "sample.json"
+    "gallery": [
+      {
+        "annotation": "HAProxy Dashboard",
+        "path": "dashboard1.png"
+      },
+      {
+        "annotation": "HAProxy Dashboard view",
+        "path": "dashboard2.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "communication",
+      "version": "1.0.0"
+    },
+    {
+      "name": "http",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs",
+      "version": "1.0.0"
     }
+  ],
+  "assets": [
+    {
+      "name": "haproxy",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
+    }
+  ],
+  "sampleData": {
+    "path": "sample.json"
   }
+}

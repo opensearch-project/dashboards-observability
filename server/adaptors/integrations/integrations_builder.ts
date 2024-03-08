@@ -42,7 +42,14 @@ export class IntegrationInstanceBuilder {
         }
         return assets.value;
       })
-      .then((assets) => this.remapIDs(assets.savedObjects! as SavedObject[]))
+      .then((assets) =>
+        this.remapIDs(
+          assets
+            .filter((asset) => asset.type === 'savedObjectBundle')
+            .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
+            .flat() as SavedObject[]
+        )
+      )
       .then((assets) => this.remapDataSource(assets, options.dataSource))
       .then((assets) => this.postAssets(assets))
       .then((refs) => this.buildInstance(integration, refs, options));

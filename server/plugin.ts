@@ -22,6 +22,7 @@ import {
 } from './saved_objects/observability_saved_object';
 import { ObservabilityPluginSetup, ObservabilityPluginStart, AssistantPluginSetup } from './types';
 import { PPLParsers } from './parsers/ppl_parser';
+import { migrateV1IntegrationToV2Integration } from './adaptors/integrations/migrations';
 
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
@@ -189,6 +190,9 @@ export class ObservabilityPlugin
             type: 'nested',
           },
         },
+      },
+      migrations: {
+        '3.0.0': migrateV1IntegrationToV2Integration,
       },
     };
 

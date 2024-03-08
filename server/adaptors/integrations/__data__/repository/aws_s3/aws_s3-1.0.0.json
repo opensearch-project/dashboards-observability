@@ -34,12 +34,14 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
+  "assets": [
+    {
       "name": "aws_s3",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
     }
-  },
+  ],
   "sampleData": {
     "path": "sample.json"
   }

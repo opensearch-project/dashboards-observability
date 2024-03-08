@@ -38,9 +38,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                       }
                       integration={
                         Object {
-                          "assets": Object {},
+                          "assets": Array [],
+                          "components": Array [],
+                          "license": "",
                           "name": "sample",
                           "type": "",
+                          "version": "",
                         }
                       }
                       setupCallout={
@@ -718,9 +721,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
             }
             integration={
               Object {
-                "assets": Object {},
+                "assets": Array [],
+                "components": Array [],
+                "license": "",
                 "name": "sample",
                 "type": "",
+                "version": "",
               }
             }
             loading={false}
@@ -1052,18 +1058,22 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
   config={
     Object {
       "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
       "connectionType": "index",
       "displayName": "Test Instance Name",
     }
   }
   integration={
     Object {
-      "assets": Object {
-        "savedObjects": Object {
+      "assets": Array [
+        Object {
+          "extension": "ndjson",
           "name": "sample",
+          "type": "savedObjectBundle",
           "version": "1.0.1",
         },
-      },
+      ],
       "components": Array [
         Object {
           "name": "logs",

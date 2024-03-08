@@ -14,8 +14,12 @@ import {
 import React from 'react';
 import _ from 'lodash';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
+import { SavedObject } from '../../../../../../src/core/types';
 
-export function IntegrationAssets(props: any) {
+export function IntegrationAssets(props: {
+  integration: IntegrationConfig;
+  integrationAssets?: ParsedIntegrationAsset[];
+}) {
   const [config, assets] = [props.integration, props.integrationAssets];
 
   const search = {
@@ -24,7 +28,7 @@ export function IntegrationAssets(props: any) {
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'type',
         name: 'Type',
         multiSelect: false,
@@ -61,18 +65,21 @@ export function IntegrationAssets(props: any) {
         </EuiText>
       ),
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ] as Array<EuiTableFieldDataColumnType<{ name: string; id: string; type: string }>>;
 
-  const entries = assets?.savedObjects
-    ? assets.savedObjects
-        .filter((x: any) => x.type !== undefined)
-        .map((asset: any) => {
-          const name = asset.attributes.title ? asset.attributes.title : '(Unnamed)';
-          const type = asset.type;
-          const id = asset.id;
-          return { name, type, id, data: { name, type } };
-        })
-    : [];
+  const entries =
+    assets
+      ?.filter(
+        (asset: ParsedIntegrationAsset): asset is { type: 'savedObjectBundle'; data: object[] } =>
+          asset.type === 'savedObjectBundle'
+      )
+      .flatMap((asset) => (asset.data as unknown) as Array<SavedObject<{ title?: string }>>)
+      .map((asset: SavedObject<{ title?: string }>) => {
+        const name = asset.attributes.title ?? '(Unnamed)';
+        const type = asset.type;
+        const id = asset.id;
+        return { name, type, id, data: { name, type } };
+      }) ?? [];
 
   return (
     <EuiPanel data-test-subj={`${config.name}-assets`}>

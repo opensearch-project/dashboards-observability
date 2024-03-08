@@ -38,12 +38,12 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
-      "name": "k8s",
-      "version": "1.0.0"
-    }
-  },
+  "assets": [{
+    "name": "k8s",
+    "version": "1.0.0",
+    "extension": "ndjson",
+    "type": "savedObjectBundle"
+  }],
   "sampleData": {
     "path": "sample.json"
   }
