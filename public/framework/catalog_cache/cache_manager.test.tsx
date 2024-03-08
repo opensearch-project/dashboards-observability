@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CATALOG_CACHE_VERSION } from '../../../common/constants/data_sources';
 import {
   ASYNC_QUERY_ACCELERATIONS_CACHE,
   ASYNC_QUERY_DATASOURCE_CACHE,
@@ -55,7 +56,7 @@ describe('CatalogCacheManager', () => {
   describe('saveDataSourceCache', () => {
     it('should save data source cache with correct key and data', () => {
       const cacheData: DataSourceCacheData = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         dataSources: [
           {
             name: 'testDataSource',
@@ -74,7 +75,7 @@ describe('CatalogCacheManager', () => {
 
     it('should overwrite existing data source cache with new data', () => {
       const initialCacheData: DataSourceCacheData = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         dataSources: [
           {
             name: 'testDataSource',
@@ -108,7 +109,7 @@ describe('CatalogCacheManager', () => {
   describe('getDataSourceCache', () => {
     it('should retrieve data source cache from local storage', () => {
       const cacheData: DataSourceCacheData = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         dataSources: [
           {
             name: 'testDataSource',
@@ -123,7 +124,7 @@ describe('CatalogCacheManager', () => {
     });
 
     it('should return default cache object if cache is not found', () => {
-      const defaultCacheObject = { version: '1.0', dataSources: [] };
+      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
       localStorage.removeItem(ASYNC_QUERY_DATASOURCE_CACHE);
       expect(CatalogCacheManager.getDataSourceCache()).toEqual(defaultCacheObject);
     });
@@ -132,7 +133,7 @@ describe('CatalogCacheManager', () => {
   describe('saveAccelerationsCache', () => {
     it('should save accelerations cache to local storage', () => {
       const cacheData: AccelerationsCacheData = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [],
         lastUpdated: '2024-03-07T12:00:00Z',
         status: CachedDataSourceStatus.Empty,
@@ -148,7 +149,7 @@ describe('CatalogCacheManager', () => {
   describe('getAccelerationsCache', () => {
     it('should retrieve accelerations cache from local storage', () => {
       const cacheData: AccelerationsCacheData = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [],
         lastUpdated: '2024-03-07T12:00:00Z',
         status: CachedDataSourceStatus.Empty,
@@ -159,7 +160,7 @@ describe('CatalogCacheManager', () => {
 
     it('should return default cache object if cache is not found', () => {
       const defaultCacheObject = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [],
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,

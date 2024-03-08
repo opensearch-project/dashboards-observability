@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CATALOG_CACHE_VERSION } from '../../../common/constants/data_sources';
 import { CachedDataSourceStatus } from '../../../common/types/data_connections';
 import {
   mockShowDatabasesPollingResult,
@@ -169,7 +170,7 @@ describe('loadCacheTests', () => {
 
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [],
         lastUpdated: expect.any(String),
         status: CachedDataSourceStatus.Failed,
@@ -181,7 +182,7 @@ describe('loadCacheTests', () => {
 
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [
           {
             flintIndexName: 'flint_mys3_default_http_logs_skipping_index',

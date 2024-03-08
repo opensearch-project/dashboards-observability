@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasourceType } from '../common/types/data_connections';
+import { AsyncPollingResult, DatasourceType } from '../common/types/data_connections';
 
 export const showDataConnectionsData = {
   schema: [
@@ -807,12 +807,12 @@ export const mockRoleData = {
   },
 };
 
-export const mockShowDatabasesPollingResult = {
+export const mockShowDatabasesPollingResult: AsyncPollingResult = {
   schema: [{ name: 'namespace', type: 'string' }],
   datarows: [['Database1'], ['Database2']],
 };
 
-export const mockShowTablesPollingResult = {
+export const mockShowTablesPollingResult: AsyncPollingResult = {
   schema: [
     { name: 'namespace', type: 'string' },
     { name: 'tableName', type: 'string' },
@@ -824,7 +824,7 @@ export const mockShowTablesPollingResult = {
   ],
 };
 
-export const mockShowIndexesPollingResult = {
+export const mockShowIndexesPollingResult: AsyncPollingResult = {
   schema: [
     { name: 'flint_index_name', type: 'string' },
     { name: 'kind', type: 'string' },

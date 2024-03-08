@@ -4,8 +4,15 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ASYNC_POLLING_INTERVAL } from '../../../common/constants/data_sources';
-import { CachedDataSourceStatus, LoadCacheType } from '../../../common/types/data_connections';
+import {
+  ASYNC_POLLING_INTERVAL,
+  CATALOG_CACHE_VERSION,
+} from '../../../common/constants/data_sources';
+import {
+  AsyncPollingResult,
+  CachedDataSourceStatus,
+  LoadCacheType,
+} from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../common/utils/query_session_utils';
 import {
@@ -19,7 +26,10 @@ import { SQLService } from '../../services/requests/sql';
 import { coreRefs } from '../core_refs';
 import { CatalogCacheManager } from './cache_manager';
 
-export const updateDatabasesToCache = (dataSourceName: string, pollingResult: any) => {
+export const updateDatabasesToCache = (
+  dataSourceName: string,
+  pollingResult: AsyncPollingResult
+) => {
   const cachedDataSource = CatalogCacheManager.getOrCreateDataSource(dataSourceName);
   const currentTime = new Date().toUTCString();
 
@@ -52,7 +62,7 @@ export const updateDatabasesToCache = (dataSourceName: string, pollingResult: an
 export const updateTablesToCache = (
   dataSourceName: string,
   databaseName: string,
-  pollingResult: any
+  pollingResult: AsyncPollingResult
 ) => {
   const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
   const currentTime = new Date().toUTCString();
@@ -81,12 +91,12 @@ export const updateTablesToCache = (
   });
 };
 
-export const updateAccelerationsToCache = (pollingResult: any) => {
+export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) => {
   const currentTime = new Date().toUTCString();
 
   if (!pollingResult) {
     CatalogCacheManager.saveAccelerationsCache({
-      version: '1.0',
+      version: CATALOG_CACHE_VERSION,
       accelerations: [],
       lastUpdated: currentTime,
       status: CachedDataSourceStatus.Failed,
@@ -107,7 +117,7 @@ export const updateAccelerationsToCache = (pollingResult: any) => {
   }));
 
   CatalogCacheManager.saveAccelerationsCache({
-    version: '1.0',
+    version: CATALOG_CACHE_VERSION,
     accelerations: newAccelerations,
     lastUpdated: currentTime,
     status: CachedDataSourceStatus.Updated,

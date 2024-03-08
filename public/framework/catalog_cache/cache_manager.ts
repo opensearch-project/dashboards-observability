@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CATALOG_CACHE_VERSION } from '../../../common/constants/data_sources';
 import {
   ASYNC_QUERY_ACCELERATIONS_CACHE,
   ASYNC_QUERY_DATASOURCE_CACHE,
@@ -48,7 +49,7 @@ export class CatalogCacheManager {
     if (catalogData) {
       return JSON.parse(catalogData);
     } else {
-      const defaultCacheObject = { version: '1.0', dataSources: [] };
+      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
       this.saveDataSourceCache(defaultCacheObject);
       return defaultCacheObject;
     }
@@ -73,7 +74,7 @@ export class CatalogCacheManager {
       return JSON.parse(accelerationCacheData);
     } else {
       const defaultCacheObject = {
-        version: '1.0',
+        version: CATALOG_CACHE_VERSION,
         accelerations: [],
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,

@@ -99,3 +99,10 @@ export interface AccelerationsCacheData {
   lastUpdated: string; // Assuming date string in UTC format
   status: CachedDataSourceStatus;
 }
+
+export interface PollingSuccessResult {
+  schema: Array<{ name: string; type: string }>;
+  datarows: Array<Array<string | number | boolean>>;
+}
+
+export type AsyncPollingResult = PollingSuccessResult | null;

@@ -19,12 +19,12 @@ export function addBackticksIfNeeded(input: string): string {
 
 export function combineSchemaAndDatarows(
   schema: Array<{ name: string; type: string }>,
-  datarows: string[][]
+  datarows: Array<Array<string | number | boolean>>
 ): object[] {
   const combinedData: object[] = [];
 
   datarows.forEach((row) => {
-    const rowData: { [key: string]: string } = {};
+    const rowData: { [key: string]: string | number | boolean } = {};
     schema.forEach((field, index) => {
       rowData[field.name] = row[index];
     });
