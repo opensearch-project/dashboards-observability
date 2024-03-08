@@ -16,3 +16,20 @@ export function addBackticksIfNeeded(input: string): string {
     return '`' + input + '`';
   }
 }
+
+export function combineSchemaAndDatarows(
+  schema: Array<{ name: string; type: string }>,
+  datarows: string[][]
+): object[] {
+  const combinedData: object[] = [];
+
+  datarows.forEach((row) => {
+    const rowData: { [key: string]: string } = {};
+    schema.forEach((field, index) => {
+      rowData[field.name] = row[index];
+    });
+    combinedData.push(rowData);
+  });
+
+  return combinedData;
+}

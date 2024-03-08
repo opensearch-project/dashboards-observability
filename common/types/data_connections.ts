@@ -44,21 +44,14 @@ export interface AsyncApiResponse {
 
 export type PollingCallback = (statusObj: AsyncApiResponse) => void;
 
+export type AccelerationIndexType = 'skipping' | 'covering' | 'materialized';
+
+export type LoadCacheType = 'databases' | 'tables' | 'accelerations';
+
 export enum CachedDataSourceStatus {
   Updated = 'Updated',
   Failed = 'Failed',
   Empty = 'Empty',
-  Loading = 'Loading',
-}
-
-export enum CachedDataSourceLoadingProgress {
-  LoadingScheduled = 'Loading Scheduled',
-  LoadingDatabases = 'Loading Databases',
-  LoadingTables = 'Loading Tables',
-  LoadingAccelerations = 'Loading Accelerations',
-  LoadingError = 'Loading cache ran into error',
-  LoadingCompleted = 'Loading Completed',
-  LoadingStopped = 'Loading Stopped',
 }
 
 export interface CachedColumn {
@@ -66,36 +59,43 @@ export interface CachedColumn {
   dataType: string;
 }
 
-export interface CachedIndex {
-  indexName: string;
-}
-
 export interface CachedTable {
   name: string;
   columns: CachedColumn[];
-  skippingIndex?: CachedIndex;
-  coveringIndices: CachedIndex[];
-}
-
-export interface CachedMaterializedView {
-  name: string;
 }
 
 export interface CachedDatabase {
   name: string;
-  materializedViews: CachedMaterializedView[];
   tables: CachedTable[];
+  lastUpdated: string; // Assuming date string in UTC format
+  status: CachedDataSourceStatus;
 }
 
 export interface CachedDataSource {
   name: string;
   lastUpdated: string; // Assuming date string in UTC format
   status: CachedDataSourceStatus;
-  loadingProgress: string;
   databases: CachedDatabase[];
 }
 
-export interface CatalogCacheData {
+export interface DataSourceCacheData {
   version: string;
   dataSources: CachedDataSource[];
+}
+
+export interface CachedAccelerations {
+  flintIndexName: string;
+  type: AccelerationIndexType;
+  database: string;
+  table: string;
+  indexName: string;
+  autoRefresh: boolean;
+  status: string;
+}
+
+export interface AccelerationsCacheData {
+  version: string;
+  accelerations: CachedAccelerations[];
+  lastUpdated: string; // Assuming date string in UTC format
+  status: CachedDataSourceStatus;
 }

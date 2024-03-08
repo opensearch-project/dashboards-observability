@@ -3,166 +3,120 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ASYNC_QUERY_CATALOG_CACHE } from '../../../common/constants/shared';
 import {
+  ASYNC_QUERY_ACCELERATIONS_CACHE,
+  ASYNC_QUERY_DATASOURCE_CACHE,
+} from '../../../common/constants/shared';
+import {
+  AccelerationsCacheData,
   CachedDataSource,
-  CachedDataSourceLoadingProgress,
   CachedDataSourceStatus,
-  CatalogCacheData,
+  CachedDatabase,
+  CachedTable,
+  DataSourceCacheData,
 } from '../../../common/types/data_connections';
 
 /**
- *
- *  Manages caching of catalog data in the browser storage
- *
- * * * * * * * * * * Example usage for CatalogCacheManager * * * * * * * * * *
- *
- * const dataSource: CachedDataSource = {
- *   name: 'DataSource1',
- *   lastUpdated: '2024-02-20T12:00:00Z',
- *   status: CachedDataSourceStatus.Empty,
- *   databases: [
- *     {
- *       name: 'Database1',
- *       materializedViews: [{ name: 'MaterializedView1' }, { name: 'MaterializedView2' }],
- *       tables: [
- *         {
- *           name: 'Table1',
- *           columns: [
- *             { name: 'column1', dataType: 'datatype1' },
- *             { name: 'column2', dataType: 'datatype2' },
- *             { name: 'column3', dataType: 'datatype3' },
- *           ],
- *           skippingIndex: { indexName: 'SkippingIndex1' },
- *           coveringIndices: [{ indexName: 'CoveringIndex1' }, { indexName: 'CoveringIndex2' }],
- *         },
- *         {
- *           name: 'Table2',
- *           columns: [
- *             { name: 'column4', dataType: 'datatype4' },
- *             { name: 'column5', dataType: 'datatype5' },
- *           ],
- *           skippingIndex: { indexName: 'SkippingIndex2' },
- *           coveringIndices: [],
- *         },
- *       ],
- *     },
- *   ],
- * };
- *
- * // Save the dataSource into cache
- * CatalogCacheManager.addOrUpdateDataSource(dataSource);
- *
- * // Retrieve dataSource from cache
- * const cachedDataSource = CatalogCacheManager.getDataSource('DataSource1');
- *
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Manages caching for catalog data including data sources and accelerations.
  */
-
 export class CatalogCacheManager {
   /**
-   * The key used to store catalog cache data in localStorage.
+   * Key for the data source cache in local storage.
    */
-  private static readonly localStorageKey = ASYNC_QUERY_CATALOG_CACHE;
+  private static readonly datasourceCacheKey = ASYNC_QUERY_DATASOURCE_CACHE;
 
   /**
-   * Retrieves catalog cache data from localStorage.
-   * If no data is found, initializes with a default cache object.
-   * @returns The catalog cache data.
+   * Key for the accelerations cache in local storage.
    */
-  private static getCatalogCacheData(): CatalogCacheData {
-    const catalogData = localStorage.getItem(this.localStorageKey);
+  private static readonly accelerationsCacheKey = ASYNC_QUERY_ACCELERATIONS_CACHE;
+
+  /**
+   * Saves data source cache to local storage.
+   * @param {DataSourceCacheData} cacheData - The data source cache data to save.
+   */
+  static saveDataSourceCache(cacheData: DataSourceCacheData): void {
+    localStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
+  }
+
+  /**
+   * Retrieves data source cache from local storage.
+   * @returns {DataSourceCacheData} The retrieved data source cache.
+   */
+  static getDataSourceCache(): DataSourceCacheData {
+    const catalogData = localStorage.getItem(this.datasourceCacheKey);
 
     if (catalogData) {
       return JSON.parse(catalogData);
     } else {
       const defaultCacheObject = { version: '1.0', dataSources: [] };
-      this.saveCatalogCacheData(defaultCacheObject);
+      this.saveDataSourceCache(defaultCacheObject);
       return defaultCacheObject;
     }
   }
 
   /**
-   * Saves catalog cache data to localStorage.
-   * @param cacheData The catalog cache data to save.
+   * Saves accelerations cache to local storage.
+   * @param {AccelerationsCacheData} cacheData - The accelerations cache data to save.
    */
-  static saveCatalogCacheData(cacheData: CatalogCacheData): void {
-    localStorage.setItem(this.localStorageKey, JSON.stringify(cacheData));
+  static saveAccelerationsCache(cacheData: AccelerationsCacheData): void {
+    localStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
   }
 
   /**
-   * Loads/Refreshes a datasource in the catalog cache.
-   * @param dataSource The data source name to be loaded/refreshed
+   * Retrieves accelerations cache from local storage.
+   * @returns {AccelerationsCacheData} The retrieved accelerations cache.
    */
-  static loadDataSource(dataSourceName: string): boolean {
-    try {
-      // let ds = this.getDataSource(dataSourceName);
-      // // TODO: Initiate loader for datasource
-      // ds.status = CachedDataSourceStatus.Loading;
-      // ds.loadingProgress = CachedDataSourceLoadingProgress.LoadingDatabases;
-      // this.addOrUpdateDataSource(ds);
-      return true;
-    } catch (err) {
-      console.error(err);
-      return false;
+  static getAccelerationsCache(): AccelerationsCacheData {
+    const accelerationCacheData = localStorage.getItem(this.accelerationsCacheKey);
+
+    if (accelerationCacheData) {
+      return JSON.parse(accelerationCacheData);
+    } else {
+      const defaultCacheObject = {
+        version: '1.0',
+        accelerations: [],
+        lastUpdated: '',
+        status: CachedDataSourceStatus.Empty,
+      };
+      this.saveAccelerationsCache(defaultCacheObject);
+      return defaultCacheObject;
     }
   }
 
   /**
-   * Loads/Refreshes a tables of a database in the catalog cache.
-   * @param dataSource The data source name to be loaded/refreshed
-   * @param databaseName The database name to be loaded/refreshed
-   */
-  static loadTables(dataSourceName: string, databaseName: string): boolean {
-    try {
-      let ds = this.getDataSource(dataSourceName);
-      // TODO: Initiate loader for Table
-      ds.status = CachedDataSourceStatus.Loading;
-      ds.loadingProgress = CachedDataSourceLoadingProgress.LoadingDatabases;
-      this.addOrUpdateDataSource(ds);
-      return true;
-    } catch (err) {
-      console.error(err);
-      return false;
-    }
-  }
-
-  /**
-   * Adds or updates a data source in the catalog cache.
-   * @param dataSource The data source to be added or updated.
+   * Adds or updates a data source in the cache.
+   * @param {CachedDataSource} dataSource - The data source to add or update.
    */
   static addOrUpdateDataSource(dataSource: CachedDataSource): void {
-    const cacheData = this.getCatalogCacheData();
-    const index = cacheData.dataSources.findIndex((ds) => ds.name === dataSource.name);
+    const cacheData = this.getDataSourceCache();
+    const index = cacheData.dataSources.findIndex(
+      (ds: CachedDataSource) => ds.name === dataSource.name
+    );
     if (index !== -1) {
       cacheData.dataSources[index] = dataSource;
     } else {
       cacheData.dataSources.push(dataSource);
     }
-    this.saveCatalogCacheData(cacheData);
+    this.saveDataSourceCache(cacheData);
   }
 
   /**
-   * Retrieves a data source from the catalog cache.
-   * If the data source does not exist, creates and returns a default data source object.
-   * @param dataSourceName The name of the data source to retrieve.
-   * @returns The cached data source, or a default data source object if not found.
+   * Retrieves or creates a data source with the specified name.
+   * @param {string} dataSourceName - The name of the data source.
+   * @returns {CachedDataSource} The retrieved or created data source.
    */
-  static getDataSource(dataSourceName: string): CachedDataSource {
-    const cacheData = this.getCatalogCacheData();
-    const cachedDataSourceData = cacheData.dataSources.find(
+  static getOrCreateDataSource(dataSourceName: string): CachedDataSource {
+    const cacheData = this.getDataSourceCache();
+    const cachedDataSource = cacheData.dataSources.find(
       (ds: CachedDataSource) => ds.name === dataSourceName
     );
-
-    if (cachedDataSourceData) {
-      return cachedDataSourceData;
+    if (cachedDataSource) {
+      return cachedDataSource;
     } else {
       const defaultDataSourceObject = {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
-        loadingProgress: '',
         databases: [],
       };
       this.addOrUpdateDataSource(defaultDataSourceObject);
@@ -171,9 +125,80 @@ export class CatalogCacheManager {
   }
 
   /**
-   * Clears the catalog cache by removing the cache data from localStorage.
+   * Retrieves a database from the cache.
+   * @param {string} dataSourceName - The name of the data source containing the database.
+   * @param {string} databaseName - The name of the database.
+   * @returns {CachedDatabase} The retrieved database.
+   * @throws {Error} If the data source or database is not found.
    */
-  static clear(): void {
-    localStorage.removeItem(this.localStorageKey);
+  static getDatabase(dataSourceName: string, databaseName: string): CachedDatabase {
+    const cachedDataSource = this.getDataSourceCache().dataSources.find(
+      (ds) => ds.name === dataSourceName
+    );
+    if (!cachedDataSource) {
+      throw new Error('DataSource not found exception: ' + dataSourceName);
+    }
+
+    const cachedDatabase = cachedDataSource.databases.find((db) => db.name === databaseName);
+    if (!cachedDatabase) {
+      throw new Error('Database not found exception: ' + databaseName);
+    }
+
+    return cachedDatabase;
+  }
+
+  /**
+   * Retrieves a table from the cache.
+   * @param {string} dataSourceName - The name of the data source containing the database.
+   * @param {string} databaseName - The name of the database.
+   * @param {string} tableName - The name of the database.
+   * @returns {Cachedtable} The retrieved database.
+   * @throws {Error} If the data source, database or table is not found.
+   */
+  static getTable(dataSourceName: string, databaseName: string, tableName: string): CachedTable {
+    const cachedDatabase = this.getDatabase(dataSourceName, databaseName);
+
+    const cachedTable = cachedDatabase.tables.find((table) => table.name === tableName);
+    if (!cachedTable) {
+      throw new Error('Table not found exception: ' + tableName);
+    }
+    return cachedTable;
+  }
+
+  /**
+   * Updates a database in the cache.
+   * @param {string} dataSourceName - The name of the data source containing the database.
+   * @param {CachedDatabase} database - The database to be updated.
+   * @throws {Error} If the data source or database is not found.
+   */
+  static updateDatabase(dataSourceName: string, database: CachedDatabase): void {
+    const cachedDataSource = this.getDataSourceCache().dataSources.find(
+      (ds) => ds.name === dataSourceName
+    );
+    if (!cachedDataSource) {
+      throw new Error('DataSource not found exception: ' + dataSourceName);
+    }
+
+    const index = cachedDataSource.databases.findIndex((db) => db.name === database.name);
+    if (index !== -1) {
+      cachedDataSource.databases[index] = database;
+      this.addOrUpdateDataSource(cachedDataSource);
+    } else {
+      throw new Error('Database not found exception: ' + database.name);
+    }
+  }
+
+  /**
+   * Clears the data source cache from local storage.
+   */
+  static clearDataSourceCache(): void {
+    localStorage.removeItem(this.datasourceCacheKey);
+  }
+
+  /**
+   * Clears the accelerations cache from local storage.
+   */
+  static clearAccelerationsCache(): void {
+    localStorage.removeItem(this.accelerationsCacheKey);
   }
 }

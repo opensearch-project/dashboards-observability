@@ -17,7 +17,8 @@ export function catalogCacheInterceptError(): any {
       httpErrorResponse.fetchOptions.path === SECURITY_PLUGIN_ACCOUNT_API
     ) {
       // Clears all user catalog cache details
-      CatalogCacheManager.clear();
+      CatalogCacheManager.clearDataSourceCache();
+      CatalogCacheManager.clearAccelerationsCache();
     }
   };
 }
