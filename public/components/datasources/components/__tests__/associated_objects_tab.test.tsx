@@ -13,12 +13,8 @@ import {
 } from '../manage/associated_objects/utils/associated_objects_tab_utils';
 
 jest.mock('../../../../plugin', () => ({
-  getRenderAccelerationDetailsFlyout: jest.fn(() =>
-    jest.fn().mockImplementation(() => console.log('Acceleration Details Flyout Rendered'))
-  ),
-  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() =>
-    jest.fn().mockImplementation(() => console.log('Associated Objects Details Flyout Rendered'))
-  ),
+  getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
+  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() => jest.fn()),
 }));
 
 describe('AssociatedObjectsTab Component', () => {

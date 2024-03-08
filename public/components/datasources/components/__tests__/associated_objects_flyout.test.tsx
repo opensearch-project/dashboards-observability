@@ -14,12 +14,8 @@ import { act } from '@testing-library/react';
 configure({ adapter: new Adapter() });
 
 jest.mock('../../../../plugin', () => ({
-  getRenderAccelerationDetailsFlyout: jest.fn(() =>
-    jest.fn().mockImplementation(() => console.log('Acceleration Details Flyout Rendered'))
-  ),
-  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() =>
-    jest.fn().mockImplementation(() => console.log('Associated Objects Details Flyout Rendered'))
-  ),
+  getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
+  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() => jest.fn()),
 }));
 
 describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
