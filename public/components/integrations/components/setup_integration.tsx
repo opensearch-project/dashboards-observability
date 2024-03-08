@@ -242,7 +242,10 @@ export function SetupIntegrationForm({
         <h3>Integration Connection</h3>
       </EuiText>
       <EuiSpacer />
-      <EuiFormRow label="Data Source Type" helpText="Select the type of data source to query.">
+      <EuiFormRow
+        label="Connection Type"
+        helpText="Select the type of connection to use for queries."
+      >
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 's3') {
@@ -320,8 +323,8 @@ export function SetupIntegrationForm({
           <EuiFormRow
             label="S3 Checkpoint Location"
             helpText={
-              'This S3 directory will be used to cache intermediary query results. ' +
-              'It typically should not overlap with the bucket location.'
+              'The Checkpoint location must be a unique directory and not the same as the Bucket ' +
+              'location. It will be used for caching intermediary results.'
             }
             isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
             error={["Must be a URL starting with 's3://'."]}
