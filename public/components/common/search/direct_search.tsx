@@ -28,20 +28,20 @@ import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common
 import { uiSettingsService } from '../../../../common/utils';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
-import { useFetchEvents } from '../../event_analytics/hooks';
-import { changeQuery } from '../../event_analytics/redux/slices/query_slice';
-import { usePolling } from '../../hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
+import { useFetchEvents } from '../../event_analytics/hooks';
+import { reset as resetResults } from '../../event_analytics/redux/slices/query_result_slice';
+import { changeQuery } from '../../event_analytics/redux/slices/query_slice';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
-import { reset as resetResults } from '../../event_analytics/redux/slices/query_result_slice';
+import { formatError } from '../../event_analytics/utils';
+import { usePolling } from '../../hooks/use_polling';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
-import { formatError } from '../../event_analytics/utils';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -209,7 +209,7 @@ export const DirectSearch = (props: any) => {
         })
       );
     });
-    const sessionId = getAsyncSessionId();
+    const sessionId = getAsyncSessionId(explorerSearchMetadata.datasources[0].label);
     const requestPayload = {
       lang: lang.toLowerCase(),
       query: tempQuery || query,
@@ -223,7 +223,10 @@ export const DirectSearch = (props: any) => {
     sqlService
       .fetch(requestPayload)
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
+        setAsyncSessionId(
+          explorerSearchMetadata.datasources[0].label,
+          getObjValue(result, 'sessionId', null)
+        );
         if (result.queryId) {
           dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
           startPolling({
