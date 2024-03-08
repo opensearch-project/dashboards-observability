@@ -22,3 +22,5 @@ export enum DATA_SOURCE_TYPES {
   S3Glue = 's3glue',
 }
 export const ASYNC_POLLING_INTERVAL = 2000;
+
+export const CATALOG_CACHE_VERSION = '1.0';
