@@ -110,7 +110,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
             Array [
               Object {
                 "field": "name",
-                "name": "Asset name",
+                "name": "Integration Name",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -558,7 +558,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 Array [
                   Object {
                     "field": "name",
-                    "name": "Asset name",
+                    "name": "Integration Name",
                     "render": [Function],
                     "sortable": true,
                     "truncateText": true,
@@ -707,15 +707,15 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                         values={
                                           Object {
                                             "description": undefined,
-                                            "innerText": "Asset name",
+                                            "innerText": "Integration Name",
                                           }
                                         }
                                       >
                                         <span
                                           className="euiTableCellContent__text"
-                                          title="Asset name"
+                                          title="Integration Name"
                                         >
-                                          Asset name
+                                          Integration Name
                                         </span>
                                       </EuiI18n>
                                     </EuiInnerText>
@@ -880,7 +880,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 key="_data_column_name_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_0"
                                 mobileOptions={
                                   Object {
-                                    "header": "Asset name",
+                                    "header": "Integration Name",
                                     "render": undefined,
                                   }
                                 }
@@ -899,7 +899,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   <div
                                     className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                   >
-                                    Asset name
+                                    Integration Name
                                   </div>
                                   <div
                                     className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
