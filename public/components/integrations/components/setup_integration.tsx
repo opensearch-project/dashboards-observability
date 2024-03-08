@@ -433,13 +433,12 @@ export function SetupBottomBar({
                     '{table_name}',
                     `${config.connectionDataSource}.default.${config.connectionTableName}`
                   );
-                  // We append to this URI in internal queries, so we normalize it to have no trailing slash
-                  let trimmedLocation = config.connectionLocation.trim();
-                  trimmedLocation = trimmedLocation.endsWith('/')
-                    ? trimmedLocation.slice(0, trimmedLocation.length - 1)
-                    : trimmedLocation;
 
-                  queryStr = queryStr.replaceAll('{s3_bucket_location}', trimmedLocation);
+                  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+                  queryStr = queryStr.replaceAll(
+                    '{s3_checkpoint_location}',
+                    config.checkpointLocation
+                  );
                   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
                   queryStr = queryStr.replaceAll(/\s+/g, ' ');
                   const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
