@@ -6,12 +6,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     Object {
       "hits": Array [
         Object {
-          "assets": Object {
-            "savedObjects": Object {
+          "assets": Array [
+            Object {
+              "extension": "ndjson",
               "name": "nginx",
+              "type": "savedObjectBundle",
               "version": "1.0.1",
             },
-          },
+          ],
           "author": "John Doe",
           "components": Array [
             Object {
@@ -29,7 +31,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           ],
           "description": "Nginx HTTP server collector",
           "displayName": "NginX Dashboard",
-          "integrationType": "logs",
           "license": "Apache-2.0",
           "name": "nginx",
           "sourceUrl": "https://github.com/",
@@ -55,9 +56,10 @@ exports[`Available Integration Table View Test Renders nginx integration table v
       ],
     }
   }
+  isCardView={false}
   loading={false}
   renderCateogryFilters={[Function]}
-  showModal={[Function]}
+  setCardView={[Function]}
 >
   <EuiPageContent
     id="availableIntegrationsArea"
@@ -110,12 +112,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           items={
             Array [
               Object {
-                "assets": Object {
-                  "savedObjects": Object {
+                "assets": Array [
+                  Object {
+                    "extension": "ndjson",
                     "name": "nginx",
+                    "type": "savedObjectBundle",
                     "version": "1.0.1",
                   },
-                },
+                ],
                 "author": "John Doe",
                 "components": Array [
                   Object {
@@ -133,7 +137,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 ],
                 "description": "Nginx HTTP server collector",
                 "displayName": "NginX Dashboard",
-                "integrationType": "logs",
                 "license": "Apache-2.0",
                 "name": "nginx",
                 "sourceUrl": "https://github.com/",
@@ -702,12 +705,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
               items={
                 Array [
                   Object {
-                    "assets": Object {
-                      "savedObjects": Object {
+                    "assets": Array [
+                      Object {
+                        "extension": "ndjson",
                         "name": "nginx",
+                        "type": "savedObjectBundle",
                         "version": "1.0.1",
                       },
-                    },
+                    ],
                     "author": "John Doe",
                     "components": Array [
                       Object {
@@ -725,7 +730,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     ],
                     "description": "Nginx HTTP server collector",
                     "displayName": "NginX Dashboard",
-                    "integrationType": "logs",
                     "license": "Apache-2.0",
                     "name": "nginx",
                     "sourceUrl": "https://github.com/",

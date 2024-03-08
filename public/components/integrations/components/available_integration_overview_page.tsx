@@ -21,21 +21,7 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
-import { useToast } from '../../../../public/components/common/toast';
 import { HttpStart } from '../../../../../../src/core/public';
-
-export interface AvailableIntegrationType {
-  labels?: string[];
-  name: string;
-  description: string;
-  assetUrl?: string | undefined;
-  version?: string | undefined;
-  displayName?: string;
-  integrationType: string;
-  statics: unknown;
-  components: Array<{ name: string }>;
-  displayAssets: unknown[];
-}
 
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
@@ -46,7 +32,7 @@ export interface AvailableIntegrationsTableProps {
 }
 
 export interface AvailableIntegrationsList {
-  hits: AvailableIntegrationType[];
+  hits: IntegrationConfig[];
 }
 
 export interface AvailableIntegrationsCardViewProps {
@@ -64,7 +50,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
 
   const [query, setQuery] = useState('');
   const [isCardView, setCardView] = useState(true);
-  const { setToast } = useToast();
   const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -128,24 +113,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       });
       setItems(newItems);
     });
-  }
-
-  async function addIntegrationRequest(name: string) {
-    http
-      .post(`${INTEGRATIONS_BASE}/store`)
-      .then((res) => {
-        setToast(
-          `${name} integration successfully added!`,
-          'success',
-          `View the added assets from ${name} in the Added Integrations list`
-        );
-      })
-      .catch((err) =>
-        setToast(
-          'Failed to load integration. Check Added Integrations table for more details',
-          'danger'
-        )
-      );
   }
 
   const renderCateogryFilters = () => {

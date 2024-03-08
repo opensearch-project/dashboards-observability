@@ -4,20 +4,7 @@
  */
 
 import { validateTemplate, validateInstance } from '../validators';
-
-const validTemplate: IntegrationConfig = {
-  name: 'test',
-  version: '1.0.0',
-  license: 'Apache-2.0',
-  type: 'logs',
-  components: [
-    {
-      name: 'logs',
-      version: '1.0.0',
-    },
-  ],
-  assets: {},
-};
+import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 
 const validInstance: IntegrationInstance = {
   name: 'test',
@@ -29,34 +16,34 @@ const validInstance: IntegrationInstance = {
 
 describe('validateTemplate', () => {
   it('Returns a success value for a valid Integration Template', () => {
-    const result: Result<IntegrationConfig> = validateTemplate(validTemplate);
+    const result: Result<IntegrationConfig> = validateTemplate(TEST_INTEGRATION_CONFIG);
     expect(result.ok).toBe(true);
-    expect((result as any).value).toBe(validTemplate);
+    expect(result.value).toBe(TEST_INTEGRATION_CONFIG);
   });
 
   it('Returns a failure value if a template is missing a license', () => {
-    const sample: any = structuredClone(validTemplate);
-    sample.license = undefined;
+    const sample = structuredClone(TEST_INTEGRATION_CONFIG);
+    sample.license = (undefined as unknown) as string;
 
     const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
-    expect((result as any).error).toBeInstanceOf(Error);
+    expect(result.error).toBeInstanceOf(Error);
   });
 
   it('Returns a failure if a template has an invalid type', () => {
-    const sample: any = structuredClone(validTemplate);
+    const sample = structuredClone(TEST_INTEGRATION_CONFIG);
     sample.components[0].name = 'not-logs';
 
     const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
-    expect((result as any).error).toBeInstanceOf(Error);
+    expect(result.error).toBeInstanceOf(Error);
   });
 
   it("Doesn't crash if given a non-object", () => {
     // May happen in some user-provided JSON parsing scenarios.
-    expect(validateTemplate([] as any).ok).toBe(false);
+    expect(validateTemplate([]).ok).toBe(false);
   });
 });
 
@@ -64,21 +51,21 @@ describe('validateInstance', () => {
   it('Returns true for a valid Integration Instance', () => {
     const result: Result<IntegrationInstance> = validateInstance(validInstance);
     expect(result.ok).toBe(true);
-    expect((result as any).value).toBe(validInstance);
+    expect(result.value).toBe(validInstance);
   });
 
   it('Returns false if an instance is missing a template', () => {
-    const sample: any = structuredClone(validInstance);
-    sample.templateName = undefined;
+    const sample: IntegrationInstance = structuredClone(validInstance);
+    sample.templateName = (undefined as unknown) as string;
 
     const result: Result<IntegrationInstance> = validateInstance(sample);
 
     expect(result.ok).toBe(false);
-    expect((result as any).error).toBeInstanceOf(Error);
+    expect(result.error).toBeInstanceOf(Error);
   });
 
   it("Doesn't crash if given a non-object", () => {
     // May happen in some user-provided JSON parsing scenarios.
-    expect(validateInstance([] as any).ok).toBe(false);
+    expect(validateInstance([]).ok).toBe(false);
   });
 });
