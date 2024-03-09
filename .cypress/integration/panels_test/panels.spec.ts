@@ -384,7 +384,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .trigger('mouseover')
         .click({ force: true })
         .focus()
-        .type(PPL_FILTER);
+        .type(PPL_FILTER, { force: true, delay: 500 });
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
       cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.get('.xtick').should('contain', 'Munich Airport');
