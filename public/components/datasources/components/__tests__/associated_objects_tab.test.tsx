@@ -12,6 +12,11 @@ import {
   ASSC_OBJ_TABLE_SUBJ,
 } from '../manage/associated_objects/utils/associated_objects_tab_utils';
 
+jest.mock('../../../../plugin', () => ({
+  getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
+  getRenderAssociatedObjectsDetailsFlyout: jest.fn(() => jest.fn()),
+}));
+
 describe('AssociatedObjectsTab Component', () => {
   configure({ adapter: new Adapter() });
 
@@ -41,32 +46,6 @@ describe('AssociatedObjectsTab Component', () => {
     expect(wrapper.find('EuiLink').length).toBeGreaterThan(0);
   });
 
-  it('initializes with correct search filters based on associatedObjects prop', () => {
-    const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
-
-    const searchConfig = wrapper
-      .find(`[data-test-subj="${ASSC_OBJ_TABLE_SUBJ}"]`)
-      .first()
-      .prop('search');
-
-    expect(searchConfig.filters).toBeDefined();
-    expect(searchConfig.filters.length).toBeGreaterThan(0);
-
-    const databaseFilterOption = searchConfig.filters.find((filter) => filter.field === 'database');
-    expect(databaseFilterOption).toBeDefined();
-    expect(databaseFilterOption.options.length).toEqual(
-      new Set(mockAssociatedObjects.map((obj) => obj.database)).size
-    );
-
-    const accelerationFilterOption = searchConfig.filters.find(
-      (filter) => filter.field === 'accelerations'
-    );
-    expect(accelerationFilterOption).toBeDefined();
-    expect(accelerationFilterOption.options.length).toEqual(
-      new Set(mockAssociatedObjects.flatMap((obj) => obj.accelerations).filter(Boolean)).size
-    );
-  });
-
   it('initializes database and acceleration filter options correctly from associated objects', () => {
     const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
 
@@ -82,9 +61,46 @@ describe('AssociatedObjectsTab Component', () => {
       .size;
     expect(databaseFilter.options.length).toEqual(expectedDatabaseOptionsCount);
 
-    const allAccelerations = mockAssociatedObjects.flatMap((obj) => obj.accelerations);
-    const uniqueAccelerations = new Set(allAccelerations);
-    const expectedAccelerationOptionsCount = Array.from(uniqueAccelerations).filter(Boolean).length;
+    const allAccelerationNames = mockAssociatedObjects.flatMap((obj) =>
+      obj.accelerations.map((acceleration) => acceleration.name)
+    );
+    const uniqueAccelerationNames = new Set(allAccelerationNames.filter(Boolean));
+    const expectedAccelerationOptionsCount = uniqueAccelerationNames.size;
     expect(accelerationFilter.options.length).toEqual(expectedAccelerationOptionsCount);
+  });
+
+  it('correctly filters associated objects by acceleration name', () => {
+    const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
+
+    const mockQueryObject = {
+      queryText: 'accelerations:skipping_index_2',
+      ast: {
+        _clauses: [
+          {
+            type: 'term',
+            value: 'skipping_index_2',
+            field: 'accelerations',
+          },
+        ],
+      },
+    };
+
+    const searchProps = wrapper.find('EuiInMemoryTable').prop('search');
+    if (searchProps && searchProps.onChange) {
+      searchProps.onChange({ query: mockQueryObject });
+    }
+
+    wrapper.update();
+
+    const filteredItems = wrapper.find('EuiInMemoryTable').prop('items');
+    const expectedFilteredItems = mockAssociatedObjects.filter((obj) =>
+      obj.accelerations.some((acc) => acc.name === 'skipping_index_2')
+    );
+
+    expect(filteredItems.length).toEqual(expectedFilteredItems.length);
+
+    expectedFilteredItems.forEach((expectedItem) => {
+      expect(filteredItems.some((item) => item.id === expectedItem.id)).toBeTruthy();
+    });
   });
 });
