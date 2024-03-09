@@ -7,6 +7,8 @@ type Result<T, E = Error> =
   | { ok: true; value: T; error?: undefined }
   | { ok: false; error: E; value?: undefined };
 
+type SupportedAssetType = 'savedObjectBundle' | 'query';
+
 interface IntegrationConfig {
   name: string;
   version: string;
@@ -19,7 +21,7 @@ interface IntegrationConfig {
   sourceUrl?: string;
   statics?: IntegrationStatics;
   components: IntegrationComponent[];
-  assets: IntegrationAssets;
+  assets: IntegrationAsset[];
   sampleData?: {
     path: string;
   };
@@ -29,7 +31,7 @@ interface IntegrationConfig {
 interface SerializedIntegration extends IntegrationConfig {
   statics?: SerializedIntegrationStatics;
   components: SerializedIntegrationComponent[];
-  assets: SerializedIntegrationAssets;
+  assets: SerializedIntegrationAsset[];
   sampleData?: {
     path: string;
     data: string;
@@ -50,38 +52,19 @@ interface SerializedIntegrationStatics {
   darkModeGallery?: SerializedStaticAsset[];
 }
 
-interface IntegrationAssets {
-  savedObjects?: {
-    name: string;
-    version: string;
-  };
-  queries?: Array<{
-    name: string;
-    version: string;
-    language: string;
-  }>;
+interface IntegrationAsset {
+  name: string;
+  version: string;
+  extension: string;
+  type: SupportedAssetType;
 }
 
-interface ParsedIntegrationAssets {
-  savedObjects?: object[];
-  queries?: Array<{
-    query: string;
-    language: string;
-  }>;
-}
+type ParsedIntegrationAsset =
+  | { type: 'savedObjectBundle'; data: object[] }
+  | { type: 'query'; query: string; language: string };
 
-interface SerializedIntegrationAssets extends IntegrationAssets {
-  savedObjects?: {
-    name: string;
-    version: string;
-    data: string;
-  };
-  queries?: Array<{
-    name: string;
-    version: string;
-    language: string;
-    data: string;
-  }>;
+interface SerializedIntegrationAsset extends IntegrationAsset {
+  data: string;
 }
 
 interface StaticAsset {

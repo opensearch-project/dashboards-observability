@@ -1,8 +1,8 @@
 {
   "name": "nginx",
   "version": "1.0.0",
-  "displayName": "NginX Dashboard",
-  "description": "Nginx HTTP server collector",
+  "displayName": "Nginx",
+  "description": "Analyze Nginx access logs.",
   "license": "Apache-2.0",
   "type": "logs",
   "labels": ["Observability", "Logs", "Flint S3"],
@@ -38,24 +38,26 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
+  "assets": [
+    {
       "name": "nginx",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
     },
-    "queries": [
-      {
-        "name": "create_table",
-        "version": "1.0.0",
-        "language": "sql"
-      },
-      {
-        "name": "create_mv",
-        "version": "1.0.0",
-        "language": "sql"
-      }
-    ]
-  },
+    {
+      "name": "create_table",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    }
+  ],
   "sampleData": {
     "path": "sample.json"
   }

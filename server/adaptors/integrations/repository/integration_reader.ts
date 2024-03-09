@@ -80,6 +80,38 @@ export class IntegrationReader {
     }
   }
 
+  private async readAsset(
+    asset: IntegrationAsset | SerializedIntegrationAsset
+  ): Promise<Result<SerializedIntegrationAsset>> {
+    const filename = `${asset.name}-${asset.version}.${asset.extension}`;
+    const fileParams = { filename, type: 'assets' as const };
+
+    if (['json', 'ndjson'].includes(asset.extension)) {
+      const maybeObject = await this.fetchDataOrReadFile(
+        asset as { data?: string },
+        fileParams,
+        'json'
+      );
+      if (!maybeObject.ok) {
+        return maybeObject;
+      }
+      return { ok: true, value: { ...asset, data: JSON.stringify(maybeObject.value) } };
+    } else {
+      const maybeBuffer = await this.fetchDataOrReadFile(
+        asset as { data?: string },
+        fileParams,
+        'binary'
+      );
+      if (!maybeBuffer.ok) {
+        return maybeBuffer;
+      }
+      return {
+        ok: true,
+        value: { ...asset, data: JSON.stringify(maybeBuffer.value.toString('utf8')) },
+      };
+    }
+  }
+
   /**
    * Get the latest version of the integration available.
    * This method relies on the fact that integration configs have their versions in their name.
@@ -144,71 +176,43 @@ export class IntegrationReader {
     return validateTemplate(pruneConfig(maybeConfig.value));
   }
 
-  private async getQueries(
-    queriesList: Array<{ name: string; version: string; language: string; data?: string }>
-  ): Promise<Result<Array<{ language: string; query: string }>>> {
-    const queries = await Promise.all(
-      queriesList.map(async (item) => {
-        const query = await this.fetchDataOrReadFile(
-          item,
-          { filename: `${item.name}-${item.version}.${item.language}`, type: 'assets' },
-          'binary'
-        );
-        if (!query.ok) {
-          return query;
-        }
-        return {
-          ok: true as const,
-          value: {
-            language: item.language,
-            query: query.value.toString('utf8'),
-          },
-        };
-      })
-    );
-    return foldResults(queries);
-  }
-
   /**
    * Retrieve assets associated with the integration.
    * This method greedily retrieves all assets.
-   * If the version is invalid, an error is thrown.
-   * If an asset is invalid, it will be skipped.
+   * If an asset is invalid, an error result is returned.
    *
    * @param version The version of the integration to retrieve assets for.
-   * @returns An object containing the different types of assets.
+   * @returns A result containing the parsed assets.
    */
-  async getAssets(version?: string): Promise<Result<ParsedIntegrationAssets>> {
+  async getAssets(version?: string): Promise<Result<ParsedIntegrationAsset[]>> {
     const configResult = await this.getRawConfig(version);
     if (!configResult.ok) {
       return configResult;
     }
     const config = configResult.value;
 
-    const resultValue: {
-      savedObjects?: object[];
-      queries?: Array<{ query: string; language: string }>;
-    } = {};
-    if (config.assets.savedObjects) {
-      const assets = await this.fetchDataOrReadFile(
-        config.assets.savedObjects as { data?: string },
-        {
-          filename: `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`,
-          type: 'assets',
-        },
-        'json'
-      );
-      if (!assets.ok) {
-        return assets;
+    const resultValue: ParsedIntegrationAsset[] = [];
+    for (const asset of config.assets) {
+      const serializedResult = await this.readAsset(asset);
+      if (!serializedResult.ok) {
+        return serializedResult;
       }
-      resultValue.savedObjects = assets.value as object[];
-    }
-    if (config.assets.queries) {
-      const queries = await this.getQueries(config.assets.queries);
-      if (!queries.ok) {
-        return queries;
+
+      switch (asset.type) {
+        case 'savedObjectBundle':
+          resultValue.push({
+            type: 'savedObjectBundle',
+            data: JSON.parse(serializedResult.value.data),
+          });
+          break;
+        case 'query':
+          resultValue.push({
+            type: 'query',
+            query: serializedResult.value.data,
+            language: asset.extension,
+          });
+          break;
       }
-      resultValue.queries = queries.value;
     }
     return { ok: true, value: resultValue };
   }
@@ -450,43 +454,12 @@ export class IntegrationReader {
       };
     });
 
-    if (config.assets.savedObjects) {
-      const soMetadata = config.assets.savedObjects;
-      const soResult = await this.fetchDataOrReadFile(
-        config.assets.savedObjects,
-        {
-          filename: `${soMetadata.name}-${soMetadata.version}.ndjson`,
-          type: 'assets',
-        },
-        'json'
-      );
-      if (!soResult.ok) {
-        return soResult;
-      }
-      config.assets.savedObjects = { ...soMetadata, data: JSON.stringify(soResult.value) };
+    const assetResults = await Promise.all(config.assets.map((asset) => this.readAsset(asset)));
+    const assets = foldResults(assetResults);
+    if (!assets.ok) {
+      return assets;
     }
-
-    if (config.assets.queries) {
-      const queryResults = await Promise.all(
-        config.assets.queries.map((query) =>
-          this.fetchDataOrReadFile(
-            query,
-            { filename: `${query.name}-${query.version}.${query.language}`, type: 'assets' },
-            'binary'
-          )
-        )
-      );
-      const queriesResult = foldResults(queryResults);
-      if (!queriesResult.ok) {
-        return queriesResult;
-      }
-      config.assets.queries = config.assets.queries.map((query, idx) => {
-        return {
-          ...query,
-          data: JSON.stringify(queriesResult.value[idx].toString('utf8')),
-        };
-      });
-    }
+    config.assets = assets.value;
 
     if (config.statics) {
       const staticsResult = await this.serializeStatics(config.statics);
