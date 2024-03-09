@@ -106,7 +106,7 @@ export function Integration(props: AvailableIntegrationProps) {
     },
     {
       id: 'fields',
-      name: 'Integration Fields',
+      name: 'Schema Fields',
       disabled: false,
     },
   ];
