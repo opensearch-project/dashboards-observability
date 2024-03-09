@@ -14,7 +14,6 @@ import {
   AccelerationIndexType,
   CreateAccelerationForm,
 } from '../../../../../../../common/types/data_connections';
-// import { executeAsyncQuery } from '../../../../common/utils/async_query_helpers';
 
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
@@ -31,6 +30,7 @@ export const IndexTypeSelector = ({
   const [loading, _setLoading] = useState(false);
 
   // useEffect(() => {
+  // TODO: Load table schema from cache
   //   if (accelerationFormData.dataTable !== '') {
   //     setLoading(true);
   //     const idPrefix = htmlIdGenerator()();

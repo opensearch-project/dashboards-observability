@@ -25,14 +25,14 @@ import {
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
-  queryWorkbenchPluginID,
 } from '../../../../../common/constants/shared';
-import { coreRefs } from '../../../../framework/core_refs';
-import { NoAccess } from '../no_access';
-import { AccessControlTab } from './access_control_tab';
 import { DatasourceType } from '../../../../../common/types/data_connections';
-import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
+import { coreRefs } from '../../../../framework/core_refs';
+import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
+import { NoAccess } from '../no_access';
 import { AccelerationTable } from './accelerations/acceleration_table';
+import { AccessControlTab } from './access_control_tab';
+import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
 
 interface DatasourceDetails {
@@ -51,6 +51,7 @@ export interface S3GlueProperties {
 export interface PrometheusProperties {
   'prometheus.uri': string;
 }
+const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
 export const DataConnection = (props: any) => {
   const { dataSource } = props;
@@ -82,6 +83,18 @@ export const DataConnection = (props: any) => {
     },
   ];
 
+  const onclickIntegrationsCard = () => {
+    application!.navigateToApp(observabilityIntegrationsID);
+  };
+
+  const onclickAccelerationsCard = () => {
+    renderCreateAccelerationFlyout(dataSource);
+  };
+
+  const onclickDiscoverCard = () => {
+    application!.navigateToApp(observabilityLogsID);
+  };
+
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
@@ -90,9 +103,9 @@ export const DataConnection = (props: any) => {
             icon={<EuiIcon size="xxl" type="integrationGeneral" />}
             title={'Configure Integrations'}
             description="Connect to common application log types using integrations"
-            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+            onClick={onclickIntegrationsCard}
             selectable={{
-              onClick: () => {},
+              onClick: onclickIntegrationsCard,
               isDisabled: false,
               children: 'Add Integrations',
             }}
@@ -103,13 +116,9 @@ export const DataConnection = (props: any) => {
             icon={<EuiIcon size="xxl" type="bolt" />}
             title={'Accelerate performance'}
             description="Accelerate query performance through OpenSearch indexing"
-            onClick={() =>
-              application!.navigateToApp(queryWorkbenchPluginID, {
-                path: `#/accelerate/${dataSource}`,
-              })
-            }
+            onClick={onclickAccelerationsCard}
             selectable={{
-              onClick: () => {},
+              onClick: onclickAccelerationsCard,
               isDisabled: false,
               children: 'Accelerate Performance',
             }}
@@ -120,9 +129,9 @@ export const DataConnection = (props: any) => {
             icon={<EuiIcon size="xxl" type="discoverApp" />}
             title={'Query data'}
             description="Uncover insights from your data or better understand it"
-            onClick={() => application!.navigateToApp(observabilityLogsID)}
+            onClick={onclickDiscoverCard}
             selectable={{
-              onClick: () => {},
+              onClick: onclickDiscoverCard,
               isDisabled: false,
               children: 'Query in Discover',
             }}

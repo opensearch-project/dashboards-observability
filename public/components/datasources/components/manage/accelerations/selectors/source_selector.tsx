@@ -3,20 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import producer from 'immer';
 import React, { useEffect, useState } from 'react';
-// import { executeAsyncQuery } from '../../../../common/utils/async_query_helpers';
 import { CoreStart } from '../../../../../../../../../src/core/public';
+import { DATACONNECTIONS_BASE } from '../../../../../../../common/constants/shared';
 import { CreateAccelerationForm } from '../../../../../../../common/types/data_connections';
 import { useToast } from '../../../../../common/toast';
-import { hasError, validateDataSource } from '../create/utils';
+import { hasError, validateDataTable, validateDatabase } from '../create/utils';
 
 interface AccelerationDataSourceSelectorProps {
   http: CoreStart['http'];
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
-  selectedDatasource: EuiComboBoxOptionOption[];
+  selectedDatasource: string;
 }
 
 export const AccelerationDataSourceSelector = ({
@@ -26,12 +35,6 @@ export const AccelerationDataSourceSelector = ({
   selectedDatasource,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
-  const [dataConnections, setDataConnections] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    []
-  );
-  const [selectedDataConnection, setSelectedDataConnection] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(selectedDatasource.length > 0 ? [{ label: selectedDatasource[0].label }] : []);
   const [databases, _setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
@@ -47,23 +50,27 @@ export const AccelerationDataSourceSelector = ({
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(`/api/get_datasources`)
+      .get(DATACONNECTIONS_BASE)
       .then((res) => {
-        const data = res.data.resp;
-        setDataConnections(
-          data
-            .filter((connection: any) => connection.connector.toUpperCase() === 'S3GLUE')
-            .map((connection: any) => ({ label: connection.name }))
+        const isValidDataSource = res.some(
+          (connection: any) =>
+            connection.connector.toUpperCase() === 'S3GLUE' &&
+            connection.name === selectedDatasource
         );
+
+        if (!isValidDataSource) {
+          setToast(`Received an invalid datasource in create acceleration flyout`, 'danger');
+        }
       })
       .catch((err) => {
         console.error(err);
-        setToast(`ERROR: failed to load datasources`, 'danger');
+        setToast(`failed to load datasources`, 'danger');
       });
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: false });
   };
 
   const loadDatabases = () => {
+    // TODO: Load databases from cache
     // setLoadingComboBoxes({ ...loadingComboBoxes, database: true });
     // const query = {
     //   lang: 'sql',
@@ -93,6 +100,7 @@ export const AccelerationDataSourceSelector = ({
   };
 
   const loadTables = () => {
+    // TODO: Load tables from cache
     // setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: true });
     // const query = {
     //   lang: 'sql',
@@ -146,36 +154,12 @@ export const AccelerationDataSourceSelector = ({
       <EuiText size="s" color="subdued">
         Select the data source to accelerate data from. External data sources may take time to load.
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        label="Data source"
-        helpText="A data source has to be configured and active to be able to select it and index data from."
-        isInvalid={hasError(accelerationFormData.formErrors, 'dataSourceError')}
-        error={accelerationFormData.formErrors.dataSourceError}
-      >
-        <EuiComboBox
-          placeholder="Select a data source"
-          singleSelection={{ asPlainText: true }}
-          options={dataConnections}
-          selectedOptions={selectedDataConnection}
-          onChange={(dataConnectionOptions) => {
-            if (dataConnectionOptions.length > 0) {
-              setAccelerationFormData(
-                producer((accData) => {
-                  accData.dataSource = dataConnectionOptions[0].label;
-                  accData.formErrors.dataSourceError = validateDataSource(
-                    dataConnectionOptions[0].label
-                  );
-                })
-              );
-              setSelectedDataConnection(dataConnectionOptions);
-            }
-          }}
-          isClearable={false}
-          isInvalid={hasError(accelerationFormData.formErrors, 'dataSourceError')}
-          isLoading={loadingComboBoxes.dataSource}
-        />
-      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiDescriptionList>
+        <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{selectedDatasource}</EuiDescriptionListDescription>
+      </EuiDescriptionList>
+      <EuiSpacer size="m" />
       <EuiFormRow
         label="Database"
         helpText="Select the database that contains the tables you'd like to use."
@@ -192,7 +176,7 @@ export const AccelerationDataSourceSelector = ({
               setAccelerationFormData(
                 producer((accData) => {
                   accData.database = databaseOptions[0].label;
-                  accData.formErrors.databaseError = validateDataSource(databaseOptions[0].label);
+                  accData.formErrors.databaseError = validateDatabase(databaseOptions[0].label);
                 })
               );
               setSelectedDatabase(databaseOptions);
@@ -219,7 +203,7 @@ export const AccelerationDataSourceSelector = ({
               setAccelerationFormData(
                 producer((accData) => {
                   accData.dataTable = tableOptions[0].label;
-                  accData.formErrors.dataTableError = validateDataSource(tableOptions[0].label);
+                  accData.formErrors.dataTableError = validateDataTable(tableOptions[0].label);
                 })
               );
               setSelectedTable(tableOptions);
