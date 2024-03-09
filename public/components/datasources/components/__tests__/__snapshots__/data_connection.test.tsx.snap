@@ -789,13 +789,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_1
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -849,7 +848,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -957,13 +956,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_2
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1017,175 +1015,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
-                            </button>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Accelerations
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              skipping_index_1
-                            </button>
-                            
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell euiTableRowCell--hasActions"
-                        >
-                          <div
-                            class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
-                          >
-                            <span
-                              class="euiToolTipAnchor"
-                            >
-                              <button
-                                aria-labelledby="random_html_id"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                                type="button"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                              </button>
-                              <span
-                                class="euiScreenReaderOnly"
-                                id="random_html_id"
-                              >
-                                Discover
-                              </span>
-                            </span>
-                            <span
-                              class="euiToolTipAnchor"
-                            >
-                              <button
-                                aria-labelledby="random_html_id"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                                type="button"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                              </button>
-                              <span
-                                class="euiScreenReaderOnly"
-                                id="random_html_id"
-                              >
-                                Accelerate
-                              </span>
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="euiTableRow euiTableRow-hasActions"
-                      >
-                        <td
-                          class="euiTableRowCell"
-                          data-test-subj="nameCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Name
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <a
-                              class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
-                            >
-                              Table_name_3
-                            </a>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Database
-                          </div>
-                          <div
-                            class="euiTableCellContent"
-                          >
-                            <span
-                              class="euiTableCellContent__text"
-                            >
-                              db1
-                            </span>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Type
-                          </div>
-                          <div
-                            class="euiTableCellContent"
-                          >
-                            <span
-                              class="euiTableCellContent__text"
-                            >
-                              Table
-                            </span>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Created by Integration
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -1293,13 +1123,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_4
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1353,7 +1182,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -1461,13 +1290,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1521,8 +1349,164 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Accelerations
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            -
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell euiTableRowCell--hasActions"
+                        >
+                          <div
+                            class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-labelledby="random_html_id"
+                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="euiScreenReaderOnly"
+                                id="random_html_id"
+                              >
+                                Discover
+                              </span>
+                            </span>
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-labelledby="random_html_id"
+                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="euiScreenReaderOnly"
+                                id="random_html_id"
+                              >
+                                Accelerate
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="euiTableRow euiTableRow-hasActions"
+                      >
+                        <td
+                          class="euiTableRowCell"
+                          data-test-subj="nameCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Name
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              Table_name_6
+                            </button>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Database
+                          </div>
+                          <div
+                            class="euiTableCellContent"
+                          >
+                            <span
+                              class="euiTableCellContent__text"
+                            >
+                              db3
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Type
+                          </div>
+                          <div
+                            class="euiTableCellContent"
+                          >
+                            <span
+                              class="euiTableCellContent__text"
+                            >
+                              Table
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Created by Integration
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            -
                           </div>
                         </td>
                         <td
@@ -1540,7 +1524,14 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              skipping_index_3
+                              skipping_index_4
+                            </button>
+                            , 
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              skipping_index_5
                             </button>
                             
                           </div>
@@ -1629,13 +1620,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
-                              Table_name_5
-                            </a>
+                              covering_index_3
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1670,7 +1660,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                             <span
                               class="euiTableCellContent__text"
                             >
-                              CI
+                              Cover Index
                             </span>
                           </div>
                         </td>
@@ -1699,7 +1689,13 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            -
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              covering_index_3
+                            </button>
+                            
                           </div>
                         </td>
                         <td
@@ -1756,13 +1752,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
-                              Table_name_5
-                            </a>
+                              skipping_index_2
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1779,7 +1774,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                             <span
                               class="euiTableCellContent__text"
                             >
-                              db3
+                              db1
                             </span>
                           </div>
                         </td>
@@ -1797,7 +1792,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                             <span
                               class="euiTableCellContent__text"
                             >
-                              CI
+                              Skip Index
                             </span>
                           </div>
                         </td>
@@ -1812,7 +1807,12 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            -
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              integration_1
+                            </button>
                           </div>
                         </td>
                         <td
@@ -1830,14 +1830,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              acc1
-                            </button>
-                            , 
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              acc2
+                              skipping_index_2
                             </button>
                             
                           </div>
@@ -2964,13 +2957,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_1
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3024,7 +3016,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -3136,13 +3128,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_2
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3196,179 +3187,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
-                            </button>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Accelerations
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              skipping_index_1
-                            </button>
-                            
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell euiTableRowCell--hasActions"
-                        >
-                          <div
-                            class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
-                          >
-                            <span
-                              class="euiToolTipAnchor"
-                            >
-                              <button
-                                aria-labelledby="random_html_id"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                                type="button"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="32"
-                                  role="img"
-                                  viewBox="0 0 32 32"
-                                  width="32"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    class="euiIcon__fillSecondary"
-                                    d="m8.33 23.67 4.79-10.55 10.55-4.79-4.79 10.55-10.55 4.79Zm6.3-9-2.28 5 5-2.28 2.28-5-5 2.28Z"
-                                  />
-                                  <path
-                                    d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16A16 16 0 0 0 16 0Zm1 29.95V28h-2v1.95A14 14 0 0 1 2.05 17H4v-2H2.05A14 14 0 0 1 15 2.05V4h2V2.05A14 14 0 0 1 29.95 15H28v2h1.95A14 14 0 0 1 17 29.95Z"
-                                  />
-                                </svg>
-                              </button>
-                              <span
-                                class="euiScreenReaderOnly"
-                                id="random_html_id"
-                              >
-                                Discover
-                              </span>
-                            </span>
-                            <span
-                              class="euiToolTipAnchor"
-                            >
-                              <button
-                                aria-labelledby="random_html_id"
-                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                                type="button"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"
-                                  />
-                                </svg>
-                              </button>
-                              <span
-                                class="euiScreenReaderOnly"
-                                id="random_html_id"
-                              >
-                                Accelerate
-                              </span>
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="euiTableRow euiTableRow-hasActions"
-                      >
-                        <td
-                          class="euiTableRowCell"
-                          data-test-subj="nameCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Name
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <a
-                              class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
-                            >
-                              Table_name_3
-                            </a>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Database
-                          </div>
-                          <div
-                            class="euiTableCellContent"
-                          >
-                            <span
-                              class="euiTableCellContent__text"
-                            >
-                              db1
-                            </span>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Type
-                          </div>
-                          <div
-                            class="euiTableCellContent"
-                          >
-                            <span
-                              class="euiTableCellContent__text"
-                            >
-                              Table
-                            </span>
-                          </div>
-                        </td>
-                        <td
-                          class="euiTableRowCell"
-                        >
-                          <div
-                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                          >
-                            Created by Integration
-                          </div>
-                          <div
-                            class="euiTableCellContent euiTableCellContent--overflowingContent"
-                          >
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -3480,13 +3299,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_4
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3540,7 +3358,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
                           </div>
                         </td>
@@ -3652,13 +3470,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
                               Table_name_5
-                            </a>
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3712,8 +3529,168 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              xx
+                              integration_1
                             </button>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Accelerations
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            -
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell euiTableRowCell--hasActions"
+                        >
+                          <div
+                            class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-labelledby="random_html_id"
+                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="32"
+                                  role="img"
+                                  viewBox="0 0 32 32"
+                                  width="32"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    class="euiIcon__fillSecondary"
+                                    d="m8.33 23.67 4.79-10.55 10.55-4.79-4.79 10.55-10.55 4.79Zm6.3-9-2.28 5 5-2.28 2.28-5-5 2.28Z"
+                                  />
+                                  <path
+                                    d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16A16 16 0 0 0 16 0Zm1 29.95V28h-2v1.95A14 14 0 0 1 2.05 17H4v-2H2.05A14 14 0 0 1 15 2.05V4h2V2.05A14 14 0 0 1 29.95 15H28v2h1.95A14 14 0 0 1 17 29.95Z"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="euiScreenReaderOnly"
+                                id="random_html_id"
+                              >
+                                Discover
+                              </span>
+                            </span>
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-labelledby="random_html_id"
+                                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="euiScreenReaderOnly"
+                                id="random_html_id"
+                              >
+                                Accelerate
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="euiTableRow euiTableRow-hasActions"
+                      >
+                        <td
+                          class="euiTableRowCell"
+                          data-test-subj="nameCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Name
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              Table_name_6
+                            </button>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Database
+                          </div>
+                          <div
+                            class="euiTableCellContent"
+                          >
+                            <span
+                              class="euiTableCellContent__text"
+                            >
+                              db3
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Type
+                          </div>
+                          <div
+                            class="euiTableCellContent"
+                          >
+                            <span
+                              class="euiTableCellContent__text"
+                            >
+                              Table
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          class="euiTableRowCell"
+                        >
+                          <div
+                            class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Created by Integration
+                          </div>
+                          <div
+                            class="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            -
                           </div>
                         </td>
                         <td
@@ -3731,7 +3708,14 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              skipping_index_3
+                              skipping_index_4
+                            </button>
+                            , 
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              skipping_index_5
                             </button>
                             
                           </div>
@@ -3824,13 +3808,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
-                              Table_name_5
-                            </a>
+                              covering_index_3
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3865,7 +3848,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                             <span
                               class="euiTableCellContent__text"
                             >
-                              CI
+                              Cover Index
                             </span>
                           </div>
                         </td>
@@ -3894,7 +3877,13 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            -
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              covering_index_3
+                            </button>
+                            
                           </div>
                         </td>
                         <td
@@ -3955,13 +3944,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            <a
+                            <button
                               class="euiLink euiLink--primary"
-                              href="https://example.com"
-                              rel="noreferrer"
+                              type="button"
                             >
-                              Table_name_5
-                            </a>
+                              skipping_index_2
+                            </button>
                           </div>
                         </td>
                         <td
@@ -3978,7 +3966,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                             <span
                               class="euiTableCellContent__text"
                             >
-                              db3
+                              db1
                             </span>
                           </div>
                         </td>
@@ -3996,7 +3984,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                             <span
                               class="euiTableCellContent__text"
                             >
-                              CI
+                              Skip Index
                             </span>
                           </div>
                         </td>
@@ -4011,7 +3999,12 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           <div
                             class="euiTableCellContent euiTableCellContent--overflowingContent"
                           >
-                            -
+                            <button
+                              class="euiLink euiLink--primary"
+                              type="button"
+                            >
+                              integration_1
+                            </button>
                           </div>
                         </td>
                         <td
@@ -4029,14 +4022,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               class="euiLink euiLink--primary"
                               type="button"
                             >
-                              acc1
-                            </button>
-                            , 
-                            <button
-                              class="euiLink euiLink--primary"
-                              type="button"
-                            >
-                              acc2
+                              skipping_index_2
                             </button>
                             
                           </div>
