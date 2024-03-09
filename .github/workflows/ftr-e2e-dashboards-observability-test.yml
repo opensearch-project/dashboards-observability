@@ -42,7 +42,7 @@ jobs:
           opensearch_version=$(node -p "require('./package.json').opensearchDashboards.version")
           plugin_version=$(node -p "require('./package.json').version")
           echo "OPENSEARCH_VERSION=$opensearch_version" >> $GITHUB_ENV
-          echo "PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
+          echo "OPENSEARCH_PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
         shell: bash
 
       - name: Download observability artifact
