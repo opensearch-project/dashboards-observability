@@ -6,72 +6,216 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
     Array [
       Object {
         "accelerations": Array [
-          "skipping_index_1",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_1",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "columns": Array [
+          Object {
+            "dataType": "dataType1",
+            "name": "column1",
+          },
+          Object {
+            "dataType": "dataType2",
+            "name": "column2",
+          },
+          Object {
+            "dataType": "dataType3",
+            "name": "column3",
+          },
+          Object {
+            "dataType": "dataType4",
+            "name": "column4",
+          },
+        ],
+        "createdByIntegration": "integration_1",
         "database": "db1",
+        "datasource": "flint_s3",
         "id": "1",
         "name": "Table_name_1",
         "type": "Table",
       },
       Object {
         "accelerations": Array [
-          "skipping_index_1",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "columns": Array [],
+        "createdByIntegration": "integration_1",
         "database": "db1",
+        "datasource": "flint_s3",
         "id": "2",
         "name": "Table_name_2",
         "type": "Table",
       },
       Object {
         "accelerations": Array [
-          "skipping_index_2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "columns": Array [],
+        "createdByIntegration": "integration_1",
         "database": "db1",
+        "datasource": "flint_s3",
         "id": "3",
-        "name": "Table_name_3",
-        "type": "Table",
+        "name": "skipping_index_2",
+        "type": "Skip Index",
       },
       Object {
         "accelerations": Array [
-          "skipping_index_2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_2",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
         ],
-        "createdByIntegration": "xx",
+        "columns": Array [
+          Object {
+            "dataType": "dataType1",
+            "name": "column1",
+          },
+          Object {
+            "dataType": "dataType2",
+            "name": "column2",
+          },
+        ],
+        "createdByIntegration": "integration_1",
         "database": "db2",
+        "datasource": "flint_s3",
         "id": "4",
         "name": "Table_name_4",
         "type": "Table",
       },
       Object {
-        "accelerations": Array [
-          "skipping_index_3",
+        "accelerations": Array [],
+        "columns": Array [
+          Object {
+            "dataType": "dataType1",
+            "name": "column1",
+          },
+          Object {
+            "dataType": "dataType2",
+            "name": "column2",
+          },
         ],
-        "createdByIntegration": "xx",
+        "createdByIntegration": "integration_1",
         "database": "db3",
+        "datasource": "flint_s3",
         "id": "5",
         "name": "Table_name_5",
         "type": "Table",
       },
       Object {
-        "accelerations": Array [],
-        "createdByIntegration": "",
-        "database": "db3",
-        "id": "6",
-        "name": "Table_name_5",
-        "type": "CI",
-      },
-      Object {
         "accelerations": Array [
-          "acc1",
-          "acc2",
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "covering_index_3",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
+        ],
+        "columns": Array [
+          Object {
+            "dataType": "dataType1",
+            "name": "column1",
+          },
+          Object {
+            "dataType": "dataType2",
+            "name": "column2",
+          },
         ],
         "createdByIntegration": "",
         "database": "db3",
+        "datasource": "flint_s3",
         "id": "6",
-        "name": "Table_name_5",
-        "type": "CI",
+        "name": "covering_index_3",
+        "type": "Cover Index",
+      },
+      Object {
+        "accelerations": Array [
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_4",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
+          Object {
+            "database": "db1",
+            "dateCreated": 1709339290,
+            "dateUpdated": 1709339290,
+            "destination": "N/A",
+            "index": "security_logs_2022",
+            "name": "skipping_index_5",
+            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+            "status": "ACTIVE",
+            "table": "Table_name_1",
+            "type": "skip",
+          },
+        ],
+        "columns": Array [
+          Object {
+            "dataType": "dataType1",
+            "name": "column1",
+          },
+          Object {
+            "dataType": "dataType2",
+            "name": "column2",
+          },
+        ],
+        "createdByIntegration": "",
+        "database": "db3",
+        "datasource": "flint_s3",
+        "id": "7",
+        "name": "Table_name_6",
+        "type": "Table",
       },
     ]
   }
@@ -403,72 +547,216 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           Array [
             Object {
               "accelerations": Array [
-                "skipping_index_1",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_1",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "columns": Array [
+                Object {
+                  "dataType": "dataType1",
+                  "name": "column1",
+                },
+                Object {
+                  "dataType": "dataType2",
+                  "name": "column2",
+                },
+                Object {
+                  "dataType": "dataType3",
+                  "name": "column3",
+                },
+                Object {
+                  "dataType": "dataType4",
+                  "name": "column4",
+                },
+              ],
+              "createdByIntegration": "integration_1",
               "database": "db1",
+              "datasource": "flint_s3",
               "id": "1",
               "name": "Table_name_1",
               "type": "Table",
             },
             Object {
               "accelerations": Array [
-                "skipping_index_1",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "columns": Array [],
+              "createdByIntegration": "integration_1",
               "database": "db1",
+              "datasource": "flint_s3",
               "id": "2",
               "name": "Table_name_2",
               "type": "Table",
             },
             Object {
               "accelerations": Array [
-                "skipping_index_2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "columns": Array [],
+              "createdByIntegration": "integration_1",
               "database": "db1",
+              "datasource": "flint_s3",
               "id": "3",
-              "name": "Table_name_3",
-              "type": "Table",
+              "name": "skipping_index_2",
+              "type": "Skip Index",
             },
             Object {
               "accelerations": Array [
-                "skipping_index_2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_2",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
               ],
-              "createdByIntegration": "xx",
+              "columns": Array [
+                Object {
+                  "dataType": "dataType1",
+                  "name": "column1",
+                },
+                Object {
+                  "dataType": "dataType2",
+                  "name": "column2",
+                },
+              ],
+              "createdByIntegration": "integration_1",
               "database": "db2",
+              "datasource": "flint_s3",
               "id": "4",
               "name": "Table_name_4",
               "type": "Table",
             },
             Object {
-              "accelerations": Array [
-                "skipping_index_3",
+              "accelerations": Array [],
+              "columns": Array [
+                Object {
+                  "dataType": "dataType1",
+                  "name": "column1",
+                },
+                Object {
+                  "dataType": "dataType2",
+                  "name": "column2",
+                },
               ],
-              "createdByIntegration": "xx",
+              "createdByIntegration": "integration_1",
               "database": "db3",
+              "datasource": "flint_s3",
               "id": "5",
               "name": "Table_name_5",
               "type": "Table",
             },
             Object {
-              "accelerations": Array [],
-              "createdByIntegration": "",
-              "database": "db3",
-              "id": "6",
-              "name": "Table_name_5",
-              "type": "CI",
-            },
-            Object {
               "accelerations": Array [
-                "acc1",
-                "acc2",
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "covering_index_3",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
+              ],
+              "columns": Array [
+                Object {
+                  "dataType": "dataType1",
+                  "name": "column1",
+                },
+                Object {
+                  "dataType": "dataType2",
+                  "name": "column2",
+                },
               ],
               "createdByIntegration": "",
               "database": "db3",
+              "datasource": "flint_s3",
               "id": "6",
-              "name": "Table_name_5",
-              "type": "CI",
+              "name": "covering_index_3",
+              "type": "Cover Index",
+            },
+            Object {
+              "accelerations": Array [
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_4",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
+                Object {
+                  "database": "db1",
+                  "dateCreated": 1709339290,
+                  "dateUpdated": 1709339290,
+                  "destination": "N/A",
+                  "index": "security_logs_2022",
+                  "name": "skipping_index_5",
+                  "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                  "status": "ACTIVE",
+                  "table": "Table_name_1",
+                  "type": "skip",
+                },
+              ],
+              "columns": Array [
+                Object {
+                  "dataType": "dataType1",
+                  "name": "column1",
+                },
+                Object {
+                  "dataType": "dataType2",
+                  "name": "column2",
+                },
+              ],
+              "createdByIntegration": "",
+              "database": "db3",
+              "datasource": "flint_s3",
+              "id": "7",
+              "name": "Table_name_6",
+              "type": "Table",
             },
           ]
         }
@@ -528,12 +816,8 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 "name": "Accelerations",
                 "options": Array [
                   Object {
-                    "text": "acc1",
-                    "value": "acc1",
-                  },
-                  Object {
-                    "text": "acc2",
-                    "value": "acc2",
+                    "text": "covering_index_3",
+                    "value": "covering_index_3",
                   },
                   Object {
                     "text": "skipping_index_1",
@@ -544,8 +828,12 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     "value": "skipping_index_2",
                   },
                   Object {
-                    "text": "skipping_index_3",
-                    "value": "skipping_index_3",
+                    "text": "skipping_index_4",
+                    "value": "skipping_index_4",
+                  },
+                  Object {
+                    "text": "skipping_index_5",
+                    "value": "skipping_index_5",
                   },
                 ],
                 "type": "field_value_selection",
@@ -612,12 +900,8 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   "name": "Accelerations",
                   "options": Array [
                     Object {
-                      "text": "acc1",
-                      "value": "acc1",
-                    },
-                    Object {
-                      "text": "acc2",
-                      "value": "acc2",
+                      "text": "covering_index_3",
+                      "value": "covering_index_3",
                     },
                     Object {
                       "text": "skipping_index_1",
@@ -628,8 +912,12 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "value": "skipping_index_2",
                     },
                     Object {
-                      "text": "skipping_index_3",
-                      "value": "skipping_index_3",
+                      "text": "skipping_index_4",
+                      "value": "skipping_index_4",
+                    },
+                    Object {
+                      "text": "skipping_index_5",
+                      "value": "skipping_index_5",
                     },
                   ],
                   "type": "field_value_selection",
@@ -791,12 +1079,8 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "name": "Accelerations",
                             "options": Array [
                               Object {
-                                "text": "acc1",
-                                "value": "acc1",
-                              },
-                              Object {
-                                "text": "acc2",
-                                "value": "acc2",
+                                "text": "covering_index_3",
+                                "value": "covering_index_3",
                               },
                               Object {
                                 "text": "skipping_index_1",
@@ -807,8 +1091,12 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 "value": "skipping_index_2",
                               },
                               Object {
-                                "text": "skipping_index_3",
-                                "value": "skipping_index_3",
+                                "text": "skipping_index_4",
+                                "value": "skipping_index_4",
+                              },
+                              Object {
+                                "text": "skipping_index_5",
+                                "value": "skipping_index_5",
                               },
                             ],
                             "type": "field_value_selection",
@@ -1014,12 +1302,8 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 "name": "Accelerations",
                                 "options": Array [
                                   Object {
-                                    "text": "acc1",
-                                    "value": "acc1",
-                                  },
-                                  Object {
-                                    "text": "acc2",
-                                    "value": "acc2",
+                                    "text": "covering_index_3",
+                                    "value": "covering_index_3",
                                   },
                                   Object {
                                     "text": "skipping_index_1",
@@ -1030,8 +1314,12 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     "value": "skipping_index_2",
                                   },
                                   Object {
-                                    "text": "skipping_index_3",
-                                    "value": "skipping_index_3",
+                                    "text": "skipping_index_4",
+                                    "value": "skipping_index_4",
+                                  },
+                                  Object {
+                                    "text": "skipping_index_5",
+                                    "value": "skipping_index_5",
                                   },
                                 ],
                                 "type": "field_value_selection",
@@ -1252,72 +1540,216 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
               Array [
                 Object {
                   "accelerations": Array [
-                    "skipping_index_1",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_1",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "columns": Array [
+                    Object {
+                      "dataType": "dataType1",
+                      "name": "column1",
+                    },
+                    Object {
+                      "dataType": "dataType2",
+                      "name": "column2",
+                    },
+                    Object {
+                      "dataType": "dataType3",
+                      "name": "column3",
+                    },
+                    Object {
+                      "dataType": "dataType4",
+                      "name": "column4",
+                    },
+                  ],
+                  "createdByIntegration": "integration_1",
                   "database": "db1",
+                  "datasource": "flint_s3",
                   "id": "1",
                   "name": "Table_name_1",
                   "type": "Table",
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_1",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "columns": Array [],
+                  "createdByIntegration": "integration_1",
                   "database": "db1",
+                  "datasource": "flint_s3",
                   "id": "2",
                   "name": "Table_name_2",
                   "type": "Table",
                 },
                 Object {
                   "accelerations": Array [
-                    "skipping_index_2",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
                   ],
-                  "createdByIntegration": "xx",
-                  "database": "db1",
-                  "id": "3",
-                  "name": "Table_name_3",
-                  "type": "Table",
-                },
-                Object {
-                  "accelerations": Array [
-                    "skipping_index_2",
+                  "columns": Array [
+                    Object {
+                      "dataType": "dataType1",
+                      "name": "column1",
+                    },
+                    Object {
+                      "dataType": "dataType2",
+                      "name": "column2",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db2",
+                  "datasource": "flint_s3",
                   "id": "4",
                   "name": "Table_name_4",
                   "type": "Table",
                 },
                 Object {
-                  "accelerations": Array [
-                    "skipping_index_3",
+                  "accelerations": Array [],
+                  "columns": Array [
+                    Object {
+                      "dataType": "dataType1",
+                      "name": "column1",
+                    },
+                    Object {
+                      "dataType": "dataType2",
+                      "name": "column2",
+                    },
                   ],
-                  "createdByIntegration": "xx",
+                  "createdByIntegration": "integration_1",
                   "database": "db3",
+                  "datasource": "flint_s3",
                   "id": "5",
                   "name": "Table_name_5",
                   "type": "Table",
                 },
                 Object {
-                  "accelerations": Array [],
-                  "createdByIntegration": "",
-                  "database": "db3",
-                  "id": "6",
-                  "name": "Table_name_5",
-                  "type": "CI",
-                },
-                Object {
                   "accelerations": Array [
-                    "acc1",
-                    "acc2",
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_4",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_5",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
+                  ],
+                  "columns": Array [
+                    Object {
+                      "dataType": "dataType1",
+                      "name": "column1",
+                    },
+                    Object {
+                      "dataType": "dataType2",
+                      "name": "column2",
+                    },
                   ],
                   "createdByIntegration": "",
                   "database": "db3",
+                  "datasource": "flint_s3",
+                  "id": "7",
+                  "name": "Table_name_6",
+                  "type": "Table",
+                },
+                Object {
+                  "accelerations": Array [
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "covering_index_3",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
+                  ],
+                  "columns": Array [
+                    Object {
+                      "dataType": "dataType1",
+                      "name": "column1",
+                    },
+                    Object {
+                      "dataType": "dataType2",
+                      "name": "column2",
+                    },
+                  ],
+                  "createdByIntegration": "",
+                  "database": "db3",
+                  "datasource": "flint_s3",
                   "id": "6",
-                  "name": "Table_name_5",
-                  "type": "CI",
+                  "name": "covering_index_3",
+                  "type": "Cover Index",
+                },
+                Object {
+                  "accelerations": Array [
+                    Object {
+                      "database": "db1",
+                      "dateCreated": 1709339290,
+                      "dateUpdated": 1709339290,
+                      "destination": "N/A",
+                      "index": "security_logs_2022",
+                      "name": "skipping_index_2",
+                      "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                      "status": "ACTIVE",
+                      "table": "Table_name_1",
+                      "type": "skip",
+                    },
+                  ],
+                  "columns": Array [],
+                  "createdByIntegration": "integration_1",
+                  "database": "db1",
+                  "datasource": "flint_s3",
+                  "id": "3",
+                  "name": "skipping_index_2",
+                  "type": "Skip Index",
                 },
               ]
             }
@@ -1966,16 +2398,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_1
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -2091,7 +2524,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2183,10 +2616,40 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_1",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_1",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "columns": Array [
+                                          Object {
+                                            "dataType": "dataType1",
+                                            "name": "column1",
+                                          },
+                                          Object {
+                                            "dataType": "dataType2",
+                                            "name": "column2",
+                                          },
+                                          Object {
+                                            "dataType": "dataType3",
+                                            "name": "column3",
+                                          },
+                                          Object {
+                                            "dataType": "dataType4",
+                                            "name": "column4",
+                                          },
+                                        ],
+                                        "createdByIntegration": "integration_1",
                                         "database": "db1",
+                                        "datasource": "flint_s3",
                                         "id": "1",
                                         "name": "Table_name_1",
                                         "type": "Table",
@@ -2210,10 +2673,40 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_1",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                            Object {
+                                              "dataType": "dataType3",
+                                              "name": "column3",
+                                            },
+                                            Object {
+                                              "dataType": "dataType4",
+                                              "name": "column4",
+                                            },
+                                          ],
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
+                                          "datasource": "flint_s3",
                                           "id": "1",
                                           "name": "Table_name_1",
                                           "type": "Table",
@@ -2307,10 +2800,40 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_1",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                            Object {
+                                              "dataType": "dataType3",
+                                              "name": "column3",
+                                            },
+                                            Object {
+                                              "dataType": "dataType4",
+                                              "name": "column4",
+                                            },
+                                          ],
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
+                                          "datasource": "flint_s3",
                                           "id": "1",
                                           "name": "Table_name_1",
                                           "type": "Table",
@@ -2433,16 +2956,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       Table_name_2
-                                    </a>
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -2558,7 +3082,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2601,7 +3125,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      skipping_index_1
+                                      skipping_index_2
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -2650,10 +3174,23 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_1",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "columns": Array [],
+                                        "createdByIntegration": "integration_1",
                                         "database": "db1",
+                                        "datasource": "flint_s3",
                                         "id": "2",
                                         "name": "Table_name_2",
                                         "type": "Table",
@@ -2677,10 +3214,23 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [],
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
+                                          "datasource": "flint_s3",
                                           "id": "2",
                                           "name": "Table_name_2",
                                           "type": "Table",
@@ -2774,10 +3324,23 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_1",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [],
+                                          "createdByIntegration": "integration_1",
                                           "database": "db1",
+                                          "datasource": "flint_s3",
                                           "id": "2",
                                           "name": "Table_name_2",
                                           "type": "Table",
@@ -2900,16 +3463,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Table_name_3
-                                    </a>
+                                      Table_name_4
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -2945,7 +3509,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   <span
                                     className="euiTableCellContent__text"
                                   >
-                                    db1
+                                    db2
                                   </span>
                                 </div>
                               </td>
@@ -3025,7 +3589,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -3117,12 +3681,34 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_2",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
-                                        "database": "db1",
-                                        "id": "3",
-                                        "name": "Table_name_3",
+                                        "columns": Array [
+                                          Object {
+                                            "dataType": "dataType1",
+                                            "name": "column1",
+                                          },
+                                          Object {
+                                            "dataType": "dataType2",
+                                            "name": "column2",
+                                          },
+                                        ],
+                                        "createdByIntegration": "integration_1",
+                                        "database": "db2",
+                                        "datasource": "flint_s3",
+                                        "id": "4",
+                                        "name": "Table_name_4",
                                         "type": "Table",
                                       }
                                     }
@@ -3144,12 +3730,34 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
-                                          "database": "db1",
-                                          "id": "3",
-                                          "name": "Table_name_3",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                          ],
+                                          "createdByIntegration": "integration_1",
+                                          "database": "db2",
+                                          "datasource": "flint_s3",
+                                          "id": "4",
+                                          "name": "Table_name_4",
                                           "type": "Table",
                                         }
                                       }
@@ -3241,12 +3849,34 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
-                                          "database": "db1",
-                                          "id": "3",
-                                          "name": "Table_name_3",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                          ],
+                                          "createdByIntegration": "integration_1",
+                                          "database": "db2",
+                                          "datasource": "flint_s3",
+                                          "id": "4",
+                                          "name": "Table_name_4",
                                           "type": "Table",
                                         }
                                       }
@@ -3367,16 +3997,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Table_name_4
-                                    </a>
+                                      Table_name_5
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -3412,7 +4043,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   <span
                                     className="euiTableCellContent__text"
                                   >
-                                    db2
+                                    db3
                                   </span>
                                 </div>
                               </td>
@@ -3492,7 +4123,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      xx
+                                      integration_1
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -3526,18 +4157,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 <div
                                   className="euiTableCellContent euiTableCellContent--overflowingContent"
                                 >
-                                  <EuiLink
-                                    onClick={[Function]}
-                                  >
-                                    <button
-                                      className="euiLink euiLink--primary"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      skipping_index_2
-                                    </button>
-                                  </EuiLink>
+                                  -
                                 </div>
                               </td>
                             </EuiTableRowCell>
@@ -3583,13 +4203,22 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     className="euiTableCellContent__hoverItem"
                                     item={
                                       Object {
-                                        "accelerations": Array [
-                                          "skipping_index_2",
+                                        "accelerations": Array [],
+                                        "columns": Array [
+                                          Object {
+                                            "dataType": "dataType1",
+                                            "name": "column1",
+                                          },
+                                          Object {
+                                            "dataType": "dataType2",
+                                            "name": "column2",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
-                                        "database": "db2",
-                                        "id": "4",
-                                        "name": "Table_name_4",
+                                        "createdByIntegration": "integration_1",
+                                        "database": "db3",
+                                        "datasource": "flint_s3",
+                                        "id": "5",
+                                        "name": "Table_name_5",
                                         "type": "Table",
                                       }
                                     }
@@ -3610,13 +4239,22 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       enabled={true}
                                       item={
                                         Object {
-                                          "accelerations": Array [
-                                            "skipping_index_2",
+                                          "accelerations": Array [],
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
-                                          "database": "db2",
-                                          "id": "4",
-                                          "name": "Table_name_4",
+                                          "createdByIntegration": "integration_1",
+                                          "database": "db3",
+                                          "datasource": "flint_s3",
+                                          "id": "5",
+                                          "name": "Table_name_5",
                                           "type": "Table",
                                         }
                                       }
@@ -3707,13 +4345,22 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       enabled={true}
                                       item={
                                         Object {
-                                          "accelerations": Array [
-                                            "skipping_index_2",
+                                          "accelerations": Array [],
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
-                                          "database": "db2",
-                                          "id": "4",
-                                          "name": "Table_name_4",
+                                          "createdByIntegration": "integration_1",
+                                          "database": "db3",
+                                          "datasource": "flint_s3",
+                                          "id": "5",
+                                          "name": "Table_name_5",
                                           "type": "Table",
                                         }
                                       }
@@ -3834,16 +4481,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Table_name_5
-                                    </a>
+                                      Table_name_6
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -3948,20 +4596,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 <div
                                   className="euiTableCellContent euiTableCellContent--overflowingContent"
                                 >
-                                  <EuiLink
-                                    className=""
-                                    key=".0"
-                                    onClick={[Function]}
-                                  >
-                                    <button
-                                      className="euiLink euiLink--primary"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      xx
-                                    </button>
-                                  </EuiLink>
+                                  -
                                 </div>
                               </td>
                             </EuiTableRowCell>
@@ -4002,7 +4637,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      skipping_index_3
+                                      skipping_index_4
+                                    </button>
+                                  </EuiLink>
+                                  , 
+                                  <EuiLink
+                                    onClick={[Function]}
+                                  >
+                                    <button
+                                      className="euiLink euiLink--primary"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      skipping_index_5
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -4051,12 +4699,46 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "skipping_index_3",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_4",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_5",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "xx",
+                                        "columns": Array [
+                                          Object {
+                                            "dataType": "dataType1",
+                                            "name": "column1",
+                                          },
+                                          Object {
+                                            "dataType": "dataType2",
+                                            "name": "column2",
+                                          },
+                                        ],
+                                        "createdByIntegration": "",
                                         "database": "db3",
-                                        "id": "5",
-                                        "name": "Table_name_5",
+                                        "datasource": "flint_s3",
+                                        "id": "7",
+                                        "name": "Table_name_6",
                                         "type": "Table",
                                       }
                                     }
@@ -4078,12 +4760,46 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_3",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_4",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_5",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                          ],
+                                          "createdByIntegration": "",
                                           "database": "db3",
-                                          "id": "5",
-                                          "name": "Table_name_5",
+                                          "datasource": "flint_s3",
+                                          "id": "7",
+                                          "name": "Table_name_6",
                                           "type": "Table",
                                         }
                                       }
@@ -4175,12 +4891,46 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "skipping_index_3",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_4",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_5",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "xx",
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                          ],
+                                          "createdByIntegration": "",
                                           "database": "db3",
-                                          "id": "5",
-                                          "name": "Table_name_5",
+                                          "datasource": "flint_s3",
+                                          "id": "7",
+                                          "name": "Table_name_6",
                                           "type": "Table",
                                         }
                                       }
@@ -4301,16 +5051,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Table_name_5
-                                    </a>
+                                      covering_index_3
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -4382,7 +5133,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   <span
                                     className="euiTableCellContent__text"
                                   >
-                                    CI
+                                    Cover Index
                                   </span>
                                 </div>
                               </td>
@@ -4447,7 +5198,18 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 <div
                                   className="euiTableCellContent euiTableCellContent--overflowingContent"
                                 >
-                                  -
+                                  <EuiLink
+                                    onClick={[Function]}
+                                  >
+                                    <button
+                                      className="euiLink euiLink--primary"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      covering_index_3
+                                    </button>
+                                  </EuiLink>
                                 </div>
                               </td>
                             </EuiTableRowCell>
@@ -4485,12 +5247,36 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     className="euiTableCellContent__hoverItem"
                                     item={
                                       Object {
-                                        "accelerations": Array [],
+                                        "accelerations": Array [
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "covering_index_3",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
+                                        ],
+                                        "columns": Array [
+                                          Object {
+                                            "dataType": "dataType1",
+                                            "name": "column1",
+                                          },
+                                          Object {
+                                            "dataType": "dataType2",
+                                            "name": "column2",
+                                          },
+                                        ],
                                         "createdByIntegration": "",
                                         "database": "db3",
+                                        "datasource": "flint_s3",
                                         "id": "6",
-                                        "name": "Table_name_5",
-                                        "type": "CI",
+                                        "name": "covering_index_3",
+                                        "type": "Cover Index",
                                       }
                                     }
                                     itemId={5}
@@ -4510,12 +5296,36 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       enabled={true}
                                       item={
                                         Object {
-                                          "accelerations": Array [],
+                                          "accelerations": Array [
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "covering_index_3",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
+                                          ],
+                                          "columns": Array [
+                                            Object {
+                                              "dataType": "dataType1",
+                                              "name": "column1",
+                                            },
+                                            Object {
+                                              "dataType": "dataType2",
+                                              "name": "column2",
+                                            },
+                                          ],
                                           "createdByIntegration": "",
                                           "database": "db3",
+                                          "datasource": "flint_s3",
                                           "id": "6",
-                                          "name": "Table_name_5",
-                                          "type": "CI",
+                                          "name": "covering_index_3",
+                                          "type": "Cover Index",
                                         }
                                       }
                                       key="item_action_5_0"
@@ -4635,16 +5445,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 >
                                   <EuiLink
                                     className=""
-                                    href="https://example.com"
                                     key=".0"
+                                    onClick={[Function]}
                                   >
-                                    <a
+                                    <button
                                       className="euiLink euiLink--primary"
-                                      href="https://example.com"
-                                      rel="noreferrer"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Table_name_5
-                                    </a>
+                                      skipping_index_2
+                                    </button>
                                   </EuiLink>
                                 </div>
                               </td>
@@ -4680,7 +5491,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   <span
                                     className="euiTableCellContent__text"
                                   >
-                                    db3
+                                    db1
                                   </span>
                                 </div>
                               </td>
@@ -4716,7 +5527,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   <span
                                     className="euiTableCellContent__text"
                                   >
-                                    CI
+                                    Skip Index
                                   </span>
                                 </div>
                               </td>
@@ -4749,7 +5560,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 <div
                                   className="euiTableCellContent euiTableCellContent--overflowingContent"
                                 >
-                                  -
+                                  <EuiLink
+                                    className=""
+                                    key=".0"
+                                    onClick={[Function]}
+                                  >
+                                    <button
+                                      className="euiLink euiLink--primary"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      integration_1
+                                    </button>
+                                  </EuiLink>
                                 </div>
                               </td>
                             </EuiTableRowCell>
@@ -4790,20 +5614,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       onClick={[Function]}
                                       type="button"
                                     >
-                                      acc1
-                                    </button>
-                                  </EuiLink>
-                                  , 
-                                  <EuiLink
-                                    onClick={[Function]}
-                                  >
-                                    <button
-                                      className="euiLink euiLink--primary"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      acc2
+                                      skipping_index_2
                                     </button>
                                   </EuiLink>
                                 </div>
@@ -4844,14 +5655,26 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     item={
                                       Object {
                                         "accelerations": Array [
-                                          "acc1",
-                                          "acc2",
+                                          Object {
+                                            "database": "db1",
+                                            "dateCreated": 1709339290,
+                                            "dateUpdated": 1709339290,
+                                            "destination": "N/A",
+                                            "index": "security_logs_2022",
+                                            "name": "skipping_index_2",
+                                            "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                            "status": "ACTIVE",
+                                            "table": "Table_name_1",
+                                            "type": "skip",
+                                          },
                                         ],
-                                        "createdByIntegration": "",
-                                        "database": "db3",
-                                        "id": "6",
-                                        "name": "Table_name_5",
-                                        "type": "CI",
+                                        "columns": Array [],
+                                        "createdByIntegration": "integration_1",
+                                        "database": "db1",
+                                        "datasource": "flint_s3",
+                                        "id": "3",
+                                        "name": "skipping_index_2",
+                                        "type": "Skip Index",
                                       }
                                     }
                                     itemId={6}
@@ -4872,14 +5695,26 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       item={
                                         Object {
                                           "accelerations": Array [
-                                            "acc1",
-                                            "acc2",
+                                            Object {
+                                              "database": "db1",
+                                              "dateCreated": 1709339290,
+                                              "dateUpdated": 1709339290,
+                                              "destination": "N/A",
+                                              "index": "security_logs_2022",
+                                              "name": "skipping_index_2",
+                                              "sql": "SELECT * FROM Table_name_1 WHERE ...",
+                                              "status": "ACTIVE",
+                                              "table": "Table_name_1",
+                                              "type": "skip",
+                                            },
                                           ],
-                                          "createdByIntegration": "",
-                                          "database": "db3",
-                                          "id": "6",
-                                          "name": "Table_name_5",
-                                          "type": "CI",
+                                          "columns": Array [],
+                                          "createdByIntegration": "integration_1",
+                                          "database": "db1",
+                                          "datasource": "flint_s3",
+                                          "id": "3",
+                                          "name": "skipping_index_2",
+                                          "type": "Skip Index",
                                         }
                                       }
                                       key="item_action_6_0"
