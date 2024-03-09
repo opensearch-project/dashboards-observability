@@ -221,7 +221,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     });
   };
 
-  getAssets = async (templateName: string): Promise<ParsedIntegrationAssets> => {
+  getAssets = async (templateName: string): Promise<ParsedIntegrationAsset[]> => {
     const integration = await this.repository.getIntegration(templateName);
     if (integration === null) {
       return Promise.reject({

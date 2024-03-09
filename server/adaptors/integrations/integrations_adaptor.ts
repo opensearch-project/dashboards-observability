@@ -26,7 +26,7 @@ export interface IntegrationsAdaptor {
 
   getSchemas: (templateName: string) => Promise<{ mappings: { [key: string]: unknown } }>;
 
-  getAssets: (templateName: string) => Promise<{ savedObjects?: unknown }>;
+  getAssets: (templateName: string) => Promise<ParsedIntegrationAsset[]>;
 
   getSampleData: (templateName: string) => Promise<{ sampleData: object[] | null }>;
 }

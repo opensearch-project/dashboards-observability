@@ -42,24 +42,26 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
+  "assets": [
+    {
       "name": "aws_vpc_flow",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
     },
-    "queries": [
-      {
-        "name": "create_table_vpc",
-        "version": "1.0.0",
-        "language": "sql"
-      },
-      {
-        "name": "create_mv_vpc",
-        "version": "1.0.0",
-        "language": "sql"
-      }
-    ]
-  },
+    {
+      "name": "create_table_vpc",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_mv_vpc",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    }
+  ],
   "sampleData": {
     "path": "sample.json"
   }

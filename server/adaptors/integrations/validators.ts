@@ -55,35 +55,19 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
       },
     },
     assets: {
-      type: 'object',
-      properties: {
-        savedObjects: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            version: { type: 'string' },
-            data: { type: 'string', nullable: true },
-          },
-          required: ['name', 'version'],
-          nullable: true,
-          additionalProperties: false,
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          version: { type: 'string' },
+          extension: { type: 'string' },
+          type: { type: 'string' },
+          data: { type: 'string', nullable: true },
         },
-        queries: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              version: { type: 'string' },
-              language: { type: 'string' },
-              data: { type: 'string', nullable: true },
-            },
-            required: ['name', 'version', 'language'],
-          },
-          nullable: true,
-        },
+        required: ['name', 'version', 'extension', 'type'],
+        additionalProperties: false,
       },
-      additionalProperties: false,
     },
     sampleData: {
       type: 'object',
