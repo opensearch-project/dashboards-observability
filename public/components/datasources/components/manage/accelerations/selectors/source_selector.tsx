@@ -32,11 +32,11 @@ export const AccelerationDataSourceSelector = ({
   const [selectedDataConnection, setSelectedDataConnection] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedDatasource.length > 0 ? [{ label: selectedDatasource[0].label }] : []);
-  // const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [databases, _setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
-  // const [tables, setTables] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [tables, _setTables] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedTable, setSelectedTable] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [loadingComboBoxes, setLoadingComboBoxes] = useState({
     dataSource: false,

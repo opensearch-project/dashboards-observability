@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_INDEX_TYPES,
+  ACC_INDEX_TYPE_DOCUMENTATION_URL,
 } from '../../../../../../../common/constants/data_sources';
 import {
   AccelerationIndexType,
@@ -27,7 +28,7 @@ export const IndexTypeSelector = ({
   const [selectedIndexType, setSelectedIndexType] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([ACCELERATION_INDEX_TYPES[0]]);
-  // const [loading, setLoading] = useState(false);
+  const [loading, _setLoading] = useState(false);
 
   // useEffect(() => {
   //   if (accelerationFormData.dataTable !== '') {

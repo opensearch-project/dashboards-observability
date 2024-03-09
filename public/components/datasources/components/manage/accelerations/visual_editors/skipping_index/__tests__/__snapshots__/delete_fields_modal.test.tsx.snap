@@ -129,7 +129,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                 aria-label="Select all rows"
                                 class="euiCheckbox__input"
                                 disabled=""
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 type="checkbox"
                               />
                               <div
@@ -137,7 +137,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                               />
                               <label
                                 class="euiCheckbox__label"
-                                for="_selection_column-checkbox_some_html_id"
+                                for="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -191,7 +191,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                       </div>
                       <table
                         class="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabindex="-1"
                       >
                         <caption
@@ -214,7 +214,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                     class="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled=""
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     type="checkbox"
                                   />
                                   <div
@@ -520,7 +520,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                 checked={false}
                                 className="euiCheckbox__input"
                                 disabled={true}
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 onChange={[Function]}
                                 type="checkbox"
                               />
@@ -529,7 +529,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                               />
                               <label
                                 className="euiCheckbox__label"
-                                htmlFor="_selection_column-checkbox_some_html_id"
+                                htmlFor="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -586,7 +586,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                       </div>
                       <table
                         className="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabIndex={-1}
                       >
                         <caption
@@ -615,7 +615,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                     className="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled={true}
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     onChange={[Function]}
                                     type="checkbox"
                                   />
@@ -949,7 +949,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                               <input
                                 aria-label="Select all rows"
                                 class="euiCheckbox__input"
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 type="checkbox"
                               />
                               <div
@@ -957,7 +957,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                               />
                               <label
                                 class="euiCheckbox__label"
-                                for="_selection_column-checkbox_some_html_id"
+                                for="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -1012,7 +1012,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                       </div>
                       <table
                         class="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabindex="-1"
                       >
                         <caption
@@ -1034,7 +1034,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                     aria-label="Select all rows"
                                     class="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     type="checkbox"
                                   />
                                   <div
@@ -1372,7 +1372,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                 class="euiPagination__item"
                               >
                                 <button
-                                  aria-controls="some_html_id"
+                                  aria-controls="random_html_id"
                                   aria-current="true"
                                   aria-label="Page 1 of 1"
                                   class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
@@ -1616,7 +1616,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                 checked={false}
                                 className="euiCheckbox__input"
                                 disabled={false}
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 onChange={[Function]}
                                 type="checkbox"
                               />
@@ -1625,7 +1625,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                               />
                               <label
                                 className="euiCheckbox__label"
-                                htmlFor="_selection_column-checkbox_some_html_id"
+                                htmlFor="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -1683,7 +1683,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                       </div>
                       <table
                         className="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabIndex={-1}
                       >
                         <caption
@@ -1712,7 +1712,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                     className="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled={false}
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     onChange={[Function]}
                                     type="checkbox"
                                   />
@@ -2110,7 +2110,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                                 className="euiPagination__item"
                               >
                                 <button
-                                  aria-controls="some_html_id"
+                                  aria-controls="random_html_id"
                                   aria-current={true}
                                   aria-label="Page 1 of 1"
                                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"

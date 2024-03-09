@@ -34,7 +34,7 @@ Array [
       </div>
       <table
         className="euiTable euiTable--responsive"
-        id="some_html_id"
+        id="random_html_id"
         tabIndex={-1}
       >
         <caption
@@ -251,7 +251,7 @@ Array [
       </div>
       <table
         className="euiTable euiTable--responsive"
-        id="some_html_id"
+        id="random_html_id"
         tabIndex={-1}
       >
         <caption
@@ -775,7 +775,7 @@ Array [
                 className="euiPagination__item"
               >
                 <button
-                  aria-controls="some_html_id"
+                  aria-controls="random_html_id"
                   aria-current={true}
                   aria-label="Page 1 of 1"
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"

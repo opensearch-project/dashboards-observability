@@ -27,7 +27,7 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -35,7 +35,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Data source
       </label>
@@ -44,7 +44,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -80,7 +80,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -140,7 +140,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         A data source has to be configured and active to be able to select it and index data from.
       </div>
@@ -148,7 +148,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -156,7 +156,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Database
       </label>
@@ -165,7 +165,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -201,7 +201,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -261,7 +261,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the database that contains the tables you'd like to use.
       </div>
@@ -269,7 +269,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -277,7 +277,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Table
       </label>
@@ -286,7 +286,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -322,7 +322,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -382,7 +382,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the Spark table that has the data you would like to index.
       </div>
@@ -418,7 +418,7 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -426,7 +426,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Data source
       </label>
@@ -435,7 +435,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -471,7 +471,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -532,7 +532,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         A data source has to be configured and active to be able to select it and index data from.
       </div>
@@ -540,7 +540,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -548,7 +548,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Database
       </label>
@@ -557,7 +557,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -593,7 +593,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -654,7 +654,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the database that contains the tables you'd like to use.
       </div>
@@ -662,7 +662,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -670,7 +670,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Table
       </label>
@@ -679,7 +679,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -693,7 +693,7 @@ Array [
             className="euiFormControlLayout__childrenWrapper"
           >
             <div
-              className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+              className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               onClick={[Function]}
               tabIndex={-1}
@@ -715,7 +715,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -746,9 +746,6 @@ Array [
             <div
               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
             >
-              <span
-                className="euiLoadingSpinner euiLoadingSpinner--medium"
-              />
               <button
                 aria-label="Open list of options"
                 className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -779,7 +776,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the Spark table that has the data you would like to index.
       </div>

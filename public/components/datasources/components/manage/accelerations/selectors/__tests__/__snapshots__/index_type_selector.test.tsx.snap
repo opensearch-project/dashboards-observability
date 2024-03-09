@@ -3,14 +3,14 @@
 exports[`Index type selector components renders type selector with default options 1`] = `
 <div
   className="euiFormRow"
-  id="some_html_id-row"
+  id="random_html_id-row"
 >
   <div
     className="euiFormRow__labelWrapper"
   >
     <label
       className="euiFormLabel euiFormRow__label"
-      htmlFor="some_html_id"
+      htmlFor="random_html_id"
     >
       Index type
     </label>
@@ -53,7 +53,7 @@ exports[`Index type selector components renders type selector with default optio
     className="euiFormRow__fieldWrapper"
   >
     <div
-      aria-describedby="some_html_id-help-0"
+      aria-describedby="random_html_id-help-0"
       aria-expanded={false}
       aria-haspopup="listbox"
       className="euiComboBox"
@@ -90,7 +90,7 @@ exports[`Index type selector components renders type selector with default optio
               <input
                 aria-controls=""
                 data-test-subj="comboBoxSearchInput"
-                id="some_html_id"
+                id="random_html_id"
                 onBlur={[Function]}
                 onChange={[Function]}
                 onFocus={[Function]}
@@ -150,7 +150,7 @@ exports[`Index type selector components renders type selector with default optio
     </div>
     <div
       className="euiFormHelpText euiFormRow__text"
-      id="some_html_id-help-0"
+      id="random_html_id-help-0"
     >
       Select the type of index you want to create. Each index type has benefits and costs.
     </div>
@@ -161,14 +161,14 @@ exports[`Index type selector components renders type selector with default optio
 exports[`Index type selector components renders type selector with different options 1`] = `
 <div
   className="euiFormRow"
-  id="some_html_id-row"
+  id="random_html_id-row"
 >
   <div
     className="euiFormRow__labelWrapper"
   >
     <label
       className="euiFormLabel euiFormRow__label"
-      htmlFor="some_html_id"
+      htmlFor="random_html_id"
     >
       Index type
     </label>
@@ -210,7 +210,7 @@ exports[`Index type selector components renders type selector with different opt
     className="euiFormRow__fieldWrapper"
   >
     <div
-      aria-describedby="some_html_id-help-0"
+      aria-describedby="random_html_id-help-0"
       aria-expanded={false}
       aria-haspopup="listbox"
       className="euiComboBox"
@@ -247,7 +247,7 @@ exports[`Index type selector components renders type selector with different opt
               <input
                 aria-controls=""
                 data-test-subj="comboBoxSearchInput"
-                id="some_html_id"
+                id="random_html_id"
                 onBlur={[Function]}
                 onChange={[Function]}
                 onFocus={[Function]}
@@ -308,7 +308,7 @@ exports[`Index type selector components renders type selector with different opt
     </div>
     <div
       className="euiFormHelpText euiFormRow__text"
-      id="some_html_id-help-0"
+      id="random_html_id-help-0"
     >
       Select the type of index you want to create. Each index type has benefits and costs.
     </div>

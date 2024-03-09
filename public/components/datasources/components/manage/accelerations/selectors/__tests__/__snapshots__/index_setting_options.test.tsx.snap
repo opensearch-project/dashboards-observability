@@ -15,14 +15,14 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index type
       </label>
@@ -65,7 +65,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -102,7 +102,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -162,7 +162,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the type of index you want to create. Each index type has benefits and costs.
       </div>
@@ -170,7 +170,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -178,7 +178,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of primary shards
       </label>
@@ -193,10 +193,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of primary shards"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={1}
             onBlur={[Function]}
@@ -210,7 +210,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
       </div>
@@ -218,7 +218,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -226,7 +226,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of replicas
       </label>
@@ -241,10 +241,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of replicas"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={0}
             onBlur={[Function]}
@@ -258,7 +258,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of replicas each primary shard should have.
       </div>
@@ -266,14 +266,14 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Refresh type
       </label>
@@ -282,8 +282,8 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
-        id="some_html_id"
+        aria-describedby="random_html_id-help-0"
+        id="random_html_id"
         onBlur={[Function]}
         onFocus={[Function]}
       >
@@ -353,7 +353,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
       </div>
@@ -361,7 +361,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -369,7 +369,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Checkpoint location
       </label>
@@ -384,10 +384,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
             className="euiFieldText"
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -399,7 +399,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         The HDFS compatible file system location path for incremental refresh job checkpoint.
       </div>
@@ -423,14 +423,14 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index type
       </label>
@@ -472,7 +472,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -509,7 +509,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -570,7 +570,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the type of index you want to create. Each index type has benefits and costs.
       </div>
@@ -578,7 +578,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -586,7 +586,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of primary shards
       </label>
@@ -601,10 +601,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of primary shards"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={1}
             onBlur={[Function]}
@@ -618,7 +618,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
       </div>
@@ -626,7 +626,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -634,7 +634,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of replicas
       </label>
@@ -649,10 +649,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of replicas"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={0}
             onBlur={[Function]}
@@ -666,7 +666,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of replicas each primary shard should have.
       </div>
@@ -674,14 +674,14 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Refresh type
       </label>
@@ -690,8 +690,8 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
-        id="some_html_id"
+        aria-describedby="random_html_id-help-0"
+        id="random_html_id"
         onBlur={[Function]}
         onFocus={[Function]}
       >
@@ -761,7 +761,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
       </div>
@@ -769,7 +769,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -777,7 +777,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Checkpoint location
       </label>
@@ -792,10 +792,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
             className="euiFieldText"
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -807,7 +807,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         The HDFS compatible file system location path for incremental refresh job checkpoint.
       </div>
@@ -831,14 +831,14 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index type
       </label>
@@ -880,7 +880,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
+        aria-describedby="random_html_id-help-0"
         aria-expanded={false}
         aria-haspopup="listbox"
         className="euiComboBox"
@@ -917,7 +917,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="some_html_id"
+                  id="random_html_id"
                   onBlur={[Function]}
                   onChange={[Function]}
                   onFocus={[Function]}
@@ -978,7 +978,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Select the type of index you want to create. Each index type has benefits and costs.
       </div>
@@ -986,7 +986,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -994,7 +994,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of primary shards
       </label>
@@ -1009,10 +1009,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of primary shards"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={1}
             onBlur={[Function]}
@@ -1026,7 +1026,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
       </div>
@@ -1034,7 +1034,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -1042,7 +1042,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Number of replicas
       </label>
@@ -1057,10 +1057,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Number of replicas"
             className="euiFieldNumber"
-            id="some_html_id"
+            id="random_html_id"
             max={100}
             min={0}
             onBlur={[Function]}
@@ -1074,7 +1074,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify the number of replicas each primary shard should have.
       </div>
@@ -1082,14 +1082,14 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
     >
       <label
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Refresh type
       </label>
@@ -1098,8 +1098,8 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="some_html_id-help-0"
-        id="some_html_id"
+        aria-describedby="random_html_id-help-0"
+        id="random_html_id"
         onBlur={[Function]}
         onFocus={[Function]}
       >
@@ -1169,7 +1169,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
       </div>
@@ -1177,7 +1177,7 @@ Array [
   </div>,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -1185,7 +1185,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Checkpoint location
       </label>
@@ -1200,10 +1200,10 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
             className="euiFieldText"
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -1215,7 +1215,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         The HDFS compatible file system location path for incremental refresh job checkpoint.
       </div>

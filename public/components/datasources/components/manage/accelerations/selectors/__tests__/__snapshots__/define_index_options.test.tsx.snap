@@ -15,7 +15,7 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -23,7 +23,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index name
       </label>
@@ -49,7 +49,7 @@ Array [
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
-          htmlFor="some_html_id"
+          htmlFor="random_html_id"
         >
           flint_{Datasource Name}_{Database Name}_{Table Name}_
         </label>
@@ -83,11 +83,11 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
             className="euiFieldText euiFieldText--inGroup"
             disabled={false}
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -98,14 +98,14 @@ Array [
         </div>
         <label
           className="euiFormLabel euiFormControlLayout__append"
-          htmlFor="some_html_id"
+          htmlFor="random_html_id"
         >
           _index
         </label>
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
       </div>
@@ -130,7 +130,7 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -138,7 +138,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index name
       </label>
@@ -164,7 +164,7 @@ Array [
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
-          htmlFor="some_html_id"
+          htmlFor="random_html_id"
         >
           flint_{Datasource Name}_{Database Name}_{Table Name}_
         </label>
@@ -198,11 +198,11 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
             className="euiFieldText euiFieldText--inGroup"
             disabled={true}
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -213,14 +213,14 @@ Array [
         </div>
         <label
           className="euiFormLabel euiFormControlLayout__append"
-          htmlFor="some_html_id"
+          htmlFor="random_html_id"
         >
           _index
         </label>
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
       </div>
@@ -245,7 +245,7 @@ Array [
   />,
   <div
     className="euiFormRow"
-    id="some_html_id-row"
+    id="random_html_id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -253,7 +253,7 @@ Array [
       <label
         aria-invalid={false}
         className="euiFormLabel euiFormRow__label"
-        htmlFor="some_html_id"
+        htmlFor="random_html_id"
       >
         Index name
       </label>
@@ -279,7 +279,7 @@ Array [
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
-          htmlFor="some_html_id"
+          htmlFor="random_html_id"
         >
           flint_{Datasource Name}_{Database Name}_
         </label>
@@ -313,11 +313,11 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="some_html_id-help-0"
+            aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
             className="euiFieldText euiFieldText--inGroup"
             disabled={false}
-            id="some_html_id"
+            id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -329,7 +329,7 @@ Array [
       </div>
       <div
         className="euiFormHelpText euiFormRow__text"
-        id="some_html_id-help-0"
+        id="random_html_id-help-0"
       >
         Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
       </div>

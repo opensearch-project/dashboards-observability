@@ -76,7 +76,7 @@ Array [
                      
                     <a
                       class="euiLink euiLink--primary"
-                      href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"
+                      href="https://opensearch.org/docs/latest/data-acceleration/index"
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -148,7 +148,7 @@ Array [
                     />
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -156,7 +156,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Data source
                         </label>
@@ -165,7 +165,7 @@ Array [
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          aria-describedby="some_html_id-help-0"
+                          aria-describedby="random_html_id-help-0"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           class="euiComboBox"
@@ -194,7 +194,7 @@ Array [
                                   <input
                                     aria-controls=""
                                     data-test-subj="comboBoxSearchInput"
-                                    id="some_html_id"
+                                    id="random_html_id"
                                     role="textbox"
                                     style="box-sizing: content-box; width: 2px;"
                                     value=""
@@ -234,7 +234,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           A data source has to be configured and active to be able to select it and index data from.
                         </div>
@@ -242,7 +242,7 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -250,7 +250,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Database
                         </label>
@@ -259,7 +259,7 @@ Array [
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          aria-describedby="some_html_id-help-0"
+                          aria-describedby="random_html_id-help-0"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           class="euiComboBox"
@@ -288,7 +288,7 @@ Array [
                                   <input
                                     aria-controls=""
                                     data-test-subj="comboBoxSearchInput"
-                                    id="some_html_id"
+                                    id="random_html_id"
                                     role="textbox"
                                     style="box-sizing: content-box; width: 2px;"
                                     value=""
@@ -328,7 +328,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Select the database that contains the tables you'd like to use.
                         </div>
@@ -336,7 +336,7 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -344,7 +344,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Table
                         </label>
@@ -353,7 +353,7 @@ Array [
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          aria-describedby="some_html_id-help-0"
+                          aria-describedby="random_html_id-help-0"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           class="euiComboBox"
@@ -382,7 +382,7 @@ Array [
                                   <input
                                     aria-controls=""
                                     data-test-subj="comboBoxSearchInput"
-                                    id="some_html_id"
+                                    id="random_html_id"
                                     role="textbox"
                                     style="box-sizing: content-box; width: 2px;"
                                     value=""
@@ -422,7 +422,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Select the Spark table that has the data you would like to index.
                         </div>
@@ -444,14 +444,14 @@ Array [
                     />
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
                       >
                         <label
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Index type
                         </label>
@@ -493,7 +493,7 @@ Array [
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          aria-describedby="some_html_id-help-0"
+                          aria-describedby="random_html_id-help-0"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           class="euiComboBox"
@@ -523,7 +523,7 @@ Array [
                                   <input
                                     aria-controls=""
                                     data-test-subj="comboBoxSearchInput"
-                                    id="some_html_id"
+                                    id="random_html_id"
                                     role="textbox"
                                     style="box-sizing: content-box; width: 2px;"
                                     value=""
@@ -563,7 +563,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Select the type of index you want to create. Each index type has benefits and costs.
                         </div>
@@ -571,7 +571,7 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -579,7 +579,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Number of primary shards
                         </label>
@@ -594,10 +594,10 @@ Array [
                             class="euiFormControlLayout__childrenWrapper"
                           >
                             <input
-                              aria-describedby="some_html_id-help-0"
+                              aria-describedby="random_html_id-help-0"
                               aria-label="Number of primary shards"
                               class="euiFieldNumber"
-                              id="some_html_id"
+                              id="random_html_id"
                               max="100"
                               min="1"
                               placeholder="Number of primary shards"
@@ -608,7 +608,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
                         </div>
@@ -616,7 +616,7 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -624,7 +624,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Number of replicas
                         </label>
@@ -639,10 +639,10 @@ Array [
                             class="euiFormControlLayout__childrenWrapper"
                           >
                             <input
-                              aria-describedby="some_html_id-help-0"
+                              aria-describedby="random_html_id-help-0"
                               aria-label="Number of replicas"
                               class="euiFieldNumber"
-                              id="some_html_id"
+                              id="random_html_id"
                               max="100"
                               min="0"
                               placeholder="Number of replicas"
@@ -653,7 +653,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Specify the number of replicas each primary shard should have.
                         </div>
@@ -661,14 +661,14 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
                       >
                         <label
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Refresh type
                         </label>
@@ -677,8 +677,8 @@ Array [
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          aria-describedby="some_html_id-help-0"
-                          id="some_html_id"
+                          aria-describedby="random_html_id-help-0"
+                          id="random_html_id"
                         >
                           <div
                             class="euiRadio euiRadioGroup__item"
@@ -744,7 +744,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
                         </div>
@@ -752,7 +752,7 @@ Array [
                     </div>
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -760,7 +760,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Checkpoint location
                         </label>
@@ -775,10 +775,10 @@ Array [
                             class="euiFormControlLayout__childrenWrapper"
                           >
                             <input
-                              aria-describedby="some_html_id-help-0"
+                              aria-describedby="random_html_id-help-0"
                               aria-label="Use aria labels when no actual label is in use"
                               class="euiFieldText"
-                              id="some_html_id"
+                              id="random_html_id"
                               placeholder="s3://checkpoint/location"
                               type="text"
                               value=""
@@ -787,7 +787,7 @@ Array [
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           The HDFS compatible file system location path for incremental refresh job checkpoint.
                         </div>
@@ -809,7 +809,7 @@ Array [
                     />
                     <div
                       class="euiFormRow"
-                      id="some_html_id-row"
+                      id="random_html_id-row"
                     >
                       <div
                         class="euiFormRow__labelWrapper"
@@ -817,7 +817,7 @@ Array [
                         <label
                           aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
-                          for="some_html_id"
+                          for="random_html_id"
                         >
                           Index name
                         </label>
@@ -841,7 +841,7 @@ Array [
                         >
                           <label
                             class="euiFormLabel euiFormControlLayout__prepend"
-                            for="some_html_id"
+                            for="random_html_id"
                           >
                             flint_{Datasource Name}_{Database Name}_{Table Name}_
                           </label>
@@ -869,11 +869,11 @@ Array [
                             class="euiFormControlLayout__childrenWrapper"
                           >
                             <input
-                              aria-describedby="some_html_id-help-0"
+                              aria-describedby="random_html_id-help-0"
                               aria-label="Enter Index Name"
                               class="euiFieldText euiFieldText--inGroup"
                               disabled=""
-                              id="some_html_id"
+                              id="random_html_id"
                               placeholder="Enter index name"
                               type="text"
                               value="skipping"
@@ -881,14 +881,14 @@ Array [
                           </div>
                           <label
                             class="euiFormLabel euiFormControlLayout__append"
-                            for="some_html_id"
+                            for="random_html_id"
                           >
                             _index
                           </label>
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"
-                          id="some_html_id-help-0"
+                          id="random_html_id-help-0"
                         >
                           Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
                         </div>
@@ -932,7 +932,7 @@ Array [
                         </div>
                         <table
                           class="euiTable euiTable--responsive"
-                          id="some_html_id"
+                          id="random_html_id"
                           tabindex="-1"
                         >
                           <caption
@@ -1241,7 +1241,7 @@ Array [
                      
                     <a
                       className="euiLink euiLink--primary"
-                      href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"
+                      href="https://opensearch.org/docs/latest/data-acceleration/index"
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -1315,7 +1315,7 @@ Array [
                       />,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -1323,7 +1323,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Data source
                           </label>
@@ -1332,7 +1332,7 @@ Array [
                           className="euiFormRow__fieldWrapper"
                         >
                           <div
-                            aria-describedby="some_html_id-help-0"
+                            aria-describedby="random_html_id-help-0"
                             aria-expanded={false}
                             aria-haspopup="listbox"
                             className="euiComboBox"
@@ -1368,7 +1368,7 @@ Array [
                                     <input
                                       aria-controls=""
                                       data-test-subj="comboBoxSearchInput"
-                                      id="some_html_id"
+                                      id="random_html_id"
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onFocus={[Function]}
@@ -1428,7 +1428,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             A data source has to be configured and active to be able to select it and index data from.
                           </div>
@@ -1436,7 +1436,7 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -1444,7 +1444,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Database
                           </label>
@@ -1453,7 +1453,7 @@ Array [
                           className="euiFormRow__fieldWrapper"
                         >
                           <div
-                            aria-describedby="some_html_id-help-0"
+                            aria-describedby="random_html_id-help-0"
                             aria-expanded={false}
                             aria-haspopup="listbox"
                             className="euiComboBox"
@@ -1489,7 +1489,7 @@ Array [
                                     <input
                                       aria-controls=""
                                       data-test-subj="comboBoxSearchInput"
-                                      id="some_html_id"
+                                      id="random_html_id"
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onFocus={[Function]}
@@ -1549,7 +1549,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Select the database that contains the tables you'd like to use.
                           </div>
@@ -1557,7 +1557,7 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -1565,7 +1565,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Table
                           </label>
@@ -1574,7 +1574,7 @@ Array [
                           className="euiFormRow__fieldWrapper"
                         >
                           <div
-                            aria-describedby="some_html_id-help-0"
+                            aria-describedby="random_html_id-help-0"
                             aria-expanded={false}
                             aria-haspopup="listbox"
                             className="euiComboBox"
@@ -1610,7 +1610,7 @@ Array [
                                     <input
                                       aria-controls=""
                                       data-test-subj="comboBoxSearchInput"
-                                      id="some_html_id"
+                                      id="random_html_id"
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onFocus={[Function]}
@@ -1670,7 +1670,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Select the Spark table that has the data you would like to index.
                           </div>
@@ -1694,14 +1694,14 @@ Array [
                       />,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
                         >
                           <label
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Index type
                           </label>
@@ -1744,7 +1744,7 @@ Array [
                           className="euiFormRow__fieldWrapper"
                         >
                           <div
-                            aria-describedby="some_html_id-help-0"
+                            aria-describedby="random_html_id-help-0"
                             aria-expanded={false}
                             aria-haspopup="listbox"
                             className="euiComboBox"
@@ -1781,7 +1781,7 @@ Array [
                                     <input
                                       aria-controls=""
                                       data-test-subj="comboBoxSearchInput"
-                                      id="some_html_id"
+                                      id="random_html_id"
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onFocus={[Function]}
@@ -1841,7 +1841,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Select the type of index you want to create. Each index type has benefits and costs.
                           </div>
@@ -1849,7 +1849,7 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -1857,7 +1857,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Number of primary shards
                           </label>
@@ -1872,10 +1872,10 @@ Array [
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <input
-                                aria-describedby="some_html_id-help-0"
+                                aria-describedby="random_html_id-help-0"
                                 aria-label="Number of primary shards"
                                 className="euiFieldNumber"
-                                id="some_html_id"
+                                id="random_html_id"
                                 max={100}
                                 min={1}
                                 onBlur={[Function]}
@@ -1889,7 +1889,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
                           </div>
@@ -1897,7 +1897,7 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -1905,7 +1905,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Number of replicas
                           </label>
@@ -1920,10 +1920,10 @@ Array [
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <input
-                                aria-describedby="some_html_id-help-0"
+                                aria-describedby="random_html_id-help-0"
                                 aria-label="Number of replicas"
                                 className="euiFieldNumber"
-                                id="some_html_id"
+                                id="random_html_id"
                                 max={100}
                                 min={0}
                                 onBlur={[Function]}
@@ -1937,7 +1937,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Specify the number of replicas each primary shard should have.
                           </div>
@@ -1945,14 +1945,14 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
                         >
                           <label
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Refresh type
                           </label>
@@ -1961,8 +1961,8 @@ Array [
                           className="euiFormRow__fieldWrapper"
                         >
                           <div
-                            aria-describedby="some_html_id-help-0"
-                            id="some_html_id"
+                            aria-describedby="random_html_id-help-0"
+                            id="random_html_id"
                             onBlur={[Function]}
                             onFocus={[Function]}
                           >
@@ -2032,7 +2032,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
                           </div>
@@ -2040,7 +2040,7 @@ Array [
                       </div>,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -2048,7 +2048,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Checkpoint location
                           </label>
@@ -2063,10 +2063,10 @@ Array [
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <input
-                                aria-describedby="some_html_id-help-0"
+                                aria-describedby="random_html_id-help-0"
                                 aria-label="Use aria labels when no actual label is in use"
                                 className="euiFieldText"
-                                id="some_html_id"
+                                id="random_html_id"
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
@@ -2078,7 +2078,7 @@ Array [
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             The HDFS compatible file system location path for incremental refresh job checkpoint.
                           </div>
@@ -2102,7 +2102,7 @@ Array [
                       />,
                       <div
                         className="euiFormRow"
-                        id="some_html_id-row"
+                        id="random_html_id-row"
                       >
                         <div
                           className="euiFormRow__labelWrapper"
@@ -2110,7 +2110,7 @@ Array [
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="some_html_id"
+                            htmlFor="random_html_id"
                           >
                             Index name
                           </label>
@@ -2136,7 +2136,7 @@ Array [
                           >
                             <label
                               className="euiFormLabel euiFormControlLayout__prepend"
-                              htmlFor="some_html_id"
+                              htmlFor="random_html_id"
                             >
                               flint_{Datasource Name}_{Database Name}_{Table Name}_
                             </label>
@@ -2170,11 +2170,11 @@ Array [
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <input
-                                aria-describedby="some_html_id-help-0"
+                                aria-describedby="random_html_id-help-0"
                                 aria-label="Enter Index Name"
                                 className="euiFieldText euiFieldText--inGroup"
                                 disabled={true}
-                                id="some_html_id"
+                                id="random_html_id"
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
@@ -2185,14 +2185,14 @@ Array [
                             </div>
                             <label
                               className="euiFormLabel euiFormControlLayout__append"
-                              htmlFor="some_html_id"
+                              htmlFor="random_html_id"
                             >
                               _index
                             </label>
                           </div>
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="some_html_id-help-0"
+                            id="random_html_id-help-0"
                           >
                             Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
                           </div>
@@ -2240,7 +2240,7 @@ Array [
                             </div>
                             <table
                               className="euiTable euiTable--responsive"
-                              id="some_html_id"
+                              id="random_html_id"
                               tabIndex={-1}
                             >
                               <caption

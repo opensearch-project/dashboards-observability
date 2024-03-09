@@ -44,6 +44,9 @@ export const ACCELERATION_INDEX_TYPES = [
   { label: 'Materialized View', value: 'materialized' },
 ];
 
+export const ACC_INDEX_TYPE_DOCUMENTATION_URL =
+  'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md';
+
 export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices have a naming format of pattern: \`prefix_<index name>_suffix\`. They share a common prefix structure, which is \`flint_<data source name>_<database name>_<table name>_\`. Additionally, they may have a suffix that varies based on the index type. 
 ##### Skipping Index
 - For 'Skipping' indices, a fixed index name 'skipping' is used, and this name cannot be modified by the user. The suffix added to this type is \`_index\`.

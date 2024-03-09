@@ -57,7 +57,7 @@ describe('Source selector components', () => {
       dataTable: 'tb',
     };
     const setAccelerationFormData = jest.fn();
-    const client = httpClientMock;
+    const client = coreStartMock.http;
     client.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
     client.post = jest.fn().mockResolvedValue([]);
     const wrapper = mount(

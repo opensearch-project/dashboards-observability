@@ -129,7 +129,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                 aria-label="Select all rows"
                                 class="euiCheckbox__input"
                                 disabled=""
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 type="checkbox"
                               />
                               <div
@@ -137,7 +137,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                               />
                               <label
                                 class="euiCheckbox__label"
-                                for="_selection_column-checkbox_some_html_id"
+                                for="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -191,7 +191,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                       </div>
                       <table
                         class="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabindex="-1"
                       >
                         <caption
@@ -214,7 +214,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                     class="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled=""
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     type="checkbox"
                                   />
                                   <div
@@ -495,7 +495,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                 checked={false}
                                 className="euiCheckbox__input"
                                 disabled={true}
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 onChange={[Function]}
                                 type="checkbox"
                               />
@@ -504,7 +504,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                               />
                               <label
                                 className="euiCheckbox__label"
-                                htmlFor="_selection_column-checkbox_some_html_id"
+                                htmlFor="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -561,7 +561,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                       </div>
                       <table
                         className="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabIndex={-1}
                       >
                         <caption
@@ -590,7 +590,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                     className="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled={true}
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     onChange={[Function]}
                                     type="checkbox"
                                   />
@@ -894,7 +894,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                 aria-label="Select all rows"
                                 class="euiCheckbox__input"
                                 disabled=""
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 type="checkbox"
                               />
                               <div
@@ -902,7 +902,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                               />
                               <label
                                 class="euiCheckbox__label"
-                                for="_selection_column-checkbox_some_html_id"
+                                for="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -957,7 +957,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                       </div>
                       <table
                         class="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabindex="-1"
                       >
                         <caption
@@ -980,7 +980,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                     class="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled=""
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     type="checkbox"
                                   />
                                   <div
@@ -1261,7 +1261,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                 checked={false}
                                 className="euiCheckbox__input"
                                 disabled={true}
-                                id="_selection_column-checkbox_some_html_id"
+                                id="_selection_column-checkbox_random_html_id"
                                 onChange={[Function]}
                                 type="checkbox"
                               />
@@ -1270,7 +1270,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                               />
                               <label
                                 className="euiCheckbox__label"
-                                htmlFor="_selection_column-checkbox_some_html_id"
+                                htmlFor="_selection_column-checkbox_random_html_id"
                               >
                                 Select all rows
                               </label>
@@ -1328,7 +1328,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                       </div>
                       <table
                         className="euiTable euiTable--responsive"
-                        id="some_html_id"
+                        id="random_html_id"
                         tabIndex={-1}
                       >
                         <caption
@@ -1357,7 +1357,7 @@ exports[`Add fields modal in skipping index renders add fields modal in skipping
                                     className="euiCheckbox__input"
                                     data-test-subj="checkboxSelectAll"
                                     disabled={true}
-                                    id="_selection_column-checkbox_some_html_id"
+                                    id="_selection_column-checkbox_random_html_id"
                                     onChange={[Function]}
                                     type="checkbox"
                                   />
