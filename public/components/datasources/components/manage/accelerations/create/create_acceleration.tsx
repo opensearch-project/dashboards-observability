@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,35 +16,31 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { CoreStart } from '../../../../../../../../../src/core/public';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_TIME_INTERVAL,
 } from '../../../../../../../common/constants/data_sources';
 import { CreateAccelerationForm } from '../../../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../../framework/core_refs';
 import { DefineIndexOptions } from '../selectors/define_index_options';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
 import { AccelerationDataSourceSelector } from '../selectors/source_selector';
-import { accelerationQueryBuilder } from '../visual_editors/query_builder';
 import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationHeader } from './create_acceleration_header';
 import { formValidator, hasError } from './utils';
 
 export interface CreateAccelerationProps {
-  http: CoreStart['http'];
-  selectedDatasource: EuiComboBoxOptionOption[];
+  selectedDatasource: string;
   resetFlyout: () => void;
-  updateQueries: (query: string) => void;
 }
 
 export const CreateAcceleration = ({
-  http,
   selectedDatasource,
   resetFlyout,
-  updateQueries,
 }: CreateAccelerationProps) => {
+  const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
-    dataSource: selectedDatasource.length > 0 ? selectedDatasource[0].label : '',
+    dataSource: selectedDatasource,
     dataTable: '',
     database: '',
     dataTableFields: [],
@@ -95,7 +90,7 @@ export const CreateAcceleration = ({
       setAccelerationFormData({ ...accelerationFormData, formErrors: errors });
       return;
     }
-    updateQueries(accelerationQueryBuilder(accelerationFormData));
+    // TODO: add -> updateQueries(accelerationQueryBuilder(accelerationFormData));
     resetFlyout();
   };
 
@@ -114,7 +109,7 @@ export const CreateAcceleration = ({
             id="acceleration-form"
           >
             <AccelerationDataSourceSelector
-              http={http}
+              http={http!}
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
