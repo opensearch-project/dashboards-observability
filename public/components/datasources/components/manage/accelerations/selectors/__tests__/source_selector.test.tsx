@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -24,7 +23,7 @@ describe('Source selector components', () => {
 
   it('renders source selector with default options', async () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
-    const selectedDatasource: EuiComboBoxOptionOption[] = [];
+    const selectedDatasource = 'my_glue';
     const setAccelerationFormData = jest.fn();
     const client = coreStartMock.http;
     client.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
@@ -49,7 +48,7 @@ describe('Source selector components', () => {
   });
 
   it('renders source selector with different options', async () => {
-    const selectedDatasource: EuiComboBoxOptionOption[] = [{ label: 'ds' }];
+    const selectedDatasource = 'ds';
     const accelerationFormData: CreateAccelerationForm = {
       ...createAccelerationEmptyDataMock,
       dataSource: 'ds',
