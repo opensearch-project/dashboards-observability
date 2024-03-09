@@ -23,6 +23,7 @@ import {
   TAB_CHART_ID,
 } from '../../../../common/constants/explorer';
 import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
+import { composeFinalQueryWithoutTimestamp } from '../../../components/common/query_utils';
 
 export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   protected queryIndex: string;
@@ -85,13 +86,22 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     const { dispatch, changeQuery } = this.storeContext;
 
     await this.processTimestamp(query);
-    if (isEmpty(this.timestamp)) return;
 
-    const curStartTime = startingTime || this.query[SELECTED_DATE_RANGE][0];
-    const curEndTime = endingTime || this.query[SELECTED_DATE_RANGE][1];
+    const noTimestamp = isEmpty(this.timestamp);
+
+    const curStartTime = noTimestamp ? undefined : startingTime || this.query[SELECTED_DATE_RANGE][0];
+    const curEndTime = noTimestamp ? undefined : endingTime || this.query[SELECTED_DATE_RANGE][1];
 
     // compose final query
-    const finalQuery = composeFinalQuery(
+    const finalQuery = noTimestamp ? 
+    composeFinalQueryWithoutTimestamp(
+      this.query[RAW_QUERY],
+      isLiveTailOn,
+      appBaseQuery,
+      this.query[SELECTED_PATTERN_FIELD],
+      this.query[PATTERN_REGEX],
+      this.query[FILTERED_PATTERN]
+    ) : composeFinalQuery(
       this.query[RAW_QUERY],
       curStartTime,
       curEndTime,
@@ -106,7 +116,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     // update UI with new query state
     await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);
     // calculate proper time interval for count distribution
-    if (!selectedInterval.current || selectedInterval.current.text === 'Auto') {
+    if (!noTimestamp && (!selectedInterval.current || selectedInterval.current.text === 'Auto')) {
       findAutoInterval(curStartTime, curEndTime);
     }
 
