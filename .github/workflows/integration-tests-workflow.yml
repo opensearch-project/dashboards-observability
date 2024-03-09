@@ -5,8 +5,6 @@ on: [pull_request, push]
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: '2.x'
-  OPENSEARCH_VERSION: '2.12.0'
-  OPENSEARCH_PLUGIN_VERSION: '2.12.0.0'
 
 jobs:
   tests:
@@ -45,6 +43,17 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '11'
+
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+
+      - name: Set env
+        run: |
+          opensearch_version=$(node -p "require('./opensearch_dashboards.json').opensearchDashboardsVersion")
+          plugin_version=$(node -p "require('./opensearch_dashboards.json').version")
+          echo "OPENSEARCH_VERSION=$opensearch_version" >> $GITHUB_ENV
+          echo "OPENSEARCH_PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
+        shell: bash
 
       - name: Download observability artifact
         uses: suisei-cn/actions-download-file@v1.4.0
