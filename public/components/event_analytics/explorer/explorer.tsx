@@ -98,7 +98,10 @@ import { findMinInterval } from '../../common/query_utils';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
 import { processMetricsData } from '../../custom_panels/helpers/utils';
-import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
@@ -265,9 +268,38 @@ export const Explorer = ({
   };
 
   const historyFromRedirection = createBrowserHistory();
-
   useEffect(() => {
     console.log(historyFromRedirection.location.state);
+    if (!historyFromRedirection.location.state) return;
+    const {
+      datasourceName,
+      datasourceType,
+      queryToRun,
+    }: any = historyFromRedirection.location.state;
+    console.log('types: ', datasourceName, datasourceType, queryToRun);
+    batch(() => {
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            datasources: [
+              {
+                label: datasourceName,
+                type: datasourceType,
+                value: datasourceName,
+                name: datasourceName,
+              },
+            ],
+          },
+        })
+      );
+      dispatch(
+        changeQuery({
+          tabId,
+          query: { [RAW_QUERY]: queryToRun },
+        })
+      );
+    });
   }, []);
 
   useEffect(() => {
