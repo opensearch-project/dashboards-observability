@@ -40,6 +40,7 @@ export interface IntegrationSetupInputs {
   connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
+  checkpointLocation: string;
   connectionTableName: string;
 }
 
@@ -64,9 +65,9 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   [
     's3',
     {
-      title: 'Catalog',
-      lower: 'catalog',
-      help: 'Select a catalog to pull the data from.',
+      title: 'Data Source',
+      lower: 'data_source',
+      help: 'Select a data source to pull the data from.',
     },
   ],
   [
@@ -193,7 +194,9 @@ export function SetupIntegrationForm({
     [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
-  const [isBlurred, setIsBlurred] = useState(false);
+  const [isBucketBlurred, setIsBucketBlurred] = useState(false);
+  const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
+
   useEffect(() => {
     const updateDataSources = async () => {
       const data = await suggestDataSources(config.connectionType);
@@ -239,7 +242,10 @@ export function SetupIntegrationForm({
         <h3>Integration Connection</h3>
       </EuiText>
       <EuiSpacer />
-      <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
+      <EuiFormRow
+        label="Connection Type"
+        helpText="Select the type of connection to use for queries."
+      >
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 's3') {
@@ -301,16 +307,35 @@ export function SetupIntegrationForm({
           </EuiFormRow>
           <EuiFormRow
             label="S3 Bucket Location"
-            isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
             error={["Must be a URL starting with 's3://'."]}
           >
             <EuiFieldText
               value={config.connectionLocation}
               onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
               placeholder="s3://"
-              isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
               onBlur={() => {
-                setIsBlurred(true);
+                setIsBucketBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Checkpoint Location"
+            helpText={
+              'The Checkpoint location must be a unique directory and not the same as the Bucket ' +
+              'location. It will be used for caching intermediary results.'
+            }
+            isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.checkpointLocation}
+              onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsCheckpointBlurred(true);
               }}
             />
           </EuiFormRow>
@@ -319,6 +344,91 @@ export function SetupIntegrationForm({
     </EuiForm>
   );
 }
+
+const addIntegration = async ({
+  config,
+  integration,
+  setLoading,
+  setCalloutLikeToast,
+}: {
+  config: IntegrationSetupInputs;
+  integration: IntegrationConfig;
+  setLoading: (loading: boolean) => void;
+  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+}) => {
+  setLoading(true);
+  let sessionId: string | null = null;
+
+  if (config.connectionType === 'index') {
+    const res = await addIntegrationRequest(
+      false,
+      integration.name,
+      config.displayName,
+      integration,
+      setCalloutLikeToast,
+      config.displayName,
+      config.connectionDataSource
+    );
+    if (!res) {
+      setLoading(false);
+    }
+  } else if (config.connectionType === 's3') {
+    const http = coreRefs.http!;
+
+    const assets = await http.get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`);
+
+    // Queries must exist because we disable s3 if they're not present
+    for (const query of assets.data.filter(
+      (a: ParsedIntegrationAsset): a is { type: 'query'; query: string; language: string } =>
+        a.type === 'query'
+    )) {
+      let queryStr = (query.query as string).replaceAll(
+        '{table_name}',
+        `${config.connectionDataSource}.default.${config.connectionTableName}`
+      );
+
+      queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+      queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
+      queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+      queryStr = queryStr.replaceAll(/\s+/g, ' ');
+      const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
+      if (!result.ok) {
+        setLoading(false);
+        setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
+        return;
+      }
+      sessionId = result.value.sessionId ?? sessionId;
+    }
+    // Once everything is ready, add the integration to the new datasource as usual
+    // TODO determine actual values here after more about queries is known
+    const res = await addIntegrationRequest(
+      false,
+      integration.name,
+      config.displayName,
+      integration,
+      setCalloutLikeToast,
+      config.displayName,
+      `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
+    );
+    if (!res) {
+      setLoading(false);
+    }
+  } else {
+    console.error('Invalid data source type');
+  }
+};
+
+const isConfigValid = (config: IntegrationSetupInputs): boolean => {
+  if (config.displayName.length < 1 || config.connectionDataSource.length < 1) {
+    return false;
+  }
+  if (config.connectionType === 's3') {
+    return (
+      config.connectionLocation.startsWith('s3://') && config.checkpointLocation.startsWith('s3://')
+    );
+  }
+  return true;
+};
 
 export function SetupBottomBar({
   config,
@@ -367,86 +477,10 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={
-              config.displayName.length < 1 ||
-              config.connectionDataSource.length < 1 ||
-              (config.connectionType === 's3' &&
-                (config.connectionTableName.length < 1 ||
-                  !config.connectionLocation.startsWith('s3://')))
+            disabled={!isConfigValid(config)}
+            onClick={async () =>
+              addIntegration({ integration, config, setLoading, setCalloutLikeToast })
             }
-            onClick={async () => {
-              setLoading(true);
-              let sessionId: string | null = null;
-
-              if (config.connectionType === 'index') {
-                const res = await addIntegrationRequest(
-                  false,
-                  integration.name,
-                  config.displayName,
-                  integration,
-                  setCalloutLikeToast,
-                  config.displayName,
-                  config.connectionDataSource
-                );
-                if (!res) {
-                  setLoading(false);
-                }
-              } else if (config.connectionType === 's3') {
-                const http = coreRefs.http!;
-
-                const assets = await http.get(
-                  `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
-                );
-
-                // Queries must exist because we disable s3 if they're not present
-                for (const query of assets.data.filter(
-                  (
-                    a: ParsedIntegrationAsset
-                  ): a is { type: 'query'; query: string; language: string } => a.type === 'query'
-                )) {
-                  let queryStr = (query.query as string).replaceAll(
-                    '{table_name}',
-                    `${config.connectionDataSource}.default.${config.connectionTableName}`
-                  );
-                  // We append to this URI in internal queries, so we normalize it to have no trailing slash
-                  let trimmedLocation = config.connectionLocation.trim();
-                  trimmedLocation = trimmedLocation.endsWith('/')
-                    ? trimmedLocation.slice(0, trimmedLocation.length - 1)
-                    : trimmedLocation;
-
-                  queryStr = queryStr.replaceAll('{s3_bucket_location}', trimmedLocation);
-                  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
-                  queryStr = queryStr.replaceAll(/\s+/g, ' ');
-                  const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
-                  if (!result.ok) {
-                    setLoading(false);
-                    setCalloutLikeToast(
-                      'Failed to add integration',
-                      'danger',
-                      result.error.message
-                    );
-                    return;
-                  }
-                  sessionId = result.value.sessionId ?? sessionId;
-                }
-                // Once everything is ready, add the integration to the new datasource as usual
-                // TODO determine actual values here after more about queries is known
-                const res = await addIntegrationRequest(
-                  false,
-                  integration.name,
-                  config.displayName,
-                  integration,
-                  setCalloutLikeToast,
-                  config.displayName,
-                  `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
-                );
-                if (!res) {
-                  setLoading(false);
-                }
-              } else {
-                console.error('Invalid data source type');
-              }
-            }}
             data-test-subj="create-instance-button"
           >
             Add Integration
@@ -475,8 +509,9 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionType: 'index',
     connectionDataSource: '',
     connectionLocation: '',
+    checkpointLocation: '',
     connectionTableName: integration,
-  } as IntegrationSetupInputs);
+  });
 
   const [template, setTemplate] = useState({
     name: integration,
