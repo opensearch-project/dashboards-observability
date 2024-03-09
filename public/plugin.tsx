@@ -84,6 +84,10 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import {
+  AssociatedObjectsDetailsFlyout,
+  AssociatedObjectsFlyoutProps,
+} from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 
 interface PublicConfig {
   query_assist: {
@@ -98,6 +102,11 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter('renderAccelerationDetailsFlyout');
+
+export const [
+  getRenderAssociatedObjectsDetailsFlyout,
+  setRenderAssociatedObjectsDetailsFlyout,
+] = createGetterSetter('renderAssociatedObjectsDetailsFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -378,9 +387,16 @@ export class ObservabilityPlugin
       );
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
+    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) =>
+      core.overlays.openFlyout(
+        toMountPoint(<AssociatedObjectsDetailsFlyout tableDetail={tableDetail} />)
+      );
+    setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
+
     // Export so other plugins can use this flyout
     return {
       renderAccelerationDetailsFlyout,
+      renderAssociatedObjectsDetailsFlyout,
     };
   }
 

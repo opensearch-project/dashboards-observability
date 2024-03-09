@@ -5,6 +5,8 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
+export type AccelerationStatus = 'ACTIVE' | 'INACTIVE';
+
 export interface PermissionsConfigurationProps {
   roles: Role[];
   selectedRoles: Role[];
@@ -13,13 +15,33 @@ export interface PermissionsConfigurationProps {
   hasSecurityAccess: boolean;
 }
 
+export interface TableColumn {
+  name: string;
+  dataType: string;
+}
+
+export interface Acceleration {
+  name: string;
+  status: AccelerationStatus;
+  type: string;
+  database: string;
+  table: string;
+  destination: string;
+  dateCreated: number;
+  dateUpdated: number;
+  index: string;
+  sql: string;
+}
+
 export interface AssociatedObject {
+  datasource: string;
   id: string;
   name: string;
   database: string;
   type: string;
   createdByIntegration: string;
-  accelerations: string[];
+  accelerations: Acceleration[];
+  columns: TableColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;
