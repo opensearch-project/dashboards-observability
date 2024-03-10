@@ -48,6 +48,7 @@ import {
   observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
+import { AssociatedObject } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -102,12 +103,14 @@ interface PublicConfig {
 export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
-] = createGetterSetter('renderAccelerationDetailsFlyout');
+] = createGetterSetter<(acceleration: any) => void>('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter('renderAssociatedObjectsDetailsFlyout');
+] = createGetterSetter<({ tableDetail }: { tableDetail: AssociatedObject }) => void>(
+  'renderAssociatedObjectsDetailsFlyout'
+);
 
 export const [
   getRenderCreateAccelerationFlyout,
