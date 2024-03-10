@@ -21,21 +21,33 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTablesToCache,
+} from '../../../../../public/framework/catalog_cache/cache_loader';
+import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
+import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
+import {
   DATACONNECTIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { DatasourceType } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
+import {
+  CachedAcceleration,
+  CachedDatabase,
+  CachedTable,
+  DatasourceType,
+} from '../../../../../common/types/data_connections';
+import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
-import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
 
-interface DatasourceDetails {
+export interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
   connector: DatasourceType;
@@ -117,6 +129,28 @@ export const DataConnection = (props: any) => {
 
   const onclickDiscoverCard = () => {
     application!.navigateToApp(observabilityLogsID);
+  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState(true);
+  const {
+    loadStatus: databasesLoadStatus,
+    startLoading: startLoadingDatabases,
+  } = useLoadDatabasesToCache();
+  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache();
+  const {
+    loadStatus: accelerationsLoadStatus,
+    startLoading: startLoadingAccelerations,
+  } = useLoadAccelerationsToCache();
+  const [tablesIsLoading, setTablesIsLoading] = useState<boolean>(false);
+  const [accelerationsIsLoading, setAccelerationsIsLoading] = useState<boolean>(false);
+  const [cachedDatabases, setCachedDatabases] = useState<CachedDatabase[]>([]);
+  const [cachedTables, setCachedTables] = useState<CachedTable[]>([]);
+  const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
+  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const loadDatabases = () => {
+    if (datasourceDetails.name) {
+      startLoadingDatabases(datasourceDetails.name);
+      setIsRefreshing(true);
+    }
   };
 
   const DefaultDatasourceCards = () => {
@@ -197,7 +231,27 @@ export const DataConnection = (props: any) => {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
-      content: <AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />,
+      content: (
+        <AssociatedObjectsTab
+          associatedObjects={mockAssociatedObjects}
+          datasource={datasourceDetails}
+          cachedDatabases={cachedDatabases}
+          databasesLoadStatus={databasesLoadStatus}
+          loadDatabases={loadDatabases}
+          selectedDatabase={selectedDatabase}
+          setSelectedDatabase={setSelectedDatabase}
+          cachedTables={cachedTables}
+          tablesLoadStatus={tablesLoadStatus}
+          startLoadingTables={startLoadingTables}
+          tablesIsLoading={tablesIsLoading}
+          cachedAccelerations={cachedAccelerations}
+          accelerationsLoadStatus={accelerationsLoadStatus}
+          startLoadingAccelerations={startLoadingAccelerations}
+          accelerationsIsLoading={accelerationsIsLoading}
+          isFirstTimeLoading={isFirstTimeLoading}
+          isRefreshing={isRefreshing}
+        />
+      ),
     },
     {
       id: 'acceleration_table',
@@ -317,6 +371,46 @@ export const DataConnection = (props: any) => {
       </EuiPanel>
     );
   };
+
+  useEffect(() => {
+    loadDatabases();
+  }, [datasourceDetails.name]);
+
+  useEffect(() => {
+    const loadingStatuses = [
+      DirectQueryLoadingStatus.RUNNING,
+      DirectQueryLoadingStatus.SCHEDULED,
+      DirectQueryLoadingStatus.WAITING,
+    ];
+    setTablesIsLoading(loadingStatuses.includes(tablesLoadStatus));
+    setAccelerationsIsLoading(loadingStatuses.includes(accelerationsLoadStatus));
+    if (databasesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedList: CachedDatabase[] =
+        CatalogCacheManager.getDataSourceCache().dataSources.find(
+          (cachedDataSource) => cachedDataSource.name === datasourceDetails.name
+        )?.databases || [];
+      if (cachedList) {
+        setCachedDatabases(cachedList);
+      }
+      setIsRefreshing(false);
+      setIsFirstTimeLoading(false);
+    }
+    if (tablesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedList: CachedTable[] = CatalogCacheManager.getDatabase(
+        datasourceDetails.name,
+        selectedDatabase
+      ).tables;
+      if (cachedList) {
+        setCachedTables(cachedList);
+      }
+    }
+    if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedList = CatalogCacheManager.getAccelerationsCache().accelerations;
+      if (cachedList) {
+        setCachedAccelerations(cachedList);
+      }
+    }
+  }, [databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus]);
 
   const DatasourceOverview = () => {
     switch (datasourceDetails.connector) {

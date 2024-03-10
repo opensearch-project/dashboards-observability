@@ -41,7 +41,7 @@ export interface AssociatedObject {
   type: string;
   createdByIntegration: string;
   accelerations: Acceleration[];
-  columns: TableColumn[];
+  columns: TableColumn[] | undefined;
 }
 
 export type Role = EuiComboBoxOptionOption;
@@ -105,7 +105,7 @@ export interface DataSourceCacheData {
   dataSources: CachedDataSource[];
 }
 
-export interface CachedAccelerations {
+export interface CachedAcceleration {
   flintIndexName: string;
   type: AccelerationIndexType;
   database: string;
@@ -117,7 +117,7 @@ export interface CachedAccelerations {
 
 export interface CachedAcclerationByDataSource {
   name: string;
-  accelerations: CachedAccelerations[];
+  accelerations: CachedAcceleration[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
