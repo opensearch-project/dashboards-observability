@@ -2051,6 +2051,53 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
           </div>
         </div>
       </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <SetupWorkflowSelector
+              id="random_html_id"
+              integration={
+                Object {
+                  "assets": Array [
+                    Object {
+                      "extension": "ndjson",
+                      "name": "sample",
+                      "type": "savedObjectBundle",
+                      "version": "1.0.1",
+                    },
+                  ],
+                  "components": Array [
+                    Object {
+                      "name": "logs",
+                      "version": "1.0.0",
+                    },
+                  ],
+                  "license": "Apache-2.0",
+                  "name": "sample",
+                  "type": "logs",
+                  "version": "2.0.0",
+                }
+              }
+              onBlur={[Function]}
+              onFocus={[Function]}
+              toggleWorkflow={[Function]}
+              useWorkflows={Array []}
+            />
+          </div>
+        </div>
+      </EuiFormRow>
     </div>
   </EuiForm>
 </SetupIntegrationForm>

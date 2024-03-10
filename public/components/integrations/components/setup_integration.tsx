@@ -8,6 +8,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCheckableCard,
   EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
@@ -182,6 +183,37 @@ const runQuery = async (
   }
 };
 
+export function SetupWorkflowSelector({
+  integration,
+  useWorkflows,
+  toggleWorkflow,
+}: {
+  integration: IntegrationConfig;
+  useWorkflows: Map<string, boolean>;
+  toggleWorkflow: (name: string) => void;
+}) {
+  if (!integration.workflows) {
+    return null;
+  }
+
+  const cards = integration.workflows.map((workflow) => {
+    return (
+      <EuiCheckableCard
+        id={`workflow-checkbox-${workflow.name}`}
+        label={workflow.label}
+        checkableType="checkbox"
+        value={workflow.name}
+        checked={useWorkflows.get(workflow.name)}
+        onChange={() => toggleWorkflow(workflow.name)}
+      >
+        {workflow.description}
+      </EuiCheckableCard>
+    );
+  });
+
+  return cards;
+}
+
 export function SetupIntegrationForm({
   config,
   updateConfig,
@@ -196,6 +228,17 @@ export function SetupIntegrationForm({
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
+
+  const [useWorkflows, setUseWorkflows] = useState(new Map());
+  const toggleWorkflow = (name: string) => {
+    setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
+  };
+
+  useEffect(() => {
+    if (integration.workflows) {
+      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
+    }
+  }, [integration.workflows]);
 
   useEffect(() => {
     const updateDataSources = async () => {
@@ -337,6 +380,13 @@ export function SetupIntegrationForm({
               onBlur={() => {
                 setIsCheckpointBlurred(true);
               }}
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <SetupWorkflowSelector
+              integration={integration}
+              useWorkflows={useWorkflows}
+              toggleWorkflow={toggleWorkflow}
             />
           </EuiFormRow>
         </>
