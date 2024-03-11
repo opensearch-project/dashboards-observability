@@ -16,6 +16,7 @@ import {
   EuiListGroupItem,
   EuiSpacer,
   EuiSplitButton,
+  EuiText,
 } from '@elastic/eui';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { useEffect, useState } from 'react';
@@ -144,6 +145,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         index: props.selectedIndex[0].label,
       }),
     });
+    // TODO remove
     const mockProhibited = Math.random() > 0.5;
     setProhibitedQuery(mockProhibited);
     if (mockProhibited) throw new ProhibitedQueryError();
@@ -353,11 +355,14 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         disabled={submitDisabled}
         isLoading={generating}
         fill={barSelected}
-        // @ts-ignore incorrect type, 'disabled' is a valid color
+        // @ts-ignore incorrect type in Oui 1.5, 'disabled' is a valid color
         color={submitDisabled ? 'disabled' : 'success'}
+        data-test-subj="query-assist-generate-and-run-button"
         options={[
           {
-            display: 'Generate query',
+            display: (
+              <EuiText data-test-subj="query-assist-generate-button">Generate query</EuiText>
+            ),
             onClick: generatePPL,
           },
         ]}

@@ -59,7 +59,8 @@ describe('<QueryAssistInput /> spec', () => {
     const { component, props } = renderQueryAssistInput();
 
     await waitFor(() => {
-      fireEvent.click(component.getByTestId('query-assist-generate-and-run-button'));
+      // splitbutton data-test-subj doesn't work in Oui 1.5, this should be query-assist-generate-and-run-button
+      fireEvent.click(component.getByText('Generate and run'));
     });
 
     expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
@@ -73,6 +74,7 @@ describe('<QueryAssistInput /> spec', () => {
 
     const { component } = renderQueryAssistInput();
     await waitFor(() => {
+      fireEvent.click(component.getByTestId('splitButton--dropdown'));
       fireEvent.click(component.getByTestId('query-assist-generate-button'));
     });
 
@@ -91,7 +93,8 @@ describe('<QueryAssistInput /> spec', () => {
 
     const { component } = renderQueryAssistInput();
     await waitFor(() => {
-      fireEvent.click(component.getByTestId('query-assist-generate-and-run-button'));
+      // splitbutton data-test-subj doesn't work in Oui 1.5, this should be query-assist-generate-and-run-button
+      fireEvent.click(component.getByText('Generate and run'));
     });
 
     expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
@@ -116,7 +119,8 @@ describe('<QueryAssistInput /> spec', () => {
 
     const { component } = renderQueryAssistInput();
     await waitFor(() => {
-      fireEvent.click(component.getByTestId('query-assist-generate-and-run-button'));
+      // splitbutton data-test-subj doesn't work in Oui 1.5, this should be query-assist-generate-and-run-button
+      fireEvent.click(component.getByText('Generate and run'));
     });
 
     expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
