@@ -11,6 +11,7 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
+import { AssociatedObject } from '../common/types/data_connections';
 import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
@@ -33,8 +34,15 @@ export interface SetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilitySetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityStart {}
+export interface ObservabilityStart {
+  renderAccelerationDetailsFlyout: (acceleration: any) => void;
+  renderAssociatedObjectsDetailsFlyout: ({
+    tableDetail,
+  }: {
+    tableDetail: AssociatedObject;
+  }) => void;
+  renderCreateAccelerationFlyout: (selectedDatasource: string) => void;
+}
 
 /**
  * Introduce a compile dependency on dashboards-assistant
@@ -42,4 +50,4 @@ export interface ObservabilityStart {}
  * It will gives an type error when dashboards-assistant is not installed so add a ts-ignore to suppress the error.
  */
 // @ts-ignore
-export type { AssistantSetup, RenderProps, IMessage } from '../../dashboards-assistant/public';
+export type { AssistantSetup, IMessage, RenderProps } from '../../dashboards-assistant/public';

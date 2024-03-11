@@ -13,3 +13,5 @@ export { ObservabilityPlugin as Plugin };
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initializerContext);
+
+export { ObservabilityStart } from './types';
