@@ -8,6 +8,7 @@ import { TemplateManager } from '../repository';
 import { IntegrationReader } from '../integration_reader';
 import { Dirent, Stats } from 'fs';
 import path from 'path';
+import { FileSystemDataAdaptor } from '../fs_data_adaptor';
 
 jest.mock('fs/promises');
 
@@ -15,7 +16,7 @@ describe('Repository', () => {
   let repository: TemplateManager;
 
   beforeEach(() => {
-    repository = new TemplateManager('path/to/directory');
+    repository = new TemplateManager([new FileSystemDataAdaptor('path/to/directory')]);
   });
 
   afterEach(() => {

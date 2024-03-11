@@ -4,7 +4,6 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { ObservabilityConfig } from '../..';
 import {
   IOpenSearchDashboardsResponse,
   IRouter,
@@ -13,14 +12,33 @@ import {
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
 import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-import { requestWithRetryAgentSearch } from './utils/agents';
+import { requestWithRetryAgentSearch, getAgentIdByConfig } from './utils/agents';
+import { AGENT_CONFIGS } from './utils/constants';
 
-export function registerQueryAssistRoutes(router: IRouter, config: ObservabilityConfig) {
-  const { ppl_agent_name: pplAgentName } = config.query_assist;
-  const {
-    response_summary_agent_name: responseSummaryAgentName,
-    error_summary_agent_name: errorSummaryAgentName,
-  } = config.summarize;
+export function registerQueryAssistRoutes(router: IRouter) {
+  /**
+   * Returns whether the PPL agent is configured.
+   */
+  router.get(
+    {
+      path: QUERY_ASSIST_API.CONFIGURED,
+      validate: {},
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const client = context.core.opensearch.client.asCurrentUser;
+      try {
+        // if the call does not throw any error, then the agent is properly configured
+        await getAgentIdByConfig(client, AGENT_CONFIGS.PPL_AGENT);
+        return response.ok({ body: { configured: true } });
+      } catch (error) {
+        return response.ok({ body: { configured: false, error: error.message } });
+      }
+    }
+  );
 
   router.post(
     {
@@ -37,18 +55,11 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!pplAgentName)
-        return response.custom({
-          statusCode: 400,
-          body:
-            'PPL agent name not found in opensearch_dashboards.yml. Expected observability.query_assist.ppl_agent_name',
-        });
-
       const client = context.core.opensearch.client.asCurrentUser;
       try {
         const pplRequest = await requestWithRetryAgentSearch({
           client,
-          agentName: pplAgentName,
+          configName: AGENT_CONFIGS.PPL_AGENT,
           body: {
             parameters: {
               index: request.body.index,
@@ -99,13 +110,6 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      if (!responseSummaryAgentName || !errorSummaryAgentName)
-        return response.custom({
-          statusCode: 400,
-          body:
-            'Summary agent name not found in opensearch_dashboards.yml. Expected observability.query_assist.response_summary_agent_name and observability.query_assist.error_summary_agent_name',
-        });
-
       const client = context.core.opensearch.client.asCurrentUser;
       const { index, question, query, response: _response, isError } = request.body;
       const queryResponse = JSON.stringify(_response);
@@ -115,7 +119,7 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
         if (!isError) {
           summaryRequest = await requestWithRetryAgentSearch({
             client,
-            agentName: responseSummaryAgentName,
+            configName: AGENT_CONFIGS.RESPONSE_SUMMARY_AGENT,
             body: {
               parameters: { index, question, query, response: queryResponse },
             },
@@ -128,7 +132,7 @@ export function registerQueryAssistRoutes(router: IRouter, config: Observability
           const fields = generateFieldContext(mappings, sampleDoc);
           summaryRequest = await requestWithRetryAgentSearch({
             client,
-            agentName: errorSummaryAgentName,
+            configName: AGENT_CONFIGS.ERROR_SUMMARY_AGENT,
             body: {
               parameters: { index, question, query, response: queryResponse, fields },
             },

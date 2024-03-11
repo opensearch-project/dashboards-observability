@@ -8,6 +8,7 @@ import { IntegrationReader } from '../integration_reader';
 import path from 'path';
 import { JsonCatalogDataAdaptor } from '../json_data_adaptor';
 import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';
+import { FileSystemDataAdaptor } from '../fs_data_adaptor';
 
 // Simplified catalog for integration searching -- Do not use for full deserialization tests.
 const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
@@ -28,9 +29,9 @@ const TEST_CATALOG_NO_SERIALIZATION: SerializedIntegration[] = [
 
 describe('JSON Data Adaptor', () => {
   it('Should be able to deserialize a serialized integration', async () => {
-    const repository: TemplateManager = new TemplateManager(
-      path.join(__dirname, '../../__data__/repository')
-    );
+    const repository: TemplateManager = new TemplateManager([
+      new FileSystemDataAdaptor(path.join(__dirname, '../../__data__/repository')),
+    ]);
     const fsIntegration: IntegrationReader = (await repository.getIntegration('nginx'))!;
     const fsConfig = await fsIntegration.getConfig();
     const serialized = await fsIntegration.serialize();
@@ -111,5 +112,14 @@ describe('JSON Data Adaptor', () => {
   it('Should report unknown directory type if integration list is empty', async () => {
     const adaptor = new JsonCatalogDataAdaptor([]);
     await expect(adaptor.getDirectoryType()).resolves.toBe('unknown');
+  });
+
+  // Bug: a previous regex for version finding counted the `8` in `k8s-1.0.0.json` as the version
+  it('Should correctly read a config with a number in the name', async () => {
+    const adaptor = new JsonCatalogDataAdaptor(TEST_CATALOG_NO_SERIALIZATION);
+    await expect(adaptor.readFile('sample2-2.1.0.json')).resolves.toMatchObject({
+      ok: true,
+      value: TEST_CATALOG_NO_SERIALIZATION[2],
+    });
   });
 });

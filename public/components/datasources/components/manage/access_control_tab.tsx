@@ -64,7 +64,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
                   ? `Restricted to ${selectedQueryPermissionRoles
                       .map((role) => role.label)
                       .join(',')}`
-                  : 'Everyone'}
+                  : 'Admin only'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

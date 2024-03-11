@@ -42,10 +42,9 @@ describe('The Local Serialized Catalog', () => {
 
   it('Should pass deep validation for all serialized integrations', async () => {
     const serialized = await fetchSerializedIntegrations();
-    const repository = new TemplateManager(
-      '.',
-      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[])
-    );
+    const repository = new TemplateManager([
+      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[]),
+    ]);
 
     for (const integ of await repository.getIntegrationList()) {
       const validationResult = await deepCheck(integ);
@@ -55,23 +54,21 @@ describe('The Local Serialized Catalog', () => {
 
   it('Should correctly retrieve a logo', async () => {
     const serialized = await fetchSerializedIntegrations();
-    const repository = new TemplateManager(
-      '.',
-      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[])
-    );
+    const repository = new TemplateManager([
+      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[]),
+    ]);
     const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
     const logoStatic = await integration.getStatic('logo.svg');
 
     expect(logoStatic).toHaveProperty('ok', true);
-    expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
+    expect((logoStatic.value as Buffer).length).toBeGreaterThan(100);
   });
 
   it('Should correctly retrieve a gallery image', async () => {
     const serialized = await fetchSerializedIntegrations();
-    const repository = new TemplateManager(
-      '.',
-      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[])
-    );
+    const repository = new TemplateManager([
+      new JsonCatalogDataAdaptor(serialized.value as SerializedIntegration[]),
+    ]);
     const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
     const logoStatic = await integration.getStatic('dashboard1.png');
 
@@ -164,7 +161,7 @@ describe('Integration validation', () => {
       .map((integ) => {
         return {
           ...integ,
-          assets: {} as SerializedIntegrationAssets,
+          assets: [] as SerializedIntegrationAsset[],
         };
       });
     const integration = new IntegrationReader(

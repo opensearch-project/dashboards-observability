@@ -564,6 +564,8 @@ export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   displayName: 'Test Instance Name',
   connectionType: 'index',
   connectionDataSource: 'ss4o_logs-nginx-test',
+  connectionTableName: '',
+  connectionLocation: '',
 };
 
 // TODO fill in the rest of the fields
@@ -578,12 +580,14 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
       version: '1.0.0',
     },
   ],
-  assets: {
-    savedObjects: {
+  assets: [
+    {
       name: 'sample',
       version: '1.0.1',
+      extension: 'ndjson',
+      type: 'savedObjectBundle',
     },
-  },
+  ],
 };
 
 export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {

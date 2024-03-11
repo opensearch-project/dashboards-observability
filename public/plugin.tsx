@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -14,9 +15,12 @@ import {
   PluginInitializerContext,
   SavedObject,
 } from '../../../src/core/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
+  S3_DATASOURCE_TYPE,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -42,9 +46,9 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
+import { AssociatedObject } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -52,8 +56,14 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
+import { DirectSearch } from './components/common/search/direct_search';
 import { Search } from './components/common/search/search';
-import { DirectSearch } from './components/common/search/sql_search';
+import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
+import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create/create_acceleration';
+import {
+  AssociatedObjectsDetailsFlyout,
+  AssociatedObjectsFlyoutProps,
+} from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -65,9 +75,10 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
+import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
 import { coreRefs } from './framework/core_refs';
-import { S3DataSource } from './framework/datasources/s3_datasource';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
+import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
@@ -88,6 +99,23 @@ interface PublicConfig {
     enabled: boolean;
   };
 }
+
+export const [
+  getRenderAccelerationDetailsFlyout,
+  setRenderAccelerationDetailsFlyout,
+] = createGetterSetter<(acceleration: any) => void>('renderAccelerationDetailsFlyout');
+
+export const [
+  getRenderAssociatedObjectsDetailsFlyout,
+  setRenderAssociatedObjectsDetailsFlyout,
+] = createGetterSetter<({ tableDetail }: { tableDetail: AssociatedObject }) => void>(
+  'renderAssociatedObjectsDetailsFlyout'
+);
+
+export const [
+  getRenderCreateAccelerationFlyout,
+  setRenderCreateAccelerationFlyout,
+] = createGetterSetter<(dataSource: string) => void>('renderCreateAccelerationFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -357,7 +385,41 @@ export class ObservabilityPlugin
       });
     });
 
-    return {};
+    core.http.intercept({
+      responseError: catalogCacheInterceptError(),
+    });
+
+    // Use overlay service to render flyouts
+    const renderAccelerationDetailsFlyout = (acceleration: any) =>
+      core.overlays.openFlyout(
+        toMountPoint(<AccelerationDetailsFlyout acceleration={acceleration} />)
+      );
+    setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
+
+    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) =>
+      core.overlays.openFlyout(
+        toMountPoint(<AssociatedObjectsDetailsFlyout tableDetail={tableDetail} />)
+      );
+    setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
+
+    const renderCreateAccelerationFlyout = (selectedDatasource: string) => {
+      const createAccelerationFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <CreateAcceleration
+            selectedDatasource={selectedDatasource}
+            resetFlyout={() => createAccelerationFlyout.close()}
+          />
+        )
+      );
+    };
+    setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
+
+    // Export so other plugins can use this flyout
+    return {
+      renderAccelerationDetailsFlyout,
+      renderAssociatedObjectsDetailsFlyout,
+      renderCreateAccelerationFlyout,
+    };
   }
 
   public stop() {}

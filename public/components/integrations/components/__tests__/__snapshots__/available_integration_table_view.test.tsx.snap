@@ -6,12 +6,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     Object {
       "hits": Array [
         Object {
-          "assets": Object {
-            "savedObjects": Object {
+          "assets": Array [
+            Object {
+              "extension": "ndjson",
               "name": "nginx",
+              "type": "savedObjectBundle",
               "version": "1.0.1",
             },
-          },
+          ],
           "author": "John Doe",
           "components": Array [
             Object {
@@ -29,7 +31,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           ],
           "description": "Nginx HTTP server collector",
           "displayName": "NginX Dashboard",
-          "integrationType": "logs",
           "license": "Apache-2.0",
           "name": "nginx",
           "sourceUrl": "https://github.com/",
@@ -55,9 +56,10 @@ exports[`Available Integration Table View Test Renders nginx integration table v
       ],
     }
   }
+  isCardView={false}
   loading={false}
   renderCateogryFilters={[Function]}
-  showModal={[Function]}
+  setCardView={[Function]}
 >
   <EuiPageContent
     id="availableIntegrationsArea"
@@ -110,12 +112,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           items={
             Array [
               Object {
-                "assets": Object {
-                  "savedObjects": Object {
+                "assets": Array [
+                  Object {
+                    "extension": "ndjson",
                     "name": "nginx",
+                    "type": "savedObjectBundle",
                     "version": "1.0.1",
                   },
-                },
+                ],
                 "author": "John Doe",
                 "components": Array [
                   Object {
@@ -133,7 +137,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 ],
                 "description": "Nginx HTTP server collector",
                 "displayName": "NginX Dashboard",
-                "integrationType": "logs",
                 "license": "Apache-2.0",
                 "name": "nginx",
                 "sourceUrl": "https://github.com/",
@@ -473,6 +476,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                 className="euiButtonContent__icon"
                                                 color="inherit"
                                                 size="m"
+                                                title="list"
                                                 type="list"
                                               >
                                                 <EuiIconBeaker
@@ -481,9 +485,12 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                   focusable="false"
                                                   role="img"
                                                   style={null}
+                                                  title="list"
+                                                  titleId="random_html_id"
                                                 >
                                                   <svg
                                                     aria-hidden={true}
+                                                    aria-labelledby="random_html_id"
                                                     className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                     focusable="false"
                                                     height={16}
@@ -493,6 +500,11 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                     width={16}
                                                     xmlns="http://www.w3.org/2000/svg"
                                                   >
+                                                    <title
+                                                      id="random_html_id"
+                                                    >
+                                                      list
+                                                    </title>
                                                     <path
                                                       d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                                     />
@@ -586,6 +598,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                 className="euiButtonContent__icon"
                                                 color="inherit"
                                                 size="m"
+                                                title="grid"
                                                 type="grid"
                                               >
                                                 <EuiIconBeaker
@@ -594,9 +607,12 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                   focusable="false"
                                                   role="img"
                                                   style={null}
+                                                  title="grid"
+                                                  titleId="random_html_id"
                                                 >
                                                   <svg
                                                     aria-hidden={true}
+                                                    aria-labelledby="random_html_id"
                                                     className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                     focusable="false"
                                                     height={16}
@@ -606,6 +622,11 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                     width={16}
                                                     xmlns="http://www.w3.org/2000/svg"
                                                   >
+                                                    <title
+                                                      id="random_html_id"
+                                                    >
+                                                      grid
+                                                    </title>
                                                     <path
                                                       d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                                     />
@@ -684,12 +705,14 @@ exports[`Available Integration Table View Test Renders nginx integration table v
               items={
                 Array [
                   Object {
-                    "assets": Object {
-                      "savedObjects": Object {
+                    "assets": Array [
+                      Object {
+                        "extension": "ndjson",
                         "name": "nginx",
+                        "type": "savedObjectBundle",
                         "version": "1.0.1",
                       },
-                    },
+                    ],
                     "author": "John Doe",
                     "components": Array [
                       Object {
@@ -707,7 +730,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     ],
                     "description": "Nginx HTTP server collector",
                     "displayName": "NginX Dashboard",
-                    "integrationType": "logs",
                     "license": "Apache-2.0",
                     "name": "nginx",
                     "sourceUrl": "https://github.com/",
