@@ -33,6 +33,8 @@ interface AccelerationTableTabProps {
 export const AccelerationTable = (props: AccelerationTableTabProps) => {
   const { accelerations } = props;
 
+  console.log('here is the accelerations');
+  console.log(accelerations);
   const RefreshButton = () => {
     // TODO: Implement logic for refreshing acceleration
     return (
@@ -104,18 +106,21 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     // TODO: fields should be determined by what the acceleration is
     // Show N/A if not applicable
     {
-      field: 'name',
+      field: 'indexName',
       name: 'Name',
       sortable: true,
-      render: (name: string) => (
+      render: (indexName: string) => (
         <EuiLink
-          onClick={() =>
-            renderAccelerationDetailsFlyout(
-              accelerations.find((acceleration) => acceleration.name === name)
-            )
-          }
+          onClick={() => {
+            renderAccelerationDetailsFlyout({
+              index: indexName,
+              accelerations: accelerations.find(
+                (acceleration) => acceleration.indexName === indexName
+              ),
+            });
+          }}
         >
-          {name}
+          {indexName}
         </EuiLink>
       ),
     },
@@ -180,7 +185,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
 
   const sorting = {
     sort: {
-      field: 'name',
+      field: 'flintIndexName',
       direction: 'asc',
     },
   };

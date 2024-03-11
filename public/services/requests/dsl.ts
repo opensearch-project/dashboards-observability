@@ -4,7 +4,13 @@
  */
 
 import { CoreStart } from '../../../../../src/core/public';
-import { DSL_BASE, DSL_SEARCH, DSL_CAT, DSL_MAPPING } from '../../../common/constants/shared';
+import {
+  DSL_BASE,
+  DSL_SEARCH,
+  DSL_CAT,
+  DSL_MAPPING,
+  DSL_SETTINGS,
+} from '../../../common/constants/shared';
 
 export default class DSLService {
   private http;
@@ -30,12 +36,19 @@ export default class DSLService {
   };
 
   fetchFields = async (index: string) => {
-    return this.http
-      .get(`${DSL_BASE}${DSL_MAPPING}`, {
-        query: {
-          index,
-        },
-      })
-      .catch((error) => console.error(error));
+    console.log('index: ', index);
+    return this.http.get(`${DSL_BASE}${DSL_MAPPING}`, {
+      query: {
+        index,
+      },
+    });
+  };
+
+  fetchSettings = async (index: string) => {
+    return this.http.get(`${DSL_BASE}${DSL_SETTINGS}`, {
+      query: {
+        index,
+      },
+    });
   };
 }

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import React from 'react';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -14,39 +14,56 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
 import { AccelerationStatus } from '../helpers/utils';
 
 interface AccelerationDetailsTabProps {
-  acceleration: any;
+  acceleration: {
+    accelerations: {
+      flintIndexName: string;
+      kind: string;
+      database: string;
+      table: string;
+      indexName: string;
+      autoRefresh: boolean;
+      status: string;
+    };
+  };
+  settings: object;
+  mappings: object;
+  indexName: string;
 }
 
-export const AccelerationDetailsTab = (props: AccelerationDetailsTabProps) => {
-  const { acceleration } = props;
+export const AccelerationDetailsTab = ({
+  acceleration,
+  settings,
+  mappings,
+}: AccelerationDetailsTabProps) => {
+  const { accelerations } = acceleration; // Correctly accessing the nested accelerations object
+  console.log('index name is !!!!');
+  console.log(accelerations.flintIndexName);
+  const DetailComponent = ({
+    title,
+    description,
+  }: {
+    title: string;
+    description: React.ReactNode;
+  }) => (
+    <EuiFlexItem>
+      <EuiDescriptionList>
+        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </EuiFlexItem>
+  );
 
-  const DetailComponent = (detailProps: { title: string; description: any }) => {
-    const { title, description } = detailProps;
-    return (
-      <EuiFlexItem>
-        <EuiDescriptionList>
-          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      </EuiFlexItem>
-    );
-  };
-
-  const TitleComponent = (titleProps: { title: string }) => {
-    const { title } = titleProps;
-    return (
-      <>
-        <EuiTitle size="s">
-          <h4>{title}</h4>
-        </EuiTitle>
-        <EuiHorizontalRule margin="s" />
-      </>
-    );
-  };
+  const TitleComponent = ({ title }: { title: string }) => (
+    <>
+      <EuiTitle size="s">
+        <h4>{title}</h4>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+    </>
+  );
 
   return (
     <>
@@ -54,18 +71,21 @@ export const AccelerationDetailsTab = (props: AccelerationDetailsTabProps) => {
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Status"
-          description={<AccelerationStatus status={acceleration.status} />}
+          description={<AccelerationStatus status={accelerations.status} />}
         />
-        <DetailComponent title="Acceleration Type" description={acceleration.type} />
+        <DetailComponent
+          title="Acceleration Type"
+          description={mappings?.data?.[accelerations.flintIndexName]?.mappings?._meta?.kind}
+        />
         <DetailComponent
           title="Creation Date"
-          description={new Date(acceleration.dateCreated).toUTCString()}
+          description={settings?.settings?.index?.creation_date}
         />
       </EuiFlexGroup>
       <EuiFlexGroup>
         <DetailComponent
           title="Last Updated"
-          description={new Date(acceleration.dateUpdated).toUTCString()}
+          description={settings?.settings?.index?.creation_date}
         />
       </EuiFlexGroup>
       <EuiSpacer />
@@ -73,18 +93,20 @@ export const AccelerationDetailsTab = (props: AccelerationDetailsTabProps) => {
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Data source connection"
-          description={<EuiLink onClick={() => console.log()}>{acceleration.index}</EuiLink>}
+          description={
+            <EuiLink onClick={() => console.log()}>{accelerations.flintIndexName}</EuiLink>
+          }
         />
-        <DetailComponent title="Database" description={acceleration.database} />
-        <DetailComponent title="Table" description={acceleration.table} />
+        <DetailComponent title="Database" description={accelerations.database} />
+        <DetailComponent title="Table" description={accelerations.table} />
       </EuiFlexGroup>
       <EuiSpacer />
       <TitleComponent title="Index details" />
       <EuiFlexGroup>
-        <DetailComponent title="Index name" description={acceleration.index} />
+        <DetailComponent title="Index name" description={accelerations.flintIndexName} />
         <DetailComponent
           title="Health"
-          description={<AccelerationStatus status={acceleration.status} />}
+          description={<AccelerationStatus status={accelerations.status} />}
         />
         <DetailComponent title="Refresh interval" description="2s" />
       </EuiFlexGroup>

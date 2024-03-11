@@ -356,11 +356,13 @@ export class ObservabilityPlugin
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
+    const dslService = new DSLService(core.http);
 
     coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
+    coreRefs.dslService = dslService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
     coreRefs.dataSources = startDeps.data.dataSources;
