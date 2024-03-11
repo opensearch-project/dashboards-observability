@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import {
   DATE_DISPLAY_FORMAT,
@@ -28,7 +29,6 @@ import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
-import { useSelector } from 'react-redux';
 import { selectQueries } from '../../redux/slices/query_slice';
 
 export interface DataGridProps {
@@ -52,7 +52,6 @@ const defaultFormatGrid = (columns: EuiDataGridColumn[]) => columns;
 
 export function DataGrid(props: DataGridProps) {
   const {
-    tabId,
     http,
     pplService,
     rows,
@@ -71,7 +70,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
   });
 
-  const query = useSelector(selectQueries)[tabId];
+  const query = useSelector(selectQueries)[requestParams.tabId];
   const defaultTimestamp = query[SELECTED_TIMESTAMP];
 
   const selectedColumns =

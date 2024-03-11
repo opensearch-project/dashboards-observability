@@ -61,7 +61,6 @@ describe('Datagrid component', () => {
     const wrapper = mount(
       <Provider store={store}>
         <DataGrid
-          tabId={tabId}
           http={http}
           pplService={pplService}
           rows={DATA_GRID_ROWS}

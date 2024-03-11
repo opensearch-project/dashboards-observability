@@ -213,7 +213,6 @@ exports[`Datagrid component Renders data grid component 1`] = `
         },
       ]
     }
-    tabId="explorer-tab-_fbef9141-48eb-11ee-a60a-af33302cfb3c"
     timeStampField="timestamp"
     totalHits={1390}
   >

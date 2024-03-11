@@ -596,7 +596,6 @@ export const Explorer = ({
                     )}
                     {(countDistribution.data?.['count()'] || explorerData?.datarows?.length) && (
                       <DataGrid
-                        tabId={tabId}
                         http={http}
                         pplService={pplService}
                         rows={explorerData.jsonData}
