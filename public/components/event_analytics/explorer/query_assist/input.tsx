@@ -4,20 +4,18 @@
  */
 
 import {
-  EuiBadge,
-  EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiIcon,
   EuiInputPopover,
-  EuiLink,
   EuiListGroup,
   EuiListGroupItem,
-  EuiPanel,
-  EuiText,
+  EuiSpacer,
+  EuiSplitButton,
 } from '@elastic/eui';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { useEffect, useState } from 'react';
@@ -36,6 +34,12 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
+
+class ProhibitedQueryError extends Error {
+  constructor(message?: string) {
+    super(message);
+  }
+}
 
 interface SummarizationContext {
   question: string;
@@ -79,7 +83,7 @@ const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
   ],
 };
 
-export const QueryAssistInput: React.FC<Props> = (props) => {
+export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
   // @ts-ignore
@@ -117,6 +121,8 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
   const [generatingOrRunning, setGeneratingOrRunning] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
+  const [prohibitedQuery, _setProhibitedQuery] = useState(false);
+  const submitDisabled = generating || props.nlqInput.trim().length === 0;
 
   useEffect(() => {
     if (autoRun) {
@@ -169,6 +175,7 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
       setGenerating(true);
       await request();
     } catch (error) {
+      if (error instanceof ProhibitedQueryError) return;
       coreRefs.toasts?.addError(formatError(error as ResponseError), {
         title: 'Failed to generate results',
       });
@@ -220,7 +227,8 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
         })
       );
     } catch (error) {
-      coreRefs.toasts?.addError(formatError(error as ResponseError), {
+      if (error instanceof ProhibitedQueryError) return;
+      coreRefs.toasts?.addError(error, {
         title: 'Failed to summarize results',
       });
     } finally {
@@ -246,11 +254,13 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     try {
+      setGenerating(true);
       setGeneratingOrRunning(true);
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
+      if (error instanceof ProhibitedQueryError) return;
       if (coreRefs.summarizeEnabled) {
         generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
       } else {
@@ -259,123 +269,99 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
         });
       }
     } finally {
+      setGenerating(false);
       setGeneratingOrRunning(false);
     }
   };
 
   return (
     <>
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiForm
-          component="form"
-          id="nlq-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            request();
-          }}
-        >
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={chatLogo} size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>Query Assistant</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>New!</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiInputPopover
-                    input={
-                      <EuiFieldText
-                        placeholder="Ask a question"
-                        disabled={generating}
-                        value={props.nlqInput}
-                        onChange={(e) => props.setNlqInput(e.target.value)}
-                        fullWidth
-                        onFocus={() => {
-                          setBarSelected(true);
-                          props.setNeedsUpdate(false);
-                          if (props.nlqInput.length === 0) setIsPopoverOpen(true);
-                        }}
-                        onBlur={() => setBarSelected(false)}
-                      />
-                    }
-                    disableFocusTrap
-                    fullWidth={true}
-                    isOpen={isPopoverOpen}
-                    closePopover={() => {
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-                      {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
-                        <EuiListGroupItem
-                          onClick={() => {
-                            props.setNlqInput(question);
-                            setIsPopoverOpen(false);
-                          }}
-                          label={question}
-                        />
-                      ))}
-                    </EuiListGroup>
-                  </EuiInputPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiFlexItem>
-                  <EuiText>
-                    <small>
-                      Share feedback via{' '}
-                      <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
-                        Forum
-                      </EuiLink>{' '}
-                      or{' '}
-                      <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">
-                        Slack
-                      </EuiLink>
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={generating}
-                    onClick={generatePPL}
-                    isDisabled={
-                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
-                    }
-                    iconSide="right"
-                    fill={false}
-                    data-test-subj="query-assist-generate-button"
-                  >
-                    Generate query
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={generatingOrRunning}
-                    onClick={runAndSummarize}
-                    isDisabled={
-                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
-                    }
-                    iconType="returnKey"
-                    iconSide="right"
-                    type="submit"
-                    fill={barSelected}
-                    data-test-subj="query-assist-generate-and-run-button"
-                  >
-                    Generate and run
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </EuiPanel>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiInputPopover
+            input={
+              <EuiFieldText
+                placeholder={
+                  props.selectedIndex[0]?.label
+                    ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
+                    : 'Select a data source or index to ask a question.'
+                }
+                disabled={generating}
+                value={props.nlqInput}
+                onChange={(e) => props.setNlqInput(e.target.value)}
+                onKeyDown={(e) => {
+                  // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
+                  if (e.key === 'Enter') runAndSummarize();
+                }}
+                prepend={<EuiIcon type={chatLogo} />}
+                fullWidth
+                onFocus={() => {
+                  props.setNeedsUpdate(false);
+                  setBarSelected(true);
+                  if (props.nlqInput.length === 0) setIsPopoverOpen(true);
+                }}
+                onBlur={() => setBarSelected(false)}
+              />
+            }
+            disableFocusTrap
+            fullWidth={true}
+            isOpen={isPopoverOpen}
+            closePopover={() => {
+              setIsPopoverOpen(false);
+            }}
+          >
+            <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+              {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
+                <EuiListGroupItem
+                  onClick={() => {
+                    props.setNlqInput(question);
+                    setIsPopoverOpen(false);
+                  }}
+                  label={question}
+                />
+              ))}
+            </EuiListGroup>
+          </EuiInputPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="returnKey"
+            display="fill"
+            isDisabled={submitDisabled}
+            onClick={runAndSummarize}
+            size="m"
+            aria-label="submit-question"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {prohibitedQuery ? (
+        <EuiCallOut
+          title="I am unable to respond to this query. Try another question."
+          size="s"
+          color="danger"
+          iconType="alert"
+        />
+      ) : props.children ? (
+        <EuiSpacer size="s" />
+      ) : null}
+      {props.children}
+      <EuiSpacer size="m" />
+      <EuiSplitButton
+        disabled={submitDisabled}
+        isLoading={generating}
+        fill={barSelected}
+        // @ts-ignore incorrect type, 'disabled' is a valid color
+        color={submitDisabled ? 'disabled' : 'success'}
+        options={[
+          {
+            display: 'Generate query',
+            onClick: generatePPL,
+          },
+        ]}
+        onClick={runAndSummarize}
+      >
+        {generating && !generatingOrRunning ? 'Generate query' : 'Generate and run'}
+      </EuiSplitButton>
     </>
   );
 };

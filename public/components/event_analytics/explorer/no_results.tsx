@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiSpacer,
   EuiText,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { coreRefs } from '../../../framework/core_refs';
 import { selectQueries } from '../redux/slices/query_slice';
@@ -62,8 +62,8 @@ export const NoResults = ({ tabId }: any) => {
               title={<h2>Get started</h2>}
               body={
                 <p>
-                  Run a query to view results, or use the Query Assistant to automatically generate
-                  complex queries using simple conversational prompts.
+                  Run a query to view results, or use the Natural Language Query Generator to
+                  automatically generate complex queries using simple conversational prompts.
                 </p>
               }
             />
