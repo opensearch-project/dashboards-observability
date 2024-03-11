@@ -271,7 +271,6 @@ export const DirectSearch = (props: any) => {
 
     for (let i = 0; i < schema.length; i++) {
       const fieldMapping = schema[i];
-      console.log('fieldmapping:', fieldMapping);
       if (!isEmpty(fieldMapping)) {
         const fieldName = fieldMapping.name;
         const fieldType = fieldMapping.type;

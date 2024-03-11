@@ -216,7 +216,7 @@ export function DataGrid(props: DataGridProps) {
           </EuiDescriptionList>
         );
       }
-      if (columnId === 'timestamp') {
+      if (columnId === timeStampField) {
         return `${moment(data[trueIndex][timeStampField]).format(DATE_DISPLAY_FORMAT)}`;
       }
       return `${data[trueIndex][columnId]}`;
