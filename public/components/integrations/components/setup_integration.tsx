@@ -392,18 +392,29 @@ export function SetupIntegrationForm({
               }}
             />
           </EuiFormRow>
-          <EuiFormRow
-            label="Select installation workflows"
-            helpText={'Select from the available types of assets based on how your use case.'}
-            isInvalid={![...useWorkflows.values()].includes(true)}
-            error={['Must select at least one workflow.']}
-          >
-            <SetupWorkflowSelector
-              integration={integration}
-              useWorkflows={useWorkflows}
-              toggleWorkflow={toggleWorkflow}
-            />
-          </EuiFormRow>
+          {integration.workflows ? (
+            <>
+              <EuiSpacer />
+              <EuiText>
+                <h3>Installation Flows</h3>
+              </EuiText>
+              <EuiSpacer />
+              <EuiFormRow
+                label={'Flows'}
+                helpText={
+                  'Select from the available asset types based on your use case. Choose at least one.'
+                }
+                isInvalid={![...useWorkflows.values()].includes(true)}
+                error={['Must select at least one workflow.']}
+              >
+                <SetupWorkflowSelector
+                  integration={integration}
+                  useWorkflows={useWorkflows}
+                  toggleWorkflow={toggleWorkflow}
+                />
+              </EuiFormRow>
+            </>
+          ) : null}
         </>
       ) : null}
     </EuiForm>
