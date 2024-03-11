@@ -121,7 +121,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const [generatingOrRunning, setGeneratingOrRunning] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
-  const [prohibitedQuery, _setProhibitedQuery] = useState(false);
+  const [prohibitedQuery, setProhibitedQuery] = useState(false);
   const submitDisabled = generating || props.nlqInput.trim().length === 0;
 
   useEffect(() => {
@@ -144,6 +144,9 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         index: props.selectedIndex[0].label,
       }),
     });
+    const mockProhibited = Math.random() > 0.5;
+    setProhibitedQuery(mockProhibited);
+    if (mockProhibited) throw new ProhibitedQueryError();
     await props.handleQueryChange(generatedPPL);
     await dispatch(
       changeQuery({
