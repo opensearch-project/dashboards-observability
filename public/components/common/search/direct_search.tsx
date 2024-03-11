@@ -54,6 +54,7 @@ import { formatError } from '../../event_analytics/utils';
 import { usePolling } from '../../hooks/use_polling';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
+import { i18n } from '@osd/i18n';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -266,7 +267,9 @@ export const DirectSearch = (props: any) => {
     const timestamp: IDefaultTimestampState = {
       hasSchemaConflict: false, // schema conflict bool used for OS index w/ different mappings, not needed here
       default_timestamp: '',
-      message: 'Index does not contain a valid time field.',
+      message: i18n.translate(`discover.events.directQuery.noTimeStampFoundMessage`, {
+        defaultMessage: 'Index does not contain a valid time field.',
+      }),
     };
 
     for (let i = 0; i < schema.length; i++) {
