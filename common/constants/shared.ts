@@ -263,3 +263,5 @@ export const DIRECT_DUMMY_QUERY = 'select 1';
 export const DEFAULT_START_TIME = 'now-15m';
 export const QUERY_ASSIST_START_TIME = 'now-40y';
 export const QUERY_ASSIST_END_TIME = 'now';
+
+export const TIMESTAMP_DATETIME_TYPES = ['date', 'date_nanos'];
