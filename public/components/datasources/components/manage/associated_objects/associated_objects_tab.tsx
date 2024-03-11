@@ -44,20 +44,22 @@ import { DirectQueryLoadingStatus } from '../../../../../../common/types/explore
 import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
 import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
 import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
+import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
   cachedDatabases: CachedDatabase[];
   databasesLoadStatus: DirectQueryLoadingStatus;
-  loadDatabases: () => void;
   databasesIsLoading: boolean;
   selectedDatabase: string;
   setSelectedDatabase: React.Dispatch<React.SetStateAction<string>>;
   cachedTables: CachedTable[];
+  setCachedTables: React.Dispatch<React.SetStateAction<CachedTable[]>>;
   tablesLoadStatus: DirectQueryLoadingStatus;
   startLoadingTables: (datasource: string, database?: string) => void;
   tablesIsLoading: boolean;
   cachedAccelerations: CachedAcceleration[];
+  setCachedAccelerations: React.Dispatch<React.SetStateAction<CachedAcceleration[]>>;
   accelerationsLoadStatus: DirectQueryLoadingStatus;
   startLoadingAccelerations: (datasource: string) => void;
   accelerationsIsLoading: boolean;
@@ -82,28 +84,51 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     datasource,
     cachedDatabases,
     databasesLoadStatus,
-    loadDatabases,
-    // databasesIsLoading,
     selectedDatabase,
     setSelectedDatabase,
     cachedTables,
+    setCachedTables,
     tablesLoadStatus,
     startLoadingTables,
     tablesIsLoading,
     cachedAccelerations,
+    setCachedAccelerations,
     accelerationsLoadStatus,
     startLoadingAccelerations,
     accelerationsIsLoading,
     isFirstTimeLoading,
     isRefreshing,
   } = props;
-  const [lastUpdated, setLastUpdated] = useState('');
-  setLastUpdated(Date.now().toUTCString()); // Update last updated time
+  const [lastUpdated, setLastUpdated] = useState(new Date().toUTCString());
+  // setLastUpdated(new Date().toUTCString()); // Update last updated time
+
+  let lastChecked: boolean;
+  if (selectedDatabase !== '') {
+    lastChecked = true;
+  } else {
+    lastChecked = false;
+  }
+  // Get last selected if there is one, set to first option if not
+  const [databaseSelectorOptions, setDatabaseSelectorOptions] = useState(
+    cachedDatabases.map((database, index) => {
+      return {
+        label: database.name,
+        checked: lastChecked
+          ? database.name === selectedDatabase
+            ? 'on'
+            : index === 0
+            ? 'on'
+            : undefined
+          : undefined,
+      };
+    })
+  );
 
   const onRefreshButtonClick = () => {
-    console.log('clicked on name');
-    if (datasource.name) {
-      loadDatabases();
+    if (datasource.name && selectedDatabase) {
+      startLoadingDatabases();
+      startLoadingTables(datasource.name, selectedDatabase);
+      startLoadingAccelerations(datasource.name);
     }
   };
 
@@ -144,37 +169,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <AssociatedObjectsRefreshButton isLoading={isRefreshing} onClick={onRefreshButtonClick} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  };
-
-  const DatabaseSelector = () => {
-    const [databaseOptions, setDatabaseOptions] = useState(
-      cachedDatabases.map((database, index) => {
-        return { label: database.name, checked: index === 0 ? 'on' : undefined };
-      })
-    );
-
-    useEffect(() => {
-      setSelectedDatabase(databaseOptions.find((option) => option.checked === 'on')?.label);
-    }, [databaseOptions]);
-
-    return (
-      <>
-        <EuiSelectable
-          searchable={true}
-          singleSelection="always"
-          searchProps={{ placeholder: 'Search for databases' }}
-          options={databaseOptions}
-          onChange={(newOptions) => setDatabaseOptions(newOptions)}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </>
     );
   };
 
@@ -391,8 +385,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           columns: table.columns,
         };
       });
-      const accelerationObjects: AssociatedObject[] = cachedAccelerations.map(
-        (acceleration: CachedAcceleration) => ({
+      const accelerationObjects: AssociatedObject[] = cachedAccelerations
+        .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
+        .map((acceleration: CachedAcceleration) => ({
           datasource: datasource.name,
           id: acceleration.flintIndexName,
           name: acceleration.flintIndexName,
@@ -402,8 +397,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           // Temporary dummy array
           accelerations: [],
           columns: undefined,
-        })
-      );
+        }));
       setAssociatedObjects(tableObjects.concat(accelerationObjects));
     }, [cachedTables, cachedAccelerations]);
 
@@ -434,18 +428,50 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         search={tableSearch}
         pagination={pagination}
         sorting={sorting}
-        // noItemsMessage={associatedObjects.length === 0 ? noDataMessage : undefined}
         data-test-subj={ASSC_OBJ_TABLE_SUBJ}
       />
     );
   };
 
   useEffect(() => {
+    // Reload tables and accelerations to cache if nothing in cache
     if (selectedDatabase) {
-      startLoadingTables(datasource.name, selectedDatabase);
-      startLoadingAccelerations(datasource.name);
+      if (
+        CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).status !== 'Updated' ||
+        CatalogCacheManager.getAccelerationsCache().status !== 'Updated'
+      ) {
+        startLoadingTables(datasource.name, selectedDatabase);
+        startLoadingAccelerations(datasource.name);
+      } else {
+        setCachedTables(CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).tables);
+        setCachedAccelerations(CatalogCacheManager.getAccelerationsCache().accelerations);
+        setLastUpdated(
+          CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).lastUpdated
+        );
+      }
     }
   }, [selectedDatabase]);
+
+  useEffect(() => {
+    setSelectedDatabase(databaseSelectorOptions.find((option) => option.checked === 'on')?.label);
+  }, [databaseSelectorOptions]);
+
+  useEffect(() => {
+    setDatabaseSelectorOptions(
+      cachedDatabases.map((database, index) => {
+        return {
+          label: database.name,
+          checked: lastChecked
+            ? database.name === selectedDatabase
+              ? 'on'
+              : index === 0
+              ? 'on'
+              : undefined
+            : undefined,
+        };
+      })
+    );
+  }, [cachedDatabases]);
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
   const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
@@ -469,7 +495,20 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                 <EuiSpacer />
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem grow={false}>
-                    <DatabaseSelector />
+                    <EuiSelectable
+                      searchable={true}
+                      singleSelection={'always'}
+                      searchProps={{ placeholder: 'Search for databases' }}
+                      options={databaseSelectorOptions}
+                      onChange={(newOptions) => setDatabaseSelectorOptions(newOptions)}
+                    >
+                      {(list, search) => (
+                        <>
+                          {search}
+                          {list}
+                        </>
+                      )}
+                    </EuiSelectable>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {tablesIsLoading || accelerationsIsLoading ? (

@@ -15,15 +15,10 @@ interface AssociatedObjectsRefreshButtonProps {
 export const AssociatedObjectsRefreshButton: React.FC<AssociatedObjectsRefreshButtonProps> = (
   props
 ) => {
-  const { isLoading } = props;
+  const { isLoading, onClick } = props;
 
   return (
-    <EuiButton
-      iconType="refresh"
-      onClick={() => console.log()}
-      isLoading={isLoading}
-      isDisabled={isLoading}
-    >
+    <EuiButton iconType="refresh" onClick={onClick} isLoading={isLoading} isDisabled={isLoading}>
       {ASSC_OBJ_REFRESH_BTN}
     </EuiButton>
   );

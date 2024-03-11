@@ -119,6 +119,7 @@ export const DataConnection = (props: any) => {
     },
   ];
 
+<<<<<<< HEAD
   const onclickIntegrationsCard = () => {
     application!.navigateToApp(observabilityIntegrationsID);
   };
@@ -130,6 +131,9 @@ export const DataConnection = (props: any) => {
   const onclickDiscoverCard = () => {
     application!.navigateToApp(observabilityLogsID);
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState(true);
+=======
+  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
+>>>>>>> ed45c084 (adding cache retrieval)
   const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
@@ -146,12 +150,6 @@ export const DataConnection = (props: any) => {
   const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const loadDatabases = () => {
-    if (datasourceDetails.name) {
-      startLoadingDatabases(datasourceDetails.name);
-      setIsRefreshing(true);
-    }
-  };
 
   const DefaultDatasourceCards = () => {
     return (
@@ -237,14 +235,15 @@ export const DataConnection = (props: any) => {
           datasource={datasourceDetails}
           cachedDatabases={cachedDatabases}
           databasesLoadStatus={databasesLoadStatus}
-          loadDatabases={loadDatabases}
           selectedDatabase={selectedDatabase}
           setSelectedDatabase={setSelectedDatabase}
           cachedTables={cachedTables}
+          setCachedTables={setCachedTables}
           tablesLoadStatus={tablesLoadStatus}
           startLoadingTables={startLoadingTables}
           tablesIsLoading={tablesIsLoading}
           cachedAccelerations={cachedAccelerations}
+          setCachedAccelerations={setCachedAccelerations}
           accelerationsLoadStatus={accelerationsLoadStatus}
           startLoadingAccelerations={startLoadingAccelerations}
           accelerationsIsLoading={accelerationsIsLoading}
@@ -373,15 +372,31 @@ export const DataConnection = (props: any) => {
   };
 
   useEffect(() => {
-    loadDatabases();
+    // Loads databases cache when cache is empty
+    if (datasourceDetails.name) {
+      const cache = CatalogCacheManager.getDataSourceCache().dataSources.find(
+        (datasource) => datasource.name === datasourceDetails.name
+      );
+      if (cache?.status !== 'Updated') {
+        startLoadingDatabases(datasourceDetails.name);
+        setIsRefreshing(true);
+      } else {
+        const cachedList: CachedDatabase[] =
+          CatalogCacheManager.getDataSourceCache().dataSources.find(
+            (cachedDataSource) => cachedDataSource.name === datasourceDetails.name
+          )?.databases || [];
+        if (cachedList) {
+          setCachedDatabases(cachedList);
+        }
+        setIsRefreshing(false);
+        setIsFirstTimeLoading(false);
+      }
+    }
   }, [datasourceDetails.name]);
 
   useEffect(() => {
-    const loadingStatuses = [
-      DirectQueryLoadingStatus.RUNNING,
-      DirectQueryLoadingStatus.SCHEDULED,
-      DirectQueryLoadingStatus.WAITING,
-    ];
+    // Handles loading tables and acceleration cache when cache is empty
+    const loadingStatuses = [DirectQueryLoadingStatus.RUNNING, DirectQueryLoadingStatus.WAITING];
     setTablesIsLoading(loadingStatuses.includes(tablesLoadStatus));
     setAccelerationsIsLoading(loadingStatuses.includes(accelerationsLoadStatus));
     if (databasesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
@@ -396,19 +411,12 @@ export const DataConnection = (props: any) => {
       setIsFirstTimeLoading(false);
     }
     if (tablesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      const cachedList: CachedTable[] = CatalogCacheManager.getDatabase(
-        datasourceDetails.name,
-        selectedDatabase
-      ).tables;
-      if (cachedList) {
-        setCachedTables(cachedList);
-      }
+      setCachedTables(
+        CatalogCacheManager.getDatabase(datasourceDetails.name, selectedDatabase).tables
+      );
     }
     if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      const cachedList = CatalogCacheManager.getAccelerationsCache().accelerations;
-      if (cachedList) {
-        setCachedAccelerations(cachedList);
-      }
+      setCachedAccelerations(CatalogCacheManager.getAccelerationsCache().accelerations);
     }
   }, [databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus]);
 
