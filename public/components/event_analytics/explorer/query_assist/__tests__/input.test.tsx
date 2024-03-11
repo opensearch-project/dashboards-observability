@@ -85,7 +85,7 @@ describe('<QueryAssistInput /> spec', () => {
     );
   });
 
-  it('should not call summarize if disabled', async () => {
+  it('should call add error toast if summarize is disabled', async () => {
     coreRefs.summarizeEnabled = false;
     httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } });
 
@@ -98,6 +98,13 @@ describe('<QueryAssistInput /> spec', () => {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
     expect(httpMock.post).not.toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, expect.anything());
+    expect(coreRefs.toasts?.addError).toBeCalledWith(
+      {
+        message: 'Request is throttled. Try again later or contact your administrator',
+        statusCode: 429,
+      },
+      { title: 'Failed to generate results' }
+    );
   });
 
   it('should call summarize for generate and run errors', async () => {

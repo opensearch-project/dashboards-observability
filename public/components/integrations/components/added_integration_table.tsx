@@ -17,7 +17,10 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
-import { AddedIntegrationsTableProps } from './added_integration_overview_page';
+import {
+  AddedIntegrationType,
+  AddedIntegrationsTableProps,
+} from './added_integration_overview_page';
 import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
@@ -33,7 +36,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const tableColumns = [
     {
       field: 'name',
-      name: 'Asset name',
+      name: 'Integration Name',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
@@ -81,7 +84,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         />
       ),
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ] as Array<EuiTableFieldDataColumnType<AddedIntegrationType>>;
 
   async function deleteAddedIntegration(integrationInstance: string, name: string) {
     http
@@ -92,7 +95,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           hits: props.data.hits.filter((i) => i.id !== integrationInstance),
         });
       })
-      .catch((err) => {
+      .catch((_err) => {
         setToast(`Error deleting ${name} or its assets`, 'danger');
       })
       .finally(() => {

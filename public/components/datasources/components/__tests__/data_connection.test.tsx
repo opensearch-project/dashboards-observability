@@ -3,17 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { act } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { act } from '@testing-library/react';
 import React from 'react';
+import ReactDOM from 'react-dom';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 import {
   describePrometheusDataConnection,
   describeS3Dataconnection,
 } from '../../../../../test/datasources';
 import { DataConnection } from '../manage/data_connection';
-import ReactDOM from 'react-dom';
-import { coreRefs } from '../../../../../public/framework/core_refs';
+
+jest.mock('../../../../plugin', () => ({
+  getRenderAccelerationDetailsFlyout: jest.fn(),
+  getRenderAssociatedObjectsDetailsFlyout: jest.fn(),
+  getRenderCreateAccelerationFlyout: jest.fn(),
+}));
 
 jest.mock('../../../../../public/framework/core_refs', () => ({
   coreRefs: {
@@ -25,6 +31,7 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
     },
   },
 }));
+jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
 describe('Data Connection Page test', () => {
   configure({ adapter: new Adapter() });
