@@ -119,7 +119,6 @@ export const DataConnection = (props: any) => {
     },
   ];
 
-<<<<<<< HEAD
   const onclickIntegrationsCard = () => {
     application!.navigateToApp(observabilityIntegrationsID);
   };
@@ -130,10 +129,8 @@ export const DataConnection = (props: any) => {
 
   const onclickDiscoverCard = () => {
     application!.navigateToApp(observabilityLogsID);
-  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState(true);
-=======
+  };
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
->>>>>>> ed45c084 (adding cache retrieval)
   const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
