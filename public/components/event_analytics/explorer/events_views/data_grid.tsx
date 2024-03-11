@@ -16,6 +16,7 @@ import {
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { i18n } from '@osd/i18n';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import {
   DATE_DISPLAY_FORMAT,
@@ -117,6 +118,12 @@ export function DataGrid(props: DataGridProps) {
     );
   };
 
+  const columnNameTranslate = (name: string) => {
+    return i18n.translate(`discover.events.dataGrid.${name.toLowerCase()}Column`, {
+      defaultMessage: name,
+    });
+  };
+
   // creates the header for each column listing what that column is
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
@@ -124,15 +131,18 @@ export function DataGrid(props: DataGridProps) {
       if (name === defaultTimestamp) {
         columns.push({
           ...DEFAULT_TIMESTAMP_COLUMN,
-          display: `Time (${defaultTimestamp})`,
+          display: `${columnNameTranslate('Time')} (${defaultTimestamp})`,
           id: defaultTimestamp,
         });
       } else if (name === '_source') {
-        columns.push(DEFAULT_SOURCE_COLUMN);
+        columns.push({
+          ...DEFAULT_SOURCE_COLUMN,
+          display: columnNameTranslate('Source'),
+        });
       } else {
         columns.push({
           id: name,
-          display: name,
+          display: columnNameTranslate(name),
           isSortable: true, // TODO: add functionality here based on type
         });
       }
