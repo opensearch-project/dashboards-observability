@@ -328,7 +328,7 @@ export const TYPE_TAB_MAPPING = {
 };
 
 export const DEFAULT_EMPTY_EXPLORER_FIELDS = [
-  { name: 'timestamp', type: 'timestamp' },
+  // timestamp field will be a default but is added after finding what it is
   { name: '_source', type: 'string' },
 ];
 
