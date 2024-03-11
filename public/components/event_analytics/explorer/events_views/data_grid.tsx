@@ -68,9 +68,11 @@ export function DataGrid(props: DataGridProps) {
   });
 
   const selectedColumns =
-    explorerFields.selectedFields.length > 0
+    explorerFields.selectedFields.length > 0 // if any fields are selected use that, otherwise defaults
       ? explorerFields.selectedFields
-      : [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS];
+      : timeStampField && timeStampField !== '' // if theres a timestamp, include that, otherwise dont
+      ? [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS]
+      : DEFAULT_EMPTY_EXPLORER_FIELDS;
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
