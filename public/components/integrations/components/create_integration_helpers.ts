@@ -9,20 +9,14 @@ import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/s
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 
-export interface IntegrationTemplate {
-  name: string;
-  type: string;
-  assets: {
-    savedObjects?: {
-      name: string;
-      version: string;
-    };
-    queries?: Array<{
-      name: string;
-      version: string;
-      language: string;
-    }>;
-  };
+interface Properties {
+  [key: string]: Properties | object;
+}
+
+interface ComponentMappingPayload {
+  template: { mappings: { _meta: { version: string } } };
+  composed_of: string[];
+  index_patterns: string[];
 }
 
 export const doTypeValidation = (
@@ -45,8 +39,8 @@ export const doTypeValidation = (
 };
 
 export const doNestedPropertyValidation = (
-  toCheck: { type?: string; properties?: { [key: string]: object } },
-  required: { type?: string; properties?: { [key: string]: object } }
+  toCheck: { type?: string; properties?: Properties },
+  required: { type?: string; properties?: Properties }
 ): ValidationResult => {
   const typeCheck = doTypeValidation(toCheck, required);
   if (!typeCheck.ok) {
@@ -70,8 +64,10 @@ export const doNestedPropertyValidation = (
 
 export const doPropertyValidation = (
   rootType: string,
-  dataSourceProps: { [key: string]: { properties?: any } },
-  requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
+  dataSourceProps: Properties,
+  requiredMappings: {
+    [key: string]: { template: { mappings: { properties?: Properties } } };
+  }
 ): ValidationResult => {
   // Check root object type (without dependencies)
   if (!Object.hasOwn(requiredMappings, rootType)) {
@@ -79,12 +75,9 @@ export const doPropertyValidation = (
     return { ok: false, errors: ['Required mapping for integration has no root type.'] };
   }
   for (const [key, value] of Object.entries(
-    requiredMappings[rootType].template.mappings.properties
+    requiredMappings[rootType].template.mappings.properties ?? {}
   )) {
-    if (
-      !dataSourceProps[key] ||
-      !doNestedPropertyValidation(dataSourceProps[key], value as any).ok
-    ) {
+    if (!dataSourceProps[key] || !doNestedPropertyValidation(dataSourceProps[key], value).ok) {
       return { ok: false, errors: [`Data source is invalid at key '${key}'`] };
     }
   }
@@ -95,7 +88,7 @@ export const doPropertyValidation = (
     }
     if (
       !dataSourceProps[key] ||
-      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties).ok
+      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties ?? {}).ok
     ) {
       return { ok: false, errors: [`Data source is invalid at key '${key}'`] };
     }
@@ -127,7 +120,7 @@ export const checkDataSourceName = (
 export const fetchDataSourceMappings = async (
   targetDataSource: string,
   http: HttpSetup
-): Promise<{ [key: string]: { properties: any } } | null> => {
+): Promise<{ [key: string]: { properties: Properties } } | null> => {
   return http
     .post(CONSOLE_PROXY, {
       query: {
@@ -142,7 +135,7 @@ export const fetchDataSourceMappings = async (
       });
       return response;
     })
-    .catch((err: any) => {
+    .catch((err) => {
       console.error(err);
       return null;
     });
@@ -151,7 +144,9 @@ export const fetchDataSourceMappings = async (
 export const fetchIntegrationMappings = async (
   targetName: string,
   http: HttpSetup
-): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
+): Promise<{
+  [key: string]: { template: { mappings: { properties?: Properties } } };
+} | null> => {
   return http
     .get(`/api/integrations/repository/${targetName}/schema`)
     .then((response) => {
@@ -160,7 +155,7 @@ export const fetchIntegrationMappings = async (
       }
       return response.data.mappings;
     })
-    .catch((err: any) => {
+    .catch((err) => {
       console.error(err);
       return null;
     });
@@ -197,12 +192,8 @@ export const doExistingDataSourceValidation = async (
 
 const createComponentMapping = async (
   componentName: string,
-  payload: {
-    template: { mappings: { _meta: { version: string } } };
-    composed_of: string[];
-    index_patterns: string[];
-  }
-): Promise<{ [key: string]: { properties: any } } | null> => {
+  payload: ComponentMappingPayload
+): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
   return http.post(CONSOLE_PROXY, {
@@ -216,14 +207,10 @@ const createComponentMapping = async (
 
 const createIndexMapping = async (
   componentName: string,
-  payload: {
-    template: { mappings: { _meta: { version: string } } };
-    composed_of: string[];
-    index_patterns: string[];
-  },
+  payload: ComponentMappingPayload,
   dataSourceName: string,
-  integration: IntegrationTemplate
-): Promise<{ [key: string]: { properties: any } } | null> => {
+  integration: IntegrationConfig
+): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
   payload.index_patterns = [dataSourceName];
@@ -239,9 +226,9 @@ const createIndexMapping = async (
 const createDataSourceMappings = async (
   targetDataSource: string,
   integrationTemplateId: string,
-  integration: IntegrationTemplate,
+  integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void
-): Promise<any> => {
+): Promise<void> => {
   const http = coreRefs.http!;
   const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
   let error: string | null = null;
@@ -261,7 +248,7 @@ const createDataSourceMappings = async (
         if (key === integration.type) {
           return Promise.resolve();
         }
-        return createComponentMapping(key, mapping as any);
+        return createComponentMapping(key, mapping as ComponentMappingPayload);
       })
     );
     // In order to see our changes, we need to manually provoke a refresh
@@ -277,7 +264,7 @@ const createDataSourceMappings = async (
       targetDataSource,
       integration
     );
-  } catch (err: any) {
+  } catch (err) {
     error = err.message;
   }
 
@@ -292,7 +279,7 @@ export async function addIntegrationRequest(
   addSample: boolean,
   templateName: string,
   integrationTemplateId: string,
-  integration: IntegrationTemplate,
+  integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
   dataSource?: string

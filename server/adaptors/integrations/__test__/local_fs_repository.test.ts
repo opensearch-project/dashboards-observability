@@ -31,7 +31,7 @@ describe('The local repository', () => {
         }
         // Otherwise, all directories must be integrations
         const integ = new IntegrationReader(integPath);
-        await expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
+        await expect(integ.getConfig()).resolves.toMatchObject({ ok: true });
       })
     );
   });

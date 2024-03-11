@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasourceType } from '../common/types/data_connections';
+import { AsyncPollingResult, DatasourceType } from '../common/types/data_connections';
 
 export const showDataConnectionsData = {
   schema: [
@@ -805,4 +805,54 @@ export const mockRoleData = {
       static: false,
     },
   },
+};
+
+export const mockShowDatabasesPollingResult: AsyncPollingResult = {
+  schema: [{ name: 'namespace', type: 'string' }],
+  datarows: [['Database1'], ['Database2']],
+};
+
+export const mockShowTablesPollingResult: AsyncPollingResult = {
+  schema: [
+    { name: 'namespace', type: 'string' },
+    { name: 'tableName', type: 'string' },
+    { name: 'isTemporary', type: 'boolean' },
+  ],
+  datarows: [
+    ['TestDatabase', 'Table1', false],
+    ['TestDatabase', 'Table2', false],
+  ],
+};
+
+export const mockShowIndexesPollingResult: AsyncPollingResult = {
+  schema: [
+    { name: 'flint_index_name', type: 'string' },
+    { name: 'kind', type: 'string' },
+    { name: 'database', type: 'string' },
+    { name: 'table', type: 'string' },
+    { name: 'index_name', type: 'string' },
+    { name: 'auto_refresh', type: 'boolean' },
+    { name: 'status', type: 'string' },
+  ],
+  datarows: [
+    [
+      'flint_mys3_default_http_logs_skipping_index',
+      'skipping',
+      'default',
+      'http_logs',
+      'skipping_index',
+      false,
+      'Active',
+    ],
+    [
+      'flint_mys3_default_http_logs_status_clientip_and_day_index',
+      'covering',
+      'default',
+      'http_logs',
+      'status_clientip_and_day',
+      true,
+      'Active',
+    ],
+    ['flint_mys3_default_http_count_view', 'mv', 'default', '', 'http_count_view', true, 'Active'],
+  ],
 };

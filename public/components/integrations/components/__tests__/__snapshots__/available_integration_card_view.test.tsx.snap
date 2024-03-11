@@ -6,12 +6,14 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
     Object {
       "hits": Array [
         Object {
-          "assets": Object {
-            "savedObjects": Object {
+          "assets": Array [
+            Object {
+              "extension": "ndjson",
               "name": "nginx",
+              "type": "savedObjectBundle",
               "version": "1.0.1",
             },
-          },
+          ],
           "author": "John Doe",
           "components": Array [
             Object {
@@ -29,7 +31,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           ],
           "description": "Nginx HTTP server collector",
           "displayName": "NginX Dashboard",
-          "integrationType": "logs",
           "license": "Apache-2.0",
           "name": "nginx",
           "sourceUrl": "https://github.com/",
@@ -55,8 +56,12 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
       ],
     }
   }
+  http={[MockFunction]}
+  isCardView={false}
+  query=""
   renderCateogryFilters={[Function]}
-  showModal={[Function]}
+  setCardView={[Function]}
+  setQuery={[Function]}
 >
   <EuiPanel>
     <div
@@ -453,6 +458,118 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                   </div>
                 </fieldset>
               </EuiButtonGroup>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFlexGroup
+        gutterSize="l"
+        style={
+          Object {
+            "flexWrap": "wrap",
+          }
+        }
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          style={
+            Object {
+              "flexWrap": "wrap",
+            }
+          }
+        >
+          <EuiFlexItem
+            key="0"
+            style={
+              Object {
+                "maxWidth": "14rem",
+                "minWidth": "14rem",
+              }
+            }
+          >
+            <div
+              className="euiFlexItem"
+              style={
+                Object {
+                  "maxWidth": "14rem",
+                  "minWidth": "14rem",
+                }
+              }
+            >
+              <EuiCard
+                data-test-subj="integration_card_nginx"
+                description="Nginx HTTP server collector"
+                footer={<EuiBadgeGroup />}
+                onClick={[Function]}
+                title="NginX Dashboard"
+                titleElement="span"
+              >
+                <EuiPanel
+                  className="euiCard euiCard--centerAligned euiCard--isClickable"
+                  data-test-subj="integration_card_nginx"
+                  element="div"
+                  hasShadow={true}
+                  onClick={[Function]}
+                >
+                  <div
+                    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable"
+                    data-test-subj="integration_card_nginx"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCard__content"
+                    >
+                      <EuiTitle
+                        className="euiCard__title"
+                        id="random_html_idTitle"
+                        size="s"
+                      >
+                        <span
+                          className="euiTitle euiTitle--small euiCard__title"
+                          id="random_html_idTitle"
+                        >
+                          <button
+                            aria-describedby=" random_html_idDescription"
+                            className="euiCard__titleButton"
+                            disabled={false}
+                            onClick={[Function]}
+                          >
+                            NginX Dashboard
+                          </button>
+                        </span>
+                      </EuiTitle>
+                      <EuiText
+                        className="euiCard__description"
+                        id="random_html_idDescription"
+                        size="s"
+                      >
+                        <div
+                          className="euiText euiText--small euiCard__description"
+                          id="random_html_idDescription"
+                        >
+                          <p>
+                            Nginx HTTP server collector
+                          </p>
+                        </div>
+                      </EuiText>
+                    </div>
+                    <div
+                      className="euiCard__footer"
+                    >
+                      <EuiBadgeGroup>
+                        <div
+                          className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
+                        />
+                      </EuiBadgeGroup>
+                    </div>
+                  </div>
+                </EuiPanel>
+              </EuiCard>
             </div>
           </EuiFlexItem>
         </div>
