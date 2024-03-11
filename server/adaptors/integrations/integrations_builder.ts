@@ -41,16 +41,32 @@ export class IntegrationInstanceBuilder {
     if (!assets.ok) {
       return Promise.reject(assets.error);
     }
-    const remapped = this.remapIDs(
-      assets.value
-        .filter((asset) => asset.type === 'savedObjectBundle')
-        .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
-        .flat() as SavedObject[]
-    );
+    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value));
     const withDataSource = this.remapDataSource(remapped, options.dataSource);
     const refs = await this.postAssets(withDataSource);
     const builtInstance = await this.buildInstance(integration, refs, options);
     return builtInstance;
+  }
+
+  getSavedObjectBundles(
+    assets: ParsedIntegrationAsset[],
+    includeWorkflows?: string[]
+  ): SavedObject[] {
+    return assets
+      .filter((asset) => {
+        // At this stage we only care about installing bundles
+        if (asset.type !== 'savedObjectBundle') {
+          return false;
+        }
+        // If no workflows present: default to all workflows
+        // Otherwise only install if workflow is present
+        if (!asset.workflows || !includeWorkflows) {
+          return true;
+        }
+        return includeWorkflows.some((w) => asset.workflows?.includes(w));
+      })
+      .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
+      .flat() as SavedObject[];
   }
 
   remapDataSource(
