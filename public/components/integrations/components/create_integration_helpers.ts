@@ -282,7 +282,8 @@ export async function addIntegrationRequest(
   integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
-  dataSource?: string
+  dataSource?: string,
+  workflows?: string[]
 ): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
@@ -298,7 +299,7 @@ export async function addIntegrationRequest(
 
   let response: boolean = await http
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
-      body: JSON.stringify({ name, dataSource }),
+      body: JSON.stringify({ name, dataSource, workflows }),
     })
     .then((res) => {
       setToast(`${name} integration successfully added!`, 'success');
