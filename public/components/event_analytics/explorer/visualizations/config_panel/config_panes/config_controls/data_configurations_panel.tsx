@@ -299,7 +299,7 @@ export const DataConfigPanelItem = ({
           },
         });
       },
-      errorCallback: (err) => {},
+      errorCallback: (_) => {},
     });
   }, [configList, query, visualizations]);
 
@@ -311,11 +311,6 @@ export const DataConfigPanelItem = ({
   }: VisualizationState) => {
     fillVisDataInStore({ visData, queryState, visConfMetadata, visMeta });
   };
-
-  const isPositionButtonVisible = (sectionName: string) =>
-    sectionName === AGGREGATIONS &&
-    (visualizations.vis.name === VIS_CHART_TYPES.Line ||
-      visualizations.vis.name === VIS_CHART_TYPES.Scatter);
 
   const getTimeStampFilteredFields = (options: IField[]) =>
     filter(options, (i: IField) => i.type !== TIMESTAMP);
@@ -343,7 +338,7 @@ export const DataConfigPanelItem = ({
     const selectedObj = isTimeStampSelected ? configList[SPAN] : configList[name][index];
     const isAggregations = name === AGGREGATIONS;
     return (
-      <div className={'vbConfig__section vbConfig--secondary'}>
+      <div className={'logExplorerVisConfig__section logExplorerVisConfig--secondary'}>
         <div className="services">
           <div className="first-division">
             <DataConfigItemClickPanel
@@ -538,9 +533,9 @@ export const DataConfigPanelItem = ({
   return isAddConfigClicked ? (
     getCommonUI(selectedConfigItem.name)
   ) : (
-    <EuiForm className={'vbConfig'}>
-      <div className="vbConfig__section">
-        <div className="vbConfig__title">
+    <EuiForm className={'logExplorerVisConfig'}>
+      <div className="logExplorerVisConfig__section">
+        <div className="logExplorerVisConfig__title">
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xxs">
@@ -550,7 +545,7 @@ export const DataConfigPanelItem = ({
           </EuiFlexGroup>
         </div>
         {visualizations.vis.name !== VIS_CHART_TYPES.Histogram ? (
-          <div className="vbConfig__content">
+          <div className="logExplorerVisConfig__content">
             <EuiSpacer size="s" />
             {DataConfigPanelFields(getRenderFieldsObj(AGGREGATIONS))}
             <EuiHorizontalRule margin="m" />
@@ -577,7 +572,7 @@ export const DataConfigPanelItem = ({
             {getNumberField('bucketOffset')}
           </>
         )}
-        <div className="vbConfig__content">
+        <div className="logExplorerVisConfig__content">
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="visualizeEditorRenderButton"

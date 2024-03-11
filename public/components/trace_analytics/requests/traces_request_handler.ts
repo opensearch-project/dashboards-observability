@@ -264,7 +264,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
       mode === 'jaeger' ? _.get(hit, '_source.operationName') : _.get(hit, '_source.name');
     const error =
       mode === 'jaeger'
-        ? hit._source.tag.error === true
+        ? hit._source.tag?.['error'] === true
           ? ' \u26a0 Error'
           : ''
         : hit._source['status.code'] === 2

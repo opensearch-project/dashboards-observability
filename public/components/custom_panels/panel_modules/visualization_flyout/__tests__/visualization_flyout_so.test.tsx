@@ -7,16 +7,21 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import PPLService from '../../../../../services/requests/ppl';
 import React from 'react';
-import { VisaulizationFlyout } from '../visualization_flyout';
+import { VisaulizationFlyoutSO } from '../visualization_flyout_so';
 // eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { ShortDate } from '@elastic/eui';
 import { cleanup } from '@testing-library/react';
 import { SavedObjectsActions } from '../../../../../../public/services/saved_objects/saved_object_client/saved_objects_actions';
 import { sampleSavedVisualization } from '../../../../../../test/panels_constants';
+import { applyMiddleware, createStore } from 'redux';
+import { rootReducer } from '../../../../../../public/framework/redux/reducers';
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
 
 describe('Visualization Flyout Component', () => {
   configure({ adapter: new Adapter() });
+  const store = createStore(rootReducer, applyMiddleware(thunk));
 
   afterEach(() => {
     cleanup();
@@ -34,18 +39,20 @@ describe('Visualization Flyout Component', () => {
     const isFlyoutReplacement = false;
 
     const wrapper = mount(
-      <VisaulizationFlyout
-        panelId={panelId}
-        pplFilterValue={pplFilterValue}
-        start={start}
-        end={end}
-        setToast={setToast}
-        closeFlyout={closeFlyout}
-        setPanelVisualizations={setPanelVisualizations}
-        http={httpClientMock}
-        pplService={pplService}
-        isFlyoutReplacement={isFlyoutReplacement}
-      />
+      <Provider store={store}>
+        <VisaulizationFlyoutSO
+          panelId={panelId}
+          pplFilterValue={pplFilterValue}
+          start={start}
+          end={end}
+          setToast={setToast}
+          closeFlyout={closeFlyout}
+          setPanelVisualizations={setPanelVisualizations}
+          http={httpClientMock}
+          pplService={pplService}
+          isFlyoutReplacement={isFlyoutReplacement}
+        />
+      </Provider>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -71,19 +78,21 @@ describe('Visualization Flyout Component', () => {
     );
 
     const wrapper = mount(
-      <VisaulizationFlyout
-        panelId={panelId}
-        pplFilterValue={pplFilterValue}
-        start={start}
-        end={end}
-        setToast={setToast}
-        closeFlyout={closeFlyout}
-        setPanelVisualizations={setPanelVisualizations}
-        http={httpClientMock}
-        pplService={pplService}
-        isFlyoutReplacement={isFlyoutReplacement}
-        replaceVisualizationId={replaceVisualizationId}
-      />
+      <Provider store={store}>
+        <VisaulizationFlyoutSO
+          panelId={panelId}
+          pplFilterValue={pplFilterValue}
+          start={start}
+          end={end}
+          setToast={setToast}
+          closeFlyout={closeFlyout}
+          setPanelVisualizations={setPanelVisualizations}
+          http={httpClientMock}
+          pplService={pplService}
+          isFlyoutReplacement={isFlyoutReplacement}
+          replaceVisualizationId={replaceVisualizationId}
+        />
+      </Provider>
     );
 
     wrapper.find('[data-test-subj="addFlyoutButton"]').first().simulate('click');
