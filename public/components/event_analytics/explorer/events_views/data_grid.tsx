@@ -32,7 +32,6 @@ import { FlyoutButton } from './docViewRow';
 import { selectQueries } from '../../redux/slices/query_slice';
 
 export interface DataGridProps {
-  tabId: string;
   http: HttpSetup;
   pplService: PPLService;
   rows: any[];

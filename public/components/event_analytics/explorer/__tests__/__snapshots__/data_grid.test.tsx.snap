@@ -128,11 +128,59 @@ exports[`Datagrid component Renders data grid component 1`] = `
         "unselectedFields": Array [],
       }
     }
-    http={[MockFunction]}
+    http={
+      Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "get": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      }
+    }
     pplService={
       PPLService {
         "fetch": [Function],
-        "http": [MockFunction],
+        "http": Object {
+          "addLoadingCountSource": [MockFunction],
+          "anonymousPaths": Object {
+            "isAnonymous": [MockFunction],
+            "register": [MockFunction],
+          },
+          "basePath": BasePath {
+            "basePath": "",
+            "get": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+            "serverBasePath": "",
+          },
+          "delete": [MockFunction],
+          "fetch": [MockFunction],
+          "get": [MockFunction],
+          "getLoadingCount$": [MockFunction],
+          "head": [MockFunction],
+          "intercept": [MockFunction],
+          "options": [MockFunction],
+          "patch": [MockFunction],
+          "post": [MockFunction],
+          "put": [MockFunction],
+        },
       }
     }
     rawQuery="source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')"
@@ -203,7 +251,6 @@ exports[`Datagrid component Renders data grid component 1`] = `
         },
       ]
     }
-    rowsAll={Array []}
     startTime="now/y"
     storedSelectedColumns={
       Array [
