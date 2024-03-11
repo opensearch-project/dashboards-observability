@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import {
@@ -23,14 +22,12 @@ import {
   DEFAULT_EMPTY_EXPLORER_FIELDS,
   DEFAULT_SOURCE_COLUMN,
   DEFAULT_TIMESTAMP_COLUMN,
-  SELECTED_TIMESTAMP,
 } from '../../../../../common/constants/explorer';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
-import { selectQueries } from '../../redux/slices/query_slice';
 
 export interface DataGridProps {
   http: HttpSetup;
@@ -70,13 +67,10 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
   });
 
-  const query = useSelector(selectQueries)[requestParams.tabId];
-  const defaultTimestamp = query[SELECTED_TIMESTAMP];
-
   const selectedColumns =
     explorerFields.selectedFields.length > 0
       ? explorerFields.selectedFields
-      : [{ name: defaultTimestamp, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS];
+      : [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS];
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
@@ -128,11 +122,11 @@ export function DataGrid(props: DataGridProps) {
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
     selectedColumns.map(({ name }) => {
-      if (name === defaultTimestamp) {
+      if (name === timeStampField) {
         columns.push({
           ...DEFAULT_TIMESTAMP_COLUMN,
-          display: `${columnNameTranslate('Time')} (${defaultTimestamp})`,
-          id: defaultTimestamp,
+          display: `${columnNameTranslate('Time')} (${timeStampField})`,
+          id: timeStampField,
         });
       } else if (name === '_source') {
         columns.push({
@@ -142,7 +136,7 @@ export function DataGrid(props: DataGridProps) {
       } else {
         columns.push({
           id: name,
-          display: columnNameTranslate(name),
+          display: name,
           isSortable: true, // TODO: add functionality here based on type
         });
       }
@@ -223,7 +217,7 @@ export function DataGrid(props: DataGridProps) {
         );
       }
       if (columnId === 'timestamp') {
-        return `${moment(data[trueIndex][defaultTimestamp]).format(DATE_DISPLAY_FORMAT)}`;
+        return `${moment(data[trueIndex][timeStampField]).format(DATE_DISPLAY_FORMAT)}`;
       }
       return `${data[trueIndex][columnId]}`;
     }
