@@ -35,6 +35,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           "connectionTableName": "sample",
                           "connectionType": "index",
                           "displayName": "sample Integration",
+                          "enabledWorkflows": Array [],
                         }
                       }
                       integration={
@@ -719,6 +720,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                 "connectionTableName": "sample",
                 "connectionType": "index",
                 "displayName": "sample Integration",
+                "enabledWorkflows": Array [],
               }
             }
             integration={
@@ -2054,9 +2056,17 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error={
+          Array [
+            "Must select at least one workflow.",
+          ]
+        }
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        helpText="Select from the available types of assets based on how your use case."
+        isInvalid={true}
+        label="Select installation workflows"
         labelType="label"
       >
         <div
@@ -2064,9 +2074,30 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
           id="random_html_id-row"
         >
           <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={true}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={true}
+              type="label"
+            >
+              <label
+                aria-invalid={true}
+                className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+                htmlFor="random_html_id"
+              >
+                Select installation workflows
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
             className="euiFormRow__fieldWrapper"
           >
             <SetupWorkflowSelector
+              aria-describedby="random_html_id-help-0 random_html_id-error-0"
               id="random_html_id"
               integration={
                 Object {
@@ -2095,6 +2126,31 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
               toggleWorkflow={[Function]}
               useWorkflows={Array []}
             />
+            <EuiFormErrorText
+              className="euiFormRow__text"
+              id="random_html_id-error-0"
+              key="Must select at least one workflow."
+            >
+              <div
+                aria-live="polite"
+                className="euiFormErrorText euiFormRow__text"
+                id="random_html_id-error-0"
+              >
+                Must select at least one workflow.
+              </div>
+            </EuiFormErrorText>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="Select from the available types of assets based on how your use case."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Select from the available types of assets based on how your use case.
+              </div>
+            </EuiFormHelpText>
           </div>
         </div>
       </EuiFormRow>

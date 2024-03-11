@@ -43,6 +43,7 @@ export interface IntegrationSetupInputs {
   connectionLocation: string;
   checkpointLocation: string;
   connectionTableName: string;
+  enabledWorkflows: string[];
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -200,6 +201,7 @@ export function SetupWorkflowSelector({
     return (
       <EuiCheckableCard
         id={`workflow-checkbox-${workflow.name}`}
+        key={workflow.name}
         label={workflow.label}
         checkableType="checkbox"
         value={workflow.name}
@@ -229,7 +231,7 @@ export function SetupIntegrationForm({
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
-  const [useWorkflows, setUseWorkflows] = useState(new Map());
+  const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
   const toggleWorkflow = (name: string) => {
     setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
   };
@@ -239,6 +241,14 @@ export function SetupIntegrationForm({
       setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
     }
   }, [integration.workflows]);
+
+  useEffect(() => {
+    updateConfig({
+      enabledWorkflows: [...useWorkflows.entries()].filter((w) => w[1]).map((w) => w[0]),
+    });
+    // If we add the updateConfig dep here, rendering crashes with "Maximum update depth exceeded"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useWorkflows]);
 
   useEffect(() => {
     const updateDataSources = async () => {
@@ -382,7 +392,12 @@ export function SetupIntegrationForm({
               }}
             />
           </EuiFormRow>
-          <EuiFormRow>
+          <EuiFormRow
+            label="Select installation workflows"
+            helpText={'Select from the available types of assets based on how your use case.'}
+            isInvalid={![...useWorkflows.values()].includes(true)}
+            error={['Must select at least one workflow.']}
+          >
             <SetupWorkflowSelector
               integration={integration}
               useWorkflows={useWorkflows}
@@ -394,6 +409,18 @@ export function SetupIntegrationForm({
     </EuiForm>
   );
 }
+
+const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
+  let queryStr = query.replaceAll(
+    '{table_name}',
+    `${config.connectionDataSource}.default.${config.connectionTableName}`
+  );
+  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+  queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
+  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  queryStr = queryStr.replaceAll(/\s+/g, ' ');
+  return queryStr;
+};
 
 const addIntegration = async ({
   config,
@@ -425,22 +452,20 @@ const addIntegration = async ({
   } else if (config.connectionType === 's3') {
     const http = coreRefs.http!;
 
-    const assets = await http.get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`);
+    const assets: { data: ParsedIntegrationAsset[] } = await http.get(
+      `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+    );
 
-    // Queries must exist because we disable s3 if they're not present
     for (const query of assets.data.filter(
-      (a: ParsedIntegrationAsset): a is { type: 'query'; query: string; language: string } =>
+      (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
         a.type === 'query'
     )) {
-      let queryStr = (query.query as string).replaceAll(
-        '{table_name}',
-        `${config.connectionDataSource}.default.${config.connectionTableName}`
-      );
+      // Skip any queries that have conditional workflows but aren't enabled
+      if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
+        continue;
+      }
 
-      queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-      queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
-      queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
-      queryStr = queryStr.replaceAll(/\s+/g, ' ');
+      const queryStr = prepareQuery(query.query, config);
       const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
       if (!result.ok) {
         setLoading(false);
@@ -450,7 +475,6 @@ const addIntegration = async ({
       sessionId = result.value.sessionId ?? sessionId;
     }
     // Once everything is ready, add the integration to the new datasource as usual
-    // TODO determine actual values here after more about queries is known
     const res = await addIntegrationRequest(
       false,
       integration.name,
