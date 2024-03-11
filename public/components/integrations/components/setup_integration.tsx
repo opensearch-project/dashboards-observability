@@ -493,11 +493,14 @@ const addIntegration = async ({
   }
 };
 
-const isConfigValid = (config: IntegrationSetupInputs): boolean => {
+const isConfigValid = (config: IntegrationSetupInputs, integration: IntegrationConfig): boolean => {
   if (config.displayName.length < 1 || config.connectionDataSource.length < 1) {
     return false;
   }
   if (config.connectionType === 's3') {
+    if (integration.workflows && config.enabledWorkflows.length < 1) {
+      return false;
+    }
     return (
       config.connectionLocation.startsWith('s3://') && config.checkpointLocation.startsWith('s3://')
     );
@@ -552,7 +555,7 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={!isConfigValid(config)}
+            disabled={!isConfigValid(config, integration)}
             onClick={async () =>
               addIntegration({ integration, config, setLoading, setCalloutLikeToast })
             }
@@ -586,6 +589,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionLocation: '',
     checkpointLocation: '',
     connectionTableName: integration,
+    enabledWorkflows: [],
   });
 
   const [template, setTemplate] = useState({
