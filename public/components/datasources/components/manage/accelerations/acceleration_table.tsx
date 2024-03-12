@@ -25,6 +25,7 @@ import {
 } from './helpers/utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 
+// TODO : USE CACHED DATA
 interface AccelerationTableTabProps {
   // TODO: Add acceleration type to plugin types
   accelerations: any[];
@@ -32,9 +33,7 @@ interface AccelerationTableTabProps {
 
 export const AccelerationTable = (props: AccelerationTableTabProps) => {
   const { accelerations } = props;
-
-  console.log('here is the accelerations');
-  console.log(accelerations);
+  console.log('accelerations top: ', accelerations);
   const RefreshButton = () => {
     // TODO: Implement logic for refreshing acceleration
     return (
@@ -114,7 +113,7 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
           onClick={() => {
             renderAccelerationDetailsFlyout({
               index: indexName,
-              accelerations: accelerations.find(
+              acceleration: accelerations.find(
                 (acceleration) => acceleration.indexName === indexName
               ),
             });

@@ -29,7 +29,6 @@ import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 
 export interface AccelerationDetailsFlyoutProps {
-  index: string;
   acceleration: any;
 }
 
@@ -51,10 +50,15 @@ const handlePromise = (
     .catch((error) => ({ status: 'rejected', flintIndexName, error }));
 };
 
-export const AccelerationDetailsFlyout = ({ acceleration }: AccelerationDetailsFlyoutProps) => {
-  const { index } = acceleration;
-  console.log('?????index');
-  console.log(acceleration);
+export const AccelerationDetailsFlyout = ({
+  acceleration: selectedAcc,
+}: AccelerationDetailsFlyoutProps) => {
+  const { index, acceleration } = selectedAcc;
+  const { flintIndexName } = acceleration;
+  console.log('hahhahhaha flintIndexName: ', flintIndexName);
+  // console.log(index);
+  // console.log('?????index');
+  console.log('acceleration AccelerationDetailsFlyout: ', acceleration);
   // console.log(index);
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -72,10 +76,10 @@ export const AccelerationDetailsFlyout = ({ acceleration }: AccelerationDetailsF
     setMappings(result);
   };
 
-  const updateSetting = (result) => {
+  const updateSetting = (result, slectedIndex: string) => {
     console.log('updateSetting: ');
     console.log(result);
-    setSettings(result.data[index]);
+    setSettings(result.data[slectedIndex]);
   };
 
   const getAccDetail = (selectedIndex: string) => {
@@ -86,7 +90,7 @@ export const AccelerationDetailsFlyout = ({ acceleration }: AccelerationDetailsF
     ])
       .then((results) => {
         updateMapping(results[0]);
-        updateSetting(results[1]);
+        updateSetting(results[1], selectedIndex);
       })
       .catch((errors: Error[]) => {
         errors.forEach((error, errorIndex) => {
@@ -96,8 +100,8 @@ export const AccelerationDetailsFlyout = ({ acceleration }: AccelerationDetailsF
   };
 
   useEffect(() => {
-    getAccDetail(index);
-  }, [index]);
+    getAccDetail(flintIndexName);
+  }, [flintIndexName]);
 
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
@@ -158,10 +162,12 @@ export const AccelerationDetailsFlyout = ({ acceleration }: AccelerationDetailsF
   };
 
   const renderTabContent = (tab: string, tabAcceleration: any) => {
+    const { acceleration: acc, settings: sett, mappings: mapp } = tabAcceleration;
+
     const TabToDisplay = tabsMap[tab];
-    // return <TabToDisplay acceleration={tabAcceleration} />;
     console.log('tabAcceleration: ', tabAcceleration);
-    return <TabToDisplay {...tabAcceleration} />;
+
+    return <TabToDisplay acceleration={acc} settings={sett} mappings={mapp} />;
   };
 
   return (
