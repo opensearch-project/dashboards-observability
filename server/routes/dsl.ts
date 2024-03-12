@@ -52,6 +52,7 @@ export function registerDslRoute({ router }: { router: IRouter; facet: DSLFacet 
       validate: {
         query: schema.object({
           format: schema.string(),
+          index: schema.string(),
         }),
       },
     },
@@ -77,7 +78,6 @@ export function registerDslRoute({ router }: { router: IRouter; facet: DSLFacet 
   router.get(
     {
       path: `${DSL_BASE}${DSL_MAPPING}`,
-      // path: `${DSL_BASE}/indices.getFieldMapping`,
       validate: { query: schema.any() },
     },
     async (context, request, response) => {

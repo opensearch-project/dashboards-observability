@@ -25,18 +25,18 @@ export default class DSLService {
       .catch((error) => console.error(error));
   };
 
-  fetchIndices = async () => {
+  fetchIndices = async (index: string = '') => {
     return this.http
       .get(`${DSL_BASE}${DSL_CAT}`, {
         query: {
           format: 'json',
+          index,
         },
       })
       .catch((error) => console.error(error));
   };
 
   fetchFields = async (index: string) => {
-    console.log('index: ', index);
     return this.http.get(`${DSL_BASE}${DSL_MAPPING}`, {
       query: {
         index,

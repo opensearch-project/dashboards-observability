@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { AccelerationStatus } from '../helpers/utils';
+import { AccelerationHealth, AccelerationStatus } from '../helpers/utils';
 
 interface AccelerationDetailsTabProps {
   acceleration: {
@@ -28,15 +28,22 @@ interface AccelerationDetailsTabProps {
   };
   settings: object;
   mappings: object;
+  indexInfo: any;
 }
 
 export const AccelerationDetailsTab = ({
   acceleration,
   settings,
   mappings,
+  indexInfo,
 }: AccelerationDetailsTabProps) => {
-  const accStatus = acceleration.status;
-  console.log('Hereererere is the status: ', accStatus);
+
+  console.log('mappings:', mappings);
+  console.log('indexInfo:', indexInfo);
+  console.log('indexInfo data:', indexInfo?.data);
+  console.log('First item in indexInfo data:', indexInfo?.data[0]);
+  console.log('Health of the first item:', indexInfo?.data[0]?.health);
+
   const DetailComponent = ({
     title,
     description,
@@ -99,10 +106,10 @@ export const AccelerationDetailsTab = ({
       <EuiSpacer />
       <TitleComponent title="Index details" />
       <EuiFlexGroup>
-        <DetailComponent title="Index name" description={acceleration.flintIndexName} />
+        <DetailComponent title="Index name" description={indexInfo?.data[0]?.index} />
         <DetailComponent
           title="Health"
-          description={<AccelerationStatus status={acceleration.status} />}
+          description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
         />
         <DetailComponent title="Refresh interval" description="2s" />
       </EuiFlexGroup>

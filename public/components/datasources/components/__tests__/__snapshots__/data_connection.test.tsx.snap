@@ -625,7 +625,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                  class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -641,7 +641,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -809,7 +809,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                  class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -825,7 +825,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -993,7 +993,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                  class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -1009,7 +1009,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -1175,7 +1175,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                  class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -1191,7 +1191,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -2227,7 +2227,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor"
+                                  class="euiIcon euiIcon--medium euiIcon--success"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -2245,7 +2245,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -2413,7 +2413,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor"
+                                  class="euiIcon euiIcon--medium euiIcon--success"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -2431,7 +2431,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -2599,7 +2599,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor"
+                                  class="euiIcon euiIcon--medium euiIcon--success"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -2617,7 +2617,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>
@@ -2783,7 +2783,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--customColor"
+                                  class="euiIcon euiIcon--medium euiIcon--success"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -2801,7 +2801,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                Paused
+                                Active
                               </div>
                             </div>
                           </div>

@@ -41,6 +41,10 @@ const getSettings = (index: string): Promise<OpenSearchDashboardsResponse> | und
   return coreRefs.dslService?.fetchSettings(index);
 };
 
+const getIndexInfo = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchIndices(index);
+};
+
 const handlePromise = (
   promise: Promise<OpenSearchDashboardsResponse> | undefined,
   flintIndexName: string
@@ -55,20 +59,15 @@ export const AccelerationDetailsFlyout = ({
 }: AccelerationDetailsFlyoutProps) => {
   const { index, acceleration } = selectedAcc;
   const { flintIndexName } = acceleration;
-  console.log('hahhahhaha flintIndexName: ', flintIndexName);
-  // console.log(index);
-  // console.log('?????index');
-  console.log('acceleration AccelerationDetailsFlyout: ', acceleration);
-  // console.log(index);
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
     details: AccelerationDetailsTab,
     schema: AccelerationSchemaTab,
     sql_definition: AccelerationSqlTab,
   };
-  // const { dslService } = coreRefs;
   const [settings, setSettings] = useState<object>();
   const [mappings, setMappings] = useState();
+  const [indexInfo, setIndexInfo] = useState();
 
   const updateMapping = (result) => {
     console.log('updateMapping: ');
@@ -82,15 +81,22 @@ export const AccelerationDetailsFlyout = ({
     setSettings(result.data[slectedIndex]);
   };
 
+  const updateIndexInfo = (result) => {
+    console.log('updateIndexInfo: ');
+    console.log(result);
+    setIndexInfo(result);
+  };
+
   const getAccDetail = (selectedIndex: string) => {
-    console.log('getAccDetail index: ', selectedIndex);
     Promise.all([
       handlePromise(getMappings(selectedIndex), 'getMappings'),
       handlePromise(getSettings(selectedIndex), 'getSettings'),
+      handlePromise(getIndexInfo(selectedIndex), 'getIndexInfo'),
     ])
       .then((results) => {
         updateMapping(results[0]);
         updateSetting(results[1], selectedIndex);
+        updateIndexInfo(results[2]);
       })
       .catch((errors: Error[]) => {
         errors.forEach((error, errorIndex) => {
@@ -162,12 +168,17 @@ export const AccelerationDetailsFlyout = ({
   };
 
   const renderTabContent = (tab: string, tabAcceleration: any) => {
-    const { acceleration: acc, settings: sett, mappings: mapp } = tabAcceleration;
+    const {
+      acceleration: acc,
+      settings: sett,
+      mappings: mapp,
+      indexInfo: indexI,
+    } = tabAcceleration;
 
     const TabToDisplay = tabsMap[tab];
     console.log('tabAcceleration: ', tabAcceleration);
 
-    return <TabToDisplay acceleration={acc} settings={sett} mappings={mapp} />;
+    return <TabToDisplay acceleration={acc} settings={sett} mappings={mapp} indexInfo={indexI} />;
   };
 
   return (
@@ -193,7 +204,7 @@ export const AccelerationDetailsFlyout = ({
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {renderTabContent(selectedTab, { acceleration, settings, mappings })}
+        {renderTabContent(selectedTab, { acceleration, settings, mappings, indexInfo })}
       </EuiFlyoutBody>
     </>
   );
