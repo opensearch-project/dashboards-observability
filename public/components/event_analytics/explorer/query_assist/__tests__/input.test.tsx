@@ -8,7 +8,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { Provider } from 'react-redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { QUERY_ASSIST_API } from '../../../../../../common/constants/query_assist';
+import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../../common/constants/query_assist';
 import * as coreServices from '../../../../../../common/utils/core_services';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { rootReducer } from '../../../../../framework/redux/reducers';
@@ -29,6 +29,7 @@ const renderQueryAssistInput = (
       selectedIndex: [{ label: 'selected-test-index' }],
       nlqInput: 'test-input',
       setNlqInput: jest.fn(),
+      handleTimePickerChange: jest.fn(),
     },
     overrideProps
   );
@@ -74,6 +75,7 @@ describe('<QueryAssistInput /> spec', () => {
 
     const { component } = renderQueryAssistInput();
     await waitFor(() => {
+      // splitbutton dropdown buttons don't support custom test id in Oui 1.5
       fireEvent.click(component.getByTestId('splitButton--dropdown'));
       fireEvent.click(component.getByTestId('query-assist-generate-button'));
     });
@@ -128,7 +130,25 @@ describe('<QueryAssistInput /> spec', () => {
     });
     expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, {
       body:
-        '{"question":"test-input","index":"selected-test-index","isError":true,"query":"","response":"{\\"statusCode\\":429}"}',
+        '{"question":"test-input","index":"selected-test-index","isError":true,"query":"","response":"{\\"statusCode\\":429,\\"message\\":\\"Request is throttled. Try again later or contact your administrator\\"}"}',
     });
+  });
+
+  it('should display callout when response returned 400 with guardrails denied', async () => {
+    coreRefs.summarizeEnabled = true;
+    httpMock.post.mockRejectedValueOnce({
+      body: { statusCode: 400, message: ERROR_DETAILS.GUARDRAILS_TRIGGERED },
+    });
+
+    const { component } = renderQueryAssistInput();
+    await waitFor(() => {
+      // splitbutton data-test-subj doesn't work in Oui 1.5, this should be query-assist-generate-and-run-button
+      fireEvent.click(component.getByText('Generate and run'));
+    });
+
+    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+      body: '{"question":"test-input","index":"selected-test-index"}',
+    });
+    expect(component.getByTestId('query-assist-guard-callout')).toBeInTheDocument();
   });
 });

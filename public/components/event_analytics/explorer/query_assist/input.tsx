@@ -22,7 +22,7 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
-import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
+import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -145,10 +145,6 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         index: props.selectedIndex[0].label,
       }),
     });
-    // TODO remove
-    const mockProhibited = Math.random() > 0.5;
-    setProhibitedQuery(mockProhibited);
-    if (mockProhibited) throw new ProhibitedQueryError();
     await props.handleQueryChange(generatedPPL);
     await dispatch(
       changeQuery({
@@ -160,13 +156,18 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     );
     return generatedPPL;
   };
-  const formatError = (error: ResponseError): Error => {
-    if (error.body) {
+  const formatError = (error: ResponseError | Error): Error => {
+    if ('body' in error) {
       if (error.body.statusCode === 429)
         return {
           ...error.body,
           message: 'Request is throttled. Try again later or contact your administrator',
         } as Error;
+      if (
+        error.body.statusCode === 400 &&
+        error.body.message === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+      )
+        return new ProhibitedQueryError(error.body.message);
       return error.body as Error;
     }
     return error;
@@ -178,12 +179,15 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     if (!props.selectedIndex.length) return;
     try {
       setGenerating(true);
+      setProhibitedQuery(false);
       await request();
-    } catch (error) {
-      if (error instanceof ProhibitedQueryError) return;
-      coreRefs.toasts?.addError(formatError(error as ResponseError), {
-        title: 'Failed to generate results',
-      });
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setProhibitedQuery(true);
+        return;
+      }
+      coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
       setGenerating(false);
     }
@@ -231,11 +235,13 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
           },
         })
       );
-    } catch (error) {
-      if (error instanceof ProhibitedQueryError) return;
-      coreRefs.toasts?.addError(error, {
-        title: 'Failed to summarize results',
-      });
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setProhibitedQuery(true);
+        return;
+      }
+      coreRefs.toasts?.addError(error, { title: 'Failed to summarize results' });
     } finally {
       await dispatch(
         changeSummary({
@@ -261,17 +267,20 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     try {
       setGenerating(true);
       setGeneratingOrRunning(true);
+      setProhibitedQuery(false);
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
-    } catch (error) {
-      if (error instanceof ProhibitedQueryError) return;
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setProhibitedQuery(true);
+        return;
+      }
       if (coreRefs.summarizeEnabled) {
-        generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+        generateSummary({ isError: true, response: JSON.stringify(error) });
       } else {
-        coreRefs.toasts?.addError(formatError(error as ResponseError), {
-          title: 'Failed to generate results',
-        });
+        coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
       setGenerating(false);
@@ -341,6 +350,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       </EuiFlexGroup>
       {prohibitedQuery ? (
         <EuiCallOut
+          data-test-subj="query-assist-guard-callout"
           title="I am unable to respond to this query. Try another question."
           size="s"
           color="danger"
