@@ -421,7 +421,6 @@ describe('CatalogCacheManager', () => {
         status: CachedDataSourceStatus.Updated,
         accelerations: [],
       };
-      // mockAccelerationsCacheData.dataSources = [initialDataSource];
 
       // Update the data source
       const updatedDataSource: CachedAcclerationByDataSource = {

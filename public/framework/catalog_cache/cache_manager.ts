@@ -112,9 +112,8 @@ export class CatalogCacheManager {
     const accCacheData = this.getAccelerationsCache();
     const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
 
-    if (cachedDataSource) {
-      return cachedDataSource;
-    } else {
+    if (cachedDataSource) return cachedDataSource;
+    else {
       const defaultDataSourceObject = {
         name: dataSourceName,
         lastUpdated: '',
