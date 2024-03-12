@@ -9,6 +9,8 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   EuiText,
@@ -17,9 +19,15 @@ import producer from 'immer';
 import React, { useEffect, useState } from 'react';
 import { CoreStart } from '../../../../../../../../../../src/core/public';
 import { DATACONNECTIONS_BASE } from '../../../../../../../../common/constants/shared';
-import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
+import {
+  CachedDataSourceStatus,
+  CreateAccelerationForm,
+} from '../../../../../../../../common/types/data_connections';
+import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
 import { hasError, validateDataTable, validateDatabase } from '../create/utils';
+import { SelectorLoadDatabases } from './selector_helpers/selector_load_databases';
+import { SelectorLoadObjects } from './selector_helpers/selector_load_objects';
 
 interface AccelerationDataSourceSelectorProps {
   http: CoreStart['http'];
@@ -35,11 +43,11 @@ export const AccelerationDataSourceSelector = ({
   selectedDatasource,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
-  const [databases, _setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
-  const [tables, _setTables] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [tables, setTables] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedTable, setSelectedTable] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [loadingComboBoxes, setLoadingComboBoxes] = useState({
     dataSource: false,
@@ -70,63 +78,54 @@ export const AccelerationDataSourceSelector = ({
   };
 
   const loadDatabases = () => {
-    // TODO: Load databases from cache
-    // setLoadingComboBoxes({ ...loadingComboBoxes, database: true });
-    // const query = {
-    //   lang: 'sql',
-    //   query: `SHOW SCHEMAS IN \`${accelerationFormData.dataSource}\``,
-    //   datasource: accelerationFormData.dataSource,
-    // };
-    // executeAsyncQuery(
-    //   accelerationFormData.dataSource,
-    //   query,
-    //   (response: AsyncApiResponse) => {
-    //     const status = response.data.resp.status.toLowerCase();
-    //     if (status === AsyncQueryStatus.Success) {
-    //       let databaseOptions: Array<EuiComboBoxOptionOption<string>> = [];
-    //       if (response.data.resp.datarows.length > 0)
-    //         databaseOptions = response.data.resp.datarows.map((subArray: any[]) => ({
-    //           label: subArray[0],
-    //         }));
-    //       setDatabases(databaseOptions);
-    //       setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
-    //     }
-    //     if (status === AsyncQueryStatus.Failed || status === AsyncQueryStatus.Cancelled) {
-    //       setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
-    //     }
-    //   },
-    //   () => setLoadingComboBoxes({ ...loadingComboBoxes, database: false })
-    // );
+    setLoadingComboBoxes({ ...loadingComboBoxes, database: true });
+    const dsCache = CatalogCacheManager.getOrCreateDataSource(accelerationFormData.dataSource);
+
+    if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
+      const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
+      setDatabases(databaseLabels);
+
+      const dbExists =
+        accelerationFormData.database !== '' &&
+        databaseLabels.some((db) => db.label === accelerationFormData.database);
+
+      if (dbExists) {
+        setSelectedDatabase([{ label: accelerationFormData.database }]);
+      }
+    } else if (
+      (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length === 0) ||
+      dsCache.status === CachedDataSourceStatus.Empty
+    ) {
+      setDatabases([]);
+    }
+    setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
   };
 
   const loadTables = () => {
-    // TODO: Load tables from cache
-    // setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: true });
-    // const query = {
-    //   lang: 'sql',
-    //   query: `SHOW TABLES IN \`${accelerationFormData.dataSource}\`.\`${accelerationFormData.database}\``,
-    //   datasource: accelerationFormData.dataSource,
-    // };
-    // executeAsyncQuery(
-    //   accelerationFormData.dataSource,
-    //   query,
-    //   (response: AsyncApiResponse) => {
-    //     const status = response.data.resp.status.toLowerCase();
-    //     if (status === AsyncQueryStatus.Success) {
-    //       let dataTableOptions: Array<EuiComboBoxOptionOption<string>> = [];
-    //       if (response.data.resp.datarows.length > 0)
-    //         dataTableOptions = response.data.resp.datarows.map((subArray) => ({
-    //           label: subArray[1],
-    //         }));
-    //       setTables(dataTableOptions);
-    //       setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: false });
-    //     }
-    //     if (status === AsyncQueryStatus.Failed || status === AsyncQueryStatus.Cancelled) {
-    //       setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: false });
-    //     }
-    //   },
-    //   () => setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: false })
-    // );
+    if (selectedDatabase.length > 0) {
+      const dbCache = CatalogCacheManager.getDatabase(
+        selectedDatasource,
+        selectedDatabase[0].label
+      );
+      if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
+        const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
+        setTables(tableLabels);
+
+        const tbExists =
+          accelerationFormData.dataTable !== '' &&
+          tableLabels.some((tb) => tb.label === accelerationFormData.dataTable);
+
+        if (tbExists) {
+          setSelectedTable([{ label: accelerationFormData.dataTable }]);
+        }
+      } else if (
+        (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length === 0) ||
+        dbCache.status === CachedDataSourceStatus.Empty
+      ) {
+        setTables([]);
+        setSelectedTable([]);
+      }
+    }
   };
 
   useEffect(() => {
@@ -140,6 +139,7 @@ export const AccelerationDataSourceSelector = ({
   }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
+    console.log('load tables triggered ds status: ', accelerationFormData.database);
     if (accelerationFormData.database !== '') {
       loadTables();
     }
@@ -166,26 +166,38 @@ export const AccelerationDataSourceSelector = ({
         isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
         error={accelerationFormData.formErrors.databaseError}
       >
-        <EuiComboBox
-          placeholder="Select a database"
-          singleSelection={{ asPlainText: true }}
-          options={databases}
-          selectedOptions={selectedDatabase}
-          onChange={(databaseOptions) => {
-            if (databaseOptions.length > 0) {
-              setAccelerationFormData(
-                producer((accData) => {
-                  accData.database = databaseOptions[0].label;
-                  accData.formErrors.databaseError = validateDatabase(databaseOptions[0].label);
-                })
-              );
-              setSelectedDatabase(databaseOptions);
-            }
-          }}
-          isClearable={false}
-          isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
-          isLoading={loadingComboBoxes.database}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiComboBox
+              placeholder="Select a database"
+              singleSelection={{ asPlainText: true }}
+              options={databases}
+              selectedOptions={selectedDatabase}
+              onChange={(databaseOptions) => {
+                console.log('db list updated');
+                if (databaseOptions.length > 0) {
+                  console.log('updating acc data');
+                  setAccelerationFormData(
+                    producer((accData) => {
+                      accData.database = databaseOptions[0].label;
+                      accData.formErrors.databaseError = validateDatabase(databaseOptions[0].label);
+                    })
+                  );
+                  setSelectedDatabase(databaseOptions);
+                }
+              }}
+              isClearable={false}
+              isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
+              isLoading={loadingComboBoxes.database}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectorLoadDatabases
+              dataSourceName={accelerationFormData.dataSource}
+              loadDatabases={loadDatabases}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
       <EuiFormRow
         label="Table"
@@ -193,26 +205,37 @@ export const AccelerationDataSourceSelector = ({
         isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
         error={accelerationFormData.formErrors.dataTableError}
       >
-        <EuiComboBox
-          placeholder="Select a table"
-          singleSelection={{ asPlainText: true }}
-          options={tables}
-          selectedOptions={selectedTable}
-          onChange={(tableOptions) => {
-            if (tableOptions.length > 0) {
-              setAccelerationFormData(
-                producer((accData) => {
-                  accData.dataTable = tableOptions[0].label;
-                  accData.formErrors.dataTableError = validateDataTable(tableOptions[0].label);
-                })
-              );
-              setSelectedTable(tableOptions);
-            }
-          }}
-          isClearable={false}
-          isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
-          isLoading={loadingComboBoxes.dataTable}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiComboBox
+              placeholder="Select a table"
+              singleSelection={{ asPlainText: true }}
+              options={tables}
+              selectedOptions={selectedTable}
+              onChange={(tableOptions) => {
+                if (tableOptions.length > 0) {
+                  setAccelerationFormData(
+                    producer((accData) => {
+                      accData.dataTable = tableOptions[0].label;
+                      accData.formErrors.dataTableError = validateDataTable(tableOptions[0].label);
+                    })
+                  );
+                  setSelectedTable(tableOptions);
+                }
+              }}
+              isClearable={false}
+              isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
+              isLoading={loadingComboBoxes.dataTable}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectorLoadObjects
+              dataSourceName={accelerationFormData.dataSource}
+              databaseName={accelerationFormData.database}
+              loadTables={loadTables}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );

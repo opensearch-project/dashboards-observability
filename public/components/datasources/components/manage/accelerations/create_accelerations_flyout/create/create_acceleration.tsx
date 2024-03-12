@@ -32,17 +32,21 @@ import { formValidator, hasError } from './utils';
 export interface CreateAccelerationProps {
   selectedDatasource: string;
   resetFlyout: () => void;
+  databaseName?: string;
+  tableName?: string;
 }
 
 export const CreateAcceleration = ({
   selectedDatasource,
   resetFlyout,
+  databaseName,
+  tableName,
 }: CreateAccelerationProps) => {
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
-    dataTable: '',
-    database: '',
+    dataTable: tableName ?? '',
+    database: databaseName ?? '',
     dataTableFields: [],
     accelerationIndexType: 'skipping',
     skippingIndexQueryData: [],

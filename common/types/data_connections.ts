@@ -108,6 +108,7 @@ export interface DataSourceCacheData {
 export interface CachedAccelerations {
   flintIndexName: string;
   type: AccelerationIndexType;
+  dataSource: string;
   database: string;
   table: string;
   indexName: string;
@@ -133,25 +134,6 @@ export interface PollingSuccessResult {
 }
 
 export type AsyncPollingResult = PollingSuccessResult | null;
-
-export interface CreateAccelerationForm {
-  dataSource: string;
-  database: string;
-  dataTable: string;
-  dataTableFields: DataTableFieldsType[];
-  accelerationIndexType: AccelerationIndexType;
-  skippingIndexQueryData: SkippingIndexRowType[];
-  coveringIndexQueryData: string[];
-  materializedViewQueryData: MaterializedViewQueryType;
-  accelerationIndexName: string;
-  primaryShardsCount: number;
-  replicaShardsCount: number;
-  refreshType: AccelerationRefreshType;
-  checkpointLocation: string | undefined;
-  watermarkDelay: WatermarkDelayType;
-  refreshIntervalOptions: RefreshIntervalType;
-  formErrors: FormErrorsType;
-}
 
 export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min';
 

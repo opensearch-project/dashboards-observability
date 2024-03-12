@@ -200,7 +200,7 @@ export class CatalogCacheManager {
   static getTable(dataSourceName: string, databaseName: string, tableName: string): CachedTable {
     const cachedDatabase = this.getDatabase(dataSourceName, databaseName);
 
-    const cachedTable = cachedDatabase.tables.find((table) => table.name === tableName);
+    const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
     if (!cachedTable) {
       throw new Error('Table not found exception: ' + tableName);
     }
