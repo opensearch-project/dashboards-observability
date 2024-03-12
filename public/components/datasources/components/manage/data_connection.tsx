@@ -68,7 +68,7 @@ export const DataConnection = (props: any) => {
   // Dummy accelerations variables for mock purposes
   // Actual accelerations should be retrieved from the backend
   // const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
-  const dummyAccelerations = [
+  const _dummyAccelerations = [
     {
       flintIndexName: 'flint_mys3_default_http_logs_skipping_index',
       kind: 'skipping',
@@ -197,7 +197,7 @@ export const DataConnection = (props: any) => {
       id: 'acceleration_table',
       name: 'Accelerations',
       disabled: false,
-      content: <AccelerationTable accelerations={dummyAccelerations} />,
+      content: <AccelerationTable/>,
     },
     {
       id: 'associated_objects',

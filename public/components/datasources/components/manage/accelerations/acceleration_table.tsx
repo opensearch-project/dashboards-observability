@@ -15,7 +15,7 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   getRefreshButtonIcon,
   onRefreshButtonClick,
@@ -24,16 +24,41 @@ import {
   AccelerationStatus,
 } from './helpers/utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
+import {
+  CachedAccelerations,
+  CachedDataSourceStatus,
+} from '../../../../../../common/types/data_connections';
+import { useAccelerationsToCache } from '../../../../../framework/catalog_cache/cache_loader';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 
-// TODO : USE CACHED DATA
-interface AccelerationTableTabProps {
-  // TODO: Add acceleration type to plugin types
-  accelerations: any[];
-}
+export const AccelerationTable = () => {
+  const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
+  const { loadStatus, startLoading } = useAccelerationsToCache();
 
-export const AccelerationTable = (props: AccelerationTableTabProps) => {
-  const { accelerations } = props;
-  console.log('accelerations top: ', accelerations);
+  useEffect(() => {
+    const cachedAccelerations = CatalogCacheManager.getAccelerationsCache();
+
+    if (
+      cachedAccelerations.status === CachedDataSourceStatus.Empty ||
+      !cachedAccelerations.lastUpdated
+    ) {
+      console.log('Cache is empty or outdated. Loading accelerations...');
+      startLoading('mys3');
+    } else {
+      console.log('Using cached accelerations.');
+      setAccelerations(cachedAccelerations.accelerations);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const updatedCache = CatalogCacheManager.getAccelerationsCache();
+      setAccelerations(updatedCache.accelerations);
+      console.log('Accelerations successfully loaded into cache.');
+    }
+  }, [loadStatus]);
+
   const RefreshButton = () => {
     // TODO: Implement logic for refreshing acceleration
     return (
@@ -102,8 +127,6 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
   ];
 
   const accelerationTableColumns: Array<EuiBasicTableColumn<any>> = [
-    // TODO: fields should be determined by what the acceleration is
-    // Show N/A if not applicable
     {
       field: 'indexName',
       name: 'Name',
