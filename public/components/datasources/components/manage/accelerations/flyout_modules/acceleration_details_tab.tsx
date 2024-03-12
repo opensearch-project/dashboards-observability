@@ -35,6 +35,8 @@ export const AccelerationDetailsTab = ({
   settings,
   mappings,
 }: AccelerationDetailsTabProps) => {
+  const accStatus = acceleration.status;
+  console.log('Hereererere is the status: ', accStatus);
   const DetailComponent = ({
     title,
     description,

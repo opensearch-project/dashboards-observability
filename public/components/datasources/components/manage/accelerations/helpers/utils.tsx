@@ -10,8 +10,8 @@ export const AccelerationStatus = (props: { status: string }) => {
   const { status } = props;
   // TODO: actually get status from acceleration
   console.log('status is', status);
-  const label = status === 'ACTIVE' ? 'Active' : 'Paused';
-  const color = status === 'ACTIVE' ? 'success' : 'inactive';
+  const label = status === 'Active' ? 'Active' : 'Paused';
+  const color = status === 'Active' ? 'success' : 'inactive';
   return <EuiHealth color={color}>{label}</EuiHealth>;
 };
 
