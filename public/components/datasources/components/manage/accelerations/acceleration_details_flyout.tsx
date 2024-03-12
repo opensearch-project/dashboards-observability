@@ -167,18 +167,27 @@ export const AccelerationDetailsFlyout = ({
     });
   };
 
-  const renderTabContent = (tab: string, tabAcceleration: any) => {
-    const {
-      acceleration: acc,
-      settings: sett,
-      mappings: mapp,
-      indexInfo: indexI,
-    } = tabAcceleration;
+  const renderTabContent = (tab: string) => {
+    let propsForTab;
+
+    // Only pass all props to AccelerationDetailsTab
+    if (tab === 'details') {
+      propsForTab = { acceleration, settings, mappings, indexInfo };
+      console.log('propsForTabDetails: ', propsForTab);
+    }
+    if (tab === 'schema') {
+      propsForTab = { mappings, indexInfo };
+      console.log('propsForTabDetails: ', propsForTab);
+    }
+    if (tab === 'sql_definition') {
+      propsForTab = { mappings };
+      console.log('propsForTabSQL: ', propsForTab);
+    }
 
     const TabToDisplay = tabsMap[tab];
-    console.log('tabAcceleration: ', tabAcceleration);
+    console.log('Selected Tab: ', tab);
 
-    return <TabToDisplay acceleration={acc} settings={sett} mappings={mapp} indexInfo={indexI} />;
+    return <TabToDisplay {...propsForTab} />;
   };
 
   return (
@@ -203,9 +212,7 @@ export const AccelerationDetailsFlyout = ({
         <EuiSpacer size="m" />
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {renderTabContent(selectedTab, { acceleration, settings, mappings, indexInfo })}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody>{renderTabContent(selectedTab)}</EuiFlyoutBody>
     </>
   );
 };
