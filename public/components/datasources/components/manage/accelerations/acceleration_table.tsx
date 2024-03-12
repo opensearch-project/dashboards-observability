@@ -34,28 +34,38 @@ import { DirectQueryLoadingStatus } from '../../../../../../common/types/explore
 
 export const AccelerationTable = () => {
   const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
-  const { loadStatus, startLoading } = useAccelerationsToCache();
+  const { loadStatus, startLoading: loadAccelerations } = useAccelerationsToCache();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const cachedAccelerations = CatalogCacheManager.getAccelerationsCache();
+    async function checkAndLoadAccelerations() {
+      const cachedAccelerations = CatalogCacheManager.getAccelerationsCache();
 
-    if (
-      cachedAccelerations.status === CachedDataSourceStatus.Empty ||
-      !cachedAccelerations.lastUpdated
-    ) {
-      console.log('Cache is empty or outdated. Loading accelerations...');
-      startLoading('mys3');
-    } else {
-      console.log('Using cached accelerations.');
-      setAccelerations(cachedAccelerations.accelerations);
+      if (
+        (cachedAccelerations.status === CachedDataSourceStatus.Empty ||
+          !cachedAccelerations.lastUpdated) &&
+        !isRefreshing
+      ) {
+        // TODO: REMOVE THIS DEBUG MSG
+        console.log('Cache is empty or outdated. Loading accelerations...');
+        setIsRefreshing(true);
+        await loadAccelerations('mys3');
+      }
     }
-  }, []);
+
+    checkAndLoadAccelerations();
+  }, [isRefreshing, loadAccelerations]);
 
   useEffect(() => {
-    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+    if (
+      loadStatus === DirectQueryLoadingStatus.SUCCESS ||
+      loadStatus === DirectQueryLoadingStatus.FAILED
+    ) {
+      // TODO: REMOVE THIS DEBUG MSG
+      console.log(`Load status: ${loadStatus}. Updating cache...`);
       const updatedCache = CatalogCacheManager.getAccelerationsCache();
       setAccelerations(updatedCache.accelerations);
-      console.log('Accelerations successfully loaded into cache.');
+      setIsRefreshing(false);
     }
   }, [loadStatus]);
 
