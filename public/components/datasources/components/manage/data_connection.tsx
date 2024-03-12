@@ -25,7 +25,6 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
-import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
 import {
   DATACONNECTIONS_BASE,
@@ -36,16 +35,11 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
-import {
-  CachedAcceleration,
-  CachedDatabase,
-  CachedTable,
-  DatasourceType,
-} from '../../../../../common/types/data_connections';
+import { CachedDatabase, DatasourceType } from '../../../../../common/types/data_connections';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
-import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
+import { isDatabasesCacheUpdated } from './associated_objects/utils/associated_objects_tab_utils';
 
 export interface DatasourceDetails {
   allowedRoles: string[];
@@ -140,11 +134,7 @@ export const DataConnection = (props: any) => {
     loadStatus: accelerationsLoadStatus,
     startLoading: startLoadingAccelerations,
   } = useLoadAccelerationsToCache();
-  const [tablesIsLoading, setTablesIsLoading] = useState<boolean>(false);
-  const [accelerationsIsLoading, setAccelerationsIsLoading] = useState<boolean>(false);
   const [cachedDatabases, setCachedDatabases] = useState<CachedDatabase[]>([]);
-  const [cachedTables, setCachedTables] = useState<CachedTable[]>([]);
-  const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -228,24 +218,17 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <AssociatedObjectsTab
-          associatedObjects={mockAssociatedObjects}
           datasource={datasourceDetails}
           cachedDatabases={cachedDatabases}
-          databasesLoadStatus={databasesLoadStatus}
           selectedDatabase={selectedDatabase}
           setSelectedDatabase={setSelectedDatabase}
-          cachedTables={cachedTables}
-          setCachedTables={setCachedTables}
           tablesLoadStatus={tablesLoadStatus}
           startLoadingTables={startLoadingTables}
-          tablesIsLoading={tablesIsLoading}
-          cachedAccelerations={cachedAccelerations}
-          setCachedAccelerations={setCachedAccelerations}
           accelerationsLoadStatus={accelerationsLoadStatus}
           startLoadingAccelerations={startLoadingAccelerations}
-          accelerationsIsLoading={accelerationsIsLoading}
           isFirstTimeLoading={isFirstTimeLoading}
           isRefreshing={isRefreshing}
+          setIsRefreshing={setIsRefreshing}
         />
       ),
     },
@@ -371,13 +354,12 @@ export const DataConnection = (props: any) => {
   useEffect(() => {
     // Loads databases cache when cache is empty
     if (datasourceDetails.name) {
-      const cache = CatalogCacheManager.getDataSourceCache().dataSources.find(
-        (datasource) => datasource.name === datasourceDetails.name
-      );
-      if (cache?.status !== 'Updated') {
+      if (!isDatabasesCacheUpdated(datasourceDetails.name) && !isRefreshing) {
+        console.log('databases is not updated');
         startLoadingDatabases(datasourceDetails.name);
         setIsRefreshing(true);
-      } else {
+      } else if (isDatabasesCacheUpdated(datasourceDetails.name)) {
+        console.log('databases is updated');
         const cachedList: CachedDatabase[] =
           CatalogCacheManager.getDataSourceCache().dataSources.find(
             (cachedDataSource) => cachedDataSource.name === datasourceDetails.name
@@ -389,33 +371,7 @@ export const DataConnection = (props: any) => {
         setIsFirstTimeLoading(false);
       }
     }
-  }, [datasourceDetails.name]);
-
-  useEffect(() => {
-    // Handles loading tables and acceleration cache when cache is empty
-    const loadingStatuses = [DirectQueryLoadingStatus.RUNNING, DirectQueryLoadingStatus.WAITING];
-    setTablesIsLoading(loadingStatuses.includes(tablesLoadStatus));
-    setAccelerationsIsLoading(loadingStatuses.includes(accelerationsLoadStatus));
-    if (databasesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      const cachedList: CachedDatabase[] =
-        CatalogCacheManager.getDataSourceCache().dataSources.find(
-          (cachedDataSource) => cachedDataSource.name === datasourceDetails.name
-        )?.databases || [];
-      if (cachedList) {
-        setCachedDatabases(cachedList);
-      }
-      setIsRefreshing(false);
-      setIsFirstTimeLoading(false);
-    }
-    if (tablesLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      setCachedTables(
-        CatalogCacheManager.getDatabase(datasourceDetails.name, selectedDatabase).tables
-      );
-    }
-    if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      setCachedAccelerations(CatalogCacheManager.getAccelerationsCache().accelerations);
-    }
-  }, [databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus]);
+  }, [datasourceDetails.name, databasesLoadStatus]);
 
   const DatasourceOverview = () => {
     switch (datasourceDetails.connector) {

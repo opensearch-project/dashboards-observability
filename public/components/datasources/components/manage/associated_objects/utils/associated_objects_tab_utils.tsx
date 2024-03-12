@@ -3,6 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CachedDataSource } from '../../../../../../../common/types/data_connections';
+import { CatalogCacheManager } from '../../../../../../framework/catalog_cache/cache_manager';
+
+export const isDatabasesCacheUpdated = (datasourceName: string) => {
+  const cache = CatalogCacheManager.getDataSourceCache().dataSources.find(
+    (datasource: CachedDataSource) => datasource.name === datasourceName
+  );
+  return cache?.status === 'Updated';
+};
+
+export const isTablesCacheUpdated = (datasourceName: string, databaseName: string) => {
+  const cache = CatalogCacheManager.getDatabase(datasourceName, databaseName);
+  return cache?.status === 'Updated';
+};
+
+export const isAccelerationsCacheUpdated = () => {
+  const cache = CatalogCacheManager.getAccelerationsCache();
+  return cache?.status === 'Updated';
+};
+
 export const mockAssociatedObjects = [
   {
     id: '1',

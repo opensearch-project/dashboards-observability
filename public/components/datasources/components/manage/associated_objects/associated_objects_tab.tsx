@@ -38,6 +38,9 @@ import {
   ASSC_OBJ_PANEL_DESRIPTION,
   ASSC_OBJ_FRESH_MSG,
   ASSC_OBJ_TABLE_SUBJ,
+  isTablesCacheUpdated,
+  isAccelerationsCacheUpdated,
+  isDatabasesCacheUpdated,
 } from './utils/associated_objects_tab_utils';
 import { DatasourceDetails } from '../data_connection';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
@@ -49,22 +52,17 @@ import { CatalogCacheManager } from '../../../../../../public/framework/catalog_
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
   cachedDatabases: CachedDatabase[];
-  databasesLoadStatus: DirectQueryLoadingStatus;
-  databasesIsLoading: boolean;
   selectedDatabase: string;
   setSelectedDatabase: React.Dispatch<React.SetStateAction<string>>;
-  cachedTables: CachedTable[];
-  setCachedTables: React.Dispatch<React.SetStateAction<CachedTable[]>>;
   tablesLoadStatus: DirectQueryLoadingStatus;
   startLoadingTables: (datasource: string, database?: string) => void;
   tablesIsLoading: boolean;
-  cachedAccelerations: CachedAcceleration[];
-  setCachedAccelerations: React.Dispatch<React.SetStateAction<CachedAcceleration[]>>;
   accelerationsLoadStatus: DirectQueryLoadingStatus;
   startLoadingAccelerations: (datasource: string) => void;
   accelerationsIsLoading: boolean;
   isFirstTimeLoading: boolean;
   isRefreshing: boolean;
+  setIsRefreshing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface FilterOption {
@@ -83,23 +81,20 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const {
     datasource,
     cachedDatabases,
-    databasesLoadStatus,
     selectedDatabase,
     setSelectedDatabase,
-    cachedTables,
-    setCachedTables,
     tablesLoadStatus,
     startLoadingTables,
-    tablesIsLoading,
-    cachedAccelerations,
-    setCachedAccelerations,
     accelerationsLoadStatus,
     startLoadingAccelerations,
-    accelerationsIsLoading,
     isFirstTimeLoading,
     isRefreshing,
+    setIsRefreshing,
   } = props;
   const [lastUpdated, setLastUpdated] = useState(new Date().toUTCString());
+  const [isObjectsLoading, setIsObjectsLoading] = useState<boolean>(false);
+  const [cachedTables, setCachedTables] = useState<CachedTable[]>([]);
+  const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
   // setLastUpdated(new Date().toUTCString()); // Update last updated time
 
   let lastChecked: boolean;
@@ -125,11 +120,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   );
 
   const onRefreshButtonClick = () => {
-    if (datasource.name && selectedDatabase) {
-      startLoadingDatabases();
-      startLoadingTables(datasource.name, selectedDatabase);
-      startLoadingAccelerations(datasource.name);
-    }
+    console.log('clicked on refresh button, i will update implementation later');
   };
 
   const AssociatedObjectsHeader = () => {
@@ -436,21 +427,35 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     // Reload tables and accelerations to cache if nothing in cache
     if (selectedDatabase) {
-      if (
-        CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).status !== 'Updated' ||
-        CatalogCacheManager.getAccelerationsCache().status !== 'Updated'
-      ) {
-        startLoadingTables(datasource.name, selectedDatabase);
-        startLoadingAccelerations(datasource.name);
+      const tablesCache = isTablesCacheUpdated(datasource.name, selectedDatabase);
+      const accelerationsCache = isAccelerationsCacheUpdated();
+      console.log(
+        'tablesCache',
+        tablesCache,
+        'accelerationsCache',
+        accelerationsCache,
+        'isRefreshing',
+        isRefreshing
+      );
+      if ((!tablesCache || !accelerationsCache) && !isRefreshing) {
+        console.log('either tables or accelerations cache not updated');
+        if (!tablesCache) {
+          startLoadingTables(datasource.name, selectedDatabase);
+        }
+        if (!accelerationsCache) startLoadingAccelerations(datasource.name);
+        setIsObjectsLoading(true);
       } else {
+        console.log('tables and acceleration cache are updated');
         setCachedTables(CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).tables);
         setCachedAccelerations(CatalogCacheManager.getAccelerationsCache().accelerations);
         setLastUpdated(
           CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).lastUpdated
         );
+        setIsRefreshing(false);
+        setIsObjectsLoading(false);
       }
     }
-  }, [selectedDatabase]);
+  }, [selectedDatabase, tablesLoadStatus, accelerationsLoadStatus]);
 
   useEffect(() => {
     setSelectedDatabase(databaseSelectorOptions.find((option) => option.checked === 'on')?.label);
@@ -473,6 +478,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     );
   }, [cachedDatabases]);
 
+  useEffect(() => {
+    console.log('isObjectsLoading', isObjectsLoading);
+  }, [isObjectsLoading]);
+
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
   const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
 
@@ -486,8 +495,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <AssociatedObjectsTabLoading objectType="databases" warningMessage={false} />
         ) : (
           <>
-            {databasesLoadStatus === DirectQueryLoadingStatus.SUCCESS &&
-            cachedDatabases.length === 0 ? (
+            {isDatabasesCacheUpdated(datasource.name) && cachedDatabases.length === 0 ? (
               <AssociatedObjectsTabEmpty cacheType="databases" />
             ) : (
               <>
@@ -497,7 +505,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                   <EuiFlexItem grow={false}>
                     <EuiSelectable
                       searchable={true}
-                      singleSelection={'always'}
+                      singleSelection="always"
                       searchProps={{ placeholder: 'Search for databases' }}
                       options={databaseSelectorOptions}
                       onChange={(newOptions) => setDatabaseSelectorOptions(newOptions)}
@@ -511,13 +519,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                     </EuiSelectable>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {tablesIsLoading || accelerationsIsLoading ? (
+                    {isObjectsLoading ? (
                       <AssociatedObjectsTabLoading objectType="tables" warningMessage={true} />
                     ) : (
                       <>
-                        {tablesLoadStatus === DirectQueryLoadingStatus.SUCCESS &&
-                        accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS &&
-                        (cachedTables.length === 0 || cachedAccelerations.length === 0) ? (
+                        {cachedTables.length === 0 || cachedAccelerations.length === 0 ? (
                           <AssociatedObjectsTabEmpty cacheType="tables" />
                         ) : (
                           <AssociatedObjectsTable />
