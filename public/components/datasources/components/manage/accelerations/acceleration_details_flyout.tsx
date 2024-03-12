@@ -47,11 +47,11 @@ const getIndexInfo = (index: string): Promise<OpenSearchDashboardsResponse> | un
 
 const handlePromise = (
   promise: Promise<OpenSearchDashboardsResponse> | undefined,
-  flintIndexName: string
+  action: string
 ) => {
   return promise!
-    .then((data) => ({ status: 'fulfilled', flintIndexName, data }))
-    .catch((error) => ({ status: 'rejected', flintIndexName, error }));
+    .then((data) => ({ status: 'fulfilled', action, data }))
+    .catch((error) => ({ status: 'rejected', action, error }));
 };
 
 export const AccelerationDetailsFlyout = ({
