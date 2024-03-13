@@ -204,11 +204,11 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       render: (table: string) => <EuiText>{table || '-'}</EuiText>,
     },
     {
-      field: 'destination',
+      field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
-      render: (destination: string) => {
-        return destination ? <EuiLink>{destination}</EuiLink> : '-';
+      render: (flintIndexName: string) => {
+        return flintIndexName ? <EuiLink>{flintIndexName}</EuiLink> : '-';
       },
     },
     {
