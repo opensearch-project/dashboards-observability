@@ -194,16 +194,16 @@ export const DataConnection = (props: any) => {
 
   const tabs = [
     {
-      id: 'acceleration_table',
-      name: 'Accelerations',
-      disabled: false,
-      content: <AccelerationTable dataSourceName={dataSource} />,
-    },
-    {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
       content: <AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />,
+    },
+    {
+      id: 'acceleration_table',
+      name: 'Accelerations',
+      disabled: false,
+      content: <AccelerationTable dataSourceName={dataSource} />,
     },
     // TODO: Installed integrations page
     {
