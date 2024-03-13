@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
@@ -91,6 +91,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const explorerData = useSelector(selectQueryResult)[props.tabId];
   // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (
@@ -295,6 +296,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
           <EuiInputPopover
             input={
               <EuiFieldText
+                inputRef={inputRef}
                 placeholder={
                   props.selectedIndex[0]?.label
                     ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
@@ -329,6 +331,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 <EuiListGroupItem
                   onClick={() => {
                     props.setNlqInput(question);
+                    inputRef.current?.focus();
                     setIsPopoverOpen(false);
                   }}
                   label={question}
