@@ -94,7 +94,15 @@ export const AccelerationDetailsTab = ({
         />
         <DetailComponent title="Creation Date" description={creationDate} />
       </EuiFlexGroup>
-      <EuiSpacer />
+      {isSkippingIndex && (
+        <>
+          <EuiFlexGroup direction="row">
+            <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
+            <DetailComponent title="Refresh time" description={refreshTime} />
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
       <TitleComponent title="Data source details" />
       <EuiFlexGroup direction="row">
         <DetailComponent
