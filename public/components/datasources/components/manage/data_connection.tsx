@@ -197,7 +197,7 @@ export const DataConnection = (props: any) => {
       id: 'acceleration_table',
       name: 'Accelerations',
       disabled: false,
-      content: <AccelerationTable/>,
+      content: <AccelerationTable dataSourceName={dataSource} />,
     },
     {
       id: 'associated_objects',

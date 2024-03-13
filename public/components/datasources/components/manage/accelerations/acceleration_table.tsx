@@ -32,8 +32,11 @@ import {
 import { useLoadAccelerationsToCache } from '../../../../../framework/catalog_cache/cache_loader';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 
-export const AccelerationTable = () => {
-  const dataSourceName = 'mys3';
+interface AccelerationTableProps {
+  dataSourceName: string;
+}
+
+export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
   const { loadStatus, startLoading } = useLoadAccelerationsToCache();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -50,7 +53,7 @@ export const AccelerationTable = () => {
       console.log(
         `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
       );
-      setIsRefreshing(true); // Set isRefreshing here to handle manual refresh
+      setIsRefreshing(true);
       startLoading(dataSourceName);
     } else {
       console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
