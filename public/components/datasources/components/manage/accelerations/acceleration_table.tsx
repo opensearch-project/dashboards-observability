@@ -33,56 +33,45 @@ import { useLoadAccelerationsToCache } from '../../../../../framework/catalog_ca
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 
 export const AccelerationTable = () => {
+  const dataSourceName = 'mys3';
   const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
-  const { loadStatus, startLoading: loadAccelerations } = useLoadAccelerationsToCache();
+  const { loadStatus, startLoading } = useLoadAccelerationsToCache();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const dataSourceName = 'mys3'; // Example dataSource name
 
   useEffect(() => {
-    async function checkAndLoadAccelerations() {
-      const accelerationsCache = CatalogCacheManager.getAccelerationsCache();
-      const cachedDataSource = accelerationsCache.dataSources.find(
-        (ds) => ds.name === dataSourceName
+    const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+      dataSourceName
+    );
+    if (
+      cachedDataSource.status === CachedDataSourceStatus.Empty ||
+      !cachedDataSource.lastUpdated ||
+      loadStatus === DirectQueryLoadingStatus.FAILED
+    ) {
+      console.log(
+        `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
       );
-
-      if (
-        !cachedDataSource ||
-        cachedDataSource.status === CachedDataSourceStatus.Empty ||
-        !cachedDataSource.lastUpdated
-      ) {
-        console.log('Cache for dataSource is empty or outdated. Loading accelerations...');
-        setIsRefreshing(true);
-        loadAccelerations(dataSourceName);
-      } else if (cachedDataSource && cachedDataSource.accelerations) {
-        console.log('Using cached accelerations for dataSource:', dataSourceName);
-        setAccelerations(cachedDataSource.accelerations);
-      }
+      setIsRefreshing(true); // Set isRefreshing here to handle manual refresh
+      startLoading(dataSourceName);
+    } else {
+      console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
+      setAccelerations(cachedDataSource.accelerations);
     }
-
-    checkAndLoadAccelerations();
-  }, [isRefreshing, loadAccelerations, dataSourceName]);
+  }, [loadStatus]);
 
   useEffect(() => {
     if (
       loadStatus === DirectQueryLoadingStatus.SUCCESS ||
       loadStatus === DirectQueryLoadingStatus.FAILED
     ) {
-      console.log(
-        `Load status: ${loadStatus}. Updating cache for dataSource: ${dataSourceName}...`
-      );
-      const updatedCache = CatalogCacheManager.getAccelerationsCache();
-      const updatedDataSource = updatedCache.dataSources.find((ds) => ds.name === dataSourceName);
-      if (updatedDataSource && updatedDataSource.accelerations) {
-        setAccelerations(updatedDataSource.accelerations);
-      }
       setIsRefreshing(false);
+      console.log('Refresh process is completed.');
     }
-  }, [loadStatus, dataSourceName]);
+  }, [loadStatus]);
 
   const handleRefresh = () => {
     console.log('Initiating refresh...');
     setIsRefreshing(true);
-    loadAccelerations('mys3');
+    startLoading(dataSourceName);
   };
 
   const RefreshButton = () => {
