@@ -4,10 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  ASYNC_POLLING_INTERVAL,
-  CATALOG_CACHE_VERSION,
-} from '../../../common/constants/data_sources';
+import { ASYNC_POLLING_INTERVAL } from '../../../common/constants/data_sources';
 import {
   AsyncPollingResult,
   CachedDataSourceStatus,
@@ -80,7 +77,6 @@ export const updateTablesToCache = (
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
   const newTables = combinedData.map((row: any) => ({
     name: row.tableName,
-    columns: [],
   }));
 
   CatalogCacheManager.updateDatabase(dataSourceName, {
@@ -91,12 +87,15 @@ export const updateTablesToCache = (
   });
 };
 
-export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) => {
+export const updateAccelerationsToCache = (
+  dataSourceName: string,
+  pollingResult: AsyncPollingResult
+) => {
   const currentTime = new Date().toUTCString();
 
   if (!pollingResult) {
-    CatalogCacheManager.saveAccelerationsCache({
-      version: CATALOG_CACHE_VERSION,
+    CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
+      name: dataSourceName,
       accelerations: [],
       lastUpdated: currentTime,
       status: CachedDataSourceStatus.Failed,
@@ -116,8 +115,8 @@ export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) =>
     status: row.status,
   }));
 
-  CatalogCacheManager.saveAccelerationsCache({
-    version: CATALOG_CACHE_VERSION,
+  CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
+    name: dataSourceName,
     accelerations: newAccelerations,
     lastUpdated: currentTime,
     status: CachedDataSourceStatus.Updated,
@@ -138,7 +137,7 @@ export const updateToCache = (
       updateTablesToCache(dataSourceName, databaseName!, pollResults);
       break;
     case 'accelerations':
-      updateAccelerationsToCache(pollResults);
+      updateAccelerationsToCache(dataSourceName, pollResults);
       break;
     default:
       break;
@@ -189,6 +188,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   }, ASYNC_POLLING_INTERVAL);
 
   const startLoading = (dataSourceName: string, databaseName?: string) => {
+    setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
 
@@ -272,7 +272,7 @@ export const useLoadTablesToCache = () => {
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useAccelerationsToCache = () => {
+export const useLoadAccelerationsToCache = () => {
   const { loadStatus, startLoading, stopLoading } = useLoadToCache('accelerations');
   return { loadStatus, startLoading, stopLoading };
 };

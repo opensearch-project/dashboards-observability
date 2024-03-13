@@ -10,6 +10,7 @@ import {
 } from '../../../common/constants/shared';
 import {
   AccelerationsCacheData,
+  CachedAcclerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
@@ -134,9 +135,7 @@ describe('CatalogCacheManager', () => {
     it('should save accelerations cache to local storage', () => {
       const cacheData: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
-        accelerations: [],
-        lastUpdated: '2024-03-07T12:00:00Z',
-        status: CachedDataSourceStatus.Empty,
+        dataSources: [],
       };
       CatalogCacheManager.saveAccelerationsCache(cacheData);
       expect(localStorage.setItem).toHaveBeenCalledWith(
@@ -150,20 +149,16 @@ describe('CatalogCacheManager', () => {
     it('should retrieve accelerations cache from local storage', () => {
       const cacheData: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
-        accelerations: [],
-        lastUpdated: '2024-03-07T12:00:00Z',
-        status: CachedDataSourceStatus.Empty,
+        dataSources: [],
       };
       localStorage.setItem(ASYNC_QUERY_ACCELERATIONS_CACHE, JSON.stringify(cacheData));
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(cacheData);
     });
 
     it('should return default cache object if cache is not found', () => {
-      const defaultCacheObject = {
+      const defaultCacheObject: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
-        accelerations: [],
-        lastUpdated: '',
-        status: CachedDataSourceStatus.Empty,
+        dataSources: [],
       };
       localStorage.removeItem(ASYNC_QUERY_ACCELERATIONS_CACHE);
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(defaultCacheObject);
@@ -394,6 +389,85 @@ describe('CatalogCacheManager', () => {
     it('should clear accelerations cache from local storage', () => {
       CatalogCacheManager.clearAccelerationsCache();
       expect(localStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);
+    });
+  });
+
+  describe('addOrUpdateAccelerationsByDataSource', () => {
+    it('should add a new data source to the accelerations cache', () => {
+      const dataSource: CachedAcclerationByDataSource = {
+        name: 'TestDataSource',
+        lastUpdated: '2024-03-08T12:00:00Z',
+        status: CachedDataSourceStatus.Updated,
+        accelerations: [],
+      };
+
+      CatalogCacheManager.addOrUpdateAccelerationsByDataSource(dataSource);
+
+      // Verify that saveAccelerationsCache is called with the updated cache data
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        ASYNC_QUERY_ACCELERATIONS_CACHE,
+        JSON.stringify({
+          version: '1.0',
+          dataSources: [{ ...dataSource }],
+        })
+      );
+    });
+
+    it('should update an existing data source in the accelerations cache', () => {
+      // Set up initial cache data
+      const initialDataSource: CachedAcclerationByDataSource = {
+        name: 'TestDataSource',
+        lastUpdated: '2024-03-08T12:00:00Z',
+        status: CachedDataSourceStatus.Updated,
+        accelerations: [],
+      };
+
+      // Update the data source
+      const updatedDataSource: CachedAcclerationByDataSource = {
+        ...initialDataSource,
+        status: CachedDataSourceStatus.Failed,
+      };
+
+      CatalogCacheManager.addOrUpdateAccelerationsByDataSource(updatedDataSource);
+
+      // Verify that saveAccelerationsCache is called with the updated cache data
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        ASYNC_QUERY_ACCELERATIONS_CACHE,
+        JSON.stringify({
+          version: '1.0',
+          dataSources: [{ ...updatedDataSource }],
+        })
+      );
+    });
+  });
+
+  describe('getOrCreateAccelerationsByDataSource', () => {
+    it('should return an existing data source from the accelerations cache', () => {
+      // Set up initial cache data
+      const existingDataSource: CachedAcclerationByDataSource = {
+        name: 'TestDataSource',
+        lastUpdated: '2024-03-08T12:00:00Z',
+        status: CachedDataSourceStatus.Updated,
+        accelerations: [],
+      };
+
+      CatalogCacheManager.addOrUpdateAccelerationsByDataSource(existingDataSource);
+      const result = CatalogCacheManager.getOrCreateAccelerationsByDataSource('TestDataSource');
+
+      // Verify that the existing data source is returned
+      expect(result).toEqual(existingDataSource);
+    });
+
+    it('should create and return a new data source if not found in the accelerations cache', () => {
+      const result = CatalogCacheManager.getOrCreateAccelerationsByDataSource('TestDataSource1');
+
+      // Verify that the new data source is created and returned
+      expect(result).toEqual({
+        name: 'TestDataSource1',
+        lastUpdated: expect.any(String),
+        status: CachedDataSourceStatus.Empty,
+        accelerations: [],
+      });
     });
   });
 });
