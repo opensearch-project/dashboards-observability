@@ -37,6 +37,8 @@ export const AccelerationDetailsTab = ({
   mappings,
   indexInfo,
 }: AccelerationDetailsTabProps) => {
+  const isSkippingIndex =
+    mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
 
   console.log('mappings:', mappings);
   console.log('indexInfo:', indexInfo);
@@ -103,16 +105,20 @@ export const AccelerationDetailsTab = ({
         <DetailComponent title="Database" description={acceleration.database} />
         <DetailComponent title="Table" description={acceleration.table} />
       </EuiFlexGroup>
-      <EuiSpacer />
-      <TitleComponent title="Index details" />
-      <EuiFlexGroup>
-        <DetailComponent title="Index name" description={indexInfo?.data[0]?.index} />
-        <DetailComponent
-          title="Health"
-          description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
-        />
-        <DetailComponent title="Refresh interval" description="2s" />
-      </EuiFlexGroup>
+      {isSkippingIndex && (
+        <>
+          <EuiSpacer />
+          <TitleComponent title="Index details" />
+          <EuiFlexGroup>
+            <DetailComponent title="Index name" description={indexInfo?.data[0]?.index} />
+            <DetailComponent
+              title="Health"
+              description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
+            />
+            <DetailComponent title="Refresh interval" description="2s" />
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
