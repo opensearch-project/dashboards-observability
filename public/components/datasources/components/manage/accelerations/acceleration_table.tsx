@@ -186,7 +186,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
             label = 'Covering Index';
             break;
           default:
-            label = 'default';
+            label = 'INVALID TYPE';
         }
         return <EuiText>{label}</EuiText>;
       },
@@ -201,15 +201,15 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'table',
       name: 'Table',
       sortable: true,
-      render: (table: string) => <EuiText>{table}</EuiText>,
+      render: (table: string) => <EuiText>{table || '-'}</EuiText>,
     },
     {
       field: 'destination',
       name: 'Destination Index',
       sortable: true,
-      render: (destination: string) => (
-        <EuiLink onClick={() => console.log('clicked on', destination)}>{destination}</EuiLink>
-      ),
+      render: (destination: string) => {
+        return destination ? <EuiLink>{destination}</EuiLink> : '-';
+      },
     },
     {
       name: 'Actions',
