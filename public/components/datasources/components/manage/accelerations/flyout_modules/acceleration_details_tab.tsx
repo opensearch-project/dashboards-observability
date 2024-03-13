@@ -29,6 +29,7 @@ interface AccelerationDetailsTabProps {
   settings: object;
   mappings: object;
   indexInfo: any;
+  dataSourceName: string;
 }
 
 export const AccelerationDetailsTab = ({
@@ -36,6 +37,7 @@ export const AccelerationDetailsTab = ({
   settings,
   mappings,
   indexInfo,
+  dataSourceName,
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
@@ -107,7 +109,7 @@ export const AccelerationDetailsTab = ({
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Data source connection"
-          description={<EuiLink onClick={() => console.log()}>{'mys3'}</EuiLink>}
+          description={<EuiLink onClick={() => console.log()}>{dataSourceName}</EuiLink>}
         />
         <DetailComponent title="Database" description={acceleration.database} />
         <DetailComponent title="Table" description={acceleration.table || '-'} />

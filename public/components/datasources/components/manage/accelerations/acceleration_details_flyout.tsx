@@ -57,7 +57,7 @@ const handlePromise = (
 export const AccelerationDetailsFlyout = ({
   acceleration: selectedAcc,
 }: AccelerationDetailsFlyoutProps) => {
-  const { index, acceleration } = selectedAcc;
+  const { index, dataSourceName, acceleration } = selectedAcc;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -172,7 +172,7 @@ export const AccelerationDetailsFlyout = ({
 
     // Only pass all props to AccelerationDetailsTab
     if (tab === 'details') {
-      propsForTab = { acceleration, settings, mappings, indexInfo };
+      propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
       console.log('propsForTabDetails: ', propsForTab);
     }
     if (tab === 'schema') {

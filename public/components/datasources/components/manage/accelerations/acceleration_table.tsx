@@ -160,6 +160,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
               renderAccelerationDetailsFlyout({
                 index: displayName,
                 acceleration,
+                dataSourceName,
               });
             }}
           >
