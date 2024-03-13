@@ -148,20 +148,23 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'indexName',
       name: 'Name',
       sortable: true,
-      render: (indexName: string) => (
-        <EuiLink
-          onClick={() => {
-            renderAccelerationDetailsFlyout({
-              index: indexName,
-              acceleration: accelerations.find(
-                (acceleration) => acceleration.indexName === indexName
-              ),
-            });
-          }}
-        >
-          {indexName}
-        </EuiLink>
-      ),
+      render: (indexName: string, acceleration: any) => {
+        const displayName =
+          indexName ||
+          `${dataSourceName}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_');
+        return (
+          <EuiLink
+            onClick={() => {
+              renderAccelerationDetailsFlyout({
+                index: displayName,
+                acceleration,
+              });
+            }}
+          >
+            {displayName}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'status',
