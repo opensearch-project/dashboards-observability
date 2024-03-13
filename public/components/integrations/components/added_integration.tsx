@@ -27,10 +27,23 @@ import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
-import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AddedIntegrationProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
+
+export const IntegrationHealthBadge = ({ status }: { status?: string }) => {
+  switch (status) {
+    case undefined:
+      return <EuiHealth color="warning">Unknown</EuiHealth>;
+    case 'available':
+      return <EuiHealth color="success">Active</EuiHealth>;
+    case 'partially-available':
+      return <EuiHealth color="warning">Partially Available</EuiHealth>;
+    default:
+      return <EuiHealth color="danger">Critical</EuiHealth>;
+  }
+};
 
 export function AddedIntegration(props: AddedIntegrationProps) {
   const { http, integrationInstanceId, chrome } = props;
@@ -59,17 +72,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
-
-  const badge = (status: string) => {
-    switch (status) {
-      case 'available':
-        return <EuiHealth color="success">Active</EuiHealth>;
-      case 'partially-available':
-        return <EuiHealth color="warning">Partially Available</EuiHealth>;
-      default:
-        return <EuiHealth color="danger">Critical</EuiHealth>;
-    }
-  };
 
   const getModal = () => {
     setModalLayout(
@@ -124,7 +126,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem style={{ justifyContent: 'center' }}>
-                  {badge(data?.status)}
+                  <IntegrationHealthBadge status={data?.status} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
