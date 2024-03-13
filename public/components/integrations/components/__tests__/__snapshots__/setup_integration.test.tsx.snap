@@ -35,6 +35,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           "connectionTableName": "sample",
                           "connectionType": "index",
                           "displayName": "sample Integration",
+                          "enabledWorkflows": Array [],
                         }
                       }
                       integration={
@@ -719,6 +720,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                 "connectionTableName": "sample",
                 "connectionType": "index",
                 "displayName": "sample Integration",
+                "enabledWorkflows": Array [],
               }
             }
             integration={
@@ -1086,6 +1088,1243 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
       "name": "sample",
       "type": "logs",
       "version": "2.0.0",
+      "workflows": Array [
+        Object {
+          "description": "This is a test workflow.",
+          "enabled_by_default": true,
+          "label": "Workflow 1",
+          "name": "workflow1",
+        },
+      ],
+    }
+  }
+  setupCallout={
+    Object {
+      "show": false,
+    }
+  }
+  updateConfig={[Function]}
+>
+  <EuiForm>
+    <div
+      className="euiForm"
+    >
+      <EuiTitle>
+        <h1
+          className="euiTitle euiTitle--medium"
+        >
+          Set Up Integration
+        </h1>
+      </EuiTitle>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiText>
+        <div
+          className="euiText euiText--medium"
+        >
+          <h3>
+            Integration Details
+          </h3>
+        </div>
+      </EuiText>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={
+          Array [
+            "Must be at least 1 character.",
+          ]
+        }
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label="Display Name"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={false}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={false}
+              type="label"
+            >
+              <label
+                aria-invalid={false}
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                Display Name
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiFieldText
+              data-test-subj="new-instance-name"
+              id="random_html_id"
+              isInvalid={false}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              placeholder="sample Integration"
+              value="Test Instance Name"
+            >
+              <EuiFormControlLayout
+                fullWidth={false}
+                inputId="random_html_id"
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl
+                      isInvalid={false}
+                    >
+                      <input
+                        className="euiFieldText"
+                        data-test-subj="new-instance-name"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        placeholder="sample Integration"
+                        type="text"
+                        value="Test Instance Name"
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons />
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiText>
+        <div
+          className="euiText euiText--medium"
+        >
+          <h3>
+            Integration Connection
+          </h3>
+        </div>
+      </EuiText>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Select the type of connection to use for queries."
+        label="Connection Type"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              type="label"
+            >
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                Connection Type
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiSelect
+              aria-describedby="random_html_id-help-0"
+              id="random_html_id"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              options={
+                Array [
+                  Object {
+                    "text": "OpenSearch Index",
+                    "value": "index",
+                  },
+                ]
+              }
+              value="s3"
+            >
+              <EuiFormControlLayout
+                compressed={false}
+                fullWidth={false}
+                icon={
+                  Object {
+                    "side": "right",
+                    "type": "arrowDown",
+                  }
+                }
+                inputId="random_html_id"
+                isLoading={false}
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl>
+                      <select
+                        aria-describedby="random_html_id-help-0"
+                        className="euiSelect"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onMouseUp={[Function]}
+                        value="s3"
+                      >
+                        <option
+                          key="0"
+                          value="index"
+                        >
+                          OpenSearch Index
+                        </option>
+                      </select>
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons
+                      compressed={false}
+                      icon={
+                        Object {
+                          "side": "right",
+                          "type": "arrowDown",
+                        }
+                      }
+                      isLoading={false}
+                    >
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <EuiFormControlLayoutCustomIcon
+                          size="m"
+                          type="arrowDown"
+                        >
+                          <span
+                            className="euiFormControlLayoutCustomIcon"
+                          >
+                            <EuiIcon
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              size="m"
+                              type="arrowDown"
+                            >
+                              <EuiIconArrowDown
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                focusable="false"
+                                role="img"
+                                style={null}
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                  focusable="false"
+                                  height={16}
+                                  role="img"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width={16}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                    fillRule="non-zero"
+                                  />
+                                </svg>
+                              </EuiIconArrowDown>
+                            </EuiIcon>
+                          </span>
+                        </EuiFormControlLayoutCustomIcon>
+                      </div>
+                    </EuiFormControlLayoutIcons>
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiSelect>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="Select the type of connection to use for queries."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Select the type of connection to use for queries.
+              </div>
+            </EuiFormHelpText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Select a data source to pull the data from."
+        label="Data Source"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              type="label"
+            >
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                Data Source
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiComboBox
+              aria-describedby="random_html_id-help-0"
+              async={false}
+              compressed={false}
+              customOptionText="Select {searchValue} as your data_source"
+              data-test-subj="data-source-name"
+              fullWidth={false}
+              id="random_html_id"
+              isClearable={true}
+              isLoading={true}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onCreateOption={[Function]}
+              onFocus={[Function]}
+              options={Array []}
+              selectedOptions={
+                Array [
+                  Object {
+                    "label": "ss4o_logs-nginx-test",
+                  },
+                ]
+              }
+              singleSelection={
+                Object {
+                  "asPlainText": true,
+                }
+              }
+              sortMatchesBy="none"
+            >
+              <div
+                aria-describedby="random_html_id-help-0"
+                aria-expanded={false}
+                aria-haspopup="listbox"
+                className="euiComboBox"
+                data-test-subj="data-source-name"
+                onKeyDown={[Function]}
+                role="combobox"
+              >
+                <EuiComboBoxInput
+                  autoSizeInputRef={[Function]}
+                  compressed={false}
+                  fullWidth={false}
+                  hasSelectedOptions={true}
+                  id="random_html_id"
+                  inputRef={[Function]}
+                  isListOpen={false}
+                  isLoading={true}
+                  noIcon={false}
+                  onChange={[Function]}
+                  onClear={[Function]}
+                  onClick={[Function]}
+                  onCloseListClick={[Function]}
+                  onFocus={[Function]}
+                  onOpenListClick={[Function]}
+                  onRemoveOption={[Function]}
+                  rootId={[Function]}
+                  searchValue=""
+                  selectedOptions={
+                    Array [
+                      Object {
+                        "label": "ss4o_logs-nginx-test",
+                      },
+                    ]
+                  }
+                  singleSelection={
+                    Object {
+                      "asPlainText": true,
+                    }
+                  }
+                  toggleButtonRef={[Function]}
+                  updatePosition={[Function]}
+                  value="ss4o_logs-nginx-test"
+                >
+                  <EuiFormControlLayout
+                    clear={
+                      Object {
+                        "data-test-subj": "comboBoxClearButton",
+                        "onClick": [Function],
+                      }
+                    }
+                    compressed={false}
+                    fullWidth={false}
+                    icon={
+                      Object {
+                        "aria-label": "Open list of options",
+                        "data-test-subj": "comboBoxToggleListButton",
+                        "disabled": undefined,
+                        "onClick": [Function],
+                        "ref": [Function],
+                        "side": "right",
+                        "type": "arrowDown",
+                      }
+                    }
+                    isLoading={true}
+                  >
+                    <div
+                      className="euiFormControlLayout"
+                    >
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <div
+                          className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
+                          data-test-subj="comboBoxInput"
+                          onClick={[Function]}
+                          tabIndex={-1}
+                        >
+                          <EuiComboBoxPill
+                            asPlainText={true}
+                            color="hollow"
+                            key="ss4o_logs-nginx-test"
+                            option={
+                              Object {
+                                "label": "ss4o_logs-nginx-test",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiComboBoxPill euiComboBoxPill--plainText"
+                            >
+                              ss4o_logs-nginx-test
+                            </span>
+                          </EuiComboBoxPill>
+                          <AutosizeInput
+                            aria-controls=""
+                            className="euiComboBox__input"
+                            data-test-subj="comboBoxSearchInput"
+                            id="random_html_id"
+                            injectStyles={true}
+                            inputRef={[Function]}
+                            minWidth={1}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            role="textbox"
+                            style={
+                              Object {
+                                "fontSize": 14,
+                              }
+                            }
+                            value=""
+                          >
+                            <div
+                              className="euiComboBox__input"
+                              style={
+                                Object {
+                                  "display": "inline-block",
+                                  "fontSize": 14,
+                                }
+                              }
+                            >
+                              <input
+                                aria-controls=""
+                                data-test-subj="comboBoxSearchInput"
+                                id="random_html_id"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                role="textbox"
+                                style={
+                                  Object {
+                                    "boxSizing": "content-box",
+                                    "width": "2px",
+                                  }
+                                }
+                                value=""
+                              />
+                              <div
+                                style={
+                                  Object {
+                                    "height": 0,
+                                    "left": 0,
+                                    "overflow": "scroll",
+                                    "position": "absolute",
+                                    "top": 0,
+                                    "visibility": "hidden",
+                                    "whiteSpace": "pre",
+                                  }
+                                }
+                              />
+                            </div>
+                          </AutosizeInput>
+                        </div>
+                        <EuiFormControlLayoutIcons
+                          clear={
+                            Object {
+                              "data-test-subj": "comboBoxClearButton",
+                              "onClick": [Function],
+                            }
+                          }
+                          compressed={false}
+                          icon={
+                            Object {
+                              "aria-label": "Open list of options",
+                              "data-test-subj": "comboBoxToggleListButton",
+                              "disabled": undefined,
+                              "onClick": [Function],
+                              "ref": [Function],
+                              "side": "right",
+                              "type": "arrowDown",
+                            }
+                          }
+                          isLoading={true}
+                        >
+                          <div
+                            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                          >
+                            <EuiFormControlLayoutClearButton
+                              data-test-subj="comboBoxClearButton"
+                              onClick={[Function]}
+                              size="m"
+                            >
+                              <EuiI18n
+                                default="Clear input"
+                                token="euiFormControlLayoutClearButton.label"
+                              >
+                                <button
+                                  aria-label="Clear input"
+                                  className="euiFormControlLayoutClearButton"
+                                  data-test-subj="comboBoxClearButton"
+                                  onClick={[Function]}
+                                  type="button"
+                                >
+                                  <EuiIcon
+                                    className="euiFormControlLayoutClearButton__icon"
+                                    type="cross"
+                                  >
+                                    <EuiIconCross
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiFormControlLayoutClearButton__icon"
+                                      focusable="false"
+                                      role="img"
+                                      style={null}
+                                    >
+                                      <svg
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiFormControlLayoutClearButton__icon"
+                                        focusable="false"
+                                        height={16}
+                                        role="img"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M7.293 8 3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8Z"
+                                        />
+                                      </svg>
+                                    </EuiIconCross>
+                                  </EuiIcon>
+                                </button>
+                              </EuiI18n>
+                            </EuiFormControlLayoutClearButton>
+                            <EuiLoadingSpinner
+                              size="m"
+                            >
+                              <span
+                                className="euiLoadingSpinner euiLoadingSpinner--medium"
+                              />
+                            </EuiLoadingSpinner>
+                            <EuiFormControlLayoutCustomIcon
+                              aria-label="Open list of options"
+                              data-test-subj="comboBoxToggleListButton"
+                              iconRef={[Function]}
+                              onClick={[Function]}
+                              size="m"
+                              type="arrowDown"
+                            >
+                              <button
+                                aria-label="Open list of options"
+                                className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                data-test-subj="comboBoxToggleListButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFormControlLayoutCustomIcon__icon"
+                                  size="m"
+                                  type="arrowDown"
+                                >
+                                  <EuiIconArrowDown
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                    focusable="false"
+                                    role="img"
+                                    style={null}
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      focusable="false"
+                                      height={16}
+                                      role="img"
+                                      style={null}
+                                      viewBox="0 0 16 16"
+                                      width={16}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                        fillRule="non-zero"
+                                      />
+                                    </svg>
+                                  </EuiIconArrowDown>
+                                </EuiIcon>
+                              </button>
+                            </EuiFormControlLayoutCustomIcon>
+                          </div>
+                        </EuiFormControlLayoutIcons>
+                      </div>
+                    </div>
+                  </EuiFormControlLayout>
+                </EuiComboBoxInput>
+              </div>
+            </EuiComboBox>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="Select a data source to pull the data from."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Select a data source to pull the data from.
+              </div>
+            </EuiFormHelpText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={
+          Array [
+            "Must be at least 1 character.",
+          ]
+        }
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Select a table name to associate with your data."
+        isInvalid={true}
+        label="Flint Table Name"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={true}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={true}
+              type="label"
+            >
+              <label
+                aria-invalid={true}
+                className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+                htmlFor="random_html_id"
+              >
+                Flint Table Name
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiFieldText
+              aria-describedby="random_html_id-help-0 random_html_id-error-0"
+              id="random_html_id"
+              isInvalid={true}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              placeholder="sample"
+              value=""
+            >
+              <EuiFormControlLayout
+                fullWidth={false}
+                inputId="random_html_id"
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl
+                      isInvalid={true}
+                    >
+                      <input
+                        aria-describedby="random_html_id-help-0 random_html_id-error-0"
+                        className="euiFieldText"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        placeholder="sample"
+                        type="text"
+                        value=""
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons />
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldText>
+            <EuiFormErrorText
+              className="euiFormRow__text"
+              id="random_html_id-error-0"
+              key="Must be at least 1 character."
+            >
+              <div
+                aria-live="polite"
+                className="euiFormErrorText euiFormRow__text"
+                id="random_html_id-error-0"
+              >
+                Must be at least 1 character.
+              </div>
+            </EuiFormErrorText>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="Select a table name to associate with your data."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Select a table name to associate with your data.
+              </div>
+            </EuiFormHelpText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={
+          Array [
+            "Must be a URL starting with 's3://'.",
+          ]
+        }
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label="S3 Bucket Location"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={false}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={false}
+              type="label"
+            >
+              <label
+                aria-invalid={false}
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                S3 Bucket Location
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiFieldText
+              id="random_html_id"
+              isInvalid={false}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              placeholder="s3://"
+              value=""
+            >
+              <EuiFormControlLayout
+                fullWidth={false}
+                inputId="random_html_id"
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl
+                      isInvalid={false}
+                    >
+                      <input
+                        className="euiFieldText"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        placeholder="s3://"
+                        type="text"
+                        value=""
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons />
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={
+          Array [
+            "Must be a URL starting with 's3://'.",
+          ]
+        }
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results."
+        isInvalid={false}
+        label="S3 Checkpoint Location"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={false}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={false}
+              type="label"
+            >
+              <label
+                aria-invalid={false}
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                S3 Checkpoint Location
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiFieldText
+              aria-describedby="random_html_id-help-0"
+              id="random_html_id"
+              isInvalid={false}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              placeholder="s3://"
+            >
+              <EuiFormControlLayout
+                fullWidth={false}
+                inputId="random_html_id"
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl
+                      isInvalid={false}
+                    >
+                      <input
+                        aria-describedby="random_html_id-help-0"
+                        className="euiFieldText"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        placeholder="s3://"
+                        type="text"
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons />
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldText>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results.
+              </div>
+            </EuiFormHelpText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiText>
+        <div
+          className="euiText euiText--medium"
+        >
+          <h3>
+            Installation Flows
+          </h3>
+        </div>
+      </EuiText>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={
+          Array [
+            "Must select at least one workflow.",
+          ]
+        }
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Select from the available asset types based on your use case. Choose at least one."
+        isInvalid={false}
+        label="Flows"
+        labelType="label"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <EuiFormLabel
+              aria-invalid={false}
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              isInvalid={false}
+              type="label"
+            >
+              <label
+                aria-invalid={false}
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                Flows
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <SetupWorkflowSelector
+              aria-describedby="random_html_id-help-0"
+              id="random_html_id"
+              integration={
+                Object {
+                  "assets": Array [
+                    Object {
+                      "extension": "ndjson",
+                      "name": "sample",
+                      "type": "savedObjectBundle",
+                      "version": "1.0.1",
+                    },
+                  ],
+                  "components": Array [
+                    Object {
+                      "name": "logs",
+                      "version": "1.0.0",
+                    },
+                  ],
+                  "license": "Apache-2.0",
+                  "name": "sample",
+                  "type": "logs",
+                  "version": "2.0.0",
+                  "workflows": Array [
+                    Object {
+                      "description": "This is a test workflow.",
+                      "enabled_by_default": true,
+                      "label": "Workflow 1",
+                      "name": "workflow1",
+                    },
+                  ],
+                }
+              }
+              onBlur={[Function]}
+              onFocus={[Function]}
+              toggleWorkflow={[Function]}
+              useWorkflows={
+                Array [
+                  Array [
+                    "workflow1",
+                    true,
+                  ],
+                ]
+              }
+            >
+              <EuiCheckableCard
+                checkableType="checkbox"
+                checked={true}
+                id="workflow-checkbox-workflow1"
+                key="workflow1"
+                label="Workflow 1"
+                onChange={[Function]}
+                value="workflow1"
+              >
+                <_EuiSplitPanelOuter
+                  className="euiCheckableCard euiCheckableCard-isChecked"
+                  direction="row"
+                  hasBorder={true}
+                  responsive={false}
+                >
+                  <EuiPanel
+                    className="euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+                    grow={false}
+                    hasBorder={true}
+                    paddingSize="none"
+                  >
+                    <div
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+                    >
+                      <_EuiSplitPanelInner
+                        color="primary"
+                        grow={false}
+                        onClick={[Function]}
+                      >
+                        <EuiPanel
+                          borderRadius="none"
+                          className="euiSplitPanel__inner"
+                          color="primary"
+                          element="div"
+                          grow={false}
+                          hasBorder={false}
+                          hasShadow={false}
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+                            onClick={[Function]}
+                          >
+                            <EuiCheckbox
+                              checked={true}
+                              compressed={false}
+                              disabled={false}
+                              id="workflow-checkbox-workflow1"
+                              indeterminate={false}
+                              onChange={[Function]}
+                              value="workflow1"
+                            >
+                              <div
+                                className="euiCheckbox euiCheckbox--noLabel"
+                              >
+                                <input
+                                  checked={true}
+                                  className="euiCheckbox__input"
+                                  disabled={false}
+                                  id="workflow-checkbox-workflow1"
+                                  onChange={[Function]}
+                                  type="checkbox"
+                                  value="workflow1"
+                                />
+                                <div
+                                  className="euiCheckbox__square"
+                                />
+                              </div>
+                            </EuiCheckbox>
+                          </div>
+                        </EuiPanel>
+                      </_EuiSplitPanelInner>
+                      <_EuiSplitPanelInner>
+                        <EuiPanel
+                          borderRadius="none"
+                          className="euiSplitPanel__inner"
+                          color="transparent"
+                          element="div"
+                          hasBorder={false}
+                          hasShadow={false}
+                        >
+                          <div
+                            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                          >
+                            <label
+                              aria-describedby="workflow-checkbox-workflow1-details"
+                              className="euiCheckableCard__label"
+                              htmlFor="workflow-checkbox-workflow1"
+                            >
+                              Workflow 1
+                            </label>
+                            <div
+                              className="euiCheckableCard__children"
+                              id="workflow-checkbox-workflow1-details"
+                            >
+                              This is a test workflow.
+                            </div>
+                          </div>
+                        </EuiPanel>
+                      </_EuiSplitPanelInner>
+                    </div>
+                  </EuiPanel>
+                </_EuiSplitPanelOuter>
+              </EuiCheckableCard>
+            </SetupWorkflowSelector>
+            <EuiFormHelpText
+              className="euiFormRow__text"
+              id="random_html_id-help-0"
+              key="Select from the available asset types based on your use case. Choose at least one."
+            >
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Select from the available asset types based on your use case. Choose at least one.
+              </div>
+            </EuiFormHelpText>
+          </div>
+        </div>
+      </EuiFormRow>
+    </div>
+  </EuiForm>
+</SetupIntegrationForm>
+`;
+
+exports[`Integration Setup Page Renders the S3 connector form without workflows 1`] = `
+<SetupIntegrationForm
+  config={
+    Object {
+      "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
+      "connectionType": "s3",
+      "displayName": "Test Instance Name",
+    }
+  }
+  integration={
+    Object {
+      "assets": Array [
+        Object {
+          "extension": "ndjson",
+          "name": "sample",
+          "type": "savedObjectBundle",
+          "version": "1.0.1",
+        },
+      ],
+      "components": Array [
+        Object {
+          "name": "logs",
+          "version": "1.0.0",
+        },
+      ],
+      "license": "Apache-2.0",
+      "name": "sample",
+      "type": "logs",
+      "version": "2.0.0",
+      "workflows": undefined,
     }
   }
   setupCallout={
@@ -2087,6 +3326,14 @@ exports[`Integration Setup Page Renders the index form as expected 1`] = `
       "name": "sample",
       "type": "logs",
       "version": "2.0.0",
+      "workflows": Array [
+        Object {
+          "description": "This is a test workflow.",
+          "enabled_by_default": true,
+          "label": "Workflow 1",
+          "name": "workflow1",
+        },
+      ],
     }
   }
   setupCallout={
