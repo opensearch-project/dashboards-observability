@@ -14,6 +14,8 @@ interface AccelerationSchemaTabProps {
 export const AccelerationSchemaTab = ({ mappings, indexInfo }: AccelerationSchemaTabProps) => {
   const indexName = indexInfo.data[0]?.index;
   const indexData = mappings.data[indexName]?.mappings._meta?.indexedColumns;
+  const indexType = mappings.data[indexName]?.mappings._meta?.kind;
+  const isSkippingIndex = indexType === 'skipping';
 
   const items =
     indexData?.map((column: { columnName: string; columnType: string; kind: string }) => ({
@@ -31,11 +33,14 @@ export const AccelerationSchemaTab = ({ mappings, indexInfo }: AccelerationSchem
       field: 'data_type',
       name: 'Data type',
     },
-    {
+  ] as Array<EuiTableFieldDataColumnType<any>>;
+
+  if (isSkippingIndex) {
+    columns.push({
       field: 'acceleration_type',
       name: 'Acceleration index type',
-    },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+    });
+  }
 
   return (
     <>

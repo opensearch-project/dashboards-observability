@@ -45,11 +45,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
       dataSourceName
     );
-    if (
-      cachedDataSource.status === CachedDataSourceStatus.Empty ||
-      !cachedDataSource.lastUpdated ||
-      loadStatus === DirectQueryLoadingStatus.FAILED
-    ) {
+    if (cachedDataSource.status === CachedDataSourceStatus.Empty) {
       console.log(
         `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
       );
@@ -57,17 +53,23 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       startLoading(dataSourceName);
     } else {
       console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
+
       setAccelerations(cachedDataSource.accelerations);
     }
-  }, [loadStatus]);
+  }, []);
 
   useEffect(() => {
-    if (
-      loadStatus === DirectQueryLoadingStatus.SUCCESS ||
-      loadStatus === DirectQueryLoadingStatus.FAILED
-    ) {
+    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+        dataSourceName
+      );
+      setAccelerations(cachedDataSource.accelerations);
       setIsRefreshing(false);
-      console.log('Refresh process is completed.');
+      console.log('Refresh process is success.');
+    }
+    if (loadStatus === DirectQueryLoadingStatus.FAILED) {
+      setIsRefreshing(false);
+      console.log('Refresh process is failed.');
     }
   }, [loadStatus]);
 
@@ -214,7 +216,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         if (acceleration.type === 'skipping') {
           return '-';
         }
-        return flintIndexName ? <EuiLink>{flintIndexName}</EuiLink> : '-';
+        return flintIndexName || '-';
       },
     },
     {
@@ -230,7 +232,6 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
 
   const sorting = {
     sort: {
-      field: 'flintIndexName',
       direction: 'asc',
     },
   };

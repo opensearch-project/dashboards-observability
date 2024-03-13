@@ -39,6 +39,16 @@ export const AccelerationDetailsTab = ({
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
+  const refreshIntervalDescription = acceleration.autoRefresh ? 'Auto refresh' : 'Manual';
+  const showRefreshTime =
+    acceleration.autoRefresh ||
+    mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.incremental_refresh;
+  const refreshTime = showRefreshTime
+    ? mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval
+    : '-';
+  const creationDate = new Date(
+    parseInt(settings?.settings?.index?.creation_date, 10)
+  ).toLocaleString();
 
   console.log('mappings:', mappings);
   console.log('indexInfo:', indexInfo);
@@ -82,30 +92,19 @@ export const AccelerationDetailsTab = ({
           title="Acceleration Type"
           description={mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind}
         />
-        <DetailComponent
-          title="Creation Date"
-          description={settings?.settings?.index?.creation_date}
-        />
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <DetailComponent
-          title="Last Updated"
-          description={settings?.settings?.index?.creation_date}
-        />
+        <DetailComponent title="Creation Date" description={creationDate} />
       </EuiFlexGroup>
       <EuiSpacer />
       <TitleComponent title="Data source details" />
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Data source connection"
-          description={
-            <EuiLink onClick={() => console.log()}>{acceleration.flintIndexName}</EuiLink>
-          }
+          description={<EuiLink onClick={() => console.log()}>{'mys3'}</EuiLink>}
         />
         <DetailComponent title="Database" description={acceleration.database} />
-        <DetailComponent title="Table" description={acceleration.table} />
+        <DetailComponent title="Table" description={acceleration.table || '-'} />
       </EuiFlexGroup>
-      {isSkippingIndex && (
+      {!isSkippingIndex && (
         <>
           <EuiSpacer />
           <TitleComponent title="Index details" />
@@ -115,7 +114,8 @@ export const AccelerationDetailsTab = ({
               title="Health"
               description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
             />
-            <DetailComponent title="Refresh interval" description="2s" />
+            <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
+            <DetailComponent title="Refresh time" description={refreshTime} />
           </EuiFlexGroup>
         </>
       )}
