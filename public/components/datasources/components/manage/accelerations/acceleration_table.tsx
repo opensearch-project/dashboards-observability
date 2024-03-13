@@ -210,7 +210,10 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
-      render: (flintIndexName: string) => {
+      render: (flintIndexName: string, acceleration: CachedAccelerations) => {
+        if (acceleration.type === 'skipping') {
+          return '-';
+        }
         return flintIndexName ? <EuiLink>{flintIndexName}</EuiLink> : '-';
       },
     },
@@ -232,7 +235,6 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
     },
   };
 
-  // Render flyout using OSD overlay service
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
 
   return (
