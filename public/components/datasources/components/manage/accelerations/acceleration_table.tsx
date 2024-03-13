@@ -69,12 +69,17 @@ export const AccelerationTable = () => {
     }
   }, [loadStatus]);
 
+  const handleRefresh = () => {
+    console.log('Initiating refresh...');
+    setIsRefreshing(true);
+    loadAccelerations('mys3');
+  };
+
   const RefreshButton = () => {
-    // TODO: Implement logic for refreshing acceleration
     return (
-      <>
-        <EuiButton onClick={() => console.log('clicked on refresh button')}>Refresh</EuiButton>
-      </>
+      <EuiButton onClick={handleRefresh} isLoading={isRefreshing}>
+        Refresh
+      </EuiButton>
     );
   };
 
