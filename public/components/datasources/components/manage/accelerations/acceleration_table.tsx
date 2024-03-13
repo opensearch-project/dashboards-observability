@@ -176,13 +176,13 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       render: (type: string) => {
         let label;
         switch (type) {
-          case 'skip':
+          case 'skipping':
             label = 'Skipping Index';
             break;
-          case 'mv':
+          case 'materialized':
             label = 'Materialized View';
             break;
-          case 'ci':
+          case 'covering':
             label = 'Covering Index';
             break;
           default:
