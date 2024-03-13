@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DirectQueryLoadingStatus } from '../../../../../../../../../common/types/explorer';
 import {
@@ -25,9 +25,10 @@ export const SelectorLoadObjects = ({
 }: SelectorLoadDatabasesProps) => {
   const { setToast } = useToast();
   const [isLoading, setIsLoading] = useState({
-    tableLoadingStatus: false,
-    accelerationsLoadingStatus: false,
+    tableStatus: false,
+    accelerationsStatus: false,
   });
+  const isEitherLoading = isLoading.accelerationsStatus || isLoading.tableStatus;
   const {
     loadStatus: loadTablesStatus,
     startLoading: startLoadingTables,
@@ -45,8 +46,8 @@ export const SelectorLoadObjects = ({
       return;
     }
     setIsLoading({
-      tableLoadingStatus: true,
-      accelerationsLoadingStatus: true,
+      tableStatus: true,
+      accelerationsStatus: true,
     });
     startLoadingTables(dataSourceName, databaseName);
     startLoadingAccelerations(dataSourceName);
@@ -56,12 +57,12 @@ export const SelectorLoadObjects = ({
     const status = loadTablesStatus.toLowerCase();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       loadTables();
-      setIsLoading({ ...isLoading, tableLoadingStatus: false });
+      setIsLoading({ ...isLoading, tableStatus: false });
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
       status === DirectQueryLoadingStatus.CANCELED
     ) {
-      setIsLoading({ ...isLoading, tableLoadingStatus: false });
+      setIsLoading({ ...isLoading, tableStatus: false });
     }
   }, [loadTablesStatus]);
 
@@ -72,13 +73,18 @@ export const SelectorLoadObjects = ({
       status === DirectQueryLoadingStatus.FAILED ||
       status === DirectQueryLoadingStatus.CANCELED
     ) {
-      setIsLoading({ ...isLoading, accelerationsLoadingStatus: false });
+      setIsLoading({ ...isLoading, accelerationsStatus: false });
     }
   }, [loadAccelerationsStatus]);
 
-  return isLoading.accelerationsLoadingStatus || isLoading.tableLoadingStatus ? (
-    <EuiButton isLoading={true}>Loading Objects</EuiButton>
-  ) : (
-    <EuiButtonIcon display="base" iconType="refresh" size="m" onClick={onClickRefreshDatabases} />
+  return (
+    <EuiButton
+      isLoading={isEitherLoading}
+      iconType="refresh"
+      iconSize="m"
+      onClick={onClickRefreshDatabases}
+    >
+      {isEitherLoading ? `Loading` : 'Refresh'}
+    </EuiButton>
   );
 };

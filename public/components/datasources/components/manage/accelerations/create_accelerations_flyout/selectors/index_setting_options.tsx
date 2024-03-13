@@ -22,12 +22,10 @@ import {
 import {
   hasError,
   validateCheckpointLocation,
-  validatePrimaryShardCount,
   validateRefreshInterval,
-  validateReplicaCount,
   validateWatermarkDelay,
 } from '../create/utils';
-import { IndexTypeSelector } from './index_type_selector';
+import { DefineIndexOptions } from './define_index_options';
 
 interface IndexSettingOptionsProps {
   accelerationFormData: CreateAccelerationForm;
@@ -56,26 +54,12 @@ export const IndexSettingOptions = ({
     },
   ];
 
-  const [primaryShards, setPrimaryShards] = useState(5);
-  const [replicaCount, setReplicaCount] = useState(1);
   const [refreshTypeSelected, setRefreshTypeSelected] = useState(autoRefreshId);
   const [refreshWindow, setRefreshWindow] = useState(1);
   const [refreshInterval, setRefreshInterval] = useState(ACCELERATION_TIME_INTERVAL[1].value);
   const [delayWindow, setDelayWindow] = useState(1);
   const [delayInterval, setDelayInterval] = useState(ACCELERATION_TIME_INTERVAL[1].value);
   const [checkpoint, setCheckpoint] = useState('');
-
-  const onChangePrimaryShards = (e: ChangeEvent<HTMLInputElement>) => {
-    const countPrimaryShards = parseInt(e.target.value, 10);
-    setAccelerationFormData({ ...accelerationFormData, primaryShardsCount: countPrimaryShards });
-    setPrimaryShards(countPrimaryShards);
-  };
-
-  const onChangeReplicaCount = (e: ChangeEvent<HTMLInputElement>) => {
-    const parsedReplicaCount = parseInt(e.target.value, 10);
-    setAccelerationFormData({ ...accelerationFormData, replicaShardsCount: parsedReplicaCount });
-    setReplicaCount(parsedReplicaCount);
-  };
 
   const onChangeRefreshType = (optionId: React.SetStateAction<string>) => {
     let refreshOption: AccelerationRefreshType = 'auto';
@@ -145,64 +129,16 @@ export const IndexSettingOptions = ({
 
   return (
     <>
-      <EuiText data-test-subj="index-settings-header">
-        <h3>Index settings</h3>
+      <EuiText data-test-subj="define-index-header">
+        <h3>Define Index</h3>
       </EuiText>
       <EuiSpacer size="s" />
-      <IndexTypeSelector
-        accelerationFormData={accelerationFormData}
-        setAccelerationFormData={setAccelerationFormData}
-      />
-      <EuiFormRow
-        label="Number of primary shards"
-        helpText="Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created."
-        isInvalid={hasError(accelerationFormData.formErrors, 'primaryShardsError')}
-        error={accelerationFormData.formErrors.primaryShardsError}
-      >
-        <EuiFieldNumber
-          placeholder="Number of primary shards"
-          value={primaryShards}
-          onChange={onChangePrimaryShards}
-          aria-label="Number of primary shards"
-          min={1}
-          max={100}
-          onBlur={(e) => {
-            setAccelerationFormData(
-              producer((accData) => {
-                accData.formErrors.primaryShardsError = validatePrimaryShardCount(
-                  parseInt(e.target.value, 10)
-                );
-              })
-            );
-          }}
-          isInvalid={hasError(accelerationFormData.formErrors, 'primaryShardsError')}
+      {accelerationFormData.accelerationIndexType !== 'skipping' && (
+        <DefineIndexOptions
+          accelerationFormData={accelerationFormData}
+          setAccelerationFormData={setAccelerationFormData}
         />
-      </EuiFormRow>
-      <EuiFormRow
-        label="Number of replicas"
-        helpText="Specify the number of replicas each primary shard should have."
-        isInvalid={hasError(accelerationFormData.formErrors, 'replicaShardsError')}
-        error={accelerationFormData.formErrors.replicaShardsError}
-      >
-        <EuiFieldNumber
-          placeholder="Number of replicas"
-          value={replicaCount}
-          onChange={onChangeReplicaCount}
-          aria-label="Number of replicas"
-          min={0}
-          max={100}
-          onBlur={(e) => {
-            setAccelerationFormData(
-              producer((accData) => {
-                accData.formErrors.replicaShardsError = validateReplicaCount(
-                  parseInt(e.target.value, 10)
-                );
-              })
-            );
-          }}
-          isInvalid={hasError(accelerationFormData.formErrors, 'replicaShardsError')}
-        />
-      </EuiFormRow>
+      )}
       <EuiFormRow
         label="Refresh type"
         helpText="Specify how often the index should refresh, which publishes the most recent changes and make them available for search."

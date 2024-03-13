@@ -26,8 +26,8 @@ import {
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
 import { hasError, validateDataTable, validateDatabase } from '../create/utils';
-import { SelectorLoadDatabases } from './selector_helpers/selector_load_databases';
-import { SelectorLoadObjects } from './selector_helpers/selector_load_objects';
+import { SelectorLoadDatabases } from './selector_helpers/load_databases';
+import { SelectorLoadObjects } from './selector_helpers/load_objects';
 
 interface AccelerationDataSourceSelectorProps {
   http: CoreStart['http'];
@@ -139,7 +139,6 @@ export const AccelerationDataSourceSelector = ({
   }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
-    console.log('load tables triggered ds status: ', accelerationFormData.database);
     if (accelerationFormData.database !== '') {
       loadTables();
     }
@@ -174,9 +173,7 @@ export const AccelerationDataSourceSelector = ({
               options={databases}
               selectedOptions={selectedDatabase}
               onChange={(databaseOptions) => {
-                console.log('db list updated');
                 if (databaseOptions.length > 0) {
-                  console.log('updating acc data');
                   setAccelerationFormData(
                     producer((accData) => {
                       accData.database = databaseOptions[0].label;

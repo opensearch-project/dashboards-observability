@@ -68,7 +68,7 @@ export type PollingCallback = (statusObj: AsyncApiResponse) => void;
 
 export type AccelerationIndexType = 'skipping' | 'covering' | 'materialized';
 
-export type LoadCacheType = 'databases' | 'tables' | 'accelerations';
+export type LoadCacheType = 'databases' | 'tables' | 'accelerations' | 'tableColumns';
 
 export enum CachedDataSourceStatus {
   Updated = 'Updated',
@@ -77,7 +77,7 @@ export enum CachedDataSourceStatus {
 }
 
 export interface CachedColumn {
-  name: string;
+  fieldName: string;
   dataType: string;
 }
 
@@ -108,7 +108,6 @@ export interface DataSourceCacheData {
 export interface CachedAccelerations {
   flintIndexName: string;
   type: AccelerationIndexType;
-  dataSource: string;
   database: string;
   table: string;
   indexName: string;

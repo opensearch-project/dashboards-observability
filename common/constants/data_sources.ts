@@ -74,3 +74,5 @@ export const ACCELERATION_AGGREGRATION_FUNCTIONS = [
   { label: 'max' },
   { label: 'min' },
 ];
+
+export const SPARK_PARTITION_INFO = `# Partition Information`;

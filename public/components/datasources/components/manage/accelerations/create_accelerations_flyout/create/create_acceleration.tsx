@@ -22,8 +22,10 @@ import {
 } from '../../../../../../../../common/constants/data_sources';
 import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../../../framework/core_refs';
-import { DefineIndexOptions } from '../selectors/define_index_options';
+import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
+import { IndexTypeSelector } from '../selectors/index_type_selector';
+import { PreviewSQLDefinition } from '../selectors/preview_sql_defintion';
 import { AccelerationDataSourceSelector } from '../selectors/source_selector';
 import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationHeader } from './create_acceleration_header';
@@ -60,7 +62,7 @@ export const CreateAcceleration = ({
       },
     },
     accelerationIndexName: ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
-    primaryShardsCount: 5,
+    primaryShardsCount: 1,
     replicaShardsCount: 1,
     refreshType: 'auto',
     checkpointLocation: undefined,
@@ -119,17 +121,27 @@ export const CreateAcceleration = ({
               selectedDatasource={selectedDatasource}
             />
             <EuiSpacer size="xxl" />
-            <IndexSettingOptions
+            <IndexTypeSelector
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
             />
             <EuiSpacer size="xxl" />
-            <DefineIndexOptions
+            <IndexSettingOptions
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
             />
             <EuiSpacer size="m" />
             <QueryVisualEditor
+              accelerationFormData={accelerationFormData}
+              setAccelerationFormData={setAccelerationFormData}
+            />
+            <EuiSpacer size="xxl" />
+            <IndexAdvancedSettings
+              accelerationFormData={accelerationFormData}
+              setAccelerationFormData={setAccelerationFormData}
+            />
+            <EuiSpacer size="l" />
+            <PreviewSQLDefinition
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
             />
@@ -144,7 +156,7 @@ export const CreateAcceleration = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={copyToEditor} fill>
-                Copy Query to Editor
+                Create acceleration
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

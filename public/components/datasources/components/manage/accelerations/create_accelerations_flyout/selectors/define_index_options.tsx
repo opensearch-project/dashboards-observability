@@ -17,7 +17,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import producer from 'immer';
@@ -90,10 +89,6 @@ export const DefineIndexOptions = ({
 
   return (
     <>
-      <EuiText data-test-subj="define-index-header">
-        <h3>Index settings</h3>
-      </EuiText>
-      <EuiSpacer size="s" />
       <EuiFormRow
         label="Index name"
         helpText='Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.'
