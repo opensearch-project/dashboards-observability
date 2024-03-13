@@ -4,19 +4,47 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiPanel, EuiHorizontalRule, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiInMemoryTable,
+  EuiTitle,
+  OuiLink,
+} from '@elastic/eui';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 
 interface IntegrationInstanceTableEntry {
-  name: string;
+  locator: {
+    name: string;
+    id: string;
+  };
   status: string;
-//   status: React.JSX.Element;
   assets: number;
 }
 
 const INSTALLED_INTEGRATIONS_COLUMNS = [
-  { field: 'name', name: 'Instance Name' },
-  { field: 'status', name: 'Status' },
+  {
+    field: 'locator',
+    name: 'Instance Name',
+    render: (locator: { name: string; id: string }) => {
+      return (
+        <OuiLink
+          data-test-subj={`${locator.name}IntegrationLink`}
+          href={`/app/integrations#/installed/${locator.id}`}
+        >
+          {locator.name}
+        </OuiLink>
+      );
+    },
+  },
+  {
+    field: 'status',
+    name: 'Status',
+    render: (status: string) => {
+      return <IntegrationHealthBadge status={status} />;
+    },
+  },
   { field: 'assets', name: 'Asset Count' },
 ];
 
@@ -24,9 +52,8 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
-    name: instance.name,
+    locator: { name: instance.name, id: instance.id },
     status: instance.status,
-    // status: <IntegrationHealthBadge status={instance.status} />,
     assets: instance.assets.length,
   };
 };
@@ -40,7 +67,9 @@ export const InstalledIntegrationsTable = ({
     <>
       <EuiSpacer />
       <EuiPanel>
-        <h1>Header</h1>
+        <EuiTitle>
+          <h2>Installed Integrations</h2>
+        </EuiTitle>
         <EuiHorizontalRule />
         <EuiSpacer />
         <EuiInMemoryTable
