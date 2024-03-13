@@ -10,6 +10,7 @@ import {
 } from '../../../common/constants/shared';
 import {
   AccelerationsCacheData,
+  CachedAcclerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
@@ -75,12 +76,52 @@ export class CatalogCacheManager {
     } else {
       const defaultCacheObject = {
         version: CATALOG_CACHE_VERSION,
-        accelerations: [],
-        lastUpdated: '',
-        status: CachedDataSourceStatus.Empty,
+        dataSources: [],
       };
       this.saveAccelerationsCache(defaultCacheObject);
       return defaultCacheObject;
+    }
+  }
+
+  /**
+   * Adds or updates a data source in the accelerations cache.
+   * @param {CachedAcclerationByDataSource} dataSource - The data source to add or update.
+   */
+  static addOrUpdateAccelerationsByDataSource(dataSource: CachedAcclerationByDataSource): void {
+    const accCacheData = this.getAccelerationsCache();
+    const index = accCacheData.dataSources.findIndex(
+      (ds: CachedAcclerationByDataSource) => ds.name === dataSource.name
+    );
+    if (index !== -1) {
+      accCacheData.dataSources[index] = dataSource;
+    } else {
+      accCacheData.dataSources.push(dataSource);
+    }
+    this.saveAccelerationsCache(accCacheData);
+  }
+
+  /**
+   * Retrieves accelerations cache from local storage by the datasource name.
+   * @param {string} dataSourceName - The name of the data source.
+   * @returns {CachedAcclerationByDataSource} The retrieved accelerations by datasource in cache.
+   * @throws {Error} If the data source is not found.
+   */
+  static getOrCreateAccelerationsByDataSource(
+    dataSourceName: string
+  ): CachedAcclerationByDataSource {
+    const accCacheData = this.getAccelerationsCache();
+    const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+
+    if (cachedDataSource) return cachedDataSource;
+    else {
+      const defaultDataSourceObject = {
+        name: dataSourceName,
+        lastUpdated: '',
+        status: CachedDataSourceStatus.Empty,
+        accelerations: [],
+      };
+      this.addOrUpdateAccelerationsByDataSource(defaultDataSourceObject);
+      return defaultDataSourceObject;
     }
   }
 
