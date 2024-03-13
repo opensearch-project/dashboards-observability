@@ -10,20 +10,20 @@ import {
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
   EuiToolTip,
-  EuiContextMenuItem,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -59,11 +59,11 @@ import {
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
+import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
-import './search.scss';
 import { QueryAssistSummarization } from './query_assist_summarization';
-import { Autocomplete } from './autocomplete';
+import './search.scss';
 
 export interface IQueryBarProps {
   query: string;
@@ -136,7 +136,6 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [needsUpdate, setNeedsUpdate] = useState(false);
-  const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
@@ -475,19 +474,21 @@ export const Search = (props: any) => {
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
-                <EuiButton
-                  color={needsUpdate ? 'success' : 'primary'}
-                  iconType={needsUpdate ? 'kqlFunction' : 'play'}
-                  fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
-                  onClick={runChanges}
-                  data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
-                >
-                  {needsUpdate ? 'Update' : 'Run'}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            {!showQueryArea && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
+                  <EuiButton
+                    color={needsUpdate ? 'success' : 'primary'}
+                    iconType={needsUpdate ? 'kqlFunction' : 'play'}
+                    fill
+                    onClick={runChanges}
+                    data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
+                  >
+                    {needsUpdate ? 'Update' : 'Run'}
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             {!showQueryArea && showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
                 <EuiPopover
@@ -573,11 +574,11 @@ export const Search = (props: any) => {
                 runQuery={query}
                 tempQuery={tempQuery}
                 setNeedsUpdate={setNeedsUpdate}
-                setFillRun={setFillRun}
                 selectedIndex={selectedIndex}
                 nlqInput={nlqInput}
                 setNlqInput={setNlqInput}
                 pplService={pplService}
+                runChanges={runChanges}
               />
             </EuiFlexItem>
             {(queryAssistantSummarization?.summary?.length > 0 ||

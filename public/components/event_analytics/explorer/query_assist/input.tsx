@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBoxOptionOption,
@@ -59,6 +60,9 @@ interface Props {
   selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
   nlqInput: string;
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
+  lastFocusedInput: 'query_area' | 'nlq_input';
+  setLastFocusedInput: React.Dispatch<React.SetStateAction<'query_area' | 'nlq_input'>>;
+  runChanges: () => void;
 }
 
 const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
@@ -83,6 +87,26 @@ const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
     'how many request failures were there by week?',
   ],
 };
+
+const prohibitedQueryCallOut = (
+  <EuiCallOut
+    data-test-subj="query-assist-guard-callout"
+    title="I am unable to respond to this query. Try another question."
+    size="s"
+    color="danger"
+    iconType="alert"
+  />
+);
+
+const emptyQueryCallOut = (
+  <EuiCallOut
+    data-test-subj="query-assist-empty-callout"
+    title="Enter a natural language question to automatically generate a query to view results."
+    size="s"
+    color="warning"
+    iconType="iInCircle"
+  />
+);
 
 export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
@@ -114,17 +138,13 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     })();
   }, [summaryData.responseForSummaryStatus]);
 
-  const [barSelected, setBarSelected] = useState(false);
-
   const dispatch = useDispatch();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [generatingOrRunning, setGeneratingOrRunning] = useState(false);
+  const [loading, setLoading] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
-  const [prohibitedQuery, setProhibitedQuery] = useState(false);
-  const submitDisabled = generating || props.nlqInput.trim().length === 0;
+  const [callOut, setCallOut] = useState<React.ReactNode>(null);
 
   useEffect(() => {
     if (autoRun) {
@@ -178,19 +198,23 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
+    if (props.nlqInput.trim().length === 0) {
+      setCallOut(emptyQueryCallOut);
+      return;
+    }
     try {
-      setGenerating(true);
-      setProhibitedQuery(false);
+      setLoading(true);
+      setCallOut(null);
       await request();
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setProhibitedQuery(true);
+        setCallOut(prohibitedQueryCallOut);
         return;
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
-      setGenerating(false);
+      setLoading(false);
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
@@ -239,7 +263,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setProhibitedQuery(true);
+        setCallOut(prohibitedQueryCallOut);
         return;
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to summarize results' });
@@ -265,17 +289,20 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
+    if (props.nlqInput.trim().length === 0) {
+      setCallOut(emptyQueryCallOut);
+      return;
+    }
     try {
-      setGenerating(true);
-      setGeneratingOrRunning(true);
-      setProhibitedQuery(false);
+      setLoading(true);
+      setCallOut(null);
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setProhibitedQuery(true);
+        setCallOut(prohibitedQueryCallOut);
         return;
       }
       if (coreRefs.summarizeEnabled) {
@@ -284,8 +311,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
-      setGenerating(false);
-      setGeneratingOrRunning(false);
+      setLoading(false);
     }
   };
 
@@ -302,7 +328,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                     ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
                     : 'Select a data source or index to ask a question.'
                 }
-                disabled={generating}
+                disabled={loading}
                 value={props.nlqInput}
                 onChange={(e) => props.setNlqInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -313,10 +339,9 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 fullWidth
                 onFocus={() => {
                   props.setNeedsUpdate(false);
-                  setBarSelected(true);
+                  props.setLastFocusedInput('nlq_input');
                   if (props.nlqInput.length === 0) setIsPopoverOpen(true);
                 }}
-                onBlur={() => setBarSelected(false)}
               />
             }
             disableFocusTrap
@@ -343,46 +368,48 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="returnKey"
-            display="fill"
-            isDisabled={submitDisabled}
+            display={props.lastFocusedInput === 'nlq_input' ? 'fill' : 'base'}
+            isDisabled={loading}
             onClick={runAndSummarize}
             size="m"
             aria-label="submit-question"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {prohibitedQuery ? (
-        <EuiCallOut
-          data-test-subj="query-assist-guard-callout"
-          title="I am unable to respond to this query. Try another question."
-          size="s"
-          color="danger"
-          iconType="alert"
-        />
-      ) : props.children ? (
-        <EuiSpacer size="s" />
-      ) : null}
+      {callOut}
+      {props.children && <EuiSpacer size="s" />}
       {props.children}
       <EuiSpacer size="m" />
-      <EuiSplitButton
-        disabled={submitDisabled}
-        isLoading={generating}
-        fill={barSelected}
-        // @ts-ignore incorrect type in Oui 1.5, 'disabled' is a valid color
-        color={submitDisabled ? 'disabled' : 'success'}
-        data-test-subj="query-assist-generate-and-run-button"
-        options={[
-          {
-            display: (
-              <EuiText data-test-subj="query-assist-generate-button">Generate query</EuiText>
-            ),
-            onClick: generatePPL,
-          },
-        ]}
-        onClick={runAndSummarize}
-      >
-        {generating && !generatingOrRunning ? 'Generate query' : 'Generate and run'}
-      </EuiSplitButton>
+      {props.lastFocusedInput === 'query_area' ? (
+        <EuiButton
+          fill
+          isLoading={loading}
+          onClick={props.runChanges}
+          iconType="play"
+          style={{ height: 44 }}
+        >
+          Run
+        </EuiButton>
+      ) : (
+        <EuiSplitButton
+          disabled={loading}
+          isLoading={loading}
+          // @ts-ignore incorrect type in Oui 1.5, 'disabled' is a valid color
+          color={loading ? 'disabled' : 'success'}
+          data-test-subj="query-assist-generate-and-run-button"
+          options={[
+            {
+              display: (
+                <EuiText data-test-subj="query-assist-generate-button">Generate query</EuiText>
+              ),
+              onClick: generatePPL,
+            },
+          ]}
+          onClick={runAndSummarize}
+        >
+          {loading ? 'Running...' : 'Generate and run'}
+        </EuiSplitButton>
+      )}
     </>
   );
 };

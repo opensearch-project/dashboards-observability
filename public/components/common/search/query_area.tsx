@@ -4,7 +4,7 @@
  */
 
 import { EuiAccordion, EuiCodeEditor, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { QueryAssistInput } from '../../event_analytics/explorer/query_assist/input';
 import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
@@ -18,7 +18,7 @@ export function QueryArea({
   runQuery,
   tempQuery,
   setNeedsUpdate,
-  setFillRun,
+  runChanges,
   selectedIndex,
   nlqInput,
   setNlqInput,
@@ -38,6 +38,7 @@ export function QueryArea({
     memoizedHandleQueryChange(indexQuery);
     memoizedGetAvailableFields(indexQuery);
   }, [selectedIndex, memoizedGetAvailableFields, memoizedHandleQueryChange]);
+  const [lastFocusedInput, setLastFocusedInput] = useState<'query_area' | 'nlq_input'>('nlq_input');
 
   const queryEditor = (
     <EuiCodeEditor
@@ -55,8 +56,7 @@ export function QueryArea({
         // setUpdatedQuery(runQuery !== query);
         setNeedsUpdate(runQuery !== query);
       }}
-      onFocus={() => setFillRun(true)}
-      onBlur={() => setFillRun(false)}
+      onFocus={() => setLastFocusedInput('query_area')}
       value={tempQuery}
       wrapEnabled={true}
     />
@@ -87,6 +87,9 @@ export function QueryArea({
             selectedIndex={selectedIndex}
             nlqInput={nlqInput}
             setNlqInput={setNlqInput}
+            lastFocusedInput={lastFocusedInput}
+            setLastFocusedInput={setLastFocusedInput}
+            runChanges={runChanges}
           >
             {queryEditor}
           </QueryAssistInput>
