@@ -219,6 +219,8 @@ export const DataConnection = (props: any) => {
       content: (
         <AssociatedObjectsTab
           datasource={datasourceDetails}
+          databasesLoadStatus={databasesLoadStatus}
+          startLoadingDatabases={startLoadingDatabases}
           cachedDatabases={cachedDatabases}
           selectedDatabase={selectedDatabase}
           setSelectedDatabase={setSelectedDatabase}
@@ -353,6 +355,7 @@ export const DataConnection = (props: any) => {
 
   useEffect(() => {
     // Loads databases cache when cache is empty
+    console.log('databasesloadstatus', databasesLoadStatus);
     if (datasourceDetails.name) {
       if (!isDatabasesCacheUpdated(datasourceDetails.name) && !isRefreshing) {
         console.log('databases is not updated');
@@ -367,7 +370,7 @@ export const DataConnection = (props: any) => {
         if (cachedList) {
           setCachedDatabases(cachedList);
         }
-        setIsRefreshing(false);
+        // setIsRefreshing(false);
         setIsFirstTimeLoading(false);
       }
     }

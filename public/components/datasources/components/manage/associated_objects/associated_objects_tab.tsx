@@ -51,15 +51,15 @@ import { CatalogCacheManager } from '../../../../../../public/framework/catalog_
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
+  databasesLoadStatus: DirectQueryLoadingStatus;
+  startLoadingDatabases: (datasource: string) => void;
   cachedDatabases: CachedDatabase[];
   selectedDatabase: string;
   setSelectedDatabase: React.Dispatch<React.SetStateAction<string>>;
   tablesLoadStatus: DirectQueryLoadingStatus;
   startLoadingTables: (datasource: string, database?: string) => void;
-  tablesIsLoading: boolean;
   accelerationsLoadStatus: DirectQueryLoadingStatus;
   startLoadingAccelerations: (datasource: string) => void;
-  accelerationsIsLoading: boolean;
   isFirstTimeLoading: boolean;
   isRefreshing: boolean;
   setIsRefreshing: React.Dispatch<React.SetStateAction<boolean>>;
@@ -80,6 +80,8 @@ interface AssociatedTableFilter {
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props) => {
   const {
     datasource,
+    databasesLoadStatus,
+    startLoadingDatabases,
     cachedDatabases,
     selectedDatabase,
     setSelectedDatabase,
@@ -91,11 +93,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     isRefreshing,
     setIsRefreshing,
   } = props;
-  const [lastUpdated, setLastUpdated] = useState(new Date().toUTCString());
+  const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
   const [isObjectsLoading, setIsObjectsLoading] = useState<boolean>(false);
   const [cachedTables, setCachedTables] = useState<CachedTable[]>([]);
   const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
-  // setLastUpdated(new Date().toUTCString()); // Update last updated time
 
   let lastChecked: boolean;
   if (selectedDatabase !== '') {
@@ -121,6 +122,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const onRefreshButtonClick = () => {
     console.log('clicked on refresh button, i will update implementation later');
+    CatalogCacheManager.clearAccelerationsCache();
+    CatalogCacheManager.clearDataSourceCache();
+    startLoadingDatabases(datasource.name);
+    setIsRefreshing(true);
   };
 
   const AssociatedObjectsHeader = () => {
@@ -363,6 +368,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     };
 
     useEffect(() => {
+      console.log('component mounted');
+      console.log(
+        'cached accelerations',
+        cachedAccelerations.filter(
+          (acceleration: CachedAcceleration) => acceleration.database === selectedDatabase
+        )
+      );
       const tableObjects: AssociatedObject[] = cachedTables.map((table: CachedTable) => {
         return {
           datasource: datasource.name,
@@ -389,8 +401,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           accelerations: [],
           columns: undefined,
         }));
-      setAssociatedObjects(tableObjects.concat(accelerationObjects));
-    }, [cachedTables, cachedAccelerations]);
+      console.log(accelerationObjects);
+      setAssociatedObjects([...tableObjects, ...accelerationObjects]);
+    }, []);
 
     useEffect(() => {
       const databaseOptions = Array.from(new Set(associatedObjects.map((obj) => obj.database)))
@@ -408,8 +421,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         .sort()
         .map((name) => ({ value: name, text: name }));
       setAccelerationFilterOptions(accelerationOptions);
-
       setFilteredObjects(associatedObjects);
+
+      return () => {
+        console.log('component unmounted');
+      };
     }, [associatedObjects]);
 
     return (
@@ -426,7 +442,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   useEffect(() => {
     // Reload tables and accelerations to cache if nothing in cache
-    if (selectedDatabase) {
+    console.log('in here');
+    if (selectedDatabase && isDatabasesCacheUpdated(datasource.name)) {
       const tablesCache = isTablesCacheUpdated(datasource.name, selectedDatabase);
       const accelerationsCache = isAccelerationsCacheUpdated();
       console.log(
@@ -437,25 +454,36 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         'isRefreshing',
         isRefreshing
       );
-      if ((!tablesCache || !accelerationsCache) && !isRefreshing) {
+      if (!tablesCache || !accelerationsCache) {
         console.log('either tables or accelerations cache not updated');
         if (!tablesCache) {
           startLoadingTables(datasource.name, selectedDatabase);
         }
         if (!accelerationsCache) startLoadingAccelerations(datasource.name);
         setIsObjectsLoading(true);
-      } else {
+      } else if (tablesCache && accelerationsCache) {
         console.log('tables and acceleration cache are updated');
         setCachedTables(CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).tables);
         setCachedAccelerations(CatalogCacheManager.getAccelerationsCache().accelerations);
         setLastUpdated(
           CatalogCacheManager.getDatabase(datasource.name, selectedDatabase).lastUpdated
         );
-        setIsRefreshing(false);
+        if (
+          tablesLoadStatus === DirectQueryLoadingStatus.SUCCESS &&
+          accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS
+        ) {
+          setIsRefreshing(false);
+        }
         setIsObjectsLoading(false);
       }
     }
-  }, [selectedDatabase, tablesLoadStatus, accelerationsLoadStatus]);
+  }, [
+    isRefreshing,
+    selectedDatabase,
+    databasesLoadStatus,
+    tablesLoadStatus,
+    accelerationsLoadStatus,
+  ]);
 
   useEffect(() => {
     setSelectedDatabase(databaseSelectorOptions.find((option) => option.checked === 'on')?.label);
@@ -464,23 +492,23 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     setDatabaseSelectorOptions(
       cachedDatabases.map((database, index) => {
+        if (selectedDatabase) {
+          return {
+            label: database.name,
+            checked: database.name === selectedDatabase ? 'on' : undefined,
+          };
+        }
         return {
           label: database.name,
-          checked: lastChecked
-            ? database.name === selectedDatabase
-              ? 'on'
-              : index === 0
-              ? 'on'
-              : undefined
-            : undefined,
+          checked: index === 0 ? 'on' : undefined,
         };
       })
     );
   }, [cachedDatabases]);
 
   useEffect(() => {
-    console.log('isObjectsLoading', isObjectsLoading);
-  }, [isObjectsLoading]);
+    console.log('selectedDatabase', selectedDatabase);
+  }, [selectedDatabase]);
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
   const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
