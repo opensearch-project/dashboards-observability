@@ -8,6 +8,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCheckableCard,
   EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
@@ -42,6 +43,7 @@ export interface IntegrationSetupInputs {
   connectionLocation: string;
   checkpointLocation: string;
   connectionTableName: string;
+  enabledWorkflows: string[];
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -182,6 +184,38 @@ const runQuery = async (
   }
 };
 
+export function SetupWorkflowSelector({
+  integration,
+  useWorkflows,
+  toggleWorkflow,
+}: {
+  integration: IntegrationConfig;
+  useWorkflows: Map<string, boolean>;
+  toggleWorkflow: (name: string) => void;
+}) {
+  if (!integration.workflows) {
+    return null;
+  }
+
+  const cards = integration.workflows.map((workflow) => {
+    return (
+      <EuiCheckableCard
+        id={`workflow-checkbox-${workflow.name}`}
+        key={workflow.name}
+        label={workflow.label}
+        checkableType="checkbox"
+        value={workflow.name}
+        checked={useWorkflows.get(workflow.name)}
+        onChange={() => toggleWorkflow(workflow.name)}
+      >
+        {workflow.description}
+      </EuiCheckableCard>
+    );
+  });
+
+  return cards;
+}
+
 export function SetupIntegrationForm({
   config,
   updateConfig,
@@ -196,6 +230,25 @@ export function SetupIntegrationForm({
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
+
+  const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
+  const toggleWorkflow = (name: string) => {
+    setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
+  };
+
+  useEffect(() => {
+    if (integration.workflows) {
+      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
+    }
+  }, [integration.workflows]);
+
+  useEffect(() => {
+    updateConfig({
+      enabledWorkflows: [...useWorkflows.entries()].filter((w) => w[1]).map((w) => w[0]),
+    });
+    // If we add the updateConfig dep here, rendering crashes with "Maximum update depth exceeded"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useWorkflows]);
 
   useEffect(() => {
     const updateDataSources = async () => {
@@ -339,11 +392,46 @@ export function SetupIntegrationForm({
               }}
             />
           </EuiFormRow>
+          {integration.workflows ? (
+            <>
+              <EuiSpacer />
+              <EuiText>
+                <h3>Installation Flows</h3>
+              </EuiText>
+              <EuiSpacer />
+              <EuiFormRow
+                label={'Flows'}
+                helpText={
+                  'Select from the available asset types based on your use case. Choose at least one.'
+                }
+                isInvalid={![...useWorkflows.values()].includes(true)}
+                error={['Must select at least one workflow.']}
+              >
+                <SetupWorkflowSelector
+                  integration={integration}
+                  useWorkflows={useWorkflows}
+                  toggleWorkflow={toggleWorkflow}
+                />
+              </EuiFormRow>
+            </>
+          ) : null}
         </>
       ) : null}
     </EuiForm>
   );
 }
+
+const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
+  let queryStr = query.replaceAll(
+    '{table_name}',
+    `${config.connectionDataSource}.default.${config.connectionTableName}`
+  );
+  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+  queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
+  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  queryStr = queryStr.replaceAll(/\s+/g, ' ');
+  return queryStr;
+};
 
 const addIntegration = async ({
   config,
@@ -375,22 +463,20 @@ const addIntegration = async ({
   } else if (config.connectionType === 's3') {
     const http = coreRefs.http!;
 
-    const assets = await http.get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`);
+    const assets: { data: ParsedIntegrationAsset[] } = await http.get(
+      `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+    );
 
-    // Queries must exist because we disable s3 if they're not present
     for (const query of assets.data.filter(
-      (a: ParsedIntegrationAsset): a is { type: 'query'; query: string; language: string } =>
+      (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
         a.type === 'query'
     )) {
-      let queryStr = (query.query as string).replaceAll(
-        '{table_name}',
-        `${config.connectionDataSource}.default.${config.connectionTableName}`
-      );
+      // Skip any queries that have conditional workflows but aren't enabled
+      if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
+        continue;
+      }
 
-      queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-      queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
-      queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
-      queryStr = queryStr.replaceAll(/\s+/g, ' ');
+      const queryStr = prepareQuery(query.query, config);
       const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
       if (!result.ok) {
         setLoading(false);
@@ -400,7 +486,6 @@ const addIntegration = async ({
       sessionId = result.value.sessionId ?? sessionId;
     }
     // Once everything is ready, add the integration to the new datasource as usual
-    // TODO determine actual values here after more about queries is known
     const res = await addIntegrationRequest(
       false,
       integration.name,
@@ -408,7 +493,8 @@ const addIntegration = async ({
       integration,
       setCalloutLikeToast,
       config.displayName,
-      `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
+      `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`,
+      config.enabledWorkflows
     );
     if (!res) {
       setLoading(false);
@@ -418,11 +504,14 @@ const addIntegration = async ({
   }
 };
 
-const isConfigValid = (config: IntegrationSetupInputs): boolean => {
+const isConfigValid = (config: IntegrationSetupInputs, integration: IntegrationConfig): boolean => {
   if (config.displayName.length < 1 || config.connectionDataSource.length < 1) {
     return false;
   }
   if (config.connectionType === 's3') {
+    if (integration.workflows && config.enabledWorkflows.length < 1) {
+      return false;
+    }
     return (
       config.connectionLocation.startsWith('s3://') && config.checkpointLocation.startsWith('s3://')
     );
@@ -477,7 +566,7 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={!isConfigValid(config)}
+            disabled={!isConfigValid(config, integration)}
             onClick={async () =>
               addIntegration({ integration, config, setLoading, setCalloutLikeToast })
             }
@@ -511,6 +600,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionLocation: '',
     checkpointLocation: '',
     connectionTableName: integration,
+    enabledWorkflows: [],
   });
 
   const [template, setTemplate] = useState({
