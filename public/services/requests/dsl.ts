@@ -12,6 +12,7 @@ import {
   DSL_SETTINGS,
 } from '../../../common/constants/shared';
 
+/* eslint-disable import/no-default-export */
 export default class DSLService {
   private http;
   constructor(http: CoreStart['http']) {
