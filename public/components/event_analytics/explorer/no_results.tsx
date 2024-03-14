@@ -8,6 +8,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPage,
   EuiSpacer,
   EuiText,
@@ -16,18 +17,26 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { coreRefs } from '../../../framework/core_refs';
+import { selectQueryAssistantSummarization } from '../redux/slices/query_assistant_summarization_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 
 export const NoResults = ({ tabId }: any) => {
   // get the queries isLoaded, if it exists AND is true = show no res
   const queryInfo = useSelector(selectQueries)[tabId];
+  const summaryData = useSelector(selectQueryAssistantSummarization)[tabId];
+  const queryAssistLoading = summaryData.loading;
 
   return (
     <EuiPage paddingSize="s">
       {coreRefs.queryAssistEnabled ? (
         <>
           {/* check to see if the rawQuery is empty or not */}
-          {queryInfo?.rawQuery ? (
+          {queryAssistLoading ? (
+            <EuiEmptyPrompt
+              title={<EuiLoadingSpinner size="xl" />}
+              body={<p>Loading results...</p>}
+            />
+          ) : queryInfo?.rawQuery ? (
             <EuiFlexGroup justifyContent="center" direction="column">
               <EuiFlexItem grow={false}>
                 <EuiCallOut

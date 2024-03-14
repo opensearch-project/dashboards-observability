@@ -32,6 +32,7 @@ import {
   changeSummary,
   resetSummary,
   selectQueryAssistantSummarization,
+  setLoading,
   setResponseForSummaryStatus,
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
@@ -115,6 +116,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const explorerData = useSelector(selectQueryResult)[props.tabId];
   // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
+  const loading = summaryData.loading;
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -141,7 +143,6 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const dispatch = useDispatch();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
   const [callOut, setCallOut] = useState<React.ReactNode>(null);
@@ -203,7 +204,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       return;
     }
     try {
-      setLoading(true);
+      dispatch(setLoading({ tabId: props.tabId, loading: true }));
       setCallOut(null);
       await request();
     } catch (err) {
@@ -214,7 +215,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
-      setLoading(false);
+      dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
@@ -294,7 +295,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       return;
     }
     try {
-      setLoading(true);
+      dispatch(setLoading({ tabId: props.tabId, loading: true }));
       setCallOut(null);
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
@@ -311,7 +312,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
-      setLoading(false);
+      dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
 
