@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { AccelerationHealth, AccelerationStatus } from '../helpers/utils';
+import { AccelerationHealth, AccelerationStatus } from '../utils/acceleration_utils';
 
 interface AccelerationDetailsTabProps {
   acceleration: {

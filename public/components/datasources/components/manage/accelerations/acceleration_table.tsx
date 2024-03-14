@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
@@ -26,7 +27,7 @@ import {
   ACC_LOADING_MSG,
   ACC_PANEL_TITLE,
   ACC_PANEL_DESC,
-} from './helpers/utils';
+} from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import {
@@ -138,6 +139,16 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         </EuiFlexGroup>
       </>
     );
+  };
+
+  const AccelerationLoading = () => {
+    const BodyText = () => (
+      <>
+        <p>{ACC_LOADING_MSG}</p>
+      </>
+    );
+
+    return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} body={<BodyText />} />;
   };
 
   const tableActions = [
@@ -265,19 +276,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         <EuiHorizontalRule />
         <EuiSpacer />
         {isRefreshing ? (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            direction="column"
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>{ACC_LOADING_MSG}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <AccelerationLoading />
         ) : (
           <EuiInMemoryTable
             items={accelerations}

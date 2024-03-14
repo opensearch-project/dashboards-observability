@@ -24,7 +24,7 @@ import {
   onRefreshButtonClick,
   onDiscoverButtonClick,
   onDeleteButtonClick,
-} from '../accelerations/helpers/utils';
+} from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 
