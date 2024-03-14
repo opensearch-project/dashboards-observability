@@ -15,7 +15,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ACCELERATION_INDEX_TYPES } from 'common/constants/data_sources';
+import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,

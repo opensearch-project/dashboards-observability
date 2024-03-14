@@ -54,7 +54,7 @@ export const showDataConnectionsData = {
 export const describePrometheusDataConnection = {
   name: 'prom',
   description: '',
-  connector: 'PROMETHEUS',
+  connector: 'mock_data_source',
   allowedRoles: [],
   properties: {
     'prometheus.uri': 'localhost:9201',
@@ -62,7 +62,7 @@ export const describePrometheusDataConnection = {
 };
 
 export const testS3ConnectionDetails = {
-  dataConnection: 'ya',
+  dataConnection: 'mock_data_source',
   description: '',
   connector: 'S3GLUE' as DatasourceType,
   properties: {

@@ -153,7 +153,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         },
       ],
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ] as Array<EuiTableFieldDataColumnType<AssociatedObject>>;
 
   const onSearchChange = ({ query, error }) => {
     if (error) {
