@@ -38,6 +38,7 @@ interface AccelerationTableProps {
 
 export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
+  const [updatedTime, setUpdatedTime] = useState<string>();
   const { loadStatus, startLoading } = useLoadAccelerationsToCache();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -55,6 +56,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
 
       setAccelerations(cachedDataSource.accelerations);
+      setUpdatedTime(cachedDataSource.lastUpdated);
     }
   }, []);
 
@@ -64,6 +66,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         dataSourceName
       );
       setAccelerations(cachedDataSource.accelerations);
+      setUpdatedTime(cachedDataSource.lastUpdated);
       setIsRefreshing(false);
       console.log('Refresh process is success.');
     }
@@ -99,10 +102,11 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
     );
   };
 
+  console.log('HERE IS THE UPDATED TIME', updatedTime);
   const AccelerationTableHeader = () => {
     return (
       <>
-        <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexGroup direction="row">
           <EuiFlexItem>
             <EuiText>
               <h3 className="panel-title">Accelerations</h3>
@@ -112,10 +116,22 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CreateButton />
+            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <CreateButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RefreshButton />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText textAlign="right" size="xs" color="subdued">
+                  {'Last updated'}
+                </EuiText>
+                <EuiText textAlign="right" color="subdued" size="xs">
+                  {updatedTime}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
