@@ -124,7 +124,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
                 <CreateButton />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RefreshButton />
+                <RefreshButton data-test-subj="refreshButton" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText textAlign="right" size="xs" color="subdued">
