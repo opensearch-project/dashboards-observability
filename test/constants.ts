@@ -574,6 +574,14 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
   version: '2.0.0',
   license: 'Apache-2.0',
   type: 'logs',
+  workflows: [
+    {
+      name: 'workflow1',
+      label: 'Workflow 1',
+      description: 'This is a test workflow.',
+      enabled_by_default: true,
+    },
+  ],
   components: [
     {
       name: 'logs',

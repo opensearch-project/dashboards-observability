@@ -17,7 +17,8 @@ export interface IntegrationsAdaptor {
   loadIntegrationInstance: (
     templateName: string,
     name: string,
-    dataSource: string
+    dataSource: string,
+    workflows?: string[]
   ) => Promise<IntegrationInstance>;
 
   deleteIntegrationInstance: (id: string) => Promise<unknown>;
