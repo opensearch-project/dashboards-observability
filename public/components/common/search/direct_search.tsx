@@ -18,28 +18,43 @@ import {
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
+import {
+  APP_ANALYTICS_TAB_ID_REGEX,
+  RAW_QUERY,
+  SELECTED_TIMESTAMP,
+} from '../../../../common/constants/explorer';
+import {
+  PPL_NEWLINE_REGEX,
+  PPL_SPAN_REGEX,
+  TIMESTAMP_DATETIME_TYPES,
+} from '../../../../common/constants/shared';
+import {
+  DirectQueryLoadingStatus,
+  DirectQueryRequest,
+  IDefaultTimestampState,
+} from '../../../../common/types/explorer';
 import { uiSettingsService } from '../../../../common/utils';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
-import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
-import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
+import { useFetchEvents } from '../../event_analytics/hooks';
+import { reset as resetResults } from '../../event_analytics/redux/slices/query_result_slice';
+import { changeQuery } from '../../event_analytics/redux/slices/query_slice';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { formatError } from '../../event_analytics/utils';
+import { usePolling } from '../../hooks/use_polling';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
+import { i18n } from '@osd/i18n';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -179,15 +194,35 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
+  const stopPollingWithStatus = (status: DirectQueryLoadingStatus | undefined) => {
+    stopPolling();
+    setIsQueryRunning(false);
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: {
+          isPolling: false,
+          status,
+        },
+      })
+    );
+  };
+
   const onQuerySearch = (lang: string) => {
     setIsQueryRunning(true);
     batch(() => {
+      dispatch(resetResults({ tabId })); // reset results
       dispatch(
         changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
       );
-      dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: { isPolling: true, lang, status: DirectQueryLoadingStatus.SCHEDULED },
+        })
+      );
     });
-    const sessionId = getAsyncSessionId();
+    const sessionId = getAsyncSessionId(explorerSearchMetadata.datasources[0].label);
     const requestPayload = {
       lang: lang.toLowerCase(),
       query: tempQuery || query,
@@ -201,7 +236,10 @@ export const DirectSearch = (props: any) => {
     sqlService
       .fetch(requestPayload)
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
+        setAsyncSessionId(
+          explorerSearchMetadata.datasources[0].label,
+          getObjValue(result, 'sessionId', null)
+        );
         if (result.queryId) {
           dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
           startPolling({
@@ -212,39 +250,85 @@ export const DirectSearch = (props: any) => {
         }
       })
       .catch((e) => {
-        setIsQueryRunning(false);
+        stopPollingWithStatus(DirectQueryLoadingStatus.FAILED);
+        const formattedError = formatError(
+          '',
+          'The query failed to execute and the operation could not be complete.',
+          e.body.message
+        );
+        coreRefs.core?.notifications.toasts.addError(formattedError, {
+          title: 'Query Failed',
+        });
         console.error(e);
       });
+  };
+
+  const getDirectQueryTimestamp = (schema: Array<{ name: string; type: string }>) => {
+    const timestamp: IDefaultTimestampState = {
+      hasSchemaConflict: false, // schema conflict bool used for OS index w/ different mappings, not needed here
+      default_timestamp: '',
+      message: i18n.translate(`discover.events.directQuery.noTimeStampFoundMessage`, {
+        defaultMessage: 'Index does not contain a valid time field.',
+      }),
+    };
+
+    for (let i = 0; i < schema.length; i++) {
+      const fieldMapping = schema[i];
+      if (!isEmpty(fieldMapping)) {
+        const fieldName = fieldMapping.name;
+        const fieldType = fieldMapping.type;
+        const isValidTimeType = TIMESTAMP_DATETIME_TYPES.some((dateTimeType) =>
+          isEqual(fieldType, dateTimeType)
+        );
+        if (isValidTimeType && isEmpty(timestamp.default_timestamp)) {
+          timestamp.default_timestamp = fieldName;
+          timestamp.message = '';
+          break;
+        }
+      }
+    }
+    return timestamp;
   };
 
   useEffect(() => {
     // cancel direct query
     if (!pollingResult) return;
-    const { status, datarows } = pollingResult;
+    const { status: anyCaseStatus, datarows, error } = pollingResult;
+    const status = anyCaseStatus?.toLowerCase();
 
     if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
-      // stop polling
-      stopPolling();
-      setIsQueryRunning(false);
+      stopPollingWithStatus(status);
+      // find the timestamp from results
+      const derivedTimestamp = getDirectQueryTimestamp(pollingResult.schema);
       dispatch(
-        updateSearchMetaData({
+        changeQuery({
           tabId,
-          data: {
-            isPolling: false,
-            status: undefined,
+          query: {
+            [SELECTED_TIMESTAMP]: derivedTimestamp.default_timestamp,
           },
         })
       );
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
-      return;
+    } else if (status === DirectQueryLoadingStatus.FAILED) {
+      stopPollingWithStatus(status);
+      // send in a toast with error message
+      const formattedError = formatError(
+        '',
+        'The query failed to execute and the operation could not be complete.',
+        error
+      );
+      coreRefs.core?.notifications.toasts.addError(formattedError, {
+        title: 'Query Failed',
+      });
+    } else {
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: { status },
+        })
+      );
     }
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { status },
-      })
-    );
   }, [pollingResult, pollingError]);
 
   useEffect(() => {

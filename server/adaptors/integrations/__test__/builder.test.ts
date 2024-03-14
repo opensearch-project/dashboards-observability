@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { IntegrationReader } from '../repository/integration_reader';
@@ -12,6 +13,22 @@ jest.mock('../repository/utils', () => ({
   ...jest.requireActual('../repository/utils'),
   deepCheck: jest.fn(),
 }));
+
+const mockParsedAssets = [
+  {
+    type: 'savedObjectBundle',
+    data: [
+      {
+        id: 'asset1',
+        references: [{ id: 'ref1' }],
+      },
+      {
+        id: 'asset2',
+        references: [{ id: 'ref2' }],
+      },
+    ],
+  },
+];
 
 const mockSavedObjectsClient: SavedObjectsClientContract = ({
   bulkCreate: jest.fn(),
@@ -23,22 +40,8 @@ const mockSavedObjectsClient: SavedObjectsClientContract = ({
 } as unknown) as SavedObjectsClientContract;
 
 const sampleIntegration: IntegrationReader = ({
-  getAssets: jest.fn().mockResolvedValue({
-    savedObjects: [
-      {
-        id: 'asset1',
-        references: [{ id: 'ref1' }],
-      },
-      {
-        id: 'asset2',
-        references: [{ id: 'ref2' }],
-      },
-    ],
-  }),
-  getConfig: jest.fn().mockResolvedValue({
-    name: 'integration-template',
-    type: 'integration-type',
-  }),
+  getAssets: jest.fn().mockResolvedValue(mockParsedAssets),
+  getConfig: jest.fn().mockResolvedValue(TEST_INTEGRATION_CONFIG),
 } as unknown) as IntegrationReader;
 
 describe('IntegrationInstanceBuilder', () => {
@@ -77,7 +80,7 @@ describe('IntegrationInstanceBuilder', () => {
       };
       const expectedInstance = {
         name: 'instance-name',
-        templateName: 'integration-template',
+        templateName: 'sample',
         dataSource: 'instance-datasource',
         creationDate: expect.any(String),
         assets: [
@@ -98,16 +101,7 @@ describe('IntegrationInstanceBuilder', () => {
         ],
       };
 
-      const mockTemplate: Partial<IntegrationConfig> = {
-        name: 'integration-template',
-        type: 'integration-type',
-        assets: {
-          savedObjects: {
-            name: 'assets',
-            version: '1.0.0',
-          },
-        },
-      };
+      const mockTemplate: Partial<IntegrationConfig> = TEST_INTEGRATION_CONFIG;
 
       jest
         .spyOn(mockUtils, 'deepCheck')
@@ -115,9 +109,10 @@ describe('IntegrationInstanceBuilder', () => {
 
       // Mock the implementation of the methods in the Integration class
       // sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
-      sampleIntegration.getAssets = jest
-        .fn()
-        .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
+      sampleIntegration.getAssets = jest.fn().mockResolvedValue({
+        ok: true,
+        value: [{ type: 'savedObjectBundle', data: remappedAssets }],
+      });
       sampleIntegration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
 
       // Mock builder sub-methods
@@ -178,9 +173,10 @@ describe('IntegrationInstanceBuilder', () => {
       jest
         .spyOn(mockUtils, 'deepCheck')
         .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
-      sampleIntegration.getAssets = jest
-        .fn()
-        .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
+      sampleIntegration.getAssets = jest.fn().mockResolvedValue({
+        ok: true,
+        value: [{ type: 'savedObjectBundle', data: remappedAssets }],
+      });
       builder.postAssets = jest.fn().mockRejectedValue(new Error(errorMessage));
 
       await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
@@ -345,5 +341,76 @@ describe('IntegrationInstanceBuilder', () => {
         builder.buildInstance((integration as unknown) as IntegrationReader, refs, options)
       ).rejects.toThrowError();
     });
+  });
+});
+
+describe('getSavedObjectBundles', () => {
+  let builder: IntegrationInstanceBuilder;
+
+  beforeEach(() => {
+    builder = new IntegrationInstanceBuilder(mockSavedObjectsClient);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should filter assets correctly without workflows and includeWorkflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets);
+    expect(result.length).toBe(2);
+  });
+
+  it('should filter assets correctly with specified workflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow1'],
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow2'],
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets, ['workflow1']);
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('1');
+  });
+
+  it('should filter assets correctly with no matching workflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow1'],
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow2'],
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets, ['workflow3']);
+    expect(result.length).toBe(0);
+  });
+
+  it('should return an empty array if no savedObjectBundle assets are present', () => {
+    const assets = [{ type: 'query' as const, query: 'query', language: 'language' }];
+    const result = builder.getSavedObjectBundles(assets);
+    expect(result.length).toBe(0);
   });
 });

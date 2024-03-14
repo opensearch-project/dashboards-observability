@@ -82,6 +82,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         body: schema.object({
           name: schema.string(),
           dataSource: schema.string(),
+          workflows: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -91,7 +92,8 @@ export function registerIntegrationsRoute(router: IRouter) {
         return a.loadIntegrationInstance(
           request.params.templateName,
           request.body.name,
-          request.body.dataSource
+          request.body.dataSource,
+          request.body.workflows
         );
       });
     }

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// eslint-disable-next-line jest/no-mocks-import
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { AddedIntegrationsTableProps } from '../added_integration_overview_page';
 import {
   AvailableIntegrationsCardViewProps,
@@ -16,7 +18,6 @@ export const availableCardViewData: AvailableIntegrationsCardViewProps = {
         name: 'nginx',
         version: '1.0.1',
         displayName: 'NginX Dashboard',
-        integrationType: 'logs',
         description: 'Nginx HTTP server collector',
         license: 'Apache-2.0',
         type: 'logs',
@@ -34,12 +35,26 @@ export const availableCardViewData: AvailableIntegrationsCardViewProps = {
           { name: 'http', version: '1.0.0' },
           { name: 'logs', version: '1.0.0' },
         ],
-        assets: { savedObjects: { name: 'nginx', version: '1.0.1' } },
+        assets: [
+          { name: 'nginx', version: '1.0.1', extension: 'ndjson', type: 'savedObjectBundle' },
+        ],
       },
     ],
   },
-  showModal: () => {},
-  renderCateogryFilters: () => null as any,
+  renderCateogryFilters: () => (null as unknown) as { type: string; props: object; key: string },
+  isCardView: false,
+  setCardView: () => {},
+  query: '',
+  setQuery: () => {},
+  http: {
+    ...httpClientMock,
+    basePath: {
+      get: jest.fn(),
+      prepend: jest.fn(),
+      remove: jest.fn(),
+      serverBasePath: 'mock_base',
+    },
+  },
 };
 
 export const availableTableViewData: AvailableIntegrationsTableProps = {
@@ -49,7 +64,6 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
         name: 'nginx',
         version: '1.0.1',
         displayName: 'NginX Dashboard',
-        integrationType: 'logs',
         description: 'Nginx HTTP server collector',
         license: 'Apache-2.0',
         type: 'logs',
@@ -67,24 +81,32 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
           { name: 'http', version: '1.0.0' },
           { name: 'logs', version: '1.0.0' },
         ],
-        assets: { savedObjects: { name: 'nginx', version: '1.0.1' } },
+        assets: [
+          { name: 'nginx', version: '1.0.1', extension: 'ndjson', type: 'savedObjectBundle' },
+        ],
       },
     ],
   },
-  showModal: () => {},
   loading: false,
-  renderCateogryFilters: () => null as any,
+  renderCateogryFilters: () => {
+    return (null as unknown) as { type: string; props: object; key: string };
+  },
+  isCardView: false,
+  setCardView: () => {},
 };
 
 export const addedIntegrationData: AddedIntegrationsTableProps = {
+  setData: () => {},
+  http: httpClientMock,
   data: {
-    total: 1,
     hits: [
       {
         name: 'nginx',
         templateName: 'nginx',
         dataSource: { sourceType: 'logs', dataset: 'nginx', namespace: 'prod' },
         creationDate: '2023-06-15T16:28:36.370Z',
+        status: 'active',
+        addedBy: 'admin',
         assets: [
           {
             assetType: 'index-pattern',

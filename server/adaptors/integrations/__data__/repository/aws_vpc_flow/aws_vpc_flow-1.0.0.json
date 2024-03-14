@@ -1,13 +1,27 @@
 {
   "name": "aws_vpc_flow",
   "version": "1.0.0",
-  "displayName": "AWS VPC Flow",
-  "description": "AWS VPC Flow log collector",
+  "displayName": "Amazon VPC",
+  "description": "Monitor IP traffic with VPC Flow Logs.",
   "license": "Apache-2.0",
   "type": "logs_vpc",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "Haidong Wang",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_vpc_flow/info",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
   "statics": {
     "logo": {
       "annotation": "AWS VPC Logo",
@@ -42,24 +56,28 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
+  "assets": [
+    {
       "name": "aws_vpc_flow",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
     },
-    "queries": [
-      {
-        "name": "create_table_vpc",
-        "version": "1.0.0",
-        "language": "sql"
-      },
-      {
-        "name": "create_mv_vpc",
-        "version": "1.0.0",
-        "language": "sql"
-      }
-    ]
-  },
+    {
+      "name": "create_table_vpc",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_mv_vpc",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards"]
+    }
+  ],
   "sampleData": {
     "path": "sample.json"
   }

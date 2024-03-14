@@ -31,6 +31,20 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
     sourceUrl: { type: 'string', nullable: true },
+    workflows: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          label: { type: 'string' },
+          description: { type: 'string' },
+          enabled_by_default: { type: 'boolean' },
+        },
+        required: ['name', 'label', 'description', 'enabled_by_default'],
+      },
+      nullable: true,
+    },
     statics: {
       type: 'object',
       properties: {
@@ -55,35 +69,24 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
       },
     },
     assets: {
-      type: 'object',
-      properties: {
-        savedObjects: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            version: { type: 'string' },
-            data: { type: 'string', nullable: true },
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          version: { type: 'string' },
+          extension: { type: 'string' },
+          type: { type: 'string' },
+          data: { type: 'string', nullable: true },
+          workflows: {
+            type: 'array',
+            items: { type: 'string' },
+            nullable: true,
           },
-          required: ['name', 'version'],
-          nullable: true,
-          additionalProperties: false,
         },
-        queries: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              version: { type: 'string' },
-              language: { type: 'string' },
-              data: { type: 'string', nullable: true },
-            },
-            required: ['name', 'version', 'language'],
-          },
-          nullable: true,
-        },
+        required: ['name', 'version', 'extension', 'type'],
+        additionalProperties: false,
       },
-      additionalProperties: false,
     },
     sampleData: {
       type: 'object',

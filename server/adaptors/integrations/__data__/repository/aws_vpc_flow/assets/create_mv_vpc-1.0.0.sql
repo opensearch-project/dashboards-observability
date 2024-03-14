@@ -24,7 +24,7 @@ FROM
     {table_name}
 WITH (
     auto_refresh = 'true',
-    checkpoint_location = '{s3_bucket_location}/checkpoint',
+    checkpoint_location = '{s3_checkpoint_location}',
     watermark_delay = '1 Minute',
     extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )

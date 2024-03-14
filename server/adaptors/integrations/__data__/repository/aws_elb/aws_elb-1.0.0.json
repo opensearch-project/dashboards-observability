@@ -1,13 +1,27 @@
 {
   "name": "aws_elb",
   "version": "1.0.0",
-  "displayName": "AWS ELB",
-  "description": "AWS Elastic Load Balancer collector",
+  "displayName": "Elastic Load Balancing",
+  "description": "Analyze access logs for Elastic Load Balancing.",
   "license": "Apache-2.0",
   "type": "logs_elb",
   "labels": ["Observability", "Logs", "AWS", "Flint S3", "Cloud"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
   "statics": {
     "logo": {
       "annotation": "ELB Logo",
@@ -46,24 +60,28 @@
       "version": "1.0.0"
     }
   ],
-  "assets": {
-    "savedObjects": {
+  "assets": [
+    {
       "name": "aws_elb",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
     },
-    "queries": [
-      {
-        "name": "create_table",
-        "version": "1.0.0",
-        "language": "sql"
-      },
-      {
-        "name": "create_mv",
-        "version": "1.0.0",
-        "language": "sql"
-      }
-    ]
-  },
+    {
+      "name": "create_table",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards"]
+    }
+  ],
   "sampleData": {
     "path": "sample.json"
   }

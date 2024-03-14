@@ -564,6 +564,8 @@ export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   displayName: 'Test Instance Name',
   connectionType: 'index',
   connectionDataSource: 'ss4o_logs-nginx-test',
+  connectionTableName: '',
+  connectionLocation: '',
 };
 
 // TODO fill in the rest of the fields
@@ -572,18 +574,28 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
   version: '2.0.0',
   license: 'Apache-2.0',
   type: 'logs',
+  workflows: [
+    {
+      name: 'workflow1',
+      label: 'Workflow 1',
+      description: 'This is a test workflow.',
+      enabled_by_default: true,
+    },
+  ],
   components: [
     {
       name: 'logs',
       version: '1.0.0',
     },
   ],
-  assets: {
-    savedObjects: {
+  assets: [
+    {
       name: 'sample',
       version: '1.0.1',
+      extension: 'ndjson',
+      type: 'savedObjectBundle',
     },
-  },
+  ],
 };
 
 export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {

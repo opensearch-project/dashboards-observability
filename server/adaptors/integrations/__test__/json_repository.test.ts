@@ -161,7 +161,7 @@ describe('Integration validation', () => {
       .map((integ) => {
         return {
           ...integ,
-          assets: {} as SerializedIntegrationAssets,
+          assets: [] as SerializedIntegrationAsset[],
         };
       });
     const integration = new IntegrationReader(

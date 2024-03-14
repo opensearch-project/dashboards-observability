@@ -7,6 +7,8 @@ type Result<T, E = Error> =
   | { ok: true; value: T; error?: undefined }
   | { ok: false; error: E; value?: undefined };
 
+type SupportedAssetType = 'savedObjectBundle' | 'query';
+
 interface IntegrationConfig {
   name: string;
   version: string;
@@ -17,9 +19,10 @@ interface IntegrationConfig {
   author?: string;
   description?: string;
   sourceUrl?: string;
+  workflows?: IntegrationWorkflow[];
   statics?: IntegrationStatics;
   components: IntegrationComponent[];
-  assets: IntegrationAssets;
+  assets: IntegrationAsset[];
   sampleData?: {
     path: string;
   };
@@ -29,7 +32,7 @@ interface IntegrationConfig {
 interface SerializedIntegration extends IntegrationConfig {
   statics?: SerializedIntegrationStatics;
   components: SerializedIntegrationComponent[];
-  assets: SerializedIntegrationAssets;
+  assets: SerializedIntegrationAsset[];
   sampleData?: {
     path: string;
     data: string;
@@ -50,38 +53,27 @@ interface SerializedIntegrationStatics {
   darkModeGallery?: SerializedStaticAsset[];
 }
 
-interface IntegrationAssets {
-  savedObjects?: {
-    name: string;
-    version: string;
-  };
-  queries?: Array<{
-    name: string;
-    version: string;
-    language: string;
-  }>;
+interface IntegrationAsset {
+  name: string;
+  version: string;
+  extension: string;
+  type: SupportedAssetType;
+  workflows?: string[];
 }
 
-interface ParsedIntegrationAssets {
-  savedObjects?: object[];
-  queries?: Array<{
-    query: string;
-    language: string;
-  }>;
+interface IntegrationWorkflow {
+  name: string;
+  label: string;
+  description: string;
+  enabled_by_default: boolean;
 }
 
-interface SerializedIntegrationAssets extends IntegrationAssets {
-  savedObjects?: {
-    name: string;
-    version: string;
-    data: string;
-  };
-  queries?: Array<{
-    name: string;
-    version: string;
-    language: string;
-    data: string;
-  }>;
+type ParsedIntegrationAsset =
+  | { type: 'savedObjectBundle'; workflows?: string[]; data: object[] }
+  | { type: 'query'; workflows?: string[]; query: string; language: string };
+
+interface SerializedIntegrationAsset extends IntegrationAsset {
+  data: string;
 }
 
 interface StaticAsset {
