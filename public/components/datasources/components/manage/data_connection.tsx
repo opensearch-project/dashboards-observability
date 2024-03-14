@@ -21,12 +21,6 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
-  useLoadAccelerationsToCache,
-  useLoadDatabasesToCache,
-  useLoadTablesToCache,
-} from '../../../../../public/framework/catalog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
-import {
   DATACONNECTIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
@@ -35,11 +29,10 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
-import { CachedDatabase, DatasourceType } from '../../../../../common/types/data_connections';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
-import { isDatabasesCacheUpdated } from './associated_objects/utils/associated_objects_tab_utils';
 
 export interface DatasourceDetails {
   allowedRoles: string[];
@@ -124,19 +117,6 @@ export const DataConnection = (props: any) => {
   const onclickDiscoverCard = () => {
     application!.navigateToApp(observabilityLogsID);
   };
-  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
-  const {
-    loadStatus: databasesLoadStatus,
-    startLoading: startLoadingDatabases,
-  } = useLoadDatabasesToCache();
-  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache();
-  const {
-    loadStatus: accelerationsLoadStatus,
-    startLoading: startLoadingAccelerations,
-  } = useLoadAccelerationsToCache();
-  const [cachedDatabases, setCachedDatabases] = useState<CachedDatabase[]>([]);
-  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const DefaultDatasourceCards = () => {
     return (
@@ -216,23 +196,7 @@ export const DataConnection = (props: any) => {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
-      content: (
-        <AssociatedObjectsTab
-          datasource={datasourceDetails}
-          databasesLoadStatus={databasesLoadStatus}
-          startLoadingDatabases={startLoadingDatabases}
-          cachedDatabases={cachedDatabases}
-          selectedDatabase={selectedDatabase}
-          setSelectedDatabase={setSelectedDatabase}
-          tablesLoadStatus={tablesLoadStatus}
-          startLoadingTables={startLoadingTables}
-          accelerationsLoadStatus={accelerationsLoadStatus}
-          startLoadingAccelerations={startLoadingAccelerations}
-          isFirstTimeLoading={isFirstTimeLoading}
-          isRefreshing={isRefreshing}
-          setIsRefreshing={setIsRefreshing}
-        />
-      ),
+      content: <AssociatedObjectsTab datasource={datasourceDetails} />,
     },
     {
       id: 'acceleration_table',
@@ -353,29 +317,6 @@ export const DataConnection = (props: any) => {
     );
   };
 
-  useEffect(() => {
-    // Loads databases cache when cache is empty
-    console.log('databasesloadstatus', databasesLoadStatus);
-    if (datasourceDetails.name) {
-      if (!isDatabasesCacheUpdated(datasourceDetails.name) && !isRefreshing) {
-        console.log('databases is not updated');
-        startLoadingDatabases(datasourceDetails.name);
-        setIsRefreshing(true);
-      } else if (isDatabasesCacheUpdated(datasourceDetails.name)) {
-        console.log('databases is updated');
-        const cachedList: CachedDatabase[] =
-          CatalogCacheManager.getDataSourceCache().dataSources.find(
-            (cachedDataSource) => cachedDataSource.name === datasourceDetails.name
-          )?.databases || [];
-        if (cachedList) {
-          setCachedDatabases(cachedList);
-        }
-        // setIsRefreshing(false);
-        setIsFirstTimeLoading(false);
-      }
-    }
-  }, [datasourceDetails.name, databasesLoadStatus]);
-
   const DatasourceOverview = () => {
     switch (datasourceDetails.connector) {
       case 'S3GLUE':
@@ -415,7 +356,6 @@ export const DataConnection = (props: any) => {
           <QueryOrAccelerateData />
         </EuiAccordion>
         <EuiTabbedContent tabs={tabs} />
-
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>

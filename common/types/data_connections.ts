@@ -115,7 +115,7 @@ export interface CachedAcceleration {
   status: string;
 }
 
-export interface CachedAcclerationByDataSource {
+export interface CachedAccelerationByDataSource {
   name: string;
   accelerations: CachedAcceleration[];
   lastUpdated: string; // date string in UTC format
@@ -124,7 +124,7 @@ export interface CachedAcclerationByDataSource {
 
 export interface AccelerationsCacheData {
   version: string;
-  dataSources: CachedAcclerationByDataSource[];
+  dataSources: CachedAccelerationByDataSource[];
 }
 
 export interface PollingSuccessResult {

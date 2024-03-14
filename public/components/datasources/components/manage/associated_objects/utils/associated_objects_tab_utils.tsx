@@ -3,24 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CachedDataSource } from '../../../../../../../common/types/data_connections';
-import { CatalogCacheManager } from '../../../../../../framework/catalog_cache/cache_manager';
+import { AccelerationIndexType } from '../../../../../../../common/types/data_connections';
 
-export const isDatabasesCacheUpdated = (datasourceName: string) => {
-  const cache = CatalogCacheManager.getDataSourceCache().dataSources.find(
-    (datasource: CachedDataSource) => datasource.name === datasourceName
-  );
-  return cache?.status === 'Updated';
-};
-
-export const isTablesCacheUpdated = (datasourceName: string, databaseName: string) => {
-  const cache = CatalogCacheManager.getDatabase(datasourceName, databaseName);
-  return cache?.status === 'Updated';
-};
-
-export const isAccelerationsCacheUpdated = () => {
-  const cache = CatalogCacheManager.getAccelerationsCache();
-  return cache?.status === 'Updated';
+export const getAccelerationType = (type: AccelerationIndexType) => {
+  switch (type) {
+    case 'skipping':
+      return 'Skipping Index';
+    case 'covering':
+      return 'Covering Index';
+    case 'materialized':
+      return 'Materialized View';
+  }
 };
 
 export const mockAssociatedObjects = [
@@ -248,7 +241,7 @@ export const ASSC_OBJ_TABLE_SEARCH_HINT =
 
 export const ASSC_OBJ_PANEL_TITLE = 'Associated objects';
 
-export const ASSC_OBJ_PANEL_DESRIPTION = 'Manage objects associated with this data sources.';
+export const ASSC_OBJ_PANEL_DESCRIPTION = 'Manage objects associated with this data sources.';
 
 export const ASSC_OBJ_NO_DATA_TITLE = 'You have no associated objects';
 
