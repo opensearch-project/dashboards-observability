@@ -807,6 +807,23 @@ export const mockRoleData = {
   },
 };
 
+export const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
+
+export const dummyAccelerations = [
+  {
+    name: 'dummy_acceleration_1',
+    status: 'ACTIVE',
+    type: 'skip',
+    database: 'default',
+    table: 'table1',
+    destination: 'N/A',
+    dateCreated: 1709339290,
+    dateUpdated: 1709339290,
+    index: 'security_logs_2022',
+    sql: sampleSql,
+  },
+];
+
 export const mockShowDatabasesPollingResult: AsyncPollingResult = {
   schema: [{ name: 'namespace', type: 'string' }],
   datarows: [['Database1'], ['Database2']],

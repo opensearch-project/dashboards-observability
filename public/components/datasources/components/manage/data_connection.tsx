@@ -34,6 +34,7 @@ import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
+import { dummyAccelerations } from '../../../../../test/datasources';
 
 interface DatasourceDetails {
   allowedRoles: string[];
