@@ -99,7 +99,9 @@ export const AccelerationDetailsFlyout = ({
   };
 
   useEffect(() => {
-    getAccDetail(flintIndexName);
+    if (flintIndexName !== undefined && flintIndexName.trim().length > 0) {
+      getAccDetail(flintIndexName);
+    }
   }, [flintIndexName]);
 
   const DiscoverButton = () => {
