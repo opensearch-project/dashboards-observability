@@ -239,6 +239,14 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       render: (table: string) => <EuiText>{table || '-'}</EuiText>,
     },
     {
+      field: 'refreshType',
+      name: 'Refresh Type',
+      sortable: true,
+      render: (autoRefresh: boolean, acceleration: CachedAccelerations) => {
+        return <EuiText>{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
+      },
+    },
+    {
       field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
