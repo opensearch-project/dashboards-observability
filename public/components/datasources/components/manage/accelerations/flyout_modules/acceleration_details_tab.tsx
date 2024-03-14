@@ -54,12 +54,6 @@ export const AccelerationDetailsTab = ({
   const checkpointName =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options?.checkpoint_location;
 
-  console.log('mappings:', mappings);
-  console.log('indexInfo:', indexInfo);
-  console.log('indexInfo data:', indexInfo?.data);
-  console.log('First item in indexInfo data:', indexInfo?.data[0]);
-  console.log('Health of the first item:', indexInfo?.data[0]?.health);
-
   const DetailComponent = ({
     title,
     description,
