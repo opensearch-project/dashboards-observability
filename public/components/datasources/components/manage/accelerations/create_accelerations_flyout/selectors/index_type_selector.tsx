@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
@@ -18,27 +11,31 @@ import {
 } from '../../../../../../../../common/constants/data_sources';
 import {
   AccelerationIndexType,
-  CachedTable,
   CreateAccelerationForm,
 } from '../../../../../../../../common/types/data_connections';
-import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
-import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
-  dataSourcesPreselected: boolean;
+  initiateColumnLoad: (dataSource: string, database: string, dataTable: string) => void;
+  loading: boolean;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
   setAccelerationFormData,
-  dataSourcesPreselected,
+  initiateColumnLoad,
+  loading,
 }: IndexTypeSelectorProps) => {
-  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState('skipping');
-  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
+
+  useEffect(() => {
+    initiateColumnLoad(
+      accelerationFormData.dataSource,
+      accelerationFormData.database,
+      accelerationFormData.dataTable
+    );
+  }, [accelerationFormData.dataTable]);
 
   const onChangeSupeSelect = (indexType: string) => {
     setAccelerationFormData({
@@ -49,73 +46,6 @@ export const IndexTypeSelector = ({
     });
     setValue(indexType);
   };
-
-  const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
-    const idPrefix = htmlIdGenerator()();
-    const dataTableFields = cachedTable.columns!.map((col, index: number) => ({
-      ...col,
-      id: `${idPrefix}${index + 1}`,
-    }));
-
-    setAccelerationFormData({
-      ...accelerationFormData,
-      dataTableFields,
-    });
-  };
-
-  const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
-    setAccelerationFormData({
-      ...accelerationFormData,
-      dataTableFields: [],
-    });
-    if (dataTable !== '') {
-      setLoading(true);
-      const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
-
-      if (cachedTable.columns) {
-        loadColumnsToAccelerationForm(cachedTable);
-        setLoading(false);
-      } else {
-        startLoading(dataSource, database, dataTable);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const status = loadStatus.toLowerCase();
-    if (status === DirectQueryLoadingStatus.SUCCESS) {
-      const cachedTable = CatalogCacheManager.getTable(
-        accelerationFormData.dataSource,
-        accelerationFormData.database,
-        accelerationFormData.dataTable
-      );
-      loadColumnsToAccelerationForm(cachedTable);
-      setLoading(false);
-    } else if (
-      status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
-    ) {
-      setLoading(false);
-    }
-  }, [loadStatus]);
-
-  useEffect(() => {
-    initiateColumnLoad(
-      accelerationFormData.dataSource,
-      accelerationFormData.database,
-      accelerationFormData.dataTable
-    );
-  }, [accelerationFormData.dataTable]);
-
-  useEffect(() => {
-    if (dataSourcesPreselected) {
-      initiateColumnLoad(
-        accelerationFormData.dataSource,
-        accelerationFormData.database,
-        accelerationFormData.dataTable
-      );
-    }
-  }, [dataSourcesPreselected]);
 
   const superSelectOptions = [
     {

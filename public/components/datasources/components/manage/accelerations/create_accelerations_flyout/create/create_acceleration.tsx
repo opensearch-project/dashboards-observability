@@ -14,13 +14,20 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_TIME_INTERVAL,
 } from '../../../../../../../../common/constants/data_sources';
-import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
+import {
+  CachedTable,
+  CreateAccelerationForm,
+} from '../../../../../../../../common/types/data_connections';
+import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
+import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../../../../../framework/core_refs';
 import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
@@ -44,9 +51,6 @@ export const CreateAcceleration = ({
   databaseName,
   tableName,
 }: CreateAccelerationProps) => {
-  // const databaseName = 'default';
-  // const tableName = 'http_logs';
-
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
@@ -92,6 +96,67 @@ export const CreateAcceleration = ({
       watermarkDelayError: [],
     },
   });
+  const [tableFieldsLoading, setTableFieldsLoading] = useState(false);
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
+
+  const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
+    const idPrefix = htmlIdGenerator()();
+    const dataTableFields = cachedTable.columns!.map((col, index: number) => ({
+      ...col,
+      id: `${idPrefix}${index + 1}`,
+    }));
+
+    setAccelerationFormData({
+      ...accelerationFormData,
+      dataTableFields,
+    });
+  };
+
+  const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
+    setAccelerationFormData({
+      ...accelerationFormData,
+      dataTableFields: [],
+    });
+    if (dataTable !== '') {
+      setTableFieldsLoading(true);
+      const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
+
+      if (cachedTable.columns) {
+        loadColumnsToAccelerationForm(cachedTable);
+        setTableFieldsLoading(false);
+      } else {
+        startLoading(dataSource, database, dataTable);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (databaseName !== undefined && tableName !== undefined) {
+      initiateColumnLoad(
+        accelerationFormData.dataSource,
+        accelerationFormData.database,
+        accelerationFormData.dataTable
+      );
+    }
+  }, [databaseName, tableName]);
+
+  useEffect(() => {
+    const status = loadStatus.toLowerCase();
+    if (status === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedTable = CatalogCacheManager.getTable(
+        accelerationFormData.dataSource,
+        accelerationFormData.database,
+        accelerationFormData.dataTable
+      );
+      loadColumnsToAccelerationForm(cachedTable);
+      setTableFieldsLoading(false);
+    } else if (
+      status === DirectQueryLoadingStatus.FAILED ||
+      status === DirectQueryLoadingStatus.CANCELED
+    ) {
+      setTableFieldsLoading(false);
+    }
+  }, [loadStatus]);
 
   const createAcceleration = () => {
     const errors = formValidator(accelerationFormData);
@@ -129,7 +194,8 @@ export const CreateAcceleration = ({
             <IndexTypeSelector
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
-              dataSourcesPreselected={dataSourcesPreselected}
+              initiateColumnLoad={initiateColumnLoad}
+              loading={tableFieldsLoading}
             />
             <EuiSpacer size="xxl" />
             <IndexSettingOptions

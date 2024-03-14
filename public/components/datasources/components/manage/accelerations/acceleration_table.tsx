@@ -4,38 +4,26 @@
  */
 
 import {
+  EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiText,
   EuiHorizontalRule,
-  EuiButton,
-  EuiSpacer,
-  EuiLink,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiLoadingSpinner,
-  EuiEmptyPrompt,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import {
-  getRefreshButtonIcon,
-  onRefreshButtonClick,
-  onDiscoverButtonClick,
-  onDeleteButtonClick,
-  AccelerationStatus,
-  ACC_LOADING_MSG,
-  ACC_PANEL_TITLE,
-  ACC_PANEL_DESC,
-} from './utils/acceleration_utils';
+import React from 'react';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
-import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import {
-  CachedAccelerations,
-  CachedDataSourceStatus,
-} from '../../../../../../common/types/data_connections';
-import { useLoadAccelerationsToCache } from '../../../../../framework/catalog_cache/cache_loader';
-import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+  AccelerationStatus,
+  getRefreshButtonIcon,
+  onDeleteButtonClick,
+  onDiscoverButtonClick,
+  onRefreshButtonClick,
+} from './helpers/utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { htmlIdGenerator } from '@elastic/eui';
+import { useEffect, useState } from 'react';
 import {
   ACCELERATION_INDEX_NAME_REGEX,
   ACCELERATION_S3_URL_REGEX,
@@ -10,11 +12,16 @@ import {
 import {
   AccelerationIndexType,
   AccelerationRefreshType,
+  CachedTable,
   CreateAccelerationForm,
+  DataTableFieldsType,
   FormErrorsType,
   MaterializedViewQueryType,
   SkippingIndexRowType,
 } from '../../../../../../../../common/types/data_connections';
+import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
+import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 
 export const pluralizeTime = (timeWindow: number) => {
   return timeWindow > 1 ? 's' : '';
@@ -161,4 +168,67 @@ export const formValidator = (accelerationformData: CreateAccelerationForm) => {
   };
 
   return accelerationFormErrors;
+};
+
+export const useDataFieldstoAccelerationForm = (
+  updateAccelerationsDataFields: (dataTableFields: DataTableFieldsType[]) => void
+) => {
+  const [loading, setLoading] = useState(false);
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
+  const [sources, setSources] = useState({
+    dataSource: '',
+    database: '',
+    dataTable: '',
+  });
+
+  const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
+    const idPrefix = htmlIdGenerator()();
+    const dataTableFields = cachedTable.columns!.map((col, index: number) => ({
+      ...col,
+      id: `${idPrefix}${index + 1}`,
+    }));
+
+    updateAccelerationsDataFields(dataTableFields);
+  };
+
+  const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
+    setSources({
+      dataSource,
+      database,
+      dataTable,
+    });
+    updateAccelerationsDataFields([]);
+
+    if (dataTable !== '') {
+      setLoading(true);
+      const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
+
+      if (cachedTable.columns) {
+        loadColumnsToAccelerationForm(cachedTable);
+        setLoading(false);
+      } else {
+        startLoading(dataSource, database, dataTable);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const status = loadStatus.toLowerCase();
+    if (status === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedTable = CatalogCacheManager.getTable(
+        sources.dataSource,
+        sources.database,
+        sources.dataTable
+      );
+      loadColumnsToAccelerationForm(cachedTable);
+      setLoading(false);
+    } else if (
+      status === DirectQueryLoadingStatus.FAILED ||
+      status === DirectQueryLoadingStatus.CANCELED
+    ) {
+      setLoading(false);
+    }
+  }, [loadStatus]);
+
+  return { loading, initiateColumnLoad };
 };

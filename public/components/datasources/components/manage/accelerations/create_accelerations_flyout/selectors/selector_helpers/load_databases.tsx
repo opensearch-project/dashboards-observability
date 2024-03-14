@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DirectQueryLoadingStatus } from '../../../../../../../../../common/types/explorer';
 import { useLoadDatabasesToCache } from '../../../../../../../../framework/catalog_cache/cache_loader';
@@ -43,13 +43,17 @@ export const SelectorLoadDatabases = ({
   }, [loadDatabasesStatus]);
 
   return (
-    <EuiButton
-      isLoading={isLoading}
-      iconType="refresh"
-      iconSize="m"
-      onClick={onClickRefreshDatabases}
-    >
-      {isLoading ? `Loading` : 'Refresh'}
-    </EuiButton>
+    <>
+      {isLoading ? (
+        <EuiLoadingSpinner size="xl" />
+      ) : (
+        <EuiButtonIcon
+          iconType="refresh"
+          size="m"
+          display="base"
+          onClick={onClickRefreshDatabases}
+        />
+      )}
+    </>
   );
 };

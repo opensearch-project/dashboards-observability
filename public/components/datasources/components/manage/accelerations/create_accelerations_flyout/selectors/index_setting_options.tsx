@@ -53,7 +53,7 @@ export const IndexSettingOptions = ({
     },
     {
       value: 'autoInterval',
-      inputDisplay: 'Auto (interval)',
+      inputDisplay: 'Auto (Interval)',
       dropdownDisplay: (
         <Fragment>
           <strong>Auto (Interval)</strong>
@@ -67,7 +67,7 @@ export const IndexSettingOptions = ({
     },
     {
       value: 'manualIncrement',
-      inputDisplay: 'Manual (increment)',
+      inputDisplay: 'Manual (Increment)',
       dropdownDisplay: (
         <Fragment>
           <strong>Manual (Increment)</strong>
@@ -178,7 +178,7 @@ export const IndexSettingOptions = ({
           hasDividers
         />
       </EuiFormRow>
-      {refreshTypeSelected !== 'manual' && refreshTypeSelected !== 'auto' && (
+      {refreshTypeSelected === 'autoInterval' && (
         <EuiFormRow
           label="Refresh increments"
           helpText="Specify how frequent the index gets updated when performing the refresh job."

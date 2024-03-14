@@ -31,7 +31,7 @@ export const buildIndexOptions = (accelerationformData: CreateAccelerationForm) 
   indexOptions.push(`auto_refresh = ${['auto', 'autoInterval'].includes(refreshType)}`);
 
   // Add refresh interval option
-  if (refreshType === 'autoInterval' || refreshType === 'manualIncrement') {
+  if (refreshType === 'autoInterval') {
     const { refreshWindow, refreshInterval } = accelerationformData.refreshIntervalOptions;
     indexOptions.push(
       `refresh_interval = '${refreshWindow} ${refreshInterval}${pluralizeTime(refreshWindow)}'`

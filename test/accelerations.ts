@@ -208,17 +208,12 @@ export const indexOptionsMock7: CreateAccelerationForm = {
   primaryShardsCount: 3,
   replicaShardsCount: 2,
   refreshType: 'manualIncrement',
-  refreshIntervalOptions: {
-    refreshWindow: 10,
-    refreshInterval: 'minute',
-  },
   checkpointLocation: 's3://ckpt',
 };
 
 export const indexOptionsMockResult7 = `WITH (
 index_settings = '{"number_of_shards":3,"number_of_replicas":2}',
 auto_refresh = false,
-refresh_interval = '10 minutes',
 incremental_refresh = true,
 checkpoint_location = 's3://ckpt'
 )`;

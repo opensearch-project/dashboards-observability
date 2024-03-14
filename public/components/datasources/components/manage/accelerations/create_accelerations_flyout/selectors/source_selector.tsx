@@ -101,14 +101,16 @@ export const AccelerationDataSourceSelector = ({
     ) {
       setDatabases([]);
     }
-    setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
+
     setSelectedDatabase([]);
     setTables([]);
     setSelectedTable([]);
     setAccelerationFormData({ ...accelerationFormData, database: '', dataTable: '' });
+    setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
   };
 
   const loadTables = () => {
+    setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: true });
     if (selectedDatabase.length > 0) {
       const dbCache = CatalogCacheManager.getDatabase(
         accelerationFormData.dataSource,
@@ -125,6 +127,7 @@ export const AccelerationDataSourceSelector = ({
       }
       setSelectedTable([]);
       setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
+      setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: false });
     }
   };
 

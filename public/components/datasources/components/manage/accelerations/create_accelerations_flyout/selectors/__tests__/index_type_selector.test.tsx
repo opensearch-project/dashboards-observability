@@ -22,6 +22,8 @@ describe('Index type selector components', () => {
       <IndexTypeSelector
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
+        initiateColumnLoad={jest.fn()}
+        loading={false}
       />
     );
     wrapper.update();
@@ -45,6 +47,8 @@ describe('Index type selector components', () => {
       <IndexTypeSelector
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
+        initiateColumnLoad={jest.fn()}
+        loading={true}
       />
     );
     wrapper.update();
