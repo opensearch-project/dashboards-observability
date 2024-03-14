@@ -78,6 +78,7 @@ export interface IDatePickerProps {
   handleTimePickerChange: (timeRange: string[]) => any;
   handleTimeRangePickerRefresh: () => any;
   isAppAnalytics: boolean;
+  includesTimestamp: boolean;
 }
 
 export const Search = (props: any) => {
@@ -433,6 +434,7 @@ export const Search = (props: any) => {
                     onQuerySearch(queryLang);
                   }}
                   isAppAnalytics={isAppAnalytics}
+                  includesTimestamp={queryRedux.selectedTimestamp !== ''}
                 />
               )}
             </EuiFlexItem>

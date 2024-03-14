@@ -12,6 +12,7 @@ import {
   QUERY_ASSIST_END_TIME,
   QUERY_ASSIST_START_TIME,
 } from '../../../../common/constants/shared';
+import { i18n } from '@osd/i18n';
 
 export function DatePicker(props: IDatePickerProps) {
   const {
@@ -20,31 +21,52 @@ export function DatePicker(props: IDatePickerProps) {
     handleTimePickerChange,
     handleTimeRangePickerRefresh,
     isAppAnalytics,
+    includesTimestamp,
   } = props;
 
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
-  const allowTimeChanging = !coreRefs.queryAssistEnabled || isAppAnalytics;
+
+  let setStartTime;
+  let setEndTime;
+  let setDisabled;
+  let toolTipMessage;
+
+  switch (true) {
+    case coreRefs.queryAssistEnabled && !isAppAnalytics: // is query assistant inside log explorer
+      setStartTime = QUERY_ASSIST_START_TIME;
+      setEndTime = QUERY_ASSIST_END_TIME;
+      setDisabled = true;
+      toolTipMessage = i18n.translate('discover.queryAssistant.timePickerDisabledMessage', {
+        defaultMessage: 'Date range has been disabled to accomodate timerange of all datasets',
+      });
+      break;
+    case !includesTimestamp: // there is no timestamp
+      setStartTime = 'now';
+      setDisabled = true;
+      toolTipMessage = i18n.translate('discover.events.timePickerNotFoundMessage', {
+        defaultMessage: 'There is no timestamp found in the index',
+      });
+      break;
+    default:
+      setStartTime = startTime;
+      setEndTime = endTime;
+      setDisabled = false;
+      toolTipMessage = false;
+  }
 
   return (
     <>
-      <EuiToolTip
-        position="bottom"
-        content={
-          allowTimeChanging
-            ? false
-            : 'Date range has been disabled to accomodate timerange of all datasets'
-        }
-      >
+      <EuiToolTip position="bottom" content={toolTipMessage}>
         <EuiSuperDatePicker
           data-test-subj="pplSearchDatePicker"
-          start={allowTimeChanging ? startTime : QUERY_ASSIST_START_TIME}
-          end={allowTimeChanging ? endTime : QUERY_ASSIST_END_TIME}
+          start={setStartTime}
+          end={setEndTime}
           dateFormat={uiSettingsService.get('dateFormat')}
           onTimeChange={handleTimeChange}
           onRefresh={handleTimeRangePickerRefresh}
           className="osdQueryBar__datePicker"
           showUpdateButton={false}
-          isDisabled={!allowTimeChanging}
+          isDisabled={setDisabled}
         />
       </EuiToolTip>
     </>
