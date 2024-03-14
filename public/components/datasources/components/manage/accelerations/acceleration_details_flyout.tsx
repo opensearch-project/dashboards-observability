@@ -69,20 +69,14 @@ export const AccelerationDetailsFlyout = ({
   const [indexInfo, setIndexInfo] = useState();
 
   const updateMapping = (result) => {
-    console.log('updateMapping: ');
-    console.log(result);
     setMappings(result);
   };
 
   const updateSetting = (result, slectedIndex: string) => {
-    console.log('updateSetting: ');
-    console.log(result);
     setSettings(result.data[slectedIndex]);
   };
 
   const updateIndexInfo = (result) => {
-    console.log('updateIndexInfo: ');
-    console.log(result);
     setIndexInfo(result);
   };
 
@@ -185,7 +179,6 @@ export const AccelerationDetailsFlyout = ({
     }
 
     const TabToDisplay = tabsMap[tab];
-    console.log('Selected Tab: ', tab);
 
     return <TabToDisplay {...propsForTab} />;
   };
