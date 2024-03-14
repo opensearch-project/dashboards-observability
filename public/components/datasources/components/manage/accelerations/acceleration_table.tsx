@@ -6,24 +6,36 @@
 import {
   EuiBasicTableColumn,
   EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  CachedAccelerations,
+  CachedDataSourceStatus,
+} from '../../../../../../common/types/data_connections';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { useLoadAccelerationsToCache } from '../../../../../framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import {
+  ACC_LOADING_MSG,
+  ACC_PANEL_DESC,
+  ACC_PANEL_TITLE,
   AccelerationStatus,
   getRefreshButtonIcon,
   onDeleteButtonClick,
   onDiscoverButtonClick,
   onRefreshButtonClick,
-} from './helpers/utils';
+} from './utils/acceleration_utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
