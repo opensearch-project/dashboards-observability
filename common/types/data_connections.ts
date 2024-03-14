@@ -83,19 +83,19 @@ export interface CachedColumn {
 
 export interface CachedTable {
   name: string;
-  columns: CachedColumn[];
+  columns?: CachedColumn[];
 }
 
 export interface CachedDatabase {
   name: string;
   tables: CachedTable[];
-  lastUpdated: string; // Assuming date string in UTC format
+  lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
 
 export interface CachedDataSource {
   name: string;
-  lastUpdated: string; // Assuming date string in UTC format
+  lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
   databases: CachedDatabase[];
 }
@@ -115,11 +115,16 @@ export interface CachedAccelerations {
   status: string;
 }
 
+export interface CachedAcclerationByDataSource {
+  name: string;
+  accelerations: CachedAccelerations[];
+  lastUpdated: string; // date string in UTC format
+  status: CachedDataSourceStatus;
+}
+
 export interface AccelerationsCacheData {
   version: string;
-  accelerations: CachedAccelerations[];
-  lastUpdated: string; // Assuming date string in UTC format
-  status: CachedDataSourceStatus;
+  dataSources: CachedAcclerationByDataSource[];
 }
 
 export interface PollingSuccessResult {

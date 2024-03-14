@@ -343,3 +343,74 @@ describe('IntegrationInstanceBuilder', () => {
     });
   });
 });
+
+describe('getSavedObjectBundles', () => {
+  let builder: IntegrationInstanceBuilder;
+
+  beforeEach(() => {
+    builder = new IntegrationInstanceBuilder(mockSavedObjectsClient);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should filter assets correctly without workflows and includeWorkflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets);
+    expect(result.length).toBe(2);
+  });
+
+  it('should filter assets correctly with specified workflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow1'],
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow2'],
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets, ['workflow1']);
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('1');
+  });
+
+  it('should filter assets correctly with no matching workflows', () => {
+    const assets = [
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow1'],
+        data: [{ id: '1', type: 'type1', attributes: { title: 'Title 1' } }],
+      },
+      {
+        type: 'savedObjectBundle' as const,
+        workflows: ['workflow2'],
+        data: [{ id: '2', type: 'type2', attributes: { title: 'Title 2' } }],
+      },
+      { type: 'query' as const, query: 'query', language: 'language' },
+    ];
+    const result = builder.getSavedObjectBundles(assets, ['workflow3']);
+    expect(result.length).toBe(0);
+  });
+
+  it('should return an empty array if no savedObjectBundle assets are present', () => {
+    const assets = [{ type: 'query' as const, query: 'query', language: 'language' }];
+    const result = builder.getSavedObjectBundles(assets);
+    expect(result.length).toBe(0);
+  });
+});

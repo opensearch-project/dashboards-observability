@@ -53,4 +53,19 @@ describe('Integration Setup Page', () => {
       expect(wrapper).toMatchSnapshot();
     });
   });
+
+  it('Renders the S3 connector form without workflows', async () => {
+    const wrapper = mount(
+      <SetupIntegrationForm
+        config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
+        updateConfig={() => {}}
+        integration={{ ...TEST_INTEGRATION_CONFIG, workflows: undefined }}
+        setupCallout={{ show: false }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
 });
