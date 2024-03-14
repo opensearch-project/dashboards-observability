@@ -33,7 +33,6 @@ export interface AccelerationDetailsFlyoutProps {
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
-  console.log('getMappings index: ', index);
   return coreRefs.dslService?.fetchFields(index);
 };
 
@@ -45,7 +44,7 @@ const getIndexInfo = (index: string): Promise<OpenSearchDashboardsResponse> | un
   return coreRefs.dslService?.fetchIndices(index);
 };
 
-const handlePromise = (
+const handleDetailsFetchingPromise = (
   promise: Promise<OpenSearchDashboardsResponse> | undefined,
   action: string
 ) => {
@@ -89,9 +88,9 @@ export const AccelerationDetailsFlyout = ({
 
   const getAccDetail = (selectedIndex: string) => {
     Promise.all([
-      handlePromise(getMappings(selectedIndex), 'getMappings'),
-      handlePromise(getSettings(selectedIndex), 'getSettings'),
-      handlePromise(getIndexInfo(selectedIndex), 'getIndexInfo'),
+      handleDetailsFetchingPromise(getMappings(selectedIndex), 'getMappings'),
+      handleDetailsFetchingPromise(getSettings(selectedIndex), 'getSettings'),
+      handleDetailsFetchingPromise(getIndexInfo(selectedIndex), 'getIndexInfo'),
     ])
       .then((results) => {
         updateMapping(results[0]);
@@ -170,18 +169,19 @@ export const AccelerationDetailsFlyout = ({
   const renderTabContent = (tab: string) => {
     let propsForTab;
 
-    // Only pass all props to AccelerationDetailsTab
-    if (tab === 'details') {
-      propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
-      console.log('propsForTabDetails: ', propsForTab);
-    }
-    if (tab === 'schema') {
-      propsForTab = { mappings, indexInfo };
-      console.log('propsForTabDetails: ', propsForTab);
-    }
-    if (tab === 'sql_definition') {
-      propsForTab = { mappings };
-      console.log('propsForTabSQL: ', propsForTab);
+    switch (tab) {
+      case 'details':
+        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
+        break;
+      case 'schema':
+        propsForTab = { mappings, indexInfo };
+        break;
+      case 'sql_definition':
+        propsForTab = { mappings };
+        break;
+      default:
+        console.log('Unknown Tab: ', tab);
+        return null;
     }
 
     const TabToDisplay = tabsMap[tab];

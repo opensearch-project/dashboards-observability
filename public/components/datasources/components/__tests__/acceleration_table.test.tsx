@@ -141,8 +141,6 @@ describe('AccelerationTable Component', () => {
       wrapper!.update();
     });
 
-    console.log(wrapper!.html());
-
     const activeStatusRows = wrapper!.find('tr.euiTableRow').filterWhere((node) => {
       return node.find('.euiFlexItem').someWhere((subNode) => subNode.text() === 'active');
     });
