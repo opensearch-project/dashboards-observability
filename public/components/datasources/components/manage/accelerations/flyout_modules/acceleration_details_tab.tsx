@@ -51,6 +51,8 @@ export const AccelerationDetailsTab = ({
   const creationDate = new Date(
     parseInt(settings?.settings?.index?.creation_date, 10)
   ).toLocaleString();
+  const checkpointName =
+    mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options?.checkpoint_location;
 
   console.log('mappings:', mappings);
   console.log('indexInfo:', indexInfo);
@@ -96,15 +98,7 @@ export const AccelerationDetailsTab = ({
         />
         <DetailComponent title="Creation Date" description={creationDate} />
       </EuiFlexGroup>
-      {isSkippingIndex && (
-        <>
-          <EuiFlexGroup direction="row">
-            <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
-            <DetailComponent title="Refresh time" description={refreshTime} />
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      )}
+      <EuiSpacer />
       <TitleComponent title="Data source details" />
       <EuiFlexGroup direction="row">
         <DetailComponent
@@ -124,11 +118,18 @@ export const AccelerationDetailsTab = ({
               title="Health"
               description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
             />
-            <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
-            <DetailComponent title="Refresh time" description={refreshTime} />
           </EuiFlexGroup>
         </>
       )}
+      <EuiSpacer />
+      <TitleComponent title="Refresh Details" />
+      <EuiFlexGroup direction="row">
+        <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
+        <DetailComponent title="Refresh time" description={refreshTime} />
+        {checkpointName && (
+          <DetailComponent title="Checkpoint location" description={checkpointName} />
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
