@@ -12,6 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiPanel,
   EuiDataGridProps,
+  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
@@ -28,6 +29,7 @@ import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
+import { HitsCounter } from '../hits_counter/hits_counter';
 
 export interface DataGridProps {
   http: HttpSetup;
@@ -253,6 +255,12 @@ export function DataGrid(props: DataGridProps) {
 
   return (
     <EuiPanel paddingSize="s">
+      {timeStampField === '' && (
+        <>
+          <HitsCounter hits={totalHits} showResetButton={false} onResetQuery={() => {}} />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div className="dscTable dscTableFixedScroll">
         <EuiDataGrid
           aria-labelledby="aria-labelledby"

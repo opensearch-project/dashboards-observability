@@ -542,7 +542,7 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {((isDefaultDataSourceType && query[SELECTED_TIMESTAMP] !== '') || appLogEvents) && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
@@ -591,7 +591,7 @@ export const Explorer = ({
                 </EuiFlexItem>
               </>
             )}
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {((isDefaultDataSourceType && query[SELECTED_TIMESTAMP] !== '') || appLogEvents) && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
