@@ -28,14 +28,24 @@ export const buildIndexOptions = (accelerationformData: CreateAccelerationForm) 
   );
 
   // Add auto refresh option
-  indexOptions.push(`auto_refresh = ${['auto', 'interval'].includes(refreshType)}`);
+  indexOptions.push(`auto_refresh = ${['auto', 'autoInterval'].includes(refreshType)}`);
 
   // Add refresh interval option
-  if (refreshType === 'interval') {
+  if (refreshType === 'autoInterval' || refreshType === 'manualIncrement') {
     const { refreshWindow, refreshInterval } = accelerationformData.refreshIntervalOptions;
     indexOptions.push(
       `refresh_interval = '${refreshWindow} ${refreshInterval}${pluralizeTime(refreshWindow)}'`
     );
+  }
+
+  // Add increment option
+  if (refreshType === 'manualIncrement') {
+    indexOptions.push(`incremental_refresh = true`);
+  }
+
+  // Add manual full refresh option
+  if (refreshType === 'manual') {
+    indexOptions.push(`incremental_refresh = false`);
   }
 
   // Add watermark delay option with materialized view
@@ -135,9 +145,11 @@ const buildMaterializedViewColumns = (columnsValues: MaterializedViewColumn[]) =
   return columnsValues
     .map(
       (column) =>
-        `   ${column.functionName}(${buildMaterializedViewColumnName(column.functionParam)})${
-          column.fieldAlias ? ` AS \`${column.fieldAlias}\`` : ``
-        }`
+        `   ${
+          column.functionName !== 'window.start'
+            ? `${column.functionName}(${buildMaterializedViewColumnName(column.functionParam!)})`
+            : `\`${column.functionName}\``
+        }${column.fieldAlias ? ` AS \`${column.fieldAlias}\`` : ``}`
     )
     .join(', \n');
 };
@@ -157,7 +169,8 @@ const buildTumbleValue = (GroupByTumbleValue: GroupByTumbleType) => {
  * count(`field`) as `counter`,
  * count(*) as `counter1`,
  * sum(`field2`),
- * avg(`field3`) as `average`
+ * avg(`field3`) as `average`,
+ * window.start as start,
  *  WITH (
  * auto_refresh = true,
  * refresh_interval = '1 minute',

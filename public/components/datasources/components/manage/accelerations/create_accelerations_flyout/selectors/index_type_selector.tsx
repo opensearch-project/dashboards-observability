@@ -28,11 +28,13 @@ import { CatalogCacheManager } from '../../../../../../../framework/catalog_cach
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
+  dataSourcesPreselected: boolean;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
   setAccelerationFormData,
+  dataSourcesPreselected,
 }: IndexTypeSelectorProps) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState('skipping');
@@ -61,6 +63,28 @@ export const IndexTypeSelector = ({
     });
   };
 
+  const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
+    console.log('reached load columns', dataTable);
+    setAccelerationFormData({
+      ...accelerationFormData,
+      dataTableFields: [],
+    });
+    if (dataTable !== '') {
+      setLoading(true);
+      console.log('reached loading from cache');
+      const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
+
+      if (cachedTable.columns) {
+        console.log('reached loaded from cache');
+        loadColumnsToAccelerationForm(cachedTable);
+        setLoading(false);
+      } else {
+        console.log('starting async load');
+        startLoading(dataSource, database, dataTable);
+      }
+    }
+  };
+
   useEffect(() => {
     const status = loadStatus.toLowerCase();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
@@ -80,27 +104,22 @@ export const IndexTypeSelector = ({
   }, [loadStatus]);
 
   useEffect(() => {
-    console.log('seeing table updated', accelerationFormData.dataTable);
-    if (accelerationFormData.dataTable !== '') {
-      setLoading(true);
-      const cachedTable = CatalogCacheManager.getTable(
+    initiateColumnLoad(
+      accelerationFormData.dataSource,
+      accelerationFormData.database,
+      accelerationFormData.dataTable
+    );
+  }, [accelerationFormData.dataTable]);
+
+  useEffect(() => {
+    if (dataSourcesPreselected) {
+      initiateColumnLoad(
         accelerationFormData.dataSource,
         accelerationFormData.database,
         accelerationFormData.dataTable
       );
-
-      if (cachedTable.columns) {
-        loadColumnsToAccelerationForm(cachedTable);
-        setLoading(false);
-      } else {
-        startLoading(
-          accelerationFormData.dataSource,
-          accelerationFormData.database,
-          accelerationFormData.dataTable
-        );
-      }
     }
-  }, [accelerationFormData.dataTable]);
+  }, [dataSourcesPreselected]);
 
   const superSelectOptions = [
     {

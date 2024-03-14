@@ -447,6 +447,12 @@ Array [
                       >
                         Min Max
                       </option>
+                      <option
+                        key="3"
+                        value="BLOOM_FILTER"
+                      >
+                        Bloom Filter
+                      </option>
                     </select>
                     <div
                       className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -612,6 +618,12 @@ Array [
                         value="MIN_MAX"
                       >
                         Min Max
+                      </option>
+                      <option
+                        key="3"
+                        value="BLOOM_FILTER"
+                      >
+                        Bloom Filter
                       </option>
                     </select>
                     <div

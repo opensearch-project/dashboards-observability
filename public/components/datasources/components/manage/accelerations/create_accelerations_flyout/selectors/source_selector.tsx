@@ -34,8 +34,7 @@ interface AccelerationDataSourceSelectorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   selectedDatasource: string;
-  preSelectedDatabaseName?: string;
-  preSelectedTableName?: string;
+  dataSourcesPreselected: boolean;
 }
 
 export const AccelerationDataSourceSelector = ({
@@ -43,8 +42,7 @@ export const AccelerationDataSourceSelector = ({
   accelerationFormData,
   setAccelerationFormData,
   selectedDatasource,
-  preSelectedDatabaseName,
-  preSelectedTableName,
+  dataSourcesPreselected,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -62,7 +60,9 @@ export const AccelerationDataSourceSelector = ({
   const dataSourceDescription = (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{selectedDatasource}</EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>
+        {accelerationFormData.dataSource}
+      </EuiDescriptionListDescription>
     </EuiDescriptionList>
   );
 
@@ -95,15 +95,17 @@ export const AccelerationDataSourceSelector = ({
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
       const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
       setDatabases(databaseLabels);
-      setSelectedDatabase([]);
     } else if (
       (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length === 0) ||
       dsCache.status === CachedDataSourceStatus.Empty
     ) {
       setDatabases([]);
-      setSelectedDatabase([]);
     }
     setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
+    setSelectedDatabase([]);
+    setTables([]);
+    setSelectedTable([]);
+    setAccelerationFormData({ ...accelerationFormData, database: '', dataTable: '' });
   };
 
   const loadTables = () => {
@@ -115,14 +117,14 @@ export const AccelerationDataSourceSelector = ({
       if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
         const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
         setTables(tableLabels);
-        setSelectedTable([]);
       } else if (
         (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length === 0) ||
         dbCache.status === CachedDataSourceStatus.Empty
       ) {
         setTables([]);
-        setSelectedTable([]);
       }
+      setSelectedTable([]);
+      setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
     }
   };
 
@@ -132,14 +134,12 @@ export const AccelerationDataSourceSelector = ({
 
   useEffect(() => {
     if (accelerationFormData.dataSource !== '') {
-      console.log('loading databases');
       loadDatabases();
     }
   }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
     if (accelerationFormData.database !== '') {
-      console.log('loading tables');
       loadTables();
     }
   }, [accelerationFormData.database]);
@@ -155,7 +155,7 @@ export const AccelerationDataSourceSelector = ({
       </EuiText>
       <EuiSpacer size="m" />
 
-      {preSelectedDatabaseName !== undefined && preSelectedTableName !== undefined ? (
+      {dataSourcesPreselected ? (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>{dataSourceDescription}</EuiFlexItem>
@@ -163,7 +163,7 @@ export const AccelerationDataSourceSelector = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Database</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {preSelectedDatabaseName}
+                  {accelerationFormData.database}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
@@ -171,7 +171,7 @@ export const AccelerationDataSourceSelector = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Table</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {preSelectedTableName}
+                  {accelerationFormData.dataTable}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>

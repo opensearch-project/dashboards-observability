@@ -3,17 +3,6 @@
 exports[`Index options acceleration components renders acceleration index options with covering index options 1`] = `
 Array [
   <div
-    className="euiText euiText--medium"
-    data-test-subj="define-index-header"
-  >
-    <h3>
-      Index settings
-    </h3>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--s"
-  />,
-  <div
     className="euiFormRow"
     id="random_html_id-row"
   >
@@ -118,17 +107,6 @@ Array [
 exports[`Index options acceleration components renders acceleration index options with default options 1`] = `
 Array [
   <div
-    className="euiText euiText--medium"
-    data-test-subj="define-index-header"
-  >
-    <h3>
-      Index settings
-    </h3>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--s"
-  />,
-  <div
     className="euiFormRow"
     id="random_html_id-row"
   >
@@ -232,17 +210,6 @@ Array [
 
 exports[`Index options acceleration components renders acceleration index options with materialized index options 1`] = `
 Array [
-  <div
-    className="euiText euiText--medium"
-    data-test-subj="define-index-header"
-  >
-    <h3>
-      Index settings
-    </h3>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--s"
-  />,
   <div
     className="euiFormRow"
     id="random_html_id-row"

@@ -24,7 +24,7 @@ exports[`Group by components in materialized view renders group by components in
         <span
           className="euiExpression__value"
         >
-          TUMBLE(, '1 millisecond')
+          TUMBLE(, '1 minute')
         </span>
       </button>
     </div>
@@ -56,7 +56,7 @@ exports[`Group by components in materialized view renders group by components in
         <span
           className="euiExpression__value"
         >
-          TUMBLE(, '1 millisecond')
+          TUMBLE(, '1 minute')
         </span>
       </button>
     </div>

@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_TIME_INTERVAL,
@@ -44,11 +44,14 @@ export const CreateAcceleration = ({
   databaseName,
   tableName,
 }: CreateAccelerationProps) => {
+  // const databaseName = 'default';
+  // const tableName = 'http_logs';
+
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
-    database: '',
-    dataTable: '',
+    database: databaseName ?? '',
+    dataTable: tableName ?? '',
     dataTableFields: [],
     accelerationIndexType: 'skipping',
     skippingIndexQueryData: [],
@@ -90,18 +93,7 @@ export const CreateAcceleration = ({
     },
   });
 
-  useEffect(() => {
-    if (databaseName !== undefined && tableName !== undefined) {
-      console.log('table and db updated');
-      setAccelerationFormData({
-        ...accelerationFormData,
-        database: databaseName,
-        dataTable: tableName,
-      });
-    }
-  }, []);
-
-  const copyToEditor = () => {
+  const createAcceleration = () => {
     const errors = formValidator(accelerationFormData);
     if (hasError(errors)) {
       setAccelerationFormData({ ...accelerationFormData, formErrors: errors });
@@ -110,6 +102,8 @@ export const CreateAcceleration = ({
     // TODO: add -> updateQueries(accelerationQueryBuilder(accelerationFormData));
     resetFlyout();
   };
+
+  const dataSourcesPreselected = databaseName !== undefined && tableName !== undefined;
 
   return (
     <>
@@ -129,13 +123,13 @@ export const CreateAcceleration = ({
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
-              preSelectedDatabaseName={databaseName}
-              preSelectedTableName={tableName}
+              dataSourcesPreselected={dataSourcesPreselected}
             />
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
+              dataSourcesPreselected={dataSourcesPreselected}
             />
             <EuiSpacer size="xxl" />
             <IndexSettingOptions
@@ -167,7 +161,7 @@ export const CreateAcceleration = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={copyToEditor} fill>
+              <EuiButton onClick={createAcceleration} fill>
                 Create acceleration
               </EuiButton>
             </EuiFlexItem>

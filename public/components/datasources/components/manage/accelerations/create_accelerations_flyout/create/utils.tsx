@@ -45,8 +45,11 @@ export const validateReplicaCount = (replicaCount: number) => {
   return replicaCount < 0 ? ['Replica count should be equal or greater than 0'] : [];
 };
 
-export const validateRefreshInterval = (refreshType: string, refreshWindow: number) => {
-  return refreshType === 'interval' && refreshWindow < 1
+export const validateRefreshInterval = (
+  refreshType: AccelerationRefreshType,
+  refreshWindow: number
+) => {
+  return refreshType !== 'auto' && refreshType !== 'manual' && refreshWindow < 1
     ? ['refresh window should be greater than 0']
     : [];
 };
