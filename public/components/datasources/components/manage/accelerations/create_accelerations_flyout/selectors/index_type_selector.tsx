@@ -64,22 +64,18 @@ export const IndexTypeSelector = ({
   };
 
   const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
-    console.log('reached load columns', dataTable);
     setAccelerationFormData({
       ...accelerationFormData,
       dataTableFields: [],
     });
     if (dataTable !== '') {
       setLoading(true);
-      console.log('reached loading from cache');
       const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
 
       if (cachedTable.columns) {
-        console.log('reached loaded from cache');
         loadColumnsToAccelerationForm(cachedTable);
         setLoading(false);
       } else {
-        console.log('starting async load');
         startLoading(dataSource, database, dataTable);
       }
     }
