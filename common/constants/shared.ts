@@ -11,6 +11,7 @@ export const DSL_BASE = '/api/dsl';
 export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
+export const DSL_SETTINGS = '/indices.getFieldSettings';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
