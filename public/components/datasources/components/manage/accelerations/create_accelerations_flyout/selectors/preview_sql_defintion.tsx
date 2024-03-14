@@ -27,6 +27,7 @@ export const PreviewSQLDefinition = ({
   setAccelerationFormData,
 }: PreviewSQLDefinitionProps) => {
   const [isPreviewStale, setIsPreviewStale] = useState(false);
+  const [isPreviewTriggered, setIsPreviewTriggered] = useState(false);
   const [sqlCode, setSQLcode] = useState('');
 
   const onClickPreview = () => {
@@ -37,6 +38,7 @@ export const PreviewSQLDefinition = ({
     }
     setSQLcode(accelerationQueryBuilder(accelerationFormData));
     setIsPreviewStale(false);
+    setIsPreviewTriggered(true);
   };
 
   useEffect(() => {
@@ -56,11 +58,7 @@ export const PreviewSQLDefinition = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            {isPreviewStale ? (
-              <EuiButton color="success" onClick={onClickPreview}>
-                Generate preview
-              </EuiButton>
-            ) : (
+            {isPreviewStale && isPreviewTriggered ? (
               <EuiButton
                 iconType="kqlFunction"
                 iconSide="left"
@@ -68,6 +66,10 @@ export const PreviewSQLDefinition = ({
                 onClick={onClickPreview}
               >
                 Update preview
+              </EuiButton>
+            ) : (
+              <EuiButton color="success" onClick={onClickPreview}>
+                Generate preview
               </EuiButton>
             )}
           </EuiFlexItem>

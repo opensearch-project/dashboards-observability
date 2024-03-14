@@ -16,7 +16,10 @@ import {
 } from '@elastic/eui';
 import producer from 'immer';
 import React, { useState } from 'react';
-import { ACCELERATION_TIME_INTERVAL } from '../../../../../../../../../common/constants/data_sources';
+import {
+  ACCELERATION_TIME_INTERVAL,
+  TIMESTAMP_DATATYPE,
+} from '../../../../../../../../../common/constants/data_sources';
 import {
   CreateAccelerationForm,
   GroupByTumbleType,
@@ -36,7 +39,7 @@ export const GroupByTumbleExpression = ({
   const [groupbyValues, setGroupByValues] = useState<GroupByTumbleType>({
     timeField: '',
     tumbleWindow: 1,
-    tumbleInterval: ACCELERATION_TIME_INTERVAL[0].value,
+    tumbleInterval: ACCELERATION_TIME_INTERVAL[2].value,
   });
 
   const updateGroupByStates = (newGroupByValue: GroupByTumbleType) => {

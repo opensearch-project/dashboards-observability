@@ -61,6 +61,10 @@ export const ColumnExpression = ({
     setColumnExpressionValues(newColumnExpresionValue);
   };
 
+  const generateColumnValueExpression = (functionName: string, functionParam: string) => {
+    if (functionName !== 'window.start') return `${functionName}(${functionParam})`;
+    else return `${functionName}`;
+  };
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup>
@@ -70,7 +74,10 @@ export const ColumnExpression = ({
             button={
               <EuiExpression
                 description=""
-                value={`${currentColumnExpressionValue.functionName}(${currentColumnExpressionValue.functionParam})`}
+                value={generateColumnValueExpression(
+                  currentColumnExpressionValue.functionName,
+                  currentColumnExpressionValue.functionParam!
+                )}
                 isActive={isFunctionPopOverOpen}
                 onClick={() => {
                   setIsAliasPopOverOpen(false);

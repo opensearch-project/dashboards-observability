@@ -7,13 +7,13 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
-  EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import producer from 'immer';
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, Fragment, useState } from 'react';
 import { ACCELERATION_TIME_INTERVAL } from '../../../../../../../../common/constants/data_sources';
 import {
   AccelerationRefreshType,
@@ -36,47 +36,74 @@ export const IndexSettingOptions = ({
   accelerationFormData,
   setAccelerationFormData,
 }: IndexSettingOptionsProps) => {
-  const autoRefreshId = 'refresh-option-1';
-  const intervalRefreshId = 'refresh-option-2';
-  const manualRefreshId = 'refresh-option-3';
   const refreshOptions = [
     {
-      id: autoRefreshId,
-      label: 'Auto refresh',
+      value: 'auto',
+      inputDisplay: 'Auto',
+      dropdownDisplay: (
+        <Fragment>
+          <strong>Auto</strong>
+          <EuiText size="s" color="subdued">
+            <p className="EuiTextColor--subdued">
+              Automatically refreshes the index when new data is available.
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
     },
     {
-      id: intervalRefreshId,
-      label: 'Auto refresh by interval',
+      value: 'autoInterval',
+      inputDisplay: 'Auto (interval)',
+      dropdownDisplay: (
+        <Fragment>
+          <strong>Auto (Interval)</strong>
+          <EuiText size="s" color="subdued">
+            <p className="EuiTextColor--subdued">
+              Automatically refreshes the index and specifies the interval between micro-batches.
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
     },
     {
-      id: manualRefreshId,
-      label: 'Manual refresh',
+      value: 'manualIncrement',
+      inputDisplay: 'Manual (increment)',
+      dropdownDisplay: (
+        <Fragment>
+          <strong>Manual (Increment)</strong>
+          <EuiText size="s" color="subdued">
+            <p className="EuiTextColor--subdued">
+              Manually fetches new data since last refresh. Ideal for reducing resource usage.
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
+    },
+    {
+      value: 'manual',
+      inputDisplay: 'Manual',
+      dropdownDisplay: (
+        <Fragment>
+          <strong>Manual</strong>
+          <EuiText size="s" color="subdued">
+            <p className="EuiTextColor--subdued">Manually fetches all available data.</p>
+          </EuiText>
+        </Fragment>
+      ),
     },
   ];
 
-  const [refreshTypeSelected, setRefreshTypeSelected] = useState(autoRefreshId);
+  const [refreshTypeSelected, setRefreshTypeSelected] = useState<AccelerationRefreshType>('auto');
   const [refreshWindow, setRefreshWindow] = useState(1);
-  const [refreshInterval, setRefreshInterval] = useState(ACCELERATION_TIME_INTERVAL[1].value);
+  const [refreshInterval, setRefreshInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
   const [delayWindow, setDelayWindow] = useState(1);
-  const [delayInterval, setDelayInterval] = useState(ACCELERATION_TIME_INTERVAL[1].value);
+  const [delayInterval, setDelayInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
   const [checkpoint, setCheckpoint] = useState('');
 
-  const onChangeRefreshType = (optionId: React.SetStateAction<string>) => {
-    let refreshOption: AccelerationRefreshType = 'auto';
-    switch (optionId) {
-      case autoRefreshId:
-        refreshOption = 'auto';
-        break;
-      case intervalRefreshId:
-        refreshOption = 'interval';
-        break;
-      case manualRefreshId:
-        refreshOption = 'manual';
-        break;
-    }
+  const onChangeRefreshType = (optionId: AccelerationRefreshType) => {
     setAccelerationFormData({
       ...accelerationFormData,
-      refreshType: refreshOption,
+      refreshType: optionId,
     });
     setRefreshTypeSelected(optionId);
   };
@@ -143,25 +170,26 @@ export const IndexSettingOptions = ({
         label="Refresh type"
         helpText="Specify how often the index should refresh, which publishes the most recent changes and make them available for search."
       >
-        <EuiRadioGroup
+        <EuiSuperSelect
           options={refreshOptions}
-          idSelected={refreshTypeSelected}
+          valueOfSelected={refreshTypeSelected}
           onChange={onChangeRefreshType}
-          name="refresh type radio group"
+          itemLayoutAlign="top"
+          hasDividers
         />
       </EuiFormRow>
-      {refreshTypeSelected === intervalRefreshId && (
+      {refreshTypeSelected !== 'manual' && refreshTypeSelected !== 'auto' && (
         <EuiFormRow
-          label="Refresh interval"
-          helpText="Specify how often the index should refresh, which publishes the most recent changes and make them available for search"
+          label="Refresh increments"
+          helpText="Specify how frequent the index gets updated when performing the refresh job."
           isInvalid={hasError(accelerationFormData.formErrors, 'refreshIntervalError')}
           error={accelerationFormData.formErrors.refreshIntervalError}
         >
           <EuiFieldNumber
-            placeholder="Refresh interval"
+            placeholder="Refresh increments"
             value={refreshWindow}
             onChange={onChangeRefreshWindow}
-            aria-label="Refresh interval"
+            aria-label="Refresh increments"
             min={1}
             isInvalid={hasError(accelerationFormData.formErrors, 'refreshIntervalError')}
             onBlur={(e) => {
@@ -184,7 +212,7 @@ export const IndexSettingOptions = ({
           />
         </EuiFormRow>
       )}
-      {refreshTypeSelected !== manualRefreshId && (
+      {refreshTypeSelected !== 'manual' && (
         <EuiFormRow
           label="Checkpoint location"
           helpText="The HDFS compatible file system location path for incremental refresh job checkpoint."

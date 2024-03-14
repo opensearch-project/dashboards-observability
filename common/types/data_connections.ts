@@ -134,16 +134,16 @@ export interface PollingSuccessResult {
 
 export type AsyncPollingResult = PollingSuccessResult | null;
 
-export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min';
+export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min' | 'window.start';
 
 export interface MaterializedViewColumn {
   id: string;
   functionName: AggregationFunctionType;
-  functionParam: string;
+  functionParam?: string;
   fieldAlias?: string;
 }
 
-export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX';
+export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX' | 'BLOOM_FILTER';
 
 export interface SkippingIndexRowType {
   id: string;
@@ -194,7 +194,7 @@ export interface FormErrorsType {
   watermarkDelayError: string[];
 }
 
-export type AccelerationRefreshType = 'auto' | 'interval' | 'manual';
+export type AccelerationRefreshType = 'auto' | 'autoInterval' | 'manual' | 'manualIncrement';
 
 export interface CreateAccelerationForm {
   dataSource: string;

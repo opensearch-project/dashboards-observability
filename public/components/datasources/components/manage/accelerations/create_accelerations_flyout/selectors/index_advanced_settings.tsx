@@ -8,6 +8,7 @@ import producer from 'immer';
 import React, { ChangeEvent, useState } from 'react';
 import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
 import { hasError, validatePrimaryShardCount, validateReplicaCount } from '../create/utils';
+import { DefineIndexOptions } from './define_index_options';
 
 interface IndexAdvancedSettingsProps {
   accelerationFormData: CreateAccelerationForm;
@@ -49,6 +50,12 @@ export const IndexAdvancedSettings = ({
       }
       paddingSize="l"
     >
+      {accelerationFormData.accelerationIndexType === 'skipping' && (
+        <DefineIndexOptions
+          accelerationFormData={accelerationFormData}
+          setAccelerationFormData={setAccelerationFormData}
+        />
+      )}
       <EuiFormRow
         label="Number of primary shards"
         helpText="Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created."

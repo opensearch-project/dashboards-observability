@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_TIME_INTERVAL,
@@ -47,8 +47,8 @@ export const CreateAcceleration = ({
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
-    dataTable: tableName ?? '',
-    database: databaseName ?? '',
+    database: '',
+    dataTable: '',
     dataTableFields: [],
     accelerationIndexType: 'skipping',
     skippingIndexQueryData: [],
@@ -58,7 +58,7 @@ export const CreateAcceleration = ({
       groupByTumbleValue: {
         timeField: '',
         tumbleWindow: 0,
-        tumbleInterval: '',
+        tumbleInterval: ACCELERATION_TIME_INTERVAL[2].value,
       },
     },
     accelerationIndexName: ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
@@ -68,11 +68,11 @@ export const CreateAcceleration = ({
     checkpointLocation: undefined,
     watermarkDelay: {
       delayWindow: 1,
-      delayInterval: ACCELERATION_TIME_INTERVAL[1].value,
+      delayInterval: ACCELERATION_TIME_INTERVAL[2].value,
     },
     refreshIntervalOptions: {
       refreshWindow: 1,
-      refreshInterval: ACCELERATION_TIME_INTERVAL[1].value,
+      refreshInterval: ACCELERATION_TIME_INTERVAL[2].value,
     },
     formErrors: {
       dataSourceError: [],
@@ -89,6 +89,17 @@ export const CreateAcceleration = ({
       watermarkDelayError: [],
     },
   });
+
+  useEffect(() => {
+    if (databaseName !== undefined && tableName !== undefined) {
+      console.log('table and db updated');
+      setAccelerationFormData({
+        ...accelerationFormData,
+        database: databaseName,
+        dataTable: tableName,
+      });
+    }
+  }, []);
 
   const copyToEditor = () => {
     const errors = formValidator(accelerationFormData);
@@ -107,7 +118,6 @@ export const CreateAcceleration = ({
           <CreateAccelerationHeader />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSpacer size="l" />
           <EuiForm
             isInvalid={hasError(accelerationFormData.formErrors)}
             error={Object.values(accelerationFormData.formErrors).flat()}
@@ -119,6 +129,8 @@ export const CreateAcceleration = ({
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
+              preSelectedDatabaseName={databaseName}
+              preSelectedTableName={tableName}
             />
             <EuiSpacer size="xxl" />
             <IndexTypeSelector

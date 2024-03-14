@@ -115,7 +115,7 @@ export const AddColumnPopOver = ({
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Aggregate function">
+            <EuiFormRow label="Function">
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={ACCELERATION_AGGREGRATION_FUNCTIONS}
@@ -125,20 +125,22 @@ export const AddColumnPopOver = ({
               />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label="Aggregation field">
-              <EuiComboBox
-                singleSelection={{ asPlainText: true }}
-                options={[
-                  { label: '*', disabled: selectedFunction[0].label !== 'count' },
-                  ...accelerationFormData.dataTableFields.map((x) => ({ label: x.fieldName })),
-                ]}
-                selectedOptions={selectedField}
-                onChange={setSelectedField}
-                isClearable={false}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+          {selectedFunction[0].label !== 'window.start' && (
+            <EuiFlexItem>
+              <EuiFormRow label="Aggregation field">
+                <EuiComboBox
+                  singleSelection={{ asPlainText: true }}
+                  options={[
+                    { label: '*', disabled: selectedFunction[0].label !== 'count' },
+                    ...accelerationFormData.dataTableFields.map((x) => ({ label: x.fieldName })),
+                  ]}
+                  selectedOptions={selectedField}
+                  onChange={setSelectedField}
+                  isClearable={false}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFormRow label="Column alias - optional">

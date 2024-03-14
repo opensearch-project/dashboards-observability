@@ -36,7 +36,7 @@ export const IndexTypeSelector = ({
 }: IndexTypeSelectorProps) => {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState('skipping');
-  const { loadStatus, startLoading, _stopLoading } = useLoadTableColumnsToCache();
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
 
   const onChangeSupeSelect = (indexType: string) => {
     setAccelerationFormData({
@@ -80,6 +80,7 @@ export const IndexTypeSelector = ({
   }, [loadStatus]);
 
   useEffect(() => {
+    console.log('seeing table updated', accelerationFormData.dataTable);
     if (accelerationFormData.dataTable !== '') {
       setLoading(true);
       const cachedTable = CatalogCacheManager.getTable(

@@ -34,6 +34,8 @@ interface AccelerationDataSourceSelectorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   selectedDatasource: string;
+  preSelectedDatabaseName?: string;
+  preSelectedTableName?: string;
 }
 
 export const AccelerationDataSourceSelector = ({
@@ -41,6 +43,8 @@ export const AccelerationDataSourceSelector = ({
   accelerationFormData,
   setAccelerationFormData,
   selectedDatasource,
+  preSelectedDatabaseName,
+  preSelectedTableName,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -54,6 +58,13 @@ export const AccelerationDataSourceSelector = ({
     database: false,
     dataTable: false,
   });
+
+  const dataSourceDescription = (
+    <EuiDescriptionList>
+      <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>{selectedDatasource}</EuiDescriptionListDescription>
+    </EuiDescriptionList>
+  );
 
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
@@ -84,19 +95,13 @@ export const AccelerationDataSourceSelector = ({
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
       const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
       setDatabases(databaseLabels);
-
-      const dbExists =
-        accelerationFormData.database !== '' &&
-        databaseLabels.some((db) => db.label === accelerationFormData.database);
-
-      if (dbExists) {
-        setSelectedDatabase([{ label: accelerationFormData.database }]);
-      }
+      setSelectedDatabase([]);
     } else if (
       (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length === 0) ||
       dsCache.status === CachedDataSourceStatus.Empty
     ) {
       setDatabases([]);
+      setSelectedDatabase([]);
     }
     setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
   };
@@ -104,20 +109,13 @@ export const AccelerationDataSourceSelector = ({
   const loadTables = () => {
     if (selectedDatabase.length > 0) {
       const dbCache = CatalogCacheManager.getDatabase(
-        selectedDatasource,
-        selectedDatabase[0].label
+        accelerationFormData.dataSource,
+        accelerationFormData.database
       );
       if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
         const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
         setTables(tableLabels);
-
-        const tbExists =
-          accelerationFormData.dataTable !== '' &&
-          tableLabels.some((tb) => tb.label === accelerationFormData.dataTable);
-
-        if (tbExists) {
-          setSelectedTable([{ label: accelerationFormData.dataTable }]);
-        }
+        setSelectedTable([]);
       } else if (
         (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length === 0) ||
         dbCache.status === CachedDataSourceStatus.Empty
@@ -134,12 +132,14 @@ export const AccelerationDataSourceSelector = ({
 
   useEffect(() => {
     if (accelerationFormData.dataSource !== '') {
+      console.log('loading databases');
       loadDatabases();
     }
   }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
     if (accelerationFormData.database !== '') {
+      console.log('loading tables');
       loadTables();
     }
   }, [accelerationFormData.database]);
@@ -154,86 +154,114 @@ export const AccelerationDataSourceSelector = ({
         Select the data source to accelerate data from. External data sources may take time to load.
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiDescriptionList>
-        <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>{selectedDatasource}</EuiDescriptionListDescription>
-      </EuiDescriptionList>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label="Database"
-        helpText="Select the database that contains the tables you'd like to use."
-        isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
-        error={accelerationFormData.formErrors.databaseError}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiComboBox
-              placeholder="Select a database"
-              singleSelection={{ asPlainText: true }}
-              options={databases}
-              selectedOptions={selectedDatabase}
-              onChange={(databaseOptions) => {
-                if (databaseOptions.length > 0) {
-                  setAccelerationFormData(
-                    producer((accData) => {
-                      accData.database = databaseOptions[0].label;
-                      accData.formErrors.databaseError = validateDatabase(databaseOptions[0].label);
-                    })
-                  );
-                  setSelectedDatabase(databaseOptions);
-                }
-              }}
-              isClearable={false}
-              isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
-              isLoading={loadingComboBoxes.database}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SelectorLoadDatabases
-              dataSourceName={accelerationFormData.dataSource}
-              loadDatabases={loadDatabases}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiFormRow
-        label="Table"
-        helpText="Select the Spark table that has the data you would like to index."
-        isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
-        error={accelerationFormData.formErrors.dataTableError}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiComboBox
-              placeholder="Select a table"
-              singleSelection={{ asPlainText: true }}
-              options={tables}
-              selectedOptions={selectedTable}
-              onChange={(tableOptions) => {
-                if (tableOptions.length > 0) {
-                  setAccelerationFormData(
-                    producer((accData) => {
-                      accData.dataTable = tableOptions[0].label;
-                      accData.formErrors.dataTableError = validateDataTable(tableOptions[0].label);
-                    })
-                  );
-                  setSelectedTable(tableOptions);
-                }
-              }}
-              isClearable={false}
-              isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
-              isLoading={loadingComboBoxes.dataTable}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SelectorLoadObjects
-              dataSourceName={accelerationFormData.dataSource}
-              databaseName={accelerationFormData.database}
-              loadTables={loadTables}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+
+      {preSelectedDatabaseName !== undefined && preSelectedTableName !== undefined ? (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>{dataSourceDescription}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>Database</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {preSelectedDatabaseName}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>Table</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {preSelectedTableName}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : (
+        <>
+          {dataSourceDescription}
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label="Database"
+            helpText="Select the database that contains the tables you'd like to use."
+            isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
+            error={accelerationFormData.formErrors.databaseError}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiComboBox
+                  placeholder="Select a database"
+                  singleSelection={{ asPlainText: true }}
+                  options={databases}
+                  selectedOptions={selectedDatabase}
+                  onChange={(databaseOptions) => {
+                    if (databaseOptions.length > 0) {
+                      setAccelerationFormData(
+                        producer((accData) => {
+                          accData.database = databaseOptions[0].label;
+                          accData.formErrors.databaseError = validateDatabase(
+                            databaseOptions[0].label
+                          );
+                        })
+                      );
+                      setSelectedDatabase(databaseOptions);
+                    }
+                  }}
+                  isClearable={false}
+                  isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
+                  isLoading={loadingComboBoxes.database}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SelectorLoadDatabases
+                  dataSourceName={accelerationFormData.dataSource}
+                  loadDatabases={loadDatabases}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+          <EuiFormRow
+            label="Table"
+            helpText="Select the Spark table that has the data you would like to index."
+            isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
+            error={accelerationFormData.formErrors.dataTableError}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiComboBox
+                  placeholder="Select a table"
+                  singleSelection={{ asPlainText: true }}
+                  options={tables}
+                  selectedOptions={selectedTable}
+                  onChange={(tableOptions) => {
+                    if (tableOptions.length > 0) {
+                      setAccelerationFormData(
+                        producer((accData) => {
+                          accData.dataTable = tableOptions[0].label;
+                          accData.formErrors.dataTableError = validateDataTable(
+                            tableOptions[0].label
+                          );
+                        })
+                      );
+                      setSelectedTable(tableOptions);
+                    }
+                  }}
+                  isClearable={false}
+                  isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
+                  isLoading={loadingComboBoxes.dataTable}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SelectorLoadObjects
+                  dataSourceName={accelerationFormData.dataSource}
+                  databaseName={accelerationFormData.database}
+                  loadTables={loadTables}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </>
+      )}
     </>
   );
 };
