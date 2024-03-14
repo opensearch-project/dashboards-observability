@@ -67,19 +67,43 @@ export const DataConnection = (props: any) => {
 
   // Dummy accelerations variables for mock purposes
   // Actual accelerations should be retrieved from the backend
-  const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
-  const dummyAccelerations = [
+  // const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
+  const _dummyAccelerations = [
     {
-      name: 'dummy_acceleration_1',
-      status: 'ACTIVE',
-      type: 'skip',
+      flintIndexName: 'flint_mys3_default_http_logs_skipping_index',
+      kind: 'skipping',
       database: 'default',
-      table: 'table1',
-      destination: 'N/A',
-      dateCreated: 1709339290,
-      dateUpdated: 1709339290,
-      index: 'security_logs_2022',
-      sql: sampleSql,
+      table: 'test',
+      indexName: 'skipping_index',
+      autoRefresh: true,
+      status: 'Active',
+    },
+    {
+      flintIndexName: 'flint_mys3_default_test_mycv_index',
+      kind: 'covering',
+      database: 'default',
+      table: 'test',
+      indexName: 'mycv',
+      autoRefresh: false,
+      status: 'Active',
+    },
+    {
+      flintIndexName: 'flint_mys3_default_mymv',
+      kind: ' ',
+      database: 'default',
+      table: '',
+      indexName: 'mymv',
+      autoRefresh: true,
+      status: 'Active',
+    },
+    {
+      flintIndexName: 'flint_mys3_default_sample_mv',
+      kind: 'mv',
+      database: 'default',
+      table: 'sample_table',
+      indexName: 'sample_mv',
+      autoRefresh: true,
+      status: 'Active',
     },
   ];
 
@@ -179,7 +203,7 @@ export const DataConnection = (props: any) => {
       id: 'acceleration_table',
       name: 'Accelerations',
       disabled: false,
-      content: <AccelerationTable accelerations={dummyAccelerations} />,
+      content: <AccelerationTable dataSourceName={dataSource} />,
     },
     // TODO: Installed integrations page
     {
