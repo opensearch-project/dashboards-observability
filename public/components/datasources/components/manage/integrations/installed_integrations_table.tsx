@@ -13,9 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiButton,
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
+import { coreRefs } from '../../../../../framework/core_refs';
 
 interface IntegrationInstanceTableEntry {
   name: string;
@@ -27,6 +29,14 @@ interface IntegrationInstanceTableEntry {
   assets: number;
 }
 
+const safeBasePathLink = (link: string): string => {
+  if (coreRefs.http && coreRefs.http.basePath) {
+    return coreRefs.http.basePath.prepend(link);
+  } else {
+    return link;
+  }
+};
+
 const INSTALLED_INTEGRATIONS_COLUMNS = [
   {
     field: 'locator',
@@ -35,7 +45,7 @@ const INSTALLED_INTEGRATIONS_COLUMNS = [
       return (
         <OuiLink
           data-test-subj={`${locator.name}IntegrationLink`}
-          href={`/app/integrations#/installed/${locator.id}`}
+          href={safeBasePathLink(`/app/integrations#/installed/${locator.id}`)}
         >
           {locator.name}
         </OuiLink>
@@ -90,6 +100,11 @@ export const InstalledIntegrationsTable = ({
                 setQuery(queryEvent.target.value);
               }}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill={true} href={safeBasePathLink('/app/integrations#available')}>
+              Add Integration
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />

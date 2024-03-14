@@ -152,6 +152,59 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
               </EuiFieldSearch>
             </div>
           </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButton
+                fill={true}
+                href="/app/integrations#available"
+              >
+                <EuiButtonDisplay
+                  baseClassName="euiButton"
+                  element="a"
+                  fill={true}
+                  href="/app/integrations#available"
+                  isDisabled={false}
+                  rel="noreferrer"
+                >
+                  <a
+                    className="euiButton euiButton--primary euiButton--fill"
+                    disabled={false}
+                    href="/app/integrations#available"
+                    rel="noreferrer"
+                    style={
+                      Object {
+                        "minWidth": undefined,
+                      }
+                    }
+                  >
+                    <EuiButtonContent
+                      className="euiButton__content"
+                      iconSide="left"
+                      textProps={
+                        Object {
+                          "className": "euiButton__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButton__content"
+                      >
+                        <span
+                          className="euiButton__text"
+                        >
+                          Add Integration
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </a>
+                </EuiButtonDisplay>
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
         </div>
       </EuiFlexGroup>
       <EuiSpacer>
