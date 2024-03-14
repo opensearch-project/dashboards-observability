@@ -35,6 +35,7 @@ import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
 import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
+import { TEST_INTEGRATION_SEARCH_RESULTS } from '../../../../../test/constants';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -81,40 +82,6 @@ export const DataConnection = (props: any) => {
       dateUpdated: 1709339290,
       index: 'security_logs_2022',
       sql: sampleSql,
-    },
-  ];
-
-  const dummyIntegrations: IntegrationInstanceResult[] = [
-    {
-      id: 'd5b55c60-e08c-11ee-9c80-ff3b93498fea',
-      status: 'available',
-      name: 'aws_waf-sample',
-      templateName: 'aws_waf',
-      dataSource: 'ss4o_logs_waf-aws_waf-sample-sample',
-      creationDate: '2024-03-12T16:23:18.053Z',
-      assets: [
-        {
-          assetType: 'index-pattern',
-          assetId: '9506c132-f466-4ce3-a875-f187ddec587c',
-          status: 'available',
-          isDefaultAsset: false,
-          description: 'ss4o_logs_waf-aws_waf-sample-sample',
-        },
-        {
-          assetType: 'visualization',
-          assetId: '7770e5be-6f10-4435-9773-021c6188bfe5',
-          status: 'available',
-          isDefaultAsset: false,
-          description: 'logs-waf-Top Client IPs',
-        },
-        {
-          assetType: 'dashboard',
-          assetId: '36f26341-22f0-49c5-9820-f787afb4090c',
-          status: 'available',
-          isDefaultAsset: true,
-          description: 'logs-waf-dashboard',
-        },
-      ],
     },
   ];
 
@@ -216,12 +183,12 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: <AccelerationTable accelerations={dummyAccelerations} />,
     },
-    // TODO: Installed integrations page
     {
       id: 'installed_integrations',
       name: 'Installed Integrations',
       disabled: false,
-      content: <InstalledIntegrationsTable integrations={dummyIntegrations} />,
+      // TODO real return values
+      content: <InstalledIntegrationsTable integrations={TEST_INTEGRATION_SEARCH_RESULTS} />,
     },
     {
       id: 'access_control',

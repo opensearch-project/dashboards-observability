@@ -3,18 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiPanel,
-  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiTitle,
   OuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
 } from '@elastic/eui';
+import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 
 interface IntegrationInstanceTableEntry {
+  name: string;
   locator: {
     name: string;
     id: string;
@@ -52,6 +56,7 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
+    name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
     assets: instance.assets.length,
@@ -63,6 +68,11 @@ export const InstalledIntegrationsTable = ({
 }: {
   integrations: IntegrationInstanceResult[];
 }) => {
+  const [query, setQuery] = useState('');
+  const filteredIntegrations = integrations
+    .map(instanceToTableEntry)
+    .filter((i) => i.name.match(new RegExp(_.escapeRegExp(query), 'i')));
+
   return (
     <>
       <EuiSpacer />
@@ -70,12 +80,20 @@ export const InstalledIntegrationsTable = ({
         <EuiTitle>
           <h2>Installed Integrations</h2>
         </EuiTitle>
-        <EuiHorizontalRule />
         <EuiSpacer />
-        <EuiInMemoryTable
-          items={integrations.map(instanceToTableEntry)}
-          columns={INSTALLED_INTEGRATIONS_COLUMNS}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              placeholder="Search..."
+              onChange={(queryEvent) => {
+                setQuery(queryEvent.target.value);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiInMemoryTable items={filteredIntegrations} columns={INSTALLED_INTEGRATIONS_COLUMNS} />
       </EuiPanel>
     </>
   );
