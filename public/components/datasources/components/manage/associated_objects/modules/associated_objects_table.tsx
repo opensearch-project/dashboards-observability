@@ -58,8 +58,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       render: (name: string, item: AssociatedObject) => (
         <EuiLink
           onClick={() => {
-            console.log('name', name);
-            console.log('item', item);
             if (item.type === 'table') {
               renderAssociatedObjectsDetailsFlyout(item);
             } else {
@@ -163,17 +161,20 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       return;
     }
 
-    const matchesClauses = (obj: AssociatedObject, clauses: AssociatedTableFilter[]): boolean => {
+    const matchesClauses = (
+      associatedObject: AssociatedObject,
+      clauses: AssociatedTableFilter[]
+    ): boolean => {
       if (clauses.length === 0) return true;
 
       return clauses.some((clause) => {
         if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
-          return obj[clause.field] === clause.value;
+          return associatedObject[clause.field] === clause.value;
         } else if (
           clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME &&
-          Array.isArray(obj.accelerations)
+          Array.isArray(associatedObject.accelerations)
         ) {
-          return obj.accelerations.some((acceleration) => acceleration.name === clause.value);
+          return associatedObject.type !== 'table' && associatedObject.name === clause.value;
         }
 
         return false;
@@ -227,7 +228,8 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     const accelerationOptions = Array.from(
       new Set(
         associatedObjects
-          .flatMap((obj) => obj.accelerations.map((acceleration) => acceleration.name))
+          .filter((obj) => obj.type !== 'table')
+          .flatMap((obj) => obj.name)
           .filter(Boolean)
       )
     )

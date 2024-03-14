@@ -9,7 +9,7 @@ import { ASSC_OBJ_REFRESH_BTN } from './associated_objects_tab_utils';
 
 interface AssociatedObjectsRefreshButtonProps {
   isLoading: boolean;
-  onClick: any;
+  onClick: () => void;
 }
 
 export const AssociatedObjectsRefreshButton: React.FC<AssociatedObjectsRefreshButtonProps> = (

@@ -14,12 +14,12 @@ interface AssociatedObjectsTabLoadingProps {
 export const AssociatedObjectsTabLoading: React.FC<AssociatedObjectsTabLoadingProps> = (props) => {
   const { objectType, warningMessage } = props;
 
-  const BodyText = () => (
+  const BodyText = (
     <>
       <p>Loading {objectType}</p>
       {warningMessage ? <p>This may take a moment.</p> : <></>}
     </>
   );
 
-  return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} body={<BodyText />} />;
+  return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} body={BodyText} />;
 };

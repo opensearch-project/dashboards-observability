@@ -41,12 +41,29 @@ export interface AssociatedObject {
   type: string;
   createdByIntegration: string;
   accelerations: Acceleration[];
-  columns: TableColumn[] | undefined;
+  columns?: TableColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;
 
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export interface DatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+}
 
 interface AsyncApiDataResponse {
   status: string;

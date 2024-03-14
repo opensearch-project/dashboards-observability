@@ -29,27 +29,14 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
-import { DatasourceType } from '../../../../../common/types/data_connections';
+import {
+  DatasourceDetails,
+  PrometheusProperties,
+} from '../../../../../common/types/data_connections';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 
-export interface DatasourceDetails {
-  allowedRoles: string[];
-  name: string;
-  connector: DatasourceType;
-  description: string;
-  properties: S3GlueProperties | PrometheusProperties;
-}
-
-export interface S3GlueProperties {
-  'glue.indexstore.opensearch.uri': string;
-  'glue.indexstore.opensearch.region': string;
-}
-
-export interface PrometheusProperties {
-  'prometheus.uri': string;
-}
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
 export const DataConnection = (props: any) => {
@@ -361,3 +348,4 @@ export const DataConnection = (props: any) => {
     </EuiPage>
   );
 };
+export { DatasourceDetails };

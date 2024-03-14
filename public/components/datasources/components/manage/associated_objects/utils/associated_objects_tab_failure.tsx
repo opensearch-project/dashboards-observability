@@ -6,7 +6,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-export const AssociatedObjectsTabFailure: React.FC = () => {
+export const AssociatedObjectsTabEmpty: React.FC = () => {
   return (
     <EuiEmptyPrompt
       iconType="alert"

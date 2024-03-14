@@ -15,6 +15,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { ACCELERATION_INDEX_TYPES } from 'common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,
@@ -22,15 +23,14 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CachedTable,
+  DatasourceDetails,
 } from '../../../../../../common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
   ASSC_OBJ_PANEL_TITLE,
   ASSC_OBJ_PANEL_DESCRIPTION,
   ASSC_OBJ_FRESH_MSG,
-  getAccelerationType,
 } from './utils/associated_objects_tab_utils';
-import { DatasourceDetails } from '../data_connection';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
 import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
@@ -256,9 +256,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       .map((acceleration: CachedAcceleration) => ({
         datasource: datasource.name,
         id: acceleration.flintIndexName,
-        name: acceleration.flintIndexName,
+        name: acceleration.indexName,
         database: acceleration.database,
-        type: getAccelerationType(acceleration.type),
+        type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
+          .label,
         createdByIntegration: '-',
         // Temporary dummy array
         accelerations: [],

@@ -6,6 +6,7 @@
 import { EuiButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { LoadCacheType } from '../../../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../../framework/core_refs';
 
 interface AssociatedObjectsTabEmptyProps {
   cacheType: LoadCacheType;
@@ -13,8 +14,14 @@ interface AssociatedObjectsTabEmptyProps {
 
 export const AssociatedObjectsTabEmpty: React.FC<AssociatedObjectsTabEmptyProps> = (props) => {
   const { cacheType } = props;
+  const { application } = coreRefs;
+
   const QueryWorkbenchButton = (
-    <EuiButton iconSide="right" onClick={() => {}} iconType="popout">
+    <EuiButton
+      iconSide="right"
+      onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+      iconType="popout"
+    >
       Query Workbench
     </EuiButton>
   );

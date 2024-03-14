@@ -7,9 +7,9 @@ import React from 'react';
 import { mount, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { AssociatedObjectsDetailsFlyout } from '../manage/associated_objects/associated_objects_details_flyout';
-import { mockAssociatedObjects } from '../manage/associated_objects/utils/associated_objects_tab_utils';
 import * as plugin from '../../../../plugin';
 import { act } from '@testing-library/react';
+import { mockAssociatedObjects } from '../../../../../test/datasources';
 
 configure({ adapter: new Adapter() });
 

@@ -280,7 +280,6 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
             queryId: result.queryId,
           });
         } else {
-          console.log('failed');
           console.error('No query id found in response');
           onLoadingFailed();
         }
