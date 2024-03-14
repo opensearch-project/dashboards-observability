@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
@@ -22,6 +23,9 @@ import {
   onDiscoverButtonClick,
   onDeleteButtonClick,
   AccelerationStatus,
+  ACC_LOADING_MSG,
+  ACC_PANEL_TITLE,
+  ACC_PANEL_DESC,
 } from './helpers/utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -109,10 +113,8 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         <EuiFlexGroup direction="row">
           <EuiFlexItem>
             <EuiText>
-              <h3 className="panel-title">Accelerations</h3>
-              <p>
-                Accelerations optimize query performance by indexing external data into OpenSearch.
-              </p>
+              <h3 className="panel-title">{ACC_PANEL_TITLE}</h3>
+              <p>{ACC_PANEL_DESC}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -161,7 +163,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
     },
   ];
 
-  const accelerationTableColumns: Array<EuiBasicTableColumn<any>> = [
+  const accelerationTableColumns = [
     {
       field: 'indexName',
       name: 'Name',
@@ -240,7 +242,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       name: 'Actions',
       actions: tableActions,
     },
-  ];
+  ] as Array<EuiBasicTableColumn<any>>;
 
   const pagination = {
     initialPageSize: 10,
@@ -262,12 +264,28 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
         <AccelerationTableHeader />
         <EuiHorizontalRule />
         <EuiSpacer />
-        <EuiInMemoryTable
-          items={accelerations}
-          columns={accelerationTableColumns}
-          pagination={pagination}
-          sorting={sorting}
-        />
+        {isRefreshing ? (
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            gutterSize="s"
+          >
+            <EuiFlexItem>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>{ACC_LOADING_MSG}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiInMemoryTable
+            items={accelerations}
+            columns={accelerationTableColumns}
+            pagination={pagination}
+            sorting={sorting}
+          />
+        )}
       </EuiPanel>
     </>
   );
