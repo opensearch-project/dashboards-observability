@@ -41,13 +41,21 @@ export const AccelerationDetailsTab = ({
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
-  const refreshIntervalDescription = acceleration.autoRefresh ? 'Auto refresh' : 'Manual';
+
+  const refreshIntervalDescription = acceleration.autoRefresh ? 'Auto refresh' : 'Manual refresh';
+
   const showRefreshTime =
-    acceleration.autoRefresh ||
-    mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.incremental_refresh;
+    (acceleration.autoRefresh ||
+      mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options
+        .incremental_refrßesh) &&
+    mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.hasOwnProperty(
+      'refresh_interval'
+    );
+
   const refreshTime = showRefreshTime
     ? mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval
     : '-';
+
   const creationDate = new Date(
     parseInt(settings?.settings?.index?.creation_date, 10)
   ).toLocaleString();

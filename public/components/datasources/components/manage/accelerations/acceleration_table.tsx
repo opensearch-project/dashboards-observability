@@ -235,8 +235,8 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'refreshType',
       name: 'Refresh Type',
       sortable: true,
-      render: (autoRefresh: boolean, acceleration: CachedAccelerations) => {
-        return <EuiText>{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
+      render: (_, acceleration: CachedAccelerations) => {
+        return <EuiText>{acceleration.autoRefresh ? 'Auto refresh' : 'Manual Refresh'}</EuiText>;
       },
     },
     {
