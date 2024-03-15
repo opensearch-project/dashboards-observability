@@ -59,7 +59,7 @@ import {
 import { DirectSearch } from './components/common/search/direct_search';
 import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
-import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create/create_acceleration';
+import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
 import {
   AssociatedObjectsDetailsFlyout,
   AssociatedObjectsFlyoutProps,

@@ -68,7 +68,7 @@ export type PollingCallback = (statusObj: AsyncApiResponse) => void;
 
 export type AccelerationIndexType = 'skipping' | 'covering' | 'materialized';
 
-export type LoadCacheType = 'databases' | 'tables' | 'accelerations';
+export type LoadCacheType = 'databases' | 'tables' | 'accelerations' | 'tableColumns';
 
 export enum CachedDataSourceStatus {
   Updated = 'Updated',
@@ -77,7 +77,7 @@ export enum CachedDataSourceStatus {
 }
 
 export interface CachedColumn {
-  name: string;
+  fieldName: string;
   dataType: string;
 }
 
@@ -134,35 +134,16 @@ export interface PollingSuccessResult {
 
 export type AsyncPollingResult = PollingSuccessResult | null;
 
-export interface CreateAccelerationForm {
-  dataSource: string;
-  database: string;
-  dataTable: string;
-  dataTableFields: DataTableFieldsType[];
-  accelerationIndexType: AccelerationIndexType;
-  skippingIndexQueryData: SkippingIndexRowType[];
-  coveringIndexQueryData: string[];
-  materializedViewQueryData: MaterializedViewQueryType;
-  accelerationIndexName: string;
-  primaryShardsCount: number;
-  replicaShardsCount: number;
-  refreshType: AccelerationRefreshType;
-  checkpointLocation: string | undefined;
-  watermarkDelay: WatermarkDelayType;
-  refreshIntervalOptions: RefreshIntervalType;
-  formErrors: FormErrorsType;
-}
-
-export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min';
+export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min' | 'window.start';
 
 export interface MaterializedViewColumn {
   id: string;
   functionName: AggregationFunctionType;
-  functionParam: string;
+  functionParam?: string;
   fieldAlias?: string;
 }
 
-export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX';
+export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX' | 'BLOOM_FILTER';
 
 export interface SkippingIndexRowType {
   id: string;
@@ -213,7 +194,7 @@ export interface FormErrorsType {
   watermarkDelayError: string[];
 }
 
-export type AccelerationRefreshType = 'auto' | 'interval' | 'manual';
+export type AccelerationRefreshType = 'auto' | 'autoInterval' | 'manual' | 'manualIncrement';
 
 export interface CreateAccelerationForm {
   dataSource: string;
