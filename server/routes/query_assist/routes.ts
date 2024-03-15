@@ -10,9 +10,9 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
-import { QUERY_ASSIST_API } from '../../../common/constants/query_assist';
+import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-import { requestWithRetryAgentSearch, getAgentIdByConfig } from './utils/agents';
+import { getAgentIdByConfig, requestWithRetryAgentSearch } from './utils/agents';
 import { AGENT_CONFIGS } from './utils/constants';
 
 export function registerQueryAssistRoutes(router: IRouter) {
@@ -81,11 +81,12 @@ export function registerQueryAssistRoutes(router: IRouter) {
           .replace(/\bSPAN\(/g, 'span('); // https://github.com/opensearch-project/dashboards-observability/issues/759
         return response.ok({ body: ppl });
       } catch (error) {
-        // parse PPL query from error response if exists
-        // TODO remove after https://github.com/opensearch-project/skills/issues/138
-        if (isResponseError(error) && error.body.error?.reason) {
-          const pplMatch = error.body.error.reason.match(/execute ppl:(.+), get error:/);
-          if (pplMatch[1]) return response.ok({ body: pplMatch[1] });
+        if (
+          isResponseError(error) &&
+          error.statusCode === 400 &&
+          error.body.error.details === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+        ) {
+          return response.badRequest({ body: ERROR_DETAILS.GUARDRAILS_TRIGGERED });
         }
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
@@ -152,10 +153,14 @@ export function registerQueryAssistRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
-        });
+        if (
+          isResponseError(error) &&
+          error.statusCode === 400 &&
+          error.body.error.details === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+        ) {
+          return response.badRequest({ body: ERROR_DETAILS.GUARDRAILS_TRIGGERED });
+        }
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
   );
