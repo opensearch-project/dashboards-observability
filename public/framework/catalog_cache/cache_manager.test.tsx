@@ -10,7 +10,7 @@ import {
 } from '../../../common/constants/shared';
 import {
   AccelerationsCacheData,
-  CachedAcclerationByDataSource,
+  CachedAccelerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
@@ -394,7 +394,7 @@ describe('CatalogCacheManager', () => {
 
   describe('addOrUpdateAccelerationsByDataSource', () => {
     it('should add a new data source to the accelerations cache', () => {
-      const dataSource: CachedAcclerationByDataSource = {
+      const dataSource: CachedAccelerationByDataSource = {
         name: 'TestDataSource',
         lastUpdated: '2024-03-08T12:00:00Z',
         status: CachedDataSourceStatus.Updated,
@@ -415,7 +415,7 @@ describe('CatalogCacheManager', () => {
 
     it('should update an existing data source in the accelerations cache', () => {
       // Set up initial cache data
-      const initialDataSource: CachedAcclerationByDataSource = {
+      const initialDataSource: CachedAccelerationByDataSource = {
         name: 'TestDataSource',
         lastUpdated: '2024-03-08T12:00:00Z',
         status: CachedDataSourceStatus.Updated,
@@ -423,7 +423,7 @@ describe('CatalogCacheManager', () => {
       };
 
       // Update the data source
-      const updatedDataSource: CachedAcclerationByDataSource = {
+      const updatedDataSource: CachedAccelerationByDataSource = {
         ...initialDataSource,
         status: CachedDataSourceStatus.Failed,
       };
@@ -444,7 +444,7 @@ describe('CatalogCacheManager', () => {
   describe('getOrCreateAccelerationsByDataSource', () => {
     it('should return an existing data source from the accelerations cache', () => {
       // Set up initial cache data
-      const existingDataSource: CachedAcclerationByDataSource = {
+      const existingDataSource: CachedAccelerationByDataSource = {
         name: 'TestDataSource',
         lastUpdated: '2024-03-08T12:00:00Z',
         status: CachedDataSourceStatus.Updated,
