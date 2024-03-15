@@ -18,19 +18,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import {
-  CachedAccelerations,
+  CachedAcceleration,
   CachedDataSourceStatus,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
-import { useLoadAccelerationsToCache } from '../../../../../framework/catalog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
+import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import {
   ACC_LOADING_MSG,
   ACC_PANEL_DESC,
   ACC_PANEL_TITLE,
   AccelerationStatus,
+  getAccelerationName,
   getRefreshButtonIcon,
   onDeleteButtonClick,
   onDiscoverButtonClick,
@@ -39,24 +40,37 @@ import {
 
 interface AccelerationTableProps {
   dataSourceName: string;
+  cacheLoadingHooks: any;
 }
 
-export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) => {
-  const [accelerations, setAccelerations] = useState<CachedAccelerations[]>([]);
+export const AccelerationTable = ({
+  dataSourceName,
+  cacheLoadingHooks,
+}: AccelerationTableProps) => {
+  const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
-  const { loadStatus, startLoading } = useLoadAccelerationsToCache();
+
+  const {
+    databasesLoadStatus,
+    tablesLoadStatus,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  } = cacheLoadingHooks;
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
       dataSourceName
     );
-    if (cachedDataSource.status === CachedDataSourceStatus.Empty) {
+    if (
+      cachedDataSource.status === CachedDataSourceStatus.Empty &&
+      !isCatalogCacheFetching(accelerationsLoadStatus)
+    ) {
       console.log(
         `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
       );
       setIsRefreshing(true);
-      startLoading(dataSourceName);
+      startLoadingAccelerations(dataSourceName);
     } else {
       console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
 
@@ -66,7 +80,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
   }, []);
 
   useEffect(() => {
-    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+    if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
       const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         dataSourceName
       );
@@ -75,21 +89,29 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       setIsRefreshing(false);
       console.log('Refresh process is success.');
     }
-    if (loadStatus === DirectQueryLoadingStatus.FAILED) {
+    if (accelerationsLoadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsRefreshing(false);
       console.log('Refresh process is failed.');
     }
-  }, [loadStatus]);
+  }, [accelerationsLoadStatus]);
 
   const handleRefresh = () => {
     console.log('Initiating refresh...');
-    setIsRefreshing(true);
-    startLoading(dataSourceName);
+    if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
+      setIsRefreshing(true);
+      startLoadingAccelerations(dataSourceName);
+    }
   };
 
   const RefreshButton = () => {
     return (
-      <EuiButton onClick={handleRefresh} isLoading={isRefreshing}>
+      <EuiButton
+        onClick={handleRefresh}
+        isLoading={
+          isRefreshing ||
+          isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
+        }
+      >
         Refresh
       </EuiButton>
     );
@@ -179,13 +201,12 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'indexName',
       name: 'Name',
       sortable: true,
-      render: (indexName: string, acceleration: any) => {
-        const displayName =
-          indexName ||
-          `${dataSourceName}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_');
+      render: (indexName: string, acceleration: CachedAcceleration) => {
+        const displayName = getAccelerationName(indexName, acceleration, dataSourceName);
         return (
           <EuiLink
             onClick={() => {
+              console.log(displayName);
               renderAccelerationDetailsFlyout({
                 index: displayName,
                 acceleration,
@@ -242,7 +263,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'refreshType',
       name: 'Refresh Type',
       sortable: true,
-      render: (autoRefresh: boolean, acceleration: CachedAccelerations) => {
+      render: (autoRefresh: boolean, acceleration: CachedAcceleration) => {
         return <EuiText>{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
       },
     },
@@ -250,7 +271,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
-      render: (flintIndexName: string, acceleration: CachedAccelerations) => {
+      render: (flintIndexName: string, acceleration: CachedAcceleration) => {
         if (acceleration.type === 'skipping') {
           return '-';
         }
@@ -270,6 +291,7 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
 
   const sorting = {
     sort: {
+      field: 'name',
       direction: 'asc',
     },
   };

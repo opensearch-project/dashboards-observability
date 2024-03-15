@@ -7,19 +7,19 @@ import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 interface AccelerationSqlTabProps {
-  acceleration: any;
+  mappings: any;
 }
 
 export const AccelerationSqlTab = (props: AccelerationSqlTabProps) => {
-  const { acceleration } = props;
+  const { mappings } = props;
   // TODO: Retrieve SQL query from backend
-  console.log(acceleration);
+  console.log(mappings);
 
   return (
     <>
       <EuiSpacer />
       <EuiCodeBlock language="sql" isCopyable>
-        {acceleration.sql}
+        Placeholder
       </EuiCodeBlock>
     </>
   );
