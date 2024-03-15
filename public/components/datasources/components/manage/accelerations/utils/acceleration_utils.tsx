@@ -77,12 +77,12 @@ export const getRefreshButtonIcon = () => {
   return 'inputOutput';
 };
 
-export const onRefreshButtonClick = (acceleration: any) => {
+export const onRefreshIconClick = (acceleration: CachedAcceleration) => {
   // TODO: send request to refresh
-  console.log('refreshing', acceleration.name);
+  console.log('refreshing', acceleration.indexName);
 };
 
-export const onDiscoverButtonClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
+export const onDiscoverIconClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
   if (acceleration.type === 'skipping') {
@@ -97,7 +97,11 @@ export const onDiscoverButtonClick = (acceleration: CachedAcceleration, dataSour
   }
 };
 
-export const onDeleteButtonClick = (acceleration: any) => {
+export const onDeleteIconClick = (acceleration: CachedAcceleration) => {
   // TODO: delete acceleration
-  console.log('deleting', acceleration.name);
+  console.log('deleting', acceleration.indexName);
+};
+
+export const onVacuumIconClick = (acceleration: CachedAcceleration) => {
+  console.log('vacuum', acceleration.indexName);
 };

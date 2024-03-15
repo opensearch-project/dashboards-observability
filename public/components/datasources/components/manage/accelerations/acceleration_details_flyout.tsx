@@ -20,10 +20,10 @@ import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_ta
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
 import {
-  getRefreshButtonIcon,
-  onRefreshButtonClick,
-  onDiscoverButtonClick,
-  onDeleteButtonClick,
+  onRefreshIconClick,
+  onDiscoverIconClick,
+  onDeleteIconClick,
+  onVacuumIconClick,
 } from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
@@ -107,12 +107,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     }
   }, [flintIndexName]);
 
-  const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
+  const DiscoverIcon = () => {
+    // Assuming `acceleration` is accessible in the current scope
     return (
       <EuiButtonEmpty
         onClick={() => {
-          onDiscoverButtonClick(acceleration, dataSourceName);
+          onDiscoverIconClick(acceleration, dataSourceName);
           resetFlyout();
         }}
       >
@@ -121,17 +121,25 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const RefreshButton = () => {
+  const RefreshIcon = () => {
     return (
-      <EuiButtonEmpty onClick={onRefreshButtonClick}>
-        <EuiIcon type={getRefreshButtonIcon()} size="m" />
+      <EuiButtonEmpty onClick={() => onRefreshIconClick(acceleration)}>
+        <EuiIcon type="inputOutput" size="m" />
       </EuiButtonEmpty>
     );
   };
 
-  const DeleteButton = () => {
+  const DeleteIcon = () => {
     return (
-      <EuiButtonEmpty onClick={onDeleteButtonClick}>
+      <EuiButtonEmpty onClick={() => onDeleteIconClick(acceleration)}>
+        <EuiIcon type="trash" size="m" />
+      </EuiButtonEmpty>
+    );
+  };
+
+  const VacuumIcon = () => {
+    return (
+      <EuiButtonEmpty onClick={() => onVacuumIconClick(acceleration)}>
         <EuiIcon type="trash" size="m" />
       </EuiButtonEmpty>
     );
@@ -203,14 +211,20 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DiscoverButton />
+            <DiscoverIcon />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshButton />
+            <RefreshIcon />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DeleteButton />
-          </EuiFlexItem>
+          {status !== 'deleted' ? (
+            <EuiFlexItem grow={false}>
+              <DeleteIcon />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <VacuumIcon />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>

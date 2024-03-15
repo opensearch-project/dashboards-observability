@@ -18,6 +18,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import {
+  getRefreshButtonIcon,
+  onRefreshIconClick,
+  onDiscoverIconClick,
+  onDeleteIconClick,
+  AccelerationStatus,
+  ACC_LOADING_MSG,
+  ACC_PANEL_TITLE,
+  ACC_PANEL_DESC,
+  getAccelerationName,
+} from './utils/acceleration_utils';
+import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import {
   CachedAcceleration,
@@ -26,20 +38,8 @@ import {
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
 import {
-  getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
-import {
-  ACC_LOADING_MSG,
-  ACC_PANEL_DESC,
-  ACC_PANEL_TITLE,
-  AccelerationStatus,
-  getAccelerationName,
-  getRefreshButtonIcon,
-  onDeleteButtonClick,
-  onDiscoverButtonClick,
-  onRefreshButtonClick,
-} from './utils/acceleration_utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -181,21 +181,21 @@ export const AccelerationTable = ({
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        onDiscoverButtonClick(acc, dataSourceName);
+        onDiscoverIconClick(acc, dataSourceName);
       },
     },
     {
       name: 'Refresh',
       description: 'Refresh/Pause/Resume',
       icon: getRefreshButtonIcon,
-      onClick: onRefreshButtonClick,
+      onClick: onRefreshIconClick,
     },
     {
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
       type: 'icon',
-      onClick: onDeleteButtonClick,
+      onClick: onDeleteIconClick,
     },
   ];
 
