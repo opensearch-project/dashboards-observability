@@ -9,17 +9,21 @@ import Adapter from 'enzyme-adapter-react-16';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { CreateAccelerationForm } from '../../../../../../../../../common/types/data_connections';
-import { createAccelerationEmptyDataMock } from '../../../../../../../../../test/accelerations';
-import { IndexSettingOptions } from '../index_setting_options';
+import {
+  coveringIndexBuilderMock1,
+  createAccelerationEmptyDataMock,
+  materializedViewBuilderMock2,
+} from '../../../../../../../../../test/accelerations';
+import { PreviewSQLDefinition } from '../preview_sql_defintion';
 
-describe('Index settings acceleration components', () => {
+describe('Preview SQL acceleration components', () => {
   configure({ adapter: new Adapter() });
 
-  it('renders acceleration index settings with default options', async () => {
+  it('renders Preview SQL settings with default options', async () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
-      <IndexSettingOptions
+      <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
@@ -35,16 +39,14 @@ describe('Index settings acceleration components', () => {
     });
   });
 
-  it('renders acceleration index settings with different options1', async () => {
+  it('renders Preview SQL settings with default covering index options', async () => {
     const accelerationFormData: CreateAccelerationForm = {
-      ...createAccelerationEmptyDataMock,
-      primaryShardsCount: 1,
-      replicaShardsCount: 5,
-      refreshType: 'auto',
+      ...coveringIndexBuilderMock1,
+      accelerationIndexType: 'covering',
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
-      <IndexSettingOptions
+      <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
@@ -60,18 +62,37 @@ describe('Index settings acceleration components', () => {
     });
   });
 
-  it('renders acceleration index settings with different options2', async () => {
+  it('renders Preview SQL settings with materialized view options', async () => {
     const accelerationFormData: CreateAccelerationForm = {
-      ...createAccelerationEmptyDataMock,
-      primaryShardsCount: 5,
-      replicaShardsCount: 1,
-      refreshType: 'autoInterval',
-      refreshIntervalOptions: { refreshWindow: 1, refreshInterval: 'second' },
-      checkpointLocation: 's3://test/url',
+      ...materializedViewBuilderMock2,
+      accelerationIndexType: 'covering',
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
-      <IndexSettingOptions
+      <PreviewSQLDefinition
+        accelerationFormData={accelerationFormData}
+        setAccelerationFormData={setAccelerationFormData}
+      />
+    );
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          noKey: false,
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
+  });
+
+  it('renders Preview SQL settings with error state', async () => {
+    const accelerationFormData: CreateAccelerationForm = {
+      ...materializedViewBuilderMock2,
+      accelerationIndexType: 'invlalid_state',
+    };
+    const setAccelerationFormData = jest.fn();
+    const wrapper = mount(
+      <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
