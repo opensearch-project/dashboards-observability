@@ -12,7 +12,7 @@ import {
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
 import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../common/constants/query_assist';
 import { generateFieldContext } from '../../common/helpers/query_assist/generate_field_context';
-import { getAgentIdByConfig, requestWithRetryAgentSearch } from './utils/agents';
+import { getAgentIdByConfig, getAgentIdAndRequest } from './utils/agents';
 import { AGENT_CONFIGS } from './utils/constants';
 
 export function registerQueryAssistRoutes(router: IRouter) {
@@ -57,7 +57,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       const client = context.core.opensearch.client.asCurrentUser;
       try {
-        const pplRequest = await requestWithRetryAgentSearch({
+        const pplRequest = await getAgentIdAndRequest({
           client,
           configName: AGENT_CONFIGS.PPL_AGENT,
           body: {
@@ -118,7 +118,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
 
       try {
         if (!isError) {
-          summaryRequest = await requestWithRetryAgentSearch({
+          summaryRequest = await getAgentIdAndRequest({
             client,
             configName: AGENT_CONFIGS.RESPONSE_SUMMARY_AGENT,
             body: {
@@ -131,7 +131,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
             client.search({ index, size: 1 }),
           ]);
           const fields = generateFieldContext(mappings, sampleDoc);
-          summaryRequest = await requestWithRetryAgentSearch({
+          summaryRequest = await getAgentIdAndRequest({
             client,
             configName: AGENT_CONFIGS.ERROR_SUMMARY_AGENT,
             body: {
