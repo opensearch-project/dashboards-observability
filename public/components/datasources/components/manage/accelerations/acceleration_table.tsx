@@ -46,6 +46,11 @@ interface AccelerationTableProps {
   cacheLoadingHooks: any;
 }
 
+interface ModalState {
+  actionType: 'delete' | 'vacuum' | null;
+  selectedItem: CachedAcceleration | null;
+}
+
 export const AccelerationTable = ({
   dataSourceName,
   cacheLoadingHooks,
@@ -60,53 +65,34 @@ export const AccelerationTable = ({
     startLoadingAccelerations,
   } = cacheLoadingHooks;
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [
-    selectedAccelerationForDelete,
-    setSelectedAccelerationForDelete,
-  ] = useState<CachedAcceleration | null>(null);
-  const [isVacuumModalVisible, setIsVacuumModalVisible] = useState(false);
-  const [
-    selectedAccelerationForVacuum,
-    setSelectedAccelerationForVacuum,
-  ] = useState<CachedAcceleration | null>(null);
+  const [modalState, setModalState] = useState<ModalState>({
+    actionType: null,
+    selectedItem: null,
+  });
 
-  const onDeleteIconClick = (acceleration: CachedAcceleration) => {
-    setSelectedAccelerationForDelete(acceleration); // Assuming acceleration is the correct type
-    setIsDeleteModalVisible(true);
+  const handleActionClick = (actionType: ModalState['actionType'], acceleration: CachedAcceleration) => {
+    setModalState({
+      actionType,
+      selectedItem: acceleration,
+    });
   };
 
-  const handleDeleteConfirm = () => {
-    if (selectedAccelerationForDelete) {
-      // TODO : THE ACTUAL ASYNC QUERY FOR DELETE
-      console.log('Deleting acceleration:', selectedAccelerationForDelete.indexName);
-      setIsDeleteModalVisible(false);
-      setSelectedAccelerationForDelete(null);
-    }
+  const handleModalClose = () => {
+    setModalState({
+      actionType: null,
+      selectedItem: null,
+    });
   };
 
-  const handleDeleteCancel = () => {
-    setIsDeleteModalVisible(false);
-    setSelectedAccelerationForDelete(null);
-  };
+  const handleConfirm = () => {
+    if (!modalState.selectedItem) return;
 
-  const onVacuumIconClick = (acceleration: CachedAcceleration) => {
-    setSelectedAccelerationForVacuum(acceleration);
-    setIsVacuumModalVisible(true);
-  };
-
-  const handleVacuumConfirm = () => {
-    if (selectedAccelerationForVacuum) {
-      // TODO: THE ACTUAL ASYNC QUERY FOR VACUUM
-      console.log('Vacuuming acceleration:', selectedAccelerationForVacuum.indexName);
-      setIsVacuumModalVisible(false);
-      setSelectedAccelerationForVacuum(null);
-    }
-  };
-
-  const handleVacuumCancel = () => {
-    setIsVacuumModalVisible(false);
-    setSelectedAccelerationForVacuum(null);
+    console.log(
+      `${modalState.actionType} action confirmed for:`,
+      modalState.selectedItem.indexName
+    );
+    // Perform your action here (delete or vacuum)
+    handleModalClose(); // Close the modal after action
   };
 
   useEffect(() => {
@@ -242,15 +228,15 @@ export const AccelerationTable = ({
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
-      onClick: onDeleteIconClick,
-      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
+      onClick: (item) => handleActionClick('delete', item),
+      enabled: (item) => item.status !== 'deleted',
     },
     {
       name: 'Vacuum',
       description: 'Vacuum acceleration',
       icon: 'broom',
-      onClick: onVacuumIconClick,
-      enabled: (item: CachedAcceleration) => item.status === 'deleted',
+      onClick: (item) => handleActionClick('vacuum', item),
+      enabled: (item) => item.status === 'deleted',
     },
   ];
 
@@ -371,24 +357,14 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
-      {isDeleteModalVisible && (
+      {(modalState.actionType === 'delete' || modalState.actionType === 'vacuum') && (
         <AccelerationActionOverlay
-          isVisible={isDeleteModalVisible}
-          actionType="delete"
-          acceleration={selectedAccelerationForDelete}
+          isVisible={!!modalState.actionType}
+          actionType={modalState.actionType}
+          acceleration={modalState.selectedItem}
           dataSourceName={dataSourceName}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
-      )}
-      {isVacuumModalVisible && (
-        <AccelerationActionOverlay
-          isVisible={isVacuumModalVisible}
-          actionType="vacuum"
-          acceleration={selectedAccelerationForVacuum}
-          dataSourceName={dataSourceName}
-          onCancel={handleVacuumCancel}
-          onConfirm={handleVacuumConfirm}
+          onCancel={handleModalClose}
+          onConfirm={handleConfirm}
         />
       )}
     </>
