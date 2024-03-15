@@ -28,6 +28,7 @@ import {
   ACC_PANEL_TITLE,
   ACC_PANEL_DESC,
   getAccelerationName,
+  onVacuumIconClick,
 } from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -194,8 +195,15 @@ export const AccelerationTable = ({
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
-      type: 'icon',
       onClick: onDeleteIconClick,
+      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
+    },
+    {
+      name: 'Vacuum',
+      description: 'Vacuum acceleration',
+      icon: 'broom',
+      onClick: onVacuumIconClick,
+      enabled: (item: CachedAcceleration) => item.status === 'deleted',
     },
   ];
 
