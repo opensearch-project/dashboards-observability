@@ -37,6 +37,7 @@ export const ACCELERATION_TIME_INTERVAL = [
 export const ACCELERATION_ADD_FIELDS_TEXT = '(add fields here)';
 export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z][a-z_]*$/;
 export const ACCELERATION_S3_URL_REGEX = /^(s3|s3a):\/\/[a-zA-Z0-9.\-]+/;
+export const TIMESTAMP_DATATYPE = 'timestamp';
 
 export const ACCELERATION_INDEX_TYPES = [
   { label: 'Skipping Index', value: 'skipping' },
@@ -65,12 +66,16 @@ export const SKIPPING_INDEX_ACCELERATION_METHODS = [
   { value: 'PARTITION', text: 'Partition' },
   { value: 'VALUE_SET', text: 'Value Set' },
   { value: 'MIN_MAX', text: 'Min Max' },
+  { value: 'BLOOM_FILTER', text: 'Bloom Filter' },
 ];
 
 export const ACCELERATION_AGGREGRATION_FUNCTIONS = [
+  { label: 'window.start' },
   { label: 'count' },
   { label: 'sum' },
   { label: 'avg' },
   { label: 'max' },
   { label: 'min' },
 ];
+
+export const SPARK_PARTITION_INFO = `# Partition Information`;

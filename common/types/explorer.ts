@@ -3,10 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { QueryManager } from 'common/query_manager';
 import { History } from 'history';
 import Plotly from 'plotly.js-dist';
-import { QueryManager } from 'common/query_manager';
+import {
+  CoreSetup,
+  CoreStart,
+  HttpSetup,
+  HttpStart,
+  NotificationsStart,
+} from '../../../../src/core/public';
+import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
+import {
+  SavedObjectAttributes,
+  SavedObjectsStart,
+} from '../../../../src/core/public/saved_objects';
+import { DataSourceType } from '../../../../src/plugins/data/public';
 import { VIS_CHART_TYPES } from '../../common/constants/shared';
+import DSLService from '../../public/services/requests/dsl';
+import PPLService from '../../public/services/requests/ppl';
+import SavedObjects from '../../public/services/saved_objects/event_analytics/saved_objects';
+import TimestampUtils from '../../public/services/timestamp/timestamp';
 import {
   AGGREGATIONS,
   AVAILABLE_FIELDS,
@@ -22,25 +39,7 @@ import {
   SELECTED_TIMESTAMP,
   UNSELECTED_FIELDS,
 } from '../constants/explorer';
-import {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  HttpStart,
-  NotificationsStart,
-} from '../../../../src/core/public';
-import SavedObjects from '../../public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from '../../public/services/timestamp/timestamp';
-import PPLService from '../../public/services/requests/ppl';
-import DSLService from '../../public/services/requests/dsl';
-import {
-  SavedObjectAttributes,
-  SavedObjectsStart,
-} from '../../../../src/core/public/saved_objects';
-import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
-import { DataSourceType } from '../../../../src/plugins/data/public';
 import { PROMQL_METRIC_SUBTYPE } from '../constants/shared';
-
 export interface IQueryTab {
   id: string;
   name: React.ReactNode | string;
@@ -428,6 +427,7 @@ export enum DirectQueryLoadingStatus {
   RUNNING = 'running',
   SCHEDULED = 'scheduled',
   CANCELED = 'canceled',
+  WAITING = 'waiting',
 }
 
 export interface DirectQueryRequest {
