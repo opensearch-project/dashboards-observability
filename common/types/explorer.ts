@@ -428,6 +428,7 @@ export enum DirectQueryLoadingStatus {
   SCHEDULED = 'scheduled',
   CANCELED = 'canceled',
   WAITING = 'waiting',
+  INITIAL = 'initial',
 }
 
 export interface DirectQueryRequest {

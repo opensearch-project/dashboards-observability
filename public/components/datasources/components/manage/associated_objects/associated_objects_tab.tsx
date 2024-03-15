@@ -6,92 +6,95 @@
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import {
-  EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiHorizontalRule,
-  EuiButton,
   EuiSpacer,
-  EuiEmptyPrompt,
-  SearchFilterConfig,
-  EuiTableFieldDataColumnType,
+  EuiSelectable,
 } from '@elastic/eui';
-import { AssociatedObject } from 'common/types/data_connections';
 import { i18n } from '@osd/i18n';
+import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
-  getRenderAccelerationDetailsFlyout,
-  getRenderAssociatedObjectsDetailsFlyout,
-} from '../../../../../plugin';
+  AssociatedObject,
+  CachedAcceleration,
+  CachedAccelerationByDataSource,
+  CachedDataSourceStatus,
+  CachedDatabase,
+  CachedTable,
+  DatasourceDetails,
+} from '../../../../../../common/types/data_connections';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import {
-  ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
-  ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_PANEL_TITLE,
-  ASSC_OBJ_PANEL_DESRIPTION,
-  ASSC_OBJ_NO_DATA_TITLE,
-  ASSC_OBJ_NO_DATA_DESCRIPTION,
-  ASSC_OBJ_REFRESH_BTN,
+  ASSC_OBJ_PANEL_DESCRIPTION,
   ASSC_OBJ_FRESH_MSG,
-  ASSC_OBJ_TABLE_SUBJ,
+  isCatalogCacheFetching,
 } from './utils/associated_objects_tab_utils';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
+import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
+import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
+import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
+import { AssociatedObjectsTable } from './modules/associated_objects_table';
+import { getAccelerationName } from '../accelerations/utils/acceleration_utils';
 
 export interface AssociatedObjectsTabProps {
-  associatedObjects: AssociatedObject[];
+  datasource: DatasourceDetails;
+  cacheLoadingHooks: any;
+  selectedDatabase: string;
+  setSelectedDatabase: React.Dispatch<React.SetStateAction<string>>;
 }
 
-interface FilterOption {
-  value: string;
-  text: string;
-}
+export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props) => {
+  const { datasource, cacheLoadingHooks, selectedDatabase, setSelectedDatabase } = props;
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
+  const [isObjectsLoading, setIsObjectsLoading] = useState<boolean>(false);
+  const [cachedDatabases, setCachedDatabases] = useState<CachedDatabase[]>([]);
+  const [cachedTables, setCachedTables] = useState<CachedTable[]>([]);
+  const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
+  const [associatedObjects, setAssociatedObjects] = useState<AssociatedObject[]>([]);
+  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
 
-interface AssociatedTableFilter {
-  type: string;
-  field: string;
-  operator: string;
-  value: string;
-}
+  const {
+    databasesLoadStatus,
+    startLoadingDatabases,
+    tablesLoadStatus,
+    startLoadingTables,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  } = cacheLoadingHooks;
 
-export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
-  associatedObjects,
-}) => {
-  const [lastUpdated, setLastUpdated] = useState('');
-  const [databaseFilterOptions, setDatabaseFilterOptions] = useState<FilterOption[]>([]);
-  const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
-  const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
+  let lastChecked: boolean;
+  if (selectedDatabase !== '') {
+    lastChecked = true;
+  } else {
+    lastChecked = false;
+  }
+  // Get last selected if there is one, set to first option if not
+  const [databaseSelectorOptions, setDatabaseSelectorOptions] = useState(
+    cachedDatabases.map((database, index) => {
+      return {
+        label: database.name,
+        checked: lastChecked
+          ? database.name === selectedDatabase
+            ? 'on'
+            : index === 0
+            ? 'on'
+            : undefined
+          : undefined,
+      };
+    })
+  );
 
-  // TODO: FINISH THE REFRESH LOGIC
-  const fetchAssociatedObjects = async () => {
-    // Placeholder for data fetching logic
-    // After fetching data:
-    // setAssociatedObjects(fetchedData);
-    const now = new Date();
-    setLastUpdated(now.toUTCString()); // Update last updated time
+  const onRefreshButtonClick = () => {
+    if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
+      startLoadingDatabases(datasource.name);
+      setIsRefreshing(true);
+    }
   };
-
-  useEffect(() => {
-    fetchAssociatedObjects();
-
-    const databaseOptions = Array.from(new Set(associatedObjects.map((obj) => obj.database)))
-      .sort()
-      .map((database) => ({ value: database, text: database }));
-    setDatabaseFilterOptions(databaseOptions);
-
-    const accelerationOptions = Array.from(
-      new Set(
-        associatedObjects
-          .flatMap((obj) => obj.accelerations.map((acceleration) => acceleration.name))
-          .filter(Boolean)
-      )
-    )
-      .sort()
-      .map((name) => ({ value: name, text: name }));
-    setAccelerationFilterOptions(accelerationOptions);
-
-    setFilteredObjects(associatedObjects);
-  }, [associatedObjects]);
 
   const AssociatedObjectsHeader = () => {
     const panelTitle = i18n.translate('datasources.associatedObjectsTab.panelTitle', {
@@ -99,11 +102,24 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
     });
 
     const panelDescription = i18n.translate('datasources.associatedObjectsTab.panelDescription', {
-      defaultMessage: ASSC_OBJ_PANEL_DESRIPTION,
+      defaultMessage: ASSC_OBJ_PANEL_DESCRIPTION,
     });
 
+    const LastUpdatedText = () => {
+      return (
+        <>
+          <EuiText textAlign="right" size="xs" color="subdued">
+            {ASSC_OBJ_FRESH_MSG}
+          </EuiText>
+          <EuiText textAlign="right" size="xs" color="subdued">
+            {lastUpdated}
+          </EuiText>
+        </>
+      );
+    };
+
     return (
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" alignItems="center">
         <EuiFlexItem>
           <EuiText size="m">
             <h2 className="panel-title">{panelTitle}</h2>
@@ -111,267 +127,219 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="freshButton"
-                iconType="refresh"
-                onClick={fetchAssociatedObjects}
-              >
-                {ASSC_OBJ_REFRESH_BTN}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText textAlign="right" size="xs" color="subdued">
-                {ASSC_OBJ_FRESH_MSG}
-              </EuiText>
-              <EuiText textAlign="right" color="subdued" size="xs">
-                {lastUpdated}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <LastUpdatedText />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AssociatedObjectsRefreshButton
+            isLoading={
+              isRefreshing ||
+              isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
+            }
+            onClick={onRefreshButtonClick}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
 
-  const noDataMessage = (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          {i18n.translate('datasources.associatedObjectsTab.noDataTitle', {
-            defaultMessage: ASSC_OBJ_NO_DATA_TITLE,
-          })}
-        </h2>
+  // Load databases if empty or retrieve from cache if updated
+  useEffect(() => {
+    if (datasource.name) {
+      const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+      if (
+        datasourceCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(databasesLoadStatus)
+      ) {
+        startLoadingDatabases(datasource.name);
+      } else if (datasourceCache.status === CachedDataSourceStatus.Updated) {
+        setCachedDatabases(datasourceCache.databases);
+        setIsFirstTimeLoading(false);
       }
-      body={
-        <p>
-          {i18n.translate('datasources.associatedObjectsTab.noDataDescription', {
-            defaultMessage: ASSC_OBJ_NO_DATA_DESCRIPTION,
-          })}
-        </p>
-      }
-      actions={
-        <EuiButton
-          color="primary"
-          fill
-          onClick={() => window.open('https://example.com', '_blank')}
-          iconType="popout"
-          iconSide="left"
-        >
-          {i18n.translate('datasources.associatedObjectsTab.queryWorkbenchButton', {
-            defaultMessage: 'Query Workbench',
-          })}
-        </EuiButton>
-      }
-    />
-  );
-
-  const columns = [
-    {
-      field: 'name',
-      name: i18n.translate('datasources.associatedObjectsTab.column.name', {
-        defaultMessage: 'Name',
-      }),
-      sortable: true,
-      'data-test-subj': 'nameCell',
-      render: (name: string, item: AssociatedObject) => (
-        <EuiLink
-          onClick={() => {
-            if (item.type === 'Table') {
-              renderAssociatedObjectsDetailsFlyout(item);
-            } else {
-              renderAccelerationDetailsFlyout(item.accelerations[0]);
-            }
-          }}
-        >
-          {name}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'database',
-      name: i18n.translate('datasources.associatedObjectsTab.column.database', {
-        defaultMessage: 'Database',
-      }),
-      sortable: true,
-    },
-    {
-      field: 'type',
-      name: i18n.translate('datasources.associatedObjectsTab.column.type', {
-        defaultMessage: 'Type',
-      }),
-      sortable: true,
-    },
-    {
-      field: 'createdByIntegration',
-      name: i18n.translate('datasources.associatedObjectsTab.column.createdByIntegration', {
-        defaultMessage: 'Created by Integration',
-      }),
-      sortable: true,
-      render: (createdByIntegration: string, _item: AssociatedObject) =>
-        createdByIntegration ? (
-          <EuiLink onClick={() => openDetailsPage(createdByIntegration)}>
-            {createdByIntegration}
-          </EuiLink>
-        ) : (
-          '-'
-        ),
-    },
-    {
-      field: 'accelerations',
-      name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
-        defaultMessage: 'Accelerations',
-      }),
-      sortable: true,
-      render: (accelerations: string[]) => {
-        return accelerations.length > 0
-          ? accelerations.map((acceleration, index) => (
-              <React.Fragment key={index}>
-                <EuiLink onClick={() => renderAccelerationDetailsFlyout(acceleration)}>
-                  {acceleration.name}
-                </EuiLink>
-                {index < accelerations.length - 1 ? ', ' : ''}
-              </React.Fragment>
-            ))
-          : '-';
-      },
-    },
-    {
-      name: i18n.translate('datasources.associatedObjectsTab.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          name: i18n.translate('datasources.associatedObjectsTab.action.discover.name', {
-            defaultMessage: 'Discover',
-          }),
-          description: i18n.translate(
-            'datasources.associatedObjectsTab.action.discover.description',
-            {
-              defaultMessage: 'Discover this object',
-            }
-          ),
-          type: 'icon',
-          icon: 'discoverApp',
-          onClick: (item: AssociatedObject) => console.log('Discover', item),
-        },
-        {
-          name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
-            defaultMessage: 'Accelerate',
-          }),
-          description: i18n.translate(
-            'datasources.associatedObjectsTab.action.accelerate.description',
-            {
-              defaultMessage: 'Accelerate this object',
-            }
-          ),
-          type: 'icon',
-          icon: 'bolt',
-          available: (item: AssociatedObject) => item.type === 'Table',
-          onClick: (item: AssociatedObject) => console.log('Accelerate', item),
-        },
-      ],
-    },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
-
-  const onSearchChange = ({ query, error }) => {
-    if (error) {
-      console.log('Search error:', error);
-      return;
     }
+  }, [datasource.name]);
 
-    const matchesClauses = (obj: AssociatedObject, clauses: AssociatedTableFilter[]): boolean => {
-      if (clauses.length === 0) return true;
+  // Retrieve from cache upon load success
+  useEffect(() => {
+    const status = databasesLoadStatus.toLowerCase();
+    const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+    if (status === DirectQueryLoadingStatus.SUCCESS) {
+      setCachedDatabases(datasourceCache.databases);
+      setIsFirstTimeLoading(false);
+    }
+  }, [datasource.name, databasesLoadStatus]);
 
-      return clauses.some((clause) => {
-        if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
-          return obj[clause.field] === clause.value;
-        } else if (
-          clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME &&
-          Array.isArray(obj.accelerations)
-        ) {
-          return obj.accelerations.some((acceleration) => acceleration.name === clause.value);
+  const handleObjectsLoad = (
+    databaseCache: CachedDatabase,
+    accelerationsCache: CachedAccelerationByDataSource
+  ) => {
+    if (
+      databaseCache.status === CachedDataSourceStatus.Updated &&
+      accelerationsCache.status === CachedDataSourceStatus.Updated
+    ) {
+      setLastUpdated(new Date(databaseCache.lastUpdated).toLocaleString());
+      setIsRefreshing(false);
+      setIsObjectsLoading(false);
+    }
+  };
+
+  // Load tables and accelerations if empty or retrieve from cache if not
+  useEffect(() => {
+    if (datasource.name && selectedDatabase) {
+      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+        datasource.name
+      );
+      if (
+        databaseCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(tablesLoadStatus)
+      ) {
+        startLoadingTables(datasource.name, selectedDatabase);
+        setIsObjectsLoading(true);
+      } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
+        setCachedTables(databaseCache.tables);
+      }
+      if (
+        accelerationsCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(accelerationsLoadStatus)
+      ) {
+        startLoadingAccelerations(datasource.name);
+        setIsObjectsLoading(true);
+      } else if (accelerationsCache.status === CachedDataSourceStatus.Updated) {
+        setCachedAccelerations(accelerationsCache.accelerations);
+      }
+    }
+  }, [datasource.name, selectedDatabase, databaseSelectorOptions]);
+
+  // Retrieve from tables cache upon load success
+  useEffect(() => {
+    if (datasource.name && selectedDatabase) {
+      const tablesStatus = tablesLoadStatus.toLowerCase();
+      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      const accelerationsStatus = accelerationsLoadStatus.toLowerCase();
+      const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+        datasource.name
+      );
+      if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
+        setCachedTables(databaseCache.tables);
+      }
+      if (accelerationsStatus === DirectQueryLoadingStatus.SUCCESS) {
+        setCachedAccelerations(accelerationsCache.accelerations);
+      }
+      handleObjectsLoad(databaseCache, accelerationsCache);
+    }
+  }, [datasource.name, selectedDatabase, tablesLoadStatus, accelerationsLoadStatus]);
+
+  useEffect(() => {
+    setDatabaseSelectorOptions(
+      cachedDatabases.map((database, index) => {
+        if (selectedDatabase) {
+          return {
+            label: database.name,
+            checked: database.name === selectedDatabase ? 'on' : undefined,
+          };
         }
+        return {
+          label: database.name,
+          checked: index === 0 ? 'on' : undefined,
+        };
+      })
+    );
+  }, [cachedDatabases]);
 
-        return false;
-      });
-    };
-
-    const filtered = associatedObjects.filter((obj) => {
-      const clauses = query.ast._clauses;
-      return matchesClauses(obj, clauses);
+  useEffect(() => {
+    setSelectedDatabase((prevState) => {
+      const select = databaseSelectorOptions.find((option) => option.checked === 'on')?.label;
+      if (select) {
+        return select;
+      }
+      return prevState;
     });
+  }, [databaseSelectorOptions]);
 
-    setFilteredObjects(filtered);
-  };
-
-  const searchFilters = [
-    {
-      type: 'field_value_selection',
-      field: 'database',
-      name: 'Database',
-      multiSelect: true,
-      options: databaseFilterOptions,
-      cache: 60000,
-    },
-    {
-      type: 'field_value_selection',
-      field: 'accelerations',
-      name: 'Accelerations',
-      multiSelect: true,
-      options: accelerationFilterOptions,
-      cache: 60000,
-    },
-  ] as SearchFilterConfig[];
-
-  const search = {
-    filters: searchFilters,
-    box: {
-      incremental: true,
-      placeholder: ASSC_OBJ_TABLE_SEARCH_HINT,
-      schema: {
-        fields: { name: { type: 'string' }, database: { type: 'string' } },
-      },
-    },
-    onChange: onSearchChange,
-  };
-
-  const pagination = {
-    initialPageSize: 10,
-    pageSizeOptions: [10, 25, 50],
-  };
-
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'asc',
-    },
-  };
-
-  const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
-  const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
+  useEffect(() => {
+    const tableObjects: AssociatedObject[] = cachedTables.map((table: CachedTable) => {
+      return {
+        datasource: datasource.name,
+        id: table.name,
+        name: table.name,
+        database: selectedDatabase,
+        type: 'table',
+        // Temporary dummy array
+        accelerations: [],
+        columns: table.columns,
+      };
+    });
+    const accelerationObjects: AssociatedObject[] = cachedAccelerations
+      .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
+      .map((acceleration: CachedAcceleration) => ({
+        datasource: datasource.name,
+        id: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
+        name: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
+        database: acceleration.database,
+        type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
+          .label,
+        // Temporary dummy array
+        accelerations: [],
+        columns: undefined,
+      }));
+    setAssociatedObjects([...tableObjects, ...accelerationObjects]);
+  }, [selectedDatabase, cachedTables, cachedAccelerations]);
 
   return (
     <>
       <EuiSpacer />
+      <AccelerationsRecommendationCallout />
+      <EuiSpacer />
       <EuiPanel>
         <AssociatedObjectsHeader />
         <EuiHorizontalRule />
-        <AccelerationsRecommendationCallout />
-        <EuiSpacer />
-        {associatedObjects.length > 0 ? (
-          <EuiInMemoryTable
-            items={filteredObjects}
-            columns={columns}
-            search={search}
-            pagination={pagination}
-            sorting={sorting}
-            noItemsMessage={associatedObjects.length === 0 ? noDataMessage : undefined}
-            data-test-subj={ASSC_OBJ_TABLE_SUBJ}
-          />
+        {isFirstTimeLoading ? (
+          <AssociatedObjectsTabLoading objectType="databases" warningMessage={false} />
         ) : (
-          noDataMessage
+          <>
+            {cachedDatabases.length === 0 ? (
+              <AssociatedObjectsTabEmpty cacheType="databases" />
+            ) : (
+              <>
+                <EuiSpacer />
+                <EuiFlexGroup direction="row">
+                  <EuiFlexItem grow={false}>
+                    <EuiSelectable
+                      searchable={true}
+                      singleSelection="always"
+                      searchProps={{ placeholder: 'Search for databases' }}
+                      options={databaseSelectorOptions}
+                      onChange={(newOptions) => setDatabaseSelectorOptions(newOptions)}
+                    >
+                      {(list, search) => (
+                        <>
+                          {search}
+                          {list}
+                        </>
+                      )}
+                    </EuiSelectable>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    {isObjectsLoading && !isRefreshing ? (
+                      <AssociatedObjectsTabLoading objectType="tables" warningMessage={true} />
+                    ) : (
+                      <>
+                        {cachedTables.length > 0 || cachedAccelerations.length > 0 ? (
+                          <AssociatedObjectsTable
+                            datasourceName={datasource.name}
+                            associatedObjects={associatedObjects}
+                            cachedAccelerations={cachedAccelerations}
+                          />
+                        ) : (
+                          <AssociatedObjectsTabEmpty cacheType="tables" />
+                        )}
+                      </>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+          </>
         )}
       </EuiPanel>
       <EuiSpacer />

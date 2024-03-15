@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AsyncPollingResult, DatasourceType } from '../common/types/data_connections';
+import {
+  AccelerationsCacheData,
+  AsyncPollingResult,
+  CachedDataSourceStatus,
+  DataSourceCacheData,
+  DatasourceType,
+  DatasourceDetails,
+  AssociatedObject,
+} from '../common/types/data_connections';
 
 export const showDataConnectionsData = {
   schema: [
@@ -46,7 +54,7 @@ export const showDataConnectionsData = {
 export const describePrometheusDataConnection = {
   name: 'prom',
   description: '',
-  connector: 'PROMETHEUS',
+  connector: 'mock_data_source',
   allowedRoles: [],
   properties: {
     'prometheus.uri': 'localhost:9201',
@@ -54,7 +62,7 @@ export const describePrometheusDataConnection = {
 };
 
 export const testS3ConnectionDetails = {
-  dataConnection: 'ya',
+  dataConnection: 'mock_data_source',
   description: '',
   connector: 'S3GLUE' as DatasourceType,
   properties: {
@@ -856,3 +864,320 @@ export const mockShowIndexesPollingResult: AsyncPollingResult = {
     ['flint_mys3_default_http_count_view', 'mv', 'default', '', 'http_count_view', true, 'Active'],
   ],
 };
+
+export const mockDatasource: DatasourceDetails = {
+  allowedRoles: ['admin'],
+  name: 'mock_data_source',
+  connector: 'S3GLUE',
+  description: '',
+  properties: {
+    'glue.indexstore.opensearch.uri': '',
+    'glue.indexstore.opensearch.region': '',
+  },
+};
+
+export const mockDataSourceCacheData: DataSourceCacheData = {
+  version: '1.0',
+  dataSources: [
+    {
+      name: 'mock_data_source',
+      lastUpdated: '2024-03-14T12:00:00Z',
+      status: CachedDataSourceStatus.Updated,
+      databases: [
+        {
+          name: 'mock_database_1',
+          lastUpdated: '2024-03-14T12:00:00Z',
+          status: CachedDataSourceStatus.Updated,
+          tables: [
+            {
+              name: 'mock_table_1',
+            },
+            {
+              name: 'mock_table_2',
+            },
+            {
+              name: 'mock_table_3',
+            },
+            {
+              name: 'mock_table_4',
+            },
+            {
+              name: 'mock_table_5',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const mockAccelerationCacheData: AccelerationsCacheData = {
+  version: '1.0',
+  dataSources: [
+    {
+      name: 'mock_data_source',
+      lastUpdated: '2024-03-14T12:00:00Z',
+      status: CachedDataSourceStatus.Updated,
+      accelerations: [
+        {
+          flintIndexName: 'mock_acceleration_1',
+          type: 'skipping',
+          database: 'mock_database_1',
+          table: '',
+          indexName: 'mock_acceleration_1',
+          autoRefresh: true,
+          status: '',
+        },
+        {
+          flintIndexName: 'mock_acceleration_2',
+          type: 'materialized',
+          database: 'mock_database_1',
+          table: '',
+          indexName: 'mock_acceleration_2',
+          autoRefresh: true,
+          status: '',
+        },
+      ],
+    },
+  ],
+};
+
+export const mockEmptyDataSourceCacheData: DataSourceCacheData = {
+  version: '1.0',
+  dataSources: [
+    {
+      name: 'mock_data_source',
+      lastUpdated: '2024-03-14T12:00:00Z',
+      status: CachedDataSourceStatus.Updated,
+      databases: [],
+    },
+  ],
+};
+
+export const mockEmptyAccelerationCacheData: AccelerationsCacheData = {
+  version: '1.0',
+  dataSources: [
+    {
+      name: 'mock_data_source',
+      lastUpdated: '2024-03-14T12:00:00Z',
+      status: CachedDataSourceStatus.Updated,
+      accelerations: [],
+    },
+  ],
+};
+
+export const mockAssociatedObjects: AssociatedObject[] = [
+  {
+    id: '1',
+    datasource: 'flint_s3',
+    name: 'Table_name_1',
+    database: 'db1',
+    type: 'Table',
+    createdByIntegration: 'integration_1',
+    accelerations: [
+      {
+        name: 'skipping_index_1',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+      {
+        name: 'column3',
+        dataType: 'dataType3',
+      },
+      {
+        name: 'column4',
+        dataType: 'dataType4',
+      },
+    ],
+  },
+  {
+    id: '2',
+    datasource: 'flint_s3',
+    name: 'Table_name_2',
+    database: 'db1',
+    type: 'Table',
+    createdByIntegration: 'integration_1',
+    accelerations: [
+      {
+        name: 'skipping_index_2',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [],
+  },
+  {
+    id: '3',
+    datasource: 'flint_s3',
+    name: 'skipping_index_2',
+    database: 'db1',
+    type: 'Skip Index',
+    createdByIntegration: 'integration_1',
+    accelerations: [
+      {
+        name: 'skipping_index_2',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [],
+  },
+  {
+    id: '4',
+    datasource: 'flint_s3',
+    name: 'Table_name_4',
+    database: 'db2',
+    type: 'Table',
+    createdByIntegration: 'integration_1',
+    accelerations: [
+      {
+        name: 'skipping_index_2',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
+  },
+  {
+    id: '5',
+    datasource: 'flint_s3',
+    name: 'Table_name_5',
+    database: 'db3',
+    type: 'Table',
+    createdByIntegration: 'integration_1',
+    accelerations: [],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
+  },
+  {
+    id: '6',
+    datasource: 'flint_s3',
+    name: 'covering_index_3',
+    database: 'db3',
+    type: 'Cover Index',
+    createdByIntegration: '',
+    accelerations: [
+      {
+        name: 'covering_index_3',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
+  },
+  {
+    id: '7',
+    datasource: 'flint_s3',
+    name: 'Table_name_6',
+    database: 'db3',
+    type: 'Table',
+    createdByIntegration: '',
+    accelerations: [
+      {
+        name: 'skipping_index_4',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+      {
+        name: 'skipping_index_5',
+        status: 'ACTIVE',
+        type: 'skip',
+        database: 'db1',
+        table: 'Table_name_1',
+        destination: 'N/A',
+        dateCreated: 1709339290,
+        dateUpdated: 1709339290,
+        index: 'security_logs_2022',
+        sql: 'SELECT * FROM Table_name_1 WHERE ...',
+      },
+    ],
+    columns: [
+      {
+        name: 'column1',
+        dataType: 'dataType1',
+      },
+      {
+        name: 'column2',
+        dataType: 'dataType2',
+      },
+    ],
+  },
+];

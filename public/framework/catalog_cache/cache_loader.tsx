@@ -230,7 +230,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   const [currentDatabaseName, setCurrentDatabaseName] = useState<string | undefined>('');
   const [currentTableName, setCurrentTableName] = useState<string | undefined>('');
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
-    DirectQueryLoadingStatus.SCHEDULED
+    DirectQueryLoadingStatus.INITIAL
   );
 
   const {

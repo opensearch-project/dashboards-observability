@@ -48,7 +48,7 @@ import {
   observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
-import { AssociatedObject } from '../common/types/data_connections';
+import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -103,7 +103,17 @@ interface PublicConfig {
 export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
-] = createGetterSetter<(acceleration: any) => void>('renderAccelerationDetailsFlyout');
+] = createGetterSetter<
+  ({
+    index,
+    acceleration,
+    dataSourceName,
+  }: {
+    index: string;
+    acceleration: CachedAcceleration;
+    dataSourceName: string;
+  }) => void
+>('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
@@ -392,9 +402,23 @@ export class ObservabilityPlugin
     });
 
     // Use overlay service to render flyouts
-    const renderAccelerationDetailsFlyout = (acceleration: any) =>
+    const renderAccelerationDetailsFlyout = ({
+      index,
+      acceleration,
+      dataSourceName,
+    }: {
+      index: string;
+      acceleration: CachedAcceleration;
+      dataSourceName: string;
+    }) =>
       core.overlays.openFlyout(
-        toMountPoint(<AccelerationDetailsFlyout acceleration={acceleration} />)
+        toMountPoint(
+          <AccelerationDetailsFlyout
+            index={index}
+            acceleration={acceleration}
+            dataSourceName={dataSourceName}
+          />
+        )
       );
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
