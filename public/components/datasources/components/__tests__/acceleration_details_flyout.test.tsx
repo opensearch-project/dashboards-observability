@@ -8,6 +8,7 @@ import { mount, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { AccelerationDetailsFlyout } from '../manage/accelerations/acceleration_details_flyout';
 import * as coreRefsModule from '../../../../framework/core_refs';
+import { CachedAcceleration } from '../../../../../common/types/data_connections';
 
 jest.mock('../../../../framework/core_refs', () => {
   const actualModule = jest.requireActual('../../../../framework/core_refs');
@@ -52,12 +53,14 @@ jest.mock('../../../../framework/core_refs', () => {
   };
 });
 
-const mockAcceleration = {
-  index: 'mockIndex',
-  dataSourceName: 'mockDataSource',
-  acceleration: {
-    flintIndexName: 'testIndex',
-  },
+const mockAcceleration: CachedAcceleration = {
+  flintIndexName: 'testIndex',
+  type: 'materialized',
+  database: 'mockDatabase',
+  table: 'mockTable',
+  indexName: 'mockIndex',
+  autoRefresh: true,
+  status: 'Updated',
 };
 
 configure({ adapter: new Adapter() });
@@ -68,7 +71,13 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
   });
 
   it('fetches acceleration details on mount', async () => {
-    mount(<AccelerationDetailsFlyout acceleration={mockAcceleration} />);
+    mount(
+      <AccelerationDetailsFlyout
+        index="mockIndex"
+        acceleration={mockAcceleration}
+        dataSourceName="mockDataSource"
+      />
+    );
 
     expect(coreRefsModule.coreRefs.dslService!.fetchFields).toHaveBeenCalledWith('testIndex');
     expect(coreRefsModule.coreRefs.dslService!.fetchSettings).toHaveBeenCalledWith('testIndex');
@@ -76,7 +85,13 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
   });
 
   it('switches tabs correctly', async () => {
-    const wrapper = mount(<AccelerationDetailsFlyout acceleration={mockAcceleration} />);
+    const wrapper = mount(
+      <AccelerationDetailsFlyout
+        index="mockIndex"
+        acceleration={mockAcceleration}
+        dataSourceName="mockDataSource"
+      />
+    );
     await new Promise(setImmediate);
     wrapper.update();
 
