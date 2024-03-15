@@ -52,14 +52,9 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       dataSourceName
     );
     if (cachedDataSource.status === CachedDataSourceStatus.Empty) {
-      console.log(
-        `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
-      );
       setIsRefreshing(true);
       startLoading(dataSourceName);
     } else {
-      console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
-
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
     }
@@ -73,16 +68,13 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
       setIsRefreshing(false);
-      console.log('Refresh process is success.');
     }
     if (loadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsRefreshing(false);
-      console.log('Refresh process is failed.');
     }
   }, [loadStatus]);
 
   const handleRefresh = () => {
-    console.log('Initiating refresh...');
     setIsRefreshing(true);
     startLoading(dataSourceName);
   };
@@ -107,7 +99,6 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
     );
   };
 
-  console.log('HERE IS THE UPDATED TIME', updatedTime);
   const AccelerationTableHeader = () => {
     return (
       <>
@@ -126,14 +117,16 @@ export const AccelerationTable = ({ dataSourceName }: AccelerationTableProps) =>
               <EuiFlexItem grow={false}>
                 <RefreshButton data-test-subj="refreshButton" />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText textAlign="right" size="xs" color="subdued">
-                  {'Last updated'}
-                </EuiText>
-                <EuiText textAlign="right" color="subdued" size="xs">
-                  {updatedTime}
-                </EuiText>
-              </EuiFlexItem>
+              {updatedTime && (
+                <EuiFlexItem>
+                  <EuiText textAlign="right" size="xs" color="subdued">
+                    {'Last updated'}
+                  </EuiText>
+                  <EuiText textAlign="right" color="subdued" size="xs">
+                    {updatedTime}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
