@@ -22,7 +22,6 @@ import {
   getRefreshButtonIcon,
   onRefreshIconClick,
   onDiscoverIconClick,
-  onDeleteIconClick,
   AccelerationStatus,
   ACC_LOADING_MSG,
   ACC_PANEL_TITLE,
@@ -41,6 +40,7 @@ import { isCatalogCacheFetching } from '../associated_objects/utils/associated_o
 import {
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
+import { AccelerationDeletionOverlay } from './overlay_modules/acceleration_delete_overlay';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -61,6 +61,30 @@ export const AccelerationTable = ({
     startLoadingAccelerations,
   } = cacheLoadingHooks;
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [
+    selectedAccelerationForDelete,
+    setSelectedAccelerationForDelete,
+  ] = useState<CachedAcceleration | null>(null);
+
+  const onDeleteIconClick = (acceleration: CachedAcceleration) => {
+    setSelectedAccelerationForDelete(acceleration); // Assuming acceleration is the correct type
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedAccelerationForDelete) {
+      // TODO : THE ACTUAL ASYNC QUERY FOR DELETE
+      console.log('Deleting acceleration:', selectedAccelerationForDelete.indexName);
+      setIsDeleteModalVisible(false);
+      setSelectedAccelerationForDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+    setSelectedAccelerationForDelete(null);
+  };
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
@@ -324,6 +348,12 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
+      <AccelerationDeletionOverlay
+        isVisible={isDeleteModalVisible}
+        acceleration={selectedAccelerationForDelete}
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 };

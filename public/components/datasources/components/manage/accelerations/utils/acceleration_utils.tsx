@@ -16,6 +16,8 @@ export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
+export const ACC_DELETE_MSG =
+  'The acceleration will be deleted. User will no longer be able to view from this acceleration. By default data will be retained in the associated index.';
 
 export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
   return (
