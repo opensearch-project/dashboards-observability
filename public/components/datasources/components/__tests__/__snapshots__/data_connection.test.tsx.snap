@@ -397,6 +397,20 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             aria-controls="random_html_id"
             aria-selected="false"
             class="euiTab"
+            id="installed_integrations"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Installed Integrations
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
             id="access_control"
             role="tab"
             type="button"
