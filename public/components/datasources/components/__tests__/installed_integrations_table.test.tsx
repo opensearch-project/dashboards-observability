@@ -19,4 +19,10 @@ describe('Installed Integrations Table test', () => {
 
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('Renders the empty installed integrations table', async () => {
+    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
 });
