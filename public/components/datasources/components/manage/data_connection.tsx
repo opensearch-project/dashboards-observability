@@ -20,8 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import {
   DATACONNECTIONS_BASE,
+  INTEGRATIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
@@ -36,6 +38,7 @@ import {
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
+import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
@@ -117,6 +120,30 @@ export const DataConnection = (props: any) => {
       status: 'Active',
     },
   ];
+
+  const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
+    [] as IntegrationInstanceResult[]
+  );
+  useEffect(() => {
+    const searchDataSourcePattern = new RegExp(
+      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*_mview`
+    );
+    const findIntegrations = async () => {
+      // TODO: we just get all results and filter, ideally we send a filtering query to the API
+      // Should still be probably okay until we get cases of 500+ integration instances
+      const result: { data: IntegrationInstancesSearchResult } = await http!.get(
+        INTEGRATIONS_BASE + `/store`
+      );
+      if (result.data?.hits) {
+        setDataSourceIntegrations(
+          result.data.hits.filter((res) => res.dataSource.match(searchDataSourcePattern))
+        );
+      } else {
+        setDataSourceIntegrations([]);
+      }
+    };
+    findIntegrations();
+  }, [http, datasourceDetails.name]);
 
   const onclickIntegrationsCard = () => {
     application!.navigateToApp(observabilityIntegrationsID);
@@ -224,6 +251,12 @@ export const DataConnection = (props: any) => {
       content: (
         <AccelerationTable dataSourceName={dataSource} cacheLoadingHooks={cacheLoadingHooks} />
       ),
+    },
+    {
+      id: 'installed_integrations',
+      name: 'Installed Integrations',
+      disabled: false,
+      content: <InstalledIntegrationsTable integrations={dataSourceIntegrations} />,
     },
     {
       id: 'access_control',
