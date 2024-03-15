@@ -34,6 +34,7 @@ describe('Source selector components', () => {
         selectedDatasource={selectedDatasource}
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
+        dataSourcesPreselected={false}
       />
     );
     wrapper.update();
@@ -65,6 +66,7 @@ describe('Source selector components', () => {
         http={client}
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
+        dataSourcesPreselected={true}
       />
     );
     wrapper.update();

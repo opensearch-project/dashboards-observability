@@ -135,12 +135,11 @@ export const updateTableColumnsToCache = (
   tableName: string,
   pollingResult: AsyncPollingResult
 ) => {
-  const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
-  const currentTime = new Date().toUTCString();
-
   if (!pollingResult) {
     return;
   }
+  const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+  const currentTime = new Date().toUTCString();
 
   const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
     pollingResult.schema,
