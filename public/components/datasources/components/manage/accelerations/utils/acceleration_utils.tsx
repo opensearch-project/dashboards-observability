@@ -18,6 +18,8 @@ export const ACC_PANEL_DESC =
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
 export const ACC_DELETE_MSG =
   'The acceleration will be deleted. User will no longer be able to view from this acceleration. By default data will be retained in the associated index.';
+export const ACC_VACUUM_MSG =
+  'Vacuuming will remove the actual data from the disk since the associated index will be removed from the cluster. To confirm your action, type the name of the acceleration below.';
 
 export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
   return (

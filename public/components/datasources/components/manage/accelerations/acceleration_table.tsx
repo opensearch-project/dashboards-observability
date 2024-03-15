@@ -27,7 +27,6 @@ import {
   ACC_PANEL_TITLE,
   ACC_PANEL_DESC,
   getAccelerationName,
-  onVacuumIconClick,
 } from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -36,11 +35,11 @@ import {
   CachedDataSourceStatus,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
 import {
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
-import { AccelerationDeletionOverlay } from './overlay_modules/acceleration_delete_overlay';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -66,6 +65,11 @@ export const AccelerationTable = ({
     selectedAccelerationForDelete,
     setSelectedAccelerationForDelete,
   ] = useState<CachedAcceleration | null>(null);
+  const [isVacuumModalVisible, setIsVacuumModalVisible] = useState(false);
+  const [
+    selectedAccelerationForVacuum,
+    setSelectedAccelerationForVacuum,
+  ] = useState<CachedAcceleration | null>(null);
 
   const onDeleteIconClick = (acceleration: CachedAcceleration) => {
     setSelectedAccelerationForDelete(acceleration); // Assuming acceleration is the correct type
@@ -84,6 +88,25 @@ export const AccelerationTable = ({
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setSelectedAccelerationForDelete(null);
+  };
+
+  const onVacuumIconClick = (acceleration: CachedAcceleration) => {
+    setSelectedAccelerationForVacuum(acceleration);
+    setIsVacuumModalVisible(true);
+  };
+
+  const handleVacuumConfirm = () => {
+    if (selectedAccelerationForVacuum) {
+      // TODO: THE ACTUAL ASYNC QUERY FOR VACUUM
+      console.log('Vacuuming acceleration:', selectedAccelerationForVacuum.indexName);
+      setIsVacuumModalVisible(false);
+      setSelectedAccelerationForVacuum(null);
+    }
+  };
+
+  const handleVacuumCancel = () => {
+    setIsVacuumModalVisible(false);
+    setSelectedAccelerationForVacuum(null);
   };
 
   useEffect(() => {
@@ -348,12 +371,24 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
-      <AccelerationDeletionOverlay
-        isVisible={isDeleteModalVisible}
-        acceleration={selectedAccelerationForDelete}
-        onCancel={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-      />
+      {isDeleteModalVisible && (
+        <AccelerationActionOverlay
+          isVisible={isDeleteModalVisible}
+          actionType="delete"
+          acceleration={selectedAccelerationForDelete}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
+      )}
+      {isVacuumModalVisible && (
+        <AccelerationActionOverlay
+          isVisible={isVacuumModalVisible}
+          actionType="vacuum"
+          acceleration={selectedAccelerationForVacuum}
+          onCancel={handleVacuumCancel}
+          onConfirm={handleVacuumConfirm}
+        />
+      )}
     </>
   );
 };
