@@ -376,6 +376,7 @@ export const AccelerationTable = ({
           isVisible={isDeleteModalVisible}
           actionType="delete"
           acceleration={selectedAccelerationForDelete}
+          dataSourceName={dataSourceName}
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
         />
@@ -385,6 +386,7 @@ export const AccelerationTable = ({
           isVisible={isVacuumModalVisible}
           actionType="vacuum"
           acceleration={selectedAccelerationForVacuum}
+          dataSourceName={dataSourceName}
           onCancel={handleVacuumCancel}
           onConfirm={handleVacuumConfirm}
         />

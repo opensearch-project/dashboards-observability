@@ -12,6 +12,7 @@ interface AccelerationActionOverlayProps {
   isVisible: boolean;
   actionType: 'delete' | 'vacuum';
   acceleration: CachedAcceleration | null;
+  dataSourceName: string;
   onCancel: () => void;
   onConfirm: (acceleration: CachedAcceleration) => void;
 }
@@ -20,6 +21,7 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
   isVisible,
   actionType,
   acceleration,
+  dataSourceName,
   onCancel,
   onConfirm,
 }) => {
@@ -29,13 +31,17 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
     return null;
   }
 
+  const displayIndexName =
+    acceleration.indexName ||
+    `${dataSourceName}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_');
+
   const isVacuumAction = actionType === 'vacuum';
   const title = isVacuumAction
-    ? `Vacuum acceleration ${acceleration.indexName}?`
-    : `Delete acceleration ${acceleration.indexName}?`;
+    ? `Vacuum acceleration ${displayIndexName}?`
+    : `Delete acceleration ${displayIndexName}?`;
   const description = isVacuumAction ? ACC_VACUUM_MSG : ACC_DELETE_MSG;
 
-  const confirmEnabled = isVacuumAction ? confirmationInput === acceleration.indexName : true;
+  const confirmEnabled = isVacuumAction ? confirmationInput === displayIndexName : true;
 
   return (
     <EuiOverlayMask>
@@ -51,7 +57,7 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
       >
         <p>{description}</p>
         {isVacuumAction && (
-          <EuiFormRow label={`To confirm your action, type ${acceleration.indexName}`}>
+          <EuiFormRow label={`To confirm your action, type ${displayIndexName}`}>
             <EuiFieldText
               name="confirmationInput"
               value={confirmationInput}
