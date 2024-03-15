@@ -11,3 +11,5 @@ export const QUERY_ASSIST_API = {
 };
 
 export const ML_COMMONS_API_PREFIX = '/_plugins/_ml';
+
+export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrail triggered' };
