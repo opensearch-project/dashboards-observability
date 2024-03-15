@@ -31,6 +31,7 @@ import {
   ACC_PANEL_DESC,
   ACC_PANEL_TITLE,
   AccelerationStatus,
+  getAccelerationName,
   getRefreshButtonIcon,
   onDeleteButtonClick,
   onDiscoverButtonClick,
