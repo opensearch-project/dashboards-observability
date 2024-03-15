@@ -7,10 +7,16 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { AssociatedObjectsTab } from '../manage/associated_objects/associated_objects_tab';
+import { ASSC_OBJ_TABLE_SUBJ } from '../manage/associated_objects/utils/associated_objects_tab_utils';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import {
-  mockAssociatedObjects,
-  ASSC_OBJ_TABLE_SUBJ,
-} from '../manage/associated_objects/utils/associated_objects_tab_utils';
+  mockAccelerationCacheData,
+  mockDataSourceCacheData,
+  mockDatasource,
+  mockEmptyAccelerationCacheData,
+  mockEmptyDataSourceCacheData,
+} from '../../../../../test/datasources';
+import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
@@ -20,9 +26,18 @@ jest.mock('../../../../plugin', () => ({
 describe('AssociatedObjectsTab Component', () => {
   configure({ adapter: new Adapter() });
 
+  const cacheLoadingHooks = {
+    databasesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingDatabases: jest.fn(),
+    tablesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingTables: jest.fn(),
+    accelerationsLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingAccelerations: jest.fn(),
+  };
+
   beforeAll(() => {
     const originalDate = Date;
-    global.Date = jest.fn(() => new originalDate('2024-03-06T07:02:37.000Z')) as any;
+    global.Date = jest.fn(() => new originalDate('2024-03-14T12:00:00Z')) as any;
 
     global.Date.UTC = originalDate.UTC;
     global.Date.parse = originalDate.parse;
@@ -33,36 +48,58 @@ describe('AssociatedObjectsTab Component', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders without crashing with no associated objects', () => {
-    const wrapper = mount(<AssociatedObjectsTab associatedObjects={[]} />);
+  it('renders tab with no databases or objects', () => {
+    CatalogCacheManager.saveDataSourceCache(mockEmptyDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockEmptyAccelerationCacheData);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={''}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
-    expect(wrapper.text()).toContain('You have no associated objects');
+    expect(wrapper.text()).toContain('You have no databases in your data source');
   });
 
   it('renders correctly with associated objects', () => {
-    const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
+    CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.find('EuiInMemoryTable').exists()).toBe(true);
     expect(wrapper.find('EuiLink').length).toBeGreaterThan(0);
   });
 
   it('initializes database and acceleration filter options correctly from associated objects', () => {
-    const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
+    CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
 
     wrapper.update();
 
     const tableProps = wrapper.find(`[data-test-subj="${ASSC_OBJ_TABLE_SUBJ}"]`).first().props();
 
     const { search } = tableProps;
-    const databaseFilter = search.filters.find((filter) => filter.field === 'database');
     const accelerationFilter = search.filters.find((filter) => filter.field === 'accelerations');
 
-    const expectedDatabaseOptionsCount = new Set(mockAssociatedObjects.map((obj) => obj.database))
-      .size;
-    expect(databaseFilter.options.length).toEqual(expectedDatabaseOptionsCount);
-
-    const allAccelerationNames = mockAssociatedObjects.flatMap((obj) =>
-      obj.accelerations.map((acceleration) => acceleration.name)
+    const allAccelerationNames = mockAccelerationCacheData.dataSources[0].accelerations.flatMap(
+      (obj) => obj.flintIndexName
     );
     const uniqueAccelerationNames = new Set(allAccelerationNames.filter(Boolean));
     const expectedAccelerationOptionsCount = uniqueAccelerationNames.size;
@@ -70,15 +107,24 @@ describe('AssociatedObjectsTab Component', () => {
   });
 
   it('correctly filters associated objects by acceleration name', () => {
-    const wrapper = mount(<AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />);
+    CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
 
     const mockQueryObject = {
-      queryText: 'accelerations:skipping_index_2',
+      queryText: 'accelerations:mock_acceleration_1',
       ast: {
         _clauses: [
           {
             type: 'term',
-            value: 'skipping_index_2',
+            value: 'mock_acceleration_1',
             field: 'accelerations',
           },
         ],
@@ -93,14 +139,7 @@ describe('AssociatedObjectsTab Component', () => {
     wrapper.update();
 
     const filteredItems = wrapper.find('EuiInMemoryTable').prop('items');
-    const expectedFilteredItems = mockAssociatedObjects.filter((obj) =>
-      obj.accelerations.some((acc) => acc.name === 'skipping_index_2')
-    );
 
-    expect(filteredItems.length).toEqual(expectedFilteredItems.length);
-
-    expectedFilteredItems.forEach((expectedItem) => {
-      expect(filteredItems.some((item) => item.id === expectedItem.id)).toBeTruthy();
-    });
+    expect(filteredItems.length).toEqual(1);
   });
 });

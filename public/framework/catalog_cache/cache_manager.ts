@@ -10,7 +10,7 @@ import {
 } from '../../../common/constants/shared';
 import {
   AccelerationsCacheData,
-  CachedAcclerationByDataSource,
+  CachedAccelerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
@@ -85,12 +85,12 @@ export class CatalogCacheManager {
 
   /**
    * Adds or updates a data source in the accelerations cache.
-   * @param {CachedAcclerationByDataSource} dataSource - The data source to add or update.
+   * @param {CachedAccelerationByDataSource} dataSource - The data source to add or update.
    */
-  static addOrUpdateAccelerationsByDataSource(dataSource: CachedAcclerationByDataSource): void {
+  static addOrUpdateAccelerationsByDataSource(dataSource: CachedAccelerationByDataSource): void {
     const accCacheData = this.getAccelerationsCache();
     const index = accCacheData.dataSources.findIndex(
-      (ds: CachedAcclerationByDataSource) => ds.name === dataSource.name
+      (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
     );
     if (index !== -1) {
       accCacheData.dataSources[index] = dataSource;
@@ -103,12 +103,12 @@ export class CatalogCacheManager {
   /**
    * Retrieves accelerations cache from local storage by the datasource name.
    * @param {string} dataSourceName - The name of the data source.
-   * @returns {CachedAcclerationByDataSource} The retrieved accelerations by datasource in cache.
+   * @returns {CachedAccelerationByDataSource} The retrieved accelerations by datasource in cache.
    * @throws {Error} If the data source is not found.
    */
   static getOrCreateAccelerationsByDataSource(
     dataSourceName: string
-  ): CachedAcclerationByDataSource {
+  ): CachedAccelerationByDataSource {
     const accCacheData = this.getAccelerationsCache();
     const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
 

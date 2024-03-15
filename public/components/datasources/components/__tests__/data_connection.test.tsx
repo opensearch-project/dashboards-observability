@@ -12,8 +12,11 @@ import { coreRefs } from '../../../../../public/framework/core_refs';
 import {
   describePrometheusDataConnection,
   describeS3Dataconnection,
+  mockAccelerationCacheData,
+  mockDataSourceCacheData,
 } from '../../../../../test/datasources';
 import { DataConnection } from '../manage/data_connection';
+import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(),
@@ -42,25 +45,23 @@ describe('Data Connection Page test', () => {
   });
 
   it('Renders Prometheus data connection page with data', async () => {
-    const pplService = {
-      fetch: jest.fn(),
-    };
+    CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
     const container = document.createElement('div');
     (coreRefs.http!.get as jest.Mock).mockResolvedValue(describePrometheusDataConnection);
     await act(() => {
-      ReactDOM.render(<DataConnection pplService={pplService} />, container);
+      ReactDOM.render(<DataConnection dataSource="prom" />, container);
     });
     expect(container).toMatchSnapshot();
   });
 
   it('Renders S3 data connection page with data', async () => {
-    const pplService = {
-      fetch: jest.fn(),
-    };
+    CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
+    CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
     const container = document.createElement('div');
     (coreRefs.http!.get as jest.Mock).mockResolvedValue(describeS3Dataconnection);
     await act(() => {
-      ReactDOM.render(<DataConnection pplService={pplService} />, container);
+      ReactDOM.render(<DataConnection dataSource="ya" />, container);
     });
     expect(container).toMatchSnapshot();
   });

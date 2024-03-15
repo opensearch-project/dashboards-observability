@@ -39,14 +39,30 @@ export interface AssociatedObject {
   name: string;
   database: string;
   type: string;
-  createdByIntegration: string;
   accelerations: Acceleration[];
-  columns: TableColumn[];
+  columns?: TableColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;
 
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export interface DatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+}
 
 interface AsyncApiDataResponse {
   status: string;
@@ -105,7 +121,7 @@ export interface DataSourceCacheData {
   dataSources: CachedDataSource[];
 }
 
-export interface CachedAccelerations {
+export interface CachedAcceleration {
   flintIndexName: string;
   type: AccelerationIndexType;
   database: string;
@@ -115,16 +131,16 @@ export interface CachedAccelerations {
   status: string;
 }
 
-export interface CachedAcclerationByDataSource {
+export interface CachedAccelerationByDataSource {
   name: string;
-  accelerations: CachedAccelerations[];
+  accelerations: CachedAcceleration[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
 
 export interface AccelerationsCacheData {
   version: string;
-  dataSources: CachedAcclerationByDataSource[];
+  dataSources: CachedAccelerationByDataSource[];
 }
 
 export interface PollingSuccessResult {

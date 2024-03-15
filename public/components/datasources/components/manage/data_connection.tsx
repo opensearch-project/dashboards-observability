@@ -26,31 +26,22 @@ import {
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { DatasourceType } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
+import {
+  DatasourceDetails,
+  PrometheusProperties,
+} from '../../../../../common/types/data_connections';
+import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
-import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
-import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTablesToCache,
+} from '../../../../../public/framework/catalog_cache/cache_loader';
 
-interface DatasourceDetails {
-  allowedRoles: string[];
-  name: string;
-  connector: DatasourceType;
-  description: string;
-  properties: S3GlueProperties | PrometheusProperties;
-}
-
-export interface S3GlueProperties {
-  'glue.indexstore.opensearch.uri': string;
-  'glue.indexstore.opensearch.region': string;
-}
-
-export interface PrometheusProperties {
-  'prometheus.uri': string;
-}
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
 export const DataConnection = (props: any) => {
@@ -64,6 +55,26 @@ export const DataConnection = (props: any) => {
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
+  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+
+  const {
+    loadStatus: databasesLoadStatus,
+    startLoading: startLoadingDatabases,
+  } = useLoadDatabasesToCache();
+  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache();
+  const {
+    loadStatus: accelerationsLoadStatus,
+    startLoading: startLoadingAccelerations,
+  } = useLoadAccelerationsToCache();
+
+  const cacheLoadingHooks = {
+    databasesLoadStatus,
+    startLoadingDatabases,
+    tablesLoadStatus,
+    startLoadingTables,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  };
 
   // Dummy accelerations variables for mock purposes
   // Actual accelerations should be retrieved from the backend
@@ -197,19 +208,22 @@ export const DataConnection = (props: any) => {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
-      content: <AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />,
+      content: (
+        <AssociatedObjectsTab
+          datasource={datasourceDetails}
+          cacheLoadingHooks={cacheLoadingHooks}
+          selectedDatabase={selectedDatabase}
+          setSelectedDatabase={setSelectedDatabase}
+        />
+      ),
     },
     {
       id: 'acceleration_table',
       name: 'Accelerations',
       disabled: false,
-      content: <AccelerationTable dataSourceName={dataSource} />,
-    },
-    // TODO: Installed integrations page
-    {
-      id: 'installed_integrations',
-      name: 'Installed Integrations',
-      disabled: false,
+      content: (
+        <AccelerationTable dataSourceName={dataSource} cacheLoadingHooks={cacheLoadingHooks} />
+      ),
     },
     {
       id: 'access_control',
@@ -357,9 +371,9 @@ export const DataConnection = (props: any) => {
           <QueryOrAccelerateData />
         </EuiAccordion>
         <EuiTabbedContent tabs={tabs} />
-
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>
   );
 };
+export { DatasourceDetails };
