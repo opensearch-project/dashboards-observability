@@ -397,20 +397,6 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             aria-controls="random_html_id"
             aria-selected="false"
             class="euiTab"
-            id="installed_integrations"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Installed Integrations
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
             id="access_control"
             role="tab"
             type="button"
@@ -427,6 +413,37 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
           id="random_html_id"
           role="tabpanel"
         >
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiCallOut euiCallOut--primary"
+          >
+            <div
+              class="euiCallOutHeader"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+                  fill-rule="evenodd"
+                />
+              </svg>
+              <span
+                class="euiCallOutHeader__title"
+              >
+                Accelerations recommended for tables. Setup acceleration or configure integrations
+              </span>
+            </div>
+          </div>
           <div
             class="euiSpacer euiSpacer--l"
           />

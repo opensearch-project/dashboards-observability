@@ -5,11 +5,22 @@
 
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
+import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
 
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
+
+export const getAccelerationName = (
+  indexName: string,
+  acceleration: CachedAcceleration,
+  datasource: string
+) => {
+  return (
+    indexName || `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
+  );
+};
 
 export const AccelerationStatus = ({ status }: { status: string }) => {
   const label = status;

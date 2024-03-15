@@ -108,10 +108,12 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     id: index,
   }));
 
-  const schemaData = tableDetail.columns.map((column, index) => ({
-    ...column,
-    id: index,
-  }));
+  const schemaData = tableDetail.columns
+    ? tableDetail.columns.map((column, index) => ({
+        ...column,
+        id: index,
+      }))
+    : {};
 
   const accelerationColumns = [
     {

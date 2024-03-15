@@ -12,7 +12,10 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { AssociatedObject } from '../../../../../../../common/types/data_connections';
+import {
+  AssociatedObject,
+  CachedAcceleration,
+} from '../../../../../../../common/types/data_connections';
 import {
   getRenderAccelerationDetailsFlyout,
   getRenderAssociatedObjectsDetailsFlyout,
@@ -22,12 +25,12 @@ import {
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
 } from '../utils/associated_objects_tab_utils';
-import { DatasourceDetails } from '../../data_connection';
+import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
 
 interface AssociatedObjectsTableProps {
-  datasource: DatasourceDetails;
-  selectedDatabase: string;
+  datasourceName: string;
   associatedObjects: AssociatedObject[];
+  cachedAccelerations: CachedAcceleration[];
 }
 
 interface FilterOption {
@@ -43,7 +46,7 @@ interface AssociatedTableFilter {
 }
 
 export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
-  const { associatedObjects } = props;
+  const { datasourceName, associatedObjects, cachedAccelerations } = props;
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
@@ -61,7 +64,19 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             if (item.type === 'table') {
               renderAssociatedObjectsDetailsFlyout(item);
             } else {
-              renderAccelerationDetailsFlyout(item);
+              const acceleration = cachedAccelerations.find(
+                (acc) => getAccelerationName(acc.indexName, acc, datasourceName) === name
+              );
+              console.log(acceleration);
+              renderAccelerationDetailsFlyout({
+                indexName: getAccelerationName(
+                  acceleration?.indexName,
+                  acceleration,
+                  datasourceName
+                ),
+                acceleration,
+                dataSourceName: datasourceName,
+              });
             }
           }}
         >
@@ -82,21 +97,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Type',
       }),
       sortable: true,
-    },
-    {
-      field: 'createdByIntegration',
-      name: i18n.translate('datasources.associatedObjectsTab.column.createdByIntegration', {
-        defaultMessage: 'Created by Integration',
-      }),
-      sortable: true,
-      render: (createdByIntegration: string, _item: AssociatedObject) =>
-        createdByIntegration ? (
-          <EuiLink onClick={() => openDetailsPage(createdByIntegration)}>
-            {createdByIntegration}
-          </EuiLink>
-        ) : (
-          '-'
-        ),
     },
     {
       field: 'accelerations',

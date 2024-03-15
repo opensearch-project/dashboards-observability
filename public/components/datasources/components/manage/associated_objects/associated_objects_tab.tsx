@@ -30,6 +30,7 @@ import {
   ASSC_OBJ_PANEL_TITLE,
   ASSC_OBJ_PANEL_DESCRIPTION,
   ASSC_OBJ_FRESH_MSG,
+  isCatalogCacheFetching,
 } from './utils/associated_objects_tab_utils';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
@@ -37,19 +38,17 @@ import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_load
 import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { AssociatedObjectsTable } from './modules/associated_objects_table';
-import {
-  useLoadAccelerationsToCache,
-  useLoadDatabasesToCache,
-  useLoadTablesToCache,
-} from '../../../../../../public/framework/catalog_cache/cache_loader';
+import { getAccelerationName } from '../accelerations/utils/acceleration_utils';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
+  cacheLoadingHooks: any;
+  selectedDatabase: string;
+  setSelectedDatabase: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props) => {
-  const { datasource } = props;
-  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const { datasource, cacheLoadingHooks, selectedDatabase, setSelectedDatabase } = props;
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
   const [isObjectsLoading, setIsObjectsLoading] = useState<boolean>(false);
@@ -60,14 +59,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
 
   const {
-    loadStatus: databasesLoadStatus,
-    startLoading: startLoadingDatabases,
-  } = useLoadDatabasesToCache();
-  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache();
-  const {
-    loadStatus: accelerationsLoadStatus,
-    startLoading: startLoadingAccelerations,
-  } = useLoadAccelerationsToCache();
+    databasesLoadStatus,
+    startLoadingDatabases,
+    tablesLoadStatus,
+    startLoadingTables,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  } = cacheLoadingHooks;
 
   let lastChecked: boolean;
   if (selectedDatabase !== '') {
@@ -92,10 +90,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   );
 
   const onRefreshButtonClick = () => {
-    startLoadingDatabases(datasource.name);
-    startLoadingTables(datasource.name, selectedDatabase);
-    startLoadingAccelerations(datasource.name);
-    setIsRefreshing(true);
+    if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
+      startLoadingDatabases(datasource.name);
+      setIsRefreshing(true);
+    }
   };
 
   const AssociatedObjectsHeader = () => {
@@ -132,7 +130,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <LastUpdatedText />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AssociatedObjectsRefreshButton isLoading={isRefreshing} onClick={onRefreshButtonClick} />
+          <AssociatedObjectsRefreshButton
+            isLoading={
+              isRefreshing ||
+              isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
+            }
+            onClick={onRefreshButtonClick}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -142,7 +146,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     if (datasource.name) {
       const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
-      if (datasourceCache.status === CachedDataSourceStatus.Empty) {
+      if (
+        datasourceCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(databasesLoadStatus)
+      ) {
         startLoadingDatabases(datasource.name);
       } else if (datasourceCache.status === CachedDataSourceStatus.Updated) {
         setCachedDatabases(datasourceCache.databases);
@@ -182,20 +189,26 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
       );
-      if (databaseCache.status === CachedDataSourceStatus.Empty) {
+      if (
+        databaseCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(tablesLoadStatus)
+      ) {
         startLoadingTables(datasource.name, selectedDatabase);
         setIsObjectsLoading(true);
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
       }
-      if (accelerationsCache.status === CachedDataSourceStatus.Empty) {
+      if (
+        accelerationsCache.status === CachedDataSourceStatus.Empty &&
+        !isCatalogCacheFetching(accelerationsLoadStatus)
+      ) {
         startLoadingAccelerations(datasource.name);
         setIsObjectsLoading(true);
       } else if (accelerationsCache.status === CachedDataSourceStatus.Updated) {
         setCachedAccelerations(accelerationsCache.accelerations);
       }
     }
-  }, [datasource.name, selectedDatabase]);
+  }, [datasource.name, selectedDatabase, databaseSelectorOptions]);
 
   // Retrieve from tables cache upon load success
   useEffect(() => {
@@ -234,7 +247,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   }, [cachedDatabases]);
 
   useEffect(() => {
-    setSelectedDatabase(databaseSelectorOptions.find((option) => option.checked === 'on')?.label);
+    setSelectedDatabase((prevState) => {
+      const select = databaseSelectorOptions.find((option) => option.checked === 'on')?.label;
+      if (select) {
+        return select;
+      }
+      return prevState;
+    });
   }, [databaseSelectorOptions]);
 
   useEffect(() => {
@@ -245,7 +264,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         name: table.name,
         database: selectedDatabase,
         type: 'table',
-        createdByIntegration: 'N/A',
         // Temporary dummy array
         accelerations: [],
         columns: table.columns,
@@ -255,12 +273,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
         datasource: datasource.name,
-        id: acceleration.flintIndexName,
-        name: acceleration.indexName,
+        id: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
+        name: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
           .label,
-        createdByIntegration: '-',
         // Temporary dummy array
         accelerations: [],
         columns: undefined,
@@ -270,6 +287,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   return (
     <>
+      <EuiSpacer />
+      <AccelerationsRecommendationCallout />
       <EuiSpacer />
       <EuiPanel>
         <AssociatedObjectsHeader />
@@ -282,7 +301,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
               <AssociatedObjectsTabEmpty cacheType="databases" />
             ) : (
               <>
-                <AccelerationsRecommendationCallout />
                 <EuiSpacer />
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem grow={false}>
@@ -308,9 +326,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                       <>
                         {cachedTables.length > 0 || cachedAccelerations.length > 0 ? (
                           <AssociatedObjectsTable
-                            datasource={datasource}
-                            selectedDatabase={selectedDatabase}
+                            datasourceName={datasource.name}
                             associatedObjects={associatedObjects}
+                            cachedAccelerations={cachedAccelerations}
                           />
                         ) : (
                           <AssociatedObjectsTabEmpty cacheType="tables" />

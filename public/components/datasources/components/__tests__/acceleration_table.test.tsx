@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import Adapter from 'enzyme-adapter-react-16';
 import { ACC_LOADING_MSG } from '../manage/accelerations/utils/acceleration_utils';
 import { ReactWrapper } from 'enzyme';
+import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 
 const accelerationCache = {
   accelerations: [
@@ -84,8 +85,17 @@ jest.mock('../../../../plugin', () => ({
 describe('AccelerationTable Component', () => {
   configure({ adapter: new Adapter() });
 
+  const cacheLoadingHooks = {
+    databasesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    tablesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    accelerationsLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingAccelerations: jest.fn(),
+  };
+
   it('renders without crashing', () => {
-    const wrapper = mount(<AccelerationTable dataSourceName="testDataSource" />);
+    const wrapper = mount(
+      <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+    );
     expect(wrapper).toBeDefined();
   });
 
@@ -99,7 +109,9 @@ describe('AccelerationTable Component', () => {
 
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = mount(<AccelerationTable dataSourceName="testDataSource" />);
+      wrapper = mount(
+        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+      );
     });
 
     wrapper!.update();
@@ -118,7 +130,9 @@ describe('AccelerationTable Component', () => {
   it('correctly displays accelerations in the table', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = mount(<AccelerationTable dataSourceName="testDataSource" />);
+      wrapper = mount(
+        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+      );
     });
     wrapper!.update();
 
@@ -136,7 +150,9 @@ describe('AccelerationTable Component', () => {
 
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = mount(<AccelerationTable dataSourceName="testDataSource" />);
+      wrapper = mount(
+        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+      );
       await new Promise((resolve) => setTimeout(resolve, 0));
       wrapper!.update();
     });
@@ -154,7 +170,9 @@ describe('AccelerationTable Component', () => {
   it('displays updated time correctly', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = mount(<AccelerationTable dataSourceName="testDataSource" />);
+      wrapper = mount(
+        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+      );
     });
     wrapper!.update();
 

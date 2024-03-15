@@ -2,6 +2,16 @@
 
 exports[`AssociatedObjectsTab Component renders correctly with associated objects 1`] = `
 <AssociatedObjectsTab
+  cacheLoadingHooks={
+    Object {
+      "accelerationsLoadStatus": "initial",
+      "databasesLoadStatus": "initial",
+      "startLoadingAccelerations": [MockFunction],
+      "startLoadingDatabases": [MockFunction],
+      "startLoadingTables": [MockFunction],
+      "tablesLoadStatus": "initial",
+    }
+  }
   datasource={
     Object {
       "allowedRoles": Array [
@@ -16,7 +26,94 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
       },
     }
   }
+  selectedDatabase="mock_database_1"
+  setSelectedDatabase={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          [Function],
+        ],
+        Array [
+          [Function],
+        ],
+        Array [
+          [Function],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
 >
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <AccelerationsRecommendationCallout>
+    <EuiCallOut
+      iconType="iInCircle"
+      title="Accelerations recommended for tables. Setup acceleration or configure integrations"
+    >
+      <div
+        className="euiCallOut euiCallOut--primary"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <EuiIcon
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            size="m"
+            type="iInCircle"
+          >
+            <EuiIconIInCircle
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+                  fillRule="evenodd"
+                />
+              </svg>
+            </EuiIconIInCircle>
+          </EuiIcon>
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Accelerations recommended for tables. Setup acceleration or configure integrations
+          </span>
+        </div>
+      </div>
+    </EuiCallOut>
+  </AccelerationsRecommendationCallout>
   <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
@@ -222,57 +319,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
         />
       </EuiHorizontalRule>
-      <AccelerationsRecommendationCallout>
-        <EuiCallOut
-          iconType="iInCircle"
-          title="Accelerations recommended for tables. Setup acceleration or configure integrations"
-        >
-          <div
-            className="euiCallOut euiCallOut--primary"
-          >
-            <div
-              className="euiCallOutHeader"
-            >
-              <EuiIcon
-                aria-hidden="true"
-                className="euiCallOutHeader__icon"
-                color="inherit"
-                size="m"
-                type="iInCircle"
-              >
-                <EuiIconBeaker
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                  focusable="false"
-                  role="img"
-                  style={null}
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                </EuiIconBeaker>
-              </EuiIcon>
-              <span
-                className="euiCallOutHeader__title"
-              >
-                Accelerations recommended for tables. Setup acceleration or configure integrations
-              </span>
-            </div>
-          </div>
-        </EuiCallOut>
-      </AccelerationsRecommendationCallout>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"
@@ -509,7 +555,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "N/A",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_table_1",
@@ -519,7 +564,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "N/A",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_table_2",
@@ -529,7 +573,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "N/A",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_table_3",
@@ -539,7 +582,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "N/A",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_table_4",
@@ -549,7 +591,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "N/A",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_table_5",
@@ -559,7 +600,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "-",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_1",
@@ -569,7 +609,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "accelerations": Array [],
                       "columns": undefined,
-                      "createdByIntegration": "-",
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_2",
@@ -578,21 +617,29 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     },
                   ]
                 }
-                datasource={
-                  Object {
-                    "allowedRoles": Array [
-                      "admin",
-                    ],
-                    "connector": "S3GLUE",
-                    "description": "",
-                    "name": "mock_data_source",
-                    "properties": Object {
-                      "glue.indexstore.opensearch.region": "",
-                      "glue.indexstore.opensearch.uri": "",
+                cachedAccelerations={
+                  Array [
+                    Object {
+                      "autoRefresh": true,
+                      "database": "mock_database_1",
+                      "flintIndexName": "mock_acceleration_1",
+                      "indexName": "mock_acceleration_1",
+                      "status": "",
+                      "table": "",
+                      "type": "skipping",
                     },
-                  }
+                    Object {
+                      "autoRefresh": true,
+                      "database": "mock_database_1",
+                      "flintIndexName": "mock_acceleration_2",
+                      "indexName": "mock_acceleration_2",
+                      "status": "",
+                      "table": "",
+                      "type": "materialized",
+                    },
+                  ]
                 }
-                selectedDatabase="mock_database_1"
+                datasourceName="mock_data_source"
               >
                 <EuiInMemoryTable
                   columns={
@@ -612,12 +659,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "field": "type",
                         "name": "Type",
-                        "sortable": true,
-                      },
-                      Object {
-                        "field": "createdByIntegration",
-                        "name": "Created by Integration",
-                        "render": [Function],
                         "sortable": true,
                       },
                       Object {
@@ -654,7 +695,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "N/A",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_table_1",
@@ -664,7 +704,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "N/A",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_table_2",
@@ -674,7 +713,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "N/A",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_table_3",
@@ -684,7 +722,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "N/A",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_table_4",
@@ -694,7 +731,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "N/A",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_table_5",
@@ -704,7 +740,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "-",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_1",
@@ -714,7 +749,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "accelerations": Array [],
                         "columns": undefined,
-                        "createdByIntegration": "-",
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_2",
@@ -1189,12 +1223,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "sortable": true,
                           },
                           Object {
-                            "field": "createdByIntegration",
-                            "name": "Created by Integration",
-                            "render": [Function],
-                            "sortable": true,
-                          },
-                          Object {
                             "field": "accelerations",
                             "name": "Accelerations",
                             "render": [Function],
@@ -1228,7 +1256,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "-",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_1",
@@ -1238,7 +1265,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "-",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_2",
@@ -1248,7 +1274,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "N/A",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_table_1",
@@ -1258,7 +1283,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "N/A",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_table_2",
@@ -1268,7 +1292,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "N/A",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_table_3",
@@ -1278,7 +1301,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "N/A",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_table_4",
@@ -1288,7 +1310,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "accelerations": Array [],
                             "columns": undefined,
-                            "createdByIntegration": "N/A",
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
                             "id": "mock_table_5",
@@ -1381,14 +1402,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Object {
                                               "isSortAscending": undefined,
                                               "isSorted": false,
-                                              "key": "_data_s_createdByIntegration_3",
-                                              "name": "Created by Integration",
-                                              "onSort": [Function],
-                                            },
-                                            Object {
-                                              "isSortAscending": undefined,
-                                              "isSorted": false,
-                                              "key": "_data_s_accelerations_4",
+                                              "key": "_data_s_accelerations_3",
                                               "name": "Accelerations",
                                               "onSort": [Function],
                                             },
@@ -1738,74 +1752,16 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     </EuiTableHeaderCell>
                                     <EuiTableHeaderCell
                                       align="left"
-                                      data-test-subj="tableHeaderCell_createdByIntegration_3"
+                                      data-test-subj="tableHeaderCell_accelerations_3"
                                       isSorted={false}
-                                      key="_data_h_createdByIntegration_3"
+                                      key="_data_h_accelerations_3"
                                       onSort={[Function]}
                                     >
                                       <th
                                         aria-live="polite"
                                         aria-sort="none"
                                         className="euiTableHeaderCell"
-                                        data-test-subj="tableHeaderCell_createdByIntegration_3"
-                                        role="columnheader"
-                                        scope="col"
-                                        style={
-                                          Object {
-                                            "width": undefined,
-                                          }
-                                        }
-                                      >
-                                        <button
-                                          className="euiTableHeaderButton"
-                                          data-test-subj="tableHeaderSortButton"
-                                          onClick={[Function]}
-                                          type="button"
-                                        >
-                                          <CellContents
-                                            className="euiTableCellContent"
-                                            isSorted={false}
-                                            showSortMsg={true}
-                                          >
-                                            <span
-                                              className="euiTableCellContent"
-                                            >
-                                              <EuiInnerText>
-                                                <EuiI18n
-                                                  default="{innerText}; {description}"
-                                                  token="euiTableHeaderCell.titleTextWithDesc"
-                                                  values={
-                                                    Object {
-                                                      "description": undefined,
-                                                      "innerText": "Created by Integration",
-                                                    }
-                                                  }
-                                                >
-                                                  <span
-                                                    className="euiTableCellContent__text"
-                                                    title="Created by Integration"
-                                                  >
-                                                    Created by Integration
-                                                  </span>
-                                                </EuiI18n>
-                                              </EuiInnerText>
-                                            </span>
-                                          </CellContents>
-                                        </button>
-                                      </th>
-                                    </EuiTableHeaderCell>
-                                    <EuiTableHeaderCell
-                                      align="left"
-                                      data-test-subj="tableHeaderCell_accelerations_4"
-                                      isSorted={false}
-                                      key="_data_h_accelerations_4"
-                                      onSort={[Function]}
-                                    >
-                                      <th
-                                        aria-live="polite"
-                                        aria-sort="none"
-                                        className="euiTableHeaderCell"
-                                        data-test-subj="tableHeaderCell_accelerations_4"
+                                        data-test-subj="tableHeaderCell_accelerations_3"
                                         role="columnheader"
                                         scope="col"
                                         style={
@@ -1854,7 +1810,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     </EuiTableHeaderCell>
                                     <EuiTableHeaderCell
                                       align="right"
-                                      key="_actions_h_5"
+                                      key="_actions_h_4"
                                     >
                                       <th
                                         className="euiTableHeaderCell"
@@ -2031,52 +1987,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_0_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                -
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_0_4"
+                                        key="_data_column_accelerations_0_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2109,7 +2020,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_0_5"
+                                        key="record_actions_0_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2142,7 +2053,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "-",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_1",
@@ -2169,7 +2079,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "-",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_1",
@@ -2383,52 +2292,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_1_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                -
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_1_4"
+                                        key="_data_column_accelerations_1_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2461,7 +2325,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_1_5"
+                                        key="record_actions_1_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2494,7 +2358,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "-",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_2",
@@ -2521,7 +2384,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "-",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_2",
@@ -2735,52 +2597,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_2_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                N/A
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_2_4"
+                                        key="_data_column_accelerations_2_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2813,7 +2630,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_2_5"
+                                        key="record_actions_2_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2846,7 +2663,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "N/A",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_1",
@@ -2873,7 +2689,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "N/A",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_1",
@@ -3087,52 +2902,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_3_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                N/A
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_3_4"
+                                        key="_data_column_accelerations_3_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3165,7 +2935,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_3_5"
+                                        key="record_actions_3_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -3198,7 +2968,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "N/A",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_2",
@@ -3225,7 +2994,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "N/A",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_2",
@@ -3439,52 +3207,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_4_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                N/A
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_4_4"
+                                        key="_data_column_accelerations_4_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3517,7 +3240,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_4_5"
+                                        key="record_actions_4_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -3550,7 +3273,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "N/A",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_3",
@@ -3577,7 +3299,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "N/A",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_3",
@@ -3791,52 +3512,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_5_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                N/A
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_5_4"
+                                        key="_data_column_accelerations_5_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3869,7 +3545,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_5_5"
+                                        key="record_actions_5_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -3902,7 +3578,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "N/A",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_4",
@@ -3929,7 +3604,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "N/A",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_4",
@@ -4143,52 +3817,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_createdByIntegration_6_3"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Created by Integration",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={false}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Created by Integration
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
-                                          >
-                                            <EuiLink
-                                              className=""
-                                              key=".0"
-                                              onClick={[Function]}
-                                            >
-                                              <button
-                                                className="euiLink euiLink--primary"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                N/A
-                                              </button>
-                                            </EuiLink>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_accelerations_6_4"
+                                        key="_data_column_accelerations_6_3"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -4221,7 +3850,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_6_5"
+                                        key="record_actions_6_4"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -4254,7 +3883,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 Object {
                                                   "accelerations": Array [],
                                                   "columns": undefined,
-                                                  "createdByIntegration": "N/A",
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_5",
@@ -4281,7 +3909,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   Object {
                                                     "accelerations": Array [],
                                                     "columns": undefined,
-                                                    "createdByIntegration": "N/A",
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_5",
@@ -4799,6 +4426,16 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
 
 exports[`AssociatedObjectsTab Component renders tab with no databases or objects 1`] = `
 <AssociatedObjectsTab
+  cacheLoadingHooks={
+    Object {
+      "accelerationsLoadStatus": "initial",
+      "databasesLoadStatus": "initial",
+      "startLoadingAccelerations": [MockFunction],
+      "startLoadingDatabases": [MockFunction],
+      "startLoadingTables": [MockFunction],
+      "tablesLoadStatus": "initial",
+    }
+  }
   datasource={
     Object {
       "allowedRoles": Array [
@@ -4813,7 +4450,93 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
       },
     }
   }
+  selectedDatabase=""
+  setSelectedDatabase={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          [Function],
+        ],
+        Array [
+          [Function],
+        ],
+        Array [
+          [Function],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
 >
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <AccelerationsRecommendationCallout>
+    <EuiCallOut
+      iconType="iInCircle"
+      title="Accelerations recommended for tables. Setup acceleration or configure integrations"
+    >
+      <div
+        className="euiCallOut euiCallOut--primary"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <EuiIcon
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            size="m"
+            type="iInCircle"
+          >
+            <EuiIconBeaker
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
+            </EuiIconBeaker>
+          </EuiIcon>
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Accelerations recommended for tables. Setup acceleration or configure integrations
+          </span>
+        </div>
+      </div>
+    </EuiCallOut>
+  </AccelerationsRecommendationCallout>
   <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"

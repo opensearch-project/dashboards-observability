@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DirectQueryLoadingStatus } from '../../../../../../../common/types/explorer';
+
 export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';
 
 export const ASSC_OBJ_TABLE_ACC_COLUMN_NAME = 'accelerations';
@@ -42,4 +44,16 @@ export const onDiscoverButtonClick = (tabaleDetail: any) => {
 export const onDeleteButtonClick = (tableDetail: any) => {
   // TODO: delete table
   console.log('deleting', tableDetail.name);
+};
+
+const catalogCacheFetchingStatus = [
+  DirectQueryLoadingStatus.RUNNING,
+  DirectQueryLoadingStatus.WAITING,
+  DirectQueryLoadingStatus.SCHEDULED,
+];
+
+export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) => {
+  return statuses.some((status: DirectQueryLoadingStatus) =>
+    catalogCacheFetchingStatus.includes(status)
+  );
 };

@@ -16,6 +16,7 @@ import {
   mockEmptyAccelerationCacheData,
   mockEmptyDataSourceCacheData,
 } from '../../../../../test/datasources';
+import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
@@ -24,6 +25,15 @@ jest.mock('../../../../plugin', () => ({
 
 describe('AssociatedObjectsTab Component', () => {
   configure({ adapter: new Adapter() });
+
+  const cacheLoadingHooks = {
+    databasesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingDatabases: jest.fn(),
+    tablesLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingTables: jest.fn(),
+    accelerationsLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingAccelerations: jest.fn(),
+  };
 
   beforeAll(() => {
     const originalDate = Date;
@@ -41,7 +51,14 @@ describe('AssociatedObjectsTab Component', () => {
   it('renders tab with no databases or objects', () => {
     CatalogCacheManager.saveDataSourceCache(mockEmptyDataSourceCacheData);
     CatalogCacheManager.saveAccelerationsCache(mockEmptyAccelerationCacheData);
-    const wrapper = mount(<AssociatedObjectsTab datasource={mockDatasource} />);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={''}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.text()).toContain('You have no databases in your data source');
   });
@@ -49,7 +66,14 @@ describe('AssociatedObjectsTab Component', () => {
   it('renders correctly with associated objects', () => {
     CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
     CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
-    const wrapper = mount(<AssociatedObjectsTab datasource={mockDatasource} />);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.find('EuiInMemoryTable').exists()).toBe(true);
     expect(wrapper.find('EuiLink').length).toBeGreaterThan(0);
@@ -58,7 +82,14 @@ describe('AssociatedObjectsTab Component', () => {
   it('initializes database and acceleration filter options correctly from associated objects', () => {
     CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
     CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
-    const wrapper = mount(<AssociatedObjectsTab datasource={mockDatasource} />);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
 
     wrapper.update();
 
@@ -78,7 +109,14 @@ describe('AssociatedObjectsTab Component', () => {
   it('correctly filters associated objects by acceleration name', () => {
     CatalogCacheManager.saveDataSourceCache(mockDataSourceCacheData);
     CatalogCacheManager.saveAccelerationsCache(mockAccelerationCacheData);
-    const wrapper = mount(<AssociatedObjectsTab datasource={mockDatasource} />);
+    const wrapper = mount(
+      <AssociatedObjectsTab
+        datasource={mockDatasource}
+        cacheLoadingHooks={cacheLoadingHooks}
+        selectedDatabase={'mock_database_1'}
+        setSelectedDatabase={jest.fn()}
+      />
+    );
 
     const mockQueryObject = {
       queryText: 'accelerations:mock_acceleration_1',

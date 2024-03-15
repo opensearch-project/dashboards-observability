@@ -27,9 +27,12 @@ import {
 } from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
+import { CachedAcceleration } from '../../../../../../common/types/data_connections';
 
 export interface AccelerationDetailsFlyoutProps {
-  acceleration: any;
+  index: string;
+  acceleration: CachedAcceleration;
+  dataSourceName: string;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
@@ -53,10 +56,9 @@ const handleDetailsFetchingPromise = (
     .catch((error) => ({ status: 'rejected', action, error }));
 };
 
-export const AccelerationDetailsFlyout = ({
-  acceleration: selectedAcc,
-}: AccelerationDetailsFlyoutProps) => {
-  const { index, dataSourceName, acceleration } = selectedAcc;
+export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
+  const { index, dataSourceName, acceleration } = props;
+  console.log(index, acceleration, dataSourceName);
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
