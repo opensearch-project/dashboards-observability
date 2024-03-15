@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { EuiOverlayMask, EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
-import { ACC_DELETE_MSG, ACC_VACUUM_MSG } from './utils/acceleration_utils';
+import { ACC_DELETE_MSG, ACC_VACUUM_MSG, getAccelerationName } from './utils/acceleration_utils';
 
 interface AccelerationActionOverlayProps {
   isVisible: boolean;
@@ -31,10 +31,11 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
     return null;
   }
 
-  const displayIndexName =
-    acceleration.indexName ||
-    `${dataSourceName}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_');
-
+  const displayIndexName = getAccelerationName(
+    acceleration.indexName,
+    acceleration,
+    dataSourceName
+  );
   const isVacuumAction = actionType === 'vacuum';
   const title = isVacuumAction
     ? `Vacuum acceleration ${displayIndexName}?`
