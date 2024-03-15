@@ -1287,6 +1287,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         "fetch": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
+        "fetchSettings": [Function],
         "http": [MockFunction],
       }
     }
@@ -1754,6 +1755,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 "fetch": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
+                                "fetchSettings": [Function],
                                 "http": [MockFunction],
                               }
                             }
@@ -3520,6 +3522,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         "fetch": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
+        "fetchSettings": [Function],
         "http": [MockFunction],
       }
     }
@@ -3985,6 +3988,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 "fetch": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
+                                "fetchSettings": [Function],
                                 "http": [MockFunction],
                               }
                             }

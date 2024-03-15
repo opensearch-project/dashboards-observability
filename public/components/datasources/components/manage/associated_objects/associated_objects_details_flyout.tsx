@@ -32,7 +32,7 @@ import {
   onDiscoverButtonClick,
 } from './utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
-import { AccelerationStatus } from '../accelerations/helpers/utils';
+import { AccelerationStatus } from '../accelerations/utils/acceleration_utils';
 import {
   ACCE_NO_DATA_TITLE,
   ACCE_NO_DATA_DESCRIPTION,
