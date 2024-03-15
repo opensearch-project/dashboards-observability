@@ -7,9 +7,15 @@ import { schema } from '@osd/config-schema';
 import { RequestParams } from '@elastic/elasticsearch';
 import { IRouter } from '../../../../src/core/server';
 import { DSLFacet } from '../services/facets/dsl_facet';
-import { DSL_BASE, DSL_SEARCH, DSL_CAT, DSL_MAPPING } from '../../common/constants/shared';
+import {
+  DSL_BASE,
+  DSL_SEARCH,
+  DSL_CAT,
+  DSL_MAPPING,
+  DSL_SETTINGS,
+} from '../../common/constants/shared';
 
-export function registerDslRoute({ router, facet }: { router: IRouter; facet: DSLFacet }) {
+export function registerDslRoute({ router }: { router: IRouter; facet: DSLFacet }) {
   router.post(
     {
       path: `${DSL_BASE}${DSL_SEARCH}`,
@@ -46,6 +52,7 @@ export function registerDslRoute({ router, facet }: { router: IRouter; facet: DS
       validate: {
         query: schema.object({
           format: schema.string(),
+          index: schema.string(),
         }),
       },
     },
@@ -77,6 +84,30 @@ export function registerDslRoute({ router, facet }: { router: IRouter; facet: DS
       try {
         const resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
           'indices.getMapping',
+          { index: request.query.index }
+        );
+        return response.ok({
+          body: resp,
+        });
+      } catch (error) {
+        if (error.statusCode !== 404) console.error(error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${DSL_BASE}${DSL_SETTINGS}`,
+      validate: { query: schema.any() },
+    },
+    async (context, request, response) => {
+      try {
+        const resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
+          'indices.getSettings',
           { index: request.query.index }
         );
         return response.ok({

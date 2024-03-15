@@ -15,7 +15,7 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
@@ -24,20 +24,85 @@ import {
   onRefreshButtonClick,
   onDiscoverButtonClick,
   onDeleteButtonClick,
-} from '../accelerations/helpers/utils';
+} from './utils/acceleration_utils';
+import { coreRefs } from '../../../../../framework/core_refs';
+import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 
 export interface AccelerationDetailsFlyoutProps {
   acceleration: any;
 }
 
-export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { acceleration } = props;
+const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchFields(index);
+};
+
+const getSettings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchSettings(index);
+};
+
+const getIndexInfo = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchIndices(index);
+};
+
+const handleDetailsFetchingPromise = (
+  promise: Promise<OpenSearchDashboardsResponse> | undefined,
+  action: string
+) => {
+  return promise!
+    .then((data) => ({ status: 'fulfilled', action, data }))
+    .catch((error) => ({ status: 'rejected', action, error }));
+};
+
+export const AccelerationDetailsFlyout = ({
+  acceleration: selectedAcc,
+}: AccelerationDetailsFlyoutProps) => {
+  const { index, dataSourceName, acceleration } = selectedAcc;
+  const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
     details: AccelerationDetailsTab,
     schema: AccelerationSchemaTab,
     sql_definition: AccelerationSqlTab,
   };
+  const [settings, setSettings] = useState<object>();
+  const [mappings, setMappings] = useState();
+  const [indexInfo, setIndexInfo] = useState();
+
+  const updateMapping = (result) => {
+    setMappings(result);
+  };
+
+  const updateSetting = (result, slectedIndex: string) => {
+    setSettings(result.data[slectedIndex]);
+  };
+
+  const updateIndexInfo = (result) => {
+    setIndexInfo(result);
+  };
+
+  const getAccDetail = (selectedIndex: string) => {
+    Promise.all([
+      handleDetailsFetchingPromise(getMappings(selectedIndex), 'getMappings'),
+      handleDetailsFetchingPromise(getSettings(selectedIndex), 'getSettings'),
+      handleDetailsFetchingPromise(getIndexInfo(selectedIndex), 'getIndexInfo'),
+    ])
+      .then((results) => {
+        updateMapping(results[0]);
+        updateSetting(results[1], selectedIndex);
+        updateIndexInfo(results[2]);
+      })
+      .catch((errors: Error[]) => {
+        errors.forEach((error, errorIndex) => {
+          console.error(`Error in async call ${errorIndex + 1}:`, error);
+        });
+      });
+  };
+
+  useEffect(() => {
+    if (flintIndexName !== undefined && flintIndexName.trim().length > 0) {
+      getAccDetail(flintIndexName);
+    }
+  }, [flintIndexName]);
 
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
@@ -83,13 +148,13 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   ];
 
   const renderTabs = () => {
-    return accelerationDetailsTabs.map((tab, index) => {
+    return accelerationDetailsTabs.map((tab, tabIndex) => {
       return (
         <EuiTab
           onClick={() => setSelectedTab(tab.id)}
           isSelected={tab.id === selectedTab}
           disabled={tab.disabled}
-          key={index}
+          key={tabIndex}
         >
           {tab.name}
         </EuiTab>
@@ -97,9 +162,27 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     });
   };
 
-  const renderTabContent = (tab: string, tabAcceleration: any) => {
+  const renderTabContent = (tab: string) => {
+    let propsForTab;
+
+    switch (tab) {
+      case 'details':
+        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
+        break;
+      case 'schema':
+        propsForTab = { mappings, indexInfo };
+        break;
+      case 'sql_definition':
+        propsForTab = { mappings };
+        break;
+      default:
+        console.log('Unknown Tab: ', tab);
+        return null;
+    }
+
     const TabToDisplay = tabsMap[tab];
-    return <TabToDisplay acceleration={tabAcceleration} />;
+
+    return <TabToDisplay {...propsForTab} />;
   };
 
   return (
@@ -108,7 +191,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiText>
-              <h2 className="panel-title">{acceleration.name}</h2>
+              <h2 className="panel-title">{index}</h2>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -124,7 +207,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiSpacer size="m" />
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{renderTabContent(selectedTab, acceleration)}</EuiFlyoutBody>
+      <EuiFlyoutBody>{renderTabContent(selectedTab)}</EuiFlyoutBody>
     </>
   );
 };

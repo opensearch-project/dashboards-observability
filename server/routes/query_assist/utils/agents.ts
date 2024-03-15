@@ -4,9 +4,8 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
-import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
+import { RequestBody, TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { OpenSearchClient } from '../../../../../../src/core/server';
-import { isResponseError } from '../../../../../../src/core/server/opensearch/client/errors';
 import { ML_COMMONS_API_PREFIX } from '../../../../common/constants/query_assist';
 
 const AGENT_REQUEST_OPTIONS = {
@@ -26,8 +25,6 @@ type AgentResponse = ApiResponse<{
     output: Array<{ name: string; result?: string }>;
   }>;
 }>;
-
-export const agentIdMap: Record<string, string> = {};
 
 export const getAgentIdByConfig = async (
   opensearchClient: OpenSearchClient,
@@ -49,32 +46,19 @@ export const getAgentIdByConfig = async (
   }
 };
 
-export const requestWithRetryAgentSearch = async (options: {
+export const getAgentIdAndRequest = async (options: {
   client: OpenSearchClient;
   configName: string;
-  shouldRetryAgentSearch?: boolean;
   body: RequestBody;
 }): Promise<AgentResponse> => {
-  const { client, configName, shouldRetryAgentSearch = true, body } = options;
-  let retry = shouldRetryAgentSearch;
-  if (!agentIdMap[configName]) {
-    agentIdMap[configName] = await getAgentIdByConfig(client, configName);
-    retry = false;
-  }
-  return client.transport
-    .request(
-      {
-        method: 'POST',
-        path: `${ML_COMMONS_API_PREFIX}/agents/${agentIdMap[configName]}/_execute`,
-        body,
-      },
-      AGENT_REQUEST_OPTIONS
-    )
-    .catch(async (error) => {
-      if (retry && isResponseError(error) && error.statusCode === 404) {
-        agentIdMap[configName] = await getAgentIdByConfig(client, configName);
-        return requestWithRetryAgentSearch({ ...options, shouldRetryAgentSearch: false });
-      }
-      return Promise.reject(error);
-    }) as Promise<AgentResponse>;
+  const { client, configName, body } = options;
+  const agentId = await getAgentIdByConfig(client, configName);
+  return client.transport.request(
+    {
+      method: 'POST',
+      path: `${ML_COMMONS_API_PREFIX}/agents/${agentId}/_execute`,
+      body,
+    },
+    AGENT_REQUEST_OPTIONS
+  ) as TransportRequestPromise<AgentResponse>;
 };

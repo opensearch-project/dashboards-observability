@@ -4,26 +4,26 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiIcon,
   EuiInputPopover,
-  EuiLink,
   EuiListGroup,
   EuiListGroupItem,
-  EuiPanel,
+  EuiSpacer,
+  EuiSplitButton,
   EuiText,
 } from '@elastic/eui';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
-import { QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
+import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
 import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -32,10 +32,17 @@ import {
   changeSummary,
   resetSummary,
   selectQueryAssistantSummarization,
+  setLoading,
   setResponseForSummaryStatus,
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
+
+class ProhibitedQueryError extends Error {
+  constructor(message?: string) {
+    super(message);
+  }
+}
 
 interface SummarizationContext {
   question: string;
@@ -54,6 +61,9 @@ interface Props {
   selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
   nlqInput: string;
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
+  lastFocusedInput: 'query_area' | 'nlq_input';
+  setLastFocusedInput: React.Dispatch<React.SetStateAction<'query_area' | 'nlq_input'>>;
+  runChanges: () => void;
 }
 
 const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
@@ -79,13 +89,35 @@ const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
   ],
 };
 
-export const QueryAssistInput: React.FC<Props> = (props) => {
+const prohibitedQueryCallOut = (
+  <EuiCallOut
+    data-test-subj="query-assist-guard-callout"
+    title="I am unable to respond to this query. Try another question."
+    size="s"
+    color="danger"
+    iconType="alert"
+  />
+);
+
+const emptyQueryCallOut = (
+  <EuiCallOut
+    data-test-subj="query-assist-empty-callout"
+    title="Enter a natural language question to automatically generate a query to view results."
+    size="s"
+    color="warning"
+    iconType="iInCircle"
+  />
+);
+
+export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
   // @ts-ignore
   const explorerData = useSelector(selectQueryResult)[props.tabId];
   // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
+  const loading = summaryData.loading;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (
@@ -108,15 +140,12 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     })();
   }, [summaryData.responseForSummaryStatus]);
 
-  const [barSelected, setBarSelected] = useState(false);
-
   const dispatch = useDispatch();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [generatingOrRunning, setGeneratingOrRunning] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
+  const [callOut, setCallOut] = useState<React.ReactNode>(null);
 
   useEffect(() => {
     if (autoRun) {
@@ -149,13 +178,18 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     );
     return generatedPPL;
   };
-  const formatError = (error: ResponseError): Error => {
-    if (error.body) {
+  const formatError = (error: ResponseError | Error): Error => {
+    if ('body' in error) {
       if (error.body.statusCode === 429)
         return {
           ...error.body,
           message: 'Request is throttled. Try again later or contact your administrator',
         } as Error;
+      if (
+        error.body.statusCode === 400 &&
+        error.body.message === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+      )
+        return new ProhibitedQueryError(error.body.message);
       return error.body as Error;
     }
     return error;
@@ -165,15 +199,23 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
+    if (props.nlqInput.trim().length === 0) {
+      setCallOut(emptyQueryCallOut);
+      return;
+    }
     try {
-      setGenerating(true);
+      dispatch(setLoading({ tabId: props.tabId, loading: true }));
+      setCallOut(null);
       await request();
-    } catch (error) {
-      coreRefs.toasts?.addError(formatError(error as ResponseError), {
-        title: 'Failed to generate results',
-      });
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setCallOut(prohibitedQueryCallOut);
+        return;
+      }
+      coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
-      setGenerating(false);
+      dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
@@ -219,10 +261,13 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
           },
         })
       );
-    } catch (error) {
-      coreRefs.toasts?.addError(formatError(error as ResponseError), {
-        title: 'Failed to summarize results',
-      });
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setCallOut(prohibitedQueryCallOut);
+        return;
+      }
+      coreRefs.toasts?.addError(error, { title: 'Failed to summarize results' });
     } finally {
       await dispatch(
         changeSummary({
@@ -245,137 +290,127 @@ export const QueryAssistInput: React.FC<Props> = (props) => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
+    if (props.nlqInput.trim().length === 0) {
+      setCallOut(emptyQueryCallOut);
+      return;
+    }
     try {
-      setGeneratingOrRunning(true);
+      dispatch(setLoading({ tabId: props.tabId, loading: true }));
+      setCallOut(null);
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
-    } catch (error) {
+    } catch (err) {
+      const error = formatError(err);
+      if (error instanceof ProhibitedQueryError) {
+        setCallOut(prohibitedQueryCallOut);
+        return;
+      }
       if (coreRefs.summarizeEnabled) {
-        generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
+        generateSummary({ isError: true, response: JSON.stringify(error) });
       } else {
-        coreRefs.toasts?.addError(formatError(error as ResponseError), {
-          title: 'Failed to generate results',
-        });
+        coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
-      setGeneratingOrRunning(false);
+      dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
 
   return (
     <>
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiForm
-          component="form"
-          id="nlq-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            request();
-          }}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiInputPopover
+            input={
+              <EuiFieldText
+                inputRef={inputRef}
+                placeholder={
+                  props.selectedIndex[0]?.label
+                    ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
+                    : 'Select a data source or index to ask a question.'
+                }
+                disabled={loading}
+                value={props.nlqInput}
+                onChange={(e) => props.setNlqInput(e.target.value)}
+                onKeyDown={(e) => {
+                  // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
+                  if (e.key === 'Enter') runAndSummarize();
+                }}
+                prepend={<EuiIcon type={chatLogo} />}
+                fullWidth
+                onFocus={() => {
+                  props.setNeedsUpdate(false);
+                  props.setLastFocusedInput('nlq_input');
+                  if (props.nlqInput.length === 0) setIsPopoverOpen(true);
+                }}
+              />
+            }
+            disableFocusTrap
+            fullWidth={true}
+            isOpen={isPopoverOpen}
+            closePopover={() => {
+              setIsPopoverOpen(false);
+            }}
+          >
+            <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+              {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
+                <EuiListGroupItem
+                  onClick={() => {
+                    props.setNlqInput(question);
+                    inputRef.current?.focus();
+                    setIsPopoverOpen(false);
+                  }}
+                  label={question}
+                />
+              ))}
+            </EuiListGroup>
+          </EuiInputPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="returnKey"
+            display={props.lastFocusedInput === 'nlq_input' ? 'fill' : 'base'}
+            isDisabled={loading}
+            onClick={runAndSummarize}
+            size="m"
+            aria-label="submit-question"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {callOut}
+      {props.children && <EuiSpacer size="s" />}
+      {props.children}
+      <EuiSpacer size="m" />
+      {props.lastFocusedInput === 'query_area' ? (
+        <EuiButton
+          fill
+          isLoading={loading}
+          onClick={props.runChanges}
+          iconType="play"
+          style={{ height: 44 }}
         >
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={chatLogo} size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>Query Assistant</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>New!</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiInputPopover
-                    input={
-                      <EuiFieldText
-                        placeholder="Ask a question"
-                        disabled={generating}
-                        value={props.nlqInput}
-                        onChange={(e) => props.setNlqInput(e.target.value)}
-                        fullWidth
-                        onFocus={() => {
-                          setBarSelected(true);
-                          props.setNeedsUpdate(false);
-                          if (props.nlqInput.length === 0) setIsPopoverOpen(true);
-                        }}
-                        onBlur={() => setBarSelected(false)}
-                      />
-                    }
-                    disableFocusTrap
-                    fullWidth={true}
-                    isOpen={isPopoverOpen}
-                    closePopover={() => {
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-                      {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
-                        <EuiListGroupItem
-                          onClick={() => {
-                            props.setNlqInput(question);
-                            setIsPopoverOpen(false);
-                          }}
-                          label={question}
-                        />
-                      ))}
-                    </EuiListGroup>
-                  </EuiInputPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiFlexItem>
-                  <EuiText>
-                    <small>
-                      Share feedback via{' '}
-                      <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
-                        Forum
-                      </EuiLink>{' '}
-                      or{' '}
-                      <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">
-                        Slack
-                      </EuiLink>
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={generating}
-                    onClick={generatePPL}
-                    isDisabled={
-                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
-                    }
-                    iconSide="right"
-                    fill={false}
-                    data-test-subj="query-assist-generate-button"
-                  >
-                    Generate query
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={generatingOrRunning}
-                    onClick={runAndSummarize}
-                    isDisabled={
-                      generating || generatingOrRunning || props.nlqInput.trim().length === 0
-                    }
-                    iconType="returnKey"
-                    iconSide="right"
-                    type="submit"
-                    fill={barSelected}
-                    data-test-subj="query-assist-generate-and-run-button"
-                  >
-                    Generate and run
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </EuiPanel>
+          Run
+        </EuiButton>
+      ) : (
+        <EuiSplitButton
+          disabled={loading}
+          isLoading={loading}
+          // @ts-ignore incorrect type in Oui 1.5, 'disabled' is a valid color
+          color={loading ? 'disabled' : 'success'}
+          data-test-subj="query-assist-generate-and-run-button"
+          options={[
+            {
+              display: (
+                <EuiText data-test-subj="query-assist-generate-button">Generate query</EuiText>
+              ),
+              onClick: generatePPL,
+            },
+          ]}
+          onClick={runAndSummarize}
+        >
+          {loading ? 'Running...' : 'Generate and run'}
+        </EuiSplitButton>
+      )}
     </>
   );
 };
