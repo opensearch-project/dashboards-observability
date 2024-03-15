@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import DSLService from 'public/services/requests/dsl';
 import {
   ApplicationStart,
   ChromeStart,
@@ -21,6 +22,7 @@ class CoreRefs {
   public http?: HttpStart;
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;
+  public dslService?: DSLService;
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
