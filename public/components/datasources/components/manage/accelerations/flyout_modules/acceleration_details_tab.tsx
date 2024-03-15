@@ -15,6 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { AccelerationHealth, AccelerationStatus } from '../utils/acceleration_utils';
+import { coreRefs } from '../../../../../../framework/core_refs';
+import { observabilityDataConnectionsID } from '../../../../../../../common/constants/shared';
 
 interface AccelerationDetailsTabProps {
   acceleration: {
@@ -105,7 +107,17 @@ export const AccelerationDetailsTab = ({
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Data source connection"
-          description={<EuiLink onClick={() => console.log()}>{dataSourceName}</EuiLink>}
+          description={
+            <EuiLink
+              onClick={() =>
+                coreRefs?.application!.navigateToApp(observabilityDataConnectionsID, {
+                  path: `#/manage/${dataSourceName}`,
+                })
+              }
+            >
+              {dataSourceName}
+            </EuiLink>
+          }
         />
         <DetailComponent title="Database" description={acceleration.database} />
         <DetailComponent title="Table" description={acceleration.table || '-'} />
