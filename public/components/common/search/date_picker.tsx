@@ -21,7 +21,6 @@ export function DatePicker(props: IDatePickerProps) {
     handleTimePickerChange,
     handleTimeRangePickerRefresh,
     isAppAnalytics,
-    includesTimestamp,
   } = props;
 
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
@@ -31,27 +30,19 @@ export function DatePicker(props: IDatePickerProps) {
   let setDisabled;
   let toolTipMessage;
 
-  switch (true) {
-    case coreRefs.queryAssistEnabled && !isAppAnalytics: // is query assistant inside log explorer
-      setStartTime = QUERY_ASSIST_START_TIME;
-      setEndTime = QUERY_ASSIST_END_TIME;
-      setDisabled = true;
-      toolTipMessage = i18n.translate('discover.queryAssistant.timePickerDisabledMessage', {
-        defaultMessage: 'Date range has been disabled to accomodate timerange of all datasets',
-      });
-      break;
-    case !includesTimestamp: // there is no timestamp
-      setStartTime = 'now';
-      setDisabled = true;
-      toolTipMessage = i18n.translate('discover.events.timePickerNotFoundMessage', {
-        defaultMessage: 'There is no timestamp found in the index',
-      });
-      break;
-    default:
-      setStartTime = startTime;
-      setEndTime = endTime;
-      setDisabled = false;
-      toolTipMessage = false;
+  if (coreRefs.queryAssistEnabled && !isAppAnalytics) {
+    // is query assistant inside log explorer
+    setStartTime = QUERY_ASSIST_START_TIME;
+    setEndTime = QUERY_ASSIST_END_TIME;
+    setDisabled = true;
+    toolTipMessage = i18n.translate('discover.queryAssistant.timePickerDisabledMessage', {
+      defaultMessage: 'Date range has been disabled to accomodate timerange of all datasets',
+    });
+  } else {
+    setStartTime = startTime;
+    setEndTime = endTime;
+    setDisabled = false;
+    toolTipMessage = false;
   }
 
   return (
