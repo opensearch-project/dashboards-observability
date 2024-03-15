@@ -20,8 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import {
   DATACONNECTIONS_BASE,
+  INTEGRATIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
@@ -108,41 +110,29 @@ export const DataConnection = (props: any) => {
     },
   ];
 
-  // If we import the constant from test/constants directly OSD fails to compile
-  // SInce it's just a temporary mock we include a copy here
-  const TEST_INTEGRATION_SEARCH_RESULTS: IntegrationInstanceResult[] = [
-    {
-      id: 'd5b55c60-e08c-11ee-9c80-ff3b93498fea',
-      status: 'available',
-      name: 'aws_waf-sample',
-      templateName: 'aws_waf',
-      dataSource: 'ss4o_logs_waf-aws_waf-sample-sample',
-      creationDate: '2024-03-12T16:23:18.053Z',
-      assets: [
-        {
-          assetType: 'index-pattern',
-          assetId: '9506c132-f466-4ce3-a875-f187ddec587c',
-          status: 'available',
-          isDefaultAsset: false,
-          description: 'ss4o_logs_waf-aws_waf-sample-sample',
-        },
-        {
-          assetType: 'visualization',
-          assetId: '7770e5be-6f10-4435-9773-021c6188bfe5',
-          status: 'available',
-          isDefaultAsset: false,
-          description: 'logs-waf-Top Client IPs',
-        },
-        {
-          assetType: 'dashboard',
-          assetId: '36f26341-22f0-49c5-9820-f787afb4090c',
-          status: 'available',
-          isDefaultAsset: true,
-          description: 'logs-waf-dashboard',
-        },
-      ],
-    },
-  ];
+  const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
+    [] as IntegrationInstanceResult[]
+  );
+  useEffect(() => {
+    const searchDataSourcePattern = new RegExp(
+      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*_mview`
+    );
+    const findIntegrations = async () => {
+      // TODO: we just get all results and filter, ideally we send a filtering query to the API
+      // Should still be probably okay until we get cases of 500+ integration instances
+      const result: { data: IntegrationInstancesSearchResult } = await http!.get(
+        INTEGRATIONS_BASE + `/store`
+      );
+      if (result.data?.hits) {
+        setDataSourceIntegrations(
+          result.data.hits.filter((res) => res.dataSource.match(searchDataSourcePattern))
+        );
+      } else {
+        setDataSourceIntegrations([]);
+      }
+    };
+    findIntegrations();
+  }, [http, datasourceDetails.name]);
 
   const onclickIntegrationsCard = () => {
     application!.navigateToApp(observabilityIntegrationsID);
@@ -247,7 +237,7 @@ export const DataConnection = (props: any) => {
       name: 'Installed Integrations',
       disabled: false,
       // TODO real return values
-      content: <InstalledIntegrationsTable integrations={TEST_INTEGRATION_SEARCH_RESULTS} />,
+      content: <InstalledIntegrationsTable integrations={dataSourceIntegrations} />,
     },
     {
       id: 'access_control',

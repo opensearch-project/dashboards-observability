@@ -69,7 +69,7 @@ const instanceToTableEntry = (
     name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
-    assets: instance.assets.length,
+    assets: (instance.assets ?? []).length,
   };
 };
 
