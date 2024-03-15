@@ -415,9 +415,6 @@ export function SetupIntegrationForm({
               </EuiFormRow>
             </>
           ) : null}
-          {/* Bottom bar will overlap content if there isn't some space at the end */}
-          <EuiSpacer />
-          <EuiSpacer />
         </>
       ) : null}
     </EuiForm>
