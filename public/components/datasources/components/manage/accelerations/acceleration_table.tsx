@@ -147,14 +147,6 @@ export const AccelerationTable = ({
     }
   }, [startLoadingAccelerations, isCatalogCacheFetching, setIsRefreshing]);
 
-  // const handleRefresh = () => {
-  //   console.log('Initiating refresh...');
-  //   if(!isCatalogCacheFetching(accelerationsLoadStatus)) {
-  //     setIsRefreshing(true);
-  //     startLoadingAccelerations(dataSourceName);
-  //   }
-  // };
-
   const RefreshButton = () => {
     return (
       <EuiButton
