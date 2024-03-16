@@ -126,6 +126,9 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   useEffect(() => {
     if (operationSuccess !== undefined) {
+      if (operationSuccess) {
+        resetFlyout();
+      }
       setOperationType(null);
       setShowConfirmationOverlay(false);
     }
