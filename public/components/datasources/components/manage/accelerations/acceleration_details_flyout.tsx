@@ -72,10 +72,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const onConfirmOperation = () => {
     if (operationType && acceleration) {
       performOperation(acceleration, operationType);
+      setShowConfirmationOverlay(false);
     }
   };
 
-  // Modified icon click handlers
   const onDeleteIconClickHandler = () => {
     setOperationType('delete');
     setShowConfirmationOverlay(true);
@@ -159,7 +159,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
 
   const DeleteIcon = () => {
-    // Use onDeleteIconClickHandler
     return (
       <EuiButtonEmpty onClick={onDeleteIconClickHandler}>
         <EuiIcon type="trash" size="m" />
@@ -168,7 +167,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
 
   const VacuumIcon = () => {
-    // Use onVacuumIconClickHandler
     return (
       <EuiButtonEmpty onClick={onVacuumIconClickHandler}>
         <EuiIcon type="broom" size="m" />
@@ -264,7 +262,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       {showConfirmationOverlay && operationType && (
         <AccelerationActionOverlay
           isVisible={showConfirmationOverlay}
-          actionType={operationType as 'delete' | 'vacuum'} // Asserting the type here
+          actionType={operationType as 'delete' | 'vacuum'}
           acceleration={acceleration}
           dataSourceName={dataSourceName}
           onCancel={() => setShowConfirmationOverlay(false)}
