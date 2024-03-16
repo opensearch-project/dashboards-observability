@@ -2288,6 +2288,16 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
           </div>
         </div>
       </EuiFormRow>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
     </div>
   </EuiForm>
 </SetupIntegrationForm>
@@ -3290,6 +3300,16 @@ exports[`Integration Setup Page Renders the S3 connector form without workflows 
           </div>
         </div>
       </EuiFormRow>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
     </div>
   </EuiForm>
 </SetupIntegrationForm>

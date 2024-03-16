@@ -289,7 +289,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
         const formattedError = formatError(
           '',
           'The query failed to execute and the operation could not be complete.',
-          e.body.message
+          e.body?.message
         );
         coreRefs.core?.notifications.toasts.addError(formattedError, {
           title: 'Query Failed',
