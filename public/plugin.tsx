@@ -101,7 +101,7 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  (index: string, acceleration: CachedAcceleration, dataSourceName: string) => void
+  (index: string, acceleration: CachedAcceleration, dataSourceName: string, handleRefresh: () => void) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
@@ -405,6 +405,7 @@ export class ObservabilityPlugin
             acceleration={acceleration}
             dataSourceName={dataSourceName}
             resetFlyout={() => accelerationDetailsFlyout.close()}
+            handleRefresh={handleRefresh}
           />
         )
       );

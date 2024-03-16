@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   getRefreshButtonIcon,
   onRefreshIconClick,
@@ -139,13 +139,21 @@ export const AccelerationTable = ({
     }
   }, [accelerationsLoadStatus]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     console.log('Initiating refresh...');
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
     }
-  };
+  }, [startLoadingAccelerations, isCatalogCacheFetching, setIsRefreshing]);
+
+  // const handleRefresh = () => {
+  //   console.log('Initiating refresh...');
+  //   if(!isCatalogCacheFetching(accelerationsLoadStatus)) {
+  //     setIsRefreshing(true);
+  //     startLoadingAccelerations(dataSourceName);
+  //   }
+  // };
 
   const RefreshButton = () => {
     return (
@@ -258,7 +266,12 @@ export const AccelerationTable = ({
           <EuiLink
             onClick={() => {
               console.log(displayName);
-              renderAccelerationDetailsFlyout(displayName, acceleration, dataSourceName);
+              renderAccelerationDetailsFlyout(
+                displayName,
+                acceleration,
+                dataSourceName,
+                handleRefresh,
+              );
             }}
           >
             {displayName}

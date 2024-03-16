@@ -35,6 +35,7 @@ export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
   dataSourceName: string;
   resetFlyout: () => void;
+  handleRefresh: () => void;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
@@ -59,7 +60,7 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { index, dataSourceName, acceleration, resetFlyout } = props;
+  const { index, dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
   console.log(index, acceleration, dataSourceName);
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
@@ -128,11 +129,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     if (operationSuccess !== undefined) {
       if (operationSuccess) {
         resetFlyout();
+        handleRefresh();
       }
       setOperationType(null);
       setShowConfirmationOverlay(false);
     }
-  }, [operationSuccess, resetFlyout]);
+  }, [operationSuccess, resetFlyout, handleRefresh]);
 
   useEffect(() => {
     if (flintIndexName !== undefined && flintIndexName.trim().length > 0) {
