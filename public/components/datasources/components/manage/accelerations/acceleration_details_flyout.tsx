@@ -140,7 +140,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const VacuumIcon = () => {
     return (
       <EuiButtonEmpty onClick={() => onVacuumIconClick(acceleration)}>
-        <EuiIcon type="trash" size="m" />
+        <EuiIcon type="broom" size="m" />
       </EuiButtonEmpty>
     );
   };
@@ -216,7 +216,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
           <EuiFlexItem grow={false}>
             <RefreshIcon />
           </EuiFlexItem>
-          {status !== 'deleted' ? (
+          {acceleration.status !== 'deleted' ? (
             <EuiFlexItem grow={false}>
               <DeleteIcon />
             </EuiFlexItem>
