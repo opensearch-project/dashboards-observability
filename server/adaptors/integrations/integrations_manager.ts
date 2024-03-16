@@ -157,7 +157,8 @@ export class IntegrationsManager implements IntegrationsAdaptor {
   loadIntegrationInstance = async (
     templateName: string,
     name: string,
-    dataSource: string
+    dataSource: string,
+    workflows?: string[]
   ): Promise<IntegrationInstance> => {
     const template = await this.repository.getIntegration(templateName);
     if (template === null) {
@@ -171,6 +172,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
       const result = await this.instanceBuilder.build(template, {
         name,
         dataSource,
+        workflows,
       });
       const test = await this.client.create('integration-instance', result);
       return Promise.resolve({ ...result, id: test.id });

@@ -19,6 +19,7 @@ interface IntegrationConfig {
   author?: string;
   description?: string;
   sourceUrl?: string;
+  workflows?: IntegrationWorkflow[];
   statics?: IntegrationStatics;
   components: IntegrationComponent[];
   assets: IntegrationAsset[];
@@ -57,11 +58,19 @@ interface IntegrationAsset {
   version: string;
   extension: string;
   type: SupportedAssetType;
+  workflows?: string[];
+}
+
+interface IntegrationWorkflow {
+  name: string;
+  label: string;
+  description: string;
+  enabled_by_default: boolean;
 }
 
 type ParsedIntegrationAsset =
-  | { type: 'savedObjectBundle'; data: object[] }
-  | { type: 'query'; query: string; language: string };
+  | { type: 'savedObjectBundle'; workflows?: string[]; data: object[] }
+  | { type: 'query'; workflows?: string[]; query: string; language: string };
 
 interface SerializedIntegrationAsset extends IntegrationAsset {
   data: string;

@@ -202,12 +202,14 @@ export class IntegrationReader {
         case 'savedObjectBundle':
           resultValue.push({
             type: 'savedObjectBundle',
+            workflows: asset.workflows,
             data: JSON.parse(serializedResult.value.data),
           });
           break;
         case 'query':
           resultValue.push({
             type: 'query',
+            workflows: asset.workflows,
             query: serializedResult.value.data,
             language: asset.extension,
           });
