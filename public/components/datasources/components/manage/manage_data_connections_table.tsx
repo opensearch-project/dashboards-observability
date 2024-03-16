@@ -6,6 +6,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -17,29 +18,30 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from '../data_connections_header';
-import { HomeProps } from '../../home';
-import { DataConnectionsDescription } from './manage_data_connections_description';
 import {
   DATACONNECTIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { useToast } from '../../../common/toast';
-import { DeleteModal } from '../../../common/helpers/delete_modal';
-import S3Logo from '../../icons/s3-logo.svg';
-import PrometheusLogo from '../../icons/prometheus-logo.svg';
-import { DatasourceType } from '../../../../../common/types/data_connections';
+import { DatasourceStatus, DatasourceType } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
+import { useToast } from '../../../common/toast';
+import { HomeProps } from '../../home';
+import PrometheusLogo from '../../icons/prometheus-logo.svg';
+import S3Logo from '../../icons/s3-logo.svg';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { DataConnectionsDescription } from './manage_data_connections_description';
 
 interface DataConnection {
   connectionType: DatasourceType;
   name: string;
+  dsStatus: DatasourceStatus;
 }
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
-  const { http, chrome, pplService } = props;
+  const { http, chrome } = props;
   const { application } = coreRefs;
 
   const { setToast } = useToast();
@@ -60,7 +62,27 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         );
       })
       .catch((err) => {
+        console.error(err);
         setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
+      });
+  };
+
+  const fetchDataSources = () => {
+    http!
+      .get(`${DATACONNECTIONS_BASE}`)
+      .then((res: any) => {
+        const dataConnections = res.map((dataConnection: any) => {
+          return {
+            name: dataConnection.name,
+            connectionType: dataConnection.connector,
+            dsStatus: dataConnection.status,
+          };
+        });
+        setData(dataConnections);
+      })
+      .catch((err) => {
+        console.error(err);
+        setToast(`Could not fetch datasources`, 'danger');
       });
   };
 
@@ -71,18 +93,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         href: '#/',
       },
     ]);
-    handleDataRequest();
+    fetchDataSources();
   }, [chrome]);
-
-  async function handleDataRequest() {
-    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
-      setData(
-        dataconnections.jsonData.map((x: any) => {
-          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
-        })
-      )
-    );
-  }
 
   const displayDeleteModal = (connectionName: string) => {
     setModalLayout(
@@ -193,6 +205,18 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
+      field: 'status',
+      name: 'Status',
+      sortable: true,
+      truncateText: true,
+      render: (value, record: DataConnection) =>
+        record.dsStatus === 'ACTIVE' ? (
+          <EuiHealth color="success">Active</EuiHealth>
+        ) : (
+          <EuiHealth color="subdued">Inactive</EuiHealth>
+        ),
+    },
+    {
       field: 'actions',
       name: 'Actions',
       actions,
@@ -208,7 +232,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const entries = data.map((dataconnection: DataConnection) => {
     const name = dataconnection.name;
     const connectionType = dataconnection.connectionType;
-    return { connectionType, name, data: { name, connectionType } };
+    const dsStatus = dataconnection.dsStatus;
+    return { connectionType, name, dsStatus, data: { name, connectionType } };
   });
 
   return (
@@ -216,8 +241,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DataConnectionsDescription refresh={handleDataRequest} />
-
+          <DataConnectionsDescription refresh={fetchDataSources} />
           <EuiInMemoryTable
             items={entries}
             itemId="id"

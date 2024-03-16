@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import {
   ASYNC_POLLING_INTERVAL,
+  SPARK_HIVE_TABLE_REGEX,
   SPARK_PARTITION_INFO,
 } from '../../../common/constants/data_sources';
 import {
@@ -81,9 +82,11 @@ export const updateTablesToCache = (
   }
 
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
-  const newTables = combinedData.map((row: any) => ({
-    name: row.tableName,
-  }));
+  const newTables = combinedData
+    .filter((row: any) => !SPARK_HIVE_TABLE_REGEX.test(row.information))
+    .map((row: any) => ({
+      name: row.tableName,
+    }));
 
   CatalogCacheManager.updateDatabase(dataSourceName, {
     ...cachedDatabase,
@@ -205,9 +208,9 @@ export const createLoadQuery = (
       query = `SHOW SCHEMAS IN ${addBackticksIfNeeded(dataSourceName)}`;
       break;
     case 'tables':
-      query = `SHOW TABLES IN ${addBackticksIfNeeded(dataSourceName)}.${addBackticksIfNeeded(
-        databaseName!
-      )}`;
+      query = `SHOW TABLE EXTENDED IN ${addBackticksIfNeeded(
+        dataSourceName
+      )}.${addBackticksIfNeeded(databaseName!)} LIKE '*'`;
       break;
     case 'accelerations':
       query = `SHOW FLINT INDEX in ${addBackticksIfNeeded(dataSourceName)}`;
