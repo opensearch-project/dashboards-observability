@@ -42,11 +42,6 @@ export const onAccelerateButtonClick = (tableDetail: any) => {
   console.log('accelerating', tableDetail.name);
 };
 
-export const onDiscoverButtonClick = (tabaleDetail: any) => {
-  // TODO: send user to Discover
-  console.log('sending user to discover for', tabaleDetail);
-};
-
 export const onDeleteButtonClick = (tableDetail: any) => {
   // TODO: delete table
   console.log('deleting', tableDetail.name);

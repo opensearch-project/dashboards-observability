@@ -29,7 +29,6 @@ import { i18n } from '@osd/i18n';
 import {
   onAccelerateButtonClick,
   onDeleteButtonClick,
-  onDiscoverButtonClick,
   redirectToExplorerWithDataSrc,
 } from './utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
