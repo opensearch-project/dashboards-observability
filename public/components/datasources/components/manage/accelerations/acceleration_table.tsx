@@ -40,7 +40,7 @@ import { isCatalogCacheFetching } from '../associated_objects/utils/associated_o
 import {
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
-import { useAccelerationOperation } from './delete_acceleration';
+import { useAccelerationOperation } from './acceleration_operation';
 
 interface AccelerationTableProps {
   dataSourceName: string;
