@@ -38,7 +38,7 @@ export interface AssociatedObject {
   id: string;
   name: string;
   database: string;
-  type: AccelerationIndexType | "table";
+  type: AccelerationIndexType | 'table';
   accelerations: Acceleration[];
   columns?: TableColumn[];
 }

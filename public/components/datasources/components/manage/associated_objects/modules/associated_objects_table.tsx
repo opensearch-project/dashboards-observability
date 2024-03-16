@@ -24,7 +24,6 @@ import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
-  redirectExplorerAsscObj,
   redirectToExplorerOSIdx,
   redirectToExplorerWithDataSrc,
 } from '../utils/associated_objects_tab_utils';

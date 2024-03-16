@@ -32,6 +32,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { createBrowserHistory } from 'history';
 import { LogExplorerRouterContext } from '..';
 import {
   DEFAULT_DATA_SOURCE_TYPE,
@@ -132,7 +133,6 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
-import { createBrowserHistory } from 'history';
 
 export const Explorer = ({
   pplService,
