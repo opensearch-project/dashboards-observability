@@ -71,8 +71,12 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
       .then((res: any) => {
-        const dataConnections = res.map((x: any) => {
-          return { name: x.name, connectionType: x.connector, dsStatus: x.status };
+        const dataConnections = res.map((dataConnection: any) => {
+          return {
+            name: dataConnection.name,
+            connectionType: dataConnection.connector,
+            dsStatus: dataConnection.status,
+          };
         });
         setData(dataConnections);
       })

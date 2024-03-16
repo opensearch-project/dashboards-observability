@@ -305,7 +305,7 @@ describe('loadCacheTests', () => {
       const loadCacheType = 'tables';
       const dataSourceName = 'example';
       const databaseName = 'test';
-      const expectedQuery = 'SHOW TABLES IN `example`.`test`';
+      const expectedQuery = "SHOW TABLE EXTENDED IN `example`.`test` LIKE '*'";
       expect(createLoadQuery(loadCacheType, dataSourceName, databaseName)).toEqual(expectedQuery);
     });
 
@@ -326,7 +326,7 @@ describe('loadCacheTests', () => {
       const loadCacheType = 'tables';
       const dataSourceName = 'example';
       const databaseName = '`sample`';
-      const expectedQuery = 'SHOW TABLES IN `example`.`sample`';
+      const expectedQuery = "SHOW TABLE EXTENDED IN `example`.`sample` LIKE '*'";
       expect(createLoadQuery(loadCacheType, dataSourceName, databaseName)).toEqual(expectedQuery);
     });
   });

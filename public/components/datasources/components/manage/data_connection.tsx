@@ -44,6 +44,7 @@ import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { InactiveDataConnectionCallout } from './inactive_data_connection';
+import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
