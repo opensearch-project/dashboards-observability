@@ -19,15 +19,12 @@ import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
-import {
-  onRefreshIconClick,
-  onDiscoverIconClick,
-  onDeleteIconClick,
-  onVacuumIconClick,
-} from './utils/acceleration_utils';
+import { onRefreshIconClick, onDiscoverIconClick } from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
+import { useAccelerationOperation } from './acceleration_operation';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 
 export interface AccelerationDetailsFlyoutProps {
   index: string;
@@ -67,6 +64,28 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     schema: AccelerationSchemaTab,
     sql_definition: AccelerationSqlTab,
   };
+  const [operationType, setOperationType] = useState<'delete' | 'vacuum' | null>(null);
+  const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
+
+  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
+
+  const onConfirmOperation = () => {
+    if (operationType && acceleration) {
+      performOperation(acceleration, operationType);
+    }
+  };
+
+  // Modified icon click handlers
+  const onDeleteIconClickHandler = () => {
+    setOperationType('delete');
+    setShowConfirmationOverlay(true);
+  };
+
+  const onVacuumIconClickHandler = () => {
+    setOperationType('vacuum');
+    setShowConfirmationOverlay(true);
+  };
+
   const [settings, setSettings] = useState<object>();
   const [mappings, setMappings] = useState();
   const [indexInfo, setIndexInfo] = useState();
@@ -102,6 +121,16 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
 
   useEffect(() => {
+    if (operationSuccess !== undefined) {
+      if (operationSuccess) {
+        resetFlyout();
+      }
+      setOperationType(null);
+      setShowConfirmationOverlay(false);
+    }
+  }, [operationSuccess, resetFlyout]);
+
+  useEffect(() => {
     if (flintIndexName !== undefined && flintIndexName.trim().length > 0) {
       getAccDetail(flintIndexName);
     }
@@ -130,16 +159,18 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
 
   const DeleteIcon = () => {
+    // Use onDeleteIconClickHandler
     return (
-      <EuiButtonEmpty onClick={() => onDeleteIconClick(acceleration)}>
+      <EuiButtonEmpty onClick={onDeleteIconClickHandler}>
         <EuiIcon type="trash" size="m" />
       </EuiButtonEmpty>
     );
   };
 
   const VacuumIcon = () => {
+    // Use onVacuumIconClickHandler
     return (
-      <EuiButtonEmpty onClick={() => onVacuumIconClick(acceleration)}>
+      <EuiButtonEmpty onClick={onVacuumIconClickHandler}>
         <EuiIcon type="broom" size="m" />
       </EuiButtonEmpty>
     );
@@ -230,6 +261,16 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderTabContent(selectedTab)}</EuiFlyoutBody>
+      {showConfirmationOverlay && operationType && (
+        <AccelerationActionOverlay
+          isVisible={showConfirmationOverlay}
+          actionType={operationType as 'delete' | 'vacuum'} // Asserting the type here
+          acceleration={acceleration}
+          dataSourceName={dataSourceName}
+          onCancel={() => setShowConfirmationOverlay(false)}
+          onConfirm={onConfirmOperation}
+        />
+      )}
     </>
   );
 };
