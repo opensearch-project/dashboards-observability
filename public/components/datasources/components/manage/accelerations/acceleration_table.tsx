@@ -40,6 +40,7 @@ import { isCatalogCacheFetching } from '../associated_objects/utils/associated_o
 import {
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
+import { useDeleteAcceleration } from './delete_acceleration';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -57,6 +58,7 @@ export const AccelerationTable = ({
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
+  const { deleteAcceleration } = useDeleteAcceleration(dataSourceName);
 
   const {
     databasesLoadStatus,
@@ -70,7 +72,10 @@ export const AccelerationTable = ({
     selectedItem: null,
   });
 
-  const handleActionClick = (actionType: ModalState['actionType'], acceleration: CachedAcceleration) => {
+  const handleActionClick = (
+    actionType: ModalState['actionType'],
+    acceleration: CachedAcceleration
+  ) => {
     setModalState({
       actionType,
       selectedItem: acceleration,
@@ -84,15 +89,15 @@ export const AccelerationTable = ({
     });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!modalState.selectedItem) return;
 
-    console.log(
-      `${modalState.actionType} action confirmed for:`,
-      modalState.selectedItem.indexName
-    );
-    // Perform your action here (delete or vacuum)
-    handleModalClose(); // Close the modal after action
+    if (modalState.actionType === 'delete') {
+      deleteAcceleration(modalState.selectedItem);
+    } else if (modalState.actionType === 'vacuum') {
+      console.log('Acceleration vacuumed successfully.');
+    }
+    handleModalClose();
   };
 
   useEffect(() => {

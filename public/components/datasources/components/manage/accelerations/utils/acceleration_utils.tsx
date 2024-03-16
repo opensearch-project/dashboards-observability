@@ -28,6 +28,25 @@ export const getAccelerationName = (acceleration: CachedAcceleration, datasource
   );
 };
 
+export const generateAccelerationDeletionQuery = (
+  acceleration: CachedAcceleration,
+  dataSource: string
+): string => {
+  switch (acceleration.type) {
+    case 'skipping':
+      return `DROP SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'covering':
+      if (!acceleration.indexName) {
+        throw new Error("Index name is required for 'covering' acceleration type.");
+      }
+      return `DROP INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'materialized':
+      return `DROP MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.table}`;
+    default:
+      throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
+  }
+};
+
 export const AccelerationStatus = ({ status }: { status: string }) => {
   const label = status;
   let color;
