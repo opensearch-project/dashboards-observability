@@ -604,7 +604,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_1",
                       "name": "mock_acceleration_1",
-                      "type": "Skipping Index",
+                      "type": "skipping",
                     },
                     Object {
                       "accelerations": Array [],
@@ -613,7 +613,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_2",
                       "name": "mock_acceleration_2",
-                      "type": "Materialized View",
+                      "type": "materialized",
                     },
                   ]
                 }
@@ -659,6 +659,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "field": "type",
                         "name": "Type",
+                        "render": [Function],
                         "sortable": true,
                       },
                       Object {
@@ -744,7 +745,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_1",
                         "name": "mock_acceleration_1",
-                        "type": "Skipping Index",
+                        "type": "skipping",
                       },
                       Object {
                         "accelerations": Array [],
@@ -753,7 +754,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_2",
                         "name": "mock_acceleration_2",
-                        "type": "Materialized View",
+                        "type": "materialized",
                       },
                     ]
                   }
@@ -1220,6 +1221,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "field": "type",
                             "name": "Type",
+                            "render": [Function],
                             "sortable": true,
                           },
                           Object {
@@ -1260,7 +1262,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_1",
                             "name": "mock_acceleration_1",
-                            "type": "Skipping Index",
+                            "type": "skipping",
                           },
                           Object {
                             "accelerations": Array [],
@@ -1269,7 +1271,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_2",
                             "name": "mock_acceleration_2",
-                            "type": "Materialized View",
+                            "type": "materialized",
                           },
                           Object {
                             "accelerations": Array [],
@@ -1959,7 +1961,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -1975,13 +1977,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              Skipping Index
-                                            </span>
+                                            Skipping Index
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2057,7 +2055,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_1",
                                                   "name": "mock_acceleration_1",
-                                                  "type": "Skipping Index",
+                                                  "type": "skipping",
                                                 }
                                               }
                                               itemId={0}
@@ -2083,7 +2081,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_1",
                                                     "name": "mock_acceleration_1",
-                                                    "type": "Skipping Index",
+                                                    "type": "skipping",
                                                   }
                                                 }
                                                 key="item_action_0_0"
@@ -2264,7 +2262,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -2280,13 +2278,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              Materialized View
-                                            </span>
+                                            Materialized View
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2362,7 +2356,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_2",
                                                   "name": "mock_acceleration_2",
-                                                  "type": "Materialized View",
+                                                  "type": "materialized",
                                                 }
                                               }
                                               itemId={1}
@@ -2388,7 +2382,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_2",
                                                     "name": "mock_acceleration_2",
-                                                    "type": "Materialized View",
+                                                    "type": "materialized",
                                                   }
                                                 }
                                                 key="item_action_1_0"
@@ -2569,7 +2563,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -2585,13 +2579,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              table
-                                            </span>
+                                            Table
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2653,6 +2643,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "description": "Discover this object",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  },
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
                                                     "onClick": [Function],
                                                     "type": "icon",
                                                   },
@@ -2768,6 +2766,102 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   </span>
                                                 </EuiToolTip>
                                               </DefaultItemAction>
+                                              <DefaultItemAction
+                                                action={
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  }
+                                                }
+                                                className="euiTableCellContent__hoverItem"
+                                                enabled={true}
+                                                item={
+                                                  Object {
+                                                    "accelerations": Array [],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_1",
+                                                    "name": "mock_table_1",
+                                                    "type": "table",
+                                                  }
+                                                }
+                                                key="item_action_2_1"
+                                              >
+                                                <EuiToolTip
+                                                  content="Accelerate this object"
+                                                  delay="long"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiButtonIcon
+                                                      aria-labelledby="random_html_id"
+                                                      className="euiTableCellContent__hoverItem"
+                                                      color="primary"
+                                                      iconType="bolt"
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                    >
+                                                      <button
+                                                        aria-labelledby="random_html_id"
+                                                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiButtonIcon__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="bolt"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiButtonIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                        id="random_html_id"
+                                                      >
+                                                        Accelerate
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </DefaultItemAction>
                                             </ExpandedItemActions>
                                           </div>
                                         </td>
@@ -2874,7 +2968,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -2890,13 +2984,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              table
-                                            </span>
+                                            Table
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2958,6 +3048,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "description": "Discover this object",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  },
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
                                                     "onClick": [Function],
                                                     "type": "icon",
                                                   },
@@ -3073,6 +3171,102 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   </span>
                                                 </EuiToolTip>
                                               </DefaultItemAction>
+                                              <DefaultItemAction
+                                                action={
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  }
+                                                }
+                                                className="euiTableCellContent__hoverItem"
+                                                enabled={true}
+                                                item={
+                                                  Object {
+                                                    "accelerations": Array [],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_2",
+                                                    "name": "mock_table_2",
+                                                    "type": "table",
+                                                  }
+                                                }
+                                                key="item_action_3_1"
+                                              >
+                                                <EuiToolTip
+                                                  content="Accelerate this object"
+                                                  delay="long"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiButtonIcon
+                                                      aria-labelledby="random_html_id"
+                                                      className="euiTableCellContent__hoverItem"
+                                                      color="primary"
+                                                      iconType="bolt"
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                    >
+                                                      <button
+                                                        aria-labelledby="random_html_id"
+                                                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiButtonIcon__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="bolt"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiButtonIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                        id="random_html_id"
+                                                      >
+                                                        Accelerate
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </DefaultItemAction>
                                             </ExpandedItemActions>
                                           </div>
                                         </td>
@@ -3179,7 +3373,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -3195,13 +3389,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              table
-                                            </span>
+                                            Table
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -3263,6 +3453,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "description": "Discover this object",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  },
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
                                                     "onClick": [Function],
                                                     "type": "icon",
                                                   },
@@ -3378,6 +3576,102 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   </span>
                                                 </EuiToolTip>
                                               </DefaultItemAction>
+                                              <DefaultItemAction
+                                                action={
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  }
+                                                }
+                                                className="euiTableCellContent__hoverItem"
+                                                enabled={true}
+                                                item={
+                                                  Object {
+                                                    "accelerations": Array [],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_3",
+                                                    "name": "mock_table_3",
+                                                    "type": "table",
+                                                  }
+                                                }
+                                                key="item_action_4_1"
+                                              >
+                                                <EuiToolTip
+                                                  content="Accelerate this object"
+                                                  delay="long"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiButtonIcon
+                                                      aria-labelledby="random_html_id"
+                                                      className="euiTableCellContent__hoverItem"
+                                                      color="primary"
+                                                      iconType="bolt"
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                    >
+                                                      <button
+                                                        aria-labelledby="random_html_id"
+                                                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiButtonIcon__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="bolt"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiButtonIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                        id="random_html_id"
+                                                      >
+                                                        Accelerate
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </DefaultItemAction>
                                             </ExpandedItemActions>
                                           </div>
                                         </td>
@@ -3484,7 +3778,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -3500,13 +3794,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              table
-                                            </span>
+                                            Table
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -3568,6 +3858,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "description": "Discover this object",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  },
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
                                                     "onClick": [Function],
                                                     "type": "icon",
                                                   },
@@ -3683,6 +3981,102 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   </span>
                                                 </EuiToolTip>
                                               </DefaultItemAction>
+                                              <DefaultItemAction
+                                                action={
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  }
+                                                }
+                                                className="euiTableCellContent__hoverItem"
+                                                enabled={true}
+                                                item={
+                                                  Object {
+                                                    "accelerations": Array [],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_4",
+                                                    "name": "mock_table_4",
+                                                    "type": "table",
+                                                  }
+                                                }
+                                                key="item_action_5_1"
+                                              >
+                                                <EuiToolTip
+                                                  content="Accelerate this object"
+                                                  delay="long"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiButtonIcon
+                                                      aria-labelledby="random_html_id"
+                                                      className="euiTableCellContent__hoverItem"
+                                                      color="primary"
+                                                      iconType="bolt"
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                    >
+                                                      <button
+                                                        aria-labelledby="random_html_id"
+                                                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiButtonIcon__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="bolt"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiButtonIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                        id="random_html_id"
+                                                      >
+                                                        Accelerate
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </DefaultItemAction>
                                             </ExpandedItemActions>
                                           </div>
                                         </td>
@@ -3789,7 +4183,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           }
                                         }
                                         setScopeRow={false}
-                                        textOnly={true}
+                                        textOnly={false}
                                       >
                                         <td
                                           className="euiTableRowCell"
@@ -3805,13 +4199,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Type
                                           </div>
                                           <div
-                                            className="euiTableCellContent"
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              table
-                                            </span>
+                                            Table
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -3873,6 +4263,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "description": "Discover this object",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  },
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
                                                     "onClick": [Function],
                                                     "type": "icon",
                                                   },
@@ -3983,6 +4381,102 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                         id="random_html_id"
                                                       >
                                                         Discover
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </DefaultItemAction>
+                                              <DefaultItemAction
+                                                action={
+                                                  Object {
+                                                    "available": [Function],
+                                                    "description": "Accelerate this object",
+                                                    "icon": "bolt",
+                                                    "name": "Accelerate",
+                                                    "onClick": [Function],
+                                                    "type": "icon",
+                                                  }
+                                                }
+                                                className="euiTableCellContent__hoverItem"
+                                                enabled={true}
+                                                item={
+                                                  Object {
+                                                    "accelerations": Array [],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_5",
+                                                    "name": "mock_table_5",
+                                                    "type": "table",
+                                                  }
+                                                }
+                                                key="item_action_6_1"
+                                              >
+                                                <EuiToolTip
+                                                  content="Accelerate this object"
+                                                  delay="long"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiButtonIcon
+                                                      aria-labelledby="random_html_id"
+                                                      className="euiTableCellContent__hoverItem"
+                                                      color="primary"
+                                                      iconType="bolt"
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                    >
+                                                      <button
+                                                        aria-labelledby="random_html_id"
+                                                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        type="button"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiButtonIcon__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="bolt"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </button>
+                                                    </EuiButtonIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                        id="random_html_id"
+                                                      >
+                                                        Accelerate
                                                       </span>
                                                     </EuiScreenReaderOnly>
                                                   </span>
