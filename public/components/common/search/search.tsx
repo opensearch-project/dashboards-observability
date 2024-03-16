@@ -15,11 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
@@ -139,9 +134,6 @@ export const Search = (props: any) => {
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
 
   const showQueryArea = !appLogEvents && coreRefs.queryAssistEnabled;
 
@@ -205,7 +197,7 @@ export const Search = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === QUERY_LANGUAGE.DQL) {
-      showModal();
+      redirectToDiscover();
       return;
     }
     dispatch(
@@ -315,36 +307,6 @@ export const Search = (props: any) => {
   const redirectToDiscover = () => {
     application!.navigateToUrl('../app/data-explorer/discover');
   };
-
-  let redirectionModal = null;
-  if (isModalVisible) {
-    redirectionModal = (
-      <EuiModal onClose={closeModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>Open in Discover</h1>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiText>
-            The OpenSearch Dashboards Query Language (DQL) offers a simplified query syntax and
-            support for scripted fields. Selecting this option will open the Discover application.
-          </EuiText>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
-          <EuiButton
-            onClick={() => {
-              redirectToDiscover();
-            }}
-            fill
-          >
-            Open in Discover
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
 
   return (
     <div className="globalQueryBar">
@@ -594,7 +556,6 @@ export const Search = (props: any) => {
           </>
         )}
       </EuiFlexGroup>
-      {redirectionModal}
       {flyout}
     </div>
   );
