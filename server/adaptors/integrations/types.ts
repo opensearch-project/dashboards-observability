@@ -124,6 +124,7 @@ interface AssetReference {
   assetId: string;
   isDefaultAsset: boolean;
   description: string;
+  status?: string;
 }
 
 interface IntegrationInstancesSearchResult {
