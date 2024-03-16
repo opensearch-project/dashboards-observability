@@ -20,6 +20,7 @@ export const useDeleteAcceleration = (dataSource: string) => {
   const { setToast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [accelerationToDelete, setAccelerationToDelete] = useState<CachedAcceleration | null>(null);
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
 
   useEffect(() => {
     if (!accelerationToDelete) return;
@@ -33,13 +34,16 @@ export const useDeleteAcceleration = (dataSource: string) => {
       setToast(`Successfully deleted acceleration: ${displayAccelerationName}`, 'success');
       setAccelerationToDelete(null);
       setIsDeleting(false);
+      setDeletionSuccess(true);
     } else if (loadStatus === DirectQueryLoadingStatus.FAILED) {
       setToast(`Failed to delete acceleration: ${displayAccelerationName}`, 'danger');
       setIsDeleting(false);
+      setDeletionSuccess(false);
     }
   }, [loadStatus, setToast, accelerationToDelete, dataSource]);
 
   const deleteAcceleration = (acceleration: CachedAcceleration) => {
+    setDeletionSuccess(false);
     const deletionQuery = generateAccelerationDeletionQuery(acceleration, dataSource);
 
     const requestPayload = {
@@ -53,5 +57,5 @@ export const useDeleteAcceleration = (dataSource: string) => {
     startLoading(requestPayload);
   };
 
-  return { deleteAcceleration, isDeleting };
+  return { deleteAcceleration, isDeleting, deletionSuccess };
 };

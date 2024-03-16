@@ -58,7 +58,7 @@ export const AccelerationTable = ({
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
-  const { deleteAcceleration } = useDeleteAcceleration(dataSourceName);
+  const { deleteAcceleration, deletionSuccess } = useDeleteAcceleration(dataSourceName);
 
   const {
     databasesLoadStatus,
@@ -71,6 +71,13 @@ export const AccelerationTable = ({
     actionType: null,
     selectedItem: null,
   });
+
+  useEffect(() => {
+    // Auto-refresh if deletion was successful
+    if (deletionSuccess) {
+      handleRefresh();
+    }
+  }, [deletionSuccess]);
 
   const handleActionClick = (
     actionType: ModalState['actionType'],
