@@ -8,54 +8,63 @@ import { CachedAcceleration } from '../../../../../../common/types/data_connecti
 import { useToast } from '../../../../common/toast';
 import { useDirectQuery } from '../../../../../framework/datasources/direct_query_hook';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
-import { generateAccelerationDeletionQuery, getAccelerationName } from './utils/acceleration_utils';
+import {
+  generateAccelerationOperationQuery,
+  getAccelerationName,
+} from './utils/acceleration_utils';
 
 export interface DeleteVcuumAccelerationProps {
   acceleration: CachedAcceleration;
   dataSource: string;
 }
 
-export const useDeleteAcceleration = (dataSource: string) => {
+export const useAccelerationOperation = (dataSource: string) => {
   const { startLoading, loadStatus } = useDirectQuery();
   const { setToast } = useToast();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [accelerationToDelete, setAccelerationToDelete] = useState<CachedAcceleration | null>(null);
-  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [isOperating, setIsOperating] = useState(false);
+  const [operationSuccess, setOperationSuccess] = useState(false);
+  const [accelerationToOperate, setAccelerationToOperate] = useState<CachedAcceleration | null>(
+    null
+  );
+  const [operationType, setOperationType] = useState<'delete' | 'vacuum' | null>(null);
 
   useEffect(() => {
-    if (!accelerationToDelete) return;
+    if (!accelerationToOperate || !operationType) return;
     const displayAccelerationName = getAccelerationName(
-      accelerationToDelete.indexName,
-      accelerationToDelete,
+      accelerationToOperate.indexName,
+      accelerationToOperate,
       dataSource
     );
 
     if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      setToast(`Successfully deleted acceleration: ${displayAccelerationName}`, 'success');
-      setAccelerationToDelete(null);
-      setIsDeleting(false);
-      setDeletionSuccess(true);
+      const operationSuccessMessage =
+        operationType === 'delete' ? 'Successfully deleted' : 'Successfully vacuumed';
+      setToast(`${operationSuccessMessage} acceleration: ${displayAccelerationName}`, 'success');
+      setAccelerationToOperate(null);
+      setIsOperating(false);
+      setOperationSuccess(true);
     } else if (loadStatus === DirectQueryLoadingStatus.FAILED) {
-      setToast(`Failed to delete acceleration: ${displayAccelerationName}`, 'danger');
-      setIsDeleting(false);
-      setDeletionSuccess(false);
+      setToast(`Failed to ${operationType} acceleration: ${displayAccelerationName}`, 'danger');
+      setIsOperating(false);
+      setOperationSuccess(false);
     }
-  }, [loadStatus, setToast, accelerationToDelete, dataSource]);
+  }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType]);
 
-  const deleteAcceleration = (acceleration: CachedAcceleration) => {
-    setDeletionSuccess(false);
-    const deletionQuery = generateAccelerationDeletionQuery(acceleration, dataSource);
+  const performOperation = (acceleration: CachedAcceleration, operation: 'delete' | 'vacuum') => {
+    setOperationSuccess(false);
+    setOperationType(operation);
+    const operationQuery = generateAccelerationOperationQuery(acceleration, dataSource, operation);
 
     const requestPayload = {
       lang: 'sql',
-      query: deletionQuery,
+      query: operationQuery,
       datasource: dataSource,
     };
 
-    setIsDeleting(true);
-    setAccelerationToDelete(acceleration);
+    setIsOperating(true);
+    setAccelerationToOperate(acceleration);
     startLoading(requestPayload);
   };
 
-  return { deleteAcceleration, isDeleting, deletionSuccess };
+  return { performOperation, isOperating, operationSuccess };
 };

@@ -28,20 +28,23 @@ export const getAccelerationName = (acceleration: CachedAcceleration, datasource
   );
 };
 
-export const generateAccelerationDeletionQuery = (
+export const generateAccelerationOperationQuery = (
   acceleration: CachedAcceleration,
-  dataSource: string
+  dataSource: string,
+  operationType: 'delete' | 'vacuum'
 ): string => {
+  const operationKeyword = operationType === 'delete' ? 'DROP' : 'VACUUM';
+
   switch (acceleration.type) {
     case 'skipping':
-      return `DROP SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationKeyword} SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
     case 'covering':
       if (!acceleration.indexName) {
         throw new Error("Index name is required for 'covering' acceleration type.");
       }
-      return `DROP INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationKeyword} INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
     case 'materialized':
-      return `DROP MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationKeyword} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.table}`;
     default:
       throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
   }
