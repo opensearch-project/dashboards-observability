@@ -9,6 +9,7 @@ import { useToast } from '../../../../common/toast';
 import { useDirectQuery } from '../../../../../framework/datasources/direct_query_hook';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import {
+  AccelerationActionType,
   generateAccelerationOperationQuery,
   getAccelerationName,
 } from './utils/acceleration_utils';
@@ -26,7 +27,7 @@ export const useAccelerationOperation = (dataSource: string) => {
   const [accelerationToOperate, setAccelerationToOperate] = useState<CachedAcceleration | null>(
     null
   );
-  const [operationType, setOperationType] = useState<'delete' | 'vacuum' | null>(null);
+  const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
 
   useEffect(() => {
     if (!accelerationToOperate || !operationType) return;
@@ -36,10 +37,21 @@ export const useAccelerationOperation = (dataSource: string) => {
       dataSource
     );
 
-    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
-      const operationSuccessMessage =
-        operationType === 'delete' ? 'Successfully deleted' : 'Successfully vacuumed';
-      setToast(`${operationSuccessMessage} acceleration: ${displayAccelerationName}`, 'success');
+    if (
+      loadStatus === DirectQueryLoadingStatus.RUNNING ||
+      loadStatus === DirectQueryLoadingStatus.WAITING ||
+      loadStatus === DirectQueryLoadingStatus.SCHEDULED
+    ) {
+      const operationInProgressMessage = `${
+        operationType === 'delete' ? 'Deleting' : 'Vacuuming'
+      } acceleration: ${displayAccelerationName}`;
+      setToast(operationInProgressMessage, 'success');
+      setIsOperating(true);
+    } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const operationSuccessMessage = `${
+        operationType === 'delete' ? 'Successfully deleted' : 'Successfully vacuumed'
+      } acceleration: ${displayAccelerationName}`;
+      setToast(operationSuccessMessage, 'success');
       setAccelerationToOperate(null);
       setIsOperating(false);
       setOperationSuccess(true);

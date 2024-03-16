@@ -59,13 +59,6 @@ export const AccelerationTable = ({
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
   const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
-  // const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
-
-  // const resetFlyout = () => {
-  //   console.log('Closing flyout');
-  //   setIsFlyoutVisible(false);
-  // };
-
   const {
     databasesLoadStatus,
     tablesLoadStatus,

@@ -6,11 +6,16 @@
 import React, { useState } from 'react';
 import { EuiOverlayMask, EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
-import { ACC_DELETE_MSG, ACC_VACUUM_MSG, getAccelerationName } from './utils/acceleration_utils';
+import {
+  ACC_DELETE_MSG,
+  ACC_VACUUM_MSG,
+  AccelerationActionType,
+  getAccelerationName,
+} from './utils/acceleration_utils';
 
 interface AccelerationActionOverlayProps {
   isVisible: boolean;
-  actionType: 'delete' | 'vacuum';
+  actionType: AccelerationActionType;
   acceleration: CachedAcceleration | null;
   dataSourceName: string;
   onCancel: () => void;

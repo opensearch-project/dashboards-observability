@@ -19,7 +19,11 @@ import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
-import { onRefreshIconClick, onDiscoverIconClick } from './utils/acceleration_utils';
+import {
+  onRefreshIconClick,
+  onDiscoverIconClick,
+  AccelerationActionType,
+} from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
@@ -64,14 +68,14 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     schema: AccelerationSchemaTab,
     sql_definition: AccelerationSqlTab,
   };
-  const [operationType, setOperationType] = useState<'delete' | 'vacuum' | null>(null);
+  const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
   const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
 
-  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
+  const { performOperation, operationSuccess } = useAccelerationOperation(props.dataSourceName);
 
   const onConfirmOperation = () => {
-    if (operationType && acceleration) {
-      performOperation(acceleration, operationType);
+    if (operationType && props.acceleration) {
+      performOperation(props.acceleration, operationType);
       setShowConfirmationOverlay(false);
     }
   };
@@ -122,9 +126,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   useEffect(() => {
     if (operationSuccess !== undefined) {
-      if (operationSuccess) {
-        resetFlyout();
-      }
       setOperationType(null);
       setShowConfirmationOverlay(false);
     }
