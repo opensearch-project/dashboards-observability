@@ -44,6 +44,7 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
+import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
@@ -116,7 +117,7 @@ export const DataConnection = (props: any) => {
       path: `#/explorer`,
       state: {
         datasourceName: dataSource,
-        datasourceType: 's3glue',
+        datasourceType: DATA_SOURCE_TYPES.S3Glue,
       },
     });
   };

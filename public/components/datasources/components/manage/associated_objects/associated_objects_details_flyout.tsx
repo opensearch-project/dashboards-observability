@@ -38,6 +38,7 @@ import {
   ACCE_NO_DATA_DESCRIPTION,
   CREATE_ACCELERATION_DESCRIPTION,
 } from '../associated_objects/utils/associated_objects_tab_utils';
+import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -56,7 +57,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           if (tableDetail.type !== 'table') return;
           redirectToExplorerWithDataSrc(
             tableDetail.datasource,
-            's3glue',
+            DATA_SOURCE_TYPES.S3Glue,
             tableDetail.database,
             tableDetail.name
           );

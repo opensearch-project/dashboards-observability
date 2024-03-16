@@ -29,7 +29,10 @@ import {
   redirectToExplorerWithDataSrc,
 } from '../utils/associated_objects_tab_utils';
 import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
-import { ACCELERATION_INDEX_TYPES } from '../../../../../../../common/constants/data_sources';
+import {
+  ACCELERATION_INDEX_TYPES,
+  DATA_SOURCE_TYPES,
+} from '../../../../../../../common/constants/data_sources';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -152,7 +155,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             } else if (asscObj.type === 'table') {
               redirectToExplorerWithDataSrc(
                 asscObj.datasource,
-                's3glue',
+                DATA_SOURCE_TYPES.S3Glue,
                 asscObj.database,
                 asscObj.name
               );
