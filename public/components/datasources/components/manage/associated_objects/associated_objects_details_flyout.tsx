@@ -30,6 +30,7 @@ import {
   onAccelerateButtonClick,
   onDeleteButtonClick,
   onDiscoverButtonClick,
+  redirectToExplorerWithDataSrc,
 } from './utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { AccelerationStatus } from '../accelerations/utils/acceleration_utils';
@@ -41,13 +42,28 @@ import {
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
+  resetFlyout: () => void;
 }
 
-export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObjectsFlyoutProps) => {
+export const AssociatedObjectsDetailsFlyout = ({
+  tableDetail,
+  resetFlyout,
+}: AssociatedObjectsFlyoutProps) => {
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
     return (
-      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+      <EuiButtonEmpty
+        onClick={() => {
+          if (tableDetail.type !== 'table') return;
+          redirectToExplorerWithDataSrc(
+            tableDetail.datasource,
+            's3glue',
+            tableDetail.database,
+            tableDetail.name
+          );
+          resetFlyout();
+        }}
+      >
         <EuiIcon type={'discoverApp'} size="m" />
       </EuiButtonEmpty>
     );

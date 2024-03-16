@@ -277,7 +277,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         name: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
-          .label,
+          .value,
         // Temporary dummy array
         accelerations: [],
         columns: undefined,

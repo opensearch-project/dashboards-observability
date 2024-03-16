@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
+import { redirectToExplorerOSIdx } from '../../associated_objects/utils/associated_objects_tab_utils';
 
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
@@ -80,9 +81,11 @@ export const onRefreshButtonClick = (acceleration: any) => {
   console.log('refreshing', acceleration.name);
 };
 
-export const onDiscoverButtonClick = (acceleration: any) => {
-  // TODO: send user to Discover
-  console.log('sending user to discover for', acceleration.name);
+export const onDiscoverButtonClick = (acceleration: CachedAcceleration) => {
+  // boolean determining whether its a skipping index table or mv/ci
+  if (acceleration.type === 'skipping' || acceleration.type === undefined) return;
+
+  redirectToExplorerOSIdx(acceleration.flintIndexName);
 };
 
 export const onDeleteButtonClick = (acceleration: any) => {

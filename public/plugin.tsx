@@ -410,22 +410,30 @@ export class ObservabilityPlugin
       index: string;
       acceleration: CachedAcceleration;
       dataSourceName: string;
-    }) =>
-      core.overlays.openFlyout(
+    }) => {
+      const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AccelerationDetailsFlyout
             index={index}
             acceleration={acceleration}
             dataSourceName={dataSourceName}
+            resetFlyout={() => accelerationDetailsFlyout.close()}
           />
         )
       );
+    };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) =>
-      core.overlays.openFlyout(
-        toMountPoint(<AssociatedObjectsDetailsFlyout tableDetail={tableDetail} />)
+    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) => {
+      const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <AssociatedObjectsDetailsFlyout
+            tableDetail={tableDetail}
+            resetFlyout={() => associatedObjectsDetailsFlyout.close()}
+          />
+        )
       );
+    };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
     const renderCreateAccelerationFlyout = (selectedDatasource: string) => {
