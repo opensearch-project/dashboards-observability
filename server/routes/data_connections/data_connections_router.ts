@@ -9,7 +9,11 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { DATACONNECTIONS_BASE, EDIT } from '../../../common/constants/shared';
+import {
+  DATACONNECTIONS_BASE,
+  DATACONNECTIONS_UPDATE_STATUS,
+  EDIT,
+} from '../../../common/constants/shared';
 
 export function registerDataConnectionsRoute(router: IRouter) {
   router.get(
@@ -88,6 +92,39 @@ export function registerDataConnectionsRoute(router: IRouter) {
             body: {
               name: request.body.name,
               allowedRoles: request.body.allowedRoles,
+            },
+          });
+        return response.ok({
+          body: dataConnectionsresponse,
+        });
+      } catch (error: any) {
+        console.error('Issue in modifying data connection:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `${DATACONNECTIONS_BASE}${EDIT}${DATACONNECTIONS_UPDATE_STATUS}`,
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          status: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('ppl.modifyDataConnection', {
+            body: {
+              name: request.body.name,
+              status: request.body.status,
             },
           });
         return response.ok({

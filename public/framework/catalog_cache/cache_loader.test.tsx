@@ -148,7 +148,7 @@ describe('loadCacheTests', () => {
         dataSourceName,
         expect.objectContaining({
           name: databaseName,
-          tables: [{ name: 'Table1' }, { name: 'Table2' }],
+          tables: [{ name: 'http_logs1' }, { name: 'http_logs2' }],
           lastUpdated: expect.any(String),
           status: CachedDataSourceStatus.Updated,
         })

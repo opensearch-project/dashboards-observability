@@ -5,12 +5,12 @@
 
 import {
   AccelerationsCacheData,
+  AssociatedObject,
   AsyncPollingResult,
   CachedDataSourceStatus,
   DataSourceCacheData,
-  DatasourceType,
   DatasourceDetails,
-  AssociatedObject,
+  DatasourceType,
 } from '../common/types/data_connections';
 
 export const showDataConnectionsData = {
@@ -89,6 +89,7 @@ export const describeS3Dataconnection = {
     'glue.indexstore.opensearch.uri': 'y',
     'glue.indexstore.opensearch.region': 'us-west-2',
   },
+  status: 'ACTIVE',
 };
 
 export const mockRoleData = {
@@ -825,10 +826,27 @@ export const mockShowTablesPollingResult: AsyncPollingResult = {
     { name: 'namespace', type: 'string' },
     { name: 'tableName', type: 'string' },
     { name: 'isTemporary', type: 'boolean' },
+    { name: 'information', type: 'string' },
   ],
   datarows: [
-    ['TestDatabase', 'Table1', false],
-    ['TestDatabase', 'Table2', false],
+    [
+      'default',
+      'dummy_table',
+      false,
+      'Catalog: spark_catalog\nDatabase: default\nTable: dummy_table\nOwner: hadoop\nCreated Time: Sun Mar 10 01:28:06 UTC 2024\nLast Access: UNKNOWN\nCreated By: Spark 3.4.1-amzn-0\nType: MANAGED\nProvider: hive\nTable Properties: [transient_lastDdlTime=1710034086]\nLocation: file:/home/hadoop/spark-warehouse/dummy_table\nSerde Library: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe\nInputFormat: org.apache.hadoop.mapred.TextInputFormat\nOutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat\nStorage Properties: [serialization.format=1]\nPartition Provider: Catalog\nSchema: root\n |-- dummy: string (nullable = true)\n\n',
+    ],
+    [
+      'default',
+      'http_logs1',
+      false,
+      'Catalog: spark_catalog\nDatabase: default\nTable: http_logs\nOwner: hadoop\nCreated Time: Thu Aug 17 01:01:32 UTC 2023\nLast Access: UNKNOWN\nCreated By: Spark 3.3.2-amzn-0\nType: EXTERNAL\nProvider: json\nLocation: s3://flint-dataset/mini_http_logs_partitioned_json_bz2\nSerde Library: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe\nInputFormat: org.apache.hadoop.mapred.SequenceFileInputFormat\nOutputFormat: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat\nStorage Properties: [compression=bzip2]\nPartition Provider: Catalog\nPartition Columns: [`year`, `month`, `day`]\nSchema: root\n |-- @timestamp: timestamp (nullable = true)\n |-- clientip: string (nullable = true)\n |-- request: string (nullable = true)\n |-- status: integer (nullable = true)\n |-- size: integer (nullable = true)\n |-- year: integer (nullable = true)\n |-- month: integer (nullable = true)\n |-- day: integer (nullable = true)\n\n',
+    ],
+    [
+      'default',
+      'http_logs2',
+      false,
+      'Catalog: spark_catalog\nDatabase: default\nTable: http_logs\nOwner: hadoop\nCreated Time: Thu Aug 17 01:01:32 UTC 2023\nLast Access: UNKNOWN\nCreated By: Spark 3.3.2-amzn-0\nType: EXTERNAL\nProvider: json\nLocation: s3://flint-dataset/mini_http_logs_partitioned_json_bz2\nSerde Library: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe\nInputFormat: org.apache.hadoop.mapred.SequenceFileInputFormat\nOutputFormat: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat\nStorage Properties: [compression=bzip2]\nPartition Provider: Catalog\nPartition Columns: [`year`, `month`, `day`]\nSchema: root\n |-- @timestamp: timestamp (nullable = true)\n |-- clientip: string (nullable = true)\n |-- request: string (nullable = true)\n |-- status: integer (nullable = true)\n |-- size: integer (nullable = true)\n |-- year: integer (nullable = true)\n |-- month: integer (nullable = true)\n |-- day: integer (nullable = true)\n\n',
+    ],
   ],
 };
 
