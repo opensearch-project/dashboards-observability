@@ -276,7 +276,6 @@ export const Explorer = ({
       datasourceType,
       queryToRun,
     }: any = historyFromRedirection.location.state;
-    console.log('types: ', datasourceName, datasourceType, queryToRun);
     batch(() => {
       dispatch(
         updateSearchMetaData({
