@@ -231,7 +231,7 @@ export const AccelerationTable = ({
       description: 'Manual Sync Data',
       icon: 'inputOutput',
       onClick: (item) => handleActionClick('sync', item),
-      enabled: (item: CachedAcceleration) => !item.autoRefresh,
+      enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
     },
     {
       name: 'Delete',

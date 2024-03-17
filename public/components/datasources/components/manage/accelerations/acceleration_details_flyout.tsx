@@ -154,8 +154,8 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const SyncIcon = ({ autoRefresh }: { autoRefresh: boolean }) => {
-    if (autoRefresh) {
+  const SyncIcon = ({ autoRefresh, status }: { autoRefresh: boolean; status: string }) => {
+    if (autoRefresh || status !== 'active') {
       return null;
     }
     return (
@@ -239,7 +239,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SyncIcon autoRefresh={acceleration.autoRefresh} />
+            <SyncIcon autoRefresh={acceleration.autoRefresh} status={acceleration.status} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DiscoverIcon />
