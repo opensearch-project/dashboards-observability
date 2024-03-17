@@ -46,14 +46,14 @@ export const AccelerationDetailsTab = ({
     acceleration.autoRefresh ||
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.incremental_refresh;
   const refreshTime = showRefreshTime
-    ? mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval
+    ? mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval ??
+      '-'
     : '-';
   const creationDate = new Date(
     parseInt(settings?.settings?.index?.creation_date, 10)
   ).toLocaleString();
   const checkpointName =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options?.checkpoint_location;
-
   const DetailComponent = ({
     title,
     description,
