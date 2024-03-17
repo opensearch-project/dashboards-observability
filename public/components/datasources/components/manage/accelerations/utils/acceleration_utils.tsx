@@ -142,12 +142,3 @@ export const onDiscoverIconClick = (acceleration: CachedAcceleration, dataSource
     redirectToExplorerOSIdx(acceleration.flintIndexName);
   }
 };
-
-export const onDeleteIconClick = (acceleration: CachedAcceleration) => {
-  // TODO: delete acceleration
-  console.log('deleting', acceleration.indexName);
-};
-
-export const onVacuumIconClick = (acceleration: CachedAcceleration) => {
-  console.log('vacuum', acceleration.indexName);
-};

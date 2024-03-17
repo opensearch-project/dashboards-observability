@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  onRefreshIconClick,
   onDiscoverIconClick,
   AccelerationStatus,
   ACC_LOADING_MSG,
   ACC_PANEL_TITLE,
   ACC_PANEL_DESC,
   getAccelerationName,
+  AccelerationActionType,
 } from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -47,7 +47,7 @@ interface AccelerationTableProps {
 }
 
 interface ModalState {
-  actionType: 'delete' | 'vacuum' | null;
+  actionType: AccelerationActionType | null;
   selectedItem: CachedAcceleration | null;
 }
 
@@ -93,11 +93,10 @@ export const AccelerationTable = ({
     });
   };
 
-  const handleConfirm = async () => {
-    if (!modalState.selectedItem) return;
+  const handleConfirm = () => {
+    if (!modalState.selectedItem || !modalState.actionType) return;
 
-    const operationType = modalState.actionType === 'delete' ? 'delete' : 'vacuum';
-    performOperation(modalState.selectedItem, operationType);
+    performOperation(modalState.selectedItem, modalState.actionType);
     handleModalClose();
   };
 
@@ -228,10 +227,10 @@ export const AccelerationTable = ({
       },
     },
     {
-      name: 'Refresh',
-      description: 'Refresh/Pause/Resume',
+      name: 'Sync',
+      description: 'Manual Sync Data',
       icon: 'inputOutput',
-      onClick: onRefreshIconClick,
+      onClick: (item) => handleActionClick('sync', item),
       enabled: (item: CachedAcceleration) => !item.autoRefresh,
     },
     {
@@ -372,7 +371,9 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
-      {(modalState.actionType === 'delete' || modalState.actionType === 'vacuum') && (
+      {(modalState.actionType === 'delete' ||
+        modalState.actionType === 'vacuum' ||
+        modalState.actionType === 'sync') && (
         <AccelerationActionOverlay
           isVisible={!!modalState.actionType}
           actionType={modalState.actionType}
