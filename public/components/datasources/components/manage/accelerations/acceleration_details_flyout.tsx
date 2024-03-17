@@ -18,11 +18,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
-import {
-  onRefreshIconClick,
-  onDiscoverIconClick,
-  AccelerationActionType,
-} from './utils/acceleration_utils';
+import { onDiscoverIconClick, AccelerationActionType } from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
@@ -77,6 +73,11 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       performOperation(props.acceleration, operationType);
       setShowConfirmationOverlay(false);
     }
+  };
+
+  const onSyncIconClickHandler = () => {
+    setOperationType('sync');
+    setShowConfirmationOverlay(true);
   };
 
   const onDeleteIconClickHandler = () => {
@@ -153,12 +154,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const RefreshIcon = ({ autoRefresh }: { autoRefresh: boolean }) => {
+  const SyncIcon = ({ autoRefresh }: { autoRefresh: boolean }) => {
     if (autoRefresh) {
       return null;
     }
     return (
-      <EuiButtonEmpty onClick={() => onRefreshIconClick(acceleration)}>
+      <EuiButtonEmpty onClick={onSyncIconClickHandler}>
         <EuiIcon type="inputOutput" size="m" />
       </EuiButtonEmpty>
     );
@@ -238,7 +239,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshIcon autoRefresh={acceleration.autoRefresh} />
+            <SyncIcon autoRefresh={acceleration.autoRefresh} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DiscoverIcon />
