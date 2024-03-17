@@ -171,7 +171,8 @@ export const AccelerationTable = ({
     );
   };
 
-  console.log('HERE IS THE UPDATED TIME', updatedTime);
+  const localUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
+
   const AccelerationTableHeader = () => {
     return (
       <>
@@ -190,14 +191,16 @@ export const AccelerationTable = ({
               <EuiFlexItem grow={false}>
                 <RefreshButton data-test-subj="refreshButton" />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText textAlign="right" size="xs" color="subdued">
-                  {'Last updated'}
-                </EuiText>
-                <EuiText textAlign="right" color="subdued" size="xs">
-                  {updatedTime}
-                </EuiText>
-              </EuiFlexItem>
+              {updatedTime && (
+                <EuiFlexItem>
+                  <EuiText textAlign="right" size="xs" color="subdued">
+                    {'Last updated'}
+                  </EuiText>
+                  <EuiText textAlign="right" color="subdued" size="xs">
+                    {localUpdatedTime}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
