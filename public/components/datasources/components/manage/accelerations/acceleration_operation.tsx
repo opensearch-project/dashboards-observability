@@ -31,34 +31,34 @@ export const useAccelerationOperation = (dataSource: string) => {
 
   useEffect(() => {
     if (!accelerationToOperate || !operationType) return;
+
     const displayAccelerationName = getAccelerationName(
       accelerationToOperate.indexName,
       accelerationToOperate,
       dataSource
     );
 
-    if (
-      loadStatus === DirectQueryLoadingStatus.RUNNING ||
-      loadStatus === DirectQueryLoadingStatus.WAITING ||
-      loadStatus === DirectQueryLoadingStatus.SCHEDULED
-    ) {
+    if (loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
+      setIsOperating(true);
       const operationInProgressMessage = `${
         operationType === 'delete' ? 'Deleting' : 'Vacuuming'
       } acceleration: ${displayAccelerationName}`;
+      console.log('loadStatus: ', loadStatus);
       setToast(operationInProgressMessage, 'success');
-      setIsOperating(true);
     } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      setIsOperating(false);
+      setAccelerationToOperate(null);
+      setOperationSuccess(true);
       const operationSuccessMessage = `${
         operationType === 'delete' ? 'Successfully deleted' : 'Successfully vacuumed'
       } acceleration: ${displayAccelerationName}`;
       setToast(operationSuccessMessage, 'success');
-      setAccelerationToOperate(null);
-      setIsOperating(false);
-      setOperationSuccess(true);
     } else if (loadStatus === DirectQueryLoadingStatus.FAILED) {
-      setToast(`Failed to ${operationType} acceleration: ${displayAccelerationName}`, 'danger');
       setIsOperating(false);
       setOperationSuccess(false);
+      setToast(`Failed to ${operationType} acceleration: ${displayAccelerationName}`, 'danger');
+    } else {
+      setIsOperating(false);
     }
   }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType]);
 
