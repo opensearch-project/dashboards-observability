@@ -48,7 +48,7 @@ import {
   observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
-import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
+import { CachedAcceleration } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -118,14 +118,16 @@ export const [
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<({ tableDetail }: { tableDetail: AssociatedObject }) => void>(
+] = createGetterSetter<({ tableDetail, datasourceName }: AssociatedObjectsFlyoutProps) => void>(
   'renderAssociatedObjectsDetailsFlyout'
 );
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(dataSource: string) => void>('renderCreateAccelerationFlyout');
+] = createGetterSetter<(dataSource: string, databaseName?: string, tableName?: string) => void>(
+  'renderCreateAccelerationFlyout'
+);
 
 export class ObservabilityPlugin
   implements
@@ -424,11 +426,15 @@ export class ObservabilityPlugin
     };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) => {
+    const renderAssociatedObjectsDetailsFlyout = ({
+      tableDetail,
+      datasourceName,
+    }: AssociatedObjectsFlyoutProps) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AssociatedObjectsDetailsFlyout
             tableDetail={tableDetail}
+            datasourceName={datasourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
           />
         )
@@ -436,12 +442,18 @@ export class ObservabilityPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    const renderCreateAccelerationFlyout = (selectedDatasource: string) => {
+    const renderCreateAccelerationFlyout = (
+      selectedDatasource: string,
+      databaseName?: string,
+      tableName?: string
+    ) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={selectedDatasource}
             resetFlyout={() => createAccelerationFlyout.close()}
+            databaseName={databaseName}
+            tableName={tableName}
           />
         )
       );

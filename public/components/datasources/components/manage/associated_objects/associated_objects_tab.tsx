@@ -264,8 +264,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         name: table.name,
         database: selectedDatabase,
         type: 'table',
-        // Temporary dummy array
-        accelerations: [],
+        accelerations: cachedAccelerations.filter(
+          (acceleration) => acceleration.table === table.name
+        ),
         columns: table.columns,
       };
     });
@@ -273,8 +274,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
         datasource: datasource.name,
-        id: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
-        name: getAccelerationName(acceleration.indexName, acceleration, datasource.name),
+        id: acceleration.indexName,
+        name: getAccelerationName(acceleration, datasource.name),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
           .value,

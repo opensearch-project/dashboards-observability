@@ -21,6 +21,7 @@ import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
   getRenderAssociatedObjectsDetailsFlyout: jest.fn(() => jest.fn()),
+  getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
 }));
 
 describe('AssociatedObjectsTab Component', () => {
