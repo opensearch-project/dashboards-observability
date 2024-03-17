@@ -177,6 +177,10 @@ describe('AccelerationTable Component', () => {
     });
     wrapper!.update();
 
-    expect(wrapper!.text()).toContain(accelerationCache.lastUpdated);
+    const expectedLocalizedTime = accelerationCache.lastUpdated
+      ? new Date(accelerationCache.lastUpdated).toLocaleString()
+      : '';
+
+    expect(wrapper!.text()).toContain(expectedLocalizedTime);
   });
 });
