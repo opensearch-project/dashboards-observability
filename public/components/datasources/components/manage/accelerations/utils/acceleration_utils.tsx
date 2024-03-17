@@ -44,7 +44,7 @@ export const generateAccelerationOperationQuery = (
       }
       return `${operationKeyword} INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
     case 'materialized':
-      return `${operationKeyword} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationKeyword} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.indexName}`;
     default:
       throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
   }
