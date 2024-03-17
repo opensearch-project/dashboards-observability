@@ -154,7 +154,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const RefreshIcon = () => {
+  const RefreshIcon = ({ autoRefresh }: { autoRefresh: boolean }) => {
+    if (autoRefresh) {
+      return null;
+    }
     return (
       <EuiButtonEmpty onClick={() => onRefreshIconClick(acceleration)}>
         <EuiIcon type="inputOutput" size="m" />
@@ -236,10 +239,10 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DiscoverIcon />
+            <RefreshIcon autoRefresh={acceleration.autoRefresh} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshIcon />
+            <DiscoverIcon />
           </EuiFlexItem>
           {acceleration.status !== 'deleted' ? (
             <EuiFlexItem grow={false}>

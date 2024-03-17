@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getRefreshButtonIcon,
   onRefreshIconClick,
   onDiscoverIconClick,
   AccelerationStatus,
@@ -231,8 +230,9 @@ export const AccelerationTable = ({
     {
       name: 'Refresh',
       description: 'Refresh/Pause/Resume',
-      icon: getRefreshButtonIcon,
+      icon: 'inputOutput',
       onClick: onRefreshIconClick,
+      enabled: (item: CachedAcceleration) => !item.autoRefresh,
     },
     {
       name: 'Delete',
