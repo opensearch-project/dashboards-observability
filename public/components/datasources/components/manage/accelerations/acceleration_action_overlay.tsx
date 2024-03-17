@@ -9,6 +9,7 @@ import { CachedAcceleration } from '../../../../../../common/types/data_connecti
 import {
   ACC_DELETE_MSG,
   ACC_VACUUM_MSG,
+  ACC_SYNC_MSG,
   AccelerationActionType,
   getAccelerationName,
 } from './utils/acceleration_utils';
@@ -19,7 +20,7 @@ interface AccelerationActionOverlayProps {
   acceleration: CachedAcceleration | null;
   dataSourceName: string;
   onCancel: () => void;
-  onConfirm: (acceleration: CachedAcceleration) => void;
+  onConfirm: () => void;
 }
 
 export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps> = ({
@@ -41,29 +42,45 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
     acceleration,
     dataSourceName
   );
-  const isVacuumAction = actionType === 'vacuum';
-  const title = isVacuumAction
-    ? `Vacuum acceleration ${displayIndexName}?`
-    : `Delete acceleration ${displayIndexName}?`;
-  const description = isVacuumAction ? ACC_VACUUM_MSG : ACC_DELETE_MSG;
+  let title = '';
+  let description = '';
+  let confirmButtonText = 'Confirm';
+  let confirmEnabled = true;
 
-  const confirmEnabled = isVacuumAction ? confirmationInput === displayIndexName : true;
+  switch (actionType) {
+    case 'vacuum':
+      title = `Vacuum acceleration ${displayIndexName}?`;
+      description = ACC_VACUUM_MSG;
+      confirmButtonText = 'Vacuum';
+      confirmEnabled = confirmationInput === displayIndexName;
+      break;
+    case 'delete':
+      title = `Delete acceleration ${displayIndexName}?`;
+      description = ACC_DELETE_MSG;
+      confirmButtonText = 'Delete';
+      break;
+    case 'sync':
+      title = 'Manual sync data?';
+      description = ACC_SYNC_MSG;
+      confirmButtonText = 'Sync';
+      break;
+  }
 
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         title={title}
         onCancel={onCancel}
-        onConfirm={() => onConfirm(acceleration)}
+        onConfirm={() => onConfirm()}
         cancelButtonText="Cancel"
-        confirmButtonText={isVacuumAction ? 'Vacuum' : 'Delete'}
+        confirmButtonText={confirmButtonText}
         buttonColor="danger"
         defaultFocusedButton="confirm"
         confirmButtonDisabled={!confirmEnabled}
       >
         <p>{description}</p>
-        {isVacuumAction && (
-          <EuiFormRow label={`To confirm your action, type ${displayIndexName}`}>
+        {actionType === 'vacuum' && (
+          <EuiFormRow label={`To confirm, type ${displayIndexName}`}>
             <EuiFieldText
               name="confirmationInput"
               value={confirmationInput}

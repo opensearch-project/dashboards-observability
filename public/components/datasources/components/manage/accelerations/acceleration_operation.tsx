@@ -38,31 +38,51 @@ export const useAccelerationOperation = (dataSource: string) => {
       dataSource
     );
 
+    let operationInProgressMessage;
+    let operationSuccessMessage;
+    let operationFailureMessage;
+    switch (operationType) {
+      case 'delete':
+        operationInProgressMessage = `Deleting acceleration: ${displayAccelerationName}`;
+        operationSuccessMessage = `Successfully deleted acceleration: ${displayAccelerationName}`;
+        operationFailureMessage = `Failed to delete acceleration: ${displayAccelerationName}`;
+        break;
+      case 'vacuum':
+        operationInProgressMessage = `Vacuuming acceleration: ${displayAccelerationName}`;
+        operationSuccessMessage = `Successfully vacuumed acceleration: ${displayAccelerationName}`;
+        operationFailureMessage = `Failed to vacuum acceleration: ${displayAccelerationName}`;
+        break;
+      case 'sync':
+        operationInProgressMessage = `Syncing acceleration: ${displayAccelerationName}`;
+        operationSuccessMessage = `Successfully synced acceleration: ${displayAccelerationName}`;
+        operationFailureMessage = `Failed to sync acceleration: ${displayAccelerationName}`;
+        break;
+      default:
+        console.error(`Unsupported operation type: ${operationType}`);
+        return;
+    }
+
     if (loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
       setIsOperating(true);
-      const operationInProgressMessage = `${
-        operationType === 'delete' ? 'Deleting' : 'Vacuuming'
-      } acceleration: ${displayAccelerationName}`;
-      console.log('loadStatus: ', loadStatus);
       setToast(operationInProgressMessage, 'success');
     } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
       setIsOperating(false);
       setAccelerationToOperate(null);
       setOperationSuccess(true);
-      const operationSuccessMessage = `${
-        operationType === 'delete' ? 'Successfully deleted' : 'Successfully vacuumed'
-      } acceleration: ${displayAccelerationName}`;
       setToast(operationSuccessMessage, 'success');
     } else if (loadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsOperating(false);
       setOperationSuccess(false);
-      setToast(`Failed to ${operationType} acceleration: ${displayAccelerationName}`, 'danger');
+      setToast(operationFailureMessage, 'danger');
     } else {
       setIsOperating(false);
     }
   }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType]);
 
-  const performOperation = (acceleration: CachedAcceleration, operation: 'delete' | 'vacuum') => {
+  const performOperation = (
+    acceleration: CachedAcceleration,
+    operation: AccelerationActionType
+  ) => {
     setOperationSuccess(false);
     setOperationType(operation);
     const operationQuery = generateAccelerationOperationQuery(acceleration, dataSource, operation);

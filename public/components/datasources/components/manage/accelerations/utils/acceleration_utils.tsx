@@ -20,8 +20,14 @@ export const ACC_DELETE_MSG =
   'The acceleration will be deleted. User will no longer be able to view from this acceleration. By default data will be retained in the associated index.';
 export const ACC_VACUUM_MSG =
   'Vacuuming will remove the actual data from the disk since the associated index will be removed from the cluster. To confirm your action, type the name of the acceleration below.';
+export const ACC_SYNC_MSG = 'Syncing data may require querying all data. Do you want to continue?';
 
-export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
+export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
+
+export const getAccelerationName = (
+  acceleration: CachedAcceleration,
+  datasource: string
+) => {
   return (
     acceleration.indexName ||
     `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
@@ -31,20 +37,34 @@ export const getAccelerationName = (acceleration: CachedAcceleration, datasource
 export const generateAccelerationOperationQuery = (
   acceleration: CachedAcceleration,
   dataSource: string,
-  operationType: 'delete' | 'vacuum'
+  operationType: AccelerationActionType
 ): string => {
-  const operationKeyword = operationType === 'delete' ? 'DROP' : 'VACUUM';
+  let operationQuery;
+
+  switch (operationType) {
+    case 'delete':
+      operationQuery = `DROP`;
+      break;
+    case 'vacuum':
+      operationQuery = `VACUUM`;
+      break;
+    case 'sync':
+      operationQuery = `REFRESH`;
+      break;
+    default:
+      throw new Error(`Unsupported operation type: ${operationType}`);
+  }
 
   switch (acceleration.type) {
     case 'skipping':
-      return `${operationKeyword} SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationQuery} SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
     case 'covering':
       if (!acceleration.indexName) {
         throw new Error("Index name is required for 'covering' acceleration type.");
       }
-      return `${operationKeyword} INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+      return `${operationQuery} INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
     case 'materialized':
-      return `${operationKeyword} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.indexName}`;
+      return `${operationQuery} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.indexName}`;
     default:
       throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
   }

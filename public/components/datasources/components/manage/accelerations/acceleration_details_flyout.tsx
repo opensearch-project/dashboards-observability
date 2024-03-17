@@ -141,7 +141,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   }, [flintIndexName]);
 
   const DiscoverIcon = () => {
-    // Assuming `acceleration` is accessible in the current scope
     return (
       <EuiButtonEmpty
         onClick={() => {
@@ -261,7 +260,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       {showConfirmationOverlay && operationType && (
         <AccelerationActionOverlay
           isVisible={showConfirmationOverlay}
-          actionType={operationType as 'delete' | 'vacuum'}
+          actionType={operationType as AccelerationActionType}
           acceleration={acceleration}
           dataSourceName={dataSourceName}
           onCancel={() => setShowConfirmationOverlay(false)}
