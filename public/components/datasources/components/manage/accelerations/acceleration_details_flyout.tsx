@@ -18,7 +18,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
-import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
 import {
   onRefreshIconClick,
   onDiscoverIconClick,
@@ -67,7 +66,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const tabsMap: { [key: string]: any } = {
     details: AccelerationDetailsTab,
     schema: AccelerationSchemaTab,
-    sql_definition: AccelerationSqlTab,
   };
   const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
   const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
@@ -191,11 +189,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       name: 'Schema',
       disabled: false,
     },
-    {
-      id: 'sql_definition',
-      name: 'SQL Definition',
-      disabled: false,
-    },
   ];
 
   const renderTabs = () => {
@@ -222,9 +215,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         break;
       case 'schema':
         propsForTab = { mappings, indexInfo };
-        break;
-      case 'sql_definition':
-        propsForTab = { mappings };
         break;
       default:
         console.log('Unknown Tab: ', tab);
