@@ -101,12 +101,7 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  (
-    index: string,
-    acceleration: CachedAcceleration,
-    dataSourceName: string,
-    handleRefresh?: () => void
-  ) => void
+  (acceleration: CachedAcceleration, dataSourceName: string, handleRefresh?: () => void) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
@@ -399,7 +394,6 @@ export class ObservabilityPlugin
 
     // Use overlay service to render flyouts
     const renderAccelerationDetailsFlyout = (
-      index: string,
       acceleration: CachedAcceleration,
       dataSourceName: string,
       handleRefresh?: () => void
@@ -407,7 +401,6 @@ export class ObservabilityPlugin
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AccelerationDetailsFlyout
-            index={index}
             acceleration={acceleration}
             dataSourceName={dataSourceName}
             resetFlyout={() => accelerationDetailsFlyout.close()}

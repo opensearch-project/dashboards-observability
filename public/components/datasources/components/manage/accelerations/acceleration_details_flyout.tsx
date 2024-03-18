@@ -18,7 +18,11 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
-import { onDiscoverIconClick, AccelerationActionType } from './utils/acceleration_utils';
+import {
+  onDiscoverIconClick,
+  AccelerationActionType,
+  getAccelerationName,
+} from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
@@ -26,7 +30,6 @@ import { useAccelerationOperation } from './acceleration_operation';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 
 export interface AccelerationDetailsFlyoutProps {
-  index: string;
   acceleration: CachedAcceleration;
   dataSourceName: string;
   resetFlyout: () => void;
@@ -55,7 +58,7 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { index, dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
+  const { dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -66,6 +69,8 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
 
   const { performOperation, operationSuccess } = useAccelerationOperation(props.dataSourceName);
+
+  const displayedIndex = getAccelerationName(acceleration);
 
   const onConfirmOperation = () => {
     if (operationType && props.acceleration) {
@@ -231,7 +236,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiText>
-              <h2 className="panel-title">{index}</h2>
+              <h2 className="panel-title">{displayedIndex}</h2>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
