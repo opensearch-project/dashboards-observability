@@ -396,14 +396,19 @@ export function SetupIntegrationForm({
             <>
               <EuiSpacer />
               <EuiText>
-                <h3>Installation Flows</h3>
+                <h3>Integration Resources</h3>
               </EuiText>
-              <EuiSpacer />
+              <EuiFormRow>
+                <EuiText grow={false} size="xs">
+                  <p>
+                    This integration offers valuable resources compatible with your data source.
+                    These can include dashboards, visualizations, indexes, and queries. Select at
+                    least one of the following options.
+                  </p>
+                </EuiText>
+              </EuiFormRow>
+              <EuiSpacer size="s" />
               <EuiFormRow
-                label={'Flows'}
-                helpText={
-                  'Select from the available asset types based on your use case. Choose at least one.'
-                }
                 isInvalid={![...useWorkflows.values()].includes(true)}
                 error={['Must select at least one workflow.']}
               >
