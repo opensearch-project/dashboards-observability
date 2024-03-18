@@ -111,7 +111,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Accelerations',
       }),
       sortable: true,
-      // align: 'center',
       render: (accelerations: CachedAcceleration[], obj: AssociatedObject) => {
         if (accelerations.length === 0) {
           return '-';
