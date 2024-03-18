@@ -38,6 +38,9 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('0');
 
   const onChangeIcons = (optionId: string) => {
+    if (!props.setCardView) {
+      return;
+    }
     setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
@@ -84,16 +87,18 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
   const renderToggle = () => {
     return (
       <EuiFlexGroup>
-        <EuiFlexItem>{props.renderCateogryFilters()}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonGroup
-            legend="Text align"
-            options={toggleButtonsIcons}
-            idSelected={toggleIconIdSelected}
-            onChange={(id) => onChangeIcons(id)}
-            isIconOnly
-          />
-        </EuiFlexItem>
+        <EuiFlexItem>{props.renderCategoryFilters()}</EuiFlexItem>
+        {props.setCardView ? (
+          <EuiFlexItem>
+            <EuiButtonGroup
+              legend="Text align"
+              options={toggleButtonsIcons}
+              idSelected={toggleIconIdSelected}
+              onChange={(id) => onChangeIcons(id)}
+              isIconOnly
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };

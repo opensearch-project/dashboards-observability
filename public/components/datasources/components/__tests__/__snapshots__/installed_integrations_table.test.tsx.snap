@@ -13,7 +13,9 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
     <div
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
-      <NoInstalledIntegrations>
+      <NoInstalledIntegrations
+        toggleFlyout={[Function]}
+      >
         <EuiFlexGroup
           alignItems="center"
           direction="column"
@@ -104,27 +106,30 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <AddIntegrationButton>
+                <AddIntegrationButton
+                  toggleFlyout={[Function]}
+                >
                   <EuiButton
-                    href="/app/integrations#available"
+                    onClick={[Function]}
                   >
                     <EuiButtonDisplay
                       baseClassName="euiButton"
-                      element="a"
-                      href="/app/integrations#available"
+                      disabled={false}
+                      element="button"
                       isDisabled={false}
-                      rel="noreferrer"
+                      onClick={[Function]}
+                      type="button"
                     >
-                      <a
+                      <button
                         className="euiButton euiButton--primary"
                         disabled={false}
-                        href="/app/integrations#available"
-                        rel="noreferrer"
+                        onClick={[Function]}
                         style={
                           Object {
                             "minWidth": undefined,
                           }
                         }
+                        type="button"
                       >
                         <EuiButtonContent
                           className="euiButton__content"
@@ -145,7 +150,7 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
                             </span>
                           </span>
                         </EuiButtonContent>
-                      </a>
+                      </button>
                     </EuiButtonDisplay>
                   </EuiButton>
                 </AddIntegrationButton>
@@ -319,29 +324,31 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
             >
               <AddIntegrationButton
                 fill={true}
+                toggleFlyout={[Function]}
               >
                 <EuiButton
                   fill={true}
-                  href="/app/integrations#available"
+                  onClick={[Function]}
                 >
                   <EuiButtonDisplay
                     baseClassName="euiButton"
-                    element="a"
+                    disabled={false}
+                    element="button"
                     fill={true}
-                    href="/app/integrations#available"
                     isDisabled={false}
-                    rel="noreferrer"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <a
+                    <button
                       className="euiButton euiButton--primary euiButton--fill"
                       disabled={false}
-                      href="/app/integrations#available"
-                      rel="noreferrer"
+                      onClick={[Function]}
                       style={
                         Object {
                           "minWidth": undefined,
                         }
                       }
+                      type="button"
                     >
                       <EuiButtonContent
                         className="euiButton__content"
@@ -362,7 +369,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                           </span>
                         </span>
                       </EuiButtonContent>
-                    </a>
+                    </button>
                   </EuiButtonDisplay>
                 </EuiButton>
               </AddIntegrationButton>

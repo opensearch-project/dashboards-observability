@@ -88,7 +88,7 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
     ],
   },
   loading: false,
-  renderCateogryFilters: () => {
+  renderCategoryFilters: () => {
     return (null as unknown) as { type: string; props: object; key: string };
   },
   isCardView: false,

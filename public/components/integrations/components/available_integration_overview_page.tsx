@@ -27,8 +27,8 @@ export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   isCardView: boolean;
-  setCardView: (input: boolean) => void;
-  renderCateogryFilters: () => React.JSX.Element;
+  setCardView?: (input: boolean) => void;
+  renderCategoryFilters: () => React.JSX.Element;
 }
 
 export interface AvailableIntegrationsList {
@@ -167,7 +167,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               },
               isCardView,
               setCardView,
-              renderCateogryFilters,
+              renderCategoryFilters: renderCateogryFilters,
             })}
       </EuiPageBody>
     </EuiPage>

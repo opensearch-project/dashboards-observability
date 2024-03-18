@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties } from 'react';
+import React, { useState, CSSProperties, useEffect } from 'react';
 import {
   EuiSpacer,
   EuiPanel,
@@ -16,10 +16,14 @@ import {
   EuiButton,
   EuiIcon,
   EuiText,
+  EuiFlyout,
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
+import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
+import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 
 interface IntegrationInstanceTableEntry {
   name: string;
@@ -75,15 +79,21 @@ const instanceToTableEntry = (
   };
 };
 
-const AddIntegrationButton = ({ fill }: { fill?: boolean }) => {
+const AddIntegrationButton = ({
+  toggleFlyout,
+  fill,
+}: {
+  fill?: boolean;
+  toggleFlyout: () => void;
+}) => {
   return (
-    <EuiButton href={safeBasePathLink('/app/integrations#available')} fill={fill}>
+    <EuiButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
     </EuiButton>
   );
 };
 
-const NoInstalledIntegrations = () => {
+const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void }) => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -100,9 +110,34 @@ const NoInstalledIntegrations = () => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AddIntegrationButton />
+        <AddIntegrationButton toggleFlyout={toggleFlyout} />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+const InstallIntegrationFlyout = ({
+  availableIntegrations,
+  setAvailableIntegrations,
+  closeFlyout,
+}: {
+  availableIntegrations: AvailableIntegrationsList;
+  setAvailableIntegrations: (value: AvailableIntegrationsList) => void;
+  closeFlyout: () => void;
+}) => {
+  useEffect(() => {
+    if (!coreRefs.http) {
+      return;
+    }
+    coreRefs.http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
+      setAvailableIntegrations(exists.data);
+    });
+  });
+
+  return (
+    <EuiFlyout onClose={closeFlyout}>
+      <AvailableIntegrationsTable loading={false} data={availableIntegrations} isCardView={true} />
+    </EuiFlyout>
   );
 };
 
@@ -115,6 +150,13 @@ export const InstalledIntegrationsTable = ({
   const filteredIntegrations = integrations
     .map(instanceToTableEntry)
     .filter((i) => i.name.match(new RegExp(_.escapeRegExp(query), 'i')));
+
+  const [showAvailableFlyout, setShowAvailableFlyout] = useState(false);
+  const toggleFlyout = () => setShowAvailableFlyout((prev) => !prev);
+
+  const [availableIntegrations, setAvailableIntegrations] = useState({
+    hits: [],
+  } as AvailableIntegrationsList);
 
   const integrationsTable = (
     <>
@@ -133,7 +175,7 @@ export const InstalledIntegrationsTable = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AddIntegrationButton fill={true} />
+          <AddIntegrationButton fill={true} toggleFlyout={toggleFlyout} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -145,8 +187,19 @@ export const InstalledIntegrationsTable = ({
     <>
       <EuiSpacer />
       <EuiPanel>
-        {integrations.length > 0 ? integrationsTable : <NoInstalledIntegrations />}
+        {integrations.length > 0 ? (
+          integrationsTable
+        ) : (
+          <NoInstalledIntegrations toggleFlyout={toggleFlyout} />
+        )}
       </EuiPanel>
+      {showAvailableFlyout ? (
+        <InstallIntegrationFlyout
+          availableIntegrations={availableIntegrations}
+          setAvailableIntegrations={setAvailableIntegrations}
+          closeFlyout={() => setShowAvailableFlyout(false)}
+        />
+      ) : null}
     </>
   );
 };
