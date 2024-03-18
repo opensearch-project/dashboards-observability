@@ -14,7 +14,7 @@ import {
   getAccelerationName,
 } from './utils/acceleration_utils';
 
-interface AccelerationActionOverlayProps {
+export interface AccelerationActionOverlayProps {
   isVisible: boolean;
   actionType: AccelerationActionType;
   acceleration: CachedAcceleration | null;

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CachedAcceleration } from '../../../../../common/types/data_connections';
+
 export const showDatasourceData = [
   {
     name: 'my_spark3',
@@ -73,3 +75,33 @@ export const describeDatasource = {
     'emr.cluster': 'j-3UNQLT1MPBGLG',
   },
 };
+
+export const skippingIndexAcceleration = {
+  flintIndexName: 'flint_mys3_default_http_logs_skipping_index',
+  type: 'skipping',
+  database: 'default',
+  table: 'http_logs',
+  indexName: '',
+  autoRefresh: false,
+  status: 'active',
+} as CachedAcceleration;
+
+export const materializedViewAcceleration = {
+  flintIndexName: 'flint_mys3_default_http_count_view',
+  type: 'materialized',
+  database: 'default',
+  table: '',
+  indexName: 'http_count_view',
+  autoRefresh: false,
+  status: 'active',
+} as CachedAcceleration;
+
+export const coveringIndexAcceleration = {
+  flintIndexName: 'flint_mys3_default_http_logs_status_clientip_and_day_index',
+  type: 'covering',
+  database: 'default',
+  table: 'http_logs',
+  indexName: 'status_clientip_and_day',
+  autoRefresh: true,
+  status: 'refreshing',
+} as CachedAcceleration;
