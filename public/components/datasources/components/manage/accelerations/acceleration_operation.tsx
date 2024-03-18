@@ -15,7 +15,7 @@ import {
 } from './utils/acceleration_utils';
 
 export const useAccelerationOperation = (dataSource: string) => {
-  const { startLoading, loadStatus } = useDirectQuery();
+  const { startLoading, stopLoading, loadStatus } = useDirectQuery();
   const { setToast } = useToast();
   const [isOperating, setIsOperating] = useState(false);
   const [operationSuccess, setOperationSuccess] = useState(false);
@@ -72,6 +72,12 @@ export const useAccelerationOperation = (dataSource: string) => {
 
     setCurrentStatus(loadStatus);
   }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType, currentStatus]);
+
+  useEffect(() => {
+    return () => {
+      stopLoading();
+    };
+  }, []);
 
   const performOperation = (
     acceleration: CachedAcceleration,
