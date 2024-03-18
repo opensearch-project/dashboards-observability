@@ -11,7 +11,7 @@ import {
   AccelerationActionOverlay,
   AccelerationActionOverlayProps,
 } from '../manage/accelerations/acceleration_action_overlay';
-import { skippingIndexAcceleration } from './testing_constants';
+import { skippingIndexAcceleration } from '../../../../../test/datasources';
 import { act } from 'react-dom/test-utils';
 
 configure({ adapter: new Adapter() });

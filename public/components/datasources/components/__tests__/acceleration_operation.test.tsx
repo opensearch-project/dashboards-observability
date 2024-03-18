@@ -8,7 +8,7 @@ import { useAccelerationOperation } from '../manage/accelerations/acceleration_o
 import * as useDirectQueryModule from '../../../../framework/datasources/direct_query_hook';
 import * as useToastModule from '../../../common/toast';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
-import { skippingIndexAcceleration } from './testing_constants';
+import { skippingIndexAcceleration } from '../../../../../test/datasources';
 
 jest.mock('../../../../framework/datasources/direct_query_hook', () => ({
   useDirectQuery: jest.fn(),
