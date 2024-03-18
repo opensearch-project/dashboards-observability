@@ -80,6 +80,7 @@ jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
+  getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
 }));
 
 describe('AccelerationTable Component', () => {

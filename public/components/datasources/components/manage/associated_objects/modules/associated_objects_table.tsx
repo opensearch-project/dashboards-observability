@@ -10,6 +10,7 @@ import {
   EuiLink,
   SearchFilterConfig,
   EuiTableFieldDataColumnType,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -19,6 +20,7 @@ import {
 import {
   getRenderAccelerationDetailsFlyout,
   getRenderAssociatedObjectsDetailsFlyout,
+  getRenderCreateAccelerationFlyout,
 } from '../../../../../../plugin';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
@@ -68,21 +70,16 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         <EuiLink
           onClick={() => {
             if (item.type === 'table') {
-              renderAssociatedObjectsDetailsFlyout(item);
+              renderAssociatedObjectsDetailsFlyout(item, datasourceName);
             } else {
-              const acceleration = cachedAccelerations.find(
-                (acc) => getAccelerationName(acc.indexName, acc, datasourceName) === name
-              );
-              console.log(acceleration);
-              renderAccelerationDetailsFlyout({
-                indexName: getAccelerationName(
-                  acceleration?.indexName,
+              const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
+              if (acceleration) {
+                renderAccelerationDetailsFlyout(
+                  getAccelerationName(acceleration, datasourceName),
                   acceleration,
                   datasourceName
-                ),
-                acceleration,
-                dataSourceName: datasourceName,
-              });
+                );
+              }
             }
           }}
         >
@@ -114,17 +111,31 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Accelerations',
       }),
       sortable: true,
-      render: (accelerations: string[]) => {
-        return accelerations.length > 0
-          ? accelerations.map((acceleration, index) => (
-              <React.Fragment key={index}>
-                <EuiLink onClick={() => renderAccelerationDetailsFlyout(acceleration)}>
-                  {acceleration.name}
-                </EuiLink>
-                {index < accelerations.length - 1 ? ', ' : ''}
-              </React.Fragment>
-            ))
-          : '-';
+      render: (accelerations: CachedAcceleration[], obj: AssociatedObject) => {
+        if (accelerations.length === 0) {
+          return '-';
+        } else if (accelerations.length === 1) {
+          const name = getAccelerationName(accelerations[0], datasourceName);
+          return (
+            <EuiLink
+              onClick={() => {
+                renderAccelerationDetailsFlyout(name, accelerations[0], datasourceName);
+              }}
+            >
+              {name}
+            </EuiLink>
+          );
+        }
+        return (
+          <EuiButtonEmpty
+            onClick={() => {
+              renderAssociatedObjectsDetailsFlyout(obj, datasourceName);
+            }}
+            size="xs"
+          >
+            View all {accelerations.length}
+          </EuiButtonEmpty>
+        );
       },
     },
     {
@@ -174,7 +185,8 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           type: 'icon',
           icon: 'bolt',
           available: (item: AssociatedObject) => item.type === 'table',
-          onClick: (item: AssociatedObject) => console.log('Accelerate', item),
+          onClick: (item: AssociatedObject) =>
+            renderCreateAccelerationFlyout(datasourceName, item.database, item.name),
         },
       ],
     },
@@ -266,6 +278,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
   const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <EuiInMemoryTable
@@ -274,6 +287,8 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       search={tableSearch}
       pagination={pagination}
       sorting={sorting}
+      hasActions={true}
+      tableLayout="auto"
       data-test-subj={ASSC_OBJ_TABLE_SUBJ}
     />
   );
