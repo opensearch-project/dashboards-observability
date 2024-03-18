@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { coreRefs } from '../../../../../../framework/core_refs';
 import { DirectQueryLoadingStatus } from '../../../../../../../common/types/explorer';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../../../common/constants/shared';
 
 export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';
 
@@ -36,11 +42,6 @@ export const onAccelerateButtonClick = (tableDetail: any) => {
   console.log('accelerating', tableDetail.name);
 };
 
-export const onDiscoverButtonClick = (tabaleDetail: any) => {
-  // TODO: send user to Discover
-  console.log('sending user to discover for', tabaleDetail.name);
-};
-
 export const onDeleteButtonClick = (tableDetail: any) => {
   // TODO: delete table
   console.log('deleting', tableDetail.name);
@@ -56,4 +57,34 @@ export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) 
   return statuses.some((status: DirectQueryLoadingStatus) =>
     catalogCacheFetchingStatus.includes(status)
   );
+};
+
+export const redirectToExplorerWithDataSrc = (
+  datasourceName: string,
+  datasourceType: string,
+  databaseName: string,
+  tableName: string
+) => {
+  const queryIndex = `${datasourceName}.${databaseName}.${tableName}`;
+  redirectToExplorerWithQuery(datasourceName, datasourceType, queryIndex);
+};
+
+export const redirectToExplorerOSIdx = (indexName: string) => {
+  redirectToExplorerWithQuery(DEFAULT_DATA_SOURCE_NAME, DEFAULT_DATA_SOURCE_TYPE, indexName);
+};
+
+const redirectToExplorerWithQuery = (
+  datasourceName: string,
+  datasourceType: string,
+  queriedIndex: string
+) => {
+  // navigate to explorer
+  coreRefs?.application!.navigateToApp(observabilityLogsID, {
+    path: `#/explorer`,
+    state: {
+      datasourceName,
+      datasourceType,
+      queryToRun: `source = ${queriedIndex} | head 10`,
+    },
+  });
 };
