@@ -15,8 +15,7 @@ export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';
 
 export const ASSC_OBJ_TABLE_ACC_COLUMN_NAME = 'accelerations';
 
-export const ASSC_OBJ_TABLE_SEARCH_HINT =
-  'database:database_1 database: database_2 accelerations:skipping_index_1';
+export const ASSC_OBJ_TABLE_SEARCH_HINT = 'accelerations:skipping_index_1';
 
 export const ASSC_OBJ_PANEL_TITLE = 'Associated objects';
 
