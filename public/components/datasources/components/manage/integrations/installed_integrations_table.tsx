@@ -165,6 +165,7 @@ export const InstallIntegrationFlyout = ({
           integration={installingIntegration}
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
+          forceConnectionType={datasourceType === 'S3GLUE' ? 's3' : undefined}
         />
       )}
     </EuiFlyout>

@@ -55,6 +55,7 @@ interface IntegrationConfigProps {
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
+  lockConnectionType?: boolean;
 }
 
 // TODO support localization
@@ -223,6 +224,7 @@ export function SetupIntegrationFormInputs({
   updateConfig,
   integration,
   setupCallout,
+  lockConnectionType,
 }: IntegrationConfigProps) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
@@ -315,6 +317,7 @@ export function SetupIntegrationFormInputs({
           onChange={(event) =>
             updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
           }
+          disabled={lockConnectionType}
         />
       </EuiFormRow>
       <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
@@ -611,14 +614,16 @@ export function SetupIntegrationForm({
   integration,
   renderType = 'page',
   unsetIntegration,
+  forceConnectionType,
 }: {
   integration: string;
   renderType: 'page' | 'flyout';
   unsetIntegration?: () => void;
+  forceConnectionType?: string;
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
-    connectionType: 'index',
+    connectionType: forceConnectionType ?? 'index',
     connectionDataSource: '',
     connectionLocation: '',
     checkpointLocation: '',
@@ -663,6 +668,7 @@ export function SetupIntegrationForm({
                 updateConfig={updateConfig}
                 integration={template}
                 setupCallout={setupCallout}
+                lockConnectionType={forceConnectionType !== undefined}
               />
             )}
           </EuiPageContentBody>
@@ -691,6 +697,7 @@ export function SetupIntegrationForm({
               updateConfig={updateConfig}
               integration={template}
               setupCallout={setupCallout}
+              lockConnectionType={forceConnectionType !== undefined}
             />
           )}
         </EuiFlyoutBody>

@@ -52,6 +52,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "version": "",
                           }
                         }
+                        lockConnectionType={false}
                         setupCallout={
                           Object {
                             "show": false,
@@ -234,6 +235,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 >
                                   <EuiSelect
                                     aria-describedby="random_html_id-help-0"
+                                    disabled={false}
                                     id="random_html_id"
                                     onBlur={[Function]}
                                     onChange={[Function]}
@@ -263,6 +265,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             <select
                                               aria-describedby="random_html_id-help-0"
                                               className="euiSelect"
+                                              disabled={false}
                                               id="random_html_id"
                                               onBlur={[Function]}
                                               onChange={[Function]}
