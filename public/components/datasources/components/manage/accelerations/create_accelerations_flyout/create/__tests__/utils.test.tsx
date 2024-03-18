@@ -109,13 +109,13 @@ describe('validateReplicaCount', () => {
 
 describe('validateRefreshInterval', () => {
   it('should return an array with an error message when refreshType is "interval" and refreshWindow is less than 1', () => {
-    expect(validateRefreshInterval('interval', 0)).toEqual([
+    expect(validateRefreshInterval('autoInterval', 0)).toEqual([
       'refresh window should be greater than 0',
     ]);
-    expect(validateRefreshInterval('interval', -1)).toEqual([
+    expect(validateRefreshInterval('autoInterval', -1)).toEqual([
       'refresh window should be greater than 0',
     ]);
-    expect(validateRefreshInterval('interval', -10)).toEqual([
+    expect(validateRefreshInterval('autoInterval', -10)).toEqual([
       'refresh window should be greater than 0',
     ]);
   });
@@ -123,8 +123,10 @@ describe('validateRefreshInterval', () => {
   it('should return an empty array when refreshType is not "interval" or when refreshWindow is greater than or equal to 1', () => {
     expect(validateRefreshInterval('auto', 0)).toEqual([]);
     expect(validateRefreshInterval('auto', 1)).toEqual([]);
-    expect(validateRefreshInterval('interval', 1)).toEqual([]);
-    expect(validateRefreshInterval('auto', 5)).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 1)).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 5)).toEqual([]);
+    expect(validateRefreshInterval('manual', 0)).toEqual([]);
+    expect(validateRefreshInterval('manualIncrement', 0)).toEqual([]);
   });
 });
 

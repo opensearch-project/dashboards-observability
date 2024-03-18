@@ -9,10 +9,23 @@ import Adapter from 'enzyme-adapter-react-16';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { coreMock } from '../../../../../../../../../../../src/core/public/mocks';
+import { queryWorkbenchPluginCheck } from '../../../../../../../../../common/constants/shared';
 import { mockDatasourcesQuery } from '../../../../../../../../../test/accelerations';
 import { CreateAcceleration } from '../create_acceleration';
 
 const coreStartMock = coreMock.createStart();
+
+// @ts-ignore
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () =>
+      Promise.resolve({
+        status: {
+          statuses: [{ id: queryWorkbenchPluginCheck }],
+        },
+      }),
+  })
+);
 
 describe('Create acceleration flyout components', () => {
   configure({ adapter: new Adapter() });

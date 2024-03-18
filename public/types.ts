@@ -12,6 +12,8 @@ import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/pub
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
+import { DirectQueryLoadingStatus } from '../common/types/explorer';
+import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
@@ -31,6 +33,12 @@ export interface SetupDependencies {
   assistantDashboards?: AssistantSetup;
 }
 
+interface LoadCachehookOutput {
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilitySetup {}
 
@@ -40,11 +48,21 @@ export interface ObservabilityStart {
     datasourceName: string,
     handleRefresh?: () => void
   ) => void;
-  renderAssociatedObjectsDetailsFlyout: (
-    tableDetail: AssociatedObject,
-    datasourceName: string
+  renderAssociatedObjectsDetailsFlyout: ({
+    tableDetail,
+  }: {
+    tableDetail: AssociatedObject;
+  }) => void;
+  renderCreateAccelerationFlyout: (
+    dataSource: string,
+    databaseName?: string,
+    tableName?: string
   ) => void;
-  renderCreateAccelerationFlyout: (selectedDatasource: string) => void;
+  CatalogCacheManagerInstance: typeof CatalogCacheManager;
+  useLoadDatabasesToCacheHook: () => LoadCachehookOutput;
+  useLoadTablesToCacheHook: () => LoadCachehookOutput;
+  useLoadTableColumnsToCacheHook: () => LoadCachehookOutput;
+  useLoadAccelerationsToCacheHook: () => LoadCachehookOutput;
 }
 
 /**

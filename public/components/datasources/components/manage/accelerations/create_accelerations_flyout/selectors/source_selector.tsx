@@ -35,6 +35,7 @@ interface AccelerationDataSourceSelectorProps {
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   selectedDatasource: string;
   dataSourcesPreselected: boolean;
+  tableFieldsLoading: boolean;
 }
 
 export const AccelerationDataSourceSelector = ({
@@ -43,6 +44,7 @@ export const AccelerationDataSourceSelector = ({
   setAccelerationFormData,
   selectedDatasource,
   dataSourcesPreselected,
+  tableFieldsLoading,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -89,7 +91,6 @@ export const AccelerationDataSourceSelector = ({
   };
 
   const loadDatabases = () => {
-    setLoadingComboBoxes({ ...loadingComboBoxes, database: true });
     const dsCache = CatalogCacheManager.getOrCreateDataSource(accelerationFormData.dataSource);
 
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
@@ -106,11 +107,9 @@ export const AccelerationDataSourceSelector = ({
     setTables([]);
     setSelectedTable([]);
     setAccelerationFormData({ ...accelerationFormData, database: '', dataTable: '' });
-    setLoadingComboBoxes({ ...loadingComboBoxes, database: false });
   };
 
   const loadTables = () => {
-    setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: true });
     if (selectedDatabase.length > 0) {
       const dbCache = CatalogCacheManager.getDatabase(
         accelerationFormData.dataSource,
@@ -127,7 +126,6 @@ export const AccelerationDataSourceSelector = ({
       }
       setSelectedTable([]);
       setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
-      setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: false });
     }
   };
 
@@ -212,20 +210,29 @@ export const AccelerationDataSourceSelector = ({
                   }}
                   isClearable={false}
                   isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
-                  isLoading={loadingComboBoxes.database}
+                  isDisabled={
+                    loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
+                  }
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SelectorLoadDatabases
                   dataSourceName={accelerationFormData.dataSource}
                   loadDatabases={loadDatabases}
+                  loadingComboBoxes={loadingComboBoxes}
+                  setLoadingComboBoxes={setLoadingComboBoxes}
+                  tableFieldsLoading={tableFieldsLoading}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow
             label="Table"
-            helpText="Select the Spark table that has the data you would like to index."
+            helpText={
+              tableFieldsLoading
+                ? 'Loading tables fields'
+                : 'Select the Spark table that has the data you would like to index.'
+            }
             isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
             error={accelerationFormData.formErrors.dataTableError}
           >
@@ -251,7 +258,9 @@ export const AccelerationDataSourceSelector = ({
                   }}
                   isClearable={false}
                   isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
-                  isLoading={loadingComboBoxes.dataTable}
+                  isDisabled={
+                    loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
+                  }
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -259,6 +268,9 @@ export const AccelerationDataSourceSelector = ({
                   dataSourceName={accelerationFormData.dataSource}
                   databaseName={accelerationFormData.database}
                   loadTables={loadTables}
+                  loadingComboBoxes={loadingComboBoxes}
+                  setLoadingComboBoxes={setLoadingComboBoxes}
+                  tableFieldsLoading={tableFieldsLoading}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

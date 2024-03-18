@@ -8,6 +8,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import toJson from 'enzyme-to-json';
 import React from 'react';
+import { queryWorkbenchPluginCheck } from '../../../../../../../../../common/constants/shared';
 import { CreateAccelerationForm } from '../../../../../../../../../common/types/data_connections';
 import {
   coveringIndexBuilderMock1,
@@ -15,6 +16,18 @@ import {
   materializedViewBuilderMock2,
 } from '../../../../../../../../../test/accelerations';
 import { PreviewSQLDefinition } from '../preview_sql_defintion';
+
+// @ts-ignore
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () =>
+      Promise.resolve({
+        status: {
+          statuses: [{ id: queryWorkbenchPluginCheck }],
+        },
+      }),
+  })
+);
 
 describe('Preview SQL acceleration components', () => {
   configure({ adapter: new Adapter() });
