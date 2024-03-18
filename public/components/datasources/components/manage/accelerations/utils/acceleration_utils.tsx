@@ -116,18 +116,6 @@ export const AccelerationHealth = ({ health }: { health: string }) => {
   return <EuiHealth color={color}>{label}</EuiHealth>;
 };
 
-export const getRefreshButtonIcon = () => {
-  // TODO: If acceleration can only be manually refreshed, return inputOutput
-  // If acceleration is automatically refreshed and paused, return play
-  // If acceleration is automatically refreshed and is refreshing, return pause
-  return 'inputOutput';
-};
-
-export const onRefreshIconClick = (acceleration: CachedAcceleration) => {
-  // TODO: send request to refresh
-  console.log('refreshing', acceleration.indexName);
-};
-
 export const onDiscoverIconClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
