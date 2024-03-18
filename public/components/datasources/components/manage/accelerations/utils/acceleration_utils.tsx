@@ -24,11 +24,21 @@ export const ACC_SYNC_MSG = 'Syncing data may require querying all data. Do you 
 
 export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
 
-export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
-  return (
-    acceleration.indexName ||
-    `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
-  );
+export const getAccelerationName = (acceleration: CachedAcceleration) => {
+  return acceleration.indexName || 'skipping_index';
+};
+
+export const getAccelerationFullPath = (acceleration: CachedAcceleration, dataSource: string) => {
+  switch (acceleration.type) {
+    case 'skipping':
+      return `${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'materialized':
+      return `${dataSource}.${acceleration.database}`;
+    case 'covering':
+      return `${dataSource}.${acceleration.database}.${acceleration.table}`;
+    default:
+      return 'Unknown acceleration type';
+  }
 };
 
 export const generateAccelerationOperationQuery = (

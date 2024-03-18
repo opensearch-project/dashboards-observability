@@ -12,6 +12,7 @@ import {
   ACC_SYNC_MSG,
   AccelerationActionType,
   getAccelerationName,
+  getAccelerationFullPath,
 } from './utils/acceleration_utils';
 
 export interface AccelerationActionOverlayProps {
@@ -37,7 +38,9 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
     return null;
   }
 
-  const displayIndexName = getAccelerationName(acceleration, dataSourceName);
+  const displayIndexName = getAccelerationName(acceleration);
+  const displayFullPath = getAccelerationFullPath(acceleration, dataSourceName);
+
   let title = '';
   let description = '';
   let confirmButtonText = 'Confirm';
@@ -45,13 +48,13 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
 
   switch (actionType) {
     case 'vacuum':
-      title = `Vacuum acceleration ${displayIndexName}?`;
+      title = `Vacuum acceleration ${displayIndexName} on ${displayFullPath}?`;
       description = ACC_VACUUM_MSG;
       confirmButtonText = 'Vacuum';
       confirmEnabled = confirmationInput === displayIndexName;
       break;
     case 'delete':
-      title = `Delete acceleration ${displayIndexName}?`;
+      title = `Delete acceleration ${displayIndexName} on ${displayFullPath}?`;
       description = ACC_DELETE_MSG;
       confirmButtonText = 'Delete';
       break;

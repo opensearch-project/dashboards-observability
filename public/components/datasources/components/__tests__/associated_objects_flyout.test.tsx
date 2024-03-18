@@ -82,7 +82,7 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
       wrapper.update();
     });
 
-    const accName = getAccelerationName(mockTableDetail.accelerations[0], 'flint_s3');
+    const accName = getAccelerationName(mockTableDetail.accelerations[0]);
     const accLink = wrapper
       .find('EuiLink')
       .findWhere((node) => node.text() === accName)

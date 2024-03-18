@@ -28,7 +28,7 @@ export const useAccelerationOperation = (dataSource: string) => {
   useEffect(() => {
     if (!accelerationToOperate || !operationType || loadStatus === currentStatus) return;
 
-    const displayAccelerationName = getAccelerationName(accelerationToOperate, dataSource);
+    const displayAccelerationName = getAccelerationName(accelerationToOperate);
 
     let operationInProgressMessage = '';
     let operationSuccessMessage = '';
@@ -50,7 +50,7 @@ export const useAccelerationOperation = (dataSource: string) => {
         break;
     }
 
-    if (loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
+    if (loadStatus === DirectQueryLoadingStatus.SCHEDULED && operationType !== 'sync') {
       setIsOperating(true);
       setToast(operationInProgressMessage, 'success');
     } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS && operationType !== 'sync') {
@@ -62,6 +62,9 @@ export const useAccelerationOperation = (dataSource: string) => {
       setIsOperating(false);
       setOperationSuccess(false);
       setToast(operationFailureMessage, 'danger');
+    } else if (operationType === 'sync' && loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
+      setToast(operationInProgressMessage, 'success');
+      stopLoading();
     }
 
     setCurrentStatus(loadStatus);

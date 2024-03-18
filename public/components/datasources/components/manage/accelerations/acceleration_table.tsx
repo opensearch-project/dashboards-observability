@@ -245,7 +245,7 @@ export const AccelerationTable = ({
       name: 'Name',
       sortable: true,
       render: (indexName: string, acceleration: CachedAcceleration) => {
-        const displayName = getAccelerationName(acceleration, dataSourceName);
+        const displayName = getAccelerationName(acceleration);
         return (
           <EuiLink
             onClick={() => {
