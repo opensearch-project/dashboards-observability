@@ -1061,11 +1061,13 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
 <SetupIntegrationForm
   config={
     Object {
+      "checkpointLocation": "",
       "connectionDataSource": "ss4o_logs-nginx-test",
       "connectionLocation": "",
       "connectionTableName": "",
       "connectionType": "s3",
       "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
     }
   }
   integration={
@@ -2016,6 +2018,7 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
               onChange={[Function]}
               onFocus={[Function]}
               placeholder="s3://"
+              value=""
             >
               <EuiFormControlLayout
                 fullWidth={false}
@@ -2039,6 +2042,7 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
                         onFocus={[Function]}
                         placeholder="s3://"
                         type="text"
+                        value=""
                       />
                     </EuiValidatableControl>
                     <EuiFormControlLayoutIcons />
@@ -2310,11 +2314,13 @@ exports[`Integration Setup Page Renders the S3 connector form without workflows 
 <SetupIntegrationForm
   config={
     Object {
+      "checkpointLocation": "",
       "connectionDataSource": "ss4o_logs-nginx-test",
       "connectionLocation": "",
       "connectionTableName": "",
       "connectionType": "s3",
       "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
     }
   }
   integration={
@@ -3258,6 +3264,7 @@ exports[`Integration Setup Page Renders the S3 connector form without workflows 
               onChange={[Function]}
               onFocus={[Function]}
               placeholder="s3://"
+              value=""
             >
               <EuiFormControlLayout
                 fullWidth={false}
@@ -3281,6 +3288,7 @@ exports[`Integration Setup Page Renders the S3 connector form without workflows 
                         onFocus={[Function]}
                         placeholder="s3://"
                         type="text"
+                        value=""
                       />
                     </EuiValidatableControl>
                     <EuiFormControlLayoutIcons />
@@ -3322,11 +3330,13 @@ exports[`Integration Setup Page Renders the index form as expected 1`] = `
 <SetupIntegrationForm
   config={
     Object {
+      "checkpointLocation": "",
       "connectionDataSource": "ss4o_logs-nginx-test",
       "connectionLocation": "",
       "connectionTableName": "",
       "connectionType": "index",
       "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
     }
   }
   integration={

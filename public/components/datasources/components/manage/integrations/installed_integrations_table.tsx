@@ -121,7 +121,7 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
   );
 };
 
-const InstallIntegrationFlyout = ({
+export const InstallIntegrationFlyout = ({
   availableIntegrations,
   setAvailableIntegrations,
   closeFlyout,
