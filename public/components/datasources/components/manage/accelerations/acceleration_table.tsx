@@ -25,7 +25,10 @@ import {
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
-import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
+import {
+  getRenderAccelerationDetailsFlyout,
+  getRenderCreateAccelerationFlyout,
+} from '../../../../../plugin';
 import {
   ACC_LOADING_MSG,
   ACC_PANEL_DESC,
@@ -118,11 +121,9 @@ export const AccelerationTable = ({
   };
 
   const CreateButton = () => {
-    // TODO: Create button should call create_acceleration.tsx, which will be brought
-    // over from dashboards-query-workbench/public/components/acceleration/create/create_accelerations.tsx
     return (
       <>
-        <EuiButton onClick={() => console.log('clicked on create accelerations button')} fill>
+        <EuiButton onClick={() => renderCreateAccelerationFlyout(dataSourceName)} fill>
           Create acceleration
         </EuiButton>
       </>
@@ -204,16 +205,12 @@ export const AccelerationTable = ({
       name: 'Name',
       sortable: true,
       render: (indexName: string, acceleration: CachedAcceleration) => {
-        const displayName = getAccelerationName(indexName, acceleration, dataSourceName);
+        const displayName = getAccelerationName(acceleration, dataSourceName);
         return (
           <EuiLink
             onClick={() => {
               console.log(displayName);
-              renderAccelerationDetailsFlyout({
-                index: displayName,
-                acceleration,
-                dataSourceName,
-              });
+              renderAccelerationDetailsFlyout(displayName, acceleration, dataSourceName);
             }}
           >
             {displayName}
@@ -299,6 +296,7 @@ export const AccelerationTable = ({
   };
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <>
