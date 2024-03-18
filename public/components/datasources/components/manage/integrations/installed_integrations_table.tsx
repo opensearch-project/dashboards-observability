@@ -158,6 +158,7 @@ export const InstallIntegrationFlyout = ({
           loading={false}
           data={s3FilteredIntegrations}
           isCardView={true}
+          setInstallingIntegration={setInstallingIntegration}
         />
       ) : (
         <SetupIntegrationForm
