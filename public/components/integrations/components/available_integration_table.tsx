@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
-import { basePathLink } from '../../../../public/framework/core_refs';
+import { basePathLink } from '../../../../common/utils/shared';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
 

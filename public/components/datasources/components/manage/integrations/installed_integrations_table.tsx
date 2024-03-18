@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
-import { coreRefs, basePathLink } from '../../../../../framework/core_refs';
+import { coreRefs } from '../../../../../framework/core_refs';
+import { basePathLink } from '../../../../../../common/utils/shared';
 import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';

@@ -41,19 +41,3 @@ class CoreRefs {
 }
 
 export const coreRefs = CoreRefs.Instance;
-
-/**
- * Safely prepend the `basePath` from `coreRefs` to the given link.
- * If `coreRefs.http.basePath` exists (always true in normal operation), prepend it to the link.
- * If it doesn't exist (usually during unit testing), return the link as-is.
- *
- * @param link The link to prepend with `coreRefs.http.basePath`.
- * @returns The link with the prepended `basePath` if it exists, otherwise the unmodified link.
- */
-export const basePathLink = (link: string): string => {
-  if (coreRefs.http?.basePath) {
-    return coreRefs.http.basePath.prepend(link);
-  } else {
-    return link;
-  }
-};
