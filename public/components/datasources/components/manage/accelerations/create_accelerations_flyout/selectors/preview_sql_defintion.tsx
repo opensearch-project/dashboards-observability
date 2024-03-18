@@ -76,7 +76,6 @@ export const PreviewSQLDefinition = ({
       })
       .then((data) => {
         for (let i = 0; i < data.status.statuses.length; ++i) {
-          console.log('id:', data.status.statuses[i].id);
           if (data.status.statuses[i].id.includes(queryWorkbenchPluginCheck)) {
             setSQLWorkbenchPluginExists(true);
           }
@@ -113,7 +112,6 @@ export const PreviewSQLDefinition = ({
   }, [accelerationFormData]);
 
   useEffect(() => {
-    console.log('ran useffect');
     checkIfSQLWorkbenchPluginIsInstalled();
   }, []);
 
