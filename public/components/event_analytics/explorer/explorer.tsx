@@ -133,7 +133,6 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
-import { createBrowserHistory } from 'history';
 
 export const Explorer = ({
   pplService,
@@ -270,7 +269,6 @@ export const Explorer = ({
 
   const historyFromRedirection = createBrowserHistory();
   useEffect(() => {
-    console.log(historyFromRedirection.location.state);
     if (!historyFromRedirection.location.state) return;
     const {
       datasourceName,
@@ -299,6 +297,7 @@ export const Explorer = ({
           query: { [RAW_QUERY]: queryToRun },
         })
       );
+      setTempQuery(queryToRun);
     });
   }, []);
 

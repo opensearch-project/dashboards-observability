@@ -50,7 +50,10 @@ import {
 import { TabContext, useRenderVisualization } from '../../../../../hooks';
 import { DataConfigItemClickPanel } from '../config_controls/data_config_item_click_panel';
 import { DataConfigPanelFields } from '../config_controls/data_config_panel_fields';
-import { composeFinalQuery } from '../../../../../../../../common/utils';
+import {
+  composeFinalQuery,
+  composeFinalQueryWithoutTimestamp,
+} from '../../../../../../common/query_utils';
 
 const initialDimensionEntry = {
   label: '',
@@ -244,16 +247,18 @@ export const DataConfigPanelItem = ({
     return {
       ...prevQuery,
       [RAW_QUERY]: newQueryString,
-      [FINAL_QUERY]: composeFinalQuery(
-        newQueryString,
-        prevQuery[SELECTED_DATE_RANGE][0] || 'now',
-        prevQuery[SELECTED_DATE_RANGE][1] || 'now',
-        !isEmpty(visConfig.span?.time_field)
-          ? visConfig.span?.time_field[0].name
-          : prevQuery.selectedTimestamp,
-        false,
-        ''
-      ),
+      [FINAL_QUERY]: isEmpty(prevQuery.selectedTimestamp)
+        ? composeFinalQueryWithoutTimestamp(newQueryString, '')
+        : composeFinalQuery(
+            newQueryString,
+            prevQuery[SELECTED_DATE_RANGE][0] || 'now',
+            prevQuery[SELECTED_DATE_RANGE][1] || 'now',
+            !isEmpty(visConfig.span?.time_field)
+              ? visConfig.span?.time_field[0].name
+              : prevQuery.selectedTimestamp,
+            false,
+            ''
+          ),
     };
   };
 

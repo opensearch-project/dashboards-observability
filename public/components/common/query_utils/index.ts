@@ -368,7 +368,6 @@ export const composeFinalQuery = (
 
 export const composeFinalQueryWithoutTimestamp = (
   curQuery: string,
-  isLiveQuery: boolean,
   appBaseQuery: string,
   selectedPatternField?: string,
   patternRegex?: string,

@@ -96,7 +96,6 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     const finalQuery = noTimestamp ? 
     composeFinalQueryWithoutTimestamp(
       this.query[RAW_QUERY],
-      isLiveTailOn,
       appBaseQuery,
       this.query[SELECTED_PATTERN_FIELD],
       this.query[PATTERN_REGEX],
