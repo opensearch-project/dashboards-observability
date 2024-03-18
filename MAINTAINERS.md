@@ -22,6 +22,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Anirudha Jadhav         | [anirudha](https://github.com/anirudha)           | Amazon      |
 | Paul Sebastian          | [paulstn](https://github.com/paulstn)             | Amazon      |
 | Sumukh Hanumantha Swamy | [sumukhswamy](https://github.com/sumukhswamy)     | Amazon      |
+| Ryan Liang              | [RyanL1997](https://github.com/RyanL1997)         | Amazon      |
 
 ## Emeritus Maintainers
 
