@@ -230,22 +230,22 @@ export const AccelerationTable = ({
       name: 'Sync',
       description: 'Manual Sync Data',
       icon: 'inputOutput',
-      onClick: (item) => handleActionClick('sync', item),
+      onClick: (item: CachedAcceleration) => handleActionClick('sync', item),
       enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
     },
     {
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
-      onClick: (item) => handleActionClick('delete', item),
-      enabled: (item) => item.status !== 'deleted',
+      onClick: (item: CachedAcceleration) => handleActionClick('delete', item),
+      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
     },
     {
       name: 'Vacuum',
       description: 'Vacuum acceleration',
       icon: 'broom',
-      onClick: (item) => handleActionClick('vacuum', item),
-      enabled: (item) => item.status === 'deleted',
+      onClick: (item: CachedAcceleration) => handleActionClick('vacuum', item),
+      enabled: (item: CachedAcceleration) => item.status === 'deleted',
     },
   ];
 

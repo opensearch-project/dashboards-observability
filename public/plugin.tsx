@@ -396,7 +396,8 @@ export class ObservabilityPlugin
     const renderAccelerationDetailsFlyout = (
       index: string,
       acceleration: CachedAcceleration,
-      dataSourceName: string
+      dataSourceName: string,
+      handleRefresh?: () => void,
     ) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(

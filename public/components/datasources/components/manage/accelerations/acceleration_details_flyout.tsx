@@ -30,7 +30,7 @@ export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
   dataSourceName: string;
   resetFlyout: () => void;
-  handleRefresh: () => void;
+  handleRefresh?: () => void;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
