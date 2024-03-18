@@ -19,8 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
   INTEGRATIONS_BASE,
@@ -28,23 +28,24 @@ import {
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { coreRefs } from '../../../../framework/core_refs';
-import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
-import { NoAccess } from '../no_access';
 import {
   DatasourceDetails,
   PrometheusProperties,
 } from '../../../../../common/types/data_connections';
-import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
-import { AccelerationTable } from './accelerations/acceleration_table';
-import { AccessControlTab } from './access_control_tab';
-import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
 import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
+import { coreRefs } from '../../../../framework/core_refs';
+import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
+import { NoAccess } from '../no_access';
+import { AccelerationTable } from './accelerations/acceleration_table';
+import { AccessControlTab } from './access_control_tab';
+import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
+import { InactiveDataConnectionCallout } from './inactive_data_connection';
+import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
@@ -56,6 +57,7 @@ export const DataConnection = (props: any) => {
     description: '',
     connector: 'PROMETHEUS',
     properties: { 'prometheus.uri': 'placeholder' },
+    status: 'ACTIVE',
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
@@ -168,6 +170,24 @@ export const DataConnection = (props: any) => {
     );
   };
 
+  const fetchSelectedDatasource = () => {
+    http!
+      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
+      .then((data) => {
+        setDatasourceDetails({
+          allowedRoles: data.allowedRoles,
+          description: data.description,
+          name: data.name,
+          connector: data.connector,
+          properties: data.properties,
+          status: data.status,
+        });
+      })
+      .catch((_err) => {
+        setHasAccess(false);
+      });
+  };
+
   useEffect(() => {
     chrome!.setBreadcrumbs([
       {
@@ -179,20 +199,7 @@ export const DataConnection = (props: any) => {
         href: `#/manage/${dataSource}`,
       },
     ]);
-    http!
-      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
-      .then((data) => {
-        setDatasourceDetails({
-          allowedRoles: data.allowedRoles,
-          description: data.description,
-          name: data.name,
-          connector: data.connector,
-          properties: data.properties,
-        });
-      })
-      .catch((_err) => {
-        setHasAccess(false);
-      });
+    fetchSelectedDatasource();
   }, [chrome, http]);
 
   const tabs = [
@@ -360,15 +367,26 @@ export const DataConnection = (props: any) => {
 
         <DatasourceOverview />
         <EuiSpacer />
-        <EuiAccordion
-          id="queryOrAccelerateAccordion"
-          buttonContent={'Get started'}
-          initialIsOpen={true}
-          paddingSize="m"
-        >
-          <QueryOrAccelerateData />
-        </EuiAccordion>
-        <EuiTabbedContent tabs={tabs} />
+
+        {datasourceDetails.status !== 'ACTIVE' ? (
+          <InactiveDataConnectionCallout
+            datasourceDetails={datasourceDetails}
+            fetchSelectedDatasource={fetchSelectedDatasource}
+          />
+        ) : (
+          <>
+            <EuiAccordion
+              id="queryOrAccelerateAccordion"
+              buttonContent={'Get started'}
+              initialIsOpen={true}
+              paddingSize="m"
+            >
+              <QueryOrAccelerateData />
+            </EuiAccordion>
+            <EuiTabbedContent tabs={tabs} />
+          </>
+        )}
+
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>

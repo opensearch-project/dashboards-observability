@@ -8,6 +8,7 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 import {
   describePrometheusDataConnection,
@@ -16,7 +17,6 @@ import {
   mockDataSourceCacheData,
 } from '../../../../../test/datasources';
 import { DataConnection } from '../manage/data_connection';
-import { CatalogCacheManager } from '../../../../../public/framework/catalog_cache/cache_manager';
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(),

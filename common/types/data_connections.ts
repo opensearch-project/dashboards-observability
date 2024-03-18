@@ -56,12 +56,15 @@ export interface PrometheusProperties {
   'prometheus.uri': string;
 }
 
+export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
+
 export interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
   connector: DatasourceType;
   description: string;
   properties: S3GlueProperties | PrometheusProperties;
+  status: DatasourceStatus;
 }
 
 interface AsyncApiDataResponse {
