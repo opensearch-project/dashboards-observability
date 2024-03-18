@@ -167,7 +167,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
   }
 
   async processSavedData(savedObjectData: SavedObjectData) {
-    const savedType = isObjectSavedQuery(savedObjectData) ? SAVED_QUERY : SAVED_VISUALIZATION;
+        const savedType = isObjectSavedQuery(savedObjectData) ? SAVED_QUERY : SAVED_VISUALIZATION;
     const objectData = isObjectSavedQuery(savedObjectData)
       ? savedObjectData.savedQuery
       : savedObjectData.savedVisualization;
@@ -204,7 +204,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
           tabId,
           query: {
             [RAW_QUERY]: currQuery,
-            [SELECTED_TIMESTAMP]: objectData?.selected_timestamp?.name || 'timestamp',
+            [SELECTED_TIMESTAMP]: objectData?.selected_timestamp?.name,
             [SAVED_OBJECT_ID]: objectId,
             [SAVED_OBJECT_TYPE]: savedType,
             [SELECTED_DATE_RANGE]:
