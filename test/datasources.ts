@@ -1008,19 +1008,19 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     ],
     columns: [
       {
-        name: 'column1',
+        fieldName: 'column1',
         dataType: 'dataType1',
       },
       {
-        name: 'column2',
+        fieldName: 'column2',
         dataType: 'dataType2',
       },
       {
-        name: 'column3',
+        fieldName: 'column3',
         dataType: 'dataType3',
       },
       {
-        name: 'column4',
+        fieldName: 'column4',
         dataType: 'dataType4',
       },
     ],

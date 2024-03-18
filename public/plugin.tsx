@@ -60,10 +60,7 @@ import { DirectSearch } from './components/common/search/direct_search';
 import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
-import {
-  AssociatedObjectsDetailsFlyout,
-  AssociatedObjectsFlyoutProps,
-} from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
+import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -104,28 +101,22 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  ({
-    index,
-    acceleration,
-    dataSourceName,
-  }: {
-    index: string;
-    acceleration: CachedAcceleration;
-    dataSourceName: string;
-  }) => void
+  (index: string, acceleration: CachedAcceleration, dataSourceName: string) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<({ tableDetail }: { tableDetail: AssociatedObject }) => void>(
+] = createGetterSetter<(tableDetail: AssociatedObject, datasourceName: string) => void>(
   'renderAssociatedObjectsDetailsFlyout'
 );
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(dataSource: string) => void>('renderCreateAccelerationFlyout');
+] = createGetterSetter<(dataSource: string, databaseName?: string, tableName?: string) => void>(
+  'renderCreateAccelerationFlyout'
+);
 
 export class ObservabilityPlugin
   implements
@@ -402,15 +393,11 @@ export class ObservabilityPlugin
     });
 
     // Use overlay service to render flyouts
-    const renderAccelerationDetailsFlyout = ({
-      index,
-      acceleration,
-      dataSourceName,
-    }: {
-      index: string;
-      acceleration: CachedAcceleration;
-      dataSourceName: string;
-    }) => {
+    const renderAccelerationDetailsFlyout = (
+      index: string,
+      acceleration: CachedAcceleration,
+      dataSourceName: string
+    ) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AccelerationDetailsFlyout
@@ -424,11 +411,15 @@ export class ObservabilityPlugin
     };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) => {
+    const renderAssociatedObjectsDetailsFlyout = (
+      tableDetail: AssociatedObject,
+      datasourceName: string
+    ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AssociatedObjectsDetailsFlyout
             tableDetail={tableDetail}
+            datasourceName={datasourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
           />
         )
@@ -436,12 +427,18 @@ export class ObservabilityPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    const renderCreateAccelerationFlyout = (selectedDatasource: string) => {
+    const renderCreateAccelerationFlyout = (
+      selectedDatasource: string,
+      databaseName?: string,
+      tableName?: string
+    ) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={selectedDatasource}
             resetFlyout={() => createAccelerationFlyout.close()}
+            databaseName={databaseName}
+            tableName={tableName}
           />
         )
       );

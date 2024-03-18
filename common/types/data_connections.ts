@@ -39,8 +39,8 @@ export interface AssociatedObject {
   name: string;
   database: string;
   type: AccelerationIndexType | 'table';
-  accelerations: Acceleration[];
-  columns?: TableColumn[];
+  accelerations: CachedAcceleration[];
+  columns?: CachedColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;

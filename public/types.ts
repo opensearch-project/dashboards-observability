@@ -11,7 +11,7 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
-import { AssociatedObject } from '../common/types/data_connections';
+import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
 import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
@@ -35,12 +35,15 @@ export interface SetupDependencies {
 export interface ObservabilitySetup {}
 
 export interface ObservabilityStart {
-  renderAccelerationDetailsFlyout: (acceleration: any) => void;
-  renderAssociatedObjectsDetailsFlyout: ({
-    tableDetail,
-  }: {
-    tableDetail: AssociatedObject;
-  }) => void;
+  renderAccelerationDetailsFlyout: (
+    index: string,
+    acceleration: CachedAcceleration,
+    datasourceName: string
+  ) => void;
+  renderAssociatedObjectsDetailsFlyout: (
+    tableDetail: AssociatedObject,
+    datasourceName: string
+  ) => void;
   renderCreateAccelerationFlyout: (selectedDatasource: string) => void;
 }
 
