@@ -89,28 +89,31 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     const noTimestamp = isEmpty(this.timestamp);
 
-    const curStartTime = noTimestamp ? undefined : startingTime || this.query[SELECTED_DATE_RANGE][0];
+    const curStartTime = noTimestamp
+      ? undefined
+      : startingTime || this.query[SELECTED_DATE_RANGE][0];
     const curEndTime = noTimestamp ? undefined : endingTime || this.query[SELECTED_DATE_RANGE][1];
 
     // compose final query
-    const finalQuery = noTimestamp ? 
-    composeFinalQueryWithoutTimestamp(
-      this.query[RAW_QUERY],
-      appBaseQuery,
-      this.query[SELECTED_PATTERN_FIELD],
-      this.query[PATTERN_REGEX],
-      this.query[FILTERED_PATTERN]
-    ) : composeFinalQuery(
-      this.query[RAW_QUERY],
-      curStartTime,
-      curEndTime,
-      this.timestamp,
-      isLiveTailOn,
-      appBaseQuery,
-      this.query[SELECTED_PATTERN_FIELD],
-      this.query[PATTERN_REGEX],
-      this.query[FILTERED_PATTERN]
-    );
+    const finalQuery = noTimestamp
+      ? composeFinalQueryWithoutTimestamp(
+          this.query[RAW_QUERY],
+          appBaseQuery,
+          this.query[SELECTED_PATTERN_FIELD],
+          this.query[PATTERN_REGEX],
+          this.query[FILTERED_PATTERN]
+        )
+      : composeFinalQuery(
+          this.query[RAW_QUERY],
+          curStartTime,
+          curEndTime,
+          this.timestamp,
+          isLiveTailOn,
+          appBaseQuery,
+          this.query[SELECTED_PATTERN_FIELD],
+          this.query[PATTERN_REGEX],
+          this.query[FILTERED_PATTERN]
+        );
 
     // update UI with new query state
     await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);

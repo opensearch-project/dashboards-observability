@@ -5,6 +5,7 @@
 
 import { EuiSuperDatePicker, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { uiSettingsService } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { IDatePickerProps } from './search';
@@ -12,7 +13,6 @@ import {
   QUERY_ASSIST_END_TIME,
   QUERY_ASSIST_START_TIME,
 } from '../../../../common/constants/shared';
-import { i18n } from '@osd/i18n';
 
 export function DatePicker(props: IDatePickerProps) {
   const {

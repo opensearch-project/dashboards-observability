@@ -167,7 +167,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
   }
 
   async processSavedData(savedObjectData: SavedObjectData) {
-        const savedType = isObjectSavedQuery(savedObjectData) ? SAVED_QUERY : SAVED_VISUALIZATION;
+    const savedType = isObjectSavedQuery(savedObjectData) ? SAVED_QUERY : SAVED_VISUALIZATION;
     const objectData = isObjectSavedQuery(savedObjectData)
       ? savedObjectData.savedQuery
       : savedObjectData.savedVisualization;
