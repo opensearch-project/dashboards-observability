@@ -40,7 +40,7 @@ export interface DataGridProps {
   requestParams: any;
   startTime: string;
   endTime: string;
-  isNotDefaultDatasource: boolean;
+  isDefaultDataSource: boolean;
   storedSelectedColumns: IField[];
   formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
   OuiDataGridProps?: Partial<EuiDataGridProps>;
@@ -60,7 +60,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
-    isNotDefaultDatasource,
+    isDefaultDataSource,
     formatGridColumn = defaultFormatGrid,
     OuiDataGridProps,
   } = props;
@@ -102,7 +102,7 @@ export function DataGrid(props: DataGridProps) {
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
-    if (isNotDefaultDatasource) return; // avoid adjusting query if using s3
+    if (!isDefaultDataSource) return; // avoid adjusting query if using s3
 
     redoQuery(
       startTime,
@@ -118,7 +118,7 @@ export function DataGrid(props: DataGridProps) {
 
   const findTrueIndex = (rowIndex: number) => {
     // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
-    if (!isNotDefaultDatasource) {
+    if (isDefaultDataSource) {
       // modulo of row length, i.e. pos on current page
       rowIndex = rowIndex % pageFields.current[1];
     }
@@ -140,7 +140,7 @@ export function DataGrid(props: DataGridProps) {
           ...DEFAULT_TIMESTAMP_COLUMN,
           display: `${columnNameTranslate('Time')} (${timeStampField})`,
           id: timeStampField,
-          isSortable: !isNotDefaultDatasource, // allow sorting for default ds, dont otherwise
+          isSortable: isDefaultDataSource, // allow sorting for default ds, dont otherwise
         });
       } else if (name === '_source') {
         columns.push({
@@ -151,7 +151,7 @@ export function DataGrid(props: DataGridProps) {
         columns.push({
           id: name,
           display: name,
-          isSortable: !isNotDefaultDatasource,
+          isSortable: isDefaultDataSource,
         });
       }
     });

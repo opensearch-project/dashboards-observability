@@ -650,8 +650,8 @@ export const Explorer = ({
                         requestParams={requestParams}
                         startTime={startTime}
                         endTime={endTime}
-                        isNotDefaultDatasource={
-                          explorerSearchMeta.datasources[0].type !== DEFAULT_DATA_SOURCE_TYPE
+                        isDefaultDataSource={
+                          explorerSearchMeta.datasources[0].type === DEFAULT_DATA_SOURCE_TYPE
                         }
                       />
                     )}
