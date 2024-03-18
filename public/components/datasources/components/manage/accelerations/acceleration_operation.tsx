@@ -51,20 +51,18 @@ export const useAccelerationOperation = (dataSource: string) => {
         break;
       case 'sync':
         operationInProgressMessage = `Syncing acceleration: ${displayAccelerationName}`;
-        operationSuccessMessage = `Successfully synced acceleration: ${displayAccelerationName}`;
-        operationFailureMessage = `Failed to sync acceleration: ${displayAccelerationName}`;
         break;
     }
 
     if (loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
       setIsOperating(true);
       setToast(operationInProgressMessage, 'success');
-    } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
+    } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS && operationType !== 'sync') {
       setIsOperating(false);
       setAccelerationToOperate(null);
       setOperationSuccess(true);
       setToast(operationSuccessMessage, 'success');
-    } else if (loadStatus === DirectQueryLoadingStatus.FAILED) {
+    } else if (loadStatus === DirectQueryLoadingStatus.FAILED && operationType !== 'sync') {
       setIsOperating(false);
       setOperationSuccess(false);
       setToast(operationFailureMessage, 'danger');

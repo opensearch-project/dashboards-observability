@@ -10,7 +10,6 @@ import * as useToastModule from '../../../common/toast';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 import { skippingIndexAcceleration } from './testing_constants';
 
-// Correctly mock the modules with jest.mock
 jest.mock('../../../../framework/datasources/direct_query_hook', () => ({
   useDirectQuery: jest.fn(),
 }));
