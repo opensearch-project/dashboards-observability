@@ -41,7 +41,7 @@ export interface AvailableIntegrationsCardViewProps {
   setCardView: (input: boolean) => void;
   query: string;
   setQuery: (input: string) => void;
-  renderCateogryFilters: () => React.JSX.Element;
+  renderCategoryFilters: () => React.JSX.Element;
   http: HttpStart;
 }
 
@@ -115,7 +115,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     });
   }
 
-  const renderCateogryFilters = () => {
+  const renderCategoryFilters = () => {
     return (
       <EuiFilterGroup>
         <EuiPopover
@@ -157,7 +157,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               setCardView,
               query,
               setQuery,
-              renderCateogryFilters,
+              renderCategoryFilters,
               http,
             })
           : AvailableIntegrationsTable({
@@ -167,7 +167,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               },
               isCardView,
               setCardView,
-              renderCategoryFilters: renderCateogryFilters,
+              renderCategoryFilters,
             })}
       </EuiPageBody>
     </EuiPage>

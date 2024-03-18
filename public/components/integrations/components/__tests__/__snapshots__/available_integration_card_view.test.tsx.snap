@@ -59,7 +59,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
   http={[MockFunction]}
   isCardView={false}
   query=""
-  renderCateogryFilters={[Function]}
+  renderCategoryFilters={[Function]}
   setCardView={[Function]}
   setQuery={[Function]}
 >

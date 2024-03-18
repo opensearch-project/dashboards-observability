@@ -41,7 +41,7 @@ export const availableCardViewData: AvailableIntegrationsCardViewProps = {
       },
     ],
   },
-  renderCateogryFilters: () => (null as unknown) as { type: string; props: object; key: string },
+  renderCategoryFilters: () => (null as unknown) as { type: string; props: object; key: string },
   isCardView: false,
   setCardView: () => {},
   query: '',

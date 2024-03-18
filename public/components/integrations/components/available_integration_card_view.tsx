@@ -101,7 +101,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{props.renderCateogryFilters()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{props.renderCategoryFilters()}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Text align"
