@@ -180,7 +180,7 @@ export function DataGrid(props: DataGridProps) {
               http={http}
               key={null}
               docId={'undefined'}
-              doc={rows[rowIndex % pageFields.current[1]]}
+              doc={data[rowIndex % pageFields.current[1]]}
               selectedCols={explorerFields.queriedFields}
               timeStampField={timeStampField}
               explorerFields={explorerFields}
@@ -192,7 +192,7 @@ export function DataGrid(props: DataGridProps) {
               selectedIndex={rowIndex}
               sortingFields={sortingFields}
               rowHeightsOptions={rowHeightsOptions}
-              rows={rows}
+              rows={data}
             />
           );
         },
