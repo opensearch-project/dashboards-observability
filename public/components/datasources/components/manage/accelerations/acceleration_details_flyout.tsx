@@ -214,7 +214,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
     switch (tab) {
       case 'details':
-        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
+        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName, resetFlyout };
         break;
       case 'schema':
         propsForTab = { mappings, indexInfo };

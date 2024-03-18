@@ -15,6 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { AccelerationHealth, AccelerationStatus } from '../utils/acceleration_utils';
+import { coreRefs } from '../../../../../../framework/core_refs';
+import { observabilityDataConnectionsID } from '../../../../../../../common/constants/shared';
 
 interface AccelerationDetailsTabProps {
   acceleration: {
@@ -30,6 +32,7 @@ interface AccelerationDetailsTabProps {
   mappings: object;
   indexInfo: any;
   dataSourceName: string;
+  resetFlyout: () => void;
 }
 
 export const AccelerationDetailsTab = ({
@@ -38,6 +41,7 @@ export const AccelerationDetailsTab = ({
   mappings,
   indexInfo,
   dataSourceName,
+  resetFlyout,
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
@@ -97,7 +101,19 @@ export const AccelerationDetailsTab = ({
       <EuiFlexGroup direction="row">
         <DetailComponent
           title="Data source connection"
-          description={<EuiLink onClick={() => console.log()}>{dataSourceName}</EuiLink>}
+          description={
+            <EuiLink
+              onClick={() => {
+                coreRefs?.application!.navigateToApp(observabilityDataConnectionsID, {
+                  path: `#/manage/${dataSourceName}`,
+                  replace: true,
+                });
+                resetFlyout();
+              }}
+            >
+              {dataSourceName}
+            </EuiLink>
+          }
         />
         <DetailComponent title="Database" description={acceleration.database} />
         <DetailComponent title="Table" description={acceleration.table || '-'} />
