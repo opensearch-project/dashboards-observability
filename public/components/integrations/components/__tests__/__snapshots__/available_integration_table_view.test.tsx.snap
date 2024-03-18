@@ -58,7 +58,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
   }
   isCardView={false}
   loading={false}
-  renderCategoryFilters={[Function]}
   setCardView={[Function]}
 >
   <EuiPageContent
