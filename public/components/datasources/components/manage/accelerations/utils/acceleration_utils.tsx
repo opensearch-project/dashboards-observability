@@ -24,10 +24,7 @@ export const ACC_SYNC_MSG = 'Syncing data may require querying all data. Do you 
 
 export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
 
-export const getAccelerationName = (
-  acceleration: CachedAcceleration,
-  datasource: string
-) => {
+export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
   return (
     acceleration.indexName ||
     `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
