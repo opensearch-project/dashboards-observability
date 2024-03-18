@@ -56,7 +56,6 @@ const handleDetailsFetchingPromise = (
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
   const { index, dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
-  console.log(index, acceleration, dataSourceName);
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -220,7 +219,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         propsForTab = { mappings, indexInfo };
         break;
       default:
-        console.log('Unknown Tab: ', tab);
         return null;
     }
 

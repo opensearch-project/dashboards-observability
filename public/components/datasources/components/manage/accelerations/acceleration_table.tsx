@@ -108,14 +108,9 @@ export const AccelerationTable = ({
       cachedDataSource.status === CachedDataSourceStatus.Empty &&
       !isCatalogCacheFetching(accelerationsLoadStatus)
     ) {
-      console.log(
-        `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
-      );
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
     } else {
-      console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
-
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
     }
@@ -129,16 +124,13 @@ export const AccelerationTable = ({
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
       setIsRefreshing(false);
-      console.log('Refresh process is success.');
     }
     if (accelerationsLoadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsRefreshing(false);
-      console.log('Refresh process is failed.');
     }
   }, [accelerationsLoadStatus]);
 
   const handleRefresh = useCallback(() => {
-    console.log('Initiating refresh...');
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
@@ -259,7 +251,6 @@ export const AccelerationTable = ({
         return (
           <EuiLink
             onClick={() => {
-              console.log(displayName);
               renderAccelerationDetailsFlyout(
                 displayName,
                 acceleration,
