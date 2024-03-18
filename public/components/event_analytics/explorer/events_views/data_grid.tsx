@@ -212,7 +212,7 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    let trueIndex = findTrueIndex(rowIndex);
+    const trueIndex = findTrueIndex(rowIndex);
 
     if (trueIndex < data.length) {
       if (columnId === '_source') {
