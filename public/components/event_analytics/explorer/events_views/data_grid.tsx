@@ -187,11 +187,11 @@ export function DataGrid(props: DataGridProps) {
               pplService={pplService}
               rawQuery={rawQuery}
               onFlyoutOpen={() => {}}
-              dataGridColumns={dataGridColumns}
-              dataGridColumnVisibility={dataGridColumnVisibility}
+              dataGridColumns={dataGridColumns()}
+              dataGridColumnVisibility={dataGridColumnVisibility()}
               selectedIndex={rowIndex}
               sortingFields={sortingFields}
-              rowHeightsOptions={rowHeightsOptions}
+              rowHeightsOptions={rowHeightsOptions()}
               rows={data}
             />
           );
