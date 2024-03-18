@@ -102,6 +102,8 @@ export function DataGrid(props: DataGridProps) {
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
+    if (isNotDefaultDatasource) return; // avoid adjusting query if using s3
+
     redoQuery(
       startTime,
       endTime,
@@ -201,7 +203,13 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const trueIndex = rowIndex % pageFields.current[1]; // modulo of row length, i.e. pos on current page
+    let trueIndex = rowIndex;
+    // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
+    if (!isNotDefaultDatasource) {
+      // modulo of row length, i.e. pos on current page
+      trueIndex = trueIndex % pageFields.current[1];
+    }
+
     if (trueIndex < data.length) {
       if (columnId === '_source') {
         return (
