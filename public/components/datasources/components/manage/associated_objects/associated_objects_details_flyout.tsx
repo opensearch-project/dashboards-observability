@@ -29,7 +29,7 @@ import { i18n } from '@osd/i18n';
 import {
   onAccelerateButtonClick,
   onDeleteButtonClick,
-  onDiscoverButtonClick,
+  redirectToExplorerWithDataSrc,
 } from './utils/associated_objects_tab_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { AccelerationStatus } from '../accelerations/utils/acceleration_utils';
@@ -38,16 +38,32 @@ import {
   ACCE_NO_DATA_DESCRIPTION,
   CREATE_ACCELERATION_DESCRIPTION,
 } from '../associated_objects/utils/associated_objects_tab_utils';
+import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
+  resetFlyout: () => void;
 }
 
-export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObjectsFlyoutProps) => {
+export const AssociatedObjectsDetailsFlyout = ({
+  tableDetail,
+  resetFlyout,
+}: AssociatedObjectsFlyoutProps) => {
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
     return (
-      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+      <EuiButtonEmpty
+        onClick={() => {
+          if (tableDetail.type !== 'table') return;
+          redirectToExplorerWithDataSrc(
+            tableDetail.datasource,
+            DATA_SOURCE_TYPES.S3Glue,
+            tableDetail.database,
+            tableDetail.name
+          );
+          resetFlyout();
+        }}
+      >
         <EuiIcon type={'discoverApp'} size="m" />
       </EuiButtonEmpty>
     );

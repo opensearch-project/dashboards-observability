@@ -33,6 +33,7 @@ export interface AccelerationDetailsFlyoutProps {
   index: string;
   acceleration: CachedAcceleration;
   dataSourceName: string;
+  resetFlyout: () => void;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
@@ -57,7 +58,7 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { index, dataSourceName, acceleration } = props;
+  const { index, dataSourceName, acceleration, resetFlyout } = props;
   console.log(index, acceleration, dataSourceName);
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
@@ -109,7 +110,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
     return (
-      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+      <EuiButtonEmpty
+        onClick={() => {
+          onDiscoverButtonClick(acceleration, dataSourceName);
+          resetFlyout();
+        }}
+      >
         <EuiIcon type={'discoverApp'} size="m" />
       </EuiButtonEmpty>
     );

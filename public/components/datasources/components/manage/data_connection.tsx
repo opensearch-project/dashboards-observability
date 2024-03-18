@@ -37,6 +37,7 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
+import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
@@ -81,48 +82,6 @@ export const DataConnection = (props: any) => {
     startLoadingAccelerations,
   };
 
-  // Dummy accelerations variables for mock purposes
-  // Actual accelerations should be retrieved from the backend
-  // const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
-  const _dummyAccelerations = [
-    {
-      flintIndexName: 'flint_mys3_default_http_logs_skipping_index',
-      kind: 'skipping',
-      database: 'default',
-      table: 'test',
-      indexName: 'skipping_index',
-      autoRefresh: true,
-      status: 'Active',
-    },
-    {
-      flintIndexName: 'flint_mys3_default_test_mycv_index',
-      kind: 'covering',
-      database: 'default',
-      table: 'test',
-      indexName: 'mycv',
-      autoRefresh: false,
-      status: 'Active',
-    },
-    {
-      flintIndexName: 'flint_mys3_default_mymv',
-      kind: ' ',
-      database: 'default',
-      table: '',
-      indexName: 'mymv',
-      autoRefresh: true,
-      status: 'Active',
-    },
-    {
-      flintIndexName: 'flint_mys3_default_sample_mv',
-      kind: 'mv',
-      database: 'default',
-      table: 'sample_table',
-      indexName: 'sample_mv',
-      autoRefresh: true,
-      status: 'Active',
-    },
-  ];
-
   const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
     [] as IntegrationInstanceResult[]
   );
@@ -156,7 +115,13 @@ export const DataConnection = (props: any) => {
   };
 
   const onclickDiscoverCard = () => {
-    application!.navigateToApp(observabilityLogsID);
+    application!.navigateToApp(observabilityLogsID, {
+      path: `#/explorer`,
+      state: {
+        datasourceName: dataSource,
+        datasourceType: DATA_SOURCE_TYPES.S3Glue,
+      },
+    });
   };
 
   const DefaultDatasourceCards = () => {

@@ -179,7 +179,9 @@ export const AccelerationTable = ({
       description: 'Open in Discover',
       icon: 'discoverApp',
       type: 'icon',
-      onClick: onDiscoverButtonClick,
+      onClick: (acc: CachedAcceleration) => {
+        onDiscoverButtonClick(acc, dataSourceName);
+      },
     },
     {
       name: 'Refresh',
