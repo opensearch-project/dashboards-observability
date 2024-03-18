@@ -75,6 +75,14 @@ const instanceToTableEntry = (
   };
 };
 
+const AddIntegrationButton = ({ fill }: { fill?: boolean }) => {
+  return (
+    <EuiButton href={safeBasePathLink('/app/integrations#available')} fill={fill}>
+      Add Integrations
+    </EuiButton>
+  );
+};
+
 const NoInstalledIntegrations = () => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
@@ -92,9 +100,7 @@ const NoInstalledIntegrations = () => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton href={safeBasePathLink('/app/integrations#available')}>
-          Add Integrations
-        </EuiButton>
+        <AddIntegrationButton />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -127,9 +133,7 @@ export const InstalledIntegrationsTable = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill={true} href={safeBasePathLink('/app/integrations#available')}>
-            Add Integration
-          </EuiButton>
+          <AddIntegrationButton fill={true} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

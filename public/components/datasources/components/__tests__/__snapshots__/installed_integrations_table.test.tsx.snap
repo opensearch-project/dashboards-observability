@@ -104,49 +104,51 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <EuiButton
-                  href="/app/integrations#available"
-                >
-                  <EuiButtonDisplay
-                    baseClassName="euiButton"
-                    element="a"
+                <AddIntegrationButton>
+                  <EuiButton
                     href="/app/integrations#available"
-                    isDisabled={false}
-                    rel="noreferrer"
                   >
-                    <a
-                      className="euiButton euiButton--primary"
-                      disabled={false}
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
+                      element="a"
                       href="/app/integrations#available"
+                      isDisabled={false}
                       rel="noreferrer"
-                      style={
-                        Object {
-                          "minWidth": undefined,
-                        }
-                      }
                     >
-                      <EuiButtonContent
-                        className="euiButton__content"
-                        iconSide="left"
-                        textProps={
+                      <a
+                        className="euiButton euiButton--primary"
+                        disabled={false}
+                        href="/app/integrations#available"
+                        rel="noreferrer"
+                        style={
                           Object {
-                            "className": "euiButton__text",
+                            "minWidth": undefined,
                           }
                         }
                       >
-                        <span
-                          className="euiButtonContent euiButton__content"
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
                         >
                           <span
-                            className="euiButton__text"
+                            className="euiButtonContent euiButton__content"
                           >
-                            Add Integrations
+                            <span
+                              className="euiButton__text"
+                            >
+                              Add Integrations
+                            </span>
                           </span>
-                        </span>
-                      </EuiButtonContent>
-                    </a>
-                  </EuiButtonDisplay>
-                </EuiButton>
+                        </EuiButtonContent>
+                      </a>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </AddIntegrationButton>
               </div>
             </EuiFlexItem>
           </div>
@@ -315,51 +317,55 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <EuiButton
+              <AddIntegrationButton
                 fill={true}
-                href="/app/integrations#available"
               >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
-                  element="a"
+                <EuiButton
                   fill={true}
                   href="/app/integrations#available"
-                  isDisabled={false}
-                  rel="noreferrer"
                 >
-                  <a
-                    className="euiButton euiButton--primary euiButton--fill"
-                    disabled={false}
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
+                    element="a"
+                    fill={true}
                     href="/app/integrations#available"
+                    isDisabled={false}
                     rel="noreferrer"
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
                   >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconSide="left"
-                      textProps={
+                    <a
+                      className="euiButton euiButton--primary euiButton--fill"
+                      disabled={false}
+                      href="/app/integrations#available"
+                      rel="noreferrer"
+                      style={
                         Object {
-                          "className": "euiButton__text",
+                          "minWidth": undefined,
                         }
                       }
                     >
-                      <span
-                        className="euiButtonContent euiButton__content"
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
                       >
                         <span
-                          className="euiButton__text"
+                          className="euiButtonContent euiButton__content"
                         >
-                          Add Integration
+                          <span
+                            className="euiButton__text"
+                          >
+                            Add Integrations
+                          </span>
                         </span>
-                      </span>
-                    </EuiButtonContent>
-                  </a>
-                </EuiButtonDisplay>
-              </EuiButton>
+                      </EuiButtonContent>
+                    </a>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </AddIntegrationButton>
             </div>
           </EuiFlexItem>
         </div>
