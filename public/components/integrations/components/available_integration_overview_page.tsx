@@ -30,7 +30,7 @@ export interface AvailableIntegrationsTableProps {
   data: AvailableIntegrationsList;
   isCardView: boolean;
   setCardView?: (input: boolean) => void;
-  filters: React.JSX.Element;
+  filters?: React.JSX.Element;
 }
 
 export interface AvailableIntegrationsList {
@@ -44,7 +44,7 @@ export interface AvailableIntegrationsCardViewProps {
   query: string;
   setQuery: (input: string) => void;
   http: HttpStart;
-  filters: React.JSX.Element;
+  filters?: React.JSX.Element;
 }
 
 export interface CategoryFiltersProps {

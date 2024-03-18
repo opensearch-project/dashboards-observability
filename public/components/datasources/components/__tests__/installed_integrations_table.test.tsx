@@ -14,14 +14,17 @@ describe('Installed Integrations Table test', () => {
 
   it('Renders the installed integrations table', async () => {
     const wrapper = mount(
-      <InstalledIntegrationsTable integrations={TEST_INTEGRATION_SEARCH_RESULTS} />
+      <InstalledIntegrationsTable
+        integrations={TEST_INTEGRATION_SEARCH_RESULTS}
+        datasourceType="S3GLUE"
+      />
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('Renders the empty installed integrations table', async () => {
-    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} />);
+    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} datasourceType="S3GLUE" />);
 
     expect(wrapper).toMatchSnapshot();
   });

@@ -1013,13 +1013,13 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                     <EuiLink
                                       className=""
                                       data-test-subj="nginxIntegrationLink"
-                                      href="#/available/nginx"
+                                      href="/app/integrations#/available/nginx"
                                       key=".0"
                                     >
                                       <a
                                         className="euiLink euiLink--primary"
                                         data-test-subj="nginxIntegrationLink"
-                                        href="#/available/nginx"
+                                        href="/app/integrations#/available/nginx"
                                         rel="noreferrer"
                                       >
                                         NginX Dashboard

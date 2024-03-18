@@ -228,7 +228,12 @@ export const DataConnection = (props: any) => {
       id: 'installed_integrations',
       name: 'Installed Integrations',
       disabled: false,
-      content: <InstalledIntegrationsTable integrations={dataSourceIntegrations} />,
+      content: (
+        <InstalledIntegrationsTable
+          integrations={dataSourceIntegrations}
+          datasourceType={datasourceDetails.connector}
+        />
+      ),
     },
     {
       id: 'access_control',
