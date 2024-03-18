@@ -93,7 +93,7 @@ export const PreviewSQLDefinition = ({
         path: `#/${accelerationFormData.dataSource}`,
         state: {
           language: 'sql',
-          queryToRun: '',
+          queryToRun: accelerationQueryBuilder(accelerationFormData),
         },
       });
     }
