@@ -36,9 +36,7 @@ import {
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
-import {
-  getRenderCreateAccelerationFlyout,
-} from '../../../../../plugin';
+import { getRenderCreateAccelerationFlyout } from '../../../../../plugin';
 import { useAccelerationOperation } from './acceleration_operation';
 
 interface AccelerationTableProps {
@@ -135,7 +133,7 @@ export const AccelerationTable = ({
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
     }
-  }, [startLoadingAccelerations, isCatalogCacheFetching, setIsRefreshing]);
+  }, [accelerationsLoadStatus]);
 
   const RefreshButton = () => {
     return (
@@ -255,7 +253,7 @@ export const AccelerationTable = ({
                 displayName,
                 acceleration,
                 dataSourceName,
-                handleRefresh,
+                handleRefresh
               );
             }}
           >

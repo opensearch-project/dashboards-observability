@@ -37,11 +37,7 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
     return null;
   }
 
-  const displayIndexName = getAccelerationName(
-    acceleration.indexName,
-    acceleration,
-    dataSourceName
-  );
+  const displayIndexName = getAccelerationName(acceleration, dataSourceName);
   let title = '';
   let description = '';
   let confirmButtonText = 'Confirm';

@@ -28,11 +28,7 @@ export const useAccelerationOperation = (dataSource: string) => {
   useEffect(() => {
     if (!accelerationToOperate || !operationType || loadStatus === currentStatus) return;
 
-    const displayAccelerationName = getAccelerationName(
-      accelerationToOperate.indexName,
-      accelerationToOperate,
-      dataSource
-    );
+    const displayAccelerationName = getAccelerationName(accelerationToOperate, dataSource);
 
     let operationInProgressMessage = '';
     let operationSuccessMessage = '';
