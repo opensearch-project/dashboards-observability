@@ -38,7 +38,8 @@ export interface ObservabilityStart {
   renderAccelerationDetailsFlyout: (
     index: string,
     acceleration: CachedAcceleration,
-    datasourceName: string
+    datasourceName: string,
+    handleRefresh?: () => void
   ) => void;
   renderAssociatedObjectsDetailsFlyout: (
     tableDetail: AssociatedObject,

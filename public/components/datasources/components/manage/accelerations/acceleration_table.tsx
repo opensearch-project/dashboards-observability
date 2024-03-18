@@ -17,33 +17,36 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  onDiscoverIconClick,
+  AccelerationStatus,
+  ACC_LOADING_MSG,
+  ACC_PANEL_TITLE,
+  ACC_PANEL_DESC,
+  getAccelerationName,
+  AccelerationActionType,
+} from './utils/acceleration_utils';
+import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import {
   CachedAcceleration,
   CachedDataSourceStatus,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
-import {
-  getRenderAccelerationDetailsFlyout,
-  getRenderCreateAccelerationFlyout,
-} from '../../../../../plugin';
-import {
-  ACC_LOADING_MSG,
-  ACC_PANEL_DESC,
-  ACC_PANEL_TITLE,
-  AccelerationStatus,
-  getAccelerationName,
-  getRefreshButtonIcon,
-  onDeleteButtonClick,
-  onDiscoverButtonClick,
-  onRefreshButtonClick,
-} from './utils/acceleration_utils';
+import { getRenderCreateAccelerationFlyout } from '../../../../../plugin';
+import { useAccelerationOperation } from './acceleration_operation';
 
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
+}
+
+interface ModalState {
+  actionType: AccelerationActionType | null;
+  selectedItem: CachedAcceleration | null;
 }
 
 export const AccelerationTable = ({
@@ -52,7 +55,7 @@ export const AccelerationTable = ({
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
-
+  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
   const {
     databasesLoadStatus,
     tablesLoadStatus,
@@ -60,6 +63,40 @@ export const AccelerationTable = ({
     startLoadingAccelerations,
   } = cacheLoadingHooks;
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({
+    actionType: null,
+    selectedItem: null,
+  });
+
+  useEffect(() => {
+    if (operationSuccess) {
+      handleRefresh();
+    }
+  }, [operationSuccess]);
+
+  const handleActionClick = (
+    actionType: ModalState['actionType'],
+    acceleration: CachedAcceleration
+  ) => {
+    setModalState({
+      actionType,
+      selectedItem: acceleration,
+    });
+  };
+
+  const handleModalClose = () => {
+    setModalState({
+      actionType: null,
+      selectedItem: null,
+    });
+  };
+
+  const handleConfirm = () => {
+    if (!modalState.selectedItem || !modalState.actionType) return;
+
+    performOperation(modalState.selectedItem, modalState.actionType);
+    handleModalClose();
+  };
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
@@ -69,14 +106,9 @@ export const AccelerationTable = ({
       cachedDataSource.status === CachedDataSourceStatus.Empty &&
       !isCatalogCacheFetching(accelerationsLoadStatus)
     ) {
-      console.log(
-        `Cache for dataSource ${dataSourceName} is empty or outdated. Loading accelerations...`
-      );
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
     } else {
-      console.log(`Using cached accelerations for dataSource: ${dataSourceName}`);
-
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
     }
@@ -90,21 +122,18 @@ export const AccelerationTable = ({
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
       setIsRefreshing(false);
-      console.log('Refresh process is success.');
     }
     if (accelerationsLoadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsRefreshing(false);
-      console.log('Refresh process is failed.');
     }
   }, [accelerationsLoadStatus]);
 
-  const handleRefresh = () => {
-    console.log('Initiating refresh...');
+  const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
       startLoadingAccelerations(dataSourceName);
     }
-  };
+  }, [accelerationsLoadStatus]);
 
   const RefreshButton = () => {
     return (
@@ -130,7 +159,8 @@ export const AccelerationTable = ({
     );
   };
 
-  console.log('HERE IS THE UPDATED TIME', updatedTime);
+  const localUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
+
   const AccelerationTableHeader = () => {
     return (
       <>
@@ -149,14 +179,16 @@ export const AccelerationTable = ({
               <EuiFlexItem grow={false}>
                 <RefreshButton data-test-subj="refreshButton" />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText textAlign="right" size="xs" color="subdued">
-                  {'Last updated'}
-                </EuiText>
-                <EuiText textAlign="right" color="subdued" size="xs">
-                  {updatedTime}
-                </EuiText>
-              </EuiFlexItem>
+              {updatedTime && (
+                <EuiFlexItem>
+                  <EuiText textAlign="right" size="xs" color="subdued">
+                    {'Last updated'}
+                  </EuiText>
+                  <EuiText textAlign="right" color="subdued" size="xs">
+                    {localUpdatedTime}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -181,21 +213,29 @@ export const AccelerationTable = ({
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        onDiscoverButtonClick(acc, dataSourceName);
+        onDiscoverIconClick(acc, dataSourceName);
       },
     },
     {
-      name: 'Refresh',
-      description: 'Refresh/Pause/Resume',
-      icon: getRefreshButtonIcon,
-      onClick: onRefreshButtonClick,
+      name: 'Sync',
+      description: 'Manual Sync Data',
+      icon: 'inputOutput',
+      onClick: (item: CachedAcceleration) => handleActionClick('sync', item),
+      enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
     },
     {
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
-      type: 'icon',
-      onClick: onDeleteButtonClick,
+      onClick: (item: CachedAcceleration) => handleActionClick('delete', item),
+      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
+    },
+    {
+      name: 'Vacuum',
+      description: 'Vacuum acceleration',
+      icon: 'broom',
+      onClick: (item: CachedAcceleration) => handleActionClick('vacuum', item),
+      enabled: (item: CachedAcceleration) => item.status === 'deleted',
     },
   ];
 
@@ -205,12 +245,11 @@ export const AccelerationTable = ({
       name: 'Name',
       sortable: true,
       render: (indexName: string, acceleration: CachedAcceleration) => {
-        const displayName = getAccelerationName(acceleration, dataSourceName);
+        const displayName = getAccelerationName(acceleration);
         return (
           <EuiLink
             onClick={() => {
-              console.log(displayName);
-              renderAccelerationDetailsFlyout(displayName, acceleration, dataSourceName);
+              renderAccelerationDetailsFlyout(acceleration, dataSourceName, handleRefresh);
             }}
           >
             {displayName}
@@ -316,6 +355,18 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
+      {(modalState.actionType === 'delete' ||
+        modalState.actionType === 'vacuum' ||
+        modalState.actionType === 'sync') && (
+        <AccelerationActionOverlay
+          isVisible={!!modalState.actionType}
+          actionType={modalState.actionType}
+          acceleration={modalState.selectedItem}
+          dataSourceName={dataSourceName}
+          onCancel={handleModalClose}
+          onConfirm={handleConfirm}
+        />
+      )}
     </>
   );
 };
