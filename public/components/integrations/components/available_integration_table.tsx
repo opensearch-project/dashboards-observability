@@ -87,7 +87,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
   const renderToggle = () => {
     return (
       <EuiFlexGroup>
-        <EuiFlexItem>{props.renderCategoryFilters()}</EuiFlexItem>
+        <EuiFlexItem>{props.filters}</EuiFlexItem>
         {props.setCardView ? (
           <EuiFlexItem>
             <EuiButtonGroup
