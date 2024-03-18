@@ -384,7 +384,7 @@ export const DirectSearch = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
-            isSuggestionDisabled={queryLang === 'SQL'}
+            isSuggestionDisabled={true}
             isDisabled={explorerSearchMetadata.isPolling}
           />
           {queryLang === QUERY_LANGUAGE.PPL && (
