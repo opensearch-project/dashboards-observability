@@ -14,11 +14,6 @@ import {
   getAccelerationName,
 } from './utils/acceleration_utils';
 
-export interface DeleteVcuumAccelerationProps {
-  acceleration: CachedAcceleration;
-  dataSource: string;
-}
-
 export const useAccelerationOperation = (dataSource: string) => {
   const { startLoading, loadStatus } = useDirectQuery();
   const { setToast } = useToast();
@@ -28,9 +23,10 @@ export const useAccelerationOperation = (dataSource: string) => {
     null
   );
   const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<DirectQueryLoadingStatus | null>(null);
 
   useEffect(() => {
-    if (!accelerationToOperate || !operationType) return;
+    if (!accelerationToOperate || !operationType || loadStatus === currentStatus) return;
 
     const displayAccelerationName = getAccelerationName(
       accelerationToOperate.indexName,
@@ -38,9 +34,10 @@ export const useAccelerationOperation = (dataSource: string) => {
       dataSource
     );
 
-    let operationInProgressMessage;
-    let operationSuccessMessage;
-    let operationFailureMessage;
+    let operationInProgressMessage = '';
+    let operationSuccessMessage = '';
+    let operationFailureMessage = '';
+
     switch (operationType) {
       case 'delete':
         operationInProgressMessage = `Deleting acceleration: ${displayAccelerationName}`;
@@ -57,9 +54,6 @@ export const useAccelerationOperation = (dataSource: string) => {
         operationSuccessMessage = `Successfully synced acceleration: ${displayAccelerationName}`;
         operationFailureMessage = `Failed to sync acceleration: ${displayAccelerationName}`;
         break;
-      default:
-        console.error(`Unsupported operation type: ${operationType}`);
-        return;
     }
 
     if (loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
@@ -74,10 +68,10 @@ export const useAccelerationOperation = (dataSource: string) => {
       setIsOperating(false);
       setOperationSuccess(false);
       setToast(operationFailureMessage, 'danger');
-    } else {
-      setIsOperating(false);
     }
-  }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType]);
+
+    setCurrentStatus(loadStatus);
+  }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType, currentStatus]);
 
   const performOperation = (
     acceleration: CachedAcceleration,
