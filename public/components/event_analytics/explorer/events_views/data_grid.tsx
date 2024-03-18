@@ -116,6 +116,15 @@ export function DataGrid(props: DataGridProps) {
     );
   };
 
+  const findTrueIndex = (rowIndex: number) => {
+    // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
+    if (!isNotDefaultDatasource) {
+      // modulo of row length, i.e. pos on current page
+      rowIndex = rowIndex % pageFields.current[1];
+    }
+    return rowIndex;
+  };
+
   const columnNameTranslate = (name: string) => {
     return i18n.translate(`discover.events.dataGrid.${name.toLowerCase()}Column`, {
       defaultMessage: name,
@@ -180,7 +189,7 @@ export function DataGrid(props: DataGridProps) {
               http={http}
               key={null}
               docId={'undefined'}
-              doc={data[rowIndex % pageFields.current[1]]}
+              doc={data[findTrueIndex(rowIndex)]}
               selectedCols={explorerFields.queriedFields}
               timeStampField={timeStampField}
               explorerFields={explorerFields}
@@ -203,12 +212,7 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    let trueIndex = rowIndex;
-    // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
-    if (!isNotDefaultDatasource) {
-      // modulo of row length, i.e. pos on current page
-      trueIndex = trueIndex % pageFields.current[1];
-    }
+    let trueIndex = findTrueIndex(rowIndex);
 
     if (trueIndex < data.length) {
       if (columnId === '_source') {
