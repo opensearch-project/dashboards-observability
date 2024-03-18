@@ -6,22 +6,44 @@
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { InstalledIntegrationsTable } from '../manage/integrations/installed_integrations_table';
-import { TEST_INTEGRATION_SEARCH_RESULTS } from '../../../../../test/constants';
+import {
+  InstallIntegrationFlyout,
+  InstalledIntegrationsTable,
+} from '../manage/integrations/installed_integrations_table';
+import {
+  TEST_AVAILABLE_INTEGRATIONS,
+  TEST_INTEGRATION_SEARCH_RESULTS,
+} from '../../../../../test/constants';
 
 describe('Installed Integrations Table test', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders the installed integrations table', async () => {
     const wrapper = mount(
-      <InstalledIntegrationsTable integrations={TEST_INTEGRATION_SEARCH_RESULTS} />
+      <InstalledIntegrationsTable
+        integrations={TEST_INTEGRATION_SEARCH_RESULTS}
+        datasourceType="S3GLUE"
+      />
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('Renders the empty installed integrations table', async () => {
-    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} />);
+    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} datasourceType="S3GLUE" />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('Renders the installed integrations table flyout', async () => {
+    const wrapper = mount(
+      <InstallIntegrationFlyout
+        availableIntegrations={TEST_AVAILABLE_INTEGRATIONS}
+        setAvailableIntegrations={() => {}}
+        closeFlyout={() => {}}
+        datasourceType="S3GLUE"
+      />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });

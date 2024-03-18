@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties } from 'react';
+import React, { useState, CSSProperties, useEffect } from 'react';
 import {
   EuiSpacer,
   EuiPanel,
@@ -16,10 +16,16 @@ import {
   EuiButton,
   EuiIcon,
   EuiText,
+  EuiFlyout,
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
+import { basePathLink } from '../../../../../../common/utils/shared';
+import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
+import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
+import { DatasourceType } from '../../../../../../common/types/data_connections';
 
 interface IntegrationInstanceTableEntry {
   name: string;
@@ -31,11 +37,15 @@ interface IntegrationInstanceTableEntry {
   assets: number;
 }
 
-const safeBasePathLink = (link: string): string => {
-  if (coreRefs.http && coreRefs.http.basePath) {
-    return coreRefs.http.basePath.prepend(link);
-  } else {
-    return link;
+const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
+  switch (dsType) {
+    case 'S3GLUE':
+      return 'Flint S3';
+    case 'PROMETHEUS':
+      return null; // TODO Prometheus integrations not supported so no label available
+    default:
+      console.error(`Unknown Data Source Type: ${dsType}`);
+      return null;
   }
 };
 
@@ -47,7 +57,7 @@ const INSTALLED_INTEGRATIONS_COLUMNS = [
       return (
         <EuiLink
           data-test-subj={`${locator.name}IntegrationLink`}
-          href={safeBasePathLink(`/app/integrations#/installed/${locator.id}`)}
+          href={basePathLink(`/app/integrations#/installed/${locator.id}`)}
         >
           {locator.name}
         </EuiLink>
@@ -75,7 +85,21 @@ const instanceToTableEntry = (
   };
 };
 
-const NoInstalledIntegrations = () => {
+const AddIntegrationButton = ({
+  toggleFlyout,
+  fill,
+}: {
+  fill?: boolean;
+  toggleFlyout: () => void;
+}) => {
+  return (
+    <EuiButton fill={fill} onClick={toggleFlyout}>
+      Add Integrations
+    </EuiButton>
+  );
+};
+
+const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void }) => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -92,23 +116,63 @@ const NoInstalledIntegrations = () => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton href={safeBasePathLink('/app/integrations#available')}>
-          Add Integrations
-        </EuiButton>
+        <AddIntegrationButton toggleFlyout={toggleFlyout} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
+export const InstallIntegrationFlyout = ({
+  availableIntegrations,
+  setAvailableIntegrations,
+  closeFlyout,
+  datasourceType,
+}: {
+  availableIntegrations: AvailableIntegrationsList;
+  setAvailableIntegrations: (value: AvailableIntegrationsList) => void;
+  closeFlyout: () => void;
+  datasourceType: DatasourceType;
+}) => {
+  useEffect(() => {
+    if (!coreRefs.http) {
+      return;
+    }
+    coreRefs.http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
+      setAvailableIntegrations(exists.data);
+    });
+  });
+
+  const s3FilteredIntegrations = {
+    hits: availableIntegrations.hits.filter((config) =>
+      config.labels?.includes(labelFromDataSourceType(datasourceType) ?? '')
+    ),
+  };
+
+  return (
+    <EuiFlyout onClose={closeFlyout}>
+      <AvailableIntegrationsTable loading={false} data={s3FilteredIntegrations} isCardView={true} />
+    </EuiFlyout>
+  );
+};
+
 export const InstalledIntegrationsTable = ({
   integrations,
+  datasourceType,
 }: {
   integrations: IntegrationInstanceResult[];
+  datasourceType: DatasourceType;
 }) => {
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
     .map(instanceToTableEntry)
     .filter((i) => i.name.match(new RegExp(_.escapeRegExp(query), 'i')));
+
+  const [showAvailableFlyout, setShowAvailableFlyout] = useState(false);
+  const toggleFlyout = () => setShowAvailableFlyout((prev) => !prev);
+
+  const [availableIntegrations, setAvailableIntegrations] = useState({
+    hits: [],
+  } as AvailableIntegrationsList);
 
   const integrationsTable = (
     <>
@@ -127,9 +191,7 @@ export const InstalledIntegrationsTable = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill={true} href={safeBasePathLink('/app/integrations#available')}>
-            Add Integration
-          </EuiButton>
+          <AddIntegrationButton fill={true} toggleFlyout={toggleFlyout} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -141,8 +203,20 @@ export const InstalledIntegrationsTable = ({
     <>
       <EuiSpacer />
       <EuiPanel>
-        {integrations.length > 0 ? integrationsTable : <NoInstalledIntegrations />}
+        {integrations.length > 0 ? (
+          integrationsTable
+        ) : (
+          <NoInstalledIntegrations toggleFlyout={toggleFlyout} />
+        )}
       </EuiPanel>
+      {showAvailableFlyout ? (
+        <InstallIntegrationFlyout
+          availableIntegrations={availableIntegrations}
+          setAvailableIntegrations={setAvailableIntegrations}
+          closeFlyout={() => setShowAvailableFlyout(false)}
+          datasourceType={datasourceType}
+        />
+      ) : null}
     </>
   );
 };

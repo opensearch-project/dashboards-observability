@@ -23,12 +23,14 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { HttpStart } from '../../../../../../src/core/public';
 
+type CategoryItems = Array<{ name: string; checked: boolean }>;
+
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   isCardView: boolean;
-  setCardView: (input: boolean) => void;
-  renderCateogryFilters: () => React.JSX.Element;
+  setCardView?: (input: boolean) => void;
+  filters?: React.JSX.Element;
 }
 
 export interface AvailableIntegrationsList {
@@ -41,17 +43,16 @@ export interface AvailableIntegrationsCardViewProps {
   setCardView: (input: boolean) => void;
   query: string;
   setQuery: (input: string) => void;
-  renderCateogryFilters: () => React.JSX.Element;
   http: HttpStart;
+  filters?: React.JSX.Element;
 }
 
-export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
-  const { chrome, http } = props;
+export interface CategoryFiltersProps {
+  items: CategoryItems;
+  setItems: React.Dispatch<CategoryItems>;
+}
 
-  const [query, setQuery] = useState('');
-  const [isCardView, setCardView] = useState(true);
-  const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
-
+export const CategoryFilters = ({ items, setItems }: CategoryFiltersProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => {
@@ -62,18 +63,14 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     setIsPopoverOpen(false);
   };
 
-  const [items, setItems] = useState([] as Array<{ name: string; checked: boolean }>);
-
-  function updateItem(index: number) {
+  const updateItem = (index: number) => {
     if (!items[index]) {
       return;
     }
     const newItems = [...items];
     newItems[index].checked = !items[index].checked;
     setItems(newItems);
-  }
-
-  const helper = items.filter((item) => item.checked).map((x) => x.name);
+  };
 
   const button = (
     <EuiFilterButton
@@ -87,6 +84,45 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       Categories
     </EuiFilterButton>
   );
+
+  return (
+    <EuiFilterGroup>
+      <EuiPopover
+        id="popoverExampleMultiSelect"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+      >
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFieldSearch compressed />
+        </EuiPopoverTitle>
+        <div className="ouiFilterSelect__items">
+          {items.map((item, index) => (
+            <EuiFilterSelectItem
+              checked={item.checked ? 'on' : undefined}
+              key={index}
+              onClick={() => updateItem(index)}
+            >
+              {item.name}
+            </EuiFilterSelectItem>
+          ))}
+        </div>
+      </EuiPopover>
+    </EuiFilterGroup>
+  );
+};
+
+export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
+  const { chrome, http } = props;
+
+  const [query, setQuery] = useState('');
+  const [isCardView, setCardView] = useState(true);
+  const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
+
+  const [items, setItems] = useState([] as Array<{ name: string; checked: boolean }>);
+
+  const helper = items.filter((item) => item.checked).map((x) => x.name);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -115,60 +151,36 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     });
   }
 
-  const renderCateogryFilters = () => {
-    return (
-      <EuiFilterGroup>
-        <EuiPopover
-          id="popoverExampleMultiSelect"
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-        >
-          <EuiPopoverTitle paddingSize="s">
-            <EuiFieldSearch compressed />
-          </EuiPopoverTitle>
-          <div className="ouiFilterSelect__items">
-            {items.map((item, index) => (
-              <EuiFilterSelectItem
-                checked={item.checked ? 'on' : undefined}
-                key={index}
-                onClick={() => updateItem(index)}
-              >
-                {item.name}
-              </EuiFilterSelectItem>
-            ))}
-          </div>
-        </EuiPopover>
-      </EuiFilterGroup>
-    );
-  };
+  const filteredHits = data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag)));
+  const filters = <CategoryFilters items={items} setItems={setItems} />;
 
   return (
     <EuiPage>
       <EuiPageBody>
-        {IntegrationHeader()}
-        {isCardView
-          ? AvailableIntegrationsCardView({
-              data: {
-                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
-              },
-              isCardView,
-              setCardView,
-              query,
-              setQuery,
-              renderCateogryFilters,
-              http,
-            })
-          : AvailableIntegrationsTable({
-              loading: false,
-              data: {
-                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
-              },
-              isCardView,
-              setCardView,
-              renderCateogryFilters,
-            })}
+        <IntegrationHeader />
+        {isCardView ? (
+          <AvailableIntegrationsCardView
+            data={{
+              hits: filteredHits,
+            }}
+            isCardView={isCardView}
+            setCardView={setCardView}
+            query={query}
+            setQuery={setQuery}
+            http={http}
+            filters={filters}
+          />
+        ) : (
+          <AvailableIntegrationsTable
+            loading={false}
+            data={{
+              hits: filteredHits,
+            }}
+            isCardView={isCardView}
+            setCardView={setCardView}
+            filters={filters}
+          />
+        )}
       </EuiPageBody>
     </EuiPage>
   );
