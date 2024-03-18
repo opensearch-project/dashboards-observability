@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AvailableIntegrationsList } from 'public/components/integrations/components/available_integration_overview_page';
 import { IntegrationSetupInputs } from 'public/components/integrations/components/setup_integration';
 
 export const TEST_SPAN_RESPONSE = {
@@ -566,6 +567,8 @@ export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   connectionDataSource: 'ss4o_logs-nginx-test',
   connectionTableName: '',
   connectionLocation: '',
+  checkpointLocation: '',
+  enabledWorkflows: [],
 };
 
 // TODO fill in the rest of the fields
@@ -595,6 +598,13 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
       extension: 'ndjson',
       type: 'savedObjectBundle',
     },
+  ],
+};
+
+export const TEST_AVAILABLE_INTEGRATIONS: AvailableIntegrationsList = {
+  hits: [
+    TEST_INTEGRATION_CONFIG,
+    { ...TEST_INTEGRATION_CONFIG, name: 'sample2', labels: ['Flint S3'] },
   ],
 };
 
