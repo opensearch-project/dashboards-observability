@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
+import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { basePathLink } from '../../../../../../common/utils/shared';
 import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
@@ -148,9 +149,23 @@ export const InstallIntegrationFlyout = ({
     ),
   };
 
+  const [installingIntegration, setInstallingIntegration] = useState<string | null>(null);
+
   return (
     <EuiFlyout onClose={closeFlyout}>
-      <AvailableIntegrationsTable loading={false} data={s3FilteredIntegrations} isCardView={true} />
+      {installingIntegration === null ? (
+        <AvailableIntegrationsTable
+          loading={false}
+          data={s3FilteredIntegrations}
+          isCardView={true}
+        />
+      ) : (
+        <SetupIntegrationForm
+          integration={installingIntegration}
+          unsetIntegration={() => setInstallingIntegration(null)}
+          renderType="flyout"
+        />
+      )}
     </EuiFlyout>
   );
 };

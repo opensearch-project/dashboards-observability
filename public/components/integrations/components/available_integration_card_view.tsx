@@ -20,9 +20,9 @@ import {
 } from './available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
+import { basePathLink } from '../../../../common/utils/shared';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const http = props.http;
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const getImage = (url?: string) => {
@@ -67,7 +67,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   icon={getImage(
-                    http.basePath.prepend(
+                    basePathLink(
                       `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
                     )
                   )}
@@ -75,11 +75,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   description={i.description}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
-                  onClick={() =>
-                    (window.location.hash = http.basePath.prepend(
-                      `/app/integrations#/available/${i.name}`
-                    ))
-                  }
+                  href={basePathLink(`/app/integrations#/available/${i.name}`)}
                   footer={badges(i.labels ?? [])}
                 />
               </EuiFlexItem>

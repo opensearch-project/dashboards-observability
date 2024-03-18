@@ -21,7 +21,6 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
-import { HttpStart } from '../../../../../../src/core/public';
 
 type CategoryItems = Array<{ name: string; checked: boolean }>;
 
@@ -31,6 +30,7 @@ export interface AvailableIntegrationsTableProps {
   isCardView: boolean;
   setCardView?: (input: boolean) => void;
   filters?: React.JSX.Element;
+  setInstallingIntegration?: (integration: string) => void;
 }
 
 export interface AvailableIntegrationsList {
@@ -43,7 +43,6 @@ export interface AvailableIntegrationsCardViewProps {
   setCardView: (input: boolean) => void;
   query: string;
   setQuery: (input: string) => void;
-  http: HttpStart;
   filters?: React.JSX.Element;
 }
 

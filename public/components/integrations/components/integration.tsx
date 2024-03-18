@@ -142,12 +142,12 @@ export function Integration(props: AvailableIntegrationProps) {
     <EuiPage>
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {IntegrationOverview({
-          integration,
-          showFlyout: () => {
+        <IntegrationOverview
+          integration={integration}
+          showFlyout={() => {
             window.location.hash = `#/available/${integration.name}/setup`;
-          },
-          setUpSample: async () => {
+          }}
+          setUpSample={async () => {
             setLoading(true);
             await addIntegrationRequest(
               true,
@@ -157,9 +157,9 @@ export function Integration(props: AvailableIntegrationProps) {
               setToast
             );
             setLoading(false);
-          },
-          loading,
-        })}
+          }}
+          loading={loading}
+        />
         <EuiSpacer />
         {IntegrationDetails({ integration })}
         <EuiSpacer />
