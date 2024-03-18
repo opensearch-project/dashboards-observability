@@ -69,7 +69,7 @@ export const useAccelerationOperation = (dataSource: string) => {
     }
 
     setCurrentStatus(loadStatus);
-  }, [loadStatus, setToast, accelerationToOperate, dataSource, operationType, currentStatus]);
+  }, [loadStatus, setToast, accelerationToOperate, operationType, currentStatus]);
 
   useEffect(() => {
     return () => {
