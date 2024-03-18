@@ -40,6 +40,7 @@ export interface DataGridProps {
   requestParams: any;
   startTime: string;
   endTime: string;
+  isNotDefaultDatasource: boolean;
   storedSelectedColumns: IField[];
   formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
   OuiDataGridProps?: Partial<EuiDataGridProps>;
@@ -59,6 +60,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    isNotDefaultDatasource,
     formatGridColumn = defaultFormatGrid,
     OuiDataGridProps,
   } = props;
@@ -127,6 +129,7 @@ export function DataGrid(props: DataGridProps) {
           ...DEFAULT_TIMESTAMP_COLUMN,
           display: `${columnNameTranslate('Time')} (${timeStampField})`,
           id: timeStampField,
+          isSortable: !isNotDefaultDatasource, // allow sorting for default ds, dont otherwise
         });
       } else if (name === '_source') {
         columns.push({
@@ -137,7 +140,7 @@ export function DataGrid(props: DataGridProps) {
         columns.push({
           id: name,
           display: name,
-          isSortable: true, // TODO: add functionality here based on type
+          isSortable: !isNotDefaultDatasource,
         });
       }
     });
