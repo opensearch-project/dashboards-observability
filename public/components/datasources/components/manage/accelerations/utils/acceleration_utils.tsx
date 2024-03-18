@@ -17,13 +17,10 @@ export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
 
-export const getAccelerationName = (
-  indexName: string,
-  acceleration: CachedAcceleration,
-  datasource: string
-) => {
+export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
   return (
-    indexName || `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
+    acceleration.indexName ||
+    `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
   );
 };
 

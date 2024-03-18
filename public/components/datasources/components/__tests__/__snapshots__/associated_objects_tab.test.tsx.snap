@@ -691,6 +691,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     ]
                   }
                   data-test-subj="associatedObjectsTable"
+                  hasActions={true}
                   items={
                     Array [
                       Object {
@@ -773,7 +774,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "box": Object {
                         "incremental": true,
-                        "placeholder": "database:database_1 database: database_2 accelerations:skipping_index_1",
+                        "placeholder": "accelerations:skipping_index_1",
                         "schema": Object {
                           "fields": Object {
                             "database": Object {
@@ -815,14 +816,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       },
                     }
                   }
-                  tableLayout="fixed"
+                  tableLayout="auto"
                 >
                   <div>
                     <EuiSearchBar
                       box={
                         Object {
                           "incremental": true,
-                          "placeholder": "database:database_1 database: database_2 accelerations:skipping_index_1",
+                          "placeholder": "accelerations:skipping_index_1",
                           "schema": Object {
                             "fields": Object {
                               "database": Object {
@@ -877,7 +878,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 incremental={true}
                                 isInvalid={false}
                                 onSearch={[Function]}
-                                placeholder="database:database_1 database: database_2 accelerations:skipping_index_1"
+                                placeholder="accelerations:skipping_index_1"
                                 query=""
                               >
                                 <EuiFieldSearch
@@ -891,7 +892,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   isInvalid={false}
                                   isLoading={false}
                                   onSearch={[Function]}
-                                  placeholder="database:database_1 database: database_2 accelerations:skipping_index_1"
+                                  placeholder="accelerations:skipping_index_1"
                                 >
                                   <EuiFormControlLayout
                                     compressed={false}
@@ -913,7 +914,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             className="euiFieldSearch euiFieldSearch--fullWidth"
                                             defaultValue=""
                                             onKeyUp={[Function]}
-                                            placeholder="database:database_1 database: database_2 accelerations:skipping_index_1"
+                                            placeholder="accelerations:skipping_index_1"
                                             type="search"
                                           />
                                         </EuiValidatableControl>
@@ -1253,6 +1254,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         ]
                       }
                       data-test-subj="associatedObjectsTable"
+                      hasActions={true}
                       items={
                         Array [
                           Object {
@@ -1345,7 +1347,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           },
                         }
                       }
-                      tableLayout="fixed"
+                      tableLayout="auto"
                     >
                       <div
                         className="euiBasicTable"
@@ -1528,10 +1530,10 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           <EuiTable
                             id="random_html_id"
                             responsive={true}
-                            tableLayout="fixed"
+                            tableLayout="auto"
                           >
                             <table
-                              className="euiTable euiTable--responsive"
+                              className="euiTable euiTable--responsive euiTable--auto"
                               id="random_html_id"
                               tabIndex={-1}
                             >

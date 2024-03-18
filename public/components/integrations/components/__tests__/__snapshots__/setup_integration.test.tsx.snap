@@ -2071,13 +2071,51 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
           className="euiText euiText--medium"
         >
           <h3>
-            Installation Flows
+            Integration Resources
           </h3>
         </div>
       </EuiText>
-      <EuiSpacer>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
         <div
-          className="euiSpacer euiSpacer--l"
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiText
+              grow={false}
+              id="random_html_id"
+              onBlur={[Function]}
+              onFocus={[Function]}
+              size="xs"
+            >
+              <div
+                className="euiText euiText--extraSmall euiText--constrainedWidth"
+                id="random_html_id"
+                onBlur={[Function]}
+                onFocus={[Function]}
+              >
+                <p>
+                  This integration offers valuable resources compatible with your data source. These can include dashboards, visualizations, indexes, and queries. Select at least one of the following options.
+                </p>
+              </div>
+            </EuiText>
+          </div>
+        </div>
+      </EuiFormRow>
+      <EuiSpacer
+        size="s"
+      >
+        <div
+          className="euiSpacer euiSpacer--s"
         />
       </EuiSpacer>
       <EuiFormRow
@@ -2091,9 +2129,7 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
-        helpText="Select from the available asset types based on your use case. Choose at least one."
         isInvalid={false}
-        label="Flows"
         labelType="label"
       >
         <div
@@ -2101,30 +2137,9 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
           id="random_html_id-row"
         >
           <div
-            className="euiFormRow__labelWrapper"
-          >
-            <EuiFormLabel
-              aria-invalid={false}
-              className="euiFormRow__label"
-              htmlFor="random_html_id"
-              isFocused={false}
-              isInvalid={false}
-              type="label"
-            >
-              <label
-                aria-invalid={false}
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="random_html_id"
-              >
-                Flows
-              </label>
-            </EuiFormLabel>
-          </div>
-          <div
             className="euiFormRow__fieldWrapper"
           >
             <SetupWorkflowSelector
-              aria-describedby="random_html_id-help-0"
               id="random_html_id"
               integration={
                 Object {
@@ -2273,18 +2288,6 @@ exports[`Integration Setup Page Renders the S3 connector form as expected 1`] = 
                 </_EuiSplitPanelOuter>
               </EuiCheckableCard>
             </SetupWorkflowSelector>
-            <EuiFormHelpText
-              className="euiFormRow__text"
-              id="random_html_id-help-0"
-              key="Select from the available asset types based on your use case. Choose at least one."
-            >
-              <div
-                className="euiFormHelpText euiFormRow__text"
-                id="random_html_id-help-0"
-              >
-                Select from the available asset types based on your use case. Choose at least one.
-              </div>
-            </EuiFormHelpText>
           </div>
         </div>
       </EuiFormRow>
