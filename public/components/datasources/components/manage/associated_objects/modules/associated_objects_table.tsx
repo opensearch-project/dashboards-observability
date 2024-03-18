@@ -75,7 +75,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
               if (acceleration) {
                 renderAccelerationDetailsFlyout(
-                  getAccelerationName(acceleration, datasourceName),
+                  getAccelerationName(acceleration),
                   acceleration,
                   datasourceName
                 );
@@ -115,7 +115,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         if (accelerations.length === 0) {
           return '-';
         } else if (accelerations.length === 1) {
-          const name = getAccelerationName(accelerations[0], datasourceName);
+          const name = getAccelerationName(accelerations[0]);
           return (
             <EuiLink
               onClick={() => {
@@ -159,7 +159,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             if (asscObj.type === 'covering' || asscObj.type === 'materialized') {
               // find the flint index name through the cached acceleration
               const acceleration = cachedAccelerations.find(
-                (acc) => getAccelerationName(acc.indexName, acc, datasourceName) === asscObj.name
+                (acc) => getAccelerationName(acc) === asscObj.name
               );
               redirectToExplorerOSIdx(acceleration!.flintIndexName);
             } else if (asscObj.type === 'table') {

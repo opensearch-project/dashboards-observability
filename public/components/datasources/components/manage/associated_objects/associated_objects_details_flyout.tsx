@@ -53,12 +53,14 @@ export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
   datasourceName: string;
   resetFlyout: () => void;
+  handleRefresh?: () => void;
 }
 
 export const AssociatedObjectsDetailsFlyout = ({
   tableDetail,
   datasourceName,
   resetFlyout,
+  handleRefresh,
 }: AssociatedObjectsFlyoutProps) => {
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
@@ -145,11 +147,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         return (
           <EuiLink
             onClick={() =>
-              renderAccelerationDetailsFlyout({
-                index: name,
-                acceleration: item,
-                dataSourceName: datasourceName,
-              })
+              renderAccelerationDetailsFlyout(name, item, datasourceName, handleRefresh)
             }
           >
             {name}
