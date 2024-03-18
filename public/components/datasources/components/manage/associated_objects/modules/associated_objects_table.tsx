@@ -24,8 +24,14 @@ import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
+  redirectToExplorerOSIdx,
+  redirectToExplorerWithDataSrc,
 } from '../utils/associated_objects_tab_utils';
 import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
+import {
+  ACCELERATION_INDEX_TYPES,
+  DATA_SOURCE_TYPES,
+} from '../../../../../../../common/constants/data_sources';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -97,6 +103,10 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Type',
       }),
       sortable: true,
+      render: (type) => {
+        if (type === 'table') return 'Table';
+        return ACCELERATION_INDEX_TYPES.find((accType) => type === accType.value)!.label;
+      },
     },
     {
       field: 'accelerations',
@@ -134,7 +144,22 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           ),
           type: 'icon',
           icon: 'discoverApp',
-          onClick: (item: AssociatedObject) => console.log('Discover', item),
+          onClick: (asscObj: AssociatedObject) => {
+            if (asscObj.type === 'covering' || asscObj.type === 'materialized') {
+              // find the flint index name through the cached acceleration
+              const acceleration = cachedAccelerations.find(
+                (acc) => getAccelerationName(acc.indexName, acc, datasourceName) === asscObj.name
+              );
+              redirectToExplorerOSIdx(acceleration!.flintIndexName);
+            } else if (asscObj.type === 'table') {
+              redirectToExplorerWithDataSrc(
+                asscObj.datasource,
+                DATA_SOURCE_TYPES.S3Glue,
+                asscObj.database,
+                asscObj.name
+              );
+            }
+          },
         },
         {
           name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
@@ -148,7 +173,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           ),
           type: 'icon',
           icon: 'bolt',
-          available: (item: AssociatedObject) => item.type === 'Table',
+          available: (item: AssociatedObject) => item.type === 'table',
           onClick: (item: AssociatedObject) => console.log('Accelerate', item),
         },
       ],
