@@ -25,22 +25,22 @@ export function DatePicker(props: IDatePickerProps) {
 
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
 
-  let setStartTime;
-  let setEndTime;
+  let finalizedStartTime;
+  let finalizedEndTime;
   let setDisabled;
   let toolTipMessage;
 
   if (coreRefs.queryAssistEnabled && !isAppAnalytics) {
     // is query assistant inside log explorer
-    setStartTime = QUERY_ASSIST_START_TIME;
-    setEndTime = QUERY_ASSIST_END_TIME;
+    finalizedStartTime = QUERY_ASSIST_START_TIME;
+    finalizedEndTime = QUERY_ASSIST_END_TIME;
     setDisabled = true;
     toolTipMessage = i18n.translate('discover.queryAssistant.timePickerDisabledMessage', {
       defaultMessage: 'Date range has been disabled to accomodate timerange of all datasets',
     });
   } else {
-    setStartTime = startTime;
-    setEndTime = endTime;
+    finalizedStartTime = startTime;
+    finalizedEndTime = endTime;
     setDisabled = false;
     toolTipMessage = false;
   }
@@ -50,8 +50,8 @@ export function DatePicker(props: IDatePickerProps) {
       <EuiToolTip position="bottom" content={toolTipMessage}>
         <EuiSuperDatePicker
           data-test-subj="pplSearchDatePicker"
-          start={setStartTime}
-          end={setEndTime}
+          start={finalizedStartTime}
+          end={finalizedEndTime}
           dateFormat={uiSettingsService.get('dateFormat')}
           onTimeChange={handleTimeChange}
           onRefresh={handleTimeRangePickerRefresh}
