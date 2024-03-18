@@ -210,11 +210,7 @@ export const AccelerationTable = ({
           <EuiLink
             onClick={() => {
               console.log(displayName);
-              renderAccelerationDetailsFlyout({
-                index: displayName,
-                acceleration,
-                dataSourceName,
-              });
+              renderAccelerationDetailsFlyout(displayName, acceleration, dataSourceName);
             }}
           >
             {displayName}

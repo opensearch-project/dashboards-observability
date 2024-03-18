@@ -92,6 +92,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
       startLoadingDatabases(datasource.name);
+      startLoadingAccelerations(datasource.name);
       setIsRefreshing(true);
     }
   };
@@ -321,7 +322,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                     </EuiSelectable>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {isObjectsLoading && !isRefreshing ? (
+                    {isObjectsLoading && isFirstTimeLoading ? (
                       <AssociatedObjectsTabLoading objectType="tables" warningMessage={true} />
                     ) : (
                       <>

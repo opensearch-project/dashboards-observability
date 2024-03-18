@@ -70,19 +70,15 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         <EuiLink
           onClick={() => {
             if (item.type === 'table') {
-              renderAssociatedObjectsDetailsFlyout({
-                tableDetail: item,
-                datasourceName,
-              });
+              renderAssociatedObjectsDetailsFlyout(item, datasourceName);
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
-              console.log(acceleration);
               if (acceleration) {
-                renderAccelerationDetailsFlyout({
-                  index: getAccelerationName(acceleration, datasourceName),
+                renderAccelerationDetailsFlyout(
+                  getAccelerationName(acceleration, datasourceName),
                   acceleration,
-                  dataSourceName: datasourceName,
-                });
+                  datasourceName
+                );
               }
             }
           }}
@@ -124,11 +120,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           return (
             <EuiLink
               onClick={() => {
-                renderAccelerationDetailsFlyout({
-                  index: name,
-                  acceleration: accelerations[0],
-                  dataSourceName: datasourceName,
-                });
+                renderAccelerationDetailsFlyout(name, accelerations[0], datasourceName);
               }}
             >
               {name}
@@ -138,10 +130,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         return (
           <EuiButtonEmpty
             onClick={() => {
-              renderAssociatedObjectsDetailsFlyout({
-                tableDetail: obj,
-                datasourceName,
-              });
+              renderAssociatedObjectsDetailsFlyout(obj, datasourceName);
             }}
             size="xs"
           >

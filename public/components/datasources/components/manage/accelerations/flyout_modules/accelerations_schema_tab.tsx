@@ -12,6 +12,8 @@ interface AccelerationSchemaTabProps {
 }
 
 export const AccelerationSchemaTab = ({ mappings, indexInfo }: AccelerationSchemaTabProps) => {
+  console.log('mappings', mappings);
+  console.log('indexInfo', indexInfo);
   const indexName = indexInfo.data[0]?.index;
   const indexData = mappings.data[indexName]?.mappings._meta?.indexedColumns;
   const indexType = mappings.data[indexName]?.mappings._meta?.kind;

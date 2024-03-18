@@ -48,7 +48,7 @@ import {
   observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
-import { CachedAcceleration } from '../common/types/data_connections';
+import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -60,10 +60,7 @@ import { DirectSearch } from './components/common/search/direct_search';
 import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
-import {
-  AssociatedObjectsDetailsFlyout,
-  AssociatedObjectsFlyoutProps,
-} from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
+import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -104,21 +101,13 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  ({
-    index,
-    acceleration,
-    dataSourceName,
-  }: {
-    index: string;
-    acceleration: CachedAcceleration;
-    dataSourceName: string;
-  }) => void
+  (index: string, acceleration: CachedAcceleration, dataSourceName: string) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<({ tableDetail, datasourceName }: AssociatedObjectsFlyoutProps) => void>(
+] = createGetterSetter<(tableDetail: AssociatedObject, datasourceName: string) => void>(
   'renderAssociatedObjectsDetailsFlyout'
 );
 
@@ -404,15 +393,11 @@ export class ObservabilityPlugin
     });
 
     // Use overlay service to render flyouts
-    const renderAccelerationDetailsFlyout = ({
-      index,
-      acceleration,
-      dataSourceName,
-    }: {
-      index: string;
-      acceleration: CachedAcceleration;
-      dataSourceName: string;
-    }) => {
+    const renderAccelerationDetailsFlyout = (
+      index: string,
+      acceleration: CachedAcceleration,
+      dataSourceName: string
+    ) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AccelerationDetailsFlyout
@@ -426,10 +411,10 @@ export class ObservabilityPlugin
     };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = ({
-      tableDetail,
-      datasourceName,
-    }: AssociatedObjectsFlyoutProps) => {
+    const renderAssociatedObjectsDetailsFlyout = (
+      tableDetail: AssociatedObject,
+      datasourceName: string
+    ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AssociatedObjectsDetailsFlyout
