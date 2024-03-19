@@ -52,3 +52,8 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
     left: 10px;
   }
 }
+
+.database-selector {
+  padding-right: 24px;
+  border-right: 1px solid $euiBorderColor;
+}

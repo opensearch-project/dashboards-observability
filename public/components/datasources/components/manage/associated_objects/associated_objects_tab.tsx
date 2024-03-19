@@ -38,7 +38,11 @@ import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_load
 import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { AssociatedObjectsTable } from './modules/associated_objects_table';
-import { getAccelerationName } from '../accelerations/utils/acceleration_utils';
+import {
+  CreateAccelerationFlyoutButton,
+  getAccelerationName,
+} from '../accelerations/utils/acceleration_utils';
+import { getRenderCreateAccelerationFlyout } from '../../../../../../public/plugin';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
@@ -137,6 +141,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
               isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
             }
             onClick={onRefreshButtonClick}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CreateAccelerationFlyoutButton
+            dataSourceName={datasource.name}
+            renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -287,6 +297,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);
   }, [selectedDatabase, cachedTables, cachedAccelerations]);
 
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+
   return (
     <>
       <EuiSpacer />
@@ -305,7 +317,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
               <>
                 <EuiSpacer />
                 <EuiFlexGroup direction="row">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} className="database-selector">
                     <EuiSelectable
                       searchable={true}
                       singleSelection="always"
@@ -322,7 +334,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                     </EuiSelectable>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {isObjectsLoading && isFirstTimeLoading ? (
+                    {isFirstTimeLoading || (isObjectsLoading && !isRefreshing) ? (
                       <AssociatedObjectsTabLoading objectType="tables" warningMessage={true} />
                     ) : (
                       <>

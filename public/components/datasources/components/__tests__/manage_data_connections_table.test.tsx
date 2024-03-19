@@ -18,6 +18,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('../../../../plugin', () => ({
+  getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
+}));
+
 describe('Manage Data Connections Table test', () => {
   configure({ adapter: new Adapter() });
 

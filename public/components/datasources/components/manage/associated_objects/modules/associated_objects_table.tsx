@@ -88,13 +88,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       ),
     },
     {
-      field: 'database',
-      name: i18n.translate('datasources.associatedObjectsTab.column.database', {
-        defaultMessage: 'Database',
-      }),
-      sortable: true,
-    },
-    {
       field: 'type',
       name: i18n.translate('datasources.associatedObjectsTab.column.type', {
         defaultMessage: 'Type',
