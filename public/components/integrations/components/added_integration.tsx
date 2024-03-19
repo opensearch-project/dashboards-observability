@@ -50,7 +50,9 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const { setToast } = useToast();
 
-  const [stateData, setData] = useState<any>({ data: {} });
+  const [stateData, setData] = useState<{ data: IntegrationInstanceResult | undefined }>({
+    data: undefined,
+  });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -73,7 +75,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
-  const getModal = () => {
+  const activateDeleteModal = (integrationName?: string) => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -83,8 +85,9 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         onCancel={() => {
           setIsModalVisible(false);
         }}
-        title={`Delete Assets`}
-        message={`Are you sure you want to delete the selected asset(s)?`}
+        title={`Delete Integration`}
+        message={`Are you sure you want to delete the selected Integration?`}
+        prompt={integrationName}
       />
     );
     setIsModalVisible(true);
@@ -97,6 +100,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         setToast(`${stateData.data?.name} integration successfully deleted!`, 'success');
       })
       .catch((err) => {
+        console.error(err);
         setToast(`Error deleting ${stateData.data?.name} or its assets`, 'danger');
       })
       .finally(() => {
@@ -110,7 +114,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
       .then((exists) => setData(exists));
   }
 
-  function AddedOverview(overviewProps: any) {
+  function AddedOverview(overviewProps: { data: { data?: IntegrationInstanceResult } }) {
     const { data } = overviewProps.data;
 
     return (
@@ -136,7 +140,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                   aria-label="Delete"
                   color="danger"
                   onClick={() => {
-                    getModal();
+                    activateDeleteModal(data?.name);
                   }}
                   data-test-subj="deleteInstanceButton"
                 />
@@ -165,12 +169,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     );
   }
 
-  function AddedAssets(assetProps: any) {
+  function AddedAssets(assetProps: { data: { data?: { assets: AssetReference[] } } }) {
     const { data } = assetProps.data;
 
     const assets = data?.assets || [];
 
-    const renderAsset = (record: any) => {
+    const renderAsset = (record: AssetReference) => {
       switch (record.assetType) {
         case 'dashboard':
           return (
@@ -259,13 +263,13 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         name: 'Type',
         sortable: true,
         truncateText: true,
-        render: (value, record) => (
-          <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
+        render: (_value, record) => (
+          <EuiText data-test-subj={`${record.assetType}AssetTypeDescription`}>
             {_.truncate(record.assetType, { length: 100 })}
           </EuiText>
         ),
       },
-    ] as Array<EuiTableFieldDataColumnType<any>>;
+    ] as Array<EuiTableFieldDataColumnType<AssetReference>>;
 
     return (
       <EuiPanel>

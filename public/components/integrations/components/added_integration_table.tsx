@@ -79,7 +79,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            getModal(record.id, record.templateName);
+            activateDeleteModal(record.id, record.name);
           }}
         />
       ),
@@ -103,7 +103,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       });
   }
 
-  const getModal = (integrationInstanceId: string, name: string) => {
+  const activateDeleteModal = (integrationInstanceId: string, name: string) => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -113,8 +113,9 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         onCancel={() => {
           setIsModalVisible(false);
         }}
-        title={`Delete Assets`}
-        message={`Are you sure you want to delete the selected asset(s)?`}
+        title={`Delete Integration`}
+        message={`Are you sure you want to delete the selected integration?`}
+        prompt={name}
       />
     );
     setIsModalVisible(true);

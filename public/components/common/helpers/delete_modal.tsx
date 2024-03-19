@@ -25,6 +25,7 @@ export const DeleteModal = ({
   onConfirm,
   title,
   message,
+  prompt,
 }: {
   onCancel: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -32,11 +33,13 @@ export const DeleteModal = ({
   onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   title: string;
   message: string;
+  prompt?: string;
 }) => {
   const [value, setValue] = useState('');
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
+  const deletePrompt = prompt ?? 'delete';
   return (
     <EuiOverlayMask>
       <EuiModal onClose={onCancel} initialFocus="[name=input]">
@@ -49,10 +52,10 @@ export const DeleteModal = ({
           <EuiText>The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiFormRow label={'To confirm deletion, enter "delete" in the text field'}>
+            <EuiFormRow label={`To confirm deletion, enter "${deletePrompt}" in the text field`}>
               <EuiFieldText
                 name="input"
-                placeholder="delete"
+                placeholder={deletePrompt}
                 value={value}
                 onChange={(e) => onChange(e)}
                 data-test-subj="popoverModal__deleteTextInput"
@@ -67,7 +70,7 @@ export const DeleteModal = ({
             onClick={() => onConfirm()}
             color="danger"
             fill
-            disabled={value !== 'delete'}
+            disabled={value !== deletePrompt}
             data-test-subj="popoverModal__deleteButton"
           >
             Delete
