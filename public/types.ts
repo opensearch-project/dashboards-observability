@@ -11,12 +11,11 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
-<<<<<<< HEAD
-import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
-import { DirectQueryLoadingStatus } from '../common/types/explorer';
-=======
-import { AssociatedObject, LoadCachehookOutput } from '../common/types/data_connections';
->>>>>>> f1aef4fa (expose types for cachemanager)
+import {
+  AssociatedObject,
+  CachedAcceleration,
+  LoadCachehookOutput,
+} from '../common/types/data_connections';
 import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
 
