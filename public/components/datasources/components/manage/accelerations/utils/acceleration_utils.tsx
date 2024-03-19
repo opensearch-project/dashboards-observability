@@ -38,6 +38,45 @@ export const ACC_SYNC_MSG = i18n.translate('accelerationActionOverlay.sync.descr
   defaultMessage: 'Syncing data may require querying all data. Do you want to continue?',
 });
 
+export const ACC_TABLE_ACTION_DESC = {
+  discoverAction: i18n.translate('accelerationTable.actions.discover', {
+    defaultMessage: 'Open in Discover',
+  }),
+  syncAction: i18n.translate('accelerationTable.actions.sync', {
+    defaultMessage: 'Manual Sync Data',
+  }),
+  deleteAction: i18n.translate('accelerationTable.actions.delete', {
+    defaultMessage: 'Delete acceleration',
+  }),
+  vacuumAction: i18n.translate('accelerationTable.actions.vacuum', {
+    defaultMessage: 'Vacuum acceleration',
+  }),
+};
+
+export const ACC_TABLE_COLUMN_NAMES = {
+  columnName: i18n.translate('accelerationTable.columns.columnName', {
+    defaultMessage: 'Name',
+  }),
+  columnStatus: i18n.translate('accelerationTable.columns.columnStatus', {
+    defaultMessage: 'Status',
+  }),
+  columnType: i18n.translate('accelerationTable.columns.columnType', {
+    defaultMessage: 'Type',
+  }),
+  columnDatabase: i18n.translate('accelerationTable.columns.columnDatabase', {
+    defaultMessage: 'Database',
+  }),
+  columnTable: i18n.translate('accelerationTable.columns.columnTable', {
+    defaultMessage: 'Table',
+  }),
+  columnRefreshType: i18n.translate('accelerationTable.columns.columnRefreshType', {
+    defaultMessage: 'Refresh Type',
+  }),
+  columnDestinationIndex: i18n.translate('accelerationTable.columns.columnDestinationIndex', {
+    defaultMessage: 'Destination Index',
+  }),
+};
+
 export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
 
 export const getAccelerationName = (acceleration: CachedAcceleration) => {
