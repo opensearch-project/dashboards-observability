@@ -74,11 +74,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
               if (acceleration) {
-                renderAccelerationDetailsFlyout(
-                  getAccelerationName(acceleration),
-                  acceleration,
-                  datasourceName
-                );
+                renderAccelerationDetailsFlyout(acceleration, datasourceName);
               }
             }
           }}
@@ -86,13 +82,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           {name}
         </EuiLink>
       ),
-    },
-    {
-      field: 'database',
-      name: i18n.translate('datasources.associatedObjectsTab.column.database', {
-        defaultMessage: 'Database',
-      }),
-      sortable: true,
     },
     {
       field: 'type',
@@ -119,7 +108,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           return (
             <EuiLink
               onClick={() => {
-                renderAccelerationDetailsFlyout(name, accelerations[0], datasourceName);
+                renderAccelerationDetailsFlyout(accelerations[0], datasourceName);
               }}
             >
               {name}

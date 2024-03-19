@@ -61,7 +61,7 @@ const accelerationCache = {
       status: 'refreshing',
     },
   ],
-  lastUpdated: 'Thu, 14 Mar 2024 04:05:53 GMT',
+  lastUpdated: 'Thu, 14 Mar 2024 04:05:53',
   status: 'Updated',
 };
 
@@ -177,9 +177,7 @@ describe('AccelerationTable Component', () => {
     });
     wrapper!.update();
 
-    const expectedLocalizedTime = accelerationCache.lastUpdated
-      ? new Date(accelerationCache.lastUpdated).toLocaleString()
-      : '';
+    const expectedLocalizedTime = 'Thu, 14 Mar 2024 04:05:53';
 
     expect(wrapper!.text()).toContain(expectedLocalizedTime);
   });

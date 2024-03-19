@@ -6,12 +6,13 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-export const AssociatedObjectsTabEmpty: React.FC = () => {
+interface AssociatedObjectsTabFailureProps {
+  type: string;
+}
+
+export const AssociatedObjectsTabFailure = (props: AssociatedObjectsTabFailureProps) => {
+  const { type } = props;
   return (
-    <EuiEmptyPrompt
-      iconType="alert"
-      title={<h3>Error</h3>}
-      body={<p>There was an error loading your databases.</p>}
-    />
+    <EuiEmptyPrompt iconType="alert" title={<h3>Error</h3>} body={<p>Error loading {type}</p>} />
   );
 };

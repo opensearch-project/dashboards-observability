@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiHealth } from '@elastic/eui';
+import { EuiButton, EuiHealth } from '@elastic/eui';
 import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
 import {
   redirectToExplorerOSIdx,
@@ -75,6 +75,22 @@ export const generateAccelerationOperationQuery = (
     default:
       throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
   }
+};
+
+export const CreateAccelerationFlyoutButton = ({
+  dataSourceName,
+  renderCreateAccelerationFlyout,
+}: {
+  dataSourceName: string;
+  renderCreateAccelerationFlyout: (dataSourceName: string) => void;
+}) => {
+  return (
+    <>
+      <EuiButton onClick={() => renderCreateAccelerationFlyout(dataSourceName)} fill>
+        Create acceleration
+      </EuiButton>
+    </>
+  );
 };
 
 export const AccelerationStatus = ({ status }: { status: string }) => {
