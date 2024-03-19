@@ -276,7 +276,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       .map((acceleration: CachedAcceleration) => ({
         datasource: datasource.name,
         id: acceleration.indexName,
-        name: getAccelerationName(acceleration, datasource.name),
+        name: getAccelerationName(acceleration),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
           .value,

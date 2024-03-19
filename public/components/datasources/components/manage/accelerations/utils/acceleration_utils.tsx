@@ -16,12 +16,65 @@ export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
+export const ACC_DELETE_MSG =
+  'The acceleration will be deleted. User will no longer be able to view from this acceleration. By default data will be retained in the associated index.';
+export const ACC_VACUUM_MSG =
+  'Vacuuming will remove the actual data from the disk since the associated index will be removed from the cluster. To confirm your action, type the name of the acceleration below.';
+export const ACC_SYNC_MSG = 'Syncing data may require querying all data. Do you want to continue?';
 
-export const getAccelerationName = (acceleration: CachedAcceleration, datasource: string) => {
-  return (
-    acceleration.indexName ||
-    `${datasource}_${acceleration.database}_${acceleration.table}`.replace(/\s+/g, '_')
-  );
+export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
+
+export const getAccelerationName = (acceleration: CachedAcceleration) => {
+  return acceleration.indexName || 'skipping_index';
+};
+
+export const getAccelerationFullPath = (acceleration: CachedAcceleration, dataSource: string) => {
+  switch (acceleration.type) {
+    case 'skipping':
+      return `${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'materialized':
+      return `${dataSource}.${acceleration.database}`;
+    case 'covering':
+      return `${dataSource}.${acceleration.database}.${acceleration.table}`;
+    default:
+      return 'Unknown acceleration type';
+  }
+};
+
+export const generateAccelerationOperationQuery = (
+  acceleration: CachedAcceleration,
+  dataSource: string,
+  operationType: AccelerationActionType
+): string => {
+  let operationQuery;
+
+  switch (operationType) {
+    case 'delete':
+      operationQuery = `DROP`;
+      break;
+    case 'vacuum':
+      operationQuery = `VACUUM`;
+      break;
+    case 'sync':
+      operationQuery = `REFRESH`;
+      break;
+    default:
+      throw new Error(`Unsupported operation type: ${operationType}`);
+  }
+
+  switch (acceleration.type) {
+    case 'skipping':
+      return `${operationQuery} SKIPPING INDEX ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'covering':
+      if (!acceleration.indexName) {
+        throw new Error("Index name is required for 'covering' acceleration type.");
+      }
+      return `${operationQuery} INDEX ${acceleration.indexName} ON ${dataSource}.${acceleration.database}.${acceleration.table}`;
+    case 'materialized':
+      return `${operationQuery} MATERIALIZED VIEW ${dataSource}.${acceleration.database}.${acceleration.indexName}`;
+    default:
+      throw new Error(`Unsupported acceleration type: ${acceleration.type}`);
+  }
 };
 
 export const AccelerationStatus = ({ status }: { status: string }) => {
@@ -70,19 +123,7 @@ export const AccelerationHealth = ({ health }: { health: string }) => {
   return <EuiHealth color={color}>{label}</EuiHealth>;
 };
 
-export const getRefreshButtonIcon = () => {
-  // TODO: If acceleration can only be manually refreshed, return inputOutput
-  // If acceleration is automatically refreshed and paused, return play
-  // If acceleration is automatically refreshed and is refreshing, return pause
-  return 'inputOutput';
-};
-
-export const onRefreshButtonClick = (acceleration: any) => {
-  // TODO: send request to refresh
-  console.log('refreshing', acceleration.name);
-};
-
-export const onDiscoverButtonClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
+export const onDiscoverIconClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
   if (acceleration.type === 'skipping') {
@@ -95,9 +136,4 @@ export const onDiscoverButtonClick = (acceleration: CachedAcceleration, dataSour
   } else {
     redirectToExplorerOSIdx(acceleration.flintIndexName);
   }
-};
-
-export const onDeleteButtonClick = (acceleration: any) => {
-  // TODO: delete acceleration
-  console.log('deleting', acceleration.name);
 };

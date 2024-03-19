@@ -18,22 +18,22 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
-import { AccelerationSqlTab } from './flyout_modules/acceleration_sql_tab';
 import {
-  getRefreshButtonIcon,
-  onRefreshButtonClick,
-  onDiscoverButtonClick,
-  onDeleteButtonClick,
+  onDiscoverIconClick,
+  AccelerationActionType,
+  getAccelerationName,
 } from './utils/acceleration_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
+import { useAccelerationOperation } from './acceleration_operation';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 
 export interface AccelerationDetailsFlyoutProps {
-  index: string;
   acceleration: CachedAcceleration;
   dataSourceName: string;
   resetFlyout: () => void;
+  handleRefresh?: () => void;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
@@ -58,15 +58,42 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { index, dataSourceName, acceleration, resetFlyout } = props;
-  console.log(index, acceleration, dataSourceName);
+  const { dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
     details: AccelerationDetailsTab,
     schema: AccelerationSchemaTab,
-    sql_definition: AccelerationSqlTab,
   };
+  const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
+  const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
+
+  const { performOperation, operationSuccess } = useAccelerationOperation(props.dataSourceName);
+
+  const displayedIndex = getAccelerationName(acceleration);
+
+  const onConfirmOperation = () => {
+    if (operationType && props.acceleration) {
+      performOperation(props.acceleration, operationType);
+      setShowConfirmationOverlay(false);
+    }
+  };
+
+  const onSyncIconClickHandler = () => {
+    setOperationType('sync');
+    setShowConfirmationOverlay(true);
+  };
+
+  const onDeleteIconClickHandler = () => {
+    setOperationType('delete');
+    setShowConfirmationOverlay(true);
+  };
+
+  const onVacuumIconClickHandler = () => {
+    setOperationType('vacuum');
+    setShowConfirmationOverlay(true);
+  };
+
   const [settings, setSettings] = useState<object>();
   const [mappings, setMappings] = useState();
   const [indexInfo, setIndexInfo] = useState();
@@ -102,17 +129,25 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
 
   useEffect(() => {
+    if (operationSuccess) {
+      resetFlyout();
+      handleRefresh?.();
+      setOperationType(null);
+      setShowConfirmationOverlay(false);
+    }
+  }, [operationSuccess, resetFlyout, handleRefresh]);
+
+  useEffect(() => {
     if (flintIndexName !== undefined && flintIndexName.trim().length > 0) {
       getAccDetail(flintIndexName);
     }
   }, [flintIndexName]);
 
-  const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
+  const DiscoverIcon = () => {
     return (
       <EuiButtonEmpty
         onClick={() => {
-          onDiscoverButtonClick(acceleration, dataSourceName);
+          onDiscoverIconClick(acceleration, dataSourceName);
           resetFlyout();
         }}
       >
@@ -121,18 +156,29 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     );
   };
 
-  const RefreshButton = () => {
+  const SyncIcon = ({ autoRefresh, status }: { autoRefresh: boolean; status: string }) => {
+    if (autoRefresh || status !== 'active') {
+      return null;
+    }
     return (
-      <EuiButtonEmpty onClick={onRefreshButtonClick}>
-        <EuiIcon type={getRefreshButtonIcon()} size="m" />
+      <EuiButtonEmpty onClick={onSyncIconClickHandler}>
+        <EuiIcon type="inputOutput" size="m" />
       </EuiButtonEmpty>
     );
   };
 
-  const DeleteButton = () => {
+  const DeleteIcon = () => {
     return (
-      <EuiButtonEmpty onClick={onDeleteButtonClick}>
+      <EuiButtonEmpty onClick={onDeleteIconClickHandler}>
         <EuiIcon type="trash" size="m" />
+      </EuiButtonEmpty>
+    );
+  };
+
+  const VacuumIcon = () => {
+    return (
+      <EuiButtonEmpty onClick={onVacuumIconClickHandler}>
+        <EuiIcon type="broom" size="m" />
       </EuiButtonEmpty>
     );
   };
@@ -146,11 +192,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     {
       id: 'schema',
       name: 'Schema',
-      disabled: false,
-    },
-    {
-      id: 'sql_definition',
-      name: 'SQL Definition',
       disabled: false,
     },
   ];
@@ -175,16 +216,12 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
     switch (tab) {
       case 'details':
-        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName };
+        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName, resetFlyout };
         break;
       case 'schema':
         propsForTab = { mappings, indexInfo };
         break;
-      case 'sql_definition':
-        propsForTab = { mappings };
-        break;
       default:
-        console.log('Unknown Tab: ', tab);
         return null;
     }
 
@@ -199,23 +236,39 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiText>
-              <h2 className="panel-title">{index}</h2>
+              <h2 className="panel-title">{displayedIndex}</h2>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DiscoverButton />
+            <SyncIcon autoRefresh={acceleration.autoRefresh} status={acceleration.status} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshButton />
+            <DiscoverIcon />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DeleteButton />
-          </EuiFlexItem>
+          {acceleration.status !== 'deleted' ? (
+            <EuiFlexItem grow={false}>
+              <DeleteIcon />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <VacuumIcon />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderTabContent(selectedTab)}</EuiFlyoutBody>
+      {showConfirmationOverlay && operationType && (
+        <AccelerationActionOverlay
+          isVisible={showConfirmationOverlay}
+          actionType={operationType as AccelerationActionType}
+          acceleration={acceleration}
+          dataSourceName={dataSourceName}
+          onCancel={() => setShowConfirmationOverlay(false)}
+          onConfirm={onConfirmOperation}
+        />
+      )}
     </>
   );
 };
