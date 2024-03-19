@@ -378,9 +378,11 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
         />
       </EuiHorizontalRule>
-      <EuiSpacer>
+      <EuiSpacer
+        size="xs"
+      >
         <div
-          className="euiSpacer euiSpacer--l"
+          className="euiSpacer euiSpacer--xs"
         />
       </EuiSpacer>
       <EuiFlexGroup

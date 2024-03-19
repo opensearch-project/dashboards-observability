@@ -146,9 +146,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         const name = getAccelerationName(item, datasourceName);
         return (
           <EuiLink
-            onClick={() =>
-              renderAccelerationDetailsFlyout(name, item, datasourceName, handleRefresh)
-            }
+            onClick={() => renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh)}
           >
             {name}
           </EuiLink>
