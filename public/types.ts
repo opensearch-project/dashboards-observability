@@ -36,7 +36,6 @@ export interface ObservabilitySetup {}
 
 export interface ObservabilityStart {
   renderAccelerationDetailsFlyout: (
-    index: string,
     acceleration: CachedAcceleration,
     datasourceName: string,
     handleRefresh?: () => void
