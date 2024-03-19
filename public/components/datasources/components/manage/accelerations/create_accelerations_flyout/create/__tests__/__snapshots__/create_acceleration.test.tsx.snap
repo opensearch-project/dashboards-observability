@@ -1275,7 +1275,7 @@ Array [
                       <span
                         class="euiButtonEmpty__text"
                       >
-                        Close
+                        Cancel
                       </span>
                     </span>
                   </button>
@@ -2790,7 +2790,7 @@ Array [
                       <span
                         className="euiButtonEmpty__text"
                       >
-                        Close
+                        Cancel
                       </span>
                     </span>
                   </button>
