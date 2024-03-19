@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
+import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { basePathLink } from '../../../../../../common/utils/shared';
 import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
@@ -127,11 +128,13 @@ export const InstallIntegrationFlyout = ({
   setAvailableIntegrations,
   closeFlyout,
   datasourceType,
+  datasourceName,
 }: {
   availableIntegrations: AvailableIntegrationsList;
   setAvailableIntegrations: (value: AvailableIntegrationsList) => void;
   closeFlyout: () => void;
   datasourceType: DatasourceType;
+  datasourceName: string;
 }) => {
   useEffect(() => {
     if (!coreRefs.http) {
@@ -148,9 +151,32 @@ export const InstallIntegrationFlyout = ({
     ),
   };
 
+  const [installingIntegration, setInstallingIntegration] = useState<string | null>(null);
+
   return (
     <EuiFlyout onClose={closeFlyout}>
-      <AvailableIntegrationsTable loading={false} data={s3FilteredIntegrations} isCardView={true} />
+      {installingIntegration === null ? (
+        <AvailableIntegrationsTable
+          loading={false}
+          data={s3FilteredIntegrations}
+          isCardView={true}
+          setInstallingIntegration={setInstallingIntegration}
+        />
+      ) : (
+        <SetupIntegrationForm
+          integration={installingIntegration}
+          unsetIntegration={() => setInstallingIntegration(null)}
+          renderType="flyout"
+          forceConnection={
+            datasourceType === 'S3GLUE'
+              ? {
+                  name: datasourceName,
+                  type: 's3',
+                }
+              : undefined
+          }
+        />
+      )}
     </EuiFlyout>
   );
 };
@@ -158,9 +184,11 @@ export const InstallIntegrationFlyout = ({
 export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
+  datasourceName,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
+  datasourceName: string;
 }) => {
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
@@ -215,6 +243,7 @@ export const InstalledIntegrationsTable = ({
           setAvailableIntegrations={setAvailableIntegrations}
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
+          datasourceName={datasourceName}
         />
       ) : null}
     </>
