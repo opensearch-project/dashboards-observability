@@ -29,7 +29,7 @@ export const NoResults = ({ tabId }: any) => {
   // get the queries isLoaded, if it exists AND is true = show no res
   const queryInfo = useSelector(selectQueries)[tabId];
   const summaryData = useSelector(selectQueryAssistantSummarization)[tabId];
-  const queryAssistLoading = summaryData.loading;
+  const queryAssistLoading = summaryData?.loading;
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
 
   const datasourceName = explorerSearchMeta?.datasources[0]?.name;

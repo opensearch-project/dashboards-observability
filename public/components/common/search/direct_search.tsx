@@ -21,6 +21,7 @@ import {
 import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@osd/i18n';
 import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
@@ -54,7 +55,6 @@ import { formatError } from '../../event_analytics/utils';
 import { usePolling } from '../../hooks/use_polling';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
-import { i18n } from '@osd/i18n';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -384,7 +384,7 @@ export const DirectSearch = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
-            isSuggestionDisabled={queryLang === 'SQL'}
+            isSuggestionDisabled={true}
             isDisabled={explorerSearchMetadata.isPolling}
           />
           {queryLang === QUERY_LANGUAGE.PPL && (
