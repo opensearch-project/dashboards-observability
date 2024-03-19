@@ -4,10 +4,8 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
-  EuiCopy,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
