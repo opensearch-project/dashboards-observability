@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
 
 export function IntegrationHeader() {

@@ -3,7 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { coreRefs } from '../../public/framework/core_refs';
+
+/**
+ * TODO making this method type-safe is nontrivial: if you just define
+ * `Nested<T> = { [k: string]: Nested<T> | T }` then you can't accumulate because `T` is not `Nested<T>`
+ * There might be a way to define a recursive type that accumulates cleanly but it's probably not
+ * worth the effort.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function get<T = unknown>(obj: Record<string, any>, path: string, defaultValue?: T): T {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return path.split('.').reduce((acc: any, part: string) => acc && acc[part], obj) || defaultValue;
 }
 
@@ -33,3 +43,19 @@ export function combineSchemaAndDatarows(
 
   return combinedData;
 }
+
+/**
+ * Safely prepend the `basePath` from `coreRefs` to the given link.
+ * If `coreRefs.http.basePath` exists (always true in normal operation), prepend it to the link.
+ * If it doesn't exist (usually during unit testing), return the link as-is.
+ *
+ * @param link The link to prepend with `coreRefs.http.basePath`.
+ * @returns The link with the prepended `basePath` if it exists, otherwise the unmodified link.
+ */
+export const basePathLink = (link: string): string => {
+  if (coreRefs.http?.basePath) {
+    return coreRefs.http.basePath.prepend(link);
+  } else {
+    return link;
+  }
+};

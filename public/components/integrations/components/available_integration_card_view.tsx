@@ -75,7 +75,11 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   description={i.description}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
-                  onClick={() => (window.location.hash = `#/available/${i.name}`)}
+                  onClick={() =>
+                    (window.location.hash = http.basePath.prepend(
+                      `/app/integrations#/available/${i.name}`
+                    ))
+                  }
                   footer={badges(i.labels ?? [])}
                 />
               </EuiFlexItem>
@@ -101,7 +105,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{props.renderCateogryFilters()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{props.filters}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Text align"
