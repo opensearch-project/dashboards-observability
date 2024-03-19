@@ -48,12 +48,12 @@ export const SelectorLoadObjects = ({
   const {
     loadStatus: loadTablesStatus,
     startLoading: startLoadingTables,
-    stopLoading: _stopLoadingTables,
+    stopLoading: stopLoadingTables,
   } = useLoadTablesToCache();
   const {
     loadStatus: loadAccelerationsStatus,
     startLoading: startLoadingAccelerations,
-    stopLoading: _stopLoadingAccelerations,
+    stopLoading: stopLoadingAccelerations,
   } = useLoadAccelerationsToCache();
 
   const onClickRefreshDatabases = () => {
@@ -97,6 +97,12 @@ export const SelectorLoadObjects = ({
     setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: isEitherLoading });
   }, [isEitherLoading]);
 
+  useEffect(() => {
+    return () => {
+      stopLoadingTables();
+      stopLoadingAccelerations();
+    };
+  }, []);
   return (
     <>
       {isEitherLoading ? (
