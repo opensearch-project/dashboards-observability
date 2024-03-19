@@ -4,6 +4,7 @@
  */
 
 import { EuiInMemoryTable, EuiTableFieldDataColumnType } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import React from 'react';
 
 interface AccelerationSchemaTabProps {
@@ -27,18 +28,24 @@ export const AccelerationSchemaTab = ({ mappings, indexInfo }: AccelerationSchem
   const columns = [
     {
       field: 'columns_name',
-      name: 'Column name',
+      name: i18n.translate('accelerationSchemaTab.columnNameHeader', {
+        defaultMessage: 'Column name',
+      }),
     },
     {
       field: 'data_type',
-      name: 'Data type',
+      name: i18n.translate('accelerationSchemaTab.dataTypeHeader', {
+        defaultMessage: 'Data type',
+      }),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
   if (isSkippingIndex) {
     columns.push({
       field: 'acceleration_type',
-      name: 'Acceleration index type',
+      name: i18n.translate('accelerationSchemaTab.accelerationIndexTypeHeader', {
+        defaultMessage: 'Acceleration index type',
+      }),
     });
   }
 
