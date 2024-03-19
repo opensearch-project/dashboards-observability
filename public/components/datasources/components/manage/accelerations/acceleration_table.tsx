@@ -150,14 +150,16 @@ export const AccelerationTable = ({
     );
   };
 
+  const displayUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
+
   const AccelerationTableHeader = () => {
     return (
       <>
-        <EuiFlexGroup direction="row">
+        <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem>
             <EuiText>
-              <h3 className="panel-title">{ACC_PANEL_TITLE}</h3>
-              <p>{ACC_PANEL_DESC}</p>
+              <h2 className="panel-title">{ACC_PANEL_TITLE}</h2>
+              {ACC_PANEL_DESC}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -174,10 +176,10 @@ export const AccelerationTable = ({
               {updatedTime && (
                 <EuiFlexItem>
                   <EuiText textAlign="right" size="xs" color="subdued">
-                    {'Last updated'}
+                    {'Last updated at:'}
                   </EuiText>
                   <EuiText textAlign="right" color="subdued" size="xs">
-                    {updatedTime}
+                    {displayUpdatedTime}
                   </EuiText>
                 </EuiFlexItem>
               )}
@@ -335,7 +337,6 @@ export const AccelerationTable = ({
       <EuiPanel>
         <AccelerationTableHeader />
         <EuiHorizontalRule />
-        <EuiSpacer />
         {isRefreshing ? (
           <AccelerationLoading />
         ) : (
