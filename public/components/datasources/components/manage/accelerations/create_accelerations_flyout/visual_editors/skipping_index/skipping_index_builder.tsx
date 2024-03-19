@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import producer from 'immer';
 import React, { useEffect, useState } from 'react';
 import { SKIPPING_INDEX_ACCELERATION_METHODS } from '../../../../../../../../../common/constants/data_sources';
 import {
@@ -21,9 +20,9 @@ import {
   SkippingIndexAccMethodType,
   SkippingIndexRowType,
 } from '../../../../../../../../../common/types/data_connections';
-import { validateSkippingIndexData } from '../../create/utils';
 import { AddFieldsModal } from './add_fields_modal';
 import { DeleteFieldsModal } from './delete_fields_modal';
+import { GenerateFields } from './generate_fields';
 
 interface SkippingIndexBuilderProps {
   accelerationFormData: CreateAccelerationForm;
@@ -40,6 +39,7 @@ export const SkippingIndexBuilder = ({
 
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isSkippingtableLoading, setIsSkippingtableLoading] = useState(false);
 
   let modal;
 
@@ -86,12 +86,14 @@ export const SkippingIndexBuilder = ({
       name: 'Field name',
       sortable: true,
       truncateText: true,
+      readOnly: isSkippingtableLoading,
     },
     {
       field: 'dataType',
       name: 'Datatype',
       sortable: true,
       truncateText: true,
+      readOnly: isSkippingtableLoading,
     },
     {
       name: 'Acceleration method',
@@ -104,9 +106,11 @@ export const SkippingIndexBuilder = ({
           aria-label="Use aria labels when no actual label is in use"
         />
       ),
+      readOnly: isSkippingtableLoading,
     },
     {
       name: 'Delete',
+      readOnly: isSkippingtableLoading,
       render: (item: SkippingIndexRowType) => {
         return (
           <EuiButtonIcon
@@ -134,28 +138,6 @@ export const SkippingIndexBuilder = ({
   };
 
   useEffect(() => {
-    if (accelerationFormData.dataTableFields.length > 0) {
-      const tableRows: SkippingIndexRowType[] = [
-        {
-          ...accelerationFormData.dataTableFields[0],
-          accelerationMethod: 'PARTITION',
-        },
-      ];
-      setAccelerationFormData(
-        producer((accData) => {
-          accData.skippingIndexQueryData = tableRows;
-          accData.formErrors.skippingIndexError = validateSkippingIndexData(
-            accData.accelerationIndexType,
-            tableRows
-          );
-        })
-      );
-    } else {
-      setAccelerationFormData({ ...accelerationFormData, skippingIndexQueryData: [] });
-    }
-  }, [accelerationFormData.dataTableFields]);
-
-  useEffect(() => {
     setTotalItemCount(accelerationFormData.skippingIndexQueryData.length);
   }, [accelerationFormData.skippingIndexQueryData]);
 
@@ -176,17 +158,42 @@ export const SkippingIndexBuilder = ({
         onChange={({ page }) => onTableChange(page)}
         hasActions={true}
         error={accelerationFormData.formErrors.skippingIndexError.join('')}
+        loading={isSkippingtableLoading}
+        noItemsMessage={
+          isSkippingtableLoading
+            ? 'Auto-generating skipping index definition.'
+            : 'Please add fields'
+        }
       />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={() => setIsAddModalVisible(true)}>
-            Add fields
-          </EuiButton>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setIsAddModalVisible(true)}
+                isDisabled={isSkippingtableLoading}
+              >
+                Add fields
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setIsDeleteModalVisible(true)}
+                isDisabled={isSkippingtableLoading}
+                color="danger"
+              >
+                Bulk delete
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setIsDeleteModalVisible(true)} color="danger">
-            Bulk delete
-          </EuiButton>
+          <GenerateFields
+            isSkippingtableLoading={isSkippingtableLoading}
+            setIsSkippingtableLoading={setIsSkippingtableLoading}
+            accelerationFormData={accelerationFormData}
+            setAccelerationFormData={setAccelerationFormData}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {modal}

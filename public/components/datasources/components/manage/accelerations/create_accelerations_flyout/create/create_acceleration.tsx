@@ -97,7 +97,11 @@ export const CreateAcceleration = ({
     },
   });
   const [tableFieldsLoading, setTableFieldsLoading] = useState(false);
-  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
+  const {
+    loadStatus,
+    startLoading,
+    stopLoading: stopLoadingTableFields,
+  } = useLoadTableColumnsToCache();
 
   const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
     const idPrefix = htmlIdGenerator()();
@@ -117,6 +121,7 @@ export const CreateAcceleration = ({
       ...accelerationFormData,
       dataTableFields: [],
     });
+    stopLoadingTableFields();
     if (dataTable !== '') {
       setTableFieldsLoading(true);
       const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
@@ -179,6 +184,7 @@ export const CreateAcceleration = ({
               setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
               dataSourcesPreselected={dataSourcesPreselected}
+              tableFieldsLoading={tableFieldsLoading}
             />
             <EuiSpacer size="xxl" />
             <IndexTypeSelector

@@ -10,6 +10,7 @@ import {
   CoreStart,
   HttpStart,
   IToasts,
+  OverlayStart,
   SavedObjectsClientContract,
 } from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -30,6 +31,7 @@ class CoreRefs {
   public summarizeEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
+  public overlays?: OverlayStart;
   private constructor() {
     // ...
   }
