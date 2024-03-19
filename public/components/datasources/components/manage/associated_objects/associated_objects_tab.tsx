@@ -38,7 +38,12 @@ import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_load
 import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { AssociatedObjectsTable } from './modules/associated_objects_table';
-import { getAccelerationName } from '../accelerations/utils/acceleration_utils';
+import {
+  CreateAccelerationFlyoutButton,
+  getAccelerationName,
+} from '../accelerations/utils/acceleration_utils';
+import { getRenderCreateAccelerationFlyout } from '../../../../../../public/plugin';
+import { AssociatedObjectsTabFailure } from './utils/associated_objects_tab_failure';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
@@ -57,6 +62,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const [cachedAccelerations, setCachedAccelerations] = useState<CachedAcceleration[]>([]);
   const [associatedObjects, setAssociatedObjects] = useState<AssociatedObject[]>([]);
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
+  const [databasesLoadFailed, setDatabasesLoadFailed] = useState<boolean>(false);
+  const [associatedObjectsLoadFailed, setAssociatedObjectsLoadFailed] = useState<boolean>(false);
 
   const {
     databasesLoadStatus,
@@ -92,7 +99,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
       startLoadingDatabases(datasource.name);
-      startLoadingAccelerations(datasource.name);
       setIsRefreshing(true);
     }
   };
@@ -139,6 +145,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
             onClick={onRefreshButtonClick}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CreateAccelerationFlyoutButton
+            dataSourceName={datasource.name}
+            renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -165,6 +177,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setCachedDatabases(datasourceCache.databases);
+      setIsFirstTimeLoading(false);
+    } else if (
+      status === DirectQueryLoadingStatus.FAILED ||
+      status === DirectQueryLoadingStatus.CANCELED
+    ) {
+      setDatabasesLoadFailed(true);
       setIsFirstTimeLoading(false);
     }
   }, [datasource.name, databasesLoadStatus]);
@@ -200,7 +218,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         setCachedTables(databaseCache.tables);
       }
       if (
-        accelerationsCache.status === CachedDataSourceStatus.Empty &&
+        (accelerationsCache.status === CachedDataSourceStatus.Empty || isRefreshing) &&
         !isCatalogCacheFetching(accelerationsLoadStatus)
       ) {
         startLoadingAccelerations(datasource.name);
@@ -222,9 +240,23 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       );
       if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
         setCachedTables(databaseCache.tables);
+      } else if (
+        tablesStatus === DirectQueryLoadingStatus.FAILED ||
+        tablesStatus === DirectQueryLoadingStatus.CANCELED
+      ) {
+        setAssociatedObjectsLoadFailed(true);
+        setIsRefreshing(false);
+        setIsObjectsLoading(false);
       }
       if (accelerationsStatus === DirectQueryLoadingStatus.SUCCESS) {
         setCachedAccelerations(accelerationsCache.accelerations);
+      } else if (
+        accelerationsStatus === DirectQueryLoadingStatus.FAILED ||
+        accelerationsStatus === DirectQueryLoadingStatus.CANCELED
+      ) {
+        setAssociatedObjectsLoadFailed(true);
+        setIsRefreshing(false);
+        setIsObjectsLoading(false);
       }
       handleObjectsLoad(databaseCache, accelerationsCache);
     }
@@ -280,12 +312,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
           .value,
-        // Temporary dummy array
         accelerations: [],
         columns: undefined,
       }));
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);
   }, [selectedDatabase, cachedTables, cachedAccelerations]);
+
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <>
@@ -297,15 +330,17 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         <EuiHorizontalRule />
         {isFirstTimeLoading ? (
           <AssociatedObjectsTabLoading objectType="databases" warningMessage={false} />
+        ) : databasesLoadFailed ? (
+          <AssociatedObjectsTabFailure type="databases" />
         ) : (
           <>
             {cachedDatabases.length === 0 ? (
               <AssociatedObjectsTabEmpty cacheType="databases" />
             ) : (
               <>
-                <EuiSpacer />
+                <EuiSpacer size="xs" />
                 <EuiFlexGroup direction="row">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} className="database-selector">
                     <EuiSelectable
                       searchable={true}
                       singleSelection="always"
@@ -322,8 +357,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                     </EuiSelectable>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {isObjectsLoading && isFirstTimeLoading ? (
+                    {isFirstTimeLoading || (isObjectsLoading && !isRefreshing) ? (
                       <AssociatedObjectsTabLoading objectType="tables" warningMessage={true} />
+                    ) : associatedObjectsLoadFailed ? (
+                      <AssociatedObjectsTabFailure type="objects" />
                     ) : (
                       <>
                         {cachedTables.length > 0 || cachedAccelerations.length > 0 ? (

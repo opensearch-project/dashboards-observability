@@ -33,6 +33,7 @@ import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import S3Logo from '../../icons/s3-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_data_connections_description';
+import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -115,16 +116,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
 
   const actions = [
     {
-      name: 'Edit',
-      isPrimary: true,
-      icon: 'pencil',
-      type: 'icon',
-      onClick: (datasource: DataConnection) => {
-        window.location.href = `#/manage/${datasource.name}`;
-      },
-      'data-test-subj': 'action-edit',
-    },
-    {
       name: (datasource: DataConnection) =>
         `Query in ${
           datasource.connectionType === 'PROMETHEUS' ? 'Metrics Analytics' : 'Observability Logs'
@@ -145,8 +136,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'bolt',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {
-        application!.navigateToApp('opensearch-query-workbench');
+      onClick: (datasource: DataConnection) => {
+        renderCreateAccelerationFlyout(datasource.name);
       },
       'data-test-subj': 'action-accelerate',
     },
@@ -235,6 +226,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     const dsStatus = dataconnection.dsStatus;
     return { connectionType, name, dsStatus, data: { name, connectionType } };
   });
+
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <EuiPage>
