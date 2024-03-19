@@ -1,55 +1,53 @@
-## What's Changed
-* [Backport 2.x] [BUG] Fix Panels PPL Filter by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1411
-* [Backport 2.x] Add redirect with error message if integrations template not found by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1415
-* [Backport 2.x] Updating app analytics jest and cypress tests by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1416
-* [Backport 2.x] Add modal for DQL language by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1421
-* [Backport 2.x] Change class name to decouple styling from discover by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1426
-* [Backport 2.x] fix explorer stats function typing crash by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1434
-* [Backport 2.x] Add release notes for 2.12.0 by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1431
-* [Backport 2.x] Backporting #1409 Panels Tests Updates by @sejli in https://github.com/opensearch-project/dashboards-observability/pull/1441
-* [2.x] upgrade plotly to v2 (#1432) by @joshuali925 in https://github.com/opensearch-project/dashboards-observability/pull/1448
-* [Backport 2.x] Add single version flag during bootstrap to fix version conflicts by @RyanL1997 in https://github.com/opensearch-project/dashboards-observability/pull/1460
-* [Backport 2.x] [BUG] Fixing style overriding issue in dashboards core vizBuilder by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1452
-* [Backport 2.x] (query assist) show error toasts if summary is disabled by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1485
-* [Backport 2.x] Data sources associated objects tab (#1470) by @RyanL1997 in https://github.com/opensearch-project/dashboards-observability/pull/1486
-* [Backport 2.x] remove hardcoded width for generate ppl button by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1487
-* [Backport 2.x] Accelerations Tab and Flyout Skeletons by @RyanL1997 in https://github.com/opensearch-project/dashboards-observability/pull/1489
-* [Backport 2.x] [Feature] Remove index store region and index store URI for data connection panel by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1491
-* [Backport 2.x] Flint bug fix explorer failure by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1478
-* [Backport 2.x] (query assist) get agent id through config API by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1493
-* [Backport 2.x] [Feature] Associated objects searchbar filters by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1492
-* [Backport 2.x] Fix jaeger spans key names for filtering by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1455
-* [Backport 2.x] Update names and descriptions for integrations by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1499
-* [Maintenance] Bump plugin version to 2.13.0 by @RyanL1997 in https://github.com/opensearch-project/dashboards-observability/pull/1506
-* [Backport 2.x] Update integration format for better handling of multiple asset types by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1502
-* [Backport 2.x] Fixing Flaky Panels Test by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1509
-* [Backport 2.x] Catalog cache and Session update for async queries by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1504
-* [Backport 2.x] Move create acceleration flyout from workbench to datasources by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1510
-* [Backport 2.x] Add flyout pages to associated objects table by @RyanL1997 in https://github.com/opensearch-project/dashboards-observability/pull/1507
-* [Backport 2.x] Expose create acceleration flyout, update acceleration docs link by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1514
-* [Backport 2.x] Export observability start interface by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1516
-* [Backport 2.x] Minor integration name updates by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1512
-* [Backport 2.x] Update integrations to allow custom checkpoint locations by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1511
-* [AUTO] Increment version to 2.13.0.0 by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1471
-* [Backport 2.x] Changed Explorer Data Grid useage of timestamp by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1520
-* [Backport 2.x] Add datasource field in accelerations cache by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1526
-* [Backport 2.x] [Feature] Acceleration components' data implementation by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1536
-* [Backport 2.x] Update UI styles for query assist by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1538
-* [Backport 2.x] Updating UI for create acceleration flyout (#1532) by @ps48 in https://github.com/opensearch-project/dashboards-observability/pull/1541
-* [Backport 2.x] [Feature] Add Retrieval from Catalog Cache by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1542
-* [Backport 2.x] Add conditional installation for S3 integrations by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1528
-* [Backport 2.x] Add "Installed Integrations" table to data sources view by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1547
-* [Backport 2.x] [Log explorer] Remove modal for discover redirection by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1546
-* [Backport 2.x] Adding datasource status and filter for hive tables by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1550
-* [Backport 2.x] Implement redirection to explorer within data sources by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1553
-* [Backport 2.x] Copy Updates: Integration Flows -> Integration Resources by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1556
-* [Backport 2.x] Data Sources component Improvements and bug fixes by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1557
-* [Backport 2.x] Allow browsing integrations in Flyout from Data Sources page by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1562
-* [Backport 2.x] [Feature] Acceleration Actions Implementation by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1563
-* [Backport 2.x] Add integration installation to data sources flyout by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1568
-* [Backport 2.x] Add auto-suggestions for skipping index definition and export types by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1569
-* [Backport 2.x] Data sources bug fixes and UI improvements by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1566
-* [Backport 2.x] Integrations: Update delete modal to support custom verify prompt by @opensearch-trigger-bot in https://github.com/opensearch-project/dashboards-observability/pull/1570
+## Version 2.13.0 Release Notes
 
+Compatible with OpenSearch and OpenSearch Dashboards version 2.13.0
 
-**Full Changelog**: https://github.com/opensearch-project/dashboards-observability/compare/2.12.0.0...2.13.0.0\
+### Features
+* Integrations: Update delete modal to support custom verify prompt by @Swiddis ([#1567](https://github.com/opensearch-project/dashboards-observability/pull/1567))
+* Data sources bug fixes and UI improvements by @sejli ([#1565](https://github.com/opensearch-project/dashboards-observability/pull/1565))
+* Add integration installation to data sources flyout by ([#1561](https://github.com/opensearch-project/dashboards-observability/pull/1561))
+* Allow browsing integrations in Flyout from Data Sources page by ([#1560](https://github.com/opensearch-project/dashboards-observability/pull/1560))
+* Add auto-suggestions for skipping index definition and export types by @ps48 ([#1552](https://github.com/opensearch-project/dashboards-observability/pull/1552))
+* Data Sources component Improvements and bug fixes by @sejli ([#1551](https://github.com/opensearch-project/dashboards-observability/pull/1551))
+* Adding datasource status and filter for hive tables by @ps48 ([#1549](https://github.com/opensearch-project/dashboards-observability/pull/1549))
+* Implement redirection to explorer within data sources by @paulstn ([#1548](https://github.com/opensearch-project/dashboards-observability/pull/1548))
+* Add actual integration queries to table by @Swiddis ([#1544](https://github.com/opensearch-project/dashboards-observability/pull/1544))
+* Remove modal for discover redirection by @mengweieric ([#1543](https://github.com/opensearch-project/dashboards-observability/pull/1543))
+* Acceleration Actions Implementation by @RyanL1997 ([#1540](https://github.com/opensearch-project/dashboards-observability/pull/1540))
+* Updating UI for create acceleration flyout by @ps48 ([#1532](https://github.com/opensearch-project/dashboards-observability/pull/1532))
+* Add datasource field in accelerations cache by @ps48 ([#1525](https://github.com/opensearch-project/dashboards-observability/pull/1525))
+* Acceleration components' data implementation by @RyanL1997 ([#1521](https://github.com/opensearch-project/dashboards-observability/pull/1521))
+* Add conditional installation for S3 integrations by @Swiddis ([#1518](https://github.com/opensearch-project/dashboards-observability/pull/1518))
+* Add Retrieval from Catalog Cache by @sejli ([#1517](https://github.com/opensearch-project/dashboards-observability/pull/1517))
+* Export observability start interface by @ps48 ([#1515](https://github.com/opensearch-project/dashboards-observability/pull/1515))
+* Expose create acceleration flyout, update acceleration docs link by @ps48 ([#1513](https://github.com/opensearch-project/dashboards-observability/pull/1513))
+* Bump plugin version to 2.13.0 by @RyanL1997 ([#1506](https://github.com/opensearch-project/dashboards-observability/pull/1506))
+* Catalog cache and Session update for async queries by @ps48 ([#1500](https://github.com/opensearch-project/dashboards-observability/pull/1500))
+* Add flyout pages to associated objects table by @RyanL1997 ([#1496](https://github.com/opensearch-project/dashboards-observability/pull/1496))
+* Remove index store region and index store URI for data connection panel by @RyanL1997 ([#1490](https://github.com/opensearch-project/dashboards-observability/pull/1490))
+* Accelerations Tab and Flyout Skeletons by @RyanL1997 ([#1489](https://github.com/opensearch-project/dashboards-observability/pull/1489))
+* (query assist) get agent id through config API by @joshuali925 ([#1482](https://github.com/opensearch-project/dashboards-observability/pull/1482))
+* Associated objects searchbar filters by @RyanL1997 ([#1474](https://github.com/opensearch-project/dashboards-observability/pull/1474))
+* Data sources associated objects tab by @RyanL1997 ([#1470](https://github.com/opensearch-project/dashboards-observability/pull/1470))
+
+### Bug Fixes
+* Update integrations to allow custom checkpoint locations by @Swiddis ([#1501](https://github.com/opensearch-project/dashboards-observability/pull/1501))
+* (query assist) show error toasts if summary is disabled by @joshuali925 ([#1480](https://github.com/opensearch-project/dashboards-observability/pull/1480))
+* Fixing style overriding issue in dashboards core vizBuilder by @mengweieric ([#1451](https://github.com/opensearch-project/dashboards-observability/pull/1451))
+* Fix jaeger spans key names for filtering by @joshuali925 ([#1428](https://github.com/opensearch-project/dashboards-observability/pull/1428))
+
+### Infrastructure
+* Add single version flag during bootstrap to fix version conflicts by @RyanL1997 ([#1460](https://github.com/opensearch-project/dashboards-observability/pull/1460))
+
+### Maintenance
+* Copy Updates: Integration Flows -> Integration Resources by @Swiddis ([#1555](https://github.com/opensearch-project/dashboards-observability/pull/1555))
+* Update UI styles for query assist by @joshuali925 ([#1523](https://github.com/opensearch-project/dashboards-observability/pull/1523))
+* Move create acceleration flyout from workbench to datasources by @ps48 ([#1508](https://github.com/opensearch-project/dashboards-observability/pull/1508))
+* Minor integration name updates by @Swiddis ([#1505](https://github.com/opensearch-project/dashboards-observability/pull/1505))
+* Update integration format for better handling of multiple asset types by @Swiddis ([#1498](https://github.com/opensearch-project/dashboards-observability/pull/1498))
+* Update names and descriptions for integrations by @Swiddis ([#1494](https://github.com/opensearch-project/dashboards-observability/pull/1494))
+* Changed Explorer Data Grid useage of timestamp by @paulstn ([#1479](https://github.com/opensearch-project/dashboards-observability/pull/1479))
+* Flint bug fix explorer failure by @paulstn ([#1476](https://github.com/opensearch-project/dashboards-observability/pull/1476))
+* Fixing Flaky Panels Test by @sejli ([#1463](https://github.com/opensearch-project/dashboards-observability/pull/1463))
+* remove hardcoded width for generate ppl button by @joshuali925 ([#1447](https://github.com/opensearch-project/dashboards-observability/pull/1447))
+* upgrade plotly to v2 by @joshuali925 ([#1432](https://github.com/opensearch-project/dashboards-observability/pull/1432))
