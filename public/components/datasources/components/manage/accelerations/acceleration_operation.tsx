@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
 import { useToast } from '../../../../common/toast';
 import { useDirectQuery } from '../../../../../framework/datasources/direct_query_hook';
@@ -36,17 +37,38 @@ export const useAccelerationOperation = (dataSource: string) => {
 
     switch (operationType) {
       case 'delete':
-        operationInProgressMessage = `Deleting acceleration: ${displayAccelerationName}`;
-        operationSuccessMessage = `Successfully deleted acceleration: ${displayAccelerationName}`;
-        operationFailureMessage = `Failed to delete acceleration: ${displayAccelerationName}`;
+        operationInProgressMessage = i18n.translate('useAccelerationOperation.deletingInProgress', {
+          defaultMessage: 'Deleting acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
+        operationSuccessMessage = i18n.translate('useAccelerationOperation.deleteSuccess', {
+          defaultMessage: 'Successfully deleted acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
+        operationFailureMessage = i18n.translate('useAccelerationOperation.deleteFailure', {
+          defaultMessage: 'Failed to delete acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
         break;
       case 'vacuum':
-        operationInProgressMessage = `Vacuuming acceleration: ${displayAccelerationName}`;
-        operationSuccessMessage = `Successfully vacuumed acceleration: ${displayAccelerationName}`;
-        operationFailureMessage = `Failed to vacuum acceleration: ${displayAccelerationName}`;
+        operationInProgressMessage = i18n.translate('useAccelerationOperation.vacuumInProgress', {
+          defaultMessage: 'Vacuuming acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
+        operationSuccessMessage = i18n.translate('useAccelerationOperation.vacuumSuccess', {
+          defaultMessage: 'Successfully vacuumed acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
+        operationFailureMessage = i18n.translate('useAccelerationOperation.vacuumFailure', {
+          defaultMessage: 'Failed to vacuum acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
         break;
       case 'sync':
-        operationInProgressMessage = `Syncing acceleration: ${displayAccelerationName}`;
+        operationInProgressMessage = i18n.translate('useAccelerationOperation.syncInProgress', {
+          defaultMessage: 'Syncing acceleration: {displayAccelerationName}',
+          values: { displayAccelerationName },
+        });
         break;
     }
 
