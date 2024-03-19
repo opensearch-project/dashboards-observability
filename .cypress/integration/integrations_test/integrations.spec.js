@@ -107,7 +107,7 @@ describe('Add nginx integration instance flow', () => {
 
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
 
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+    cy.get(`input.euiFieldText[placeholder="${testInstance}"]`).focus().type(testInstance, {
       delay: 50,
     });
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
