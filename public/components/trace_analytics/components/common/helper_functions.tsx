@@ -21,10 +21,7 @@ import { TraceAnalyticsMode } from '../../home';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
-
-const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
-
-const missingDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
+import { getTenantIndexName } from '../../../../../common/utils/tenant_index_name';
 
 export function PanelTitle({ title, totalItems }: { title: string; totalItems?: number }) {
   return (
@@ -55,7 +52,23 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
   );
 }
 
-export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode }) {
+export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode; tenant?: string }) {
+  const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${getTenantIndexName(
+    JAEGER_INDEX_NAME,
+    props.tenant
+  )} and ${getTenantIndexName(
+    JAEGER_SERVICE_INDEX_NAME,
+    props.tenant
+  )}) do not exist or you do not have permission to access them.`;
+
+  const missingDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${getTenantIndexName(
+    DATA_PREPPER_INDEX_NAME,
+    props.tenant
+  )} and ${getTenantIndexName(
+    DATA_PREPPER_SERVICE_INDEX_NAME,
+    props.tenant
+  )}) do not exist or you do not have permission to access them.`;
+
   const missingConfigurationBody =
     props.mode === 'jaeger'
       ? missingJaegerTracesConfigurationMessage

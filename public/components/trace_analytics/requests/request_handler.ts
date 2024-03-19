@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getTenantIndexName } from '../../../../common/utils/tenant_index_name';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   TRACE_ANALYTICS_DSL_ROUTE,
@@ -18,7 +19,8 @@ export async function handleDslRequest(
   DSL: any,
   bodyQuery: any,
   mode: TraceAnalyticsMode,
-  setShowTimeoutToast?: () => void
+  setShowTimeoutToast?: () => void,
+  tenant?: string
 ) {
   if (DSL?.query) {
     bodyQuery.query.bool.must.push(...DSL.query.bool.must);
@@ -30,7 +32,13 @@ export async function handleDslRequest(
   }
   let body = bodyQuery;
   if (!bodyQuery.index) {
-    body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
+    body = {
+      ...bodyQuery,
+      index: getTenantIndexName(
+        mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME,
+        tenant
+      ),
+    };
   }
   if (setShowTimeoutToast) {
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
@@ -45,7 +53,6 @@ export async function handleDslRequest(
       clearTimeout(id);
     }
   } else {
-
     try {
       return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
         body: JSON.stringify(body),
@@ -58,20 +65,30 @@ export async function handleDslRequest(
 
 export async function handleJaegerIndicesExistRequest(
   http: CoreStart['http'],
-  setJaegerIndicesExist
+  setJaegerIndicesExist,
+  tenant?: string
 ) {
   http
-    .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE)
+    .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE, {
+      body: JSON.stringify({
+        tenant,
+      }),
+    })
     .then((exists) => setJaegerIndicesExist(exists))
     .catch(() => setJaegerIndicesExist(false));
 }
 
 export async function handleDataPrepperIndicesExistRequest(
   http: CoreStart['http'],
-  setDataPrepperIndicesExist
+  setDataPrepperIndicesExist,
+  tenant?: string
 ) {
   http
-    .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE)
+    .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE, {
+      body: JSON.stringify({
+        tenant,
+      }),
+    })
     .then((exists) => setDataPrepperIndicesExist(exists))
     .catch(() => setDataPrepperIndicesExist(false));
 }

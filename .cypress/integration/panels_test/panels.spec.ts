@@ -70,7 +70,11 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       // cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[1], {
       //   delay: 50,
       // });
-      cy.get('[id^=autocomplete-textarea]').focus().invoke('val', PPL_VISUALIZATIONS[1]).trigger('input').trigger('change');
+      cy.get('[id^=autocomplete-textarea]')
+        .focus()
+        .invoke('val', PPL_VISUALIZATIONS[1])
+        .trigger('input')
+        .trigger('change');
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')

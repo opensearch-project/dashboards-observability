@@ -5,12 +5,11 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
 import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
 import { FilterType } from './components/common/filters/filters';
 import { SearchBarProps } from './components/common/search_bar';
-import { Dashboard } from './components/dashboard';
 import { Services, ServiceView } from './components/services';
 import { Traces, TraceView } from './components/traces';
 import {
@@ -18,6 +17,8 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
+import { loadTenantInfo } from './components/common/indices';
+import { PublicConfig } from '../../plugin';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -25,7 +26,9 @@ export interface TraceAnalyticsCoreDeps {
   chrome: ChromeStart;
 }
 
-interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
+interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {
+  config: PublicConfig;
+}
 
 export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
@@ -38,6 +41,7 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  tenant?: string;
 }
 
 export const Home = (props: HomeProps) => {
@@ -46,6 +50,8 @@ export const Home = (props: HomeProps) => {
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
+  const [tenantLoaded, setTenantLoaded] = useState(false);
+  const [tenantName, setTenantName] = useState<string | undefined>();
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
   const [filters, setFilters] = useState<FilterType[]>(
@@ -76,15 +82,15 @@ export const Home = (props: HomeProps) => {
   };
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
-    if (!text) text = '';
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
-
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist);
-    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
-  }, []);
+    if (!tenantLoaded)
+      loadTenantInfo(props.config.multitenancy.enabled).then((tenant) => {
+        setTenantLoaded(true);
+        setTenantName(tenant);
+        handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist, tenant);
+        handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, tenant);
+      });
+  }, [props.config.multitenancy.enabled, tenantLoaded, props.http]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
@@ -152,6 +158,7 @@ export const Home = (props: HomeProps) => {
     },
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    tenant: tenantName,
   };
 
   return (
@@ -167,7 +174,7 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path="/traces"
-          render={(routerProps) => (
+          render={() => (
             <TraceSideBar>
               <Traces
                 page="traces"
@@ -180,29 +187,34 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           path="/traces/:id+"
-          render={(routerProps) => (
-            <TraceView
-              parentBreadcrumb={props.parentBreadcrumb}
-              chrome={props.chrome}
-              http={props.http}
-              traceId={decodeURIComponent(routerProps.match.params.id)}
-              mode={mode}
-            />
-          )}
+          render={(routerProps) =>
+            tenantLoaded && (
+              <TraceView
+                parentBreadcrumb={props.parentBreadcrumb}
+                chrome={props.chrome}
+                http={props.http}
+                traceId={decodeURIComponent(routerProps.match.params.id)}
+                mode={mode}
+                tenant={tenantName}
+              />
+            )
+          }
         />
         <Route
           exact
           path={['/services', '/']}
-          render={(routerProps) => (
+          render={() => (
             <TraceSideBar>
-              <Services
-                page="services"
-                childBreadcrumbs={serviceBreadcrumbs}
-                nameColumnAction={nameColumnAction}
-                traceColumnAction={traceColumnAction}
-                toasts={toasts}
-                {...commonProps}
-              />
+              {tenantLoaded && (
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  nameColumnAction={nameColumnAction}
+                  traceColumnAction={traceColumnAction}
+                  toasts={toasts}
+                  {...commonProps}
+                />
+              )}
             </TraceSideBar>
           )}
         />

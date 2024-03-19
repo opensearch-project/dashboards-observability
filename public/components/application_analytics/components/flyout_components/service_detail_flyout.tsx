@@ -28,6 +28,7 @@ import { ServiceObject } from '../../../../../public/components/trace_analytics/
 import { SpanDetailTable } from '../../../../../public/components/trace_analytics/components/traces/span_detail_table';
 import { TraceAnalyticsComponentDeps } from '../../../../../public/components/trace_analytics/home';
 import { getListItem } from '../../helpers/utils';
+import { tenantName } from '../../../../components/trace_analytics/components/common/indices';
 
 interface ServiceFlyoutProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -131,7 +132,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       appConfigs
     );
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
-    handleServiceMapRequest(http, serviceDSL, mode, setServiceMap, serviceName);
+    handleServiceMapRequest(http, serviceDSL, mode, setServiceMap, serviceName, tenantName);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.must.push({
       term: {

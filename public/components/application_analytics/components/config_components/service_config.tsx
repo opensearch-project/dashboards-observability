@@ -24,6 +24,7 @@ import { handleServiceMapRequest } from '../../../trace_analytics/requests/servi
 import { AppAnalyticsComponentDeps } from '../../home';
 import { OptionType } from '../../../../../common/types/application_analytics';
 import { getClearModal } from '../../helpers/modal_containers';
+import { tenantName } from '../../../../components/trace_analytics/components/common/indices';
 
 interface ServiceConfigProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -50,7 +51,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   useEffect(() => {
-    handleServiceMapRequest(http, dslService, mode, setServiceMap);
+    handleServiceMapRequest(http, dslService, mode, setServiceMap, undefined, tenantName);
   }, []);
 
   useEffect(() => {

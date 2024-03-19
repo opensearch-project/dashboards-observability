@@ -15,7 +15,6 @@ import {
   handleJaegerDashboardRequest,
   handleJaegerErrorDashboardRequest,
 } from '../../requests/dashboard_request_handler';
-import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import {
@@ -27,9 +26,7 @@ import {
   processTimeStamp,
 } from '../common/helper_functions';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
-import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ThroughputPlt } from '../common/plots/throughput_plt';
-import { SearchBar } from '../common/search_bar';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
@@ -49,12 +46,12 @@ export function DashboardContent(props: DashboardProps) {
     filters,
     setStartTime,
     setEndTime,
-    setQuery,
     setFilters,
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
+    tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -62,7 +59,6 @@ export function DashboardContent(props: DashboardProps) {
   const [throughputPltItems, setThroughputPltItems] = useState({ items: [], fixedInterval: '1h' });
   const [errorRatePltItems, setErrorRatePltItems] = useState({ items: [], fixedInterval: '1h' });
   const [percentileMap, setPercentileMap] = useState<{ [traceGroup: string]: number[] }>({});
-  const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
@@ -92,27 +88,12 @@ export function DashboardContent(props: DashboardProps) {
   }, []);
 
   useEffect(() => {
-    let newFilteredService = '';
-    for (const filter of filters) {
-      if (mode === 'data_prepper') {
-        if (filter.field === 'serviceName') {
-          newFilteredService = filter.value;
-          break;
-        }
-      } else if (mode === 'jaeger') {
-        if (filter.field === 'process.serviceName') {
-          newFilteredService = filter.value;
-          break;
-        }
-      }
-    }
-    setFilteredService(newFilteredService);
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
-      refresh(newFilteredService);
+      refresh();
   }, [
     filters,
     startTime,
@@ -124,7 +105,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
   ]);
 
-  const refresh = async (currService?: string) => {
+  const refresh = async () => {
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
@@ -201,7 +182,8 @@ export function DashboardContent(props: DashboardProps) {
         setTableItems,
         mode,
         () => setShowTimeoutToast(true),
-        setPercentileMap
+        setPercentileMap,
+        tenant
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
       const serviceMapDSL = _.cloneDeep(DSL);
@@ -216,7 +198,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       throughputPltItems,
       setThroughputPltItems,
-      mode
+      mode,
+      tenant
     );
 
     handleDashboardErrorRatePltRequest(
@@ -225,7 +208,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       errorRatePltItems,
       setErrorRatePltItems,
-      mode
+      mode,
+      tenant
     );
   };
 
@@ -344,7 +328,7 @@ export function DashboardContent(props: DashboardProps) {
           )}
         </div>
       ) : (
-        <MissingConfigurationMessage mode={mode} />
+        <MissingConfigurationMessage mode={mode} tenant={tenant} />
       )}
     </>
   );

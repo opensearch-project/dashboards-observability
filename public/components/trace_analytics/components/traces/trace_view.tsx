@@ -35,10 +35,11 @@ import { SpanDetailPanel } from './span_detail_panel';
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
   mode: TraceAnalyticsMode;
+  tenant?: string;
 }
 
 export function TraceView(props: TraceViewProps) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const page = 'traceView';
   const renderTitle = (traceId: string) => {
     return (
@@ -160,16 +161,18 @@ export function TraceView(props: TraceViewProps) {
       processTimeStamp('now', mode),
       page
     );
-    handleTraceViewRequest(props.traceId, props.http, fields, setFields, mode);
-    handlePayloadRequest(props.traceId, props.http, payloadData, setPayloadData, mode);
+    console.log('tenant', tenant);
+    handleTraceViewRequest(props.traceId, props.http, fields, setFields, mode, tenant);
+    handlePayloadRequest(props.traceId, props.http, payloadData, setPayloadData, mode, tenant);
     handleServicesPieChartRequest(
       props.traceId,
       props.http,
       setServiceBreakdownData,
       setColorMap,
-      mode
+      mode,
+      tenant
     );
-    handleServiceMapRequest(props.http, DSL, mode, setServiceMap);
+    handleServiceMapRequest(props.http, DSL, mode, setServiceMap, undefined, tenant);
   };
 
   useEffect(() => {
@@ -221,7 +224,7 @@ export function TraceView(props: TraceViewProps) {
       },
     ]);
     refresh();
-  }, [props.mode]);
+  }, [props.mode, props.tenant]);
 
   return (
     <>
@@ -246,6 +249,7 @@ export function TraceView(props: TraceViewProps) {
                 mode={mode}
                 data={ganttData}
                 setData={setGanttData}
+                tenant={tenant}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -33,6 +33,7 @@ export function TracesContent(props: TracesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [redirect, setRedirect] = useState(true);
@@ -78,7 +79,16 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
-    await handleTracesRequest(http, DSL, timeFilterDSL, tableItems, setTableItems, mode, sort);
+    await handleTracesRequest(
+      http,
+      DSL,
+      timeFilterDSL,
+      tableItems,
+      setTableItems,
+      mode,
+      sort,
+      tenant
+    );
     setLoading(false);
   };
 
@@ -107,6 +117,7 @@ export function TracesContent(props: TracesProps) {
         traceIdColumnAction={traceIdColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        tenant={tenant}
       />
     </>
   );
