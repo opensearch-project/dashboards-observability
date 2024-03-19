@@ -73,6 +73,13 @@ import {
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
 import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTableColumnsToCache,
+  useLoadTablesToCache,
+} from './framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
@@ -371,6 +378,7 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
+    coreRefs.overlays = core.overlays;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
@@ -445,11 +453,21 @@ export class ObservabilityPlugin
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
 
+    const CatalogCacheManagerInstance = CatalogCacheManager;
+    const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;
+    const useLoadTablesToCacheHook = useLoadTablesToCache;
+    const useLoadTableColumnsToCacheHook = useLoadTableColumnsToCache;
+    const useLoadAccelerationsToCacheHook = useLoadAccelerationsToCache;
     // Export so other plugins can use this flyout
     return {
       renderAccelerationDetailsFlyout,
       renderAssociatedObjectsDetailsFlyout,
       renderCreateAccelerationFlyout,
+      CatalogCacheManagerInstance,
+      useLoadDatabasesToCacheHook,
+      useLoadTablesToCacheHook,
+      useLoadTableColumnsToCacheHook,
+      useLoadAccelerationsToCacheHook,
     };
   }
 

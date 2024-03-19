@@ -88,5 +88,5 @@ export const useDirectQuery = () => {
     }
   }, [pollingResult, pollingError]);
 
-  return { loadStatus, startLoading, stopLoading };
+  return { loadStatus, startLoading, stopLoading, pollingResult };
 };

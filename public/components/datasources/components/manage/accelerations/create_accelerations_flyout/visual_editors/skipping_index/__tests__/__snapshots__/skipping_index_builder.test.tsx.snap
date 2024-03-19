@@ -151,7 +151,7 @@ Array [
                 <span
                   className="euiTableCellContent__text"
                 >
-                  No items found
+                  Please add fields
                 </span>
               </div>
             </td>
@@ -161,57 +161,93 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      className="euiFlexItem euiFlexItem--flexGrowZero"
+      className="euiFlexItem"
     >
-      <button
-        className="euiButton euiButton--primary euiButton--fill"
-        disabled={false}
-        onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
-        type="button"
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
       >
-        <span
-          className="euiButtonContent euiButton__content"
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            className="euiButton__text"
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
           >
-            Add fields
-          </span>
-        </span>
-      </button>
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Add fields
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--danger"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Bulk delete
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <button
-        className="euiButton euiButton--danger"
-        disabled={false}
-        onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
+      Array [
+        <button
+          className="euiButton euiButton--primary"
+          disabled={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
           }
-        }
-        type="button"
-      >
-        <span
-          className="euiButtonContent euiButton__content"
+          type="button"
         >
           <span
-            className="euiButton__text"
+            className="euiButtonContent euiButton__content"
           >
-            Bulk delete
+            <span
+              className="euiButton__text"
+            >
+              Generate
+            </span>
           </span>
-        </span>
-      </button>
+        </button>,
+        "",
+      ]
     </div>
   </div>,
 ]
@@ -355,6 +391,7 @@ Array [
           >
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -378,6 +415,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -401,6 +439,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -483,6 +522,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -527,6 +567,7 @@ Array [
           >
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -550,6 +591,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -573,6 +615,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -655,6 +698,7 @@ Array [
             </td>
             <td
               className="euiTableRowCell"
+              readOnly={false}
               style={
                 Object {
                   "width": undefined,
@@ -838,57 +882,93 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      className="euiFlexItem euiFlexItem--flexGrowZero"
+      className="euiFlexItem"
     >
-      <button
-        className="euiButton euiButton--primary euiButton--fill"
-        disabled={false}
-        onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
-        type="button"
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
       >
-        <span
-          className="euiButtonContent euiButton__content"
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            className="euiButton__text"
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
           >
-            Add fields
-          </span>
-        </span>
-      </button>
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Add fields
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--danger"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Bulk delete
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <button
-        className="euiButton euiButton--danger"
-        disabled={false}
-        onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
+      Array [
+        <button
+          className="euiButton euiButton--primary"
+          disabled={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
           }
-        }
-        type="button"
-      >
-        <span
-          className="euiButtonContent euiButton__content"
+          type="button"
         >
           <span
-            className="euiButton__text"
+            className="euiButtonContent euiButton__content"
           >
-            Bulk delete
+            <span
+              className="euiButton__text"
+            >
+              Generate
+            </span>
           </span>
-        </span>
-      </button>
+        </button>,
+        "",
+      ]
     </div>
   </div>,
 ]

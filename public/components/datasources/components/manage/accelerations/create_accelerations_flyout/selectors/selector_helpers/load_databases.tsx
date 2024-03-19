@@ -11,11 +11,27 @@ import { useLoadDatabasesToCache } from '../../../../../../../../framework/catal
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;
   loadDatabases: () => void;
+  loadingComboBoxes: {
+    dataSource: boolean;
+    database: boolean;
+    dataTable: boolean;
+  };
+  setLoadingComboBoxes: React.Dispatch<
+    React.SetStateAction<{
+      dataSource: boolean;
+      database: boolean;
+      dataTable: boolean;
+    }>
+  >;
+  tableFieldsLoading: boolean;
 }
 
 export const SelectorLoadDatabases = ({
   dataSourceName,
   loadDatabases,
+  loadingComboBoxes,
+  setLoadingComboBoxes,
+  tableFieldsLoading,
 }: SelectorLoadDatabasesProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -42,6 +58,10 @@ export const SelectorLoadDatabases = ({
     }
   }, [loadDatabasesStatus]);
 
+  useEffect(() => {
+    setLoadingComboBoxes({ ...loadingComboBoxes, database: isLoading });
+  }, [isLoading]);
+
   return (
     <>
       {isLoading ? (
@@ -52,6 +72,9 @@ export const SelectorLoadDatabases = ({
           size="m"
           display="base"
           onClick={onClickRefreshDatabases}
+          isDisabled={
+            loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
+          }
         />
       )}
     </>
