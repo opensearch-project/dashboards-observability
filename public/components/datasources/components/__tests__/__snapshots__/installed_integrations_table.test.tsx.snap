@@ -2,6 +2,7 @@
 
 exports[`Installed Integrations Table test Renders the empty installed integrations table 1`] = `
 <InstalledIntegrationsTable
+  datasourceName="test"
   datasourceType="S3GLUE"
   integrations={Array []}
 >
@@ -928,6 +929,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
     }
   }
   closeFlyout={[Function]}
+  datasourceName="test"
   datasourceType="S3GLUE"
   setAvailableIntegrations={[Function]}
 >

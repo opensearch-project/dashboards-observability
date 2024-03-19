@@ -128,11 +128,13 @@ export const InstallIntegrationFlyout = ({
   setAvailableIntegrations,
   closeFlyout,
   datasourceType,
+  datasourceName,
 }: {
   availableIntegrations: AvailableIntegrationsList;
   setAvailableIntegrations: (value: AvailableIntegrationsList) => void;
   closeFlyout: () => void;
   datasourceType: DatasourceType;
+  datasourceName: string;
 }) => {
   useEffect(() => {
     if (!coreRefs.http) {
@@ -165,7 +167,14 @@ export const InstallIntegrationFlyout = ({
           integration={installingIntegration}
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
-          forceConnectionType={datasourceType === 'S3GLUE' ? 's3' : undefined}
+          forceConnection={
+            datasourceType === 'S3GLUE'
+              ? {
+                  name: datasourceName,
+                  type: 's3',
+                }
+              : undefined
+          }
         />
       )}
     </EuiFlyout>
@@ -175,9 +184,11 @@ export const InstallIntegrationFlyout = ({
 export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
+  datasourceName,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
+  datasourceName: string;
 }) => {
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
@@ -232,6 +243,7 @@ export const InstalledIntegrationsTable = ({
           setAvailableIntegrations={setAvailableIntegrations}
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
+          datasourceName={datasourceName}
         />
       ) : null}
     </>

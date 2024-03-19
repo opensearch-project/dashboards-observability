@@ -344,6 +344,7 @@ export function SetupIntegrationFormInputs({
           }}
           customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
           data-test-subj="data-source-name"
+          isDisabled={lockConnectionType}
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
@@ -614,17 +615,20 @@ export function SetupIntegrationForm({
   integration,
   renderType = 'page',
   unsetIntegration,
-  forceConnectionType,
+  forceConnection,
 }: {
   integration: string;
   renderType: 'page' | 'flyout';
   unsetIntegration?: () => void;
-  forceConnectionType?: string;
+  forceConnection?: {
+    name: string;
+    type: string;
+  };
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
-    connectionType: forceConnectionType ?? 'index',
-    connectionDataSource: '',
+    connectionType: forceConnection?.type ?? 'index',
+    connectionDataSource: forceConnection?.name ?? '',
     connectionLocation: '',
     checkpointLocation: '',
     connectionTableName: integration,
@@ -668,7 +672,7 @@ export function SetupIntegrationForm({
                 updateConfig={updateConfig}
                 integration={template}
                 setupCallout={setupCallout}
-                lockConnectionType={forceConnectionType !== undefined}
+                lockConnectionType={forceConnection !== undefined}
               />
             )}
           </EuiPageContentBody>
@@ -697,7 +701,7 @@ export function SetupIntegrationForm({
               updateConfig={updateConfig}
               integration={template}
               setupCallout={setupCallout}
-              lockConnectionType={forceConnectionType !== undefined}
+              lockConnectionType={forceConnection !== undefined}
             />
           )}
         </EuiFlyoutBody>

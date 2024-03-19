@@ -390,6 +390,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                     fullWidth={false}
                                     id="random_html_id"
                                     isClearable={true}
+                                    isDisabled={false}
                                     isLoading={true}
                                     onBlur={[Function]}
                                     onChange={[Function]}
@@ -426,6 +427,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                         hasSelectedOptions={true}
                                         id="random_html_id"
                                         inputRef={[Function]}
+                                        isDisabled={false}
                                         isListOpen={false}
                                         isLoading={true}
                                         noIcon={false}
@@ -467,7 +469,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             Object {
                                               "aria-label": "Open list of options",
                                               "data-test-subj": "comboBoxToggleListButton",
-                                              "disabled": undefined,
+                                              "disabled": false,
                                               "onClick": [Function],
                                               "ref": [Function],
                                               "side": "right",
@@ -506,6 +508,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                   aria-controls=""
                                                   className="euiComboBox__input"
                                                   data-test-subj="comboBoxSearchInput"
+                                                  disabled={false}
                                                   id="random_html_id"
                                                   injectStyles={true}
                                                   inputRef={[Function]}
@@ -533,6 +536,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                     <input
                                                       aria-controls=""
                                                       data-test-subj="comboBoxSearchInput"
+                                                      disabled={false}
                                                       id="random_html_id"
                                                       onBlur={[Function]}
                                                       onChange={[Function]}
@@ -574,7 +578,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                   Object {
                                                     "aria-label": "Open list of options",
                                                     "data-test-subj": "comboBoxToggleListButton",
-                                                    "disabled": undefined,
+                                                    "disabled": false,
                                                     "onClick": [Function],
                                                     "ref": [Function],
                                                     "side": "right",
@@ -643,6 +647,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                   <EuiFormControlLayoutCustomIcon
                                                     aria-label="Open list of options"
                                                     data-test-subj="comboBoxToggleListButton"
+                                                    disabled={false}
                                                     iconRef={[Function]}
                                                     onClick={[Function]}
                                                     size="m"
@@ -652,6 +657,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                                       aria-label="Open list of options"
                                                       className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
                                                       data-test-subj="comboBoxToggleListButton"
+                                                      disabled={false}
                                                       onClick={[Function]}
                                                       type="button"
                                                     >
