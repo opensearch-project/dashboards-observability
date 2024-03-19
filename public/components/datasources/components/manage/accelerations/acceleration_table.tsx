@@ -26,6 +26,7 @@ import {
   ACC_PANEL_DESC,
   getAccelerationName,
   AccelerationActionType,
+  CreateAccelerationFlyoutButton,
 } from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -149,18 +150,6 @@ export const AccelerationTable = ({
     );
   };
 
-  const CreateButton = () => {
-    return (
-      <>
-        <EuiButton onClick={() => renderCreateAccelerationFlyout(dataSourceName)} fill>
-          Create acceleration
-        </EuiButton>
-      </>
-    );
-  };
-
-  const localUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
-
   const AccelerationTableHeader = () => {
     return (
       <>
@@ -174,7 +163,10 @@ export const AccelerationTable = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
-                <CreateButton />
+                <CreateAccelerationFlyoutButton
+                  dataSourceName={dataSourceName}
+                  renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <RefreshButton data-test-subj="refreshButton" />
@@ -185,7 +177,7 @@ export const AccelerationTable = ({
                     {'Last updated'}
                   </EuiText>
                   <EuiText textAlign="right" color="subdued" size="xs">
-                    {localUpdatedTime}
+                    {updatedTime}
                   </EuiText>
                 </EuiFlexItem>
               )}

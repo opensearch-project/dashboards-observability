@@ -311,6 +311,65 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 </AssociatedObjectsRefreshButton>
               </div>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <CreateAccelerationFlyoutButton
+                  dataSourceName="mock_data_source"
+                  renderCreateAccelerationFlyout={[MockFunction]}
+                >
+                  <EuiButton
+                    fill={true}
+                    onClick={[Function]}
+                  >
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
+                      disabled={false}
+                      element="button"
+                      fill={true}
+                      isDisabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <button
+                        className="euiButton euiButton--primary euiButton--fill"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
+                        type="button"
+                      >
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              className="euiButton__text"
+                            >
+                              Create acceleration
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </CreateAccelerationFlyoutButton>
+              </div>
+            </EuiFlexItem>
           </div>
         </EuiFlexGroup>
       </AssociatedObjectsHeader>
@@ -319,9 +378,11 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
         />
       </EuiHorizontalRule>
-      <EuiSpacer>
+      <EuiSpacer
+        size="xs"
+      >
         <div
-          className="euiSpacer euiSpacer--l"
+          className="euiSpacer euiSpacer--xs"
         />
       </EuiSpacer>
       <EuiFlexGroup
@@ -331,10 +392,11 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
+            className="database-selector"
             grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+              className="euiFlexItem euiFlexItem--flexGrowZero database-selector"
             >
               <EuiSelectable
                 isPreFiltered={false}
@@ -652,11 +714,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "sortable": true,
                       },
                       Object {
-                        "field": "database",
-                        "name": "Database",
-                        "sortable": true,
-                      },
-                      Object {
                         "field": "type",
                         "name": "Type",
                         "render": [Function],
@@ -774,7 +831,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     Object {
                       "box": Object {
                         "incremental": true,
-                        "placeholder": "accelerations:skipping_index_1",
+                        "placeholder": "Search for objects",
                         "schema": Object {
                           "fields": Object {
                             "database": Object {
@@ -823,7 +880,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       box={
                         Object {
                           "incremental": true,
-                          "placeholder": "accelerations:skipping_index_1",
+                          "placeholder": "Search for objects",
                           "schema": Object {
                             "fields": Object {
                               "database": Object {
@@ -878,7 +935,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                 incremental={true}
                                 isInvalid={false}
                                 onSearch={[Function]}
-                                placeholder="accelerations:skipping_index_1"
+                                placeholder="Search for objects"
                                 query=""
                               >
                                 <EuiFieldSearch
@@ -892,7 +949,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                   isInvalid={false}
                                   isLoading={false}
                                   onSearch={[Function]}
-                                  placeholder="accelerations:skipping_index_1"
+                                  placeholder="Search for objects"
                                 >
                                   <EuiFormControlLayout
                                     compressed={false}
@@ -914,7 +971,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             className="euiFieldSearch euiFieldSearch--fullWidth"
                                             defaultValue=""
                                             onKeyUp={[Function]}
-                                            placeholder="accelerations:skipping_index_1"
+                                            placeholder="Search for objects"
                                             type="search"
                                           />
                                         </EuiValidatableControl>
@@ -1215,11 +1272,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "sortable": true,
                           },
                           Object {
-                            "field": "database",
-                            "name": "Database",
-                            "sortable": true,
-                          },
-                          Object {
                             "field": "type",
                             "name": "Type",
                             "render": [Function],
@@ -1392,21 +1444,14 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                             Object {
                                               "isSortAscending": undefined,
                                               "isSorted": false,
-                                              "key": "_data_s_database_1",
-                                              "name": "Database",
-                                              "onSort": [Function],
-                                            },
-                                            Object {
-                                              "isSortAscending": undefined,
-                                              "isSorted": false,
-                                              "key": "_data_s_type_2",
+                                              "key": "_data_s_type_1",
                                               "name": "Type",
                                               "onSort": [Function],
                                             },
                                             Object {
                                               "isSortAscending": undefined,
                                               "isSorted": false,
-                                              "key": "_data_s_accelerations_3",
+                                              "key": "_data_s_accelerations_2",
                                               "name": "Accelerations",
                                               "onSort": [Function],
                                             },
@@ -1640,74 +1685,16 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     </EuiTableHeaderCell>
                                     <EuiTableHeaderCell
                                       align="left"
-                                      data-test-subj="tableHeaderCell_database_1"
+                                      data-test-subj="tableHeaderCell_type_1"
                                       isSorted={false}
-                                      key="_data_h_database_1"
+                                      key="_data_h_type_1"
                                       onSort={[Function]}
                                     >
                                       <th
                                         aria-live="polite"
                                         aria-sort="none"
                                         className="euiTableHeaderCell"
-                                        data-test-subj="tableHeaderCell_database_1"
-                                        role="columnheader"
-                                        scope="col"
-                                        style={
-                                          Object {
-                                            "width": undefined,
-                                          }
-                                        }
-                                      >
-                                        <button
-                                          className="euiTableHeaderButton"
-                                          data-test-subj="tableHeaderSortButton"
-                                          onClick={[Function]}
-                                          type="button"
-                                        >
-                                          <CellContents
-                                            className="euiTableCellContent"
-                                            isSorted={false}
-                                            showSortMsg={true}
-                                          >
-                                            <span
-                                              className="euiTableCellContent"
-                                            >
-                                              <EuiInnerText>
-                                                <EuiI18n
-                                                  default="{innerText}; {description}"
-                                                  token="euiTableHeaderCell.titleTextWithDesc"
-                                                  values={
-                                                    Object {
-                                                      "description": undefined,
-                                                      "innerText": "Database",
-                                                    }
-                                                  }
-                                                >
-                                                  <span
-                                                    className="euiTableCellContent__text"
-                                                    title="Database"
-                                                  >
-                                                    Database
-                                                  </span>
-                                                </EuiI18n>
-                                              </EuiInnerText>
-                                            </span>
-                                          </CellContents>
-                                        </button>
-                                      </th>
-                                    </EuiTableHeaderCell>
-                                    <EuiTableHeaderCell
-                                      align="left"
-                                      data-test-subj="tableHeaderCell_type_2"
-                                      isSorted={false}
-                                      key="_data_h_type_2"
-                                      onSort={[Function]}
-                                    >
-                                      <th
-                                        aria-live="polite"
-                                        aria-sort="none"
-                                        className="euiTableHeaderCell"
-                                        data-test-subj="tableHeaderCell_type_2"
+                                        data-test-subj="tableHeaderCell_type_1"
                                         role="columnheader"
                                         scope="col"
                                         style={
@@ -1756,16 +1743,16 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     </EuiTableHeaderCell>
                                     <EuiTableHeaderCell
                                       align="left"
-                                      data-test-subj="tableHeaderCell_accelerations_3"
+                                      data-test-subj="tableHeaderCell_accelerations_2"
                                       isSorted={false}
-                                      key="_data_h_accelerations_3"
+                                      key="_data_h_accelerations_2"
                                       onSort={[Function]}
                                     >
                                       <th
                                         aria-live="polite"
                                         aria-sort="none"
                                         className="euiTableHeaderCell"
-                                        data-test-subj="tableHeaderCell_accelerations_3"
+                                        data-test-subj="tableHeaderCell_accelerations_2"
                                         role="columnheader"
                                         scope="col"
                                         style={
@@ -1814,7 +1801,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                     </EuiTableHeaderCell>
                                     <EuiTableHeaderCell
                                       align="right"
-                                      key="_actions_h_4"
+                                      key="_actions_h_3"
                                     >
                                       <th
                                         className="euiTableHeaderCell"
@@ -1919,43 +1906,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_0_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_0_2"
+                                        key="_data_column_type_0_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -1987,7 +1938,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_0_3"
+                                        key="_data_column_accelerations_0_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2020,7 +1971,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_0_4"
+                                        key="record_actions_0_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2220,43 +2171,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_1_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_1_2"
+                                        key="_data_column_type_1_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -2288,7 +2203,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_1_3"
+                                        key="_data_column_accelerations_1_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2321,7 +2236,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_1_4"
+                                        key="record_actions_1_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2521,43 +2436,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_2_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_2_2"
+                                        key="_data_column_type_2_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -2589,7 +2468,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_2_3"
+                                        key="_data_column_accelerations_2_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -2622,7 +2501,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_2_4"
+                                        key="record_actions_2_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -2926,43 +2805,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_3_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_3_2"
+                                        key="_data_column_type_3_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -2994,7 +2837,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_3_3"
+                                        key="_data_column_accelerations_3_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3027,7 +2870,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_3_4"
+                                        key="record_actions_3_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -3331,43 +3174,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_4_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_4_2"
+                                        key="_data_column_type_4_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -3399,7 +3206,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_4_3"
+                                        key="_data_column_accelerations_4_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3432,7 +3239,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_4_4"
+                                        key="record_actions_4_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -3736,43 +3543,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_5_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_5_2"
+                                        key="_data_column_type_5_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -3804,7 +3575,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_5_3"
+                                        key="_data_column_accelerations_5_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -3837,7 +3608,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_5_4"
+                                        key="record_actions_5_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -4141,43 +3912,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_database_6_1"
-                                        mobileOptions={
-                                          Object {
-                                            "header": "Database",
-                                            "render": undefined,
-                                          }
-                                        }
-                                        setScopeRow={false}
-                                        textOnly={true}
-                                      >
-                                        <td
-                                          className="euiTableRowCell"
-                                          style={
-                                            Object {
-                                              "width": undefined,
-                                            }
-                                          }
-                                        >
-                                          <div
-                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                          >
-                                            Database
-                                          </div>
-                                          <div
-                                            className="euiTableCellContent"
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                            >
-                                              mock_database_1
-                                            </span>
-                                          </div>
-                                        </td>
-                                      </EuiTableRowCell>
-                                      <EuiTableRowCell
-                                        align="left"
-                                        key="_data_column_type_6_2"
+                                        key="_data_column_type_6_1"
                                         mobileOptions={
                                           Object {
                                             "header": "Type",
@@ -4209,7 +3944,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       </EuiTableRowCell>
                                       <EuiTableRowCell
                                         align="left"
-                                        key="_data_column_accelerations_6_3"
+                                        key="_data_column_accelerations_6_2"
                                         mobileOptions={
                                           Object {
                                             "header": "Accelerations",
@@ -4242,7 +3977,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       <EuiTableRowCell
                                         align="right"
                                         hasActions={true}
-                                        key="record_actions_6_4"
+                                        key="record_actions_6_3"
                                         showOnHover={true}
                                         textOnly={false}
                                       >
@@ -5228,6 +4963,65 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                     </EuiButtonDisplay>
                   </EuiButton>
                 </AssociatedObjectsRefreshButton>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <CreateAccelerationFlyoutButton
+                  dataSourceName="mock_data_source"
+                  renderCreateAccelerationFlyout={[MockFunction]}
+                >
+                  <EuiButton
+                    fill={true}
+                    onClick={[Function]}
+                  >
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
+                      disabled={false}
+                      element="button"
+                      fill={true}
+                      isDisabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <button
+                        className="euiButton euiButton--primary euiButton--fill"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
+                        type="button"
+                      >
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              className="euiButton__text"
+                            >
+                              Create acceleration
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </CreateAccelerationFlyoutButton>
               </div>
             </EuiFlexItem>
           </div>
