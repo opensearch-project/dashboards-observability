@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { AccelerationHealth, AccelerationStatus } from '../utils/acceleration_utils';
 import { coreRefs } from '../../../../../../framework/core_refs';
 import { observabilityDataConnectionsID } from '../../../../../../../common/constants/shared';
@@ -58,6 +59,7 @@ export const AccelerationDetailsTab = ({
   ).toLocaleString();
   const checkpointName =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options?.checkpoint_location;
+
   const DetailComponent = ({
     title,
     description,
@@ -67,7 +69,11 @@ export const AccelerationDetailsTab = ({
   }) => (
     <EuiFlexItem>
       <EuiDescriptionList>
-        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+        <EuiDescriptionListTitle>
+          {i18n.translate(`accelerationDetailsTab.details.${title}`, {
+            defaultMessage: title,
+          })}
+        </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
       </EuiDescriptionList>
     </EuiFlexItem>
@@ -76,7 +82,11 @@ export const AccelerationDetailsTab = ({
   const TitleComponent = ({ title }: { title: string }) => (
     <>
       <EuiTitle size="s">
-        <h4>{title}</h4>
+        <h4>
+          {i18n.translate(`accelerationDetailsTab.titles.${title}`, {
+            defaultMessage: title,
+          })}
+        </h4>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
     </>
@@ -87,20 +97,36 @@ export const AccelerationDetailsTab = ({
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <DetailComponent
-          title="Status"
+          title={i18n.translate('accelerationDetailsTab.detailComponent.statusTitle', {
+            defaultMessage: 'Status',
+          })}
           description={<AccelerationStatus status={acceleration.status} />}
         />
         <DetailComponent
-          title="Acceleration Type"
+          title={i18n.translate('accelerationDetailsTab.detailComponent.accelerationTypeTitle', {
+            defaultMessage: 'Acceleration Type',
+          })}
           description={mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind}
         />
-        <DetailComponent title="Creation Date" description={creationDate} />
+        <DetailComponent
+          title={i18n.translate('accelerationDetailsTab.detailComponent.creationDateTitle', {
+            defaultMessage: 'Creation Date',
+          })}
+          description={creationDate}
+        />
       </EuiFlexGroup>
       <EuiSpacer />
-      <TitleComponent title="Data source details" />
+      <TitleComponent
+        title={i18n.translate('accelerationDetailsTab.titleComponent.dataSourceDetails', {
+          defaultMessage: 'Data source details',
+        })}
+      />
       <EuiFlexGroup direction="row">
         <DetailComponent
-          title="Data source connection"
+          title={i18n.translate(
+            'accelerationDetailsTab.detailComponent.dataSourceConnectionTitle',
+            { defaultMessage: 'Data source connection' }
+          )}
           description={
             <EuiLink
               onClick={() => {
@@ -115,29 +141,70 @@ export const AccelerationDetailsTab = ({
             </EuiLink>
           }
         />
-        <DetailComponent title="Database" description={acceleration.database} />
-        <DetailComponent title="Table" description={acceleration.table || '-'} />
+        <DetailComponent
+          title={i18n.translate('accelerationDetailsTab.detailComponent.databaseTitle', {
+            defaultMessage: 'Database',
+          })}
+          description={acceleration.database}
+        />
+        <DetailComponent
+          title={i18n.translate('accelerationDetailsTab.detailComponent.tableTitle', {
+            defaultMessage: 'Table',
+          })}
+          description={acceleration.table || '-'}
+        />
       </EuiFlexGroup>
       {!isSkippingIndex && (
         <>
           <EuiSpacer />
-          <TitleComponent title="Index details" />
+          <TitleComponent
+            title={i18n.translate('accelerationDetailsTab.titleComponent.indexDetails', {
+              defaultMessage: 'Index details',
+            })}
+          />
           <EuiFlexGroup>
-            <DetailComponent title="Index name" description={indexInfo?.data[0]?.index} />
             <DetailComponent
-              title="Health"
+              title={i18n.translate('accelerationDetailsTab.detailComponent.indexNameTitle', {
+                defaultMessage: 'Index name',
+              })}
+              description={indexInfo?.data[0]?.index}
+            />
+            <DetailComponent
+              title={i18n.translate('accelerationDetailsTab.detailComponent.healthTitle', {
+                defaultMessage: 'Health',
+              })}
               description={<AccelerationHealth health={indexInfo?.data[0]?.health} />}
             />
           </EuiFlexGroup>
         </>
       )}
       <EuiSpacer />
-      <TitleComponent title="Refresh Details" />
+      <TitleComponent
+        title={i18n.translate('accelerationDetailsTab.titleComponent.refreshDetails', {
+          defaultMessage: 'Refresh Details',
+        })}
+      />
       <EuiFlexGroup direction="row">
-        <DetailComponent title="Refresh type" description={refreshIntervalDescription} />
-        <DetailComponent title="Refresh time" description={refreshTime} />
+        <DetailComponent
+          title={i18n.translate('accelerationDetailsTab.detailComponent.refreshTypeTitle', {
+            defaultMessage: 'Refresh type',
+          })}
+          description={refreshIntervalDescription}
+        />
+        <DetailComponent
+          title={i18n.translate('accelerationDetailsTab.detailComponent.refreshTimeTitle', {
+            defaultMessage: 'Refresh time',
+          })}
+          description={refreshTime}
+        />
         {checkpointName && (
-          <DetailComponent title="Checkpoint location" description={checkpointName} />
+          <DetailComponent
+            title={i18n.translate(
+              'accelerationDetailsTab.detailComponent.checkpointLocationTitle',
+              { defaultMessage: 'Checkpoint location' }
+            )}
+            description={checkpointName}
+          />
         )}
       </EuiFlexGroup>
     </>
