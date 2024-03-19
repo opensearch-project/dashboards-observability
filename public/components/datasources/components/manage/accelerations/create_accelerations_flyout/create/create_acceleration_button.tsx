@@ -14,6 +14,10 @@ import { useDirectQuery } from '../../../../../../../framework/datasources/direc
 import { useToast } from '../../../../../../common/toast';
 import { accelerationQueryBuilder } from '../visual_editors/query_builder';
 import { formValidator, hasError } from './utils';
+import {
+  ACC_CREATE_SUBMIT_SUCCESS_MSG,
+  ACC_CREATE_SUBMIT_FAIL_MSG,
+} from '../../utils/acceleration_utils';
 
 interface CreateAccelerationButtonProps {
   accelerationFormData: CreateAccelerationForm;
@@ -51,14 +55,14 @@ export const CreateAccelerationButton = ({
     const status = directqueryLoadStatus.toLowerCase();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setIsLoading(false);
-      setToast('Create acceleration query submitted successfully!', 'success');
+      setToast(ACC_CREATE_SUBMIT_SUCCESS_MSG, 'success');
       resetFlyout();
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
       status === DirectQueryLoadingStatus.CANCELED
     ) {
       setIsLoading(false);
-      setToast('Create acceleration query failed', 'success');
+      setToast(ACC_CREATE_SUBMIT_FAIL_MSG, 'success');
     }
   }, [directqueryLoadStatus]);
 
