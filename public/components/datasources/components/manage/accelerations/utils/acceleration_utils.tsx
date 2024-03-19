@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiButton, EuiHealth } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
 import {
   redirectToExplorerOSIdx,
@@ -16,11 +17,18 @@ export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
 export const ACC_LOADING_MSG = 'Loading/Refreshing accelerations...';
+
 export const ACC_DELETE_MSG = (name: string) =>
   `Are you sure you want to delete ${name}? Any accelerations associated with this data source will also be deleted.This action cannot be undone.`;
-export const ACC_VACUUM_MSG =
-  'Vacuuming will remove the actual data from the disk since the associated index will be removed from the cluster. To confirm your action, type the name of the acceleration below.';
-export const ACC_SYNC_MSG = 'Syncing data may require querying all data. Do you want to continue?';
+
+export const ACC_VACUUM_MSG = i18n.translate('accelerationActionOverlay.vacuum.description', {
+  defaultMessage:
+    'Vacuuming will remove the actual data from the disk since the associated index will be removed from the cluster. To confirm your action, type the name of the acceleration below.',
+});
+
+export const ACC_SYNC_MSG = i18n.translate('accelerationActionOverlay.sync.description', {
+  defaultMessage: 'Syncing data may require querying all data. Do you want to continue?',
+});
 
 export type AccelerationActionType = 'delete' | 'vacuum' | 'sync';
 
