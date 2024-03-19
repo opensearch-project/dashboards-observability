@@ -289,7 +289,7 @@ exports[`Datagrid component Renders data grid component 1`] = `
                   "display": "Time (timestamp)",
                   "id": "timestamp",
                   "initialWidth": 200,
-                  "isSortable": true,
+                  "isSortable": undefined,
                   "schema": "datetime",
                 },
                 Object {
@@ -775,7 +775,7 @@ exports[`Datagrid component renders data grid with different timestamp 1`] = `
                   "display": "Time (utc_time)",
                   "id": "utc_time",
                   "initialWidth": 200,
-                  "isSortable": true,
+                  "isSortable": undefined,
                   "schema": "datetime",
                 },
                 Object {

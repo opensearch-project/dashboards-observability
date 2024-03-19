@@ -40,6 +40,7 @@ export interface DataGridProps {
   requestParams: any;
   startTime: string;
   endTime: string;
+  isDefaultDataSource: boolean;
   storedSelectedColumns: IField[];
   formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
   OuiDataGridProps?: Partial<EuiDataGridProps>;
@@ -59,6 +60,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    isDefaultDataSource,
     formatGridColumn = defaultFormatGrid,
     OuiDataGridProps,
   } = props;
@@ -100,6 +102,8 @@ export function DataGrid(props: DataGridProps) {
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
+    if (!isDefaultDataSource) return; // avoid adjusting query if using s3
+
     redoQuery(
       startTime,
       endTime,
@@ -110,6 +114,15 @@ export function DataGrid(props: DataGridProps) {
       fetchEvents,
       setData
     );
+  };
+
+  const findTrueIndex = (rowIndex: number) => {
+    // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
+    if (isDefaultDataSource) {
+      // modulo of row length, i.e. pos on current page
+      rowIndex = rowIndex % pageFields.current[1];
+    }
+    return rowIndex;
   };
 
   const columnNameTranslate = (name: string) => {
@@ -127,6 +140,7 @@ export function DataGrid(props: DataGridProps) {
           ...DEFAULT_TIMESTAMP_COLUMN,
           display: `${columnNameTranslate('Time')} (${timeStampField})`,
           id: timeStampField,
+          isSortable: isDefaultDataSource, // allow sorting for default ds, dont otherwise
         });
       } else if (name === '_source') {
         columns.push({
@@ -137,7 +151,7 @@ export function DataGrid(props: DataGridProps) {
         columns.push({
           id: name,
           display: name,
-          isSortable: true, // TODO: add functionality here based on type
+          isSortable: isDefaultDataSource,
         });
       }
     });
@@ -175,19 +189,19 @@ export function DataGrid(props: DataGridProps) {
               http={http}
               key={null}
               docId={'undefined'}
-              doc={rows[rowIndex % pageFields.current[1]]}
+              doc={data[findTrueIndex(rowIndex)]}
               selectedCols={explorerFields.queriedFields}
               timeStampField={timeStampField}
               explorerFields={explorerFields}
               pplService={pplService}
               rawQuery={rawQuery}
               onFlyoutOpen={() => {}}
-              dataGridColumns={dataGridColumns}
-              dataGridColumnVisibility={dataGridColumnVisibility}
+              dataGridColumns={dataGridColumns()}
+              dataGridColumnVisibility={dataGridColumnVisibility()}
               selectedIndex={rowIndex}
               sortingFields={sortingFields}
-              rowHeightsOptions={rowHeightsOptions}
-              rows={rows}
+              rowHeightsOptions={rowHeightsOptions()}
+              rows={data}
             />
           );
         },
@@ -198,7 +212,8 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const trueIndex = rowIndex % pageFields.current[1]; // modulo of row length, i.e. pos on current page
+    const trueIndex = findTrueIndex(rowIndex);
+
     if (trueIndex < data.length) {
       if (columnId === '_source') {
         return (
