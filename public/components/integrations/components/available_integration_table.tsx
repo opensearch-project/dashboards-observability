@@ -22,6 +22,7 @@ import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
+  const setInstallingIntegration = props.setInstallingIntegration;
 
   const toggleButtonsIcons = [
     {
@@ -56,14 +57,27 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Name',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          href={basePathLink(`/app/integrations#/available/${record.name}`)}
-        >
-          {_.truncate(record.displayName || record.name, { length: 100 })}
-        </EuiLink>
-      ),
+      render: (_value, record) => {
+        if (setInstallingIntegration) {
+          return (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              onClick={() => setInstallingIntegration(record.name)}
+            >
+              {_.truncate(record.displayName || record.name, { length: 100 })}
+            </EuiLink>
+          );
+        } else {
+          return (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              href={basePathLink(`/app/integrations#/available/${record.name}`)}
+            >
+              {_.truncate(record.displayName || record.name, { length: 100 })}
+            </EuiLink>
+          );
+        }
+      },
     },
     {
       field: 'description',
