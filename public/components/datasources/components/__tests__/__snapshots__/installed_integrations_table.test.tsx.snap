@@ -2,6 +2,7 @@
 
 exports[`Installed Integrations Table test Renders the empty installed integrations table 1`] = `
 <InstalledIntegrationsTable
+  datasourceName="test"
   datasourceType="S3GLUE"
   integrations={Array []}
 >
@@ -928,6 +929,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
     }
   }
   closeFlyout={[Function]}
+  datasourceName="test"
   datasourceType="S3GLUE"
   setAvailableIntegrations={[Function]}
 >
@@ -1147,14 +1149,13 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                 <div
                                   class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                 >
-                                  <a
+                                  <button
                                     class="euiLink euiLink--primary"
                                     data-test-subj="sample2IntegrationLink"
-                                    href="/app/integrations#/available/sample2"
-                                    rel="noreferrer"
+                                    type="button"
                                   >
                                     sample2
-                                  </a>
+                                  </button>
                                 </div>
                               </td>
                               <td
@@ -1636,14 +1637,13 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                         <div
                                           class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                         >
-                                          <a
+                                          <button
                                             class="euiLink euiLink--primary"
                                             data-test-subj="sample2IntegrationLink"
-                                            href="/app/integrations#/available/sample2"
-                                            rel="noreferrer"
+                                            type="button"
                                           >
                                             sample2
-                                          </a>
+                                          </button>
                                         </div>
                                       </td>
                                       <td
@@ -2057,14 +2057,13 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                           <div
                                             class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                           >
-                                            <a
+                                            <button
                                               class="euiLink euiLink--primary"
                                               data-test-subj="sample2IntegrationLink"
-                                              href="/app/integrations#/available/sample2"
-                                              rel="noreferrer"
+                                              type="button"
                                             >
                                               sample2
-                                            </a>
+                                            </button>
                                           </div>
                                         </td>
                                         <td
@@ -2478,14 +2477,13 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                             <div
                                               class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                             >
-                                              <a
+                                              <button
                                                 class="euiLink euiLink--primary"
                                                 data-test-subj="sample2IntegrationLink"
-                                                href="/app/integrations#/available/sample2"
-                                                rel="noreferrer"
+                                                type="button"
                                               >
                                                 sample2
-                                              </a>
+                                              </button>
                                             </div>
                                           </td>
                                           <td
@@ -2887,14 +2885,13 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                               <div
                                                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                               >
-                                                <a
+                                                <button
                                                   class="euiLink euiLink--primary"
                                                   data-test-subj="sample2IntegrationLink"
-                                                  href="/app/integrations#/available/sample2"
-                                                  rel="noreferrer"
+                                                  type="button"
                                                 >
                                                   sample2
-                                                </a>
+                                                </button>
                                               </div>
                                             </td>
                                             <td
@@ -3229,6 +3226,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                           }
                           isCardView={true}
                           loading={false}
+                          setInstallingIntegration={[Function]}
                         >
                           <EuiPageContent
                             id="availableIntegrationsArea"
@@ -3817,17 +3815,18 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                                             <EuiLink
                                                               className=""
                                                               data-test-subj="sample2IntegrationLink"
-                                                              href="/app/integrations#/available/sample2"
                                                               key=".0"
+                                                              onClick={[Function]}
                                                             >
-                                                              <a
+                                                              <button
                                                                 className="euiLink euiLink--primary"
                                                                 data-test-subj="sample2IntegrationLink"
-                                                                href="/app/integrations#/available/sample2"
-                                                                rel="noreferrer"
+                                                                disabled={false}
+                                                                onClick={[Function]}
+                                                                type="button"
                                                               >
                                                                 sample2
-                                                              </a>
+                                                              </button>
                                                             </EuiLink>
                                                           </div>
                                                         </td>

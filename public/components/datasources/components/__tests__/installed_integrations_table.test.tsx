@@ -30,7 +30,9 @@ describe('Installed Integrations Table test', () => {
   });
 
   it('Renders the empty installed integrations table', async () => {
-    const wrapper = mount(<InstalledIntegrationsTable integrations={[]} datasourceType="S3GLUE" />);
+    const wrapper = mount(
+      <InstalledIntegrationsTable integrations={[]} datasourceType="S3GLUE" datasourceName="test" />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -42,6 +44,7 @@ describe('Installed Integrations Table test', () => {
         setAvailableIntegrations={() => {}}
         closeFlyout={() => {}}
         datasourceType="S3GLUE"
+        datasourceName="test"
       />
     );
 

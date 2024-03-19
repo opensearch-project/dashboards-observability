@@ -41,9 +41,9 @@ export function NewDatasourceCardView() {
     return (
       <>
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
-          {datasources.map((i, v) => {
+          {datasources.map((i) => {
             return (
-              <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
+              <EuiFlexItem key={i.name} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   icon={i.displayIcon}
                   title={i.displayName}
