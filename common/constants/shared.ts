@@ -71,6 +71,7 @@ export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
+export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

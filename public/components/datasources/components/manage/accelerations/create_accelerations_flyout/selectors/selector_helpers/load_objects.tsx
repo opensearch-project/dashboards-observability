@@ -16,12 +16,28 @@ interface SelectorLoadDatabasesProps {
   dataSourceName: string;
   databaseName: string;
   loadTables: () => void;
+  loadingComboBoxes: {
+    dataSource: boolean;
+    database: boolean;
+    dataTable: boolean;
+  };
+  setLoadingComboBoxes: React.Dispatch<
+    React.SetStateAction<{
+      dataSource: boolean;
+      database: boolean;
+      dataTable: boolean;
+    }>
+  >;
+  tableFieldsLoading: boolean;
 }
 
 export const SelectorLoadObjects = ({
   dataSourceName,
   databaseName,
   loadTables,
+  loadingComboBoxes,
+  setLoadingComboBoxes,
+  tableFieldsLoading,
 }: SelectorLoadDatabasesProps) => {
   const { setToast } = useToast();
   const [isLoading, setIsLoading] = useState({
@@ -77,6 +93,10 @@ export const SelectorLoadObjects = ({
     }
   }, [loadAccelerationsStatus]);
 
+  useEffect(() => {
+    setLoadingComboBoxes({ ...loadingComboBoxes, dataTable: isEitherLoading });
+  }, [isEitherLoading]);
+
   return (
     <>
       {isEitherLoading ? (
@@ -87,6 +107,9 @@ export const SelectorLoadObjects = ({
           size="m"
           display="base"
           onClick={onClickRefreshDatabases}
+          isDisabled={
+            loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
+          }
         />
       )}
     </>

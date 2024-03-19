@@ -49,7 +49,7 @@ export const validateRefreshInterval = (
   refreshType: AccelerationRefreshType,
   refreshWindow: number
 ) => {
-  return refreshType !== 'auto' && refreshType !== 'manual' && refreshWindow < 1
+  return refreshType === 'autoInterval' && refreshWindow < 1
     ? ['refresh window should be greater than 0']
     : [];
 };

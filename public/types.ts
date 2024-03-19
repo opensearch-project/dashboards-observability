@@ -11,7 +11,12 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
-import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
+import {
+  AssociatedObject,
+  CachedAcceleration,
+  LoadCachehookOutput,
+} from '../common/types/data_connections';
+import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
@@ -41,12 +46,25 @@ export interface ObservabilityStart {
     datasourceName: string,
     handleRefresh?: () => void
   ) => void;
-  renderAssociatedObjectsDetailsFlyout: (
-    tableDetail: AssociatedObject,
-    datasourceName: string
+  renderAssociatedObjectsDetailsFlyout: ({
+    tableDetail,
+  }: {
+    tableDetail: AssociatedObject;
+  }) => void;
+  renderCreateAccelerationFlyout: (
+    dataSource: string,
+    databaseName?: string,
+    tableName?: string
   ) => void;
-  renderCreateAccelerationFlyout: (selectedDatasource: string) => void;
+  CatalogCacheManagerInstance: typeof CatalogCacheManager;
+  useLoadDatabasesToCacheHook: () => LoadCachehookOutput;
+  useLoadTablesToCacheHook: () => LoadCachehookOutput;
+  useLoadTableColumnsToCacheHook: () => LoadCachehookOutput;
+  useLoadAccelerationsToCacheHook: () => LoadCachehookOutput;
 }
+
+export type CatalogCacheManagerType = typeof CatalogCacheManager;
+export type LoadCachehookOutputType = LoadCachehookOutput;
 
 /**
  * Introduce a compile dependency on dashboards-assistant

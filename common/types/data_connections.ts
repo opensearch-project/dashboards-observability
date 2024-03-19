@@ -4,6 +4,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DirectQueryLoadingStatus } from './explorer';
 
 export type AccelerationStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -232,4 +233,10 @@ export interface CreateAccelerationForm {
   watermarkDelay: WatermarkDelayType;
   refreshIntervalOptions: RefreshIntervalType;
   formErrors: FormErrorsType;
+}
+
+export interface LoadCachehookOutput {
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
 }

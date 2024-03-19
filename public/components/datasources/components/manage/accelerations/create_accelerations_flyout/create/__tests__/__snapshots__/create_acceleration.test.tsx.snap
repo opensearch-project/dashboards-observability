@@ -814,7 +814,7 @@ Array [
                                   <span
                                     class="euiTableCellContent__text"
                                   >
-                                    No items found
+                                    Please add fields
                                   </span>
                                 </div>
                               </td>
@@ -824,31 +824,57 @@ Array [
                       </div>
                     </div>
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem"
                       >
-                        <button
-                          class="euiButton euiButton--primary euiButton--fill"
-                          type="button"
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
                         >
-                          <span
-                            class="euiButtonContent euiButton__content"
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            <span
-                              class="euiButton__text"
+                            <button
+                              class="euiButton euiButton--primary"
+                              type="button"
                             >
-                              Add fields
-                            </span>
-                          </span>
-                        </button>
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Add fields
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButton euiButton--danger"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Bulk delete
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <button
-                          class="euiButton euiButton--danger"
+                          class="euiButton euiButton--primary"
                           type="button"
                         >
                           <span
@@ -857,7 +883,7 @@ Array [
                             <span
                               class="euiButton__text"
                             >
-                              Bulk delete
+                              Generate
                             </span>
                           </span>
                         </button>
@@ -1188,36 +1214,7 @@ Array [
                               </div>
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
-                              >
-                                <button
-                                  class="euiButton euiButton--primary"
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                  >
-                                    <svg
-                                      aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                      focusable="false"
-                                      height="16"
-                                      role="img"
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                      />
-                                    </svg>
-                                    <span
-                                      class="euiButton__text"
-                                    >
-                                      Open in Query Workbench
-                                    </span>
-                                  </span>
-                                </button>
-                              </div>
+                              />
                             </div>
                             <div
                               class="euiSpacer euiSpacer--l"
@@ -1556,6 +1553,7 @@ Array [
                                         <input
                                           aria-controls=""
                                           data-test-subj="comboBoxSearchInput"
+                                          disabled={false}
                                           onBlur={[Function]}
                                           onChange={[Function]}
                                           onFocus={[Function]}
@@ -1590,6 +1588,7 @@ Array [
                                         aria-label="Open list of options"
                                         className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
                                         data-test-subj="comboBoxToggleListButton"
+                                        disabled={false}
                                         onClick={[Function]}
                                         type="button"
                                       >
@@ -1713,6 +1712,7 @@ Array [
                                         <input
                                           aria-controls=""
                                           data-test-subj="comboBoxSearchInput"
+                                          disabled={false}
                                           onBlur={[Function]}
                                           onChange={[Function]}
                                           onFocus={[Function]}
@@ -1747,6 +1747,7 @@ Array [
                                         aria-label="Open list of options"
                                         className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
                                         data-test-subj="comboBoxToggleListButton"
+                                        disabled={false}
                                         onClick={[Function]}
                                         type="button"
                                       >
@@ -2270,7 +2271,7 @@ Array [
                                       <span
                                         className="euiTableCellContent__text"
                                       >
-                                        No items found
+                                        Please add fields
                                       </span>
                                     </div>
                                   </td>
@@ -2280,57 +2281,93 @@ Array [
                           </div>
                         </div>,
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
-                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                            className="euiFlexItem"
                           >
-                            <button
-                              className="euiButton euiButton--primary euiButton--fill"
-                              disabled={false}
-                              onClick={[Function]}
-                              style={
-                                Object {
-                                  "minWidth": undefined,
-                                }
-                              }
-                              type="button"
+                            <div
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
                             >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
                               >
-                                <span
-                                  className="euiButton__text"
+                                <button
+                                  className="euiButton euiButton--primary"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
                                 >
-                                  Add fields
-                                </span>
-                              </span>
-                            </button>
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Add fields
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  className="euiButton euiButton--danger"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Bulk delete
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
                           </div>
                           <div
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            <button
-                              className="euiButton euiButton--danger"
-                              disabled={false}
-                              onClick={[Function]}
-                              style={
-                                Object {
-                                  "minWidth": undefined,
+                            Array [
+                              <button
+                                className="euiButton euiButton--primary"
+                                disabled={false}
+                                onClick={[Function]}
+                                style={
+                                  Object {
+                                    "minWidth": undefined,
+                                  }
                                 }
-                              }
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                                type="button"
                               >
                                 <span
-                                  className="euiButton__text"
+                                  className="euiButtonContent euiButton__content"
                                 >
-                                  Bulk delete
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Generate
+                                  </span>
                                 </span>
-                              </span>
-                            </button>
+                              </button>,
+                              "",
+                            ]
                           </div>
                         </div>,
                       ],
@@ -2691,43 +2728,7 @@ Array [
                               </div>
                               <div
                                 className="euiFlexItem euiFlexItem--flexGrowZero"
-                              >
-                                <button
-                                  className="euiButton euiButton--primary"
-                                  disabled={false}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
-                                  type="button"
-                                >
-                                  <span
-                                    className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                  >
-                                    <svg
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                      focusable="false"
-                                      height={16}
-                                      role="img"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width={16}
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                      />
-                                    </svg>
-                                    <span
-                                      className="euiButton__text"
-                                    >
-                                      Open in Query Workbench
-                                    </span>
-                                  </span>
-                                </button>
-                              </div>
+                              />
                             </div>
                             <div
                               className="euiSpacer euiSpacer--l"

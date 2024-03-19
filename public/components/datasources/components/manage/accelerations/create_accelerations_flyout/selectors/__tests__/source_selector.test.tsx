@@ -35,6 +35,7 @@ describe('Source selector components', () => {
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
         dataSourcesPreselected={false}
+        tableFieldsLoading={false}
       />
     );
     wrapper.update();
@@ -67,6 +68,7 @@ describe('Source selector components', () => {
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
         dataSourcesPreselected={true}
+        tableFieldsLoading={false}
       />
     );
     wrapper.update();
