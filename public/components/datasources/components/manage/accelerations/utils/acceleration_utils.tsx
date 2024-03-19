@@ -38,6 +38,14 @@ export const ACC_SYNC_MSG = i18n.translate('accelerationActionOverlay.sync.descr
   defaultMessage: 'Syncing data may require querying all data. Do you want to continue?',
 });
 
+export const ACC_CREATE_SUBMIT_SUCCESS_MSG = i18n.translate('acceleration.create.submitSuccess', {
+  defaultMessage: 'Create acceleration query submitted successfully!',
+});
+
+export const ACC_CREATE_SUBMIT_FAIL_MSG = i18n.translate('acceleration.create.submitFail', {
+  defaultMessage: 'Create acceleration query failed',
+});
+
 export const ACC_TABLE_ACTION_DESC = {
   discoverAction: i18n.translate('accelerationTable.actions.discover', {
     defaultMessage: 'Open in Discover',
