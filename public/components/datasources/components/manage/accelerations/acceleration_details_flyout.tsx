@@ -16,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import {
@@ -186,12 +187,16 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const accelerationDetailsTabs = [
     {
       id: 'details',
-      name: 'Details',
+      name: i18n.translate('accelerationDetailsFlyout.tabs.details', {
+        defaultMessage: 'Details',
+      }),
       disabled: false,
     },
     {
       id: 'schema',
-      name: 'Schema',
+      name: i18n.translate('accelerationDetailsFlyout.tabs.schema', {
+        defaultMessage: 'Schema',
+      }),
       disabled: false,
     },
   ];
