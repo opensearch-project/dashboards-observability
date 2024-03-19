@@ -203,7 +203,7 @@ export const AccelerationTable = ({
   const tableActions = [
     {
       name: 'Discover',
-      description: 'Open in Discover',
+      description: 'Query in Observability Logs',
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
