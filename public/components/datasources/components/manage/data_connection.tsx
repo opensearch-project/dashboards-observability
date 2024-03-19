@@ -232,6 +232,7 @@ export const DataConnection = (props: any) => {
         <InstalledIntegrationsTable
           integrations={dataSourceIntegrations}
           datasourceType={datasourceDetails.connector}
+          datasourceName={datasourceDetails.name}
         />
       ),
     },
