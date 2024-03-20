@@ -540,7 +540,7 @@ export function SetupBottomBar({
   setLoading,
   setSetupCallout,
   unsetIntegration,
-  onStartInstalling,
+  setIsInstalling,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
@@ -548,7 +548,7 @@ export function SetupBottomBar({
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
   unsetIntegration?: () => void;
-  onStartInstalling?: () => void;
+  setIsInstalling?: (isInstalling: boolean) => void;
 }) {
   // Drop-in replacement for setToast
   const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
@@ -590,10 +590,20 @@ export function SetupBottomBar({
           isLoading={loading}
           disabled={!isConfigValid(config, integration)}
           onClick={async () => {
-            if (onStartInstalling) {
-              onStartInstalling();
+            if (setIsInstalling) {
+              setIsInstalling(true);
+              await addIntegration({
+                integration,
+                config,
+                setLoading: (newLoading: boolean) => {
+                  setLoading(newLoading);
+                  setIsInstalling(newLoading);
+                },
+                setCalloutLikeToast,
+              });
+            } else {
+              await addIntegration({ integration, config, setLoading, setCalloutLikeToast });
             }
-            await addIntegration({ integration, config, setLoading, setCalloutLikeToast });
           }}
           data-test-subj="create-instance-button"
         >
@@ -621,7 +631,7 @@ export function SetupIntegrationForm({
   renderType = 'page',
   unsetIntegration,
   forceConnection,
-  onStartInstalling,
+  setIsInstalling,
 }: {
   integration: string;
   renderType: 'page' | 'flyout';
@@ -630,7 +640,7 @@ export function SetupIntegrationForm({
     name: string;
     type: string;
   };
-  onStartInstalling?: () => void;
+  setIsInstalling?: (isInstalling: boolean) => void;
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
@@ -692,7 +702,7 @@ export function SetupIntegrationForm({
             setLoading={setShowLoading}
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
-            onStartInstalling={onStartInstalling}
+            setIsInstalling={setIsInstalling}
           />
         </EuiBottomBar>
       </>
@@ -721,7 +731,7 @@ export function SetupIntegrationForm({
             setLoading={setShowLoading}
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
-            onStartInstalling={onStartInstalling}
+            setIsInstalling={setIsInstalling}
           />
         </EuiFlyoutFooter>
       </>

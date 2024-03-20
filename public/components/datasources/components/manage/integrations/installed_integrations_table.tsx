@@ -181,7 +181,7 @@ export const InstallIntegrationFlyout = ({
                 }
               : undefined
           }
-          onStartInstalling={() => setIsInstalling(true)}
+          setIsInstalling={setIsInstalling}
         />
       )}
     </EuiFlyout>
