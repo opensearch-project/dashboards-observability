@@ -124,18 +124,18 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
 };
 
 export const InstallIntegrationFlyout = ({
-  availableIntegrations,
-  setAvailableIntegrations,
   closeFlyout,
   datasourceType,
   datasourceName,
 }: {
-  availableIntegrations: AvailableIntegrationsList;
-  setAvailableIntegrations: (value: AvailableIntegrationsList) => void;
   closeFlyout: () => void;
   datasourceType: DatasourceType;
   datasourceName: string;
 }) => {
+  const [availableIntegrations, setAvailableIntegrations] = useState({
+    hits: [],
+  } as AvailableIntegrationsList);
+
   useEffect(() => {
     if (!coreRefs.http) {
       return;
@@ -205,10 +205,6 @@ export const InstalledIntegrationsTable = ({
   const [showAvailableFlyout, setShowAvailableFlyout] = useState(false);
   const toggleFlyout = () => setShowAvailableFlyout((prev) => !prev);
 
-  const [availableIntegrations, setAvailableIntegrations] = useState({
-    hits: [],
-  } as AvailableIntegrationsList);
-
   const integrationsTable = (
     <>
       <EuiTitle>
@@ -246,8 +242,6 @@ export const InstalledIntegrationsTable = ({
       </EuiPanel>
       {showAvailableFlyout ? (
         <InstallIntegrationFlyout
-          availableIntegrations={availableIntegrations}
-          setAvailableIntegrations={setAvailableIntegrations}
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
           datasourceName={datasourceName}
