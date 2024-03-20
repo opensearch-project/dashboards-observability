@@ -159,7 +159,7 @@ describe('AccelerationTable Component', () => {
     });
 
     const activeStatusRows = wrapper!.find('tr.euiTableRow').filterWhere((node) => {
-      return node.find('.euiFlexItem').someWhere((subNode) => subNode.text() === 'active');
+      return node.find('.euiFlexItem').someWhere((subNode) => subNode.text() === 'Active');
     });
 
     expect(activeStatusRows.length).toBe(
@@ -177,7 +177,7 @@ describe('AccelerationTable Component', () => {
     });
     wrapper!.update();
 
-    const expectedLocalizedTime = 'Thu, 14 Mar 2024 04:05:53';
+    const expectedLocalizedTime = '3/14/2024, 4:05:53 AM';
 
     expect(wrapper!.text()).toContain(expectedLocalizedTime);
   });

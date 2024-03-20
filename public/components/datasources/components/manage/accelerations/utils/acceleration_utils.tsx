@@ -28,6 +28,14 @@ export const getAccelerationName = (acceleration: CachedAcceleration) => {
   return acceleration.indexName || 'skipping_index';
 };
 
+export const getCapitalizedStatusColumnContent = (status: string) => {
+  return status
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export const getAccelerationFullPath = (acceleration: CachedAcceleration, dataSource: string) => {
   switch (acceleration.type) {
     case 'skipping':
@@ -94,24 +102,25 @@ export const CreateAccelerationFlyoutButton = ({
 };
 
 export const AccelerationStatus = ({ status }: { status: string }) => {
-  const label = status;
+  const capitalizedStatusColumn = getCapitalizedStatusColumnContent(status);
+
   let color;
 
-  switch (status) {
-    case 'active':
+  switch (capitalizedStatusColumn) {
+    case 'Active':
       color = 'success';
       break;
-    case 'refreshing':
+    case 'Refreshing':
       color = 'warning';
       break;
-    case 'deleted':
+    case 'Deleted':
       color = 'danger';
       break;
     default:
       color = 'subdued';
   }
 
-  return <EuiHealth color={color}>{label}</EuiHealth>;
+  return <EuiHealth color={color}>{capitalizedStatusColumn}</EuiHealth>;
 };
 
 export const AccelerationHealth = ({ health }: { health: string }) => {
