@@ -48,13 +48,13 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
 
   switch (actionType) {
     case 'vacuum':
-      title = `Vacuum acceleration ${displayIndexName} on ${displayFullPath}?`;
+      title = `Vacuum acceleration ${displayIndexName} on ${displayFullPath} ?`;
       description = ACC_VACUUM_MSG;
       confirmButtonText = 'Vacuum';
       confirmEnabled = confirmationInput === displayIndexName;
       break;
     case 'delete':
-      title = `Delete acceleration ${displayIndexName} on ${displayFullPath}?`;
+      title = `Delete acceleration ${displayIndexName} on ${displayFullPath} ?`;
       description = ACC_DELETE_MSG;
       confirmButtonText = 'Delete';
       break;
