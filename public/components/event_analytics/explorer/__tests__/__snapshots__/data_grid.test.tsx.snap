@@ -971,3 +971,630 @@ exports[`Datagrid component renders data grid with different timestamp 1`] = `
   </DataGrid>
 </Provider>
 `;
+
+exports[`Datagrid component renders data grid with no timestamp 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(Symbol.observable): [Function],
+    }
+  }
+>
+  <DataGrid
+    endTime="now"
+    explorerFields={
+      Object {
+        "availableFields": Array [
+          Object {
+            "name": "agent",
+            "type": "string",
+          },
+          Object {
+            "name": "bytes",
+            "type": "long",
+          },
+          Object {
+            "name": "clientip",
+            "type": "ip",
+          },
+          Object {
+            "name": "event",
+            "type": "struct",
+          },
+          Object {
+            "name": "extension",
+            "type": "string",
+          },
+          Object {
+            "name": "geo",
+            "type": "struct",
+          },
+          Object {
+            "name": "host",
+            "type": "string",
+          },
+          Object {
+            "name": "index",
+            "type": "string",
+          },
+          Object {
+            "name": "ip",
+            "type": "ip",
+          },
+          Object {
+            "name": "machine",
+            "type": "struct",
+          },
+          Object {
+            "name": "memory",
+            "type": "double",
+          },
+          Object {
+            "name": "message",
+            "type": "string",
+          },
+          Object {
+            "name": "phpmemory",
+            "type": "long",
+          },
+          Object {
+            "name": "referer",
+            "type": "string",
+          },
+          Object {
+            "name": "request",
+            "type": "string",
+          },
+          Object {
+            "name": "response",
+            "type": "string",
+          },
+          Object {
+            "name": "tags",
+            "type": "string",
+          },
+          Object {
+            "name": "timestamp",
+            "type": "timestamp",
+          },
+          Object {
+            "name": "url",
+            "type": "string",
+          },
+          Object {
+            "name": "utc_time",
+            "type": "timestamp",
+          },
+        ],
+        "queriedFields": Array [
+          Object {
+            "name": "double_per_ip_bytes",
+            "type": "long",
+          },
+          Object {
+            "name": "host",
+            "type": "text",
+          },
+          Object {
+            "name": "ip_count",
+            "type": "integer",
+          },
+          Object {
+            "name": "per_ip_bytes",
+            "type": "long",
+          },
+          Object {
+            "name": "resp_code",
+            "type": "text",
+          },
+          Object {
+            "name": "sum_bytes",
+            "type": "long",
+          },
+        ],
+        "selectedFields": Array [],
+        "unselectedFields": Array [],
+      }
+    }
+    http={
+      Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "clientBasePath": "",
+          "get": [Function],
+          "getBasePath": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      }
+    }
+    pplService={
+      PPLService {
+        "fetch": [Function],
+        "http": Object {
+          "addLoadingCountSource": [MockFunction],
+          "anonymousPaths": Object {
+            "isAnonymous": [MockFunction],
+            "register": [MockFunction],
+          },
+          "basePath": BasePath {
+            "basePath": "",
+            "clientBasePath": "",
+            "get": [Function],
+            "getBasePath": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+            "serverBasePath": "",
+          },
+          "delete": [MockFunction],
+          "fetch": [MockFunction],
+          "get": [MockFunction],
+          "getLoadingCount$": [MockFunction],
+          "head": [MockFunction],
+          "intercept": [MockFunction],
+          "options": [MockFunction],
+          "patch": [MockFunction],
+          "post": [MockFunction],
+          "put": [MockFunction],
+        },
+      }
+    }
+    rawQuery="source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')"
+    requestParams={
+      Object {
+        "tabId": "explorer-tab-_fbef9141-48eb-11ee-a60a-af33302cfb3c",
+      }
+    }
+    rows={
+      Array [
+        Object {
+          "AvgTicketPrice": 841.2656,
+          "Cancelled": "false",
+          "Carrier": "OpenSearch Dashboards Airlines",
+          "Dest": "Sydney Kingsford Smith International Airport",
+          "DestAirportID": "SYD",
+          "DestCityName": "Sydney",
+          "DestCountry": "AU",
+          "DestLocation": "{\\"lat\\":-33.94609833,\\"lon\\":151.177002}",
+          "DestRegion": "SE-BD",
+          "DestWeather": "Rain",
+          "DistanceKilometers": 16492.326,
+          "DistanceMiles": 10247.856,
+          "FlightDelay": "false",
+          "FlightDelayMin": 0,
+          "FlightDelayType": "No Delay",
+          "FlightNum": "9HY9SWR",
+          "FlightTimeHour": "17.179506930998397",
+          "FlightTimeMin": 1030.7704,
+          "Origin": "Frankfurt am Main Airport",
+          "OriginAirportID": "FRA",
+          "OriginCityName": "Frankfurt am Main",
+          "OriginCountry": "DE",
+          "OriginLocation": "{\\"lat\\":50.033333,\\"lon\\":8.570556}",
+          "OriginRegion": "DE-HE",
+          "OriginWeather": "Sunny",
+          "dayOfWeek": 0,
+          "timestamp": "2021-05-24 00:00:00",
+        },
+        Object {
+          "AvgTicketPrice": 882.98267,
+          "Cancelled": "false",
+          "Carrier": "Logstash Airways",
+          "Dest": "Venice Marco Polo Airport",
+          "DestAirportID": "VE05",
+          "DestCityName": "Venice",
+          "DestCountry": "IT",
+          "DestLocation": "{\\"lat\\":45.505299,\\"lon\\":12.3519}",
+          "DestRegion": "IT-34",
+          "DestWeather": "Sunny",
+          "DistanceKilometers": 8823.4,
+          "DistanceMiles": 5482.6064,
+          "FlightDelay": "false",
+          "FlightDelayMin": 0,
+          "FlightDelayType": "No Delay",
+          "FlightNum": "X98CCZO",
+          "FlightTimeHour": "7.73982468459836",
+          "FlightTimeMin": 464.3895,
+          "Origin": "Cape Town International Airport",
+          "OriginAirportID": "CPT",
+          "OriginCityName": "Cape Town",
+          "OriginCountry": "ZA",
+          "OriginLocation": "{\\"lat\\":-33.96480179,\\"lon\\":18.60169983}",
+          "OriginRegion": "SE-BD",
+          "OriginWeather": "Clear",
+          "dayOfWeek": 0,
+          "timestamp": "2021-05-24 18:27:00",
+        },
+      ]
+    }
+    startTime="now/y"
+    storedSelectedColumns={
+      Array [
+        Object {
+          "name": "_source",
+          "type": "string",
+        },
+      ]
+    }
+    timeStampField=""
+    totalHits={1390}
+  >
+    <EuiPanel
+      paddingSize="s"
+    >
+      <div
+        className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <HitsCounter
+          hits={1390}
+          onResetQuery={[Function]}
+          showResetButton={false}
+        >
+          <I18nProvider>
+            <IntlProvider
+              defaultLocale="en"
+              formats={
+                Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                }
+              }
+              locale="en"
+              messages={Object {}}
+              textComponent={Symbol(react.fragment)}
+            >
+              <PseudoLocaleWrapper>
+                <EuiFlexGroup
+                  alignItems="center"
+                  className="dscResultCount"
+                  gutterSize="s"
+                  justifyContent="center"
+                  responsive={false}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <strong
+                              data-test-subj="discoverQueryHits"
+                            >
+                              1,390
+                            </strong>
+                             
+                            <FormattedMessage
+                              defaultMessage="{hits, plural, one {hit} other {hits}}"
+                              id="discover.hitsPluralTitle"
+                              values={
+                                Object {
+                                  "hits": 1390,
+                                }
+                              }
+                            >
+                              hits
+                            </FormattedMessage>
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </PseudoLocaleWrapper>
+            </IntlProvider>
+          </I18nProvider>
+        </HitsCounter>
+        <EuiSpacer
+          size="s"
+        >
+          <div
+            className="euiSpacer euiSpacer--s"
+          />
+        </EuiSpacer>
+        <div
+          className="dscTable dscTableFixedScroll"
+        >
+          <EuiDataGrid
+            aria-labelledby="aria-labelledby"
+            columnVisibility={
+              Object {
+                "setVisibleColumns": [Function],
+                "visibleColumns": Array [
+                  "_source",
+                ],
+              }
+            }
+            columns={
+              Array [
+                Object {
+                  "display": "Source",
+                  "id": "_source",
+                  "isSortable": false,
+                  "schema": "_source",
+                },
+              ]
+            }
+            data-test-subj="docTable"
+            leadingControlColumns={
+              Array [
+                Object {
+                  "headerCellRender": [Function],
+                  "id": "inspectCollapseColumn",
+                  "rowCellRender": [Function],
+                  "width": 40,
+                },
+              ]
+            }
+            pagination={
+              Object {
+                "onChangeItemsPerPage": [Function],
+                "onChangePage": [Function],
+                "pageIndex": 0,
+                "pageSize": 100,
+                "pageSizeOptions": Array [
+                  25,
+                  50,
+                  100,
+                ],
+              }
+            }
+            renderCellValue={[Function]}
+            rowCount={1390}
+            rowHeightsOptions={
+              Object {
+                "defaultHeight": Object {
+                  "lineCount": 3,
+                },
+              }
+            }
+            sorting={
+              Object {
+                "columns": Array [],
+                "onSort": [Function],
+              }
+            }
+            toolbarVisibility={
+              Object {
+                "showColumnSelector": Object {
+                  "allowHide": false,
+                  "allowReorder": true,
+                },
+                "showFullScreenSelector": false,
+                "showStyleSelector": false,
+              }
+            }
+          >
+            <EuiFocusTrap
+              className="euiDataGrid__focusWrap"
+              clickOutsideDisables={false}
+              disabled={true}
+              noIsolation={true}
+              returnFocus={true}
+              scrollLock={false}
+            >
+              <ForwardRef
+                className="euiDataGrid__focusWrap"
+                enabled={false}
+                noIsolation={true}
+                onClickOutside={[Function]}
+                returnFocus={true}
+                scrollLock={false}
+              >
+                <ForwardRef
+                  className="euiDataGrid__focusWrap"
+                  enabled={false}
+                  noIsolation={true}
+                  onClickOutside={[Function]}
+                  returnFocus={true}
+                  scrollLock={false}
+                  sideCar={[Function]}
+                >
+                  <ForwardRef(FocusLockUI)
+                    as={
+                      Object {
+                        "$$typeof": Symbol(react.forward_ref),
+                        "classNames": Object {
+                          "fullWidth": "width-before-scroll-bar",
+                          "zeroRight": "right-scroll-bar-position",
+                        },
+                        "defaultProps": Object {
+                          "enabled": true,
+                          "inert": false,
+                          "removeScrollBar": true,
+                        },
+                        "render": [Function],
+                      }
+                    }
+                    autoFocus={true}
+                    className="euiDataGrid__focusWrap"
+                    crossFrame={true}
+                    disabled={true}
+                    lockProps={
+                      Object {
+                        "allowPinchZoom": undefined,
+                        "as": undefined,
+                        "enabled": false,
+                        "inert": undefined,
+                        "shards": undefined,
+                        "sideCar": [Function],
+                        "style": undefined,
+                      }
+                    }
+                    noFocusGuards={false}
+                    persistentFocus={false}
+                    returnFocus={true}
+                    sideCar={[Function]}
+                  >
+                    <div
+                      data-focus-guard={true}
+                      key="guard-first"
+                      style={
+                        Object {
+                          "height": "0px",
+                          "left": "1px",
+                          "overflow": "hidden",
+                          "padding": 0,
+                          "position": "fixed",
+                          "top": "1px",
+                          "width": "1px",
+                        }
+                      }
+                      tabIndex={-1}
+                    />
+                    <ForwardRef
+                      className="euiDataGrid__focusWrap"
+                      data-focus-lock-disabled="disabled"
+                      enabled={false}
+                      inert={false}
+                      onBlur={[Function]}
+                      onFocus={[Function]}
+                      removeScrollBar={true}
+                      sideCar={[Function]}
+                    >
+                      <div
+                        className="euiDataGrid__focusWrap"
+                        data-focus-lock-disabled="disabled"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        onScrollCapture={[Function]}
+                        onTouchMoveCapture={[Function]}
+                        onWheelCapture={[Function]}
+                      >
+                        <div
+                          className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+                          data-test-subj="docTable"
+                          onKeyDown={[Function]}
+                          style={
+                            Object {
+                              "height": undefined,
+                              "width": undefined,
+                            }
+                          }
+                        />
+                      </div>
+                    </ForwardRef>
+                    <div
+                      data-focus-guard={true}
+                      style={
+                        Object {
+                          "height": "0px",
+                          "left": "1px",
+                          "overflow": "hidden",
+                          "padding": 0,
+                          "position": "fixed",
+                          "top": "1px",
+                          "width": "1px",
+                        }
+                      }
+                      tabIndex={-1}
+                    />
+                  </ForwardRef(FocusLockUI)>
+                </ForwardRef>
+              </ForwardRef>
+            </EuiFocusTrap>
+          </EuiDataGrid>
+        </div>
+      </div>
+    </EuiPanel>
+  </DataGrid>
+</Provider>
+`;

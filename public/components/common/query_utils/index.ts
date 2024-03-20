@@ -347,6 +347,23 @@ export const composeFinalQuery = (
   });
 };
 
+export const composeFinalQueryWithoutTimestamp = (
+  curQuery: string,
+  appBaseQuery: string,
+  selectedPatternField?: string,
+  patternRegex?: string,
+  filteredPattern?: string
+) => {
+  let fullQuery = curQuery.includes(appBaseQuery) ? curQuery : buildQuery(appBaseQuery, curQuery);
+  if (isEmpty(fullQuery)) return '';
+
+  // if a pattern is selected as filter, build it into finalQuery
+  if (selectedPatternField && filteredPattern)
+    fullQuery = buildPatternsQuery(fullQuery, selectedPatternField, patternRegex, filteredPattern);
+
+  return fullQuery;
+};
+
 export const removeBacktick = (stringContainsBacktick: string) => {
   if (!stringContainsBacktick) return '';
   return stringContainsBacktick.replace(/`/g, '');

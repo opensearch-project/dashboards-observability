@@ -269,7 +269,6 @@ export const Explorer = ({
 
   const historyFromRedirection = createBrowserHistory();
   useEffect(() => {
-    console.log(historyFromRedirection.location.state);
     if (!historyFromRedirection.location.state) return;
     const {
       datasourceName,
@@ -298,6 +297,7 @@ export const Explorer = ({
           query: { [RAW_QUERY]: queryToRun },
         })
       );
+      setTempQuery(queryToRun);
     });
   }, []);
 
@@ -541,7 +541,7 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {(isDefaultDataSourceType || appLogEvents) && query[SELECTED_TIMESTAMP] !== '' && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
@@ -590,7 +590,7 @@ export const Explorer = ({
                 </EuiFlexItem>
               </>
             )}
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {(isDefaultDataSourceType || appLogEvents) && query[SELECTED_TIMESTAMP] !== '' && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
@@ -632,7 +632,7 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    {(countDistribution.data?.['count()'] || explorerData?.datarows?.length) && (
+                    {(explorerData?.datarows?.length || countDistribution.data?.['count()']) && (
                       <DataGrid
                         http={http}
                         pplService={pplService}
@@ -642,7 +642,8 @@ export const Explorer = ({
                         timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
-                          isDefaultDataSourceType || appLogEvents
+                          (isDefaultDataSourceType || appLogEvents) &&
+                          query[SELECTED_TIMESTAMP] !== ''
                             ? _.sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length

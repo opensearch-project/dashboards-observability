@@ -12,6 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiPanel,
   EuiDataGridProps,
+  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
@@ -28,6 +29,7 @@ import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
+import { HitsCounter } from '../hits_counter/hits_counter';
 
 export interface DataGridProps {
   http: HttpSetup;
@@ -68,9 +70,11 @@ export function DataGrid(props: DataGridProps) {
   });
 
   const selectedColumns =
-    explorerFields.selectedFields.length > 0
+    explorerFields.selectedFields.length > 0 // if any fields are selected use that, otherwise defaults
       ? explorerFields.selectedFields
-      : [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS];
+      : timeStampField && timeStampField !== '' // if theres a timestamp, include that, otherwise dont
+      ? [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS]
+      : DEFAULT_EMPTY_EXPLORER_FIELDS;
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
@@ -251,6 +255,12 @@ export function DataGrid(props: DataGridProps) {
 
   return (
     <EuiPanel paddingSize="s">
+      {timeStampField === '' && (
+        <>
+          <HitsCounter hits={totalHits} showResetButton={false} onResetQuery={() => {}} />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div className="dscTable dscTableFixedScroll">
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
