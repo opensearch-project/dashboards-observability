@@ -10,10 +10,7 @@ import {
   InstallIntegrationFlyout,
   InstalledIntegrationsTable,
 } from '../manage/integrations/installed_integrations_table';
-import {
-  TEST_AVAILABLE_INTEGRATIONS,
-  TEST_INTEGRATION_SEARCH_RESULTS,
-} from '../../../../../test/constants';
+import { TEST_INTEGRATION_SEARCH_RESULTS } from '../../../../../test/constants';
 
 describe('Installed Integrations Table test', () => {
   configure({ adapter: new Adapter() });
@@ -22,6 +19,7 @@ describe('Installed Integrations Table test', () => {
     const wrapper = mount(
       <InstalledIntegrationsTable
         integrations={TEST_INTEGRATION_SEARCH_RESULTS}
+        datasourceName="unknown"
         datasourceType="S3GLUE"
       />
     );
@@ -40,8 +38,6 @@ describe('Installed Integrations Table test', () => {
   it('Renders the installed integrations table flyout', async () => {
     const wrapper = mount(
       <InstallIntegrationFlyout
-        availableIntegrations={TEST_AVAILABLE_INTEGRATIONS}
-        setAvailableIntegrations={() => {}}
         closeFlyout={() => {}}
         datasourceType="S3GLUE"
         datasourceName="test"

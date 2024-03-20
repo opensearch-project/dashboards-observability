@@ -24,7 +24,6 @@ import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
   INTEGRATIONS_BASE,
-  observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
@@ -45,11 +44,14 @@ import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
 import { InactiveDataConnectionCallout } from './inactive_data_connection';
-import { InstalledIntegrationsTable } from './integrations/installed_integrations_table';
+import {
+  InstallIntegrationFlyout,
+  InstalledIntegrationsTable,
+} from './integrations/installed_integrations_table';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
-export const DataConnection = (props: any) => {
+export const DataConnection = (props: { dataSource: string }) => {
   const { dataSource } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
@@ -106,9 +108,17 @@ export const DataConnection = (props: any) => {
     findIntegrations();
   }, [http, datasourceDetails.name]);
 
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const onclickIntegrationsCard = () => {
-    application!.navigateToApp(observabilityIntegrationsID);
+    setShowIntegrationsFlyout(true);
   };
+  const integrationsFlyout = showIntegrationsFlyout ? (
+    <InstallIntegrationFlyout
+      closeFlyout={() => setShowIntegrationsFlyout(false)}
+      datasourceType={datasourceDetails.connector}
+      datasourceName={datasourceDetails.name}
+    />
+  ) : null;
 
   const onclickAccelerationsCard = () => {
     renderCreateAccelerationFlyout(dataSource);
@@ -200,6 +210,7 @@ export const DataConnection = (props: any) => {
       },
     ]);
     fetchSelectedDatasource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome, http]);
 
   const tabs = [
@@ -373,6 +384,8 @@ export const DataConnection = (props: any) => {
 
         <DatasourceOverview />
         <EuiSpacer />
+
+        {integrationsFlyout}
 
         {datasourceDetails.status !== 'ACTIVE' ? (
           <InactiveDataConnectionCallout
