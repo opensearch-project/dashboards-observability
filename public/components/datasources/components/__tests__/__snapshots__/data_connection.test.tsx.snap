@@ -341,7 +341,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         <span
                           class="euiButtonEmpty__text"
                         >
-                          Query in Discover
+                          Query in Observability Logs
                         </span>
                       </span>
                     </button>
