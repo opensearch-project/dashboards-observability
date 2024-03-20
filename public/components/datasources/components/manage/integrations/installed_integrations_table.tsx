@@ -154,7 +154,7 @@ export const InstallIntegrationFlyout = ({
   const [installingIntegration, setInstallingIntegration] = useState<string | null>(null);
 
   return (
-    <EuiFlyout onClose={closeFlyout}>
+    <EuiFlyout onClose={closeFlyout} hideCloseButton={installingIntegration !== null}>
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
