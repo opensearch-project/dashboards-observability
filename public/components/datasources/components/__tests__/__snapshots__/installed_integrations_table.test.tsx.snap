@@ -934,6 +934,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
   setAvailableIntegrations={[Function]}
 >
   <EuiFlyout
+    hideCloseButton={false}
     onClose={[Function]}
   >
     <OuiWindowEvent
