@@ -18,14 +18,12 @@ interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   initiateColumnLoad: (dataSource: string, database: string, dataTable: string) => void;
-  loading: boolean;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
   setAccelerationFormData,
   initiateColumnLoad,
-  loading,
 }: IndexTypeSelectorProps) => {
   const [value, setValue] = useState('skipping');
 
@@ -116,7 +114,6 @@ export const IndexTypeSelector = ({
           onChange={onChangeSupeSelect}
           itemLayoutAlign="top"
           hasDividers
-          isLoading={loading}
         />
       </EuiFormRow>
     </>
