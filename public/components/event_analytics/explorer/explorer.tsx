@@ -651,6 +651,9 @@ export const Explorer = ({
                         requestParams={requestParams}
                         startTime={startTime}
                         endTime={endTime}
+                        isDefaultDataSource={
+                          explorerSearchMeta.datasources[0].type === DEFAULT_DATA_SOURCE_TYPE
+                        }
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
