@@ -5046,34 +5046,10 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                   Add databases and tables to your data source or use Query Workbench
                 </p>
               </EuiText>
-              <EuiLink
-                external={true}
-                onClick={[Function]}
-              >
-                Learn more
-              </EuiLink>
             </React.Fragment>
-          }
-          button={
-            <EuiButton
-              iconSide="right"
-              iconType="popout"
-              onClick={[Function]}
-            >
-              Query Workbench
-            </EuiButton>
           }
         >
           <div
-            button={
-              <EuiButton
-                iconSide="right"
-                iconType="popout"
-                onClick={[Function]}
-              >
-                Query Workbench
-              </EuiButton>
-            }
             className="euiEmptyPrompt"
           >
             <EuiTextColor
@@ -5098,19 +5074,6 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                         </p>
                       </div>
                     </EuiText>
-                    <EuiLink
-                      external={true}
-                      onClick={[Function]}
-                    >
-                      <button
-                        className="euiLink euiLink--primary"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        Learn more
-                      </button>
-                    </EuiLink>
                   </div>
                 </EuiText>
               </span>

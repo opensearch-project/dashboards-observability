@@ -160,7 +160,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     if (datasource.name) {
       const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
       if (
-        datasourceCache.status === CachedDataSourceStatus.Empty &&
+        (datasourceCache.status === CachedDataSourceStatus.Empty ||
+          datasourceCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(databasesLoadStatus)
       ) {
         startLoadingDatabases(datasource.name);
@@ -209,7 +210,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         datasource.name
       );
       if (
-        databaseCache.status === CachedDataSourceStatus.Empty &&
+        (databaseCache.status === CachedDataSourceStatus.Empty ||
+          databaseCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(tablesLoadStatus)
       ) {
         startLoadingTables(datasource.name, selectedDatabase);
@@ -218,7 +220,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         setCachedTables(databaseCache.tables);
       }
       if (
-        (accelerationsCache.status === CachedDataSourceStatus.Empty || isRefreshing) &&
+        (accelerationsCache.status === CachedDataSourceStatus.Empty ||
+          accelerationsCache.status === CachedDataSourceStatus.Failed ||
+          isRefreshing) &&
         !isCatalogCacheFetching(accelerationsLoadStatus)
       ) {
         startLoadingAccelerations(datasource.name);
