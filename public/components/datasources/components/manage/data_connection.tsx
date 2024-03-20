@@ -176,7 +176,7 @@ export const DataConnection = (props: any) => {
             selectable={{
               onClick: onclickDiscoverCard,
               isDisabled: false,
-              children: 'Query in Discover',
+              children: 'Query in Observability Logs',
             }}
           />
         </EuiFlexItem>

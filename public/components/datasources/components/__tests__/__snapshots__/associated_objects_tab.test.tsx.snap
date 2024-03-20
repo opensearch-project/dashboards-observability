@@ -728,7 +728,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       Object {
                         "actions": Array [
                           Object {
-                            "description": "Discover this object",
+                            "description": "Query in Observability Logs",
                             "icon": "discoverApp",
                             "name": "Discover",
                             "onClick": [Function],
@@ -1286,7 +1286,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           Object {
                             "actions": Array [
                               Object {
-                                "description": "Discover this object",
+                                "description": "Query in Observability Logs",
                                 "icon": "discoverApp",
                                 "name": "Discover",
                                 "onClick": [Function],
@@ -1991,7 +1991,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2017,7 +2017,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2040,7 +2040,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_0_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -2256,7 +2256,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2282,7 +2282,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2305,7 +2305,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_1_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -2521,7 +2521,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2555,7 +2555,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2578,7 +2578,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_2_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -2890,7 +2890,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2924,7 +2924,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -2947,7 +2947,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_3_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -3259,7 +3259,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -3293,7 +3293,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -3316,7 +3316,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_4_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -3628,7 +3628,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -3662,7 +3662,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -3685,7 +3685,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_5_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
@@ -3997,7 +3997,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               actions={
                                                 Array [
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -4031,7 +4031,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               <DefaultItemAction
                                                 action={
                                                   Object {
-                                                    "description": "Discover this object",
+                                                    "description": "Query in Observability Logs",
                                                     "icon": "discoverApp",
                                                     "name": "Discover",
                                                     "onClick": [Function],
@@ -4054,7 +4054,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 key="item_action_6_0"
                                               >
                                                 <EuiToolTip
-                                                  content="Discover this object"
+                                                  content="Query in Observability Logs"
                                                   delay="long"
                                                   position="top"
                                                 >
