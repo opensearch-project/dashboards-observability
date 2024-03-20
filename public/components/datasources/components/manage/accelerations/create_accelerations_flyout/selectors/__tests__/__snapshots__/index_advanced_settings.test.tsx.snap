@@ -154,7 +154,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                 className="euiFormHelpText euiFormRow__text"
                 id="random_html_id-help-0"
               >
-                Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
               </div>
             </div>
           </div>,
