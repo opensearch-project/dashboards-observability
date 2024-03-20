@@ -202,7 +202,7 @@ export const AccelerationTable = ({
 
   const tableActions = [
     {
-      name: 'Discover',
+      name: 'Query Data',
       description: 'Query in Observability Logs',
       icon: 'discoverApp',
       type: 'icon',
