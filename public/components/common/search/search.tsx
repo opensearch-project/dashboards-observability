@@ -45,7 +45,7 @@ import {
   resetSummary,
   selectQueryAssistantSummarization,
 } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
-import { reset } from '../../event_analytics/redux/slices/query_result_slice';
+import { reset, selectQueryResult } from '../../event_analytics/redux/slices/query_result_slice';
 import {
   changeData,
   changeQuery,
@@ -123,6 +123,7 @@ export const Search = (props: any) => {
   } = props;
 
   const queryRedux = useSelector(selectQueries)[tabId];
+  const queryResults = useSelector(selectQueryResult)[tabId];
   const queryAssistantSummarization = useSelector(selectQueryAssistantSummarization)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
@@ -409,33 +410,35 @@ export const Search = (props: any) => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
-            <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-              {!isLiveTailOn && (
-                <DatePicker
-                  startTime={startTime}
-                  endTime={endTime}
-                  setStartTime={setStartTime}
-                  setEndTime={setEndTime}
-                  setIsOutputStale={setIsOutputStale}
-                  liveStreamChecked={props.liveStreamChecked}
-                  onLiveStreamChange={props.onLiveStreamChange}
-                  handleTimePickerChange={(tRange: string[]) => {
-                    // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
-                    setNeedsUpdate(
-                      !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
-                        !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
-                    );
-                    // keeps the time range change local, to be used when update pressed
-                    setStartTime(tRange[0]);
-                    setEndTime(tRange[1]);
-                  }}
-                  handleTimeRangePickerRefresh={() => {
-                    onQuerySearch(queryLang);
-                  }}
-                  isAppAnalytics={isAppAnalytics}
-                />
-              )}
-            </EuiFlexItem>
+            {!(queryRedux.selectedTimestamp === '' && queryResults?.datarows) && ( // index with no timestamp, dont show timepicker
+              <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+                {!isLiveTailOn && (
+                  <DatePicker
+                    startTime={startTime}
+                    endTime={endTime}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    setIsOutputStale={setIsOutputStale}
+                    liveStreamChecked={props.liveStreamChecked}
+                    onLiveStreamChange={props.onLiveStreamChange}
+                    handleTimePickerChange={(tRange: string[]) => {
+                      // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
+                      setNeedsUpdate(
+                        !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
+                          !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
+                      );
+                      // keeps the time range change local, to be used when update pressed
+                      setStartTime(tRange[0]);
+                      setEndTime(tRange[1]);
+                    }}
+                    handleTimeRangePickerRefresh={() => {
+                      onQuerySearch(queryLang);
+                    }}
+                    isAppAnalytics={isAppAnalytics}
+                  />
+                )}
+              </EuiFlexItem>
+            )}
             {!showQueryArea && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
