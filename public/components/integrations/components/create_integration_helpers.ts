@@ -283,7 +283,8 @@ export async function addIntegrationRequest(
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
   dataSource?: string,
-  workflows?: string[]
+  workflows?: string[],
+  skipRedirect?: boolean
 ): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
@@ -303,7 +304,9 @@ export async function addIntegrationRequest(
     })
     .then((res) => {
       setToast(`${name} integration successfully added!`, 'success');
-      window.location.hash = `#/installed/${res.data?.id}`;
+      if (!skipRedirect) {
+        window.location.hash = `#/installed/${res.data?.id}`;
+      }
       return true;
     })
     .catch((err) => {
