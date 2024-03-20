@@ -152,9 +152,15 @@ export const InstallIntegrationFlyout = ({
   };
 
   const [installingIntegration, setInstallingIntegration] = useState<string | null>(null);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const maybeCloseFlyout = () => {
+    if (!isInstalling) {
+      closeFlyout();
+    }
+  };
 
   return (
-    <EuiFlyout onClose={closeFlyout} hideCloseButton={installingIntegration !== null}>
+    <EuiFlyout onClose={maybeCloseFlyout} hideCloseButton={isInstalling}>
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
@@ -175,6 +181,7 @@ export const InstallIntegrationFlyout = ({
                 }
               : undefined
           }
+          onStartInstalling={() => setIsInstalling(true)}
         />
       )}
     </EuiFlyout>

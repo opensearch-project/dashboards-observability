@@ -540,6 +540,7 @@ export function SetupBottomBar({
   setLoading,
   setSetupCallout,
   unsetIntegration,
+  onStartInstalling,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
@@ -547,6 +548,7 @@ export function SetupBottomBar({
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
   unsetIntegration?: () => void;
+  onStartInstalling?: () => void;
 }) {
   // Drop-in replacement for setToast
   const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
@@ -587,9 +589,12 @@ export function SetupBottomBar({
           iconSide="right"
           isLoading={loading}
           disabled={!isConfigValid(config, integration)}
-          onClick={async () =>
-            addIntegration({ integration, config, setLoading, setCalloutLikeToast })
-          }
+          onClick={async () => {
+            if (onStartInstalling) {
+              onStartInstalling();
+            }
+            await addIntegration({ integration, config, setLoading, setCalloutLikeToast });
+          }}
           data-test-subj="create-instance-button"
         >
           Add Integration
@@ -616,6 +621,7 @@ export function SetupIntegrationForm({
   renderType = 'page',
   unsetIntegration,
   forceConnection,
+  onStartInstalling,
 }: {
   integration: string;
   renderType: 'page' | 'flyout';
@@ -624,6 +630,7 @@ export function SetupIntegrationForm({
     name: string;
     type: string;
   };
+  onStartInstalling?: () => void;
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
@@ -685,6 +692,7 @@ export function SetupIntegrationForm({
             setLoading={setShowLoading}
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
+            onStartInstalling={onStartInstalling}
           />
         </EuiBottomBar>
       </>
@@ -713,6 +721,7 @@ export function SetupIntegrationForm({
             setLoading={setShowLoading}
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
+            onStartInstalling={onStartInstalling}
           />
         </EuiFlyoutFooter>
       </>
