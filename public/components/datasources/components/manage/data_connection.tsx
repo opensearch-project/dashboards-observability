@@ -35,6 +35,7 @@ import {
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
+  useLoadTableColumnsToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
 import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
@@ -72,6 +73,11 @@ export const DataConnection = (props: any) => {
     loadStatus: accelerationsLoadStatus,
     startLoading: startLoadingAccelerations,
   } = useLoadAccelerationsToCache();
+  const {
+    loadStatus: tableColumnsLoadStatus,
+    startLoading: startLoadingTableColumns,
+    stopLoading: stopLoadingTableColumns,
+  } = useLoadTableColumnsToCache();
 
   const cacheLoadingHooks = {
     databasesLoadStatus,
@@ -80,6 +86,9 @@ export const DataConnection = (props: any) => {
     startLoadingTables,
     accelerationsLoadStatus,
     startLoadingAccelerations,
+    tableColumnsLoadStatus,
+    startLoadingTableColumns,
+    stopLoadingTableColumns,
   };
 
   const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
@@ -111,7 +120,12 @@ export const DataConnection = (props: any) => {
   };
 
   const onclickAccelerationsCard = () => {
-    renderCreateAccelerationFlyout(dataSource);
+    renderCreateAccelerationFlyout(
+      dataSource,
+      tableColumnsLoadStatus,
+      startLoadingTableColumns,
+      stopLoadingTableColumns
+    );
   };
 
   const onclickDiscoverCard = () => {

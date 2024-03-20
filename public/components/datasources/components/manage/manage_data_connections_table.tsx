@@ -34,6 +34,7 @@ import S3Logo from '../../icons/s3-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
+import { useLoadTableColumnsToCache } from '../../../../../public/framework/catalog_cache/cache_loader';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -50,6 +51,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const { loadStatus, startLoading, stopLoading } = useLoadTableColumnsToCache();
 
   const deleteConnection = (connectionName: string) => {
     http!
@@ -137,7 +139,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
       onClick: (datasource: DataConnection) => {
-        renderCreateAccelerationFlyout(datasource.name);
+        renderCreateAccelerationFlyout(datasource.name, loadStatus, startLoading, stopLoading);
       },
       'data-test-subj': 'action-accelerate',
     },

@@ -11,6 +11,7 @@ import {
   redirectToExplorerWithDataSrc,
 } from '../../associated_objects/utils/associated_objects_tab_utils';
 import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
+import { DirectQueryLoadingStatus } from '../../../../../../../common/types/explorer';
 
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
@@ -80,13 +81,29 @@ export const generateAccelerationOperationQuery = (
 export const CreateAccelerationFlyoutButton = ({
   dataSourceName,
   renderCreateAccelerationFlyout,
+  loadStatus,
+  startLoading,
+  stopLoading,
 }: {
   dataSourceName: string;
-  renderCreateAccelerationFlyout: (dataSourceName: string) => void;
+  renderCreateAccelerationFlyout: (
+    dataSourceName: string,
+    loadStatus: DirectQueryLoadingStatus,
+    startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+    stopLoading: () => void
+  ) => void;
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
 }) => {
   return (
     <>
-      <EuiButton onClick={() => renderCreateAccelerationFlyout(dataSourceName)} fill>
+      <EuiButton
+        onClick={() =>
+          renderCreateAccelerationFlyout(dataSourceName, loadStatus, startLoading, stopLoading)
+        }
+        fill
+      >
         Create acceleration
       </EuiButton>
     </>

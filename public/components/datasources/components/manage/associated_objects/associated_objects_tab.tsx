@@ -72,7 +72,16 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     startLoadingTables,
     accelerationsLoadStatus,
     startLoadingAccelerations,
+    tableColumnsLoadStatus,
+    startLoadingTableColumns,
+    stopLoadingTableColumns,
   } = cacheLoadingHooks;
+
+  // const {
+  //   loadStatus: tableColumnsLoadStatus,
+  //   startLoading: startLoadingTableColumns,
+  //   stopLoading: stopLoadingTableColumns,
+  // } = useLoadTableColumnsToCache();
 
   let lastChecked: boolean;
   if (selectedDatabase !== '') {
@@ -149,6 +158,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <CreateAccelerationFlyoutButton
             dataSourceName={datasource.name}
             renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+            loadStatus={tableColumnsLoadStatus}
+            startLoading={startLoadingTableColumns}
+            stopLoading={stopLoadingTableColumns}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -34,6 +34,7 @@ import {
   ACCELERATION_INDEX_TYPES,
   DATA_SOURCE_TYPES,
 } from '../../../../../../../common/constants/data_sources';
+import { useLoadTableColumnsToCache } from '../../../../../../../public/framework/catalog_cache/cache_loader';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -58,6 +59,8 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
+  const { loadStatus, startLoading, stopLoading } = useLoadTableColumnsToCache();
+
   const columns = [
     {
       field: 'name',
@@ -70,7 +73,13 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         <EuiLink
           onClick={() => {
             if (item.type === 'table') {
-              renderAssociatedObjectsDetailsFlyout(item, datasourceName);
+              renderAssociatedObjectsDetailsFlyout(
+                item,
+                datasourceName,
+                loadStatus,
+                startLoading,
+                stopLoading
+              );
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
               if (acceleration) {
@@ -118,7 +127,13 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         return (
           <EuiButtonEmpty
             onClick={() => {
-              renderAssociatedObjectsDetailsFlyout(obj, datasourceName);
+              renderAssociatedObjectsDetailsFlyout(
+                obj,
+                datasourceName,
+                loadStatus,
+                startLoading,
+                stopLoading
+              );
             }}
             size="xs"
           >
@@ -175,7 +190,14 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           icon: 'bolt',
           available: (item: AssociatedObject) => item.type === 'table',
           onClick: (item: AssociatedObject) =>
-            renderCreateAccelerationFlyout(datasourceName, item.database, item.name),
+            renderCreateAccelerationFlyout(
+              datasourceName,
+              loadStatus,
+              startLoading,
+              stopLoading,
+              item.database,
+              item.name
+            ),
         },
       ],
     },

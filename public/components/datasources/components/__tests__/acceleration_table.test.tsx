@@ -76,6 +76,7 @@ jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
     loadStatus: 'success',
     startLoading: jest.fn(),
   })),
+  useLoadTableColumnsToCache: jest.fn(() => jest.fn()),
 }));
 
 jest.mock('../../../../plugin', () => ({
@@ -91,6 +92,9 @@ describe('AccelerationTable Component', () => {
     tablesLoadStatus: DirectQueryLoadingStatus.INITIAL,
     accelerationsLoadStatus: DirectQueryLoadingStatus.INITIAL,
     startLoadingAccelerations: jest.fn(),
+    tableColumnsLoadStatus: DirectQueryLoadingStatus.INITIAL,
+    startLoadingTableColumns: jest.fn(),
+    stopLoadingTableColumns: jest.fn(),
   };
 
   it('renders without crashing', () => {

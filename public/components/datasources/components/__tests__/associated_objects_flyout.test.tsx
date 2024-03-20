@@ -11,6 +11,7 @@ import * as plugin from '../../../../plugin';
 import { act } from '@testing-library/react';
 import { mockAssociatedObjects } from '../../../../../test/datasources';
 import { getAccelerationName } from '../manage/accelerations/utils/acceleration_utils';
+import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 
 configure({ adapter: new Adapter() });
 
@@ -22,6 +23,9 @@ jest.mock('../../../../plugin', () => ({
 
 describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
   const mockTableDetail = mockAssociatedObjects[0];
+  const loadStatus = DirectQueryLoadingStatus.INITIAL;
+  const startLoading = jest.fn();
+  const stopLoading = jest.fn();
 
   beforeEach(() => {
     plugin.getRenderAccelerationDetailsFlyout.mockClear();
@@ -29,7 +33,13 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
 
   it('renders acceleration details correctly and triggers flyout on click', () => {
     const wrapper = mount(
-      <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
+      <AssociatedObjectsDetailsFlyout
+        tableDetail={mockTableDetail}
+        datasourceName="flint_s3"
+        loadStatus={loadStatus}
+        startLoading={startLoading}
+        stopLoading={stopLoading}
+      />
     );
     expect(wrapper.find('EuiInMemoryTable').at(0).find('EuiLink').length).toBeGreaterThan(0);
 
@@ -51,6 +61,9 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
       <AssociatedObjectsDetailsFlyout
         tableDetail={mockDetailNoAccelerations}
         datasourceName="flint_s3"
+        loadStatus={loadStatus}
+        startLoading={startLoading}
+        stopLoading={stopLoading}
       />
     );
 
@@ -62,7 +75,13 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
 
   it('renders schema table correctly with column data', () => {
     const wrapper = mount(
-      <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
+      <AssociatedObjectsDetailsFlyout
+        tableDetail={mockTableDetail}
+        datasourceName="flint_s3"
+        loadStatus={loadStatus}
+        startLoading={startLoading}
+        stopLoading={stopLoading}
+      />
     );
 
     expect(wrapper.find('EuiInMemoryTable').at(1).exists()).toBe(true);
@@ -73,7 +92,13 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
 
   it('triggers details flyout on acceleration link click', async () => {
     const wrapper = mount(
-      <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
+      <AssociatedObjectsDetailsFlyout
+        tableDetail={mockTableDetail}
+        datasourceName="flint_s3"
+        loadStatus={loadStatus}
+        startLoading={startLoading}
+        stopLoading={stopLoading}
+      />
     );
 
     await act(async () => {

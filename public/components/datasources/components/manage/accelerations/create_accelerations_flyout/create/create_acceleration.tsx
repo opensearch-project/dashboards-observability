@@ -25,7 +25,6 @@ import {
   CreateAccelerationForm,
 } from '../../../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
-import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../../../../../framework/core_refs';
 import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
@@ -41,6 +40,9 @@ import { hasError } from './utils';
 export interface CreateAccelerationProps {
   selectedDatasource: string;
   resetFlyout: () => void;
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
   databaseName?: string;
   tableName?: string;
 }
@@ -48,9 +50,13 @@ export interface CreateAccelerationProps {
 export const CreateAcceleration = ({
   selectedDatasource,
   resetFlyout,
+  loadStatus,
+  startLoading,
+  stopLoading,
   databaseName,
   tableName,
 }: CreateAccelerationProps) => {
+  console.log(loadStatus);
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
@@ -97,11 +103,6 @@ export const CreateAcceleration = ({
     },
   });
   const [tableFieldsLoading, setTableFieldsLoading] = useState(false);
-  const {
-    loadStatus,
-    startLoading,
-    stopLoading: stopLoadingTableFields,
-  } = useLoadTableColumnsToCache();
 
   const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
     const idPrefix = htmlIdGenerator()();
@@ -132,7 +133,7 @@ export const CreateAcceleration = ({
         },
       },
     });
-    stopLoadingTableFields();
+    stopLoading();
     if (dataTable !== '') {
       setTableFieldsLoading(true);
       const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
@@ -176,7 +177,7 @@ export const CreateAcceleration = ({
 
   useEffect(() => {
     return () => {
-      stopLoadingTableFields();
+      stopLoading();
     };
   }, []);
 

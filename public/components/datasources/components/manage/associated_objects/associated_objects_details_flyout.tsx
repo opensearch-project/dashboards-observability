@@ -45,13 +45,15 @@ import {
   CREATE_ACCELERATION_DESCRIPTION,
 } from '../associated_objects/utils/associated_objects_tab_utils';
 import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
-import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
   datasourceName: string;
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
   resetFlyout: () => void;
   handleRefresh?: () => void;
 }
@@ -59,15 +61,16 @@ export interface AssociatedObjectsFlyoutProps {
 export const AssociatedObjectsDetailsFlyout = ({
   tableDetail,
   datasourceName,
+  loadStatus,
+  startLoading,
+  stopLoading,
   resetFlyout,
   handleRefresh,
 }: AssociatedObjectsFlyoutProps) => {
-  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
   const [schemaData, setSchemaData] = useState<any>([]);
 
   const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
     return (
       <EuiButtonEmpty
         onClick={() => {
@@ -90,7 +93,14 @@ export const AssociatedObjectsDetailsFlyout = ({
     return (
       <EuiButtonEmpty
         onClick={() =>
-          renderCreateAccelerationFlyout(datasourceName, tableDetail.database, tableDetail.name)
+          renderCreateAccelerationFlyout(
+            datasourceName,
+            loadStatus,
+            startLoading,
+            stopLoading,
+            tableDetail.database,
+            tableDetail.name
+          )
         }
       >
         <EuiIcon type={'bolt'} size="m" />
@@ -143,7 +153,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       name: 'Name',
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
-        const name = getAccelerationName(item, datasourceName);
+        const name = getAccelerationName(item);
         return (
           <EuiLink
             onClick={() => renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh)}
@@ -185,7 +195,14 @@ export const AssociatedObjectsDetailsFlyout = ({
           color="primary"
           fill
           onClick={() =>
-            renderCreateAccelerationFlyout(datasourceName, tableDetail.database, tableDetail.name)
+            renderCreateAccelerationFlyout(
+              datasourceName,
+              loadStatus,
+              startLoading,
+              stopLoading,
+              tableDetail.database,
+              tableDetail.name
+            )
           }
           iconType="popout"
           iconSide="left"
@@ -222,7 +239,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   }, []);
 
   useEffect(() => {
-    if (loadStatus.toLowerCase() === DirectQueryLoadingStatus.SUCCESS) {
+    if (loadStatus === DirectQueryLoadingStatus.SUCCESS) {
       const columns = CatalogCacheManager.getTable(
         datasourceName,
         tableDetail.database,
@@ -241,6 +258,10 @@ export const AssociatedObjectsDetailsFlyout = ({
       }))
     );
   }, [tableColumns]);
+
+  useEffect(() => {
+    stopLoading();
+  }, []);
 
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 

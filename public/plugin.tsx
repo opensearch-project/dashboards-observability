@@ -94,6 +94,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { DirectQueryLoadingStatus } from '../common/types/explorer';
 
 interface PublicConfig {
   query_assist: {
@@ -114,16 +115,29 @@ export const [
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<(tableDetail: AssociatedObject, datasourceName: string) => void>(
-  'renderAssociatedObjectsDetailsFlyout'
-);
+] = createGetterSetter<
+  (
+    tableDetail: AssociatedObject,
+    datasourceName: string,
+    loadStatus: DirectQueryLoadingStatus,
+    startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+    stopLoading: () => void
+  ) => void
+>('renderAssociatedObjectsDetailsFlyout');
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(dataSource: string, databaseName?: string, tableName?: string) => void>(
-  'renderCreateAccelerationFlyout'
-);
+] = createGetterSetter<
+  (
+    dataSource: string,
+    loadStatus: DirectQueryLoadingStatus,
+    startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+    stopLoading: () => void,
+    databaseName?: string,
+    tableName?: string
+  ) => void
+>('renderCreateAccelerationFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -421,13 +435,19 @@ export class ObservabilityPlugin
 
     const renderAssociatedObjectsDetailsFlyout = (
       tableDetail: AssociatedObject,
-      datasourceName: string
+      datasourceName: string,
+      loadStatus: DirectQueryLoadingStatus,
+      startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+      stopLoading: () => void
     ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AssociatedObjectsDetailsFlyout
             tableDetail={tableDetail}
             datasourceName={datasourceName}
+            loadStatus={loadStatus}
+            startLoading={startLoading}
+            stopLoading={stopLoading}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
           />
         )
@@ -437,6 +457,9 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
+      loadStatus: DirectQueryLoadingStatus,
+      startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+      stopLoading: () => void,
       databaseName?: string,
       tableName?: string
     ) => {
@@ -445,6 +468,9 @@ export class ObservabilityPlugin
           <CreateAcceleration
             selectedDatasource={selectedDatasource}
             resetFlyout={() => createAccelerationFlyout.close()}
+            loadStatus={loadStatus}
+            startLoading={startLoading}
+            stopLoading={stopLoading}
             databaseName={databaseName}
             tableName={tableName}
           />

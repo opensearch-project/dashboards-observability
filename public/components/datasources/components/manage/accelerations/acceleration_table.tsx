@@ -39,6 +39,7 @@ import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
 import { getRenderCreateAccelerationFlyout } from '../../../../../plugin';
 import { useAccelerationOperation } from './acceleration_operation';
+import { useLoadTableColumnsToCache } from '../../../../../framework/catalog_cache/cache_loader';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -68,6 +69,7 @@ export const AccelerationTable = ({
     actionType: null,
     selectedItem: null,
   });
+  const { loadStatus, startLoading, stopLoading } = useLoadTableColumnsToCache();
 
   useEffect(() => {
     if (operationSuccess) {
@@ -166,6 +168,9 @@ export const AccelerationTable = ({
                 <CreateAccelerationFlyoutButton
                   dataSourceName={dataSourceName}
                   renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+                  loadStatus={loadStatus}
+                  startLoading={startLoading}
+                  stopLoading={stopLoading}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

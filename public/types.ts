@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DirectQueryLoadingStatus } from '../common/types/explorer';
 import { SavedObjectsClient } from '../../../src/core/server';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
@@ -45,13 +46,18 @@ export interface ObservabilityStart {
     datasourceName: string,
     handleRefresh?: () => void
   ) => void;
-  renderAssociatedObjectsDetailsFlyout: ({
-    tableDetail,
-  }: {
-    tableDetail: AssociatedObject;
-  }) => void;
+  renderAssociatedObjectsDetailsFlyout: (
+    tableDetail: AssociatedObject,
+    datasourceName: string,
+    loadStatus: DirectQueryLoadingStatus,
+    startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+    stopLoading: () => void
+  ) => void;
   renderCreateAccelerationFlyout: (
     dataSource: string,
+    loadStatus: DirectQueryLoadingStatus,
+    startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void,
+    stopLoading: () => void,
     databaseName?: string,
     tableName?: string
   ) => void;

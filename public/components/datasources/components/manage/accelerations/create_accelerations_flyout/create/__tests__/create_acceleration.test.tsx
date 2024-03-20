@@ -12,6 +12,7 @@ import { coreMock } from '../../../../../../../../../../../src/core/public/mocks
 import { queryWorkbenchPluginCheck } from '../../../../../../../../../common/constants/shared';
 import { mockDatasourcesQuery } from '../../../../../../../../../test/accelerations';
 import { CreateAcceleration } from '../create_acceleration';
+import { DirectQueryLoadingStatus } from '../../../../../../../../../common/types/explorer';
 
 const coreStartMock = coreMock.createStart();
 
@@ -36,7 +37,13 @@ describe('Create acceleration flyout components', () => {
     coreStartMock.http.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
 
     const wrapper = mount(
-      <CreateAcceleration selectedDatasource={selectedDatasource} resetFlyout={resetFlyout} />
+      <CreateAcceleration
+        selectedDatasource={selectedDatasource}
+        loadStatus={DirectQueryLoadingStatus.INITIAL}
+        startLoading={jest.fn()}
+        stopLoading={jest.fn()}
+        resetFlyout={resetFlyout}
+      />
     );
     wrapper.update();
     await waitFor(() => {
