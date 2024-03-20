@@ -452,11 +452,13 @@ const addIntegration = async ({
   integration,
   setLoading,
   setCalloutLikeToast,
+  skipRedirect,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  skipRedirect?: boolean;
 }) => {
   setLoading(true);
   let sessionId: string | null = null;
@@ -469,7 +471,9 @@ const addIntegration = async ({
       integration,
       setCalloutLikeToast,
       config.displayName,
-      config.connectionDataSource
+      config.connectionDataSource,
+      undefined,
+      skipRedirect
     );
     if (!res) {
       setLoading(false);
@@ -508,7 +512,8 @@ const addIntegration = async ({
       setCalloutLikeToast,
       config.displayName,
       `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`,
-      config.enabledWorkflows
+      config.enabledWorkflows,
+      skipRedirect
     );
     if (!res) {
       setLoading(false);
@@ -541,6 +546,7 @@ export function SetupBottomBar({
   setSetupCallout,
   unsetIntegration,
   setIsInstalling,
+  skipRedirect,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
@@ -549,6 +555,7 @@ export function SetupBottomBar({
   setSetupCallout: (setupCallout: SetupCallout) => void;
   unsetIntegration?: () => void;
   setIsInstalling?: (isInstalling: boolean) => void;
+  skipRedirect?: boolean;
 }) {
   // Drop-in replacement for setToast
   const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
@@ -600,9 +607,16 @@ export function SetupBottomBar({
                   setIsInstalling(newLoading);
                 },
                 setCalloutLikeToast,
+                skipRedirect,
               });
             } else {
-              await addIntegration({ integration, config, setLoading, setCalloutLikeToast });
+              await addIntegration({
+                integration,
+                config,
+                setLoading,
+                setCalloutLikeToast,
+                skipRedirect,
+              });
             }
           }}
           data-test-subj="create-instance-button"
@@ -732,6 +746,7 @@ export function SetupIntegrationForm({
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
             setIsInstalling={setIsInstalling}
+            skipRedirect={true}
           />
         </EuiFlyoutFooter>
       </>
