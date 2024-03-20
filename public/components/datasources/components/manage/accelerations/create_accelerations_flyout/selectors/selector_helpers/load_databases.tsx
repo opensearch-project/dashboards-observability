@@ -37,7 +37,7 @@ export const SelectorLoadDatabases = ({
   const {
     loadStatus: loadDatabasesStatus,
     startLoading: startDatabasesLoading,
-    stopLoading: _stopDatabasesLoading,
+    stopLoading: stopDatabasesLoading,
   } = useLoadDatabasesToCache();
 
   const onClickRefreshDatabases = () => {
@@ -61,6 +61,12 @@ export const SelectorLoadDatabases = ({
   useEffect(() => {
     setLoadingComboBoxes({ ...loadingComboBoxes, database: isLoading });
   }, [isLoading]);
+
+  useEffect(() => {
+    return () => {
+      stopDatabasesLoading();
+    };
+  }, []);
 
   return (
     <>

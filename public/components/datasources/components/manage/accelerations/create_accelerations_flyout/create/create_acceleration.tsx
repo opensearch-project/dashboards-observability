@@ -117,9 +117,20 @@ export const CreateAcceleration = ({
   };
 
   const initiateColumnLoad = (dataSource: string, database: string, dataTable: string) => {
+    // All components related to table fields
     setAccelerationFormData({
       ...accelerationFormData,
       dataTableFields: [],
+      skippingIndexQueryData: [],
+      coveringIndexQueryData: [],
+      materializedViewQueryData: {
+        columnsValues: [],
+        groupByTumbleValue: {
+          timeField: '',
+          tumbleWindow: 0,
+          tumbleInterval: ACCELERATION_TIME_INTERVAL[2].value, // minutes
+        },
+      },
     });
     stopLoadingTableFields();
     if (dataTable !== '') {
@@ -163,6 +174,12 @@ export const CreateAcceleration = ({
     }
   }, [loadStatus]);
 
+  useEffect(() => {
+    return () => {
+      stopLoadingTableFields();
+    };
+  }, []);
+
   const dataSourcesPreselected = databaseName !== undefined && tableName !== undefined;
 
   return (
@@ -191,7 +208,6 @@ export const CreateAcceleration = ({
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               initiateColumnLoad={initiateColumnLoad}
-              loading={tableFieldsLoading}
             />
             <EuiSpacer size="xxl" />
             <IndexSettingOptions
@@ -202,6 +218,7 @@ export const CreateAcceleration = ({
             <QueryVisualEditor
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
+              tableFieldsLoading={tableFieldsLoading}
             />
             <EuiSpacer size="xxl" />
             <IndexAdvancedSettings
