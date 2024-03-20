@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 import { LoadCacheType } from '../../../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../../framework/core_refs';
@@ -51,12 +51,9 @@ export const AssociatedObjectsTabEmpty: React.FC<AssociatedObjectsTabEmptyProps>
             <h4>{titleText}</h4>
             <p>{bodyText}</p>
           </EuiText>
-          <EuiLink onClick={() => console.log()} external>
-            Learn more
-          </EuiLink>
         </>
       }
-      button={QueryWorkbenchButton}
+      actions={QueryWorkbenchButton}
     />
   );
 };

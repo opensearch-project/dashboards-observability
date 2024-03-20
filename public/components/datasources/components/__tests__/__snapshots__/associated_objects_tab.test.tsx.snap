@@ -5036,6 +5036,15 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
         cacheType="databases"
       >
         <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              iconSide="right"
+              iconType="popout"
+              onClick={[Function]}
+            >
+              Query Workbench
+            </EuiButton>
+          }
           body={
             <React.Fragment>
               <EuiText>
@@ -5046,34 +5055,10 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                   Add databases and tables to your data source or use Query Workbench
                 </p>
               </EuiText>
-              <EuiLink
-                external={true}
-                onClick={[Function]}
-              >
-                Learn more
-              </EuiLink>
             </React.Fragment>
-          }
-          button={
-            <EuiButton
-              iconSide="right"
-              iconType="popout"
-              onClick={[Function]}
-            >
-              Query Workbench
-            </EuiButton>
           }
         >
           <div
-            button={
-              <EuiButton
-                iconSide="right"
-                iconType="popout"
-                onClick={[Function]}
-              >
-                Query Workbench
-              </EuiButton>
-            }
             className="euiEmptyPrompt"
           >
             <EuiTextColor
@@ -5098,23 +5083,96 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                         </p>
                       </div>
                     </EuiText>
-                    <EuiLink
-                      external={true}
-                      onClick={[Function]}
-                    >
-                      <button
-                        className="euiLink euiLink--primary"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        Learn more
-                      </button>
-                    </EuiLink>
                   </div>
                 </EuiText>
               </span>
             </EuiTextColor>
+            <EuiSpacer
+              size="l"
+            >
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiButton
+              iconSide="right"
+              iconType="popout"
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                disabled={false}
+                element="button"
+                iconSide="right"
+                iconType="popout"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="right"
+                    iconType="popout"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="popout"
+                      >
+                        <EuiIconBeaker
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </EuiIconBeaker>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Query Workbench
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
           </div>
         </EuiEmptyPrompt>
       </AssociatedObjectsTabEmpty>
