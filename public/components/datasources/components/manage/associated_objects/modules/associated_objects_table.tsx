@@ -139,7 +139,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           description: i18n.translate(
             'datasources.associatedObjectsTab.action.discover.description',
             {
-              defaultMessage: 'Discover this object',
+              defaultMessage: 'Query in Observability Logs',
             }
           ),
           type: 'icon',
