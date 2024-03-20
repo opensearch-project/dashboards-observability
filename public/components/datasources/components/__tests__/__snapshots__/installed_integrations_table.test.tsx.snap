@@ -168,6 +168,7 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
 
 exports[`Installed Integrations Table test Renders the installed integrations table 1`] = `
 <InstalledIntegrationsTable
+  datasourceName="unknown"
   datasourceType="S3GLUE"
   integrations={
     Array [
@@ -863,75 +864,9 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
 
 exports[`Installed Integrations Table test Renders the installed integrations table flyout 1`] = `
 <InstallIntegrationFlyout
-  availableIntegrations={
-    Object {
-      "hits": Array [
-        Object {
-          "assets": Array [
-            Object {
-              "extension": "ndjson",
-              "name": "sample",
-              "type": "savedObjectBundle",
-              "version": "1.0.1",
-            },
-          ],
-          "components": Array [
-            Object {
-              "name": "logs",
-              "version": "1.0.0",
-            },
-          ],
-          "license": "Apache-2.0",
-          "name": "sample",
-          "type": "logs",
-          "version": "2.0.0",
-          "workflows": Array [
-            Object {
-              "description": "This is a test workflow.",
-              "enabled_by_default": true,
-              "label": "Workflow 1",
-              "name": "workflow1",
-            },
-          ],
-        },
-        Object {
-          "assets": Array [
-            Object {
-              "extension": "ndjson",
-              "name": "sample",
-              "type": "savedObjectBundle",
-              "version": "1.0.1",
-            },
-          ],
-          "components": Array [
-            Object {
-              "name": "logs",
-              "version": "1.0.0",
-            },
-          ],
-          "labels": Array [
-            "Flint S3",
-          ],
-          "license": "Apache-2.0",
-          "name": "sample2",
-          "type": "logs",
-          "version": "2.0.0",
-          "workflows": Array [
-            Object {
-              "description": "This is a test workflow.",
-              "enabled_by_default": true,
-              "label": "Workflow 1",
-              "name": "workflow1",
-            },
-          ],
-        },
-      ],
-    }
-  }
   closeFlyout={[Function]}
   datasourceName="test"
   datasourceType="S3GLUE"
-  setAvailableIntegrations={[Function]}
 >
   <EuiFlyout
     hideCloseButton={false}
