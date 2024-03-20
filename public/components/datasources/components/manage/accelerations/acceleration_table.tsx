@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiBasicTableColumn,
   EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -15,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -276,27 +276,27 @@ export const AccelerationTable = ({
           default:
             label = 'INVALID TYPE';
         }
-        return <EuiText>{label}</EuiText>;
+        return <EuiText size="s">{label}</EuiText>;
       },
     },
     {
       field: 'database',
       name: 'Database',
       sortable: true,
-      render: (database: string) => <EuiText>{database}</EuiText>,
+      render: (database: string) => <EuiText size="s">{database}</EuiText>,
     },
     {
       field: 'table',
       name: 'Table',
       sortable: true,
-      render: (table: string) => <EuiText>{table || '-'}</EuiText>,
+      render: (table: string) => <EuiText size="s">{table || '-'}</EuiText>,
     },
     {
       field: 'refreshType',
       name: 'Refresh Type',
       sortable: true,
       render: (autoRefresh: boolean, acceleration: CachedAcceleration) => {
-        return <EuiText>{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
+        return <EuiText size="s">{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
       },
     },
     {
@@ -314,7 +314,7 @@ export const AccelerationTable = ({
       name: 'Actions',
       actions: tableActions,
     },
-  ] as Array<EuiBasicTableColumn<any>>;
+  ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const pagination = {
     initialPageSize: 10,
