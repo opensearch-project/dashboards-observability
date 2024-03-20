@@ -367,7 +367,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                       <AssociatedObjectsTabFailure type="objects" />
                     ) : (
                       <>
-                        {cachedTables.length > 0 || cachedAccelerations.length > 0 ? (
+                        {cachedTables.length > 0 ||
+                        cachedAccelerations.filter(
+                          (acceleration: CachedAcceleration) =>
+                            acceleration.database === selectedDatabase
+                        ).length > 0 ? (
                           <AssociatedObjectsTable
                             datasourceName={datasource.name}
                             associatedObjects={associatedObjects}

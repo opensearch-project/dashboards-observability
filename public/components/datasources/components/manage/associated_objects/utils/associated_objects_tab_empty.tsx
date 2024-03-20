@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 import { LoadCacheType } from '../../../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../../framework/core_refs';
 
 interface AssociatedObjectsTabEmptyProps {
   cacheType: LoadCacheType;
@@ -13,6 +14,17 @@ interface AssociatedObjectsTabEmptyProps {
 
 export const AssociatedObjectsTabEmpty: React.FC<AssociatedObjectsTabEmptyProps> = (props) => {
   const { cacheType } = props;
+  const { application } = coreRefs;
+
+  const QueryWorkbenchButton = (
+    <EuiButton
+      iconSide="right"
+      onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+      iconType="popout"
+    >
+      Query Workbench
+    </EuiButton>
+  );
 
   let titleText;
   let bodyText;
@@ -41,6 +53,7 @@ export const AssociatedObjectsTabEmpty: React.FC<AssociatedObjectsTabEmptyProps>
           </EuiText>
         </>
       }
+      actions={QueryWorkbenchButton}
     />
   );
 };
