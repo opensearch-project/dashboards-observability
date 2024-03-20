@@ -20,11 +20,14 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
-  observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { DatasourceStatus, DatasourceType } from '../../../../../common/types/data_connections';
+import {
+  DatasourceDetails,
+  DatasourceStatus,
+  DatasourceType,
+} from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import { useToast } from '../../../common/toast';
@@ -34,6 +37,7 @@ import S3Logo from '../../icons/s3-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
+import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -71,8 +75,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const fetchDataSources = () => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
-      .then((res: any) => {
-        const dataConnections = res.map((dataConnection: any) => {
+      .then((res: DatasourceDetails[]) => {
+        const dataConnections = res.map((dataConnection: DatasourceDetails) => {
           return {
             name: dataConnection.name,
             connectionType: dataConnection.connector,
@@ -95,6 +99,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       },
     ]);
     fetchDataSources();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome]);
 
   const displayDeleteModal = (connectionName: string) => {
@@ -113,6 +118,9 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     );
     setIsModalVisible(true);
   };
+
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
 
   const actions = [
     {
@@ -147,8 +155,15 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'integrationGeneral',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {
-        application!.navigateToApp(observabilityIntegrationsID);
+      onClick: (datasource: DataConnection) => {
+        setIntegrationsFlyout(
+          <InstallIntegrationFlyout
+            closeFlyout={() => setShowIntegrationsFlyout(false)}
+            datasourceType={datasource.connectionType}
+            datasourceName={datasource.name}
+          />
+        );
+        setShowIntegrationsFlyout(true);
       },
       'data-test-subj': 'action-integrate',
     },
@@ -212,7 +227,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       name: 'Actions',
       actions,
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ] as Array<EuiTableFieldDataColumnType<unknown>>;
 
   const search = {
     box: {
@@ -250,6 +265,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
           />
         </EuiPageContent>
         {isModalVisible && modalLayout}
+        {showIntegrationsFlyout && integrationsFlyout}
       </EuiPageBody>
     </EuiPage>
   );
