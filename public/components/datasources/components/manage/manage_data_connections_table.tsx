@@ -20,7 +20,6 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
-  observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
 import {
@@ -38,6 +37,7 @@ import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
 import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -132,9 +132,11 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'discoverApp',
       type: 'icon',
       onClick: (datasource: DataConnection) => {
-        application!.navigateToApp(
-          datasource.connectionType === 'PROMETHEUS' ? observabilityMetricsID : observabilityLogsID
-        );
+        if (datasource.connectionType === 'PROMETHEUS') {
+          application!.navigateToApp(observabilityMetricsID);
+        } else if (datasource.connectionType === 'S3GLUE') {
+          redirectToExplorerS3(datasource.name);
+        }
       },
       'data-test-subj': 'action-query',
     },

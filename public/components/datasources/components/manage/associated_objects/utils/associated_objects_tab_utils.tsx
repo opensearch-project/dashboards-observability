@@ -6,6 +6,7 @@
 import { coreRefs } from '../../../../../../framework/core_refs';
 import { DirectQueryLoadingStatus } from '../../../../../../../common/types/explorer';
 import {
+  DATA_SOURCE_TYPES,
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../../../common/constants/data_sources';
@@ -70,6 +71,16 @@ export const redirectToExplorerWithDataSrc = (
 
 export const redirectToExplorerOSIdx = (indexName: string) => {
   redirectToExplorerWithQuery(DEFAULT_DATA_SOURCE_NAME, DEFAULT_DATA_SOURCE_TYPE, indexName);
+};
+
+export const redirectToExplorerS3 = (datasourceName: string) => {
+  coreRefs?.application!.navigateToApp(observabilityLogsID, {
+    path: `#/explorer`,
+    state: {
+      datasourceName,
+      datasourceType: DATA_SOURCE_TYPES.S3Glue,
+    },
+  });
 };
 
 const redirectToExplorerWithQuery = (
