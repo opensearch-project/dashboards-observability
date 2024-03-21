@@ -1,120 +1,120 @@
 {
 	"version": "1.0",
 	"dataSources": [
-			{
-					"name": "mys3",
-					"accelerations": [
-							{
-									"flintIndexName": "flint_mys3_default_http_count_view",
-									"type": "materialized",
-									"database": "default",
-									"table": null,
-									"indexName": "http_count_view",
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_count_view_2",
-									"type": "materialized",
-									"database": "default",
-									"table": null,
-									"indexName": "http_count_view_2",
-									"autoRefresh": true,
-									"status": "refreshing"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_1_skipping_index",
-									"type": "skipping",
-									"database": "default",
-									"table": "http_logs_1",
-									"indexName": null,
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_covering2_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "covering2",
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_covering_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "covering",
-									"autoRefresh": true,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_coveringdummy_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "coveringdummy",
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_cv_1_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "cv_1",
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_cv_idx_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "cv_idx",
-									"autoRefresh": false,
-									"status": "active"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_cvcv1_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "cvcv1",
-									"autoRefresh": true,
-									"status": "refreshing"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_skipping_index",
-									"type": "skipping",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": null,
-									"autoRefresh": false,
-									"status": "deleted"
-							},
-							{
-									"flintIndexName": "flint_mys3_default_http_logs_status_clientip_and_day_index",
-									"type": "covering",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": "status_clientip_and_day",
-									"autoRefresh": true,
-									"status": "refreshing"
-							},
-							{
-									"flintIndexName": "flint_mys3_dummy3_default_http_logs_skipping_index",
-									"type": "skipping",
-									"database": "default",
-									"table": "http_logs",
-									"indexName": null,
-									"autoRefresh": false,
-									"status": "unavailable"
-							}
-					],
-					"lastUpdated": "Thu, 21 Mar 2024 22:01:22 GMT",
-					"status": "Updated"
-			}
+		{
+			"name": "mys3",
+			"accelerations": [
+				{
+					"flintIndexName": "flint_mys3_default_http_count_view",
+					"type": "materialized",
+					"database": "default",
+					"table": null,
+					"indexName": "http_count_view",
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_count_view_2",
+					"type": "materialized",
+					"database": "default",
+					"table": null,
+					"indexName": "http_count_view_2",
+					"autoRefresh": true,
+					"status": "refreshing"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_1_skipping_index",
+					"type": "skipping",
+					"database": "default",
+					"table": "http_logs_1",
+					"indexName": null,
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_covering2_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "covering2",
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_covering_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "covering",
+					"autoRefresh": true,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_coveringdummy_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "coveringdummy",
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_cv_1_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "cv_1",
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_cv_idx_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "cv_idx",
+					"autoRefresh": false,
+					"status": "active"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_cvcv1_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "cvcv1",
+					"autoRefresh": true,
+					"status": "refreshing"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_skipping_index",
+					"type": "skipping",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": null,
+					"autoRefresh": false,
+					"status": "deleted"
+				},
+				{
+					"flintIndexName": "flint_mys3_default_http_logs_status_clientip_and_day_index",
+					"type": "covering",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": "status_clientip_and_day",
+					"autoRefresh": true,
+					"status": "refreshing"
+				},
+				{
+					"flintIndexName": "flint_mys3_dummy3_default_http_logs_skipping_index",
+					"type": "skipping",
+					"database": "default",
+					"table": "http_logs",
+					"indexName": null,
+					"autoRefresh": false,
+					"status": "unavailable"
+				}
+			],
+			"lastUpdated": "Thu, 21 Mar 2024 22:01:22 GMT",
+			"status": "Updated"
+		}
 	]
 }
