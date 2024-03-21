@@ -132,7 +132,7 @@ describe('validateRefreshInterval', () => {
 
 describe('validateIndexName', () => {
   it('should return an array with an error message when the index name is invalid', () => {
-    expect(validateIndexName('_invalid')).toEqual(['Enter a valid index name']);
+    expect(validateIndexName('Iinvalid')).toEqual(['Enter a valid index name']);
     expect(validateIndexName('-invalid')).toEqual(['Enter a valid index name']);
     expect(validateIndexName('InVal1d')).toEqual(['Enter a valid index name']);
     expect(validateIndexName('invalid_with spaces')).toEqual(['Enter a valid index name']);
@@ -147,9 +147,13 @@ describe('validateIndexName', () => {
 
   it('should use the ACCELERATION_INDEX_NAME_REGEX pattern to validate the index name', () => {
     expect(ACCELERATION_INDEX_NAME_REGEX.test('valid_name')).toBe(true);
+    expect(ACCELERATION_INDEX_NAME_REGEX.test('_valid_name')).toBe(true);
+    expect(ACCELERATION_INDEX_NAME_REGEX.test('23valid_name')).toBe(true);
+    expect(ACCELERATION_INDEX_NAME_REGEX.test('___1__')).toBe(true);
+    expect(ACCELERATION_INDEX_NAME_REGEX.test('23')).toBe(true);
     expect(ACCELERATION_INDEX_NAME_REGEX.test('invalid name')).toBe(false);
     expect(ACCELERATION_INDEX_NAME_REGEX.test('-invalid')).toBe(false);
-    expect(ACCELERATION_INDEX_NAME_REGEX.test('_invalid')).toBe(false);
+    expect(ACCELERATION_INDEX_NAME_REGEX.test('_invalid')).toBe(true);
     expect(ACCELERATION_INDEX_NAME_REGEX.test('invalid.')).toBe(false);
     expect(ACCELERATION_INDEX_NAME_REGEX.test('invalid<')).toBe(false);
     expect(ACCELERATION_INDEX_NAME_REGEX.test('invalid*')).toBe(false);

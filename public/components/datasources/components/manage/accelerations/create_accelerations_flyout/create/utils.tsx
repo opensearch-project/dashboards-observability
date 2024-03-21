@@ -64,7 +64,7 @@ export const validateWatermarkDelay = (
 };
 
 export const validateIndexName = (value: string) => {
-  // Check if the value does not begin with underscores or hyphens and all characters are lower case
+  // Check if the value contains lower case letters, numbers and underscore
   return !ACCELERATION_INDEX_NAME_REGEX.test(value) ? ['Enter a valid index name'] : [];
 };
 

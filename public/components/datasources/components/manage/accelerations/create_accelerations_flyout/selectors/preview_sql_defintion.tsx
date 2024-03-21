@@ -26,11 +26,13 @@ import { accelerationQueryBuilder } from '../visual_editors/query_builder';
 interface PreviewSQLDefinitionProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
+  resetFlyout: () => void;
 }
 
 export const PreviewSQLDefinition = ({
   accelerationFormData,
   setAccelerationFormData,
+  resetFlyout,
 }: PreviewSQLDefinitionProps) => {
   const { setToast } = useToast();
   const [isPreviewStale, setIsPreviewStale] = useState(false);
@@ -96,12 +98,13 @@ export const PreviewSQLDefinition = ({
           queryToRun: accelerationQueryBuilder(accelerationFormData),
         },
       });
+      resetFlyout();
     }
   };
 
   const queryWorkbenchButton = sqlWorkbenchPLuginExists ? (
-    <EuiButton iconType="popout" iconSide="right" onClick={openInWorkbench}>
-      Open in Query Workbench
+    <EuiButton iconSide="right" onClick={openInWorkbench}>
+      Continue in Query Workbench
     </EuiButton>
   ) : (
     <></>
