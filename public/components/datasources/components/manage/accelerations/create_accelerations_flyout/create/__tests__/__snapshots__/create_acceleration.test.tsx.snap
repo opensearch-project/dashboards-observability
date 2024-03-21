@@ -435,7 +435,7 @@ Array [
                           class="euiFormLabel euiFormRow__label"
                           for="random_html_id"
                         >
-                          Index type
+                          Acceleration type
                         </label>
                          
                         <div
@@ -538,7 +538,7 @@ Array [
                           class="euiFormHelpText euiFormRow__text"
                           id="random_html_id-help-0"
                         >
-                          Select the type of index you want to create. Each index type has benefits and costs.
+                          Select the type of acceleration according to your use case.
                         </div>
                       </div>
                     </div>
@@ -1031,7 +1031,7 @@ Array [
                                   class="euiFormHelpText euiFormRow__text"
                                   id="random_html_id-help-0"
                                 >
-                                  Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                                  Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
                                 </div>
                               </div>
                             </div>
@@ -1834,7 +1834,7 @@ Array [
                             className="euiFormLabel euiFormRow__label"
                             htmlFor="random_html_id"
                           >
-                            Index type
+                            Acceleration type
                           </label>
                            
                           <div
@@ -1950,7 +1950,7 @@ Array [
                             className="euiFormHelpText euiFormRow__text"
                             id="random_html_id-help-0"
                           >
-                            Select the type of index you want to create. Each index type has benefits and costs.
+                            Select the type of acceleration according to your use case.
                           </div>
                         </div>
                       </div>,
@@ -2528,7 +2528,7 @@ Array [
                                     className="euiFormHelpText euiFormRow__text"
                                     id="random_html_id-help-0"
                                   >
-                                    Must be in lowercase letters. Cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                                    Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
                                   </div>
                                 </div>
                               </div>,

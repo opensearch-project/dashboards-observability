@@ -98,8 +98,8 @@ export const IndexTypeSelector = ({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFormRow
-        label="Index type"
-        helpText="Select the type of index you want to create. Each index type has benefits and costs."
+        label="Acceleration type"
+        helpText="Select the type of acceleration according to your use case."
         labelAppend={
           <EuiText size="xs">
             <EuiLink href={ACC_INDEX_TYPE_DOCUMENTATION_URL} target="_blank">

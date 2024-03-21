@@ -229,6 +229,7 @@ export const CreateAcceleration = ({
             <PreviewSQLDefinition
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
+              resetFlyout={resetFlyout}
             />
           </EuiForm>
         </EuiFlyoutBody>
