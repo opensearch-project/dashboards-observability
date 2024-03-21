@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
 
@@ -85,6 +85,7 @@ export function usePolling<T, P = void>(
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const intervalRef = useRef<NodeJS.Timeout | string | number | undefined>(undefined);
+  const unmounted = useRef<boolean>(false);
 
   const shouldPoll = useRef(false);
 
@@ -96,6 +97,9 @@ export function usePolling<T, P = void>(
       }
     }, interval);
     intervalRef.current = intervalId;
+    if (unmounted.current) {
+      clearInterval(intervalId);
+    }
   };
 
   const stopPolling = () => {
@@ -123,6 +127,12 @@ export function usePolling<T, P = void>(
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
 
   return { data, loading, error, startPolling, stopPolling };
 }
