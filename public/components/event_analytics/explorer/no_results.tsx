@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -32,6 +33,14 @@ export const NoResults = ({ tabId }: any) => {
 
   const datasourceName = explorerSearchMeta?.datasources[0]?.name;
   const languageInUse = explorerSearchMeta?.lang;
+
+  const createCodeBlock = (code: string) => {
+    return (
+      <EuiCodeBlock isCopyable={true} paddingSize="none" fontSize="s" language="sql">
+        {code}
+      </EuiCodeBlock>
+    );
+  };
 
   return (
     <EuiPage paddingSize="s">
@@ -86,82 +95,99 @@ export const NoResults = ({ tabId }: any) => {
           )}
         </>
       ) : (
-        <EuiFlexGroup justifyContent="center" direction="column">
-          <EuiFlexItem grow={false}>
-            {explorerSearchMeta?.datasources[0]?.type === DATA_SOURCE_TYPES.S3Glue ? (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                    defaultMessage="Explore S3 data source"
-                  />
-                }
-                color="warning"
-                iconType="help"
-                data-test-subj="observabilityNoResultsCallout"
-              >
-                {languageInUse === QUERY_LANGUAGE.SQL ? (
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem grow={false}>
-                      <h4>Explore Databases</h4>
-                      <EuiCodeBlock isCopyable={true} paddingSize="none" fontSize="s">
-                        {`SHOW SCHEMAS IN ${datasourceName}`}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <h4>Explore Tables</h4>
-                      <EuiCodeBlock isCopyable={true} paddingSize="none" fontSize="s">
-                        {`SHOW TABLES EXTENDED IN ${datasourceName}.<database> LIKE '*'`}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <h4>Sample Query</h4>
-                      <EuiCodeBlock isCopyable={true} paddingSize="none" fontSize="s">
-                        {`SELECT * FROM ${datasourceName}.<database>.<table> LIMIT 10`}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <>
-                    <h4>Sample Query</h4>
-                    <EuiCodeBlock isCopyable={true} paddingSize="none" fontSize="s">
-                      {`source = ${datasourceName}.<database>.<table> | head 10`}
-                    </EuiCodeBlock>
-                  </>
-                )}
-              </EuiCallOut>
-            ) : (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                    defaultMessage="No results match your search criteria"
-                  />
-                }
-                color="warning"
-                iconType="help"
-                data-test-subj="observabilityNoResultsCallout"
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <h2 data-test-subj="obsNoResultsTimefilter">
-                <FormattedMessage
-                  id="observability.noResults.expandYourTimeRangeTitle"
-                  defaultMessage="Select a data source, expand your time range, or modify the query"
+        <>
+          {explorerSearchMeta?.datasources[0]?.type === DATA_SOURCE_TYPES.S3Glue ? (
+            <EuiFlexGroup justifyContent="center" direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="observability.noResults.exploreDataSourceCallout"
+                      defaultMessage="Explore S3 data source"
+                    />
+                  }
+                  color="success"
+                  iconType="iInCircle"
+                  data-test-subj="observabilityExploreDataSourceCallout"
+                >
+                  <EuiButton
+                    onClick={() => {
+                      coreRefs?.application!.navigateToApp('datasources', {
+                        path: `#/manage/${datasourceName}`,
+                      });
+                    }}
+                  >
+                    Explore Data Source
+                  </EuiButton>
+                </EuiCallOut>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                      defaultMessage="Example Queries"
+                    />
+                  }
+                  color="warning"
+                  iconType="help"
+                  data-test-subj="observabilityNoResultsCallout"
+                >
+                  {languageInUse === QUERY_LANGUAGE.SQL ? (
+                    <EuiFlexGroup direction="column">
+                      <EuiFlexItem grow={false}>
+                        {createCodeBlock(`SHOW DATABASES IN <datasource>`)}
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        {createCodeBlock(
+                          `SHOW TABLES EXTENDED IN <datasource>.<database> LIKE '*'`
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        {createCodeBlock(`SELECT * FROM <datasource>.<database>.<table> LIMIT 10`)}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <>{createCodeBlock(`source = <datasource>.<database>.<table> | head 10`)}</>
+                  )}
+                </EuiCallOut>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiFlexGroup justifyContent="center" direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                      defaultMessage="No results match your search criteria"
+                    />
+                  }
+                  color="warning"
+                  iconType="help"
+                  data-test-subj="observabilityNoResultsCallout"
                 />
-              </h2>
-              <p>
-                <FormattedMessage
-                  id="observability.noResults.queryMayNotMatchTitle"
-                  defaultMessage="After selection, check the time range, query filters, fields, and query"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  <h2 data-test-subj="obsNoResultsTimefilter">
+                    <FormattedMessage
+                      id="observability.noResults.expandYourTimeRangeTitle"
+                      defaultMessage="Select a data source, expand your time range, or modify the query"
+                    />
+                  </h2>
+                  <p>
+                    <FormattedMessage
+                      id="observability.noResults.queryMayNotMatchTitle"
+                      defaultMessage="After selection, check the time range, query filters, fields, and query"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </>
       )}
     </EuiPage>
   );

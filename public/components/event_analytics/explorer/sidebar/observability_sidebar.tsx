@@ -87,7 +87,7 @@ export const ObservabilitySideBar = ({ tabId, pplService, notifications }) => {
       isOverridingTimestamp={isOverridingTimestamp}
       isOverridingPattern={isOverridingPattern}
       isFieldToggleButtonDisabled={
-        isEmpty(explorerData.jsonData) || !isEmpty(query[RAW_QUERY].match(PPL_STATS_REGEX))
+        isEmpty(explorerData.jsonData) || !isEmpty(query[RAW_QUERY]?.match(PPL_STATS_REGEX))
       }
       tabId={tabId}
     />
