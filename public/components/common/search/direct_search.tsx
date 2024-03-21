@@ -18,11 +18,15 @@ import {
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@osd/i18n';
-import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
+import {
+  ASYNC_POLLING_INTERVAL,
+  QUERY_LANGUAGE,
+  SANITIZE_QUERY_REGEX,
+} from '../../../../common/constants/data_sources';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
   RAW_QUERY,
@@ -223,9 +227,10 @@ export const DirectSearch = (props: any) => {
       );
     });
     const sessionId = getAsyncSessionId(explorerSearchMetadata.datasources[0].label);
+    const requestQuery = tempQuery || query;
     const requestPayload = {
       lang: lang.toLowerCase(),
-      query: tempQuery || query,
+      query: requestQuery.replaceAll(SANITIZE_QUERY_REGEX, ' '),
       datasource: explorerSearchMetadata.datasources[0].label,
     } as DirectQueryRequest;
 
