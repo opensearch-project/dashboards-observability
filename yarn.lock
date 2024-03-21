@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@ag-grid-community/styles@^31.2.0":
+  version "31.2.0"
+  resolved "https://registry.yarnpkg.com/@ag-grid-community/styles/-/styles-31.2.0.tgz#7605338f2e0f3a3c2e7952f0e96360600033316c"
+  integrity sha512-fU6wDpK0//dJLp5pwojuTUQPi4nVZ4iTBF1yaQw+6NXeGi0ma7rz7IOS6Idw0XXE3ELKGTuO7QUJmxxdL7kykw==
+
 "@algolia/autocomplete-core@^1.4.1":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@algolia/autocomplete-core/-/autocomplete-core-1.11.0.tgz#9db68f2aa38fe3149507d214082a1926b6b91fac"
@@ -354,7 +359,7 @@ acorn@^7.1.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-ag-grid-community@31.2.0, ag-grid-community@^31.2.0:
+ag-grid-community@31.2.0:
   version "31.2.0"
   resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-31.2.0.tgz#376f07a3a7dd5c87d8cb6f660e4e338ec70663d1"
   integrity sha512-Ija6X171Iq3mFZASZlriQIIdEFqA71rZIsjQD6KHy5lMmxnoseZTX2neThBav1gvr6SA6n5B2PD6eUHdZnrUfw==
