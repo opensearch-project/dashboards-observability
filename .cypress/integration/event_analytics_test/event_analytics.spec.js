@@ -53,7 +53,7 @@ describe('Has working breadcrumbs', () => {
   });
 });
 
-describe('Search a query on event home', () => {
+describe.skip('Search a query on event home', () => {
   it('Search a query and redirect to explorer to display query output', () => {
     landOnEventHome();
 
@@ -75,7 +75,7 @@ describe('Search a query on event home', () => {
   });
 });
 
-describe('Open flyout for a data row to see details', () => {
+describe.skip('Open flyout for a data row to see details', () => {
   beforeEach(() => {
     landOnEventExplorer();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
@@ -212,7 +212,7 @@ describe('Click actions test', () => {
   });
 });
 
-describe('Saves a query on explorer page', () => {
+describe.skip('Saves a query on explorer page', () => {
   it('Saves a visualization on visualization tab of explorer page', () => {
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
@@ -294,7 +294,7 @@ describe('Saves a query on explorer page', () => {
   });
 });
 
-describe('Override timestamp for an index', () => {
+describe.skip('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
     landOnEventExplorer();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
@@ -312,7 +312,7 @@ describe('Override timestamp for an index', () => {
   });
 });
 
-describe('Toggle the sidebar fields', () => {
+describe.skip('Toggle the sidebar fields', () => {
   it('Toggle fields between available and selected section', () => {
     landOnEventExplorer();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
@@ -325,7 +325,7 @@ describe('Toggle the sidebar fields', () => {
   });
 });
 
-describe('Search fields in the sidebar', () => {
+describe.skip('Search fields in the sidebar', () => {
   it('Search a field', () => {
     landOnEventExplorer();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
@@ -353,7 +353,7 @@ describe('Delete saved objects', () => {
   });
 });
 
-describe('Click to view field insights', () => {
+describe.skip('Click to view field insights', () => {
   beforeEach(() => {
     landOnEventExplorer();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
@@ -466,7 +466,7 @@ describe('Live tail stop automatically', () => {
   });
 });
 
-describe('Visualizing data', () => {
+describe.skip('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);

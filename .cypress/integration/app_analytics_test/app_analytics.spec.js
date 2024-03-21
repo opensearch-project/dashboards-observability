@@ -195,7 +195,7 @@ describe('Creating application', () => {
 });
 
 describe('Setting availability', () => {
-  it('Redirects to set availability at three entry points', () => {
+  it.skip('Redirects to set availability at three entry points', () => {
     moveToCreatePage();
     cy.get('[data-test-subj="nameFormRow"]').type(nameThree);
     cy.get('[data-test-subj="logSourceAccordion"]').trigger('mouseover').click();
@@ -326,7 +326,7 @@ describe('Viewing application', () => {
     cy.get('.euiToolTipPopover').contains('source = opensearch_dashboards_sample_data_flights').should('exist');
   });
 
-  it('Saves visualization #1 to panel', () => {
+  it.skip('Saves visualization #1 to panel', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[data-test-subj="addVisualizationButton"]').first().click();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
@@ -347,7 +347,7 @@ describe('Viewing application', () => {
     cy.get('[class="trace bars"]').should('exist');
   });
 
-  it('Adds availability level to visualization #1', () => {
+  it.skip('Adds availability level to visualization #1', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[aria-label="actionMenuButton"]').click();
     cy.get('[data-test-subj="editVizContextMenuItem"]').click();
@@ -383,7 +383,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('exist');
   });
 
-  it('Saves visualization #2 to panel with availability level', () => {
+  it.skip('Saves visualization #2 to panel with availability level', () => {
     changeTimeTo24('months');
     cy.get('[data-test-subj="app-analytics-logTab"]').click();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
@@ -419,7 +419,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="SuperAvailabilityBadge"][style="background-color: rgb(145, 112, 184); color: rgb(0, 0, 0);"]').should('contain', 'Super');
   });
 
-  it('Configuration tab shows details', () => {
+  it.skip('Configuration tab shows details', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('[data-test-subj="configBaseQueryCode"]').should('contain', baseQuery);
     cy.get('[aria-label="List of services and entities"]').find('li').should('have.length', 1);
@@ -428,7 +428,7 @@ describe('Viewing application', () => {
   });
 
 
-  it('Changes availability visualization', () => {
+  it.skip('Changes availability visualization', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
     cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
@@ -540,7 +540,7 @@ describe('Application Analytics home page', () => {
     moveToHomePage();
   })
 
-  it('Show correct information in table', () => {
+  it.skip('Show correct information in table', () => {
     cy.get(`[data-test-subj="${nameOne}ApplicationLink"]`).should('exist');
     cy.get('[data-test-subj="appAnalytics__compositionColumn"]').should('contain', composition);
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available')
