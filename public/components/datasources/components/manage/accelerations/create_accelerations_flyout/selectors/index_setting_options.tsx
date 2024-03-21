@@ -101,10 +101,13 @@ export const IndexSettingOptions = ({
   const [checkpoint, setCheckpoint] = useState('');
 
   const onChangeRefreshType = (optionId: AccelerationRefreshType) => {
-    setAccelerationFormData({
-      ...accelerationFormData,
-      refreshType: optionId,
-    });
+    setAccelerationFormData(
+      producer((accData) => {
+        accData.refreshType = optionId;
+        accData.formErrors.checkpointLocationError = [];
+        accData.formErrors.refreshIntervalError = [];
+      })
+    );
     setRefreshTypeSelected(optionId);
   };
 

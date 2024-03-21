@@ -24,7 +24,7 @@ Array [
         className="euiFormLabel euiFormRow__label"
         htmlFor="random_html_id"
       >
-        Index type
+        Acceleration type
       </label>
        
       <div
@@ -140,7 +140,7 @@ Array [
         className="euiFormHelpText euiFormRow__text"
         id="random_html_id-help-0"
       >
-        Select the type of index you want to create. Each index type has benefits and costs.
+        Select the type of acceleration according to your use case.
       </div>
     </div>
   </div>,
@@ -171,7 +171,7 @@ Array [
         className="euiFormLabel euiFormRow__label"
         htmlFor="random_html_id"
       >
-        Index type
+        Acceleration type
       </label>
        
       <div
@@ -287,7 +287,7 @@ Array [
         className="euiFormHelpText euiFormRow__text"
         id="random_html_id-help-0"
       >
-        Select the type of index you want to create. Each index type has benefits and costs.
+        Select the type of acceleration according to your use case.
       </div>
     </div>
   </div>,
