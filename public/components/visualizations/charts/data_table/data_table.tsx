@@ -131,11 +131,11 @@ export const DataTable = ({ visualizations, layout, config }: any) => {
   const onPageSizeChanged = useCallback(
     (val: number) => {
       setPageSize(val);
-      gridRef.current.api.setGridOption("paginationPageSize", val);
+      gridRef.current.api.setGridOption('paginationPageSize', val);
       setActivePage(0);
       gridRef.current.api.paginationGoToPage(0);
       if (isFullScreen) {
-        gridRefFullScreen.current.api.setGridOption("paginationPageSize", val);
+        gridRefFullScreen.current.api.setGridOption('paginationPageSize', val);
         gridRefFullScreen.current.api.paginationGoToPage(0);
       }
     },
