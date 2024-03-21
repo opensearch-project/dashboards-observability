@@ -14,6 +14,8 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
   EuiLoadingLogo,
@@ -53,6 +55,7 @@ interface IntegrationConfigProps {
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
+  lockConnectionType?: boolean;
 }
 
 // TODO support localization
@@ -216,11 +219,12 @@ export function SetupWorkflowSelector({
   return cards;
 }
 
-export function SetupIntegrationForm({
+export function SetupIntegrationFormInputs({
   config,
   updateConfig,
   integration,
   setupCallout,
+  lockConnectionType,
 }: IntegrationConfigProps) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
@@ -313,6 +317,7 @@ export function SetupIntegrationForm({
           onChange={(event) =>
             updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
           }
+          disabled={lockConnectionType}
         />
       </EuiFormRow>
       <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
@@ -339,6 +344,7 @@ export function SetupIntegrationForm({
           }}
           customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
           data-test-subj="data-source-name"
+          isDisabled={lockConnectionType}
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
@@ -396,14 +402,19 @@ export function SetupIntegrationForm({
             <>
               <EuiSpacer />
               <EuiText>
-                <h3>Installation Flows</h3>
+                <h3>Integration Resources</h3>
               </EuiText>
-              <EuiSpacer />
+              <EuiFormRow>
+                <EuiText grow={false} size="xs">
+                  <p>
+                    This integration offers valuable resources compatible with your data source.
+                    These can include dashboards, visualizations, indexes, and queries. Select at
+                    least one of the following options.
+                  </p>
+                </EuiText>
+              </EuiFormRow>
+              <EuiSpacer size="s" />
               <EuiFormRow
-                label={'Flows'}
-                helpText={
-                  'Select from the available asset types based on your use case. Choose at least one.'
-                }
                 isInvalid={![...useWorkflows.values()].includes(true)}
                 error={['Must select at least one workflow.']}
               >
@@ -415,6 +426,9 @@ export function SetupIntegrationForm({
               </EuiFormRow>
             </>
           ) : null}
+          {/* Bottom bar will overlap content if there isn't some space at the end */}
+          <EuiSpacer />
+          <EuiSpacer />
         </>
       ) : null}
     </EuiForm>
@@ -438,11 +452,13 @@ const addIntegration = async ({
   integration,
   setLoading,
   setCalloutLikeToast,
+  skipRedirect,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  skipRedirect?: boolean;
 }) => {
   setLoading(true);
   let sessionId: string | null = null;
@@ -455,7 +471,9 @@ const addIntegration = async ({
       integration,
       setCalloutLikeToast,
       config.displayName,
-      config.connectionDataSource
+      config.connectionDataSource,
+      undefined,
+      skipRedirect
     );
     if (!res) {
       setLoading(false);
@@ -494,7 +512,8 @@ const addIntegration = async ({
       setCalloutLikeToast,
       config.displayName,
       `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`,
-      config.enabledWorkflows
+      config.enabledWorkflows,
+      skipRedirect
     );
     if (!res) {
       setLoading(false);
@@ -525,12 +544,18 @@ export function SetupBottomBar({
   loading,
   setLoading,
   setSetupCallout,
+  unsetIntegration,
+  setIsInstalling,
+  skipRedirect,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
+  unsetIntegration?: () => void;
+  setIsInstalling?: (isInstalling: boolean) => void;
+  skipRedirect?: boolean;
 }) {
   // Drop-in replacement for setToast
   const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
@@ -542,41 +567,64 @@ export function SetupBottomBar({
     });
 
   return (
-    <EuiBottomBar>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="text"
-            iconType="cross"
-            onClick={() => {
-              // TODO evil hack because props aren't set up
-              let hash = window.location.hash;
-              hash = hash.trim();
-              hash = hash.substring(0, hash.lastIndexOf('/setup'));
-              window.location.hash = hash;
-            }}
-            disabled={loading}
-          >
-            Discard
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="arrowRight"
-            iconSide="right"
-            isLoading={loading}
-            disabled={!isConfigValid(config, integration)}
-            onClick={async () =>
-              addIntegration({ integration, config, setLoading, setCalloutLikeToast })
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          color="text"
+          iconType="cross"
+          onClick={() => {
+            // If we can unset the integration, then just unset it.
+            // Otherwise, remove `/setup` from the window location.
+            if (unsetIntegration) {
+              unsetIntegration();
+              return;
             }
-            data-test-subj="create-instance-button"
-          >
-            Add Integration
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBottomBar>
+            let hash = window.location.hash;
+            hash = hash.trim();
+            hash = hash.substring(0, hash.lastIndexOf('/setup'));
+            window.location.hash = hash;
+          }}
+          disabled={loading}
+        >
+          Discard
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          iconType="arrowRight"
+          iconSide="right"
+          isLoading={loading}
+          disabled={!isConfigValid(config, integration)}
+          onClick={async () => {
+            if (setIsInstalling) {
+              setIsInstalling(true);
+              await addIntegration({
+                integration,
+                config,
+                setLoading: (newLoading: boolean) => {
+                  setLoading(newLoading);
+                  setIsInstalling(newLoading);
+                },
+                setCalloutLikeToast,
+                skipRedirect,
+              });
+            } else {
+              await addIntegration({
+                integration,
+                config,
+                setLoading,
+                setCalloutLikeToast,
+                skipRedirect,
+              });
+            }
+          }}
+          data-test-subj="create-instance-button"
+        >
+          Add Integration
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -592,11 +640,26 @@ export function LoadingPage() {
   );
 }
 
-export function SetupIntegrationPage({ integration }: { integration: string }) {
+export function SetupIntegrationForm({
+  integration,
+  renderType = 'page',
+  unsetIntegration,
+  forceConnection,
+  setIsInstalling,
+}: {
+  integration: string;
+  renderType: 'page' | 'flyout';
+  unsetIntegration?: () => void;
+  forceConnection?: {
+    name: string;
+    type: string;
+  };
+  setIsInstalling?: (isInstalling: boolean) => void;
+}) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
-    connectionType: 'index',
-    connectionDataSource: '',
+    connectionType: forceConnection?.type ?? 'index',
+    connectionDataSource: forceConnection?.name ?? '',
     connectionLocation: '',
     checkpointLocation: '',
     connectionTableName: integration,
@@ -627,29 +690,84 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-  return (
-    <EuiPage>
-      <EuiPageBody>
+  if (renderType === 'page') {
+    return (
+      <>
         <EuiPageContent>
           <EuiPageContentBody>
             {showLoading ? (
               <LoadingPage />
             ) : (
-              <SetupIntegrationForm
+              <SetupIntegrationFormInputs
                 config={integConfig}
                 updateConfig={updateConfig}
                 integration={template}
                 setupCallout={setupCallout}
+                lockConnectionType={forceConnection !== undefined}
               />
             )}
           </EuiPageContentBody>
         </EuiPageContent>
-        <SetupBottomBar
-          config={integConfig}
-          integration={template}
-          loading={showLoading}
-          setLoading={setShowLoading}
-          setSetupCallout={setSetupCallout}
+        <EuiBottomBar>
+          <SetupBottomBar
+            config={integConfig}
+            integration={template}
+            loading={showLoading}
+            setLoading={setShowLoading}
+            setSetupCallout={setSetupCallout}
+            unsetIntegration={unsetIntegration}
+            setIsInstalling={setIsInstalling}
+          />
+        </EuiBottomBar>
+      </>
+    );
+  } else if (renderType === 'flyout') {
+    return (
+      <>
+        <EuiFlyoutBody>
+          {showLoading ? (
+            <LoadingPage />
+          ) : (
+            <SetupIntegrationFormInputs
+              config={integConfig}
+              updateConfig={updateConfig}
+              integration={template}
+              setupCallout={setupCallout}
+              lockConnectionType={forceConnection !== undefined}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <SetupBottomBar
+            config={integConfig}
+            integration={template}
+            loading={showLoading}
+            setLoading={setShowLoading}
+            setSetupCallout={setSetupCallout}
+            unsetIntegration={unsetIntegration}
+            setIsInstalling={setIsInstalling}
+            skipRedirect={true}
+          />
+        </EuiFlyoutFooter>
+      </>
+    );
+  }
+}
+
+export function SetupIntegrationPage({
+  integration,
+  unsetIntegration,
+}: {
+  integration: string;
+  unsetIntegration?: () => void;
+}) {
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <SetupIntegrationForm
+          integration={integration}
+          unsetIntegration={unsetIntegration}
+          renderType="page"
         />
       </EuiPageBody>
     </EuiPage>

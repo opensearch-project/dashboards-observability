@@ -204,7 +204,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
           tabId,
           query: {
             [RAW_QUERY]: currQuery,
-            [SELECTED_TIMESTAMP]: objectData?.selected_timestamp?.name || 'timestamp',
+            [SELECTED_TIMESTAMP]: objectData?.selected_timestamp?.name,
             [SAVED_OBJECT_ID]: objectId,
             [SAVED_OBJECT_TYPE]: savedType,
             [SELECTED_DATE_RANGE]:

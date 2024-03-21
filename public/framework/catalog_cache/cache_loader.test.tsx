@@ -148,7 +148,7 @@ describe('loadCacheTests', () => {
         dataSourceName,
         expect.objectContaining({
           name: databaseName,
-          tables: [{ name: 'Table1' }, { name: 'Table2' }],
+          tables: [{ name: 'http_logs1' }, { name: 'http_logs2' }],
           lastUpdated: expect.any(String),
           status: CachedDataSourceStatus.Updated,
         })
@@ -305,7 +305,7 @@ describe('loadCacheTests', () => {
       const loadCacheType = 'tables';
       const dataSourceName = 'example';
       const databaseName = 'test';
-      const expectedQuery = 'SHOW TABLES IN `example`.`test`';
+      const expectedQuery = "SHOW TABLE EXTENDED IN `example`.`test` LIKE '*'";
       expect(createLoadQuery(loadCacheType, dataSourceName, databaseName)).toEqual(expectedQuery);
     });
 
@@ -326,7 +326,7 @@ describe('loadCacheTests', () => {
       const loadCacheType = 'tables';
       const dataSourceName = 'example';
       const databaseName = '`sample`';
-      const expectedQuery = 'SHOW TABLES IN `example`.`sample`';
+      const expectedQuery = "SHOW TABLE EXTENDED IN `example`.`sample` LIKE '*'";
       expect(createLoadQuery(loadCacheType, dataSourceName, databaseName)).toEqual(expectedQuery);
     });
   });

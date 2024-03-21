@@ -41,7 +41,6 @@ export const availableCardViewData: AvailableIntegrationsCardViewProps = {
       },
     ],
   },
-  renderCateogryFilters: () => (null as unknown) as { type: string; props: object; key: string },
   isCardView: false,
   setCardView: () => {},
   query: '',
@@ -88,9 +87,6 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
     ],
   },
   loading: false,
-  renderCateogryFilters: () => {
-    return (null as unknown) as { type: string; props: object; key: string };
-  },
   isCardView: false,
   setCardView: () => {},
 };

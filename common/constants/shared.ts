@@ -10,11 +10,13 @@ export const DSL_BASE = '/api/dsl';
 export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
+export const DSL_SETTINGS = '/indices.getFieldSettings';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EDIT = '/edit';
+export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
@@ -68,6 +70,7 @@ export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
+export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

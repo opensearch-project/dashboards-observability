@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import DSLService from 'public/services/requests/dsl';
 import {
   ApplicationStart,
   ChromeStart,
   CoreStart,
   HttpStart,
   IToasts,
+  OverlayStart,
   SavedObjectsClientContract,
 } from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -21,6 +23,7 @@ class CoreRefs {
   public http?: HttpStart;
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;
+  public dslService?: DSLService;
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
@@ -28,6 +31,7 @@ class CoreRefs {
   public summarizeEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
+  public overlays?: OverlayStart;
   private constructor() {
     // ...
   }

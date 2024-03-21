@@ -1,0 +1,431 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Advanced Index settings acceleration components renders acceleration index settings with default options 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="advanced-settings-header"
+        >
+          <h3>
+            Advanced settings
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        Array [
+          <div
+            className="euiFormRow"
+            id="random_html_id-row"
+          >
+            <div
+              className="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid={false}
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
+              >
+                Index name
+              </label>
+               
+              <div
+                className="euiText euiText--extraSmall"
+              >
+                <button
+                  className="euiLink euiLink--primary"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  Help
+                </button>
+              </div>
+            </div>
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--group"
+              >
+                <label
+                  className="euiFormLabel euiFormControlLayout__prepend"
+                  htmlFor="random_html_id"
+                >
+                  flint_{Datasource Name}_{Database Name}_{Table Name}_
+                </label>
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <svg
+                    aria-hidden={true}
+                    aria-label="Info"
+                    className="euiIcon euiIcon--medium euiIcon--subdued euiIcon-isLoading"
+                    focusable="true"
+                    height={16}
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    role="img"
+                    style={null}
+                    tabIndex={0}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </span>
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="random_html_id-help-0"
+                    aria-label="Enter Index Name"
+                    className="euiFieldText euiFieldText--inGroup"
+                    disabled={true}
+                    id="random_html_id"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    placeholder="Enter index name"
+                    type="text"
+                    value="skipping"
+                  />
+                </div>
+                <label
+                  className="euiFormLabel euiFormControlLayout__append"
+                  htmlFor="random_html_id"
+                >
+                  _index
+                </label>
+              </div>
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="random_html_id-help-0"
+              >
+                Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+              </div>
+            </div>
+          </div>,
+          "",
+        ]
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid={false}
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="random_html_id"
+            >
+              Number of primary shards
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="random_html_id-help-0"
+                  aria-label="Number of primary shards"
+                  className="euiFieldNumber"
+                  id="random_html_id"
+                  max={100}
+                  min={1}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  placeholder="Number of primary shards"
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="random_html_id-help-0"
+            >
+              Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid={false}
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="random_html_id"
+            >
+              Number of replicas
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="random_html_id-help-0"
+                  aria-label="Number of replicas"
+                  className="euiFieldNumber"
+                  id="random_html_id"
+                  max={100}
+                  min={0}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  placeholder="Number of replicas"
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="random_html_id-help-0"
+            >
+              Specify the number of replicas each primary shard should have.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Advanced Index settings acceleration components renders acceleration index settings with default options 2 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+            fillRule="nonzero"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="advanced-settings-header"
+        >
+          <h3>
+            Advanced settings
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid={false}
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="random_html_id"
+            >
+              Number of primary shards
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="random_html_id-help-0"
+                  aria-label="Number of primary shards"
+                  className="euiFieldNumber"
+                  id="random_html_id"
+                  max={100}
+                  min={1}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  placeholder="Number of primary shards"
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="random_html_id-help-0"
+            >
+              Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiFormRow"
+          id="random_html_id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid={false}
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="random_html_id"
+            >
+              Number of replicas
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="random_html_id-help-0"
+                  aria-label="Number of replicas"
+                  className="euiFieldNumber"
+                  id="random_html_id"
+                  max={100}
+                  min={0}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  placeholder="Number of replicas"
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="random_html_id-help-0"
+            >
+              Specify the number of replicas each primary shard should have.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

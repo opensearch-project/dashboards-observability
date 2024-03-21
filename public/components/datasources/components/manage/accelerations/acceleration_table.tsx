@@ -4,55 +4,153 @@
  */
 
 import {
+  EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiText,
   EuiHorizontalRule,
-  EuiButton,
-  EuiSpacer,
-  EuiLink,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiTableFieldDataColumnType,
+  EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getRefreshButtonIcon,
-  onRefreshButtonClick,
-  onDiscoverButtonClick,
-  onDeleteButtonClick,
+  onDiscoverIconClick,
   AccelerationStatus,
-} from './helpers/utils';
+  ACC_LOADING_MSG,
+  ACC_PANEL_TITLE,
+  ACC_PANEL_DESC,
+  getAccelerationName,
+  AccelerationActionType,
+  CreateAccelerationFlyoutButton,
+} from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
+import {
+  CachedAcceleration,
+  CachedDataSourceStatus,
+} from '../../../../../../common/types/data_connections';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
+import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
+import { getRenderCreateAccelerationFlyout } from '../../../../../plugin';
+import { useAccelerationOperation } from './acceleration_operation';
 
-interface AccelerationTableTabProps {
-  // TODO: Add acceleration type to plugin types
-  accelerations: any[];
+interface AccelerationTableProps {
+  dataSourceName: string;
+  cacheLoadingHooks: any;
 }
 
-export const AccelerationTable = (props: AccelerationTableTabProps) => {
-  const { accelerations } = props;
+interface ModalState {
+  actionType: AccelerationActionType | null;
+  selectedItem: CachedAcceleration | null;
+}
+
+export const AccelerationTable = ({
+  dataSourceName,
+  cacheLoadingHooks,
+}: AccelerationTableProps) => {
+  const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
+  const [updatedTime, setUpdatedTime] = useState<string>();
+  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
+  const {
+    databasesLoadStatus,
+    tablesLoadStatus,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  } = cacheLoadingHooks;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({
+    actionType: null,
+    selectedItem: null,
+  });
+
+  useEffect(() => {
+    if (operationSuccess) {
+      handleRefresh();
+    }
+  }, [operationSuccess]);
+
+  const handleActionClick = (
+    actionType: ModalState['actionType'],
+    acceleration: CachedAcceleration
+  ) => {
+    setModalState({
+      actionType,
+      selectedItem: acceleration,
+    });
+  };
+
+  const handleModalClose = () => {
+    setModalState({
+      actionType: null,
+      selectedItem: null,
+    });
+  };
+
+  const handleConfirm = () => {
+    if (!modalState.selectedItem || !modalState.actionType) return;
+
+    performOperation(modalState.selectedItem, modalState.actionType);
+    handleModalClose();
+  };
+
+  useEffect(() => {
+    const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+      dataSourceName
+    );
+    if (
+      cachedDataSource.status === CachedDataSourceStatus.Empty &&
+      !isCatalogCacheFetching(accelerationsLoadStatus)
+    ) {
+      setIsRefreshing(true);
+      startLoadingAccelerations(dataSourceName);
+    } else {
+      setAccelerations(cachedDataSource.accelerations);
+      setUpdatedTime(cachedDataSource.lastUpdated);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
+      const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
+        dataSourceName
+      );
+      setAccelerations(cachedDataSource.accelerations);
+      setUpdatedTime(cachedDataSource.lastUpdated);
+      setIsRefreshing(false);
+    }
+    if (accelerationsLoadStatus === DirectQueryLoadingStatus.FAILED) {
+      setIsRefreshing(false);
+    }
+  }, [accelerationsLoadStatus]);
+
+  const handleRefresh = useCallback(() => {
+    if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
+      setIsRefreshing(true);
+      startLoadingAccelerations(dataSourceName);
+    }
+  }, [accelerationsLoadStatus]);
 
   const RefreshButton = () => {
-    // TODO: Implement logic for refreshing acceleration
     return (
-      <>
-        <EuiButton onClick={() => console.log('clicked on refresh button')}>Refresh</EuiButton>
-      </>
+      <EuiButton
+        onClick={handleRefresh}
+        isLoading={
+          isRefreshing ||
+          isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
+        }
+      >
+        Refresh
+      </EuiButton>
     );
   };
 
-  const CreateButton = () => {
-    // TODO: Create button should call create_acceleration.tsx, which will be brought
-    // over from dashboards-query-workbench/public/components/acceleration/create/create_accelerations.tsx
-    return (
-      <>
-        <EuiButton onClick={() => console.log('clicked on create accelerations button')} fill>
-          Create acceleration
-        </EuiButton>
-      </>
-    );
-  };
+  const displayUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
 
   const AccelerationTableHeader = () => {
     return (
@@ -60,64 +158,98 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem>
             <EuiText>
-              <h3 className="panel-title">Accelerations</h3>
-              <p>
-                Accelerations optimize query performance by indexing external data into OpenSearch.
-              </p>
+              <h2 className="panel-title">{ACC_PANEL_TITLE}</h2>
+              {ACC_PANEL_DESC}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CreateButton />
+            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <CreateAccelerationFlyoutButton
+                  dataSourceName={dataSourceName}
+                  renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RefreshButton data-test-subj="refreshButton" />
+              </EuiFlexItem>
+              {updatedTime && (
+                <EuiFlexItem>
+                  <EuiText textAlign="right" size="xs" color="subdued">
+                    {'Last updated at:'}
+                  </EuiText>
+                  <EuiText textAlign="right" color="subdued" size="xs">
+                    {displayUpdatedTime}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
   };
 
+  const AccelerationLoading = () => {
+    const BodyText = () => (
+      <>
+        <p>{ACC_LOADING_MSG}</p>
+      </>
+    );
+
+    return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} body={<BodyText />} />;
+  };
+
   const tableActions = [
     {
-      name: 'Discover',
-      description: 'Open in Discover',
+      name: 'Query Data',
+      description: 'Query in Observability Logs',
       icon: 'discoverApp',
       type: 'icon',
-      onClick: onDiscoverButtonClick,
+      onClick: (acc: CachedAcceleration) => {
+        onDiscoverIconClick(acc, dataSourceName);
+      },
     },
     {
-      name: 'Refresh',
-      description: 'Refresh/Pause/Resume',
-      icon: getRefreshButtonIcon,
-      onClick: onRefreshButtonClick,
+      name: 'Sync',
+      description: 'Manual Sync Data',
+      icon: 'inputOutput',
+      onClick: (item: CachedAcceleration) => handleActionClick('sync', item),
+      enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
     },
     {
       name: 'Delete',
       description: 'Delete acceleration',
       icon: 'trash',
-      type: 'icon',
-      onClick: onDeleteButtonClick,
+      onClick: (item: CachedAcceleration) => handleActionClick('delete', item),
+      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
+    },
+    {
+      name: 'Vacuum',
+      description: 'Vacuum acceleration',
+      icon: 'broom',
+      onClick: (item: CachedAcceleration) => handleActionClick('vacuum', item),
+      enabled: (item: CachedAcceleration) => item.status === 'deleted',
     },
   ];
 
-  const accelerationTableColumns: Array<EuiBasicTableColumn<any>> = [
-    // TODO: fields should be determined by what the acceleration is
-    // Show N/A if not applicable
+  const accelerationTableColumns = [
     {
-      field: 'name',
+      field: 'indexName',
       name: 'Name',
       sortable: true,
-      render: (name: string) => (
-        <EuiLink
-          onClick={() =>
-            renderAccelerationDetailsFlyout(
-              accelerations.find((acceleration) => acceleration.name === name)
-            )
-          }
-        >
-          {name}
-        </EuiLink>
-      ),
+      render: (indexName: string, acceleration: CachedAcceleration) => {
+        const displayName = getAccelerationName(acceleration);
+        return (
+          <EuiLink
+            onClick={() => {
+              renderAccelerationDetailsFlyout(acceleration, dataSourceName, handleRefresh);
+            }}
+          >
+            {displayName}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'status',
@@ -132,46 +264,57 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
       render: (type: string) => {
         let label;
         switch (type) {
-          case 'skip':
+          case 'skipping':
             label = 'Skipping Index';
             break;
-          case 'mv':
+          case 'materialized':
             label = 'Materialized View';
             break;
-          case 'ci':
+          case 'covering':
             label = 'Covering Index';
             break;
           default:
-            label = 'default';
+            label = 'INVALID TYPE';
         }
-        return <EuiText>{label}</EuiText>;
+        return <EuiText size="s">{label}</EuiText>;
       },
     },
     {
       field: 'database',
       name: 'Database',
       sortable: true,
-      render: (database: string) => <EuiText>{database}</EuiText>,
+      render: (database: string) => <EuiText size="s">{database}</EuiText>,
     },
     {
       field: 'table',
       name: 'Table',
       sortable: true,
-      render: (table: string) => <EuiText>{table}</EuiText>,
+      render: (table: string) => <EuiText size="s">{table || '-'}</EuiText>,
     },
     {
-      field: 'destination',
+      field: 'refreshType',
+      name: 'Refresh Type',
+      sortable: true,
+      render: (autoRefresh: boolean, acceleration: CachedAcceleration) => {
+        return <EuiText size="s">{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
+      },
+    },
+    {
+      field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
-      render: (destination: string) => (
-        <EuiLink onClick={() => console.log('clicked on', destination)}>{destination}</EuiLink>
-      ),
+      render: (flintIndexName: string, acceleration: CachedAcceleration) => {
+        if (acceleration.type === 'skipping') {
+          return '-';
+        }
+        return flintIndexName || '-';
+      },
     },
     {
       name: 'Actions',
       actions: tableActions,
     },
-  ];
+  ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const pagination = {
     initialPageSize: 10,
@@ -185,8 +328,8 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
     },
   };
 
-  // Render flyout using OSD overlay service
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <>
@@ -194,14 +337,29 @@ export const AccelerationTable = (props: AccelerationTableTabProps) => {
       <EuiPanel>
         <AccelerationTableHeader />
         <EuiHorizontalRule />
-        <EuiSpacer />
-        <EuiInMemoryTable
-          items={accelerations}
-          columns={accelerationTableColumns}
-          pagination={pagination}
-          sorting={sorting}
-        />
+        {isRefreshing ? (
+          <AccelerationLoading />
+        ) : (
+          <EuiInMemoryTable
+            items={accelerations}
+            columns={accelerationTableColumns}
+            pagination={pagination}
+            sorting={sorting}
+          />
+        )}
       </EuiPanel>
+      {(modalState.actionType === 'delete' ||
+        modalState.actionType === 'vacuum' ||
+        modalState.actionType === 'sync') && (
+        <AccelerationActionOverlay
+          isVisible={!!modalState.actionType}
+          actionType={modalState.actionType}
+          acceleration={modalState.selectedItem}
+          dataSourceName={dataSourceName}
+          onCancel={handleModalClose}
+          onConfirm={handleConfirm}
+        />
+      )}
     </>
   );
 };
