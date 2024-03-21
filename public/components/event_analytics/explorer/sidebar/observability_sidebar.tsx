@@ -28,11 +28,7 @@ export const ObservabilitySideBar = ({ tabId, pplService, notifications }) => {
   const explorerFields = useSelector(selectFields)[tabId];
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const requestParams = { tabId };
-  const {
-    isEventsLoading: isPatternLoading,
-    getPatterns,
-    setDefaultPatternsField,
-  } = useFetchPatterns({
+  const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
     requestParams,
   });
