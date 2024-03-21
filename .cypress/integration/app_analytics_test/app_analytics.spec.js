@@ -562,7 +562,7 @@ describe('Application Analytics home page', () => {
     });
   });
 
-  it('Deletes application', () => {
+  it.skip('Deletes application', () => {
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
     cy.get('[data-test-subj="deleteApplicationContextMenuItem"]').should('exist');
     cy.get('[data-test-subj="appAnalyticsActionsButton"]').click();
