@@ -5,6 +5,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { SANITIZE_QUERY_REGEX } from '../../../../../../../../common/constants/data_sources';
 import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
 import {
   DirectQueryLoadingStatus,
@@ -39,7 +40,7 @@ export const CreateAccelerationButton = ({
 
     const requestPayload: DirectQueryRequest = {
       lang: 'sql',
-      query: accelerationQueryBuilder(accelerationFormData),
+      query: accelerationQueryBuilder(accelerationFormData).replaceAll(SANITIZE_QUERY_REGEX, ' '),
       datasource: accelerationFormData.dataSource,
     };
 
