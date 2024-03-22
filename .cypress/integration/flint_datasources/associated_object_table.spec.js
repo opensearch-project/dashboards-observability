@@ -6,6 +6,7 @@
 /// <reference types="cypress" />
 
 import {
+	ASSO_TABLE_CALLOUT,
 	ASSO_TABLE_TITTLE,
 	ASSO_HEADER_DESC,
 	UPDATE_AT_DESC,
@@ -20,6 +21,10 @@ import {
 	ACTION_ICON_DIS,
 	ACTION_ICON_ACC,
 	AO_TYPE_TABLE,
+	ASSO_TABLE_FILTER,
+	SKIP_INDEX_NAME,
+	ASSO_SEARCH_BAR_DEFAULT_INPUT,
+	ASSO_SEARCH_BAR_FILTER_INPUT,
 } from '../../utils/flint-datasources/panel_constants'
 
 Cypress.on('uncaught:exception', (err, runnable) => {
@@ -60,6 +65,17 @@ describe('Associated Object test', () => {
 	afterEach(() => {
 		cy.clearLocalStorage('async-query-catalog-cache');
 		cy.clearLocalStorage('async-query-acclerations-cache');
+	});
+
+	it('Navigates to Associated objects table and check callout', () => {
+		goToDataConnectionPage();
+
+		cy.get('div.euiCallOut.euiCallOut--primary').should('exist');
+
+		cy.get('div.euiCallOut.euiCallOut--primary')
+			.find('span.euiCallOutHeader__title')
+			.contains(ASSO_TABLE_CALLOUT)
+			.should('exist');
 	});
 
 	it('Navigates to Associated objects table and check header elements', () => {
@@ -106,14 +122,33 @@ describe('Associated Object test', () => {
 		cy.get('@targetRow').find('div.euiTableCellContent--alignRight').within(() => {
 			cy.get('button.euiButtonIcon').eq(0).invoke('attr', 'aria-labelledby').then((labelId) => {
 				cy.get('button.euiButtonIcon').eq(0).should('exist');
-				cy.get(`span#${labelId}`).should('have.text', 'Discover');
+				cy.get(`span#${labelId}`).should('have.text', ACTION_ICON_DIS);
 			});
 
 			cy.get('button.euiButtonIcon').eq(1).invoke('attr', 'aria-labelledby').then((labelId) => {
 				cy.get('button.euiButtonIcon').eq(1).should('exist');
-				cy.get(`span#${labelId}`).should('have.text', 'Accelerate');
+				cy.get(`span#${labelId}`).should('have.text', ACTION_ICON_ACC);
 			});
 		});
 	});
 
+	it('Navigates to Associated objects table and check table filter logic', () => {
+		goToDataConnectionPage();
+
+		cy.contains(`[data-text=${ASSO_TABLE_FILTER}]`, ASSO_TABLE_FILTER)
+			.should('be.visible')
+			.click();
+
+		cy.contains('span.euiFlexItem.euiFilterSelectItem__content', SKIP_INDEX_NAME)
+			.should('be.visible')
+			.click();
+
+		cy.get(`input[type="search"][placeholder="${ASSO_SEARCH_BAR_DEFAULT_INPUT}"]`)
+			.should('have.value', ASSO_SEARCH_BAR_FILTER_INPUT);
+
+		cy.get('tr.euiTableRow').each(($row) => {
+      cy.wrap($row).find('td[data-test-subj="nameCell"]')
+          .should('contain.text', SKIP_INDEX_NAME);
+    });
+	});
 });

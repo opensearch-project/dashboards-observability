@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const ASSO_TABLE_CALLOUT = 'Accelerations recommended for tables. Setup acceleration or configure integrations';
+
 export const ASSO_TABLE_TITTLE = 'Associated objects';
 export const ASSO_HEADER_DESC = 'Manage objects associated with this data sources.';
 
@@ -27,3 +29,9 @@ export const ACTION_ICON_DIS = 'Discover';
 export const ACTION_ICON_ACC = 'Accelerate';
 
 export const AO_TYPE_TABLE = 'Table';
+
+export const SKIP_INDEX_NAME = 'skipping_index';
+
+export const ASSO_TABLE_FILTER = 'Accelerations';
+export const ASSO_SEARCH_BAR_DEFAULT_INPUT = 'Search for objects';
+export const ASSO_SEARCH_BAR_FILTER_INPUT = 'accelerations:skipping_index';
