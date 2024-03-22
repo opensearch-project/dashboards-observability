@@ -5,7 +5,6 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiComboBoxOptionOption,
   EuiFieldText,
@@ -109,6 +108,16 @@ const emptyQueryCallOut = (
   />
 );
 
+const pplGenerated = (
+  <EuiCallOut
+    data-test-subj="query-assist-ppl-callout"
+    title="PPL query generated"
+    size="s"
+    color="success"
+    iconType="check"
+  />
+);
+
 export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
@@ -176,6 +185,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         },
       })
     );
+    setCallOut(pplGenerated);
     return generatedPPL;
   };
   const formatError = (error: ResponseError | Error): Error => {
@@ -365,16 +375,6 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
               ))}
             </EuiListGroup>
           </EuiInputPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="returnKey"
-            display={props.lastFocusedInput === 'nlq_input' ? 'fill' : 'base'}
-            isDisabled={loading}
-            onClick={runAndSummarize}
-            size="m"
-            aria-label="submit-question"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {callOut}
