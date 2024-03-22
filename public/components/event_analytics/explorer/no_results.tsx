@@ -31,7 +31,7 @@ export const NoResults = ({ tabId }: any) => {
   const queryAssistLoading = summaryData?.loading;
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
 
-  const datasourceName = explorerSearchMeta?.datasources[0]?.name;
+  const datasourceName = explorerSearchMeta?.datasources[0]?.label;
   const languageInUse = explorerSearchMeta?.lang;
 
   const createCodeBlock = (code: string) => {
