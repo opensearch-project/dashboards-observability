@@ -10,7 +10,7 @@ import {
 	ASSO_TABLE_TITTLE,
 	ASSO_HEADER_DESC,
 	UPDATE_AT_DESC,
-	LOCALIZED_UPDATE_TIMESTAMP,
+	LOCALIZED_UPDATE_TIMESTAMP_AO,
 	REFRESH_BTN_DESC,
 	CREATE_ACC_BTN_DESC,
 	ASSO_NAME_COL,
@@ -85,7 +85,7 @@ describe('Associated Object Table test', () => {
 			.should('contain.text', ASSO_HEADER_DESC);
 
 		cy.contains('.euiTextColor--subdued', UPDATE_AT_DESC).should('exist');
-		cy.contains('.euiTextColor--subdued', LOCALIZED_UPDATE_TIMESTAMP).should('exist');
+		cy.contains('.euiTextColor--subdued', LOCALIZED_UPDATE_TIMESTAMP_AO).should('exist');
 
 		cy.contains('.euiButton--primary', REFRESH_BTN_DESC).should('exist');
 		cy.contains('.euiButton--primary.euiButton--fill', CREATE_ACC_BTN_DESC).should('exist');
