@@ -34,9 +34,15 @@ export const ACC_TABLE_DESC = 'Accelerations optimize query performance by index
 
 export const LOCALIZED_UPDATE_TIMESTAMP_ACC = '3/21/2024, 3:01:22 PM';
 
-// Acceleration Table Columns
-export const ACC_NAME_COL = 'Name';
-export const ACC_TYPE_COL = 'Type';
+// Acceleration Table Columns / Flyout Fields
+export const ACC_NAME = 'Name';
+export const ACC_STATUS = 'Status';
+export const ACC_TYPE = 'Type';
+export const ACC_DATABASE = 'Database';
+export const ACC_TABLE = 'Table';
+export const ACC_REFRESH_TYPE = 'Refresh Type';
+export const ACC_DESTINATION_INDEX = 'Destination Index';
+export const ACC_ACTIONS_COL = 'Actions';
 
 // Table Actions
 export const ACTION_ICON_DIS = 'Discover';
