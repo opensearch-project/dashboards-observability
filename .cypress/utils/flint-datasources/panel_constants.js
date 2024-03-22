@@ -4,7 +4,8 @@
  */
 
 // Associated Object Table Callout
-export const ASSO_TABLE_CALLOUT = 'Accelerations recommended for tables. Setup acceleration or configure integrations';
+export const ASSO_TABLE_CALLOUT =
+  'Accelerations recommended for tables. Setup acceleration or configure integrations';
 
 // Associated Object Table Header
 export const ASSO_TABLE_TITTLE = 'Associated objects';
@@ -30,7 +31,8 @@ export const ASSO_SEARCH_BAR_FILTER_INPUT = 'accelerations:skipping_index';
 
 //Acceleration Table Header
 export const ACC_TABLE_TITLE = 'Accelerations';
-export const ACC_TABLE_DESC = 'Accelerations optimize query performance by indexing external data into OpenSearch.';
+export const ACC_TABLE_DESC =
+  'Accelerations optimize query performance by indexing external data into OpenSearch.';
 
 export const LOCALIZED_UPDATE_TIMESTAMP_ACC = '3/21/2024, 3:01:22 PM';
 
