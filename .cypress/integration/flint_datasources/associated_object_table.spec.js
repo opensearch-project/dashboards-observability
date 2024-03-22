@@ -33,13 +33,13 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 	}
 });
 
-const goToDataConnectionPage = () => {
+const goToAssociatedObjectTable = () => {
 	cy.visit(`${Cypress.env('opensearchDashboards')}/app/datasources`);
 	cy.get('h1[data-test-subj="dataconnections-header"]').should('be.visible');
 	cy.get('a[data-test-subj="mys3DataConnectionsLink"]').click();
 }
 
-describe('Associated Object test', () => {
+describe('Associated Object Table test', () => {
 	beforeEach(() => {
 		// Load the catalog cache data
 		const catalogCachePath = './.cypress/utils/flint-datasources/catalog-cache.json';
@@ -68,7 +68,7 @@ describe('Associated Object test', () => {
 	});
 
 	it('Navigates to Associated objects table and check callout', () => {
-		goToDataConnectionPage();
+		goToAssociatedObjectTable();
 
 		cy.get('div.euiCallOut.euiCallOut--primary').should('exist');
 
@@ -79,7 +79,7 @@ describe('Associated Object test', () => {
 	});
 
 	it('Navigates to Associated objects table and check header elements', () => {
-		goToDataConnectionPage();
+		goToAssociatedObjectTable();
 
 		cy.contains('.euiFlexItem .euiText.euiText--medium', ASSO_TABLE_TITTLE)
 			.should('contain.text', ASSO_HEADER_DESC);
@@ -92,7 +92,7 @@ describe('Associated Object test', () => {
 	});
 
 	it('Navigates to Associated objects table and check table elements', () => {
-		goToDataConnectionPage();
+		goToAssociatedObjectTable();
 
 		cy.contains('.euiTableCellContent__text', ASSO_NAME_COL).as('NameHeader')
 			.should('exist')
@@ -111,7 +111,7 @@ describe('Associated Object test', () => {
 	});
 
 	it('Navigates to Associated objects table and check table content', () => {
-		goToDataConnectionPage();
+		goToAssociatedObjectTable();
 
 		cy.get('tr.euiTableRow').contains('button', TABLE_NAME_1).parents('tr.euiTableRow').as('targetRow');
 
@@ -133,7 +133,7 @@ describe('Associated Object test', () => {
 	});
 
 	it('Navigates to Associated objects table and check table filter logic', () => {
-		goToDataConnectionPage();
+		goToAssociatedObjectTable();
 
 		cy.contains(`[data-text=${ASSO_TABLE_FILTER}]`, ASSO_TABLE_FILTER)
 			.should('be.visible')
