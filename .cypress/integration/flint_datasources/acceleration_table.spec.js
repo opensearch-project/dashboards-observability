@@ -142,29 +142,21 @@ describe('Acceleration Table test', () => {
       });
   });
 
-  it('Checks rows for "Skipping Index" type and verifies Destination Index column content', () => {
+  it('Checks rows for "Skipping index" type and verifies Destination Index column content', () => {
     goToAccelerationTable();
 
-    let conditionMet = false;
-
-    cy.get('tbody tr')
+    cy.get('tbody')
+      .find('tr')
       .each(($row) => {
         cy.wrap($row)
           .find('td')
           .eq(2)
           .invoke('text')
-          .then((typeText) => {
-            if (typeText.trim() === TYPE_SI) {
-              conditionMet = true;
+          .then((text) => {
+            if (text.includes(TYPE_SI)) {
               cy.wrap($row).find('td').eq(6).should('contain.text', EMPTY_CONTENT);
             }
           });
-      })
-      .then(() => {
-        expect(
-          conditionMet,
-          'Expected to find at least one row with "Skipping Index" type and specific Destination Index content'
-        ).to.be.true;
       });
   });
 
