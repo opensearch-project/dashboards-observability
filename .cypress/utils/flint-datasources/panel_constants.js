@@ -22,14 +22,14 @@ export const ASSO_TYPE_COL = 'Type';
 export const ASSO_ACC_COL = 'Accelerations';
 export const ASSO_ACTION_COL = 'Actions';
 
-//Associated Object Table Filter
+// Associated Object Table Filter
 export const ASSO_TABLE_FILTER = 'Accelerations';
 
 // Associated Object Table Search Bar
 export const ASSO_SEARCH_BAR_DEFAULT_INPUT = 'Search for objects';
 export const ASSO_SEARCH_BAR_FILTER_INPUT = 'accelerations:skipping_index';
 
-//Acceleration Table Header
+// Acceleration Table Header
 export const ACC_TABLE_TITLE = 'Accelerations';
 export const ACC_TABLE_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
@@ -54,7 +54,7 @@ export const TYPE_CI = 'Covering Index';
 // Acceleration Status
 export const STATUS_ACT = 'Active';
 export const STATUS_REF = 'Refreshing';
-export const STATUS_DEL = 'Deleted'
+export const STATUS_DEL = 'Deleted';
 
 // Acceleration Refresh Types
 export const REFRESH_TYPE_AUTO = 'Auto refresh';
