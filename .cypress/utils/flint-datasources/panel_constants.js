@@ -69,7 +69,7 @@ export const ACTION_ICON_SYN = 'Sync';
 
 // Table Content
 export const EMPTY_CONTENT = '-';
-export const DATABASE_NAME_DDEFAULT = 'default';
+export const DATABASE_NAME_DEFAULT = 'default';
 export const TABLE_NAME_1 = 'http_logs';
 export const TABLE_NAME_2 = 'http_logs_1';
 export const TABLE_NAME_3 = 'table_no_timestamp';

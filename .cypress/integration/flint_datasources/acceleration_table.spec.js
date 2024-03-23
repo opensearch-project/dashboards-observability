@@ -28,8 +28,10 @@ import {
   ACTION_ICON_DEL,
   ACTION_ICON_VAC,
   ACTION_ICON_SYN,
-  REFRESH_TYPE_AUTO,
   REFRESH_TYPE_MANUAL,
+  DATABASE_NAME_DEFAULT,
+  TABLE_NAME_1,
+  STATUS_DEL,
 } from '../../utils/flint-datasources/panel_constants';
 
 Cypress.on('uncaught:exception', (err, runnable) => {
@@ -73,7 +75,7 @@ describe('Acceleration Table test', () => {
     cy.clearLocalStorage('async-query-acclerations-cache');
   });
 
-  it.skip('Navigates to Acceleration table and check header elements', () => {
+  it('Navigates to Acceleration table and check header elements', () => {
     goToAccelerationTable();
 
     cy.contains('.euiFlexItem .euiText.euiText--medium', ACC_TABLE_TITLE).should(
@@ -88,7 +90,7 @@ describe('Acceleration Table test', () => {
     cy.contains('.euiButton--primary.euiButton--fill', CREATE_ACC_BTN_DESC).should('exist');
   });
 
-  it.skip('Navigates to Acceleration table and check table columns', () => {
+  it('Navigates to Acceleration table and check table columns', () => {
     goToAccelerationTable();
 
     cy.get('th[data-test-subj="tableHeaderCell_indexName_0"]')
@@ -122,7 +124,7 @@ describe('Acceleration Table test', () => {
     cy.get('th').contains('span[title="Actions"]', ACC_ACTIONS_COL).should('exist');
   });
 
-  it.skip('Checks rows for "Materialized View" type and verifies table column content', () => {
+  it('Checks rows for "Materialized View" type and verifies table column content', () => {
     goToAccelerationTable();
 
     cy.get('tbody')
@@ -140,21 +142,29 @@ describe('Acceleration Table test', () => {
       });
   });
 
-  it.skip('Checks rows for "Skipping Index" type and verifies Destination Index column content', () => {
+  it('Checks rows for "Skipping Index" type and verifies Destination Index column content', () => {
     goToAccelerationTable();
 
-    cy.get('tbody')
-      .find('tr')
+    let conditionMet = false;
+
+    cy.get('tbody tr')
       .each(($row) => {
         cy.wrap($row)
           .find('td')
           .eq(2)
           .invoke('text')
-          .then((text) => {
-            if (text.includes(TYPE_SI)) {
-              cy.wrap($row).find('td').last().should('contain.text', EMPTY_CONTENT);
+          .then((typeText) => {
+            if (typeText.trim() === TYPE_SI) {
+              conditionMet = true;
+              cy.wrap($row).find('td').eq(6).should('contain.text', EMPTY_CONTENT);
             }
           });
+      })
+      .then(() => {
+        expect(
+          conditionMet,
+          'Expected to find at least one row with "Skipping Index" type and specific Destination Index content'
+        ).to.be.true;
       });
   });
 
@@ -184,5 +194,51 @@ describe('Acceleration Table test', () => {
     });
 
     cy.get('body').click(0, 0);
+  });
+
+  it('Verifies actions for rows with specific criteria and ensures menu interaction', () => {
+    goToAccelerationTable();
+    let criteriaMet = false;
+
+    cy.get('tbody tr')
+      .each(($row) => {
+        const name = $row.find('td:eq(0) .euiLink').text().trim();
+        const database = $row.find('td:eq(3) .euiText--small').text().trim();
+        const table = $row.find('td:eq(4) .euiText--small').text().trim();
+        const statusText = $row.find('td:eq(1) .euiHealth').text().trim();
+
+        cy.log(
+          `Extracted -> Name: '${name}', Database: '${database}', Table: '${table}', Status: '${statusText}'`
+        );
+
+        if (
+          name === SKIP_INDEX_NAME &&
+          database === DATABASE_NAME_DEFAULT &&
+          table === TABLE_NAME_1 &&
+          statusText.includes(STATUS_DEL)
+        ) {
+          criteriaMet = true;
+          console.log('Found row matching criteria');
+          cy.wrap($row)
+            .find('[data-test-subj="euiCollapsedItemActionsButton"]')
+            .should('exist')
+            .click({ force: true });
+
+          cy.get('.euiContextMenuPanel')
+            .should('be.visible')
+            .within(() => {
+              cy.contains('button', ACTION_ICON_SYN).should('exist').and('be.disabled');
+              cy.contains('button', ACTION_ICON_DEL).should('exist').and('be.disabled');
+              cy.contains('button', ACTION_ICON_VAC).should('exist').and('not.be.disabled');
+            });
+
+          cy.get('body').click(0, 0);
+
+          return false;
+        }
+      })
+      .then(() => {
+        expect(criteriaMet, 'Failed to find a row matching the specified criteria').to.be.true;
+      });
   });
 });
