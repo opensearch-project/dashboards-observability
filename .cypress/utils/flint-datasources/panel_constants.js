@@ -46,11 +46,29 @@ export const ACC_REFRESH_TYPE = 'Refresh Type';
 export const ACC_DESTINATION_INDEX = 'Destination Index';
 export const ACC_ACTIONS_COL = 'Actions';
 
+// Acceleration Types
+export const TYPE_MV = 'Materialized View';
+export const TYPE_SI = 'Skipping Index';
+export const TYPE_CI = 'Covering Index';
+
+// Acceleration Status
+export const STATUS_ACT = 'Active';
+export const STATUS_REF = 'Refreshing';
+export const STATUS_DEL = 'Deleted'
+
+// Acceleration Refresh Types
+export const REFRESH_TYPE_AUTO = 'Auto refresh';
+export const REFRESH_TYPE_MANUAL = 'Manual';
+
 // Table Actions
 export const ACTION_ICON_DIS = 'Discover';
 export const ACTION_ICON_ACC = 'Accelerate';
+export const ACTION_ICON_DEL = 'Delete';
+export const ACTION_ICON_VAC = 'Vacuum';
+export const ACTION_ICON_SYN = 'Sync';
 
 // Table Content
+export const EMPTY_CONTENT = '-';
 export const DATABASE_NAME_DDEFAULT = 'default';
 export const TABLE_NAME_1 = 'http_logs';
 export const TABLE_NAME_2 = 'http_logs_1';
@@ -58,3 +76,4 @@ export const TABLE_NAME_3 = 'table_no_timestamp';
 export const TABLE_NAME_4 = 'table_struct';
 export const AO_TYPE_TABLE = 'Table';
 export const SKIP_INDEX_NAME = 'skipping_index';
+export const ACTIVE_MV_NAME = 'http_count_view';

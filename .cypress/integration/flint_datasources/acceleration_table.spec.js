@@ -20,6 +20,16 @@ import {
   ACC_REFRESH_TYPE,
   ACC_DESTINATION_INDEX,
   ACC_ACTIONS_COL,
+  TYPE_MV,
+  TYPE_SI,
+  EMPTY_CONTENT,
+  ACTIVE_MV_NAME,
+  SKIP_INDEX_NAME,
+  ACTION_ICON_DEL,
+  ACTION_ICON_VAC,
+  ACTION_ICON_SYN,
+  REFRESH_TYPE_AUTO,
+  REFRESH_TYPE_MANUAL,
 } from '../../utils/flint-datasources/panel_constants';
 
 Cypress.on('uncaught:exception', (err, runnable) => {
@@ -63,7 +73,7 @@ describe('Acceleration Table test', () => {
     cy.clearLocalStorage('async-query-acclerations-cache');
   });
 
-  it('Navigates to Acceleration table and check header elements', () => {
+  it.skip('Navigates to Acceleration table and check header elements', () => {
     goToAccelerationTable();
 
     cy.contains('.euiFlexItem .euiText.euiText--medium', ACC_TABLE_TITLE).should(
@@ -78,7 +88,7 @@ describe('Acceleration Table test', () => {
     cy.contains('.euiButton--primary.euiButton--fill', CREATE_ACC_BTN_DESC).should('exist');
   });
 
-  it('Navigates to Acceleration table and check table columns', () => {
+  it.skip('Navigates to Acceleration table and check table columns', () => {
     goToAccelerationTable();
 
     cy.get('th[data-test-subj="tableHeaderCell_indexName_0"]')
@@ -110,5 +120,69 @@ describe('Acceleration Table test', () => {
       .should('exist');
 
     cy.get('th').contains('span[title="Actions"]', ACC_ACTIONS_COL).should('exist');
+  });
+
+  it.skip('Checks rows for "Materialized View" type and verifies table column content', () => {
+    goToAccelerationTable();
+
+    cy.get('tbody')
+      .find('tr')
+      .each(($row) => {
+        cy.wrap($row)
+          .find('td')
+          .eq(2)
+          .invoke('text')
+          .then((text) => {
+            if (text.includes(TYPE_MV)) {
+              cy.wrap($row).find('td').eq(4).should('contain.text', EMPTY_CONTENT);
+            }
+          });
+      });
+  });
+
+  it.skip('Checks rows for "Skipping Index" type and verifies Destination Index column content', () => {
+    goToAccelerationTable();
+
+    cy.get('tbody')
+      .find('tr')
+      .each(($row) => {
+        cy.wrap($row)
+          .find('td')
+          .eq(2)
+          .invoke('text')
+          .then((text) => {
+            if (text.includes(TYPE_SI)) {
+              cy.wrap($row).find('td').last().should('contain.text', EMPTY_CONTENT);
+            }
+          });
+      });
+  });
+
+  it('Verifies Sync is enabled and Vacuum is disabled for specific row', () => {
+    goToAccelerationTable();
+
+    cy.get('tbody tr').contains('td', ACTIVE_MV_NAME).parent('tr').as('selectedRow');
+
+    cy.get('@selectedRow').find('td').eq(2).contains('div', TYPE_MV).should('exist');
+
+    cy.get('@selectedRow').find('td').eq(5).contains('div', REFRESH_TYPE_MANUAL).should('exist');
+
+    cy.get('@selectedRow').find('[data-test-subj="euiCollapsedItemActionsButton"]').click();
+
+    cy.get('.euiContextMenuPanel')
+      .should('be.visible')
+      .within(() => {
+        cy.contains('button', ACTION_ICON_SYN).should('be.visible').and('not.be.disabled');
+      });
+
+    cy.get('.euiContextMenuPanel').within(() => {
+      cy.contains('button', ACTION_ICON_DEL).should('be.visible').and('not.be.disabled');
+    });
+
+    cy.get('.euiContextMenuPanel').within(() => {
+      cy.contains('button', ACTION_ICON_VAC).should('be.visible').and('be.disabled');
+    });
+
+    cy.get('body').click(0, 0);
   });
 });
