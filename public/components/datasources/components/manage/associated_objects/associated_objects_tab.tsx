@@ -15,6 +15,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useToast } from 'public/components/common/toast';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
@@ -65,6 +66,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [databasesLoadFailed, setDatabasesLoadFailed] = useState<boolean>(false);
   const [associatedObjectsLoadFailed, setAssociatedObjectsLoadFailed] = useState<boolean>(false);
+  const { setToast } = useToast();
 
   const {
     databasesLoadStatus,
@@ -206,7 +208,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   // Load tables and accelerations if empty or retrieve from cache if not
   useEffect(() => {
     if (datasource.name && selectedDatabase) {
-      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      let databaseCache;
+      try {
+        databaseCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+      } catch (error) {
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        return;
+      }
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
       );
@@ -238,7 +246,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     if (datasource.name && selectedDatabase) {
       const tablesStatus = tablesLoadStatus.toLowerCase();
-      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      let databaseCache;
+      try {
+        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      } catch (error) {
+        return;
+      }
       const accelerationsStatus = accelerationsLoadStatus.toLowerCase();
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name

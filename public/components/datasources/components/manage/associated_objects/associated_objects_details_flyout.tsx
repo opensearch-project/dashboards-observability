@@ -234,7 +234,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         ).columns;
         setTableColumns(columns);
       } catch (error) {
-        setToast('Cache is out of date, reload your cache.', 'warning');
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
       }
     }
   }, [loadStatus]);
