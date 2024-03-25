@@ -319,6 +319,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
                   <EuiButton
@@ -615,7 +616,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 associatedObjects={
                   Array [
                     Object {
-                      "accelerations": Array [],
+                      "accelerations": Array [
+                        Object {
+                          "autoRefresh": true,
+                          "database": "mock_database_1",
+                          "flintIndexName": "mock_acceleration_1",
+                          "indexName": "mock_acceleration_1",
+                          "status": "",
+                          "table": "mock_table_1",
+                          "type": "skipping",
+                        },
+                      ],
                       "columns": undefined,
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
@@ -665,7 +676,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "type": "table",
                     },
                     Object {
-                      "accelerations": Array [],
+                      "accelerations": Object {
+                        "accelerations": Array [
+                          Object {
+                            "autoRefresh": true,
+                            "database": "mock_database_1",
+                            "flintIndexName": "mock_acceleration_1",
+                            "indexName": "mock_acceleration_1",
+                            "status": "",
+                            "table": "mock_table_1",
+                            "type": "skipping",
+                          },
+                        ],
+                        "columns": undefined,
+                        "database": "mock_database_1",
+                        "datasource": "mock_data_source",
+                        "id": "mock_table_1",
+                        "name": "mock_table_1",
+                        "type": "table",
+                      },
                       "columns": undefined,
                       "database": "mock_database_1",
                       "datasource": "mock_data_source",
@@ -694,7 +723,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "flintIndexName": "mock_acceleration_1",
                       "indexName": "mock_acceleration_1",
                       "status": "",
-                      "table": "",
+                      "table": "mock_table_1",
                       "type": "skipping",
                     },
                     Object {
@@ -709,6 +738,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   ]
                 }
                 datasourceName="mock_data_source"
+                handleRefresh={[Function]}
               >
                 <EuiInMemoryTable
                   columns={
@@ -728,7 +758,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       },
                       Object {
                         "field": "accelerations",
-                        "name": "Accelerations",
+                        "name": "Associations",
                         "render": [Function],
                         "sortable": true,
                       },
@@ -759,7 +789,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   items={
                     Array [
                       Object {
-                        "accelerations": Array [],
+                        "accelerations": Array [
+                          Object {
+                            "autoRefresh": true,
+                            "database": "mock_database_1",
+                            "flintIndexName": "mock_acceleration_1",
+                            "indexName": "mock_acceleration_1",
+                            "status": "",
+                            "table": "mock_table_1",
+                            "type": "skipping",
+                          },
+                        ],
                         "columns": undefined,
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
@@ -809,7 +849,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "type": "table",
                       },
                       Object {
-                        "accelerations": Array [],
+                        "accelerations": Object {
+                          "accelerations": Array [
+                            Object {
+                              "autoRefresh": true,
+                              "database": "mock_database_1",
+                              "flintIndexName": "mock_acceleration_1",
+                              "indexName": "mock_acceleration_1",
+                              "status": "",
+                              "table": "mock_table_1",
+                              "type": "skipping",
+                            },
+                          ],
+                          "columns": undefined,
+                          "database": "mock_database_1",
+                          "datasource": "mock_data_source",
+                          "id": "mock_table_1",
+                          "name": "mock_table_1",
+                          "type": "table",
+                        },
                         "columns": undefined,
                         "database": "mock_database_1",
                         "datasource": "mock_data_source",
@@ -1293,7 +1351,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           },
                           Object {
                             "field": "accelerations",
-                            "name": "Accelerations",
+                            "name": "Associations",
                             "render": [Function],
                             "sortable": true,
                           },
@@ -1324,7 +1382,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       items={
                         Array [
                           Object {
-                            "accelerations": Array [],
+                            "accelerations": Object {
+                              "accelerations": Array [
+                                Object {
+                                  "autoRefresh": true,
+                                  "database": "mock_database_1",
+                                  "flintIndexName": "mock_acceleration_1",
+                                  "indexName": "mock_acceleration_1",
+                                  "status": "",
+                                  "table": "mock_table_1",
+                                  "type": "skipping",
+                                },
+                              ],
+                              "columns": undefined,
+                              "database": "mock_database_1",
+                              "datasource": "mock_data_source",
+                              "id": "mock_table_1",
+                              "name": "mock_table_1",
+                              "type": "table",
+                            },
                             "columns": undefined,
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
@@ -1344,7 +1420,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "type": "materialized",
                           },
                           Object {
-                            "accelerations": Array [],
+                            "accelerations": Array [
+                              Object {
+                                "autoRefresh": true,
+                                "database": "mock_database_1",
+                                "flintIndexName": "mock_acceleration_1",
+                                "indexName": "mock_acceleration_1",
+                                "status": "",
+                                "table": "mock_table_1",
+                                "type": "skipping",
+                              },
+                            ],
                             "columns": undefined,
                             "database": "mock_database_1",
                             "datasource": "mock_data_source",
@@ -1473,7 +1559,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               "isSortAscending": undefined,
                                               "isSorted": false,
                                               "key": "_data_s_accelerations_2",
-                                              "name": "Accelerations",
+                                              "name": "Associations",
                                               "onSort": [Function],
                                             },
                                           ]
@@ -1803,15 +1889,15 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   values={
                                                     Object {
                                                       "description": undefined,
-                                                      "innerText": "Accelerations",
+                                                      "innerText": "Associations",
                                                     }
                                                   }
                                                 >
                                                   <span
                                                     className="euiTableCellContent__text"
-                                                    title="Accelerations"
+                                                    title="Associations"
                                                   >
-                                                    Accelerations
+                                                    Associations
                                                   </span>
                                                 </EuiI18n>
                                               </EuiInnerText>
@@ -1962,7 +2048,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_0_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -1980,12 +2066,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            -
+                                            <EuiLink
+                                              className=""
+                                              key=".0"
+                                              onClick={[Function]}
+                                            >
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                disabled={false}
+                                                onClick={[Function]}
+                                                type="button"
+                                              >
+                                                mock_table_1
+                                              </button>
+                                            </EuiLink>
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2023,7 +2122,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               className="euiTableCellContent__hoverItem"
                                               item={
                                                 Object {
-                                                  "accelerations": Array [],
+                                                  "accelerations": Object {
+                                                    "accelerations": Array [
+                                                      Object {
+                                                        "autoRefresh": true,
+                                                        "database": "mock_database_1",
+                                                        "flintIndexName": "mock_acceleration_1",
+                                                        "indexName": "mock_acceleration_1",
+                                                        "status": "",
+                                                        "table": "mock_table_1",
+                                                        "type": "skipping",
+                                                      },
+                                                    ],
+                                                    "columns": undefined,
+                                                    "database": "mock_database_1",
+                                                    "datasource": "mock_data_source",
+                                                    "id": "mock_table_1",
+                                                    "name": "mock_table_1",
+                                                    "type": "table",
+                                                  },
                                                   "columns": undefined,
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
@@ -2050,7 +2167,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 enabled={true}
                                                 item={
                                                   Object {
-                                                    "accelerations": Array [],
+                                                    "accelerations": Object {
+                                                      "accelerations": Array [
+                                                        Object {
+                                                          "autoRefresh": true,
+                                                          "database": "mock_database_1",
+                                                          "flintIndexName": "mock_acceleration_1",
+                                                          "indexName": "mock_acceleration_1",
+                                                          "status": "",
+                                                          "table": "mock_table_1",
+                                                          "type": "skipping",
+                                                        },
+                                                      ],
+                                                      "columns": undefined,
+                                                      "database": "mock_database_1",
+                                                      "datasource": "mock_data_source",
+                                                      "id": "mock_table_1",
+                                                      "name": "mock_table_1",
+                                                      "type": "table",
+                                                    },
                                                     "columns": undefined,
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
@@ -2229,7 +2364,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_1_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -2247,7 +2382,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2496,7 +2631,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_2_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -2514,12 +2649,25 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
                                           >
-                                            -
+                                            <EuiLink
+                                              className=""
+                                              key=".0"
+                                              onClick={[Function]}
+                                            >
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                disabled={false}
+                                                onClick={[Function]}
+                                                type="button"
+                                              >
+                                                mock_acceleration_1
+                                              </button>
+                                            </EuiLink>
                                           </div>
                                         </td>
                                       </EuiTableRowCell>
@@ -2565,7 +2713,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               className="euiTableCellContent__hoverItem"
                                               item={
                                                 Object {
-                                                  "accelerations": Array [],
+                                                  "accelerations": Array [
+                                                    Object {
+                                                      "autoRefresh": true,
+                                                      "database": "mock_database_1",
+                                                      "flintIndexName": "mock_acceleration_1",
+                                                      "indexName": "mock_acceleration_1",
+                                                      "status": "",
+                                                      "table": "mock_table_1",
+                                                      "type": "skipping",
+                                                    },
+                                                  ],
                                                   "columns": undefined,
                                                   "database": "mock_database_1",
                                                   "datasource": "mock_data_source",
@@ -2592,7 +2750,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 enabled={true}
                                                 item={
                                                   Object {
-                                                    "accelerations": Array [],
+                                                    "accelerations": Array [
+                                                      Object {
+                                                        "autoRefresh": true,
+                                                        "database": "mock_database_1",
+                                                        "flintIndexName": "mock_acceleration_1",
+                                                        "indexName": "mock_acceleration_1",
+                                                        "status": "",
+                                                        "table": "mock_table_1",
+                                                        "type": "skipping",
+                                                      },
+                                                    ],
                                                     "columns": undefined,
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
@@ -2689,7 +2857,17 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 enabled={true}
                                                 item={
                                                   Object {
-                                                    "accelerations": Array [],
+                                                    "accelerations": Array [
+                                                      Object {
+                                                        "autoRefresh": true,
+                                                        "database": "mock_database_1",
+                                                        "flintIndexName": "mock_acceleration_1",
+                                                        "indexName": "mock_acceleration_1",
+                                                        "status": "",
+                                                        "table": "mock_table_1",
+                                                        "type": "skipping",
+                                                      },
+                                                    ],
                                                     "columns": undefined,
                                                     "database": "mock_database_1",
                                                     "datasource": "mock_data_source",
@@ -2868,7 +3046,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_3_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -2886,7 +3064,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3240,7 +3418,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_4_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -3258,7 +3436,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3612,7 +3790,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_5_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -3630,7 +3808,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3984,7 +4162,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                         key="_data_column_accelerations_6_2"
                                         mobileOptions={
                                           Object {
-                                            "header": "Accelerations",
+                                            "header": "Associations",
                                             "render": undefined,
                                           }
                                         }
@@ -4002,7 +4180,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                           <div
                                             className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                           >
-                                            Accelerations
+                                            Associations
                                           </div>
                                           <div
                                             className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5013,6 +5191,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
                   <EuiButton

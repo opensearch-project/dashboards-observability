@@ -45,15 +45,16 @@ export interface ObservabilityStart {
     datasourceName: string,
     handleRefresh?: () => void
   ) => void;
-  renderAssociatedObjectsDetailsFlyout: ({
-    tableDetail,
-  }: {
-    tableDetail: AssociatedObject;
-  }) => void;
+  renderAssociatedObjectsDetailsFlyout: (
+    tableDetail: AssociatedObject,
+    datasourceName: string,
+    handleRefresh?: () => void
+  ) => void;
   renderCreateAccelerationFlyout: (
     dataSource: string,
     databaseName?: string,
-    tableName?: string
+    tableName?: string,
+    handleRefresh?: () => void
   ) => void;
   CatalogCacheManagerInstance: typeof CatalogCacheManager;
   useLoadDatabasesToCacheHook: () => LoadCachehookOutput;

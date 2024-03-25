@@ -55,7 +55,7 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
       break;
     case 'delete':
       title = `Delete acceleration ${displayIndexName} on ${displayFullPath} ?`;
-      description = ACC_DELETE_MSG;
+      description = ACC_DELETE_MSG(displayIndexName);
       confirmButtonText = 'Delete';
       break;
     case 'sync':

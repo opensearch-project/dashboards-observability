@@ -41,7 +41,7 @@ export interface AssociatedObject {
   name: string;
   database: string;
   type: AssociatedObjectIndexType;
-  accelerations: CachedAcceleration[];
+  accelerations: CachedAcceleration[] | AssociatedObject;
   columns?: CachedColumn[];
 }
 
