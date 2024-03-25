@@ -52,7 +52,7 @@ export function registerDslRoute({ router }: { router: IRouter; facet: DSLFacet 
       validate: {
         query: schema.object({
           format: schema.string(),
-          index: schema.string(),
+          index: schema.maybe(schema.string()),
         }),
       },
     },
