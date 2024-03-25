@@ -104,7 +104,7 @@ export const PreviewSQLDefinition = ({
 
   const queryWorkbenchButton = sqlWorkbenchPLuginExists ? (
     <EuiButton iconSide="right" onClick={openInWorkbench}>
-      Continue in Query Workbench
+      Edit in Query Workbench
     </EuiButton>
   ) : (
     <></>

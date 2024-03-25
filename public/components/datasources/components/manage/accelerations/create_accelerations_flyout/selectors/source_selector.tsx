@@ -20,12 +20,13 @@ import React, { useEffect, useState } from 'react';
 import { CoreStart } from '../../../../../../../../../../src/core/public';
 import { DATACONNECTIONS_BASE } from '../../../../../../../../common/constants/shared';
 import {
+  CachedDatabase,
   CachedDataSourceStatus,
   CreateAccelerationForm,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
-import { hasError, validateDataTable, validateDatabase } from '../create/utils';
+import { hasError, validateDatabase, validateDataTable } from '../create/utils';
 import { SelectorLoadDatabases } from './selector_helpers/load_databases';
 import { SelectorLoadObjects } from './selector_helpers/load_objects';
 
@@ -111,18 +112,25 @@ export const AccelerationDataSourceSelector = ({
 
   const loadTables = () => {
     if (selectedDatabase.length > 0) {
-      const dbCache = CatalogCacheManager.getDatabase(
-        accelerationFormData.dataSource,
-        accelerationFormData.database
-      );
-      if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
-        const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
-        setTables(tableLabels);
-      } else if (
-        (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length === 0) ||
-        dbCache.status === CachedDataSourceStatus.Empty
-      ) {
+      let dbCache = {} as CachedDatabase;
+      try {
+        dbCache = CatalogCacheManager.getDatabase(
+          accelerationFormData.dataSource,
+          accelerationFormData.database
+        );
+        if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
+          const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
+          setTables(tableLabels);
+        } else if (
+          (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length === 0) ||
+          dbCache.status === CachedDataSourceStatus.Empty
+        ) {
+          setTables([]);
+        }
+      } catch (error) {
         setTables([]);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        console.error(error);
       }
       setSelectedTable([]);
       setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
