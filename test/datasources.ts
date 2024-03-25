@@ -942,7 +942,7 @@ export const mockAccelerationCacheData: AccelerationsCacheData = {
           flintIndexName: 'mock_acceleration_1',
           type: 'skipping',
           database: 'mock_database_1',
-          table: '',
+          table: 'mock_table_1',
           indexName: 'mock_acceleration_1',
           autoRefresh: true,
           status: '',
