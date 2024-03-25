@@ -18,7 +18,7 @@ import producer from 'immer';
 import React, { useState } from 'react';
 import {
   ACCELERATION_TIME_INTERVAL,
-  TIMESTAMP_DATATYPE,
+  SPARK_TIMESTAMP_DATATYPE,
 } from '../../../../../../../../../common/constants/data_sources';
 import {
   CreateAccelerationForm,
@@ -99,7 +99,7 @@ export const GroupByTumbleExpression = ({
                 placeholder="Select one or more options"
                 singleSelection={{ asPlainText: true }}
                 options={accelerationFormData.dataTableFields
-                  .filter((value) => value.dataType.includes(TIMESTAMP_DATATYPE))
+                  .filter((value) => value.dataType.includes(SPARK_TIMESTAMP_DATATYPE))
                   .map((value) => ({ label: value.fieldName }))}
                 selectedOptions={[{ label: groupbyValues.timeField }]}
                 onChange={onChangeTimeField}
