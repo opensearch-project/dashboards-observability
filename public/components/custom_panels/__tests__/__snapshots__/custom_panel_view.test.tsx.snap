@@ -191,7 +191,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                     disabled=""
                     enterkeyhint="search"
                     id="autocomplete-textarea"
-                    maxlength="512"
+                    maxlength="16384"
                     placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                     spellcheck="false"
                     style="margin-top: 0px; height: 18px; padding: 8px;"
@@ -622,7 +622,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                     disabled=""
                     enterkeyhint="search"
                     id="autocomplete-textarea"
-                    maxlength="512"
+                    maxlength="16384"
                     placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                     spellcheck="false"
                     style="margin-top: 0px; height: 18px; padding: 8px;"
@@ -1810,7 +1810,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 enterKeyHint="search"
                                 fullWidth={true}
                                 id="autocomplete-textarea"
-                                maxLength={512}
+                                maxLength={16384}
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onClick={[Function]}
@@ -1864,7 +1864,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           disabled={true}
                                           enterKeyHint="search"
                                           id="autocomplete-textarea"
-                                          maxLength={512}
+                                          maxLength={16384}
                                           onBlur={[Function]}
                                           onChange={[Function]}
                                           onClick={[Function]}
@@ -4043,7 +4043,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 enterKeyHint="search"
                                 fullWidth={true}
                                 id="autocomplete-textarea"
-                                maxLength={512}
+                                maxLength={16384}
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onClick={[Function]}
@@ -4097,7 +4097,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           disabled={true}
                                           enterKeyHint="search"
                                           id="autocomplete-textarea"
-                                          maxLength={512}
+                                          maxLength={16384}
                                           onBlur={[Function]}
                                           onChange={[Function]}
                                           onClick={[Function]}

@@ -18,6 +18,7 @@ import { i18n } from '@osd/i18n';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
+  AssociatedObjectIndexType,
   CachedAcceleration,
   CachedAccelerationByDataSource,
   CachedDataSourceStatus,
@@ -296,6 +297,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     const tableObjects: AssociatedObject[] = cachedTables.map((table: CachedTable) => {
       return {
+        tableName: table.name,
         datasource: datasource.name,
         id: table.name,
         name: table.name,
@@ -310,12 +312,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     const accelerationObjects: AssociatedObject[] = cachedAccelerations
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
+        tableName: acceleration.table,
         datasource: datasource.name,
         id: acceleration.indexName,
         name: getAccelerationName(acceleration),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
-          .value,
+          .value as AssociatedObjectIndexType,
         accelerations: [],
         columns: undefined,
       }));
