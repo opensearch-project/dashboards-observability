@@ -319,7 +319,12 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
           .value as AssociatedObjectIndexType,
-        accelerations: [],
+        accelerations:
+          acceleration.type === 'covering' || acceleration.type === 'skipping'
+            ? tableObjects.find(
+                (tableObject: AssociatedObject) => tableObject.name === acceleration.table
+              )
+            : [],
         columns: undefined,
       }));
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);

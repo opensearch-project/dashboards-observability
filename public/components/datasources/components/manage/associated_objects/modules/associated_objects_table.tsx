@@ -10,7 +10,6 @@ import {
   EuiLink,
   SearchFilterConfig,
   EuiTableFieldDataColumnType,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -97,34 +96,37 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     {
       field: 'accelerations',
       name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
-        defaultMessage: 'Accelerations',
+        defaultMessage: 'Associations',
       }),
       sortable: true,
-      render: (accelerations: CachedAcceleration[], obj: AssociatedObject) => {
-        if (accelerations.length === 0) {
-          return '-';
-        } else if (accelerations.length === 1) {
-          const name = getAccelerationName(accelerations[0]);
+      render: (accelerations: CachedAcceleration[] | AssociatedObject, obj: AssociatedObject) => {
+        if (Array.isArray(accelerations)) {
+          if (accelerations.length === 0) {
+            return '-';
+          } else if (accelerations.length === 1) {
+            const name = getAccelerationName(accelerations[0]);
+            return (
+              <EuiLink
+                onClick={() => renderAccelerationDetailsFlyout(accelerations[0], datasourceName)}
+              >
+                {name}
+              </EuiLink>
+            );
+          }
+          return (
+            <EuiLink onClick={() => renderAssociatedObjectsDetailsFlyout(obj, datasourceName)}>
+              View all {accelerations.length}
+            </EuiLink>
+          );
+        } else {
           return (
             <EuiLink
-              onClick={() => {
-                renderAccelerationDetailsFlyout(accelerations[0], datasourceName);
-              }}
+              onClick={() => renderAssociatedObjectsDetailsFlyout(accelerations, datasourceName)}
             >
-              {name}
+              {accelerations.name}
             </EuiLink>
           );
         }
-        return (
-          <EuiButtonEmpty
-            onClick={() => {
-              renderAssociatedObjectsDetailsFlyout(obj, datasourceName);
-            }}
-            size="xs"
-          >
-            View all {accelerations.length}
-          </EuiButtonEmpty>
-        );
       },
     },
     {
@@ -196,10 +198,9 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       return clauses.some((clause) => {
         if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
           return associatedObject[clause.field] === clause.value;
-        } else if (
-          clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME &&
-          Array.isArray(associatedObject.accelerations)
-        ) {
+        } else if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
+          console.log('in here');
+          console.log(associatedObject);
           return associatedObject.type !== 'table' && associatedObject.name === clause.value;
         }
 
