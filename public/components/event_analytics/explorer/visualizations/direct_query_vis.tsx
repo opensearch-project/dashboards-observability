@@ -41,7 +41,7 @@ export const DirectQueryVisualization = ({ currentDataSource }: DirectQueryVisua
                 <EuiLink
                   onClick={() =>
                     coreRefs?.application!.navigateToApp(queryWorkbenchPluginID, {
-                      path: `#/${currentDataSource}`,
+                      path: `#/accelerate/${currentDataSource}`,
                     })
                   }
                 >
