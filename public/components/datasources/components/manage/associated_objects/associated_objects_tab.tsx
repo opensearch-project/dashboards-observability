@@ -15,7 +15,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useToast } from 'public/components/common/toast';
+import { useToast } from '../../../../../../public/components/common/toast';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
@@ -210,8 +210,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     if (datasource.name && selectedDatabase) {
       let databaseCache;
       try {
-        databaseCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
       } catch (error) {
+        console.error(error);
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
         return;
       }
@@ -250,6 +251,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       try {
         databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
       } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
         return;
       }
       const accelerationsStatus = accelerationsLoadStatus.toLowerCase();

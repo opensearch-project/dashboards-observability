@@ -69,7 +69,6 @@ export const AssociatedObjectsDetailsFlyout = ({
   const { setToast } = useToast();
 
   const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
     return (
       <EuiButtonEmpty
         onClick={() => {
@@ -234,6 +233,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         ).columns;
         setTableColumns(columns);
       } catch (error) {
+        console.error(error);
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
       }
     }

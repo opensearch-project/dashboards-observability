@@ -199,8 +199,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
           return associatedObject[clause.field] === clause.value;
         } else if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
-          console.log('in here');
-          console.log(associatedObject);
           return associatedObject.type !== 'table' && associatedObject.name === clause.value;
         }
 
