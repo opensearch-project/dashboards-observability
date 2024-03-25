@@ -52,6 +52,7 @@ export const CreateAcceleration = ({
   resetFlyout,
   databaseName,
   tableName,
+  refreshHandler,
 }: CreateAccelerationProps) => {
   const { setToast } = useToast();
   const http = coreRefs!.http;
@@ -259,6 +260,7 @@ export const CreateAcceleration = ({
                 accelerationFormData={accelerationFormData}
                 setAccelerationFormData={setAccelerationFormData}
                 resetFlyout={resetFlyout}
+                refreshHandler={refreshHandler}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
