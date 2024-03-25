@@ -151,12 +151,12 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                 (acc) => getAccelerationName(acc) === asscObj.name
               );
               redirectToExplorerOSIdx(acceleration!.flintIndexName);
-            } else if (asscObj.type === 'table') {
+            } else if (asscObj.type === 'table' || asscObj.type === 'skipping') {
               redirectToExplorerWithDataSrc(
                 asscObj.datasource,
                 DATA_SOURCE_TYPES.S3Glue,
                 asscObj.database,
-                asscObj.name
+                asscObj.tableName
               );
             }
           },
