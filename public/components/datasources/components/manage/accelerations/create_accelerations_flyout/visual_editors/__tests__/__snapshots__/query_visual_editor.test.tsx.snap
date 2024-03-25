@@ -241,7 +241,7 @@ Array [
                   <span
                     className="euiTableCellContent__text"
                   >
-                    Please add fields
+                    You have no definitions defined.
                   </span>
                 </div>
               </td>
@@ -728,12 +728,6 @@ Array [
                         </option>
                         <option
                           key="2"
-                          value="MIN_MAX"
-                        >
-                          Min Max
-                        </option>
-                        <option
-                          key="3"
                           value="BLOOM_FILTER"
                         >
                           Bloom Filter
