@@ -48,6 +48,7 @@ import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sourc
 import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { useToast } from '../../../../../../public/components/common/toast';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -65,6 +66,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
   const [schemaData, setSchemaData] = useState<any>([]);
+  const { setToast } = useToast();
 
   const DiscoverButton = () => {
     // TODO: display button if can be sent to discover
@@ -223,12 +225,17 @@ export const AssociatedObjectsDetailsFlyout = ({
 
   useEffect(() => {
     if (loadStatus.toLowerCase() === DirectQueryLoadingStatus.SUCCESS) {
-      const columns = CatalogCacheManager.getTable(
-        datasourceName,
-        tableDetail.database,
-        tableDetail.name
-      ).columns;
-      setTableColumns(columns);
+      let columns;
+      try {
+        columns = CatalogCacheManager.getTable(
+          datasourceName,
+          tableDetail.database,
+          tableDetail.name
+        ).columns;
+        setTableColumns(columns);
+      } catch (error) {
+        setToast('Cache is out of date, reload your cache.', 'warning');
+      }
     }
   }, [loadStatus]);
 
