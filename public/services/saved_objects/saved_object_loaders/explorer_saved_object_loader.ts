@@ -11,6 +11,7 @@ import {
   ASYNC_POLLING_INTERVAL,
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
+  QUERY_LANGUAGE,
 } from '../../../../common/constants/data_sources';
 import {
   AGGREGATIONS,
@@ -28,6 +29,7 @@ import {
 } from '../../../../common/constants/explorer';
 import { QueryManager } from '../../../../common/query_manager';
 import { statsChunk } from '../../../../common/query_manager/ast/types/stats';
+import { getGroupBy } from '../../../../common/query_manager/query_parser/sql_query_parser';
 import {
   DirectQueryRequest,
   IField,
@@ -252,7 +254,11 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {
-      const statsTokens = queryManager.queryParser().parse(objectData.query).getStats();
+      // although type says it's objectData.queryLang, the field is query_lang
+      const statsTokens =
+        objectData.query_lang === QUERY_LANGUAGE.SQL
+          ? getGroupBy(objectData.query)
+          : queryManager.queryParser().parse(objectData.query).getStats();
       visConfig = { dataConfig: { ...getDefaultVisConfig(statsTokens) } };
     }
     await dispatch(

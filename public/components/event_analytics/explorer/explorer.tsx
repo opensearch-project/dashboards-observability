@@ -67,6 +67,7 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
+import { getGroupBy } from '../../../../common/query_manager/query_parser/sql_query_parser';
 import {
   IExplorerProps,
   IField,
@@ -132,7 +133,6 @@ import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
-import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 
 export const Explorer = ({
   pplService,
@@ -684,7 +684,11 @@ export const Explorer = ({
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
     ? { ...userVizConfigs[curVisId] }
     : {
-        dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
+        dataConfig: getDefaultVisConfig(
+          explorerSearchMeta.lang === QUERY_LANGUAGE.SQL
+            ? getGroupBy(tempQuery)
+            : queryManager.queryParser().parse(tempQuery).getStats()
+        ),
       };
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -709,8 +713,8 @@ export const Explorer = ({
     }
   };
 
-  const explorerVis = useMemo(() => {
-    return isDefaultDataSourceType || appLogEvents ? (
+  const explorerVis = useMemo(
+    () => (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -722,23 +726,19 @@ export const Explorer = ({
         handleOverrideTimestamp={handleOverrideTimestamp}
         callback={callbackForConfig}
         queryManager={queryManager}
+        shouldShowConfigurationUI={isDefaultDataSourceType}
       />
-    ) : (
-      <DirectQueryVisualization
-        currentDataSource={
-          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
-        }
-      />
-    );
-  }, [
-    query,
-    curVisId,
-    explorerFields,
-    explorerVisualizations,
-    explorerData,
-    visualizations,
-    explorerSearchMeta.datasources,
-  ]);
+    ),
+    [
+      query,
+      curVisId,
+      explorerFields,
+      explorerVisualizations,
+      explorerData,
+      visualizations,
+      explorerSearchMeta.datasources,
+    ]
+  );
 
   const contentTabs = [
     {

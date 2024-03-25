@@ -3,21 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { QueryManager } from 'common/query_manager';
+import React from 'react';
+import { VIS_CHART_TYPES } from '../../../../../common/constants/shared';
 import {
+  ExplorerFields,
   IField,
   IQuery,
   IVisualizationContainerProps,
-  ExplorerFields,
 } from '../../../../../common/types/explorer';
-import { WorkspacePanel } from './workspace_panel';
 import { ConfigPanel } from './config_panel';
 import { DataConfigPanelItem } from './config_panel/config_panes/config_controls/data_configurations_panel';
-import { VIS_CHART_TYPES } from '../../../../../common/constants/shared';
-import { TreemapConfigPanelItem } from './config_panel/config_panes/config_controls/treemap_config_panel_item';
 import { LogsViewConfigPanelItem } from './config_panel/config_panes/config_controls/logs_view_config_panel_item';
+import { TreemapConfigPanelItem } from './config_panel/config_panes/config_controls/treemap_config_panel_item';
+import { WorkspacePanel } from './workspace_panel';
 
 interface IExplorerVisualizationsProps {
   query: IQuery;
@@ -30,6 +30,7 @@ interface IExplorerVisualizationsProps {
   handleOverrideTimestamp: (field: IField) => void;
   callback?: any;
   queryManager: QueryManager;
+  shouldShowConfigurationUI: boolean;
 }
 
 export const ExplorerVisualizations = ({
@@ -40,6 +41,7 @@ export const ExplorerVisualizations = ({
   visualizations,
   callback,
   queryManager,
+  shouldShowConfigurationUI,
 }: IExplorerVisualizationsProps) => {
   const { vis } = visualizations;
   const isMarkDown = vis.id === VIS_CHART_TYPES.Text;
@@ -86,16 +88,22 @@ export const ExplorerVisualizations = ({
       <EuiResizableContainer onPanelWidthChange={syntheticResize}>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
-            <EuiResizablePanel
-              initialSize={isMarkDown ? 12 : 20}
-              minSize={isMarkDown ? '10%' : '17%'}
-              mode={['collapsible', { position: 'top' }]}
-              paddingSize="none"
-              className="vis__leftPanel"
-            >
-              {!isMarkDown && <>{renderDataConfigContainer()}</>}
-            </EuiResizablePanel>
-            <EuiResizableButton />
+            {shouldShowConfigurationUI ? (
+              <>
+                <EuiResizablePanel
+                  initialSize={isMarkDown ? 12 : 20}
+                  minSize={isMarkDown ? '10%' : '17%'}
+                  mode={['collapsible', { position: 'top' }]}
+                  paddingSize="none"
+                  className="vis__leftPanel"
+                >
+                  {!isMarkDown && <>{renderDataConfigContainer()}</>}
+                </EuiResizablePanel>
+                <EuiResizableButton />
+              </>
+            ) : (
+              <></>
+            )}
             <EuiResizablePanel
               className="ws__central--canvas"
               initialSize={80}
