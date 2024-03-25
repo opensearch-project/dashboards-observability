@@ -39,7 +39,8 @@ export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z0-9_]+$/;
 export const ACCELERATION_S3_URL_REGEX = /^(s3|s3a):\/\/[a-zA-Z0-9.\-]+/;
 export const SPARK_HIVE_TABLE_REGEX = /Provider:\s*hive/;
 export const SANITIZE_QUERY_REGEX = /\s+/g;
-export const TIMESTAMP_DATATYPE = 'timestamp';
+export const SPARK_TIMESTAMP_DATATYPE = 'timestamp';
+export const SPARK_STRING_DATATYPE = 'string';
 
 export const ACCELERATION_INDEX_TYPES = [
   { label: 'Skipping Index', value: 'skipping' },
@@ -49,6 +50,8 @@ export const ACCELERATION_INDEX_TYPES = [
 
 export const ACC_INDEX_TYPE_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md';
+export const ACC_CHECKPOINT_DOCUMENTATION_URL =
+  'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options';
 
 export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices have a naming format of pattern: \`prefix_<index name>_suffix\`. They share a common prefix structure, which is \`flint_<data source name>_<database name>_<table name>_\`. Additionally, they may have a suffix that varies based on the index type. 
 ##### Skipping Index

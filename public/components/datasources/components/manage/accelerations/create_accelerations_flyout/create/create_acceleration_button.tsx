@@ -59,13 +59,12 @@ export const CreateAccelerationButton = ({
       status === DirectQueryLoadingStatus.CANCELED
     ) {
       setIsLoading(false);
-      setToast('Create acceleration query failed', 'success');
     }
   }, [directqueryLoadStatus]);
 
   return (
     <EuiButton onClick={createAcceleration} fill isLoading={isLoading}>
-      Create acceleration
+      {isLoading ? 'Creating acceleration' : 'Create acceleration'}
     </EuiButton>
   );
 };
