@@ -621,6 +621,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_table_1",
                       "name": "mock_table_1",
+                      "tableName": "mock_table_1",
                       "type": "table",
                     },
                     Object {
@@ -630,6 +631,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_table_2",
                       "name": "mock_table_2",
+                      "tableName": "mock_table_2",
                       "type": "table",
                     },
                     Object {
@@ -639,6 +641,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_table_3",
                       "name": "mock_table_3",
+                      "tableName": "mock_table_3",
                       "type": "table",
                     },
                     Object {
@@ -648,6 +651,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_table_4",
                       "name": "mock_table_4",
+                      "tableName": "mock_table_4",
                       "type": "table",
                     },
                     Object {
@@ -657,6 +661,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_table_5",
                       "name": "mock_table_5",
+                      "tableName": "mock_table_5",
                       "type": "table",
                     },
                     Object {
@@ -666,6 +671,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_1",
                       "name": "mock_acceleration_1",
+                      "tableName": "",
                       "type": "skipping",
                     },
                     Object {
@@ -675,6 +681,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_2",
                       "name": "mock_acceleration_2",
+                      "tableName": "",
                       "type": "materialized",
                     },
                   ]
@@ -758,6 +765,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_1",
                         "name": "mock_table_1",
+                        "tableName": "mock_table_1",
                         "type": "table",
                       },
                       Object {
@@ -767,6 +775,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_2",
                         "name": "mock_table_2",
+                        "tableName": "mock_table_2",
                         "type": "table",
                       },
                       Object {
@@ -776,6 +785,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_3",
                         "name": "mock_table_3",
+                        "tableName": "mock_table_3",
                         "type": "table",
                       },
                       Object {
@@ -785,6 +795,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_4",
                         "name": "mock_table_4",
+                        "tableName": "mock_table_4",
                         "type": "table",
                       },
                       Object {
@@ -794,6 +805,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_5",
                         "name": "mock_table_5",
+                        "tableName": "mock_table_5",
                         "type": "table",
                       },
                       Object {
@@ -803,6 +815,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_1",
                         "name": "mock_acceleration_1",
+                        "tableName": "",
                         "type": "skipping",
                       },
                       Object {
@@ -812,6 +825,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_2",
                         "name": "mock_acceleration_2",
+                        "tableName": "",
                         "type": "materialized",
                       },
                     ]
@@ -1316,6 +1330,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_1",
                             "name": "mock_acceleration_1",
+                            "tableName": "",
                             "type": "skipping",
                           },
                           Object {
@@ -1325,6 +1340,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_2",
                             "name": "mock_acceleration_2",
+                            "tableName": "",
                             "type": "materialized",
                           },
                           Object {
@@ -1334,6 +1350,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_table_1",
                             "name": "mock_table_1",
+                            "tableName": "mock_table_1",
                             "type": "table",
                           },
                           Object {
@@ -1343,6 +1360,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_table_2",
                             "name": "mock_table_2",
+                            "tableName": "mock_table_2",
                             "type": "table",
                           },
                           Object {
@@ -1352,6 +1370,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_table_3",
                             "name": "mock_table_3",
+                            "tableName": "mock_table_3",
                             "type": "table",
                           },
                           Object {
@@ -1361,6 +1380,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_table_4",
                             "name": "mock_table_4",
+                            "tableName": "mock_table_4",
                             "type": "table",
                           },
                           Object {
@@ -1370,6 +1390,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_table_5",
                             "name": "mock_table_5",
+                            "tableName": "mock_table_5",
                             "type": "table",
                           },
                         ]
@@ -2008,6 +2029,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_1",
                                                   "name": "mock_acceleration_1",
+                                                  "tableName": "",
                                                   "type": "skipping",
                                                 }
                                               }
@@ -2034,6 +2056,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_1",
                                                     "name": "mock_acceleration_1",
+                                                    "tableName": "",
                                                     "type": "skipping",
                                                   }
                                                 }
@@ -2273,6 +2296,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_2",
                                                   "name": "mock_acceleration_2",
+                                                  "tableName": "",
                                                   "type": "materialized",
                                                 }
                                               }
@@ -2299,6 +2323,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_2",
                                                     "name": "mock_acceleration_2",
+                                                    "tableName": "",
                                                     "type": "materialized",
                                                   }
                                                 }
@@ -2546,6 +2571,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_1",
                                                   "name": "mock_table_1",
+                                                  "tableName": "mock_table_1",
                                                   "type": "table",
                                                 }
                                               }
@@ -2572,6 +2598,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_1",
                                                     "name": "mock_table_1",
+                                                    "tableName": "mock_table_1",
                                                     "type": "table",
                                                   }
                                                 }
@@ -2668,6 +2695,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_1",
                                                     "name": "mock_table_1",
+                                                    "tableName": "mock_table_1",
                                                     "type": "table",
                                                   }
                                                 }
@@ -2915,6 +2943,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_2",
                                                   "name": "mock_table_2",
+                                                  "tableName": "mock_table_2",
                                                   "type": "table",
                                                 }
                                               }
@@ -2941,6 +2970,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_2",
                                                     "name": "mock_table_2",
+                                                    "tableName": "mock_table_2",
                                                     "type": "table",
                                                   }
                                                 }
@@ -3037,6 +3067,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_2",
                                                     "name": "mock_table_2",
+                                                    "tableName": "mock_table_2",
                                                     "type": "table",
                                                   }
                                                 }
@@ -3284,6 +3315,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_3",
                                                   "name": "mock_table_3",
+                                                  "tableName": "mock_table_3",
                                                   "type": "table",
                                                 }
                                               }
@@ -3310,6 +3342,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_3",
                                                     "name": "mock_table_3",
+                                                    "tableName": "mock_table_3",
                                                     "type": "table",
                                                   }
                                                 }
@@ -3406,6 +3439,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_3",
                                                     "name": "mock_table_3",
+                                                    "tableName": "mock_table_3",
                                                     "type": "table",
                                                   }
                                                 }
@@ -3653,6 +3687,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_4",
                                                   "name": "mock_table_4",
+                                                  "tableName": "mock_table_4",
                                                   "type": "table",
                                                 }
                                               }
@@ -3679,6 +3714,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_4",
                                                     "name": "mock_table_4",
+                                                    "tableName": "mock_table_4",
                                                     "type": "table",
                                                   }
                                                 }
@@ -3775,6 +3811,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_4",
                                                     "name": "mock_table_4",
+                                                    "tableName": "mock_table_4",
                                                     "type": "table",
                                                   }
                                                 }
@@ -4022,6 +4059,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_table_5",
                                                   "name": "mock_table_5",
+                                                  "tableName": "mock_table_5",
                                                   "type": "table",
                                                 }
                                               }
@@ -4048,6 +4086,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_5",
                                                     "name": "mock_table_5",
+                                                    "tableName": "mock_table_5",
                                                     "type": "table",
                                                   }
                                                 }
@@ -4144,6 +4183,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_5",
                                                     "name": "mock_table_5",
+                                                    "tableName": "mock_table_5",
                                                     "type": "table",
                                                   }
                                                 }
