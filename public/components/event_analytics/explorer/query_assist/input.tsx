@@ -95,6 +95,7 @@ const prohibitedQueryCallOut = (
     size="s"
     color="danger"
     iconType="alert"
+    dismissible
   />
 );
 
@@ -105,6 +106,7 @@ const emptyQueryCallOut = (
     size="s"
     color="warning"
     iconType="iInCircle"
+    dismissible
   />
 );
 
@@ -115,6 +117,7 @@ const pplGenerated = (
     size="s"
     color="success"
     iconType="check"
+    dismissible
   />
 );
 
