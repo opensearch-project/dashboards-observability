@@ -44,6 +44,7 @@ export interface CreateAccelerationProps {
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
+  refreshHandler?: () => void;
 }
 
 export const CreateAcceleration = ({

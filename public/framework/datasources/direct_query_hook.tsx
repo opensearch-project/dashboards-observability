@@ -74,6 +74,7 @@ export const useDirectQuery = () => {
       setLoadStatus(status);
       stopLoading();
     } else if (status === DirectQueryLoadingStatus.FAILED) {
+      setLoadStatus(status);
       stopLoading();
       const formattedError = formatError(
         '',

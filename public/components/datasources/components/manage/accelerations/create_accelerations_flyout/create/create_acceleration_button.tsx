@@ -62,9 +62,11 @@ export const CreateAccelerationButton = ({
     }
   }, [directqueryLoadStatus]);
 
-  return (
+  const createAccelerationBtn = (
     <EuiButton onClick={createAcceleration} fill isLoading={isLoading}>
       {isLoading ? 'Creating acceleration' : 'Create acceleration'}
     </EuiButton>
   );
+
+  return createAccelerationBtn;
 };
