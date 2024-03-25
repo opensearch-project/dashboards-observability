@@ -88,13 +88,25 @@ export const generateAccelerationOperationQuery = (
 export const CreateAccelerationFlyoutButton = ({
   dataSourceName,
   renderCreateAccelerationFlyout,
+  handleRefresh,
 }: {
   dataSourceName: string;
-  renderCreateAccelerationFlyout: (dataSourceName: string) => void;
+  renderCreateAccelerationFlyout: (
+    dataSource: string,
+    databaseName?: string,
+    tableName?: string,
+    handleRefresh?: () => void
+  ) => void;
+  handleRefresh: () => void;
 }) => {
   return (
     <>
-      <EuiButton onClick={() => renderCreateAccelerationFlyout(dataSourceName)} fill>
+      <EuiButton
+        onClick={() =>
+          renderCreateAccelerationFlyout(dataSourceName, undefined, undefined, handleRefresh)
+        }
+        fill
+      >
         Create acceleration
       </EuiButton>
     </>

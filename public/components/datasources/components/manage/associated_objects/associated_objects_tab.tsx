@@ -152,6 +152,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <CreateAccelerationFlyoutButton
             dataSourceName={datasource.name}
             renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+            handleRefresh={onRefreshButtonClick}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -400,6 +401,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                             datasourceName={datasource.name}
                             associatedObjects={associatedObjects}
                             cachedAccelerations={cachedAccelerations}
+                            handleRefresh={onRefreshButtonClick}
                           />
                         ) : (
                           <AssociatedObjectsTabEmpty cacheType="tables" />

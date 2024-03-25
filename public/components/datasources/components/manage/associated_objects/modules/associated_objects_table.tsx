@@ -38,6 +38,7 @@ interface AssociatedObjectsTableProps {
   datasourceName: string;
   associatedObjects: AssociatedObject[];
   cachedAccelerations: CachedAcceleration[];
+  handleRefresh: () => void;
 }
 
 interface FilterOption {
@@ -53,7 +54,7 @@ interface AssociatedTableFilter {
 }
 
 export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
-  const { datasourceName, associatedObjects, cachedAccelerations } = props;
+  const { datasourceName, associatedObjects, cachedAccelerations, handleRefresh } = props;
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
@@ -69,7 +70,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         <EuiLink
           onClick={() => {
             if (item.type === 'table') {
-              renderAssociatedObjectsDetailsFlyout(item, datasourceName);
+              renderAssociatedObjectsDetailsFlyout(item, datasourceName, handleRefresh);
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
               if (acceleration) {
@@ -107,21 +108,29 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             const name = getAccelerationName(accelerations[0]);
             return (
               <EuiLink
-                onClick={() => renderAccelerationDetailsFlyout(accelerations[0], datasourceName)}
+                onClick={() =>
+                  renderAccelerationDetailsFlyout(accelerations[0], datasourceName, handleRefresh)
+                }
               >
                 {name}
               </EuiLink>
             );
           }
           return (
-            <EuiLink onClick={() => renderAssociatedObjectsDetailsFlyout(obj, datasourceName)}>
+            <EuiLink
+              onClick={() =>
+                renderAssociatedObjectsDetailsFlyout(obj, datasourceName, handleRefresh)
+              }
+            >
               View all {accelerations.length}
             </EuiLink>
           );
         } else {
           return (
             <EuiLink
-              onClick={() => renderAssociatedObjectsDetailsFlyout(accelerations, datasourceName)}
+              onClick={() =>
+                renderAssociatedObjectsDetailsFlyout(accelerations, datasourceName, handleRefresh)
+              }
             >
               {accelerations.name}
             </EuiLink>
@@ -177,7 +186,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           icon: 'bolt',
           available: (item: AssociatedObject) => item.type === 'table',
           onClick: (item: AssociatedObject) =>
-            renderCreateAccelerationFlyout(datasourceName, item.database, item.name),
+            renderCreateAccelerationFlyout(datasourceName, item.database, item.name, handleRefresh),
         },
       ],
     },

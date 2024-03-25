@@ -20,12 +20,14 @@ interface CreateAccelerationButtonProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   resetFlyout: () => void;
+  refreshHandler?: () => void;
 }
 
 export const CreateAccelerationButton = ({
   accelerationFormData,
   setAccelerationFormData,
   resetFlyout,
+  refreshHandler,
 }: CreateAccelerationButtonProps) => {
   const { setToast } = useToast();
   const { loadStatus: directqueryLoadStatus, startLoading: startDirectQuery } = useDirectQuery();
@@ -53,6 +55,7 @@ export const CreateAccelerationButton = ({
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setIsLoading(false);
       setToast('Create acceleration query submitted successfully!', 'success');
+      if (refreshHandler) refreshHandler();
       resetFlyout();
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||

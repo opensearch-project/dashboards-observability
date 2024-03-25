@@ -319,6 +319,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
                   <EuiButton
@@ -737,6 +738,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                   ]
                 }
                 datasourceName="mock_data_source"
+                handleRefresh={[Function]}
               >
                 <EuiInMemoryTable
                   columns={
@@ -5189,6 +5191,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
                   <EuiButton
