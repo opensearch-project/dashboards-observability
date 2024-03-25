@@ -276,28 +276,32 @@ export const Explorer = ({
       queryToRun,
     }: any = historyFromRedirection.location.state;
     batch(() => {
-      dispatch(
-        updateSearchMetaData({
-          tabId,
-          data: {
-            datasources: [
-              {
-                label: datasourceName,
-                type: datasourceType,
-                value: datasourceName,
-                name: datasourceName,
-              },
-            ],
-          },
-        })
-      );
-      dispatch(
-        changeQuery({
-          tabId,
-          query: { [RAW_QUERY]: queryToRun },
-        })
-      );
-      setTempQuery(queryToRun);
+      if (datasourceName && datasourceType) {
+        dispatch(
+          updateSearchMetaData({
+            tabId,
+            data: {
+              datasources: [
+                {
+                  label: datasourceName,
+                  type: datasourceType,
+                  value: datasourceName,
+                  name: datasourceName,
+                },
+              ],
+            },
+          })
+        );
+      }
+      if (queryToRun) {
+        dispatch(
+          changeQuery({
+            tabId,
+            query: { [RAW_QUERY]: queryToRun },
+          })
+        );
+        setTempQuery(queryToRun);
+      }
     });
   }, []);
 

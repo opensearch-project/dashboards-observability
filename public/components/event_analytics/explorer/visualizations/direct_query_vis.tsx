@@ -3,15 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPage,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPage, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { queryWorkbenchPluginID } from '../../../../../common/constants/shared';
@@ -41,7 +33,7 @@ export const DirectQueryVisualization = ({ currentDataSource }: DirectQueryVisua
                 <EuiLink
                   onClick={() =>
                     coreRefs?.application!.navigateToApp(queryWorkbenchPluginID, {
-                      path: `#/${currentDataSource}`,
+                      path: `#/accelerate/${currentDataSource}`,
                     })
                   }
                 >

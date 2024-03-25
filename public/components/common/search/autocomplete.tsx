@@ -9,7 +9,7 @@ import { EuiFieldText, EuiTextArea } from '@elastic/eui';
 import $ from 'jquery';
 import DSLService from 'public/services/requests/dsl';
 import React, { useEffect, useMemo, useState } from 'react';
-import { AutocompleteItem } from '../../../../common/constants/autocomplete';
+import { AutocompleteItem, textAreaMaxLength } from '../../../../common/constants/autocomplete';
 import { uiSettingsService } from '../../../../common/utils';
 import { IQueryBarProps } from './search';
 import './search.scss';
@@ -142,6 +142,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
           'data-test-subj': 'searchAutocompleteTextArea',
           placeholder,
           inputElement: null,
+          maxLength: textAreaMaxLength,
         })}
         {...(panelsFilter && { append, fullWidth: true })}
         disabled={isDisabled}
