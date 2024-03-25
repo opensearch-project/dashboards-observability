@@ -24,7 +24,6 @@ import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
   INTEGRATIONS_BASE,
-  observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
 import {
@@ -36,7 +35,7 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
-import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
@@ -125,13 +124,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   };
 
   const onclickDiscoverCard = () => {
-    application!.navigateToApp(observabilityLogsID, {
-      path: `#/explorer`,
-      state: {
-        datasourceName: dataSource,
-        datasourceType: DATA_SOURCE_TYPES.S3Glue,
-      },
-    });
+    redirectToExplorerS3(dataSource);
   };
 
   const DefaultDatasourceCards = () => {
