@@ -68,32 +68,36 @@ export const updateTablesToCache = (
   databaseName: string,
   pollingResult: AsyncPollingResult
 ) => {
-  const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
-  const currentTime = new Date().toUTCString();
+  try {
+    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const currentTime = new Date().toUTCString();
 
-  if (!pollingResult) {
+    if (!pollingResult) {
+      CatalogCacheManager.updateDatabase(dataSourceName, {
+        ...cachedDatabase,
+        tables: [],
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Failed,
+      });
+      return;
+    }
+
+    const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
+    const newTables = combinedData
+      .filter((row: any) => !SPARK_HIVE_TABLE_REGEX.test(row.information))
+      .map((row: any) => ({
+        name: row.tableName,
+      }));
+
     CatalogCacheManager.updateDatabase(dataSourceName, {
       ...cachedDatabase,
-      tables: [],
+      tables: newTables,
       lastUpdated: currentTime,
-      status: CachedDataSourceStatus.Failed,
+      status: CachedDataSourceStatus.Updated,
     });
-    return;
+  } catch (error) {
+    console.error(error);
   }
-
-  const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
-  const newTables = combinedData
-    .filter((row: any) => !SPARK_HIVE_TABLE_REGEX.test(row.information))
-    .map((row: any) => ({
-      name: row.tableName,
-    }));
-
-  CatalogCacheManager.updateDatabase(dataSourceName, {
-    ...cachedDatabase,
-    tables: newTables,
-    lastUpdated: currentTime,
-    status: CachedDataSourceStatus.Updated,
-  });
 };
 
 export const updateAccelerationsToCache = (
@@ -138,38 +142,44 @@ export const updateTableColumnsToCache = (
   tableName: string,
   pollingResult: AsyncPollingResult
 ) => {
-  if (!pollingResult) {
-    return;
-  }
-  const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
-  const currentTime = new Date().toUTCString();
-
-  const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
-    pollingResult.schema,
-    pollingResult.datarows
-  );
-
-  const tableColumns: CachedColumn[] = [];
-  for (const row of combinedData) {
-    if (row.col_name === SPARK_PARTITION_INFO) {
-      break;
+  try {
+    if (!pollingResult) {
+      return;
     }
-    tableColumns.push({
-      fieldName: row.col_name,
-      dataType: row.data_type,
-    });
+    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const currentTime = new Date().toUTCString();
+
+    const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
+      pollingResult.schema,
+      pollingResult.datarows
+    );
+
+    const tableColumns: CachedColumn[] = [];
+    for (const row of combinedData) {
+      if (row.col_name === SPARK_PARTITION_INFO) {
+        break;
+      }
+      tableColumns.push({
+        fieldName: row.col_name,
+        dataType: row.data_type,
+      });
+    }
+
+    const newTables: CachedTable[] = cachedDatabase.tables.map((ts) =>
+      ts.name === tableName ? { ...ts, columns: tableColumns } : { ...ts }
+    );
+
+    if (cachedDatabase.status === CachedDataSourceStatus.Updated) {
+      CatalogCacheManager.updateDatabase(dataSourceName, {
+        ...cachedDatabase,
+        tables: newTables,
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Updated,
+      });
+    }
+  } catch (error) {
+    console.error(error);
   }
-
-  const newTables: CachedTable[] = cachedDatabase.tables.map((ts) =>
-    ts.name === tableName ? { ...ts, columns: tableColumns } : { ...ts }
-  );
-
-  CatalogCacheManager.updateDatabase(dataSourceName, {
-    ...cachedDatabase,
-    tables: newTables,
-    lastUpdated: currentTime,
-    status: CachedDataSourceStatus.Updated,
-  });
 };
 
 export const updateToCache = (

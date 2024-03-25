@@ -28,6 +28,7 @@ import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/e
 import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../../../../../framework/core_refs';
+import { useToast } from '../../../../../../common/toast';
 import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
 import { IndexTypeSelector } from '../selectors/index_type_selector';
@@ -43,6 +44,7 @@ export interface CreateAccelerationProps {
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
+  refreshHandler?: () => void;
 }
 
 export const CreateAcceleration = ({
@@ -51,6 +53,7 @@ export const CreateAcceleration = ({
   databaseName,
   tableName,
 }: CreateAccelerationProps) => {
+  const { setToast } = useToast();
   const http = coreRefs!.http;
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
@@ -135,13 +138,17 @@ export const CreateAcceleration = ({
     stopLoadingTableFields();
     if (dataTable !== '') {
       setTableFieldsLoading(true);
-      const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
-
-      if (cachedTable.columns) {
-        loadColumnsToAccelerationForm(cachedTable);
-        setTableFieldsLoading(false);
-      } else {
-        startLoading(dataSource, database, dataTable);
+      try {
+        const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
+        if (cachedTable.columns) {
+          loadColumnsToAccelerationForm(cachedTable);
+          setTableFieldsLoading(false);
+        } else {
+          startLoading(dataSource, database, dataTable);
+        }
+      } catch (error) {
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        console.error(error);
       }
     }
   };
@@ -159,11 +166,18 @@ export const CreateAcceleration = ({
   useEffect(() => {
     const status = loadStatus.toLowerCase();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
-      const cachedTable = CatalogCacheManager.getTable(
-        accelerationFormData.dataSource,
-        accelerationFormData.database,
-        accelerationFormData.dataTable
-      );
+      let cachedTable = {} as CachedTable;
+      try {
+        cachedTable = CatalogCacheManager.getTable(
+          accelerationFormData.dataSource,
+          accelerationFormData.database,
+          accelerationFormData.dataTable
+        );
+      } catch (error) {
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        console.error(error);
+      }
+
       loadColumnsToAccelerationForm(cachedTable);
       setTableFieldsLoading(false);
     } else if (

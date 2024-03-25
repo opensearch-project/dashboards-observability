@@ -14,7 +14,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { SKIPPING_INDEX_ACCELERATION_METHODS } from '../../../../../../../../../common/constants/data_sources';
+import {
+  SKIPPING_INDEX_ACCELERATION_METHODS,
+  SPARK_STRING_DATATYPE,
+} from '../../../../../../../../../common/constants/data_sources';
 import {
   CreateAccelerationForm,
   SkippingIndexAccMethodType,
@@ -100,7 +103,11 @@ export const SkippingIndexBuilder = ({
       render: (item: SkippingIndexRowType) => (
         <EuiSelect
           id="selectDocExample"
-          options={SKIPPING_INDEX_ACCELERATION_METHODS}
+          options={
+            item.dataType === SPARK_STRING_DATATYPE
+              ? SKIPPING_INDEX_ACCELERATION_METHODS.filter((method) => method.value !== 'MIN_MAX')
+              : SKIPPING_INDEX_ACCELERATION_METHODS
+          }
           value={item.accelerationMethod}
           onChange={(e) => onChangeAccelerationMethod(e, item)}
           aria-label="Use aria labels when no actual label is in use"
@@ -162,7 +169,7 @@ export const SkippingIndexBuilder = ({
         noItemsMessage={
           isSkippingtableLoading
             ? 'Auto-generating skipping index definition.'
-            : 'Please add fields'
+            : 'You have no definitions defined.'
         }
       />
       <EuiFlexGroup justifyContent="spaceBetween">
