@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@ag-grid-community/styles@^31.2.0":
+  version "31.2.0"
+  resolved "https://registry.yarnpkg.com/@ag-grid-community/styles/-/styles-31.2.0.tgz#7605338f2e0f3a3c2e7952f0e96360600033316c"
+  integrity sha512-fU6wDpK0//dJLp5pwojuTUQPi4nVZ4iTBF1yaQw+6NXeGi0ma7rz7IOS6Idw0XXE3ELKGTuO7QUJmxxdL7kykw==
+
 "@algolia/autocomplete-core@^1.4.1":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@algolia/autocomplete-core/-/autocomplete-core-1.11.0.tgz#9db68f2aa38fe3149507d214082a1926b6b91fac"
@@ -359,16 +364,17 @@ acorn@^7.1.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-ag-grid-community@^27.3.0:
-  version "27.3.0"
-  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-27.3.0.tgz#b1e94a58026aaf2f0cd7920e35833325b5e762c7"
-  integrity sha512-R5oZMXEHXnOLrmhn91J8lR0bv6IAnRcU6maO+wKLMJxffRWaAYFAuw1jt7bdmcKCv8c65F6LEBx4ykSOALa9vA==
+ag-grid-community@31.2.0:
+  version "31.2.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-31.2.0.tgz#376f07a3a7dd5c87d8cb6f660e4e338ec70663d1"
+  integrity sha512-Ija6X171Iq3mFZASZlriQIIdEFqA71rZIsjQD6KHy5lMmxnoseZTX2neThBav1gvr6SA6n5B2PD6eUHdZnrUfw==
 
-ag-grid-react@^27.3.0:
-  version "27.3.0"
-  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-27.3.0.tgz#fe06647653f8b0b349b8e613aab8ea2e07915562"
-  integrity sha512-2bs9YfJ/shvBZQLLjny4NFvht+ic6VtpTPO0r3bHHOhlL3Fjx2rGvS6AHSwfvu+kJacHCta30PjaEbX8T3UDyw==
+ag-grid-react@^31.2.0:
+  version "31.2.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-31.2.0.tgz#c3e90edd4ccac3fbb113b657ad6192bc2d85e314"
+  integrity sha512-ObFdPmF3EC7/xWZX8NjrZjURePyFa72MWjb1ZgUqDP7Wq09OSXXyKBN1qXmfUIT3h4o5+os6tCQEqoo7Op+3ZA==
   dependencies:
+    ag-grid-community "31.2.0"
     prop-types "^15.8.1"
 
 aggregate-error@^3.0.0:
