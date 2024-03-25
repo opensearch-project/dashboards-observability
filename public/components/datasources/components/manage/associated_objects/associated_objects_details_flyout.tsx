@@ -48,6 +48,7 @@ import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sourc
 import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { useToast } from '../../../../../../public/components/common/toast';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -65,9 +66,9 @@ export const AssociatedObjectsDetailsFlyout = ({
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
   const [schemaData, setSchemaData] = useState<any>([]);
+  const { setToast } = useToast();
 
   const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
     return (
       <EuiButtonEmpty
         onClick={() => {
@@ -90,7 +91,12 @@ export const AssociatedObjectsDetailsFlyout = ({
     return (
       <EuiButtonEmpty
         onClick={() =>
-          renderCreateAccelerationFlyout(datasourceName, tableDetail.database, tableDetail.name)
+          renderCreateAccelerationFlyout(
+            datasourceName,
+            tableDetail.database,
+            tableDetail.name,
+            handleRefresh
+          )
         }
       >
         <EuiIcon type={'bolt'} size="m" />
@@ -185,7 +191,12 @@ export const AssociatedObjectsDetailsFlyout = ({
           color="primary"
           fill
           onClick={() =>
-            renderCreateAccelerationFlyout(datasourceName, tableDetail.database, tableDetail.name)
+            renderCreateAccelerationFlyout(
+              datasourceName,
+              tableDetail.database,
+              tableDetail.name,
+              handleRefresh
+            )
           }
           iconType="popout"
           iconSide="left"
@@ -223,12 +234,18 @@ export const AssociatedObjectsDetailsFlyout = ({
 
   useEffect(() => {
     if (loadStatus.toLowerCase() === DirectQueryLoadingStatus.SUCCESS) {
-      const columns = CatalogCacheManager.getTable(
-        datasourceName,
-        tableDetail.database,
-        tableDetail.name
-      ).columns;
-      setTableColumns(columns);
+      let columns;
+      try {
+        columns = CatalogCacheManager.getTable(
+          datasourceName,
+          tableDetail.database,
+          tableDetail.name
+        ).columns;
+        setTableColumns(columns);
+      } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+      }
     }
   }, [loadStatus]);
 

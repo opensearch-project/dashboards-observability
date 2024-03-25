@@ -114,16 +114,21 @@ export const [
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<(tableDetail: AssociatedObject, datasourceName: string) => void>(
-  'renderAssociatedObjectsDetailsFlyout'
-);
+] = createGetterSetter<
+  (tableDetail: AssociatedObject, datasourceName: string, handleRefresh?: () => void) => void
+>('renderAssociatedObjectsDetailsFlyout');
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(dataSource: string, databaseName?: string, tableName?: string) => void>(
-  'renderCreateAccelerationFlyout'
-);
+] = createGetterSetter<
+  (
+    dataSource: string,
+    databaseName?: string,
+    tableName?: string,
+    handleRefresh?: () => void
+  ) => void
+>('renderCreateAccelerationFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -421,7 +426,8 @@ export class ObservabilityPlugin
 
     const renderAssociatedObjectsDetailsFlyout = (
       tableDetail: AssociatedObject,
-      datasourceName: string
+      datasourceName: string,
+      handleRefresh?: () => void
     ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -429,6 +435,7 @@ export class ObservabilityPlugin
             tableDetail={tableDetail}
             datasourceName={datasourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
+            handleRefresh={handleRefresh}
           />
         )
       );
@@ -438,7 +445,8 @@ export class ObservabilityPlugin
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
       databaseName?: string,
-      tableName?: string
+      tableName?: string,
+      handleRefresh?: () => void
     ) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -447,6 +455,7 @@ export class ObservabilityPlugin
             resetFlyout={() => createAccelerationFlyout.close()}
             databaseName={databaseName}
             tableName={tableName}
+            refreshHandler={handleRefresh}
           />
         )
       );
