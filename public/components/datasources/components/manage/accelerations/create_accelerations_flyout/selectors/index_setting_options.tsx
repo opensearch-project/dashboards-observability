@@ -7,6 +7,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
@@ -14,7 +15,10 @@ import {
 } from '@elastic/eui';
 import producer from 'immer';
 import React, { ChangeEvent, Fragment, useState } from 'react';
-import { ACCELERATION_TIME_INTERVAL } from '../../../../../../../../common/constants/data_sources';
+import {
+  ACC_CHECKPOINT_DOCUMENTATION_URL,
+  ACCELERATION_TIME_INTERVAL,
+} from '../../../../../../../../common/constants/data_sources';
 import {
   AccelerationRefreshType,
   CreateAccelerationForm,
@@ -221,6 +225,13 @@ export const IndexSettingOptions = ({
           helpText="The HDFS compatible file system location path for incremental refresh job checkpoint."
           isInvalid={hasError(accelerationFormData.formErrors, 'checkpointLocationError')}
           error={accelerationFormData.formErrors.checkpointLocationError}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink href={ACC_CHECKPOINT_DOCUMENTATION_URL} target="_blank">
+                Learn more
+              </EuiLink>
+            </EuiText>
+          }
         >
           <EuiFieldText
             placeholder="s3://checkpoint/location"
