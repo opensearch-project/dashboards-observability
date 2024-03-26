@@ -84,7 +84,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
         if (
           isResponseError(error) &&
           error.statusCode === 400 &&
-          error.body.error.details === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+          error.body.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
         ) {
           return response.badRequest({ body: ERROR_DETAILS.GUARDRAILS_TRIGGERED });
         }
@@ -156,7 +156,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
         if (
           isResponseError(error) &&
           error.statusCode === 400 &&
-          error.body.error.details === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+          error.body.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
         ) {
           return response.badRequest({ body: ERROR_DETAILS.GUARDRAILS_TRIGGERED });
         }
