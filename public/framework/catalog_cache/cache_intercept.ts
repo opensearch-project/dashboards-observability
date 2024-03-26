@@ -11,7 +11,7 @@ import { CatalogCacheManager } from './cache_manager';
 
 export function catalogCacheInterceptError(): any {
   return (httpErrorResponse: HttpInterceptorResponseError, _: IHttpInterceptController) => {
-    if (httpErrorResponse.response?.status === 401 || httpErrorResponse.response?.status === 403) {
+    if (httpErrorResponse.response?.status === 401) {
       // Clears all user catalog cache details
       CatalogCacheManager.clearDataSourceCache();
       CatalogCacheManager.clearAccelerationsCache();
