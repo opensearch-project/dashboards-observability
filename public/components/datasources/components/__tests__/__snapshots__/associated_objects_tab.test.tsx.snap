@@ -693,6 +693,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_table_1",
                         "name": "mock_table_1",
+                        "tableName": "mock_table_1",
                         "type": "table",
                       },
                       "columns": undefined,
@@ -700,7 +701,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                       "datasource": "mock_data_source",
                       "id": "mock_acceleration_1",
                       "name": "mock_acceleration_1",
-                      "tableName": "",
+                      "tableName": "mock_table_1",
                       "type": "skipping",
                     },
                     Object {
@@ -866,6 +867,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                           "datasource": "mock_data_source",
                           "id": "mock_table_1",
                           "name": "mock_table_1",
+                          "tableName": "mock_table_1",
                           "type": "table",
                         },
                         "columns": undefined,
@@ -873,7 +875,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         "datasource": "mock_data_source",
                         "id": "mock_acceleration_1",
                         "name": "mock_acceleration_1",
-                        "tableName": "",
+                        "tableName": "mock_table_1",
                         "type": "skipping",
                       },
                       Object {
@@ -1399,6 +1401,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                               "datasource": "mock_data_source",
                               "id": "mock_table_1",
                               "name": "mock_table_1",
+                              "tableName": "mock_table_1",
                               "type": "table",
                             },
                             "columns": undefined,
@@ -1406,7 +1409,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             "datasource": "mock_data_source",
                             "id": "mock_acceleration_1",
                             "name": "mock_acceleration_1",
-                            "tableName": "",
+                            "tableName": "mock_table_1",
                             "type": "skipping",
                           },
                           Object {
@@ -2139,6 +2142,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_table_1",
                                                     "name": "mock_table_1",
+                                                    "tableName": "mock_table_1",
                                                     "type": "table",
                                                   },
                                                   "columns": undefined,
@@ -2146,7 +2150,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   "datasource": "mock_data_source",
                                                   "id": "mock_acceleration_1",
                                                   "name": "mock_acceleration_1",
-                                                  "tableName": "",
+                                                  "tableName": "mock_table_1",
                                                   "type": "skipping",
                                                 }
                                               }
@@ -2184,6 +2188,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                       "datasource": "mock_data_source",
                                                       "id": "mock_table_1",
                                                       "name": "mock_table_1",
+                                                      "tableName": "mock_table_1",
                                                       "type": "table",
                                                     },
                                                     "columns": undefined,
@@ -2191,7 +2196,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                     "datasource": "mock_data_source",
                                                     "id": "mock_acceleration_1",
                                                     "name": "mock_acceleration_1",
-                                                    "tableName": "",
+                                                    "tableName": "mock_table_1",
                                                     "type": "skipping",
                                                   }
                                                 }
