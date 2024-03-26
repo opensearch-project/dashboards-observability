@@ -200,7 +200,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         } as Error;
       if (
         error.body.statusCode === 400 &&
-        error.body.message === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+        error.body.message.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
       )
         return new ProhibitedQueryError(error.body.message);
       return error.body as Error;
