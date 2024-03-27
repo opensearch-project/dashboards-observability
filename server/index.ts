@@ -16,7 +16,7 @@ export { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 const observabilityConfig = {
   schema: schema.object({
     query_assist: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
     }),
     summarize: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
