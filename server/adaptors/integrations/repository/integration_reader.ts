@@ -107,7 +107,7 @@ export class IntegrationReader {
       }
       return {
         ok: true,
-        value: { ...asset, data: JSON.stringify(maybeBuffer.value.toString('utf8')) },
+        value: { ...asset, data: maybeBuffer.value.toString('utf8') },
       };
     }
   }
