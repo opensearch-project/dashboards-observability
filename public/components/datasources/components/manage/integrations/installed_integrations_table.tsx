@@ -127,14 +127,18 @@ export const InstallIntegrationFlyout = ({
   closeFlyout,
   datasourceType,
   datasourceName,
+  refreshInstances,
 }: {
   closeFlyout: () => void;
   datasourceType: DatasourceType;
   datasourceName: string;
+  refreshInstances: () => void;
 }) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
   } as AvailableIntegrationsList);
+
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
     if (!coreRefs.http) {
@@ -143,7 +147,7 @@ export const InstallIntegrationFlyout = ({
     coreRefs.http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setAvailableIntegrations(exists.data);
     });
-  });
+  }, []);
 
   const s3FilteredIntegrations = {
     hits: availableIntegrations.hits.filter((config) =>
@@ -152,7 +156,6 @@ export const InstallIntegrationFlyout = ({
   };
 
   const [installingIntegration, setInstallingIntegration] = useState<string | null>(null);
-  const [isInstalling, setIsInstalling] = useState(false);
   const maybeCloseFlyout = () => {
     if (!isInstalling) {
       closeFlyout();
@@ -181,7 +184,13 @@ export const InstallIntegrationFlyout = ({
                 }
               : undefined
           }
-          setIsInstalling={setIsInstalling}
+          setIsInstalling={(installing: boolean, success?: boolean) => {
+            setIsInstalling(installing);
+            if (success) {
+              closeFlyout();
+              refreshInstances();
+            }
+          }}
         />
       )}
     </EuiFlyout>
@@ -192,10 +201,12 @@ export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
   datasourceName,
+  refreshInstances,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
   datasourceName: string;
+  refreshInstances: () => void;
 }) => {
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
@@ -245,6 +256,7 @@ export const InstalledIntegrationsTable = ({
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
           datasourceName={datasourceName}
+          refreshInstances={refreshInstances}
         />
       ) : null}
     </>

@@ -452,13 +452,13 @@ const addIntegration = async ({
   integration,
   setLoading,
   setCalloutLikeToast,
-  skipRedirect,
+  setIsInstalling,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
-  skipRedirect?: boolean;
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) => {
   setLoading(true);
   let sessionId: string | null = null;
@@ -473,8 +473,11 @@ const addIntegration = async ({
       config.displayName,
       config.connectionDataSource,
       undefined,
-      skipRedirect
+      setIsInstalling ? true : false
     );
+    if (setIsInstalling) {
+      setIsInstalling(false, res);
+    }
     if (!res) {
       setLoading(false);
     }
@@ -513,8 +516,11 @@ const addIntegration = async ({
       config.displayName,
       `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`,
       config.enabledWorkflows,
-      skipRedirect
+      setIsInstalling ? true : false
     );
+    if (setIsInstalling) {
+      setIsInstalling(false, res);
+    }
     if (!res) {
       setLoading(false);
     }
@@ -546,7 +552,6 @@ export function SetupBottomBar({
   setSetupCallout,
   unsetIntegration,
   setIsInstalling,
-  skipRedirect,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
@@ -554,8 +559,7 @@ export function SetupBottomBar({
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
   unsetIntegration?: () => void;
-  setIsInstalling?: (isInstalling: boolean) => void;
-  skipRedirect?: boolean;
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
   // Drop-in replacement for setToast
   const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
@@ -607,7 +611,7 @@ export function SetupBottomBar({
                   setIsInstalling(newLoading);
                 },
                 setCalloutLikeToast,
-                skipRedirect,
+                setIsInstalling,
               });
             } else {
               await addIntegration({
@@ -615,7 +619,7 @@ export function SetupBottomBar({
                 config,
                 setLoading,
                 setCalloutLikeToast,
-                skipRedirect,
+                setIsInstalling,
               });
             }
           }}
@@ -654,7 +658,7 @@ export function SetupIntegrationForm({
     name: string;
     type: string;
   };
-  setIsInstalling?: (isInstalling: boolean) => void;
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
@@ -746,7 +750,6 @@ export function SetupIntegrationForm({
             setSetupCallout={setSetupCallout}
             unsetIntegration={unsetIntegration}
             setIsInstalling={setIsInstalling}
-            skipRedirect={true}
           />
         </EuiFlyoutFooter>
       </>
