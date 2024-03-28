@@ -20,7 +20,6 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -46,6 +45,7 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
@@ -72,7 +72,7 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
-import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
+import { catalogRequestIntercept } from './framework/catalog_cache/cache_intercept';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
@@ -402,7 +402,7 @@ export class ObservabilityPlugin
     });
 
     core.http.intercept({
-      responseError: catalogCacheInterceptError(),
+      request: catalogRequestIntercept(),
     });
 
     // Use overlay service to render flyouts
