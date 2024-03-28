@@ -341,7 +341,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 }
                 disabled={loading}
                 value={props.nlqInput}
-                onChange={(e) => props.setNlqInput(e.target.value)}
+                onChange={(e) => {
+                  props.setNlqInput(e.target.value);
+                  setCallOut(null);
+                }}
                 onKeyDown={(e) => {
                   // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
                   if (e.key === 'Enter') runAndSummarize();
