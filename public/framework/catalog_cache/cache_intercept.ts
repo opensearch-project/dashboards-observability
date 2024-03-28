@@ -9,7 +9,7 @@ import { CatalogCacheManager } from './cache_manager';
 export function catalogRequestIntercept(): any {
   return (
     fetchOptions: Readonly<HttpFetchOptionsWithPath>,
-    controller: IHttpInterceptController
+    _controller: IHttpInterceptController
   ) => {
     if (fetchOptions.path.includes('/logout')) {
       // Clears all user catalog cache details
