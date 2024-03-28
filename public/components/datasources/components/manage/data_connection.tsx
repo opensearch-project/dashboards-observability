@@ -86,6 +86,9 @@ export const DataConnection = (props: { dataSource: string }) => {
   const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
     [] as IntegrationInstanceResult[]
   );
+  const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
+  const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
+
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
       `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*_mview`
@@ -105,7 +108,7 @@ export const DataConnection = (props: { dataSource: string }) => {
       }
     };
     findIntegrations();
-  }, [http, datasourceDetails.name]);
+  }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
 
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const onclickIntegrationsCard = () => {
@@ -237,6 +240,7 @@ export const DataConnection = (props: { dataSource: string }) => {
           integrations={dataSourceIntegrations}
           datasourceType={datasourceDetails.connector}
           datasourceName={datasourceDetails.name}
+          refreshInstances={refreshInstances}
         />
       ),
     },
