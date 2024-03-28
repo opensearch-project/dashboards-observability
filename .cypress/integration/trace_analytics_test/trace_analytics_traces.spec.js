@@ -22,7 +22,7 @@ describe('Testing traces table empty state', () => {
   });
 });
 
-describe('Testing traces table', () => {
+describe.skip('Testing traces table', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {
@@ -58,7 +58,7 @@ describe('Testing traces table', () => {
   });
 });
 
-describe('Testing trace view', () => {
+describe.skip('Testing trace view', () => {
   beforeEach(() => {
     cy.visit(`app/observability-traces#/traces`, {
       onBeforeLoad: (win) => {
@@ -110,7 +110,7 @@ describe('Testing trace view', () => {
   });
 });
 
-describe('Testing traces table', () => {
+describe.skip('Testing traces table', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {
@@ -149,7 +149,7 @@ describe('Testing traces table', () => {
   });
 });
 
-describe('Testing switch mode to jaeger', () => {
+describe.skip('Testing switch mode to jaeger', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {

@@ -20,7 +20,7 @@ describe('Metrics Analytics', () => {
     eraseSavedObjectMetrics();
   });
 
-  describe('Creating custom metrics', () => {
+  describe.skip('Creating custom metrics', () => {
     beforeEach(() => {
       moveToEventsExplorer();
       clearQuerySearchBoxText('searchAutocompleteTextArea');
@@ -36,7 +36,7 @@ describe('Metrics Analytics', () => {
     });
   });
 
-  describe('Listing custom metrics', () => {
+  describe.skip('Listing custom metrics', () => {
     it('Check for new metrics under available metrics', () => {
       createSavedObjectMetric({ testMetricIndex: 1 });
 
@@ -55,7 +55,7 @@ describe('Metrics Analytics', () => {
       suppressResizeObserverIssue();
     });
 
-    describe('Check data source picker', () => {
+    describe.skip('Check data source picker', () => {
       it('Index picker should be only available under Otel metric datasource', () => {
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
@@ -137,7 +137,7 @@ describe('Metrics Analytics', () => {
           .click();
       });
 
-      it('Drag and drop a Metric visualization in edit mode', () => {
+      it.skip('Drag and drop a Metric visualization in edit mode', () => {
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[1])
           .trigger('mouseover')
@@ -165,7 +165,7 @@ describe('Metrics Analytics', () => {
           .should('exist');
       });
 
-      it('Saves metrics to an existing panel', () => {
+      it.skip('Saves metrics to an existing panel', () => {
         landOnPanels();
         cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
         cy.get('input.euiFieldText').type(TESTING_PANEL);

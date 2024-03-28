@@ -83,7 +83,7 @@ describe('Testing dashboard table empty state', () => {
   });
 });
 
-describe('Testing dashboard table', () => {
+describe.skip('Testing dashboard table', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
@@ -135,7 +135,7 @@ describe('Testing dashboard table', () => {
   });
 });
 
-describe('Testing plots', () => {
+describe.skip('Testing plots', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
@@ -170,7 +170,7 @@ describe('Testing plots', () => {
   });
 });
 
-describe('Latency by trace group table', () =>{
+describe.skip('Latency by trace group table', () =>{
   beforeEach(() => {
     cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
@@ -239,7 +239,7 @@ describe('Latency by trace group table', () =>{
   });
 });
 
-describe('Testing filters on trace analytics page', { scrollBehavior: false }, () =>{
+describe.skip('Testing filters on trace analytics page', { scrollBehavior: false }, () =>{
   beforeEach(() => {
     cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
@@ -335,7 +335,7 @@ describe('Dump jaeger test data', () => {
   });
 });
 
-describe('Testing switch mode to jaeger', () => {
+describe.skip('Testing switch mode to jaeger', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {

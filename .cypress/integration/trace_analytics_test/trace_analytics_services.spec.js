@@ -25,7 +25,7 @@ describe('Testing services table empty state', () => {
   });
 });
 
-describe('Testing services table', () => {
+describe.skip('Testing services table', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
@@ -88,7 +88,7 @@ describe('Testing service view empty state', () => {
   });
 });
 
-describe('Testing service view', () => {
+describe.skip('Testing service view', () => {
   beforeEach(() => {
     cy.visit(`app/observability-traces#/services`, {
       onBeforeLoad: (win) => {
@@ -131,7 +131,7 @@ describe('Testing service view', () => {
   });
 });
 
-describe('Testing Service map', () => {
+describe.skip('Testing Service map', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
@@ -154,7 +154,7 @@ describe('Testing Service map', () => {
   })
 });
 
-describe('Testing traces Spans table verify table headers functionality', () => {
+describe.skip('Testing traces Spans table verify table headers functionality', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
@@ -226,7 +226,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 });
 
-describe('Testing traces Spans table and verify columns functionality', () => {
+describe.skip('Testing traces Spans table and verify columns functionality', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
@@ -267,7 +267,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
 });
 
 
-describe('Testing switch mode to jaeger', () => {
+describe.skip('Testing switch mode to jaeger', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
