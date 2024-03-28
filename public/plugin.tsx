@@ -21,6 +21,7 @@ import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/
 import {
   DATACONNECTIONS_BASE,
   S3_DATASOURCE_TYPE,
+  SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -388,16 +389,18 @@ export class ObservabilityPlugin
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
     // register all s3 datasources
-    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-      s3DataSources.map((s3ds) => {
-        dataSourceService.registerDataSource(
-          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-            name: s3ds.name,
-            type: s3ds.connector.toLowerCase(),
-            metadata: s3ds,
-          })
-        );
+    core.http.get(SECURITY_PLUGIN_ACCOUNT_API).then(() => {
+      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+        s3DataSources.map((s3ds) => {
+          dataSourceService.registerDataSource(
+            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+              name: s3ds.name,
+              type: s3ds.connector.toLowerCase(),
+              metadata: s3ds,
+            })
+          );
+        });
       });
     });
 
