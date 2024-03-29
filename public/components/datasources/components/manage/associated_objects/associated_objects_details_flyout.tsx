@@ -226,21 +226,20 @@ export const AssociatedObjectsDetailsFlyout = ({
 
   useEffect(() => {
     if (tableDetail && !tableDetail.columns) {
-      let tables;
       try {
-        tables = CatalogCacheManager.getTable(
+        const tables = CatalogCacheManager.getTable(
           datasourceName,
           tableDetail.database,
           tableDetail.name
         );
+        if (tables?.columns) {
+          setTableColumns(tables?.columns);
+        } else {
+          startLoading(datasourceName, tableDetail.database, tableDetail.name);
+        }
       } catch (error) {
         console.error(error);
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
-      }
-      if (tables?.columns) {
-        setTableColumns(tables?.columns);
-      } else {
-        startLoading(datasourceName, tableDetail.database, tableDetail.name);
       }
     } else if (tableDetail && tableDetail.columns) {
       setTableColumns(tableDetail.columns);
