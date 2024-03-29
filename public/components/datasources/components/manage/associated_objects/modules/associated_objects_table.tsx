@@ -125,7 +125,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               View all {accelerations.length}
             </EuiLink>
           );
-        } else {
+        } else if (accelerations) {
           return (
             <EuiLink
               onClick={() =>
