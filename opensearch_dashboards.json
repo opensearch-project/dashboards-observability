@@ -20,7 +20,8 @@
   ],
   "optionalPlugins": [
     "managementOverview",
-    "assistantDashboards"
+    "assistantDashboards",
+    "securityDashboards"
   ],
   "configPath": [
     "observability"
