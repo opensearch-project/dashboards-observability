@@ -405,9 +405,16 @@ export class ObservabilityPlugin
     };
 
     if (startDeps.securityDashboards) {
-      core.http.get(SECURITY_PLUGIN_ACCOUNT_API).then(() => {
-        registerS3Datasource();
-      });
+      core.http
+        .get(SECURITY_PLUGIN_ACCOUNT_API)
+        .then(() => {
+          registerS3Datasource();
+        })
+        .catch((e) => {
+          if (e?.response?.status !== 401) {
+            registerS3Datasource();
+          }
+        });
     } else {
       registerS3Datasource();
     }
