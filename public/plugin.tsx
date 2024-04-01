@@ -412,6 +412,8 @@ export class ObservabilityPlugin
         })
         .catch((e) => {
           if (e?.response?.status !== 401) {
+            // accounts api should not return any error status other than 401 if security installed,
+            // this datasource register is included just in case
             registerS3Datasource();
           }
         });
