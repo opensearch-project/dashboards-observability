@@ -389,20 +389,22 @@ export class ObservabilityPlugin
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
     // register all s3 datasources
-    core.http.get(SECURITY_PLUGIN_ACCOUNT_API).then(() => {
-      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-        s3DataSources.map((s3ds) => {
-          dataSourceService.registerDataSource(
-            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-              name: s3ds.name,
-              type: s3ds.connector.toLowerCase(),
-              metadata: s3ds,
-            })
-          );
+    if (startDeps.securityDashboards) {
+      core.http.get(SECURITY_PLUGIN_ACCOUNT_API).then(() => {
+        dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+        core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+          s3DataSources.map((s3ds) => {
+            dataSourceService.registerDataSource(
+              dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+                name: s3ds.name,
+                type: s3ds.connector.toLowerCase(),
+                metadata: s3ds,
+              })
+            );
+          });
         });
       });
-    });
+    }
 
     core.http.intercept({
       responseError: catalogCacheInterceptError(),
