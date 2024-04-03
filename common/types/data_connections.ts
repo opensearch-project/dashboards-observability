@@ -35,12 +35,13 @@ export interface Acceleration {
 }
 
 export interface AssociatedObject {
+  tableName: string;
   datasource: string;
   id: string;
   name: string;
   database: string;
-  type: AccelerationIndexType | 'table';
-  accelerations: CachedAcceleration[];
+  type: AssociatedObjectIndexType;
+  accelerations: CachedAcceleration[] | AssociatedObject;
   columns?: CachedColumn[];
 }
 
@@ -85,6 +86,8 @@ export interface AsyncApiResponse {
 }
 
 export type PollingCallback = (statusObj: AsyncApiResponse) => void;
+
+export type AssociatedObjectIndexType = AccelerationIndexType | 'table';
 
 export type AccelerationIndexType = 'skipping' | 'covering' | 'materialized';
 

@@ -24,7 +24,6 @@ import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
   INTEGRATIONS_BASE,
-  observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
 import {
@@ -36,7 +35,7 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
-import { DATA_SOURCE_TYPES } from '../../../../../common/constants/data_sources';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
@@ -87,6 +86,9 @@ export const DataConnection = (props: { dataSource: string }) => {
   const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
     [] as IntegrationInstanceResult[]
   );
+  const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
+  const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
+
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
       `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*_mview`
@@ -106,7 +108,7 @@ export const DataConnection = (props: { dataSource: string }) => {
       }
     };
     findIntegrations();
-  }, [http, datasourceDetails.name]);
+  }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
 
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const onclickIntegrationsCard = () => {
@@ -125,13 +127,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   };
 
   const onclickDiscoverCard = () => {
-    application!.navigateToApp(observabilityLogsID, {
-      path: `#/explorer`,
-      state: {
-        datasourceName: dataSource,
-        datasourceType: DATA_SOURCE_TYPES.S3Glue,
-      },
-    });
+    redirectToExplorerS3(dataSource);
   };
 
   const DefaultDatasourceCards = () => {
@@ -244,6 +240,7 @@ export const DataConnection = (props: { dataSource: string }) => {
           integrations={dataSourceIntegrations}
           datasourceType={datasourceDetails.connector}
           datasourceName={datasourceDetails.name}
+          refreshInstances={refreshInstances}
         />
       ),
     },

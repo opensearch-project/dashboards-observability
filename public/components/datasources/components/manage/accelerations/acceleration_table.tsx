@@ -168,6 +168,7 @@ export const AccelerationTable = ({
                 <CreateAccelerationFlyoutButton
                   dataSourceName={dataSourceName}
                   renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+                  handleRefresh={handleRefresh}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

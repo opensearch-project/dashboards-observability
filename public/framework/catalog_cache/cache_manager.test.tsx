@@ -22,8 +22,8 @@ interface LooseObject {
   [key: string]: any;
 }
 
-// Mock localStorage
-const localStorageMock = (() => {
+// Mock sessionStorage
+const sessionStorageMock = (() => {
   let store = {} as LooseObject;
   return {
     getItem(key: string) {
@@ -41,13 +41,13 @@ const localStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
 
 describe('CatalogCacheManager', () => {
   beforeEach(() => {
-    jest.spyOn(window.localStorage, 'setItem');
-    jest.spyOn(window.localStorage, 'getItem');
-    jest.spyOn(window.localStorage, 'removeItem');
+    jest.spyOn(window.sessionStorage, 'setItem');
+    jest.spyOn(window.sessionStorage, 'getItem');
+    jest.spyOn(window.sessionStorage, 'removeItem');
   });
 
   afterEach(() => {
@@ -68,7 +68,7 @@ describe('CatalogCacheManager', () => {
         ],
       };
       CatalogCacheManager.saveDataSourceCache(cacheData);
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
         ASYNC_QUERY_DATASOURCE_CACHE,
         JSON.stringify(cacheData)
       );
@@ -86,7 +86,7 @@ describe('CatalogCacheManager', () => {
           },
         ],
       };
-      localStorage.setItem(ASYNC_QUERY_DATASOURCE_CACHE, JSON.stringify(initialCacheData));
+      sessionStorage.setItem(ASYNC_QUERY_DATASOURCE_CACHE, JSON.stringify(initialCacheData));
 
       const newCacheData: DataSourceCacheData = {
         version: '1.1',
@@ -100,7 +100,7 @@ describe('CatalogCacheManager', () => {
         ],
       };
       CatalogCacheManager.saveDataSourceCache(newCacheData);
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
         ASYNC_QUERY_DATASOURCE_CACHE,
         JSON.stringify(newCacheData)
       );
@@ -120,13 +120,13 @@ describe('CatalogCacheManager', () => {
           },
         ],
       };
-      localStorage.setItem(ASYNC_QUERY_DATASOURCE_CACHE, JSON.stringify(cacheData));
+      sessionStorage.setItem(ASYNC_QUERY_DATASOURCE_CACHE, JSON.stringify(cacheData));
       expect(CatalogCacheManager.getDataSourceCache()).toEqual(cacheData);
     });
 
     it('should return default cache object if cache is not found', () => {
       const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
-      localStorage.removeItem(ASYNC_QUERY_DATASOURCE_CACHE);
+      sessionStorage.removeItem(ASYNC_QUERY_DATASOURCE_CACHE);
       expect(CatalogCacheManager.getDataSourceCache()).toEqual(defaultCacheObject);
     });
   });
@@ -138,7 +138,7 @@ describe('CatalogCacheManager', () => {
         dataSources: [],
       };
       CatalogCacheManager.saveAccelerationsCache(cacheData);
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
         ASYNC_QUERY_ACCELERATIONS_CACHE,
         JSON.stringify(cacheData)
       );
@@ -151,7 +151,7 @@ describe('CatalogCacheManager', () => {
         version: CATALOG_CACHE_VERSION,
         dataSources: [],
       };
-      localStorage.setItem(ASYNC_QUERY_ACCELERATIONS_CACHE, JSON.stringify(cacheData));
+      sessionStorage.setItem(ASYNC_QUERY_ACCELERATIONS_CACHE, JSON.stringify(cacheData));
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(cacheData);
     });
 
@@ -160,7 +160,7 @@ describe('CatalogCacheManager', () => {
         version: CATALOG_CACHE_VERSION,
         dataSources: [],
       };
-      localStorage.removeItem(ASYNC_QUERY_ACCELERATIONS_CACHE);
+      sessionStorage.removeItem(ASYNC_QUERY_ACCELERATIONS_CACHE);
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(defaultCacheObject);
     });
   });
@@ -381,14 +381,14 @@ describe('CatalogCacheManager', () => {
   describe('clearDataSourceCache', () => {
     it('should clear data source cache from local storage', () => {
       CatalogCacheManager.clearDataSourceCache();
-      expect(localStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
     });
   });
 
   describe('clearAccelerationsCache', () => {
     it('should clear accelerations cache from local storage', () => {
       CatalogCacheManager.clearAccelerationsCache();
-      expect(localStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);
     });
   });
 
@@ -404,7 +404,7 @@ describe('CatalogCacheManager', () => {
       CatalogCacheManager.addOrUpdateAccelerationsByDataSource(dataSource);
 
       // Verify that saveAccelerationsCache is called with the updated cache data
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
         ASYNC_QUERY_ACCELERATIONS_CACHE,
         JSON.stringify({
           version: '1.0',
@@ -431,7 +431,7 @@ describe('CatalogCacheManager', () => {
       CatalogCacheManager.addOrUpdateAccelerationsByDataSource(updatedDataSource);
 
       // Verify that saveAccelerationsCache is called with the updated cache data
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
         ASYNC_QUERY_ACCELERATIONS_CACHE,
         JSON.stringify({
           version: '1.0',

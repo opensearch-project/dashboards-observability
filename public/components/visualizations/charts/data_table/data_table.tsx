@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 // ag-data-grid
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import '@ag-grid-community/styles/ag-grid.css';
+import '@ag-grid-community/styles/ag-theme-alpine.css';
 
 // grid elements
 import { CustomOverlay, RowConfigType, GridHeader } from './data_table_header';
@@ -18,7 +18,6 @@ import { GridFooter } from './data_table_footer';
 // constants
 import { COLUMN_DEFAULT_MIN_WIDTH, HEADER_HEIGHT } from '../../../../../common/constants/explorer';
 import { IVisualizationContainerProps, IField } from '../../../../../common/types/explorer';
-import 'ag-grid-community/dist/styles/ag-theme-alpine-dark.css';
 
 // styles
 import './data_table.scss';
@@ -131,11 +130,11 @@ export const DataTable = ({ visualizations, layout, config }: any) => {
   const onPageSizeChanged = useCallback(
     (val: number) => {
       setPageSize(val);
-      gridRef.current.api.paginationSetPageSize(val);
+      gridRef.current.api.setGridOption('paginationPageSize', val);
       setActivePage(0);
       gridRef.current.api.paginationGoToPage(0);
       if (isFullScreen) {
-        gridRefFullScreen.current.api.paginationSetPageSize(val);
+        gridRefFullScreen.current.api.setGridOption('paginationPageSize', val);
         gridRefFullScreen.current.api.paginationGoToPage(0);
       }
     },

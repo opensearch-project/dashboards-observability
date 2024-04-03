@@ -37,7 +37,7 @@ export class CatalogCacheManager {
    * @param {DataSourceCacheData} cacheData - The data source cache data to save.
    */
   static saveDataSourceCache(cacheData: DataSourceCacheData): void {
-    localStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -45,7 +45,7 @@ export class CatalogCacheManager {
    * @returns {DataSourceCacheData} The retrieved data source cache.
    */
   static getDataSourceCache(): DataSourceCacheData {
-    const catalogData = localStorage.getItem(this.datasourceCacheKey);
+    const catalogData = sessionStorage.getItem(this.datasourceCacheKey);
 
     if (catalogData) {
       return JSON.parse(catalogData);
@@ -61,7 +61,7 @@ export class CatalogCacheManager {
    * @param {AccelerationsCacheData} cacheData - The accelerations cache data to save.
    */
   static saveAccelerationsCache(cacheData: AccelerationsCacheData): void {
-    localStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -69,7 +69,7 @@ export class CatalogCacheManager {
    * @returns {AccelerationsCacheData} The retrieved accelerations cache.
    */
   static getAccelerationsCache(): AccelerationsCacheData {
-    const accelerationCacheData = localStorage.getItem(this.accelerationsCacheKey);
+    const accelerationCacheData = sessionStorage.getItem(this.accelerationsCacheKey);
 
     if (accelerationCacheData) {
       return JSON.parse(accelerationCacheData);
@@ -234,13 +234,13 @@ export class CatalogCacheManager {
    * Clears the data source cache from local storage.
    */
   static clearDataSourceCache(): void {
-    localStorage.removeItem(this.datasourceCacheKey);
+    sessionStorage.removeItem(this.datasourceCacheKey);
   }
 
   /**
    * Clears the accelerations cache from local storage.
    */
   static clearAccelerationsCache(): void {
-    localStorage.removeItem(this.accelerationsCacheKey);
+    sessionStorage.removeItem(this.accelerationsCacheKey);
   }
 }

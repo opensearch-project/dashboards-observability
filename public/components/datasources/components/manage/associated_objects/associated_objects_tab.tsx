@@ -15,9 +15,11 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useToast } from '../../../../../../public/components/common/toast';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
+  AssociatedObjectIndexType,
   CachedAcceleration,
   CachedAccelerationByDataSource,
   CachedDataSourceStatus,
@@ -64,6 +66,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [databasesLoadFailed, setDatabasesLoadFailed] = useState<boolean>(false);
   const [associatedObjectsLoadFailed, setAssociatedObjectsLoadFailed] = useState<boolean>(false);
+  const { setToast } = useToast();
 
   const {
     databasesLoadStatus,
@@ -149,6 +152,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           <CreateAccelerationFlyoutButton
             dataSourceName={datasource.name}
             renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+            handleRefresh={onRefreshButtonClick}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -205,7 +209,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   // Load tables and accelerations if empty or retrieve from cache if not
   useEffect(() => {
     if (datasource.name && selectedDatabase) {
-      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      let databaseCache;
+      try {
+        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        return;
+      }
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
       );
@@ -237,7 +248,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     if (datasource.name && selectedDatabase) {
       const tablesStatus = tablesLoadStatus.toLowerCase();
-      const databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      let databaseCache;
+      try {
+        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+      } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+        return;
+      }
       const accelerationsStatus = accelerationsLoadStatus.toLowerCase();
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
@@ -296,6 +314,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   useEffect(() => {
     const tableObjects: AssociatedObject[] = cachedTables.map((table: CachedTable) => {
       return {
+        tableName: table.name,
         datasource: datasource.name,
         id: table.name,
         name: table.name,
@@ -310,13 +329,19 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     const accelerationObjects: AssociatedObject[] = cachedAccelerations
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
+        tableName: acceleration.table,
         datasource: datasource.name,
         id: acceleration.indexName,
         name: getAccelerationName(acceleration),
         database: acceleration.database,
         type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
-          .value,
-        accelerations: [],
+          .value as AssociatedObjectIndexType,
+        accelerations:
+          acceleration.type === 'covering' || acceleration.type === 'skipping'
+            ? tableObjects.find(
+                (tableObject: AssociatedObject) => tableObject.name === acceleration.table
+              )
+            : [],
         columns: undefined,
       }));
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);
@@ -376,6 +401,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                             datasourceName={datasource.name}
                             associatedObjects={associatedObjects}
                             cachedAccelerations={cachedAccelerations}
+                            handleRefresh={onRefreshButtonClick}
                           />
                         ) : (
                           <AssociatedObjectsTabEmpty cacheType="tables" />

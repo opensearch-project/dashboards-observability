@@ -5,7 +5,6 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiComboBoxOptionOption,
   EuiFieldText,
@@ -109,6 +108,16 @@ const emptyQueryCallOut = (
   />
 );
 
+const pplGenerated = (
+  <EuiCallOut
+    data-test-subj="query-assist-ppl-callout"
+    title="PPL query generated"
+    size="s"
+    color="success"
+    iconType="check"
+  />
+);
+
 export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
@@ -176,6 +185,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         },
       })
     );
+    setCallOut(pplGenerated);
     return generatedPPL;
   };
   const formatError = (error: ResponseError | Error): Error => {
@@ -187,7 +197,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         } as Error;
       if (
         error.body.statusCode === 400 &&
-        error.body.message === ERROR_DETAILS.GUARDRAILS_TRIGGERED
+        error.body.message.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
       )
         return new ProhibitedQueryError(error.body.message);
       return error.body as Error;
@@ -331,7 +341,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 }
                 disabled={loading}
                 value={props.nlqInput}
-                onChange={(e) => props.setNlqInput(e.target.value)}
+                onChange={(e) => {
+                  props.setNlqInput(e.target.value);
+                  setCallOut(null);
+                }}
                 onKeyDown={(e) => {
                   // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
                   if (e.key === 'Enter') runAndSummarize();
@@ -365,16 +378,6 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
               ))}
             </EuiListGroup>
           </EuiInputPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="returnKey"
-            display={props.lastFocusedInput === 'nlq_input' ? 'fill' : 'base'}
-            isDisabled={loading}
-            onClick={runAndSummarize}
-            size="m"
-            aria-label="submit-question"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {callOut}
