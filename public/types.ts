@@ -25,6 +25,7 @@ export interface AppPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsClient: SavedObjectsClient;
   data: DataPublicPluginStart;
+  securityDashboards?: {};
 }
 
 export interface SetupDependencies {
