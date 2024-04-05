@@ -20,6 +20,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
+  SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -388,18 +389,37 @@ export class ObservabilityPlugin
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
     // register all s3 datasources
-    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-      s3DataSources.map((s3ds) => {
-        dataSourceService.registerDataSource(
-          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-            name: s3ds.name,
-            type: s3ds.connector.toLowerCase(),
-            metadata: s3ds,
-          })
-        );
+    const registerS3Datasource = () => {
+      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+        s3DataSources.map((s3ds) => {
+          dataSourceService.registerDataSource(
+            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+              name: s3ds.name,
+              type: s3ds.connector.toLowerCase(),
+              metadata: s3ds,
+            })
+          );
+        });
       });
-    });
+    };
+
+    if (startDeps.securityDashboards) {
+      core.http
+        .get(SECURITY_PLUGIN_ACCOUNT_API)
+        .then(() => {
+          registerS3Datasource();
+        })
+        .catch((e) => {
+          if (e?.response?.status !== 401) {
+            // accounts api should not return any error status other than 401 if security installed,
+            // this datasource register is included just in case
+            registerS3Datasource();
+          }
+        });
+    } else {
+      registerS3Datasource();
+    }
 
     core.http.intercept({
       request: catalogRequestIntercept(),
