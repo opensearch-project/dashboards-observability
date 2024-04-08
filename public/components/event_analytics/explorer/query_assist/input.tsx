@@ -88,36 +88,6 @@ const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
   ],
 };
 
-const prohibitedQueryCallOut = (
-  <EuiCallOut
-    data-test-subj="query-assist-guard-callout"
-    title="I am unable to respond to this query. Try another question."
-    size="s"
-    color="danger"
-    iconType="alert"
-  />
-);
-
-const emptyQueryCallOut = (
-  <EuiCallOut
-    data-test-subj="query-assist-empty-callout"
-    title="Enter a natural language question to automatically generate a query to view results."
-    size="s"
-    color="warning"
-    iconType="iInCircle"
-  />
-);
-
-const pplGenerated = (
-  <EuiCallOut
-    data-test-subj="query-assist-ppl-callout"
-    title="PPL query generated"
-    size="s"
-    color="success"
-    iconType="check"
-  />
-);
-
 export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
@@ -155,6 +125,43 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
   const [callOut, setCallOut] = useState<React.ReactNode>(null);
+  const dismissCallOut = () => setCallOut(null);
+
+  const prohibitedQueryCallOut = (
+    <EuiCallOut
+      data-test-subj="query-assist-guard-callout"
+      title="I am unable to respond to this query. Try another question."
+      size="s"
+      color="danger"
+      iconType="alert"
+      dismissible
+      onDismiss={dismissCallOut}
+    />
+  );
+
+  const emptyQueryCallOut = (
+    <EuiCallOut
+      data-test-subj="query-assist-empty-callout"
+      title="Enter a natural language question to automatically generate a query to view results."
+      size="s"
+      color="warning"
+      iconType="iInCircle"
+      dismissible
+      onDismiss={dismissCallOut}
+    />
+  );
+
+  const pplGenerated = (
+    <EuiCallOut
+      data-test-subj="query-assist-ppl-callout"
+      title="PPL query generated"
+      size="s"
+      color="success"
+      iconType="check"
+      dismissible
+      onDismiss={dismissCallOut}
+    />
+  );
 
   useEffect(() => {
     if (autoRun) {
@@ -215,7 +222,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     }
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
-      setCallOut(null);
+      dismissCallOut();
       await request();
     } catch (err) {
       const error = formatError(err);
@@ -306,7 +313,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     }
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
-      setCallOut(null);
+      dismissCallOut();
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
@@ -343,7 +350,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 value={props.nlqInput}
                 onChange={(e) => {
                   props.setNlqInput(e.target.value);
-                  setCallOut(null);
+                  dismissCallOut();
                 }}
                 onKeyDown={(e) => {
                   // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit

@@ -68,6 +68,12 @@ describe('<QueryAssistInput /> spec', () => {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
     expect(props.handleQueryChange).toBeCalledWith('source = index');
+    expect(component.getByTestId('query-assist-ppl-callout')).toBeInTheDocument();
+
+    await waitFor(() => {
+      fireEvent.click(component.getByTestId('closeCallOutButton'));
+    });
+    expect(component.queryByTestId('query-assist-ppl-callout')).toBeNull();
   });
 
   it('should display toast for generate errors', async () => {
