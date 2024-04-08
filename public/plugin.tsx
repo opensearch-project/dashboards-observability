@@ -20,7 +20,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
+  SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -46,6 +46,7 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
@@ -72,7 +73,7 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
-import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
+import { catalogRequestIntercept } from './framework/catalog_cache/cache_intercept';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
@@ -388,21 +389,40 @@ export class ObservabilityPlugin
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
     // register all s3 datasources
-    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-      s3DataSources.map((s3ds) => {
-        dataSourceService.registerDataSource(
-          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-            name: s3ds.name,
-            type: s3ds.connector.toLowerCase(),
-            metadata: s3ds,
-          })
-        );
+    const registerS3Datasource = () => {
+      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+        s3DataSources.map((s3ds) => {
+          dataSourceService.registerDataSource(
+            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+              name: s3ds.name,
+              type: s3ds.connector.toLowerCase(),
+              metadata: s3ds,
+            })
+          );
+        });
       });
-    });
+    };
+
+    if (startDeps.securityDashboards) {
+      core.http
+        .get(SECURITY_PLUGIN_ACCOUNT_API)
+        .then(() => {
+          registerS3Datasource();
+        })
+        .catch((e) => {
+          if (e?.response?.status !== 401) {
+            // accounts api should not return any error status other than 401 if security installed,
+            // this datasource register is included just in case
+            registerS3Datasource();
+          }
+        });
+    } else {
+      registerS3Datasource();
+    }
 
     core.http.intercept({
-      responseError: catalogCacheInterceptError(),
+      request: catalogRequestIntercept(),
     });
 
     // Use overlay service to render flyouts
