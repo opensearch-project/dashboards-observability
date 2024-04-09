@@ -10,6 +10,9 @@ import { QueryAssistInput } from '../../event_analytics/explorer/query_assist/in
 import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
 import './query_area.scss';
 
+/**
+ * QueryArea is currently used for query assist only.
+ */
 export function QueryArea({
   tabId,
   handleQueryChange,
@@ -39,6 +42,7 @@ export function QueryArea({
     memoizedGetAvailableFields(indexQuery);
   }, [selectedIndex, memoizedGetAvailableFields, memoizedHandleQueryChange]);
   const [lastFocusedInput, setLastFocusedInput] = useState<'query_area' | 'nlq_input'>('nlq_input');
+  const [callOut, setCallOut] = useState<React.ReactNode>(null);
 
   const queryEditor = (
     <EuiCodeEditor
@@ -52,8 +56,8 @@ export function QueryArea({
       aria-label="Code Editor"
       onChange={(query) => {
         handleQueryChange(query);
+        setCallOut(null);
         // query is considered updated when the last run query is not the same as whats in the editor
-        // setUpdatedQuery(runQuery !== query);
         setNeedsUpdate(runQuery !== query);
       }}
       onFocus={() => setLastFocusedInput('query_area')}
@@ -90,6 +94,8 @@ export function QueryArea({
             lastFocusedInput={lastFocusedInput}
             setLastFocusedInput={setLastFocusedInput}
             runChanges={runChanges}
+            callOut={callOut}
+            setCallOut={setCallOut}
           >
             {queryEditor}
           </QueryAssistInput>

@@ -5,7 +5,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
@@ -36,12 +35,30 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
+import { EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from './callouts';
 
 class ProhibitedQueryError extends Error {
   constructor(message?: string) {
     super(message);
   }
 }
+
+const formatError = (error: ResponseError | Error): Error => {
+  if ('body' in error) {
+    if (error.body.statusCode === 429)
+      return {
+        ...error.body,
+        message: 'Request is throttled. Try again later or contact your administrator',
+      } as Error;
+    if (
+      error.body.statusCode === 400 &&
+      error.body.message.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
+    )
+      return new ProhibitedQueryError(error.body.message);
+    return error.body as Error;
+  }
+  return error;
+};
 
 interface SummarizationContext {
   question: string;
@@ -62,6 +79,8 @@ interface Props {
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
   lastFocusedInput: 'query_area' | 'nlq_input';
   setLastFocusedInput: React.Dispatch<React.SetStateAction<'query_area' | 'nlq_input'>>;
+  callOut: React.ReactNode | null;
+  setCallOut: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
   runChanges: () => void;
 }
 
@@ -87,36 +106,6 @@ const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
     'how many request failures were there by week?',
   ],
 };
-
-const prohibitedQueryCallOut = (
-  <EuiCallOut
-    data-test-subj="query-assist-guard-callout"
-    title="I am unable to respond to this query. Try another question."
-    size="s"
-    color="danger"
-    iconType="alert"
-  />
-);
-
-const emptyQueryCallOut = (
-  <EuiCallOut
-    data-test-subj="query-assist-empty-callout"
-    title="Enter a natural language question to automatically generate a query to view results."
-    size="s"
-    color="warning"
-    iconType="iInCircle"
-  />
-);
-
-const pplGenerated = (
-  <EuiCallOut
-    data-test-subj="query-assist-ppl-callout"
-    title="PPL query generated"
-    size="s"
-    color="success"
-    iconType="check"
-  />
-);
 
 export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props) => {
   // @ts-ignore
@@ -154,7 +143,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
-  const [callOut, setCallOut] = useState<React.ReactNode>(null);
+  const dismissCallOut = () => props.setCallOut(null);
 
   useEffect(() => {
     if (autoRun) {
@@ -185,42 +174,27 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         },
       })
     );
-    setCallOut(pplGenerated);
+    props.setCallOut(<PPLGeneratedCallOut onDismiss={dismissCallOut} />);
     return generatedPPL;
   };
-  const formatError = (error: ResponseError | Error): Error => {
-    if ('body' in error) {
-      if (error.body.statusCode === 429)
-        return {
-          ...error.body,
-          message: 'Request is throttled. Try again later or contact your administrator',
-        } as Error;
-      if (
-        error.body.statusCode === 400 &&
-        error.body.message.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
-      )
-        return new ProhibitedQueryError(error.body.message);
-      return error.body as Error;
-    }
-    return error;
-  };
+
   // used by generate query button
   const generatePPL = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     if (props.nlqInput.trim().length === 0) {
-      setCallOut(emptyQueryCallOut);
+      props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
     }
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
-      setCallOut(null);
+      dismissCallOut();
       await request();
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setCallOut(prohibitedQueryCallOut);
+        props.setCallOut(<ProhibitedQueryCallOut onDismiss={dismissCallOut} />);
         return;
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
@@ -274,7 +248,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setCallOut(prohibitedQueryCallOut);
+        props.setCallOut(<ProhibitedQueryCallOut onDismiss={dismissCallOut} />);
         return;
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to summarize results' });
@@ -301,19 +275,19 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     if (props.nlqInput.trim().length === 0) {
-      setCallOut(emptyQueryCallOut);
+      props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
     }
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
-      setCallOut(null);
+      dismissCallOut();
       await request();
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (err) {
       const error = formatError(err);
       if (error instanceof ProhibitedQueryError) {
-        setCallOut(prohibitedQueryCallOut);
+        props.setCallOut(<ProhibitedQueryCallOut onDismiss={dismissCallOut} />);
         return;
       }
       if (coreRefs.summarizeEnabled) {
@@ -343,7 +317,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                 value={props.nlqInput}
                 onChange={(e) => {
                   props.setNlqInput(e.target.value);
-                  setCallOut(null);
+                  dismissCallOut();
                 }}
                 onKeyDown={(e) => {
                   // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
@@ -380,8 +354,8 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
           </EuiInputPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {callOut}
-      {props.children && <EuiSpacer size="s" />}
+      {props.callOut}
+      <EuiSpacer size="s" />
       {props.children}
       <EuiSpacer size="m" />
       {props.lastFocusedInput === 'query_area' ? (
