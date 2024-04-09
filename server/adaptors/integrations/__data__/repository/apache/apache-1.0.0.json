@@ -5,7 +5,7 @@
   "description": "Insights on applications using the standard Apache access log format.",
   "license": "Apache-2.0",
   "type": "logs_apache",
-  "labels": ["Observability", "Logs"],
+  "labels": ["Observability", "Logs", "Flint S3"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
   "statics": {
