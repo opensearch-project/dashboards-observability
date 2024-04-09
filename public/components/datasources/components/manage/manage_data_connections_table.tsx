@@ -55,23 +55,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
-  const deleteConnection = (connectionName: string) => {
-    http!
-      .delete(`${DATACONNECTIONS_BASE}/${connectionName}`)
-      .then(() => {
-        setToast(`Data connection ${connectionName} deleted successfully`);
-        setData(
-          data.filter((connection) => {
-            return !(connection.name === connectionName);
-          })
-        );
-      })
-      .catch((err) => {
-        console.error(err);
-        setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
-      });
-  };
-
   const fetchDataSources = () => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
@@ -101,23 +84,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     fetchDataSources();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome]);
-
-  const displayDeleteModal = (connectionName: string) => {
-    setModalLayout(
-      <DeleteModal
-        onConfirm={() => {
-          setIsModalVisible(false);
-          deleteConnection(connectionName);
-        }}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-        title={`Delete ${connectionName}`}
-        message={`Are you sure you want to delete ${connectionName}?`}
-      />
-    );
-    setIsModalVisible(true);
-  };
 
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
@@ -168,16 +134,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         setShowIntegrationsFlyout(true);
       },
       'data-test-subj': 'action-integrate',
-    },
-    {
-      name: 'Delete',
-      description: 'Delete this data source',
-      icon: 'trash',
-      color: 'danger',
-      type: 'icon',
-      onClick: (datasource: DataConnection) => displayDeleteModal(datasource.name),
-      isPrimary: false,
-      'data-test-subj': 'action-delete',
     },
   ];
 

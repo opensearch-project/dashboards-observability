@@ -32,8 +32,7 @@ export const DataConnectionsDescription = (props: DataConnectionsDescriptionProp
 
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              Manage existing data sources or{' '}
-              <EuiLink href="#/new">create a new data source</EuiLink>
+              Manage existing data sources
             </EuiText>
           </>
         </EuiFlexItem>

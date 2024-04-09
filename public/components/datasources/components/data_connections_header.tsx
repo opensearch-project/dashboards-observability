@@ -23,11 +23,6 @@ const tabs = [
     name: 'Manage data sources',
     disabled: false,
   },
-  {
-    id: 'new',
-    name: 'New data source',
-    disabled: false,
-  },
 ];
 
 export const DataConnectionsHeader = () => {

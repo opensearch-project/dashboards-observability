@@ -79,19 +79,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
               Manage data sources
             </span>
           </button>
-          <button
-            aria-selected="false"
-            class="euiTab"
-            data-test-subj="new"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              New data source
-            </span>
-          </button>
         </div>
         <div
           class="euiSpacer euiSpacer--s"
@@ -123,15 +110,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                 <div
                   class="euiTextColor euiTextColor--subdued"
                 >
-                  Manage existing data sources or
-                   
-                  <a
-                    class="euiLink euiLink--primary"
-                    href="#/new"
-                    rel="noreferrer"
-                  >
-                    create a new data source
-                  </a>
+                  Manage existing data sources
                 </div>
               </div>
             </div>
