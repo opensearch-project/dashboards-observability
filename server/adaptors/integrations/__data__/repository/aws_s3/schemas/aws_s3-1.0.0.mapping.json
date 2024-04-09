@@ -26,7 +26,13 @@
                   }
                 },
                 "remote_ip": {
-                  "type": "keyword"
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
                 },
                 "requester": {
                   "type": "text",
@@ -50,7 +56,13 @@
                   "type": "keyword"
                 },
                 "key": {
-                  "type": "keyword"
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
                 },
                 "copy_source": {
                   "type": "keyword"
