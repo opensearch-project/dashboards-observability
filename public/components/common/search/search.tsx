@@ -354,7 +354,7 @@ export const Search = (props: any) => {
                       placeholder="Select an index"
                       isClearable={true}
                       prepend={<EuiText>Index</EuiText>}
-                      singleSelection={true}
+                      singleSelection={{ asPlainText: true }}
                       isLoading={loading}
                       options={indicesAndIndexPatterns}
                       selectedOptions={selectedIndex}
@@ -412,7 +412,7 @@ export const Search = (props: any) => {
             <EuiFlexItem grow={false} />
             {!(queryRedux.selectedTimestamp === '' && queryResults?.datarows) && ( // index with no timestamp, dont show timepicker
               <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-                {!isLiveTailOn && (
+                {!isLiveTailOn && !coreRefs.queryAssistEnabled && (
                   <DatePicker
                     startTime={startTime}
                     endTime={endTime}

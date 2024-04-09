@@ -13,6 +13,7 @@ import * as coreServices from '../../../../../../common/utils/core_services';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { rootReducer } from '../../../../../framework/redux/reducers';
 import { initialTabId } from '../../../../../framework/redux/store/shared_state';
+import { PPLGeneratedCallOut, ProhibitedQueryCallOut } from '../callouts';
 import { QueryAssistInput } from '../input';
 
 const renderQueryAssistInput = (
@@ -20,7 +21,10 @@ const renderQueryAssistInput = (
 ) => {
   const preloadedState = {};
   const store = configureStore({ reducer: rootReducer, preloadedState });
-  const props: ComponentProps<typeof QueryAssistInput> = Object.assign(
+  const props: jest.Mocked<ComponentProps<typeof QueryAssistInput>> = Object.assign<
+    ComponentProps<typeof QueryAssistInput>,
+    Partial<ComponentProps<typeof QueryAssistInput>>
+  >(
     {
       handleQueryChange: jest.fn(),
       handleTimeRangePickerRefresh: jest.fn(),
@@ -29,6 +33,8 @@ const renderQueryAssistInput = (
       selectedIndex: [{ label: 'selected-test-index' }],
       nlqInput: 'test-input',
       setNlqInput: jest.fn(),
+      callOut: null,
+      setCallOut: jest.fn(),
       handleTimePickerChange: jest.fn(),
     },
     overrideProps
@@ -68,6 +74,12 @@ describe('<QueryAssistInput /> spec', () => {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
     expect(props.handleQueryChange).toBeCalledWith('source = index');
+    expect(props.setCallOut.mock.calls[0][0]).toBeNull();
+    expect(props.setCallOut.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        type: PPLGeneratedCallOut,
+      })
+    );
   });
 
   it('should display toast for generate errors', async () => {
@@ -140,7 +152,7 @@ describe('<QueryAssistInput /> spec', () => {
       body: { statusCode: 400, message: ERROR_DETAILS.GUARDRAILS_TRIGGERED },
     });
 
-    const { component } = renderQueryAssistInput();
+    const { component, props } = renderQueryAssistInput();
     await waitFor(() => {
       // splitbutton data-test-subj doesn't work in Oui 1.5, this should be query-assist-generate-and-run-button
       fireEvent.click(component.getByText('Generate and run'));
@@ -149,6 +161,11 @@ describe('<QueryAssistInput /> spec', () => {
     expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
-    expect(component.getByTestId('query-assist-guard-callout')).toBeInTheDocument();
+    expect(props.setCallOut.mock.calls[0][0]).toBeNull();
+    expect(props.setCallOut.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        type: ProhibitedQueryCallOut,
+      })
+    );
   });
 });
