@@ -389,9 +389,7 @@ export const Search = (props: any) => {
                   tempQuery={tempQuery}
                   baseQuery={baseQuery}
                   handleQueryChange={handleQueryChange}
-                  handleQuerySearch={() => {
-                    onQuerySearch(queryLang);
-                  }}
+                  handleQuerySearch={runChanges}
                   dslService={dslService}
                   getSuggestions={getSuggestions}
                   onItemSelect={onItemSelect}
