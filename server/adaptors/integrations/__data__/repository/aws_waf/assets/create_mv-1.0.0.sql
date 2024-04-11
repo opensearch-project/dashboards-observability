@@ -20,6 +20,9 @@ SELECT
     ja3Fingerprint AS `aws.waf.ja3Fingerprint`
 FROM
     {table_name}
-;
-
-REFRESH MATERIALIZED VIEW mys3.default.{table_name}_mview
+WITH (
+  auto_refresh = 'true',
+  checkpoint_location = '{s3_bucket_location}',
+  watermark_delay = '1 Minute',
+  extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+);
