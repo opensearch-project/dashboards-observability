@@ -126,7 +126,7 @@ export const NoResults = ({ tabId }: any) => {
                     <p>Show a list of tables within a database</p>
                     <EuiSpacer size="s" />
                     <CreatedCodeBlock
-                      code={`SHOW TABLES EXTENDED IN ${datasourceName}.<database> LIKE '*'`}
+                      code={`SHOW TABLE EXTENDED IN ${datasourceName}.<database> LIKE '*'`}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>

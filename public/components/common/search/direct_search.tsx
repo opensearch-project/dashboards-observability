@@ -391,6 +391,7 @@ export const DirectSearch = (props: any) => {
             tabId={tabId}
             isSuggestionDisabled={true}
             isDisabled={explorerSearchMetadata.isPolling}
+            ignoreShiftEnter={true}
           />
           {queryLang === QUERY_LANGUAGE.PPL && (
             <EuiBadge
