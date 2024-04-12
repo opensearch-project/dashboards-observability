@@ -1,6 +1,6 @@
 CREATE MATERIALIZED VIEW {table_name}_mview AS
 SELECT
-    `timestamp` AS `@timestamp`,
+    CAST(FROM_UNIXTIME(`timestamp`/ 1000) AS TIMESTAMP) AS `@timestamp`,
     formatVersion AS `aws.waf.formatVersion`,
     webaclId AS `aws.waf.webaclId`,
     terminatingRuleId AS `aws.waf.terminatingRuleId`,
@@ -22,7 +22,7 @@ FROM
     {table_name}
 WITH (
   auto_refresh = 'true',
-  checkpoint_location = '{s3_bucket_location}',
+  checkpoint_location = '{s3_checkpoint_location}',
   watermark_delay = '1 Minute',
   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 );
