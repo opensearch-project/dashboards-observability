@@ -2,6 +2,7 @@ CREATE MATERIALIZED VIEW {table_name}_mview AS
 SELECT
   owner_id AS `aws.s3.bucket_owner`,
   bucket_name AS `aws.s3.bucket`,
+  to_timestamp(CONCAT(SUBSTRING(request_time, 2), ' ', SUBSTRING(request_time_zone, 1, LENGTH(request_time_zone) - 1)), 'dd/MMM/yyyy:HH:mm:ss Z') AS `@timestamp`,
   CONCAT(request_time, ' ', request_time_zone) AS `aws.s3.request_time`,
   remote_ip AS `aws.s3.remote_ip`,
   requester AS `aws.s3.requester`,
