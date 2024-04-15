@@ -32,5 +32,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
 USING csv
 LOCATION '{s3_bucket_location}'
 OPTIONS (
-  sep=' '
+  sep=' ',
+  compression='gzip',
+  recursiveFileLookup='true'
 );
