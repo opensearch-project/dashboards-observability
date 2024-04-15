@@ -32,13 +32,10 @@ WITH hourly_buckets AS (
     interval_start_time ASC,
     addr_rank ASC
 WITH (
-    auto_refresh = false
+  auto_refresh = true,
+  refresh_interval = '1 day',
+  checkpoint_location = '{s3_checkpoint_location}',
+  watermark_delay = '1 day',
+  extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
--- Enable for Auto refresh --
---  WITH (
---   auto_refresh = true,
---   refresh_interval = '1 day',
---   checkpoint_location = '{s3_checkpoint_location}',
---   watermark_delay = '1 day',
---   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
--- )
+
