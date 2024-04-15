@@ -14,6 +14,9 @@
           "properties": {
             "elb": {
               "properties": {
+                "actions_executed": {
+                  "type": "keyword"
+                },
                 "backend.ip": {
                   "type": "ip"
                 },
@@ -25,6 +28,15 @@
                 },
                 "backend.status_code": {
                   "type": "short"
+                },
+                "chosen_cert_arn": {
+                  "type": "keyword"
+                },
+                "classification": {
+                  "type": "keyword"
+                },
+                "classification_reason": {
+                  "type": "keyword"
                 },
                 "client.ip": {
                   "type": "ip"
@@ -41,8 +53,14 @@
                 "destination.port": {
                   "type": "integer"
                 },
+                "elb_name": {
+                  "type": "keyword"
+                },
                 "elb_status_code": {
                   "type": "short"
+                },
+                "elb_type": {
+                  "type": "keyword"
                 },
                 "http.port": {
                   "type": "integer"
@@ -50,11 +68,17 @@
                 "http.version": {
                   "type": "keyword"
                 },
+                "lambda_error_reason": {
+                  "type": "keyword"
+                },
                 "matched_rule_priority": {
                   "type": "integer"
                 },
                 "received_bytes": {
                   "type": "integer"
+                },
+                "redirect_url": {
+                  "type": "keyword"
                 },
                 "request_creation_time": {
                   "type": "date"
