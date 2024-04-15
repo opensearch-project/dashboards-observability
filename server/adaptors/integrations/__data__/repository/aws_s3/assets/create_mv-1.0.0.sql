@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
 SELECT
   owner_id AS `aws.s3.bucket_owner`,
   bucket_name AS `aws.s3.bucket`,
