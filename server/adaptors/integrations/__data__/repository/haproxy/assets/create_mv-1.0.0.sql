@@ -140,7 +140,7 @@ SELECT
 		"^([\\d\\.]+):(\\d+) \\[(.+)\\] ([\\w\\-]+) ([\\w\\-]+)\\\/([\\w\\-]+) (\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+) (\\d+) (\\d+) (.+) (.+) (.+) (\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+) (\\d+)\\\/(\\d+) \\{(.*)\\}(?: \\{(.*)\\})? \"(\\w+) (.+) (.+)\"+$",
 		28
 	) AS `http.flavor`,
-    'haproxy_access' AS `event.domain`
+    'haproxy.access' AS `event.domain`
 FROM {table_name}
 WITH (
     auto_refresh = true,
