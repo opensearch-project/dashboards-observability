@@ -20,6 +20,12 @@
       "label": "Dashboards & Visualizations",
       "description": "Dashboards and indices that enable you to easily visualize important metrics.",
       "enabled_by_default": false
+    },
+    {
+      "name": "flint-dashboards",
+      "label": "Dashboards & Visualizations For Flint Integrations",
+      "description": "Dashboards and visualizations aligned with Flint S3 datasource ",
+      "enabled_by_default": false
     }
   ],
   "statics": {
@@ -58,6 +64,13 @@
   ],
   "assets": [
     {
+      "name": "aws_vpc_flow_flint",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["flint-dashboards"]
+    },
+    {
       "name": "aws_vpc_flow",
       "version": "1.0.0",
       "extension": "ndjson",
@@ -65,17 +78,34 @@
       "workflows": ["dashboards"]
     },
     {
-      "name": "create_table_vpc",
+      "name": "create_table_parquet_vpc",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query"
     },
     {
-      "name": "create_mv_vpc",
+      "name": "vpc_agg_60min_connections_mv",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query",
-      "workflows": ["dashboards"]
+      "type": "query"
+    },
+    {
+      "name": "vpc_live_week_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_cardinality_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_total-bytes_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
     }
   ],
   "sampleData": {
