@@ -1,0 +1,1719 @@
+[
+  {
+    "name": "_index",
+    "type": "string",
+    "esTypes": [
+      "_index"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": false
+  },
+  {
+    "name": "_score",
+    "type": "number",
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": false
+  },
+  {
+    "name": "_source",
+    "type": "_source",
+    "esTypes": [
+      "_source"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": false,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "_type",
+    "type": "string",
+    "esTypes": [
+      "_type"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": false
+  },
+  {
+    "name": "severity.number",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "severity.text",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "severity.text.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "severity.text"
+      }
+    }
+  },
+  {
+    "name": "attributes.data_stream.dataset",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "attributes.data_stream.namespace",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "attributes.data_stream.type",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "body",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "@message",
+    "type": "string",
+    "esTypes": [
+      "alias"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "@timestamp",
+    "type": "date",
+    "esTypes": [
+      "date"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "observedTimestamp",
+    "type": "date",
+    "esTypes": [
+      "date"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "observerTime",
+    "type": "string",
+    "esTypes": [
+      "alias"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "traceId",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "spanId",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "schemaUrl",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "schemaUrl.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "schemaUrl"
+      }
+    }
+  },
+  {
+    "name": "instrumentationScope.name",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "instrumentationScope.name.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "instrumentationScope.name"
+      }
+    }
+  },
+  {
+    "name": "instrumentationScope.version",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "instrumentationScope.version.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "instrumentationScope.version"
+      }
+    }
+  },
+  {
+    "name": "instrumentationScope.dropped_attributes_count",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "instrumentationScope.schemaUrl",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "instrumentationScope.schemaUrl.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "instrumentationScope.schemaUrl"
+      }
+    }
+  },
+  {
+    "name": "event.domain",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.source",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.category",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.type",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.kind",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.result",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.exception.message",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.exception.type",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "event.exception.stacktrace",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.backend.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.backend.port",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.backend.processing_time",
+    "type": "number",
+    "esTypes": [
+      "half_float"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.backend.status_code",
+    "type": "number",
+    "esTypes": [
+      "short"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.client.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.client.port",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.connection_time",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.destination.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.destination.port",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.elb_status_code",
+    "type": "number",
+    "esTypes": [
+      "short"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.http.port",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.http.version",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.matched_rule_priority",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.received_bytes",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.request_creation_time",
+    "type": "date",
+    "esTypes": [
+      "date"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.request_processing_time",
+    "type": "number",
+    "esTypes": [
+      "half_float"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.response_processing_time",
+    "type": "number",
+    "esTypes": [
+      "half_float"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.sent_bytes",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.ssl_protocol",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.ssl_cipher",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.target_ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.target_port",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.target_processing_time",
+    "type": "number",
+    "esTypes": [
+      "half_float"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.target_status_code",
+    "type": "number",
+    "esTypes": [
+      "short"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "aws.elb.timestamp",
+    "type": "date",
+    "esTypes": [
+      "date"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.flavor",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.user_agent",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.url",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.schema",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.target",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.route",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.client.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.resent_count",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.request.id",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "http.request.id.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "http.request.id"
+      }
+    }
+  },
+  {
+    "name": "http.request.body.content",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.request.bytes",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.request.method",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.request.referrer",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.request.mime_type",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.response.id",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "http.response.id.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "http.response.id"
+      }
+    }
+  },
+  {
+    "name": "http.response.body.content",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.response.bytes",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.response.status_code",
+    "type": "number",
+    "esTypes": [
+      "integer"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.sock.family",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.address",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "communication.source.address.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "communication.source.address"
+      }
+    }
+  },
+  {
+    "name": "communication.source.domain",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "communication.source.domain.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "communication.source.domain"
+      }
+    }
+  },
+  {
+    "name": "communication.source.bytes",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.port",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.mac",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.packets",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.geo.city_name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.geo.country_iso_code",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.geo.country_name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.source.geo.location",
+    "type": "geo_point",
+    "esTypes": [
+      "geo_point"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.address",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "communication.destination.address.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "communication.destination.address"
+      }
+    }
+  },
+  {
+    "name": "communication.destination.domain",
+    "type": "string",
+    "esTypes": [
+      "text"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": false,
+    "readFromDocValues": false
+  },
+  {
+    "name": "communication.destination.domain.keyword",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true,
+    "subType": {
+      "multi": {
+        "parent": "communication.destination.domain"
+      }
+    }
+  },
+  {
+    "name": "communication.destination.bytes",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.ip",
+    "type": "ip",
+    "esTypes": [
+      "ip"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.port",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.mac",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.packets",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.geo.city_name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.geo.country_iso_code",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.geo.country_name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "communication.destination.geo.location",
+    "type": "geo_point",
+    "esTypes": [
+      "geo_point"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.provider",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.availability_zone",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.region",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.machine.type",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.account.id",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.account.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.service.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.project.id",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.project.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.instance.id",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "cloud.instance.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.original",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.full",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.scheme",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.domain",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.registered_domain",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.top_level_domain",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.subdomain",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.port",
+    "type": "number",
+    "esTypes": [
+      "long"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.path",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.query",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.extension",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.fragment",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.username",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "url.password",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.user_agent.original",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.user_agent.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.user_agent.version",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  },
+  {
+    "name": "http.user_agent.device.name",
+    "type": "string",
+    "esTypes": [
+      "keyword"
+    ],
+    "count": 0,
+    "scripted": false,
+    "searchable": true,
+    "aggregatable": true,
+    "readFromDocValues": true
+  }
+]
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
