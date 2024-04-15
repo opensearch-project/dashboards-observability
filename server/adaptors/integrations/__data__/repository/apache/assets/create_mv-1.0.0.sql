@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
 SELECT
     to_timestamp(trim(BOTH '[]' FROM concat(time_local_1, ' ', time_local_2)), 'dd/MMM/yyyy:HH:mm:ss Z') AS `@timestamp`,
     split_part (request, ' ', 1) as `http.request.method`,
