@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
 SELECT
   to_timestamp(trim(BOTH '[]' FROM concat(date, ' ', time)), 'yyyy-MM-dd HH:mm:ss') AS `@timestamp`,
   c_ip AS `aws.cloudfront.c-ip`,
