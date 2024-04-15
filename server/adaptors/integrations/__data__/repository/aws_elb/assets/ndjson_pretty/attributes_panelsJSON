@@ -16,8 +16,6 @@ null
 null
 null
 null
-null
-null
 [
   {
     "version": "7.7.0",
@@ -195,36 +193,7 @@ null
     "gridData": {
       "x": 0,
       "y": 62,
-      "w": 13,
-      "h": 11,
-      "i": "21f540ca-5524-4b28-a534-7619c1274f2c"
-    },
-    "panelIndex": "21f540ca-5524-4b28-a534-7619c1274f2c",
-    "embeddableConfig": {},
-    "panelRefName": "panel_13"
-  },
-  {
-    "version": "7.7.0",
-    "gridData": {
-      "x": 13,
-      "y": 62,
-      "w": 35,
-      "h": 21,
-      "i": "6fe30837-fe94-4a5c-8b3d-085ba337e5ae"
-    },
-    "panelIndex": "6fe30837-fe94-4a5c-8b3d-085ba337e5ae",
-    "embeddableConfig": {
-      "mapCenter": null,
-      "mapZoom": 2
-    },
-    "panelRefName": "panel_14"
-  },
-  {
-    "version": "7.7.0",
-    "gridData": {
-      "x": 0,
-      "y": 73,
-      "w": 13,
+      "w": 24,
       "h": 10,
       "i": "0e25b5f6-8744-473c-b426-f8d5850d6519"
     },
@@ -235,10 +204,10 @@ null
   {
     "version": "7.7.0",
     "gridData": {
-      "x": 0,
-      "y": 83,
-      "w": 10,
-      "h": 15,
+      "x": 24,
+      "y": 62,
+      "w": 24,
+      "h": 10,
       "i": "96ec06ba-2f21-4db4-a13c-527ea26f74a0"
     },
     "panelIndex": "96ec06ba-2f21-4db4-a13c-527ea26f74a0",
@@ -248,9 +217,9 @@ null
   {
     "version": "7.7.0",
     "gridData": {
-      "x": 10,
-      "y": 83,
-      "w": 38,
+      "x": 0,
+      "y": 72,
+      "w": 48,
       "h": 15,
       "i": "e3caa6de-d408-4216-b6bd-6b230d28d195"
     },
@@ -262,7 +231,7 @@ null
     "version": "7.7.0",
     "gridData": {
       "x": 0,
-      "y": 98,
+      "y": 87,
       "w": 48,
       "h": 15,
       "i": "ccd7b879-7013-4219-87dd-8ba436177671"

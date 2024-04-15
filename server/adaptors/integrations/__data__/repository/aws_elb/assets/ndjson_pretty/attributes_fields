@@ -1146,30 +1146,6 @@
     "readFromDocValues": true
   },
   {
-    "name": "communication.source.geo.country_iso_code",
-    "type": "string",
-    "esTypes": [
-      "keyword"
-    ],
-    "count": 0,
-    "scripted": false,
-    "searchable": true,
-    "aggregatable": true,
-    "readFromDocValues": true
-  },
-  {
-    "name": "communication.source.geo.country_name",
-    "type": "string",
-    "esTypes": [
-      "keyword"
-    ],
-    "count": 0,
-    "scripted": false,
-    "searchable": true,
-    "aggregatable": true,
-    "readFromDocValues": true
-  },
-  {
     "name": "communication.source.geo.location",
     "type": "geo_point",
     "esTypes": [
@@ -1696,8 +1672,6 @@
     "readFromDocValues": true
   }
 ]
-null
-null
 null
 null
 null
