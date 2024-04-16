@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS aws_cloudtrail_attempt4 (
+CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   Records ARRAY<STRUCT<
     eventVersion STRING,
     userIdentity STRUCT<
@@ -57,9 +57,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS aws_cloudtrail_attempt4 (
       clientProvidedHostHeader:STRING
     >
   >>
-)
-USING json
-LOCATION 's3://cloudtrail-awslogs-458776276247-xkylkxpn-isengard-do-not-delete/AWSLogs/458776276247/CloudTrail/us-west-2/2024/04/15/'
+) USING json
+LOCATION '{s3_bucket_location}'
 OPTIONS (
   compression='gzip',
   recursivefilelookup='true'
