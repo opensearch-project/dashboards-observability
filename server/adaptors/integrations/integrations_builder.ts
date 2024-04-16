@@ -43,7 +43,7 @@ export class IntegrationInstanceBuilder {
     if (!assets.ok) {
       return Promise.reject(assets.error);
     }
-    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value));
+    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value, options.workflows));
     const withDataSource = this.remapDataSource(remapped, options.indexPattern);
     const withSubstitutedQueries = this.substituteQueries(
       withDataSource,
