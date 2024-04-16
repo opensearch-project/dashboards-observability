@@ -1,5 +1,5 @@
 -- One Hour Aggregation MV of VPC connections / bytes / packets
-CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}_agg_60_min_connections_mview AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}__agg_60_min_connections_mview AS
   SELECT
     date_trunc('hour', from_unixtime(start_time / 1000)) AS interval_start_time,
     date_trunc('hour', from_unixtime(start_time / 1000)) + INTERVAL 1 HOUR AS interval_end_time,
