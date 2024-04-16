@@ -314,7 +314,7 @@ export async function addIntegrationRequest(
   };
   if (dataSourceInfo) {
     createReqBody.dataSource = dataSourceInfo.dataSource;
-    createReqBody.tableName = dataSourceInfo.dataSource;
+    createReqBody.tableName = dataSourceInfo.tableName;
   }
 
   let response: boolean = await http
