@@ -41,7 +41,7 @@ export class IntegrationInstanceBuilder {
     if (!assets.ok) {
       return Promise.reject(assets.error);
     }
-    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value));
+    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value, options.workflows));
     const withDataSource = this.remapDataSource(remapped, options.dataSource);
     const refs = await this.postAssets(withDataSource);
     const builtInstance = await this.buildInstance(integration, refs, options);
