@@ -189,6 +189,9 @@ export class IntegrationInstanceBuilder {
     return Promise.resolve({
       name: options.name,
       templateName: config.value.name,
+      // Before data sources existed we called the index pattern a data source. Now we need the old
+      // name for BWC but still use the new data sources in building, so we map the variable only
+      // for returned output here
       dataSource: options.indexPattern,
       creationDate: new Date().toISOString(),
       assets: refs,
