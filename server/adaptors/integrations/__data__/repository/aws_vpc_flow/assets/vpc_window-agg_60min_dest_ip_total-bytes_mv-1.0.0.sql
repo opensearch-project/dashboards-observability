@@ -1,4 +1,3 @@
--- One Hour Aggregation time window of top IP dest by cardinality group by hourly
 CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}__window_agg_60_min_network_ip_cardinality_mview AS
 WITH hourly_buckets AS (
     SELECT

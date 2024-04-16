@@ -1,4 +1,3 @@
- --- DDL VPC create table statement definition
 CREATE EXTERNAL TABLE IF NOT EXISTS  {table_name} (
   cloud STRUCT<
     account_uid: STRING,

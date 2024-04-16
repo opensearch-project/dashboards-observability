@@ -81,31 +81,36 @@
       "name": "create_table_parquet_vpc",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query"
+      "type": "query",
+      "workflows": ["flint-dashboards"]
     },
     {
       "name": "vpc_agg_60min_connections_mv",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query"
+      "type": "query",
+      "workflows": ["flint-dashboards"]
     },
     {
       "name": "vpc_live_week_mv",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query"
+      "type": "query",
+      "workflows": ["flint-dashboards"]
     },
     {
       "name": "vpc_window-agg_60min_dest_ip_cardinality_mv",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query"
+      "type": "query",
+      "workflows": ["flint-dashboards"]
     },
     {
       "name": "vpc_window-agg_60min_dest_ip_total-bytes_mv",
       "version": "1.0.0",
       "extension": "sql",
-      "type": "query"
+      "type": "query",
+      "workflows": ["flint-dashboards"]
     }
   ],
   "sampleData": {
