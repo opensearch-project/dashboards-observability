@@ -286,7 +286,8 @@ export async function addIntegrationRequest(
   name?: string,
   indexPattern?: string,
   workflows?: string[],
-  skipRedirect?: boolean
+  skipRedirect?: boolean,
+  dataSourceInfo?: { dataSource: string; tableName: string }
 ): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
@@ -300,9 +301,25 @@ export async function addIntegrationRequest(
     indexPattern = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
   }
 
+  const createReqBody: {
+    name?: string;
+    indexPattern?: string;
+    workflows?: string[];
+    dataSource?: string;
+    tableName?: string;
+  } = {
+    name,
+    indexPattern,
+    workflows,
+  };
+  if (dataSourceInfo) {
+    createReqBody.dataSource = dataSourceInfo.dataSource;
+    createReqBody.tableName = dataSourceInfo.dataSource;
+  }
+
   let response: boolean = await http
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
-      body: JSON.stringify({ name, indexPattern, workflows }),
+      body: JSON.stringify(createReqBody),
     })
     .then((res) => {
       setToast(`${name} integration successfully added!`, 'success');
