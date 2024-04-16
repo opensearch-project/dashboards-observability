@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS  {table_name} (
+CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   cloud STRUCT<
     account_uid: STRING,
     region: STRING,
@@ -58,17 +58,5 @@ CREATE EXTERNAL TABLE IF NOT EXISTS  {table_name} (
   accountid STRING,
   eventday STRING
 )
-PARTITIONED BY (
-  `year` string,
-  `month` string,
-  `day` string,
-  `hour` string
-)ROW FORMAT SERDE
-  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-STORED AS INPUTFORMAT
-  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
-OUTPUTFORMAT
-  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION
-  '{s3_bucket_location}'
-)
+USING json
+LOCATION '{s3_bucket_location}'

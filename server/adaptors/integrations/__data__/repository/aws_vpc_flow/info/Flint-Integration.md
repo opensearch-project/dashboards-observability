@@ -161,26 +161,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS vpc_flow_logs_parquet (
   flow_direction string,
   traffic_path int
 )
-PARTITIONED BY (
-  `aws-account-id` string,
-  `aws-service` string,
-  `aws-region` string,
-  `year` string, 
-  `month` string, 
-  `day` string,
-  `hour` string
-)ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION
-  's3://*DOC-EXAMPLE-BUCKET*/*prefix*/AWSLogs/'
-TBLPROPERTIES (
-  'EXTERNAL'='true', 
-  'skip.header.line.count'='1'
-  )
+USING json
+LOCATION 's3://DOC-EXAMPLE-BUCKET/prefix/AWSLogs/'
 ```
 
 * Modify the sample `LOCATION 's3://`DOC-EXAMPLE-BUCKET`/`prefix`/AWSLogs/'` to point to the Amazon S3 path that contains your log data.
@@ -488,6 +470,78 @@ The placeholders for the start and end dates (`StartYear`, `StartMonth`, `StartD
 
 ## Appendix
 
+
+### JSON Format Based VPC Table definition
+
+```
+--- DDL VPC statement definition
+EXTERNAL TABLE IF NOT EXISTS vpc_flow_logs_parquet (
+  cloud STRUCT<
+    account_uid: STRING, 
+    region: STRING, 
+    zone: STRING, 
+    provider: STRING
+  >,
+  src_endpoint STRUCT<
+    port: INT, 
+    svc_name: STRING, 
+    ip: STRING, 
+    intermediate_ips: ARRAY<STRING>, 
+    interface_uid: STRING, 
+    vpc_uid: STRING, 
+    instance_uid: STRING, 
+    subnet_uid: STRING
+  >,
+  dst_endpoint STRUCT<
+    port: INT, 
+    svc_name: STRING, 
+    ip: STRING, 
+    intermediate_ips: ARRAY<STRING>, 
+    interface_uid: STRING, 
+    vpc_uid: STRING, 
+    instance_uid: STRING, 
+    subnet_uid: STRING
+  >,
+  connection_info STRUCT<
+    protocol_num: INT, 
+    tcp_flags: INT, 
+    protocol_ver: STRING, 
+    boundary_id: INT, 
+    boundary: STRING, 
+    direction_id: INT, 
+    direction: STRING
+  >,
+  traffic STRUCT<
+    packets: BIGINT, 
+    bytes: BIGINT
+  >,
+  time BIGINT,
+  start_time BIGINT,
+  end_time BIGINT,
+  status_code STRING,
+  severity_id INT,
+  severity STRING,
+  class_name STRING,
+  class_uid INT,
+  category_name STRING,
+  category_uid INT,
+  activity_name STRING,
+  activity_id INT,
+  disposition STRING,
+  disposition_id INT,
+  type_uid INT,
+  type_name STRING,
+  region STRING,
+  accountid STRING,
+  eventday STRING
+)
+USING json
+LOCATION
+  's3://DOC-EXAMPLE-BUCKET/prefix/AWSLogs/'
+
+```
+
+* * *
 
 ### Hive Based VPC Table definition
 
