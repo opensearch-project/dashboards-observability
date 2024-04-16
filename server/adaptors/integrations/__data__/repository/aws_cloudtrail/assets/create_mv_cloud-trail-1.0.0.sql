@@ -8,7 +8,7 @@ SELECT
   rec.userIdentity.accessKeyId AS `aws.cloudtrail.userIdentity.accessKeyId`,
   rec.userIdentity.userName AS `aws.cloudtrail.userIdentity.userName`,
   rec.userIdentity.sessionContext.attributes.mfaAuthenticated AS `aws.cloudtrail.userIdentity.sessionContext.attributes.mfaAuthenticated`,
-  rec.userIdentity.sessionContext.attributes.creationDate AS `aws.cloudtrail.userIdentity.sessionContext.attributes.creationDate`,
+  CAST(rec.userIdentity.sessionContext.attributes.creationDate  AS TIMESTAMP) AS `aws.cloudtrail.userIdentity.sessionContext.attributes.creationDate`,
   rec.userIdentity.sessionContext.sessionIssuer.type AS `aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.type`,
   rec.userIdentity.sessionContext.sessionIssuer.principalId AS `aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.principalId`,
   rec.userIdentity.sessionContext.sessionIssuer.arn AS `aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.arn`,
@@ -17,7 +17,7 @@ SELECT
   rec.userIdentity.sessionContext.ec2RoleDelivery AS `aws.cloudtrail.userIdentity.sessionContext.ec2RoleDelivery`,
 
   rec.eventVersion AS `aws.cloudtrail.eventVersion`,
-  rec.eventTime AS `@timestamp`,
+  CAST(rec.eventTime AS TIMESTAMP)  AS `@timestamp`,
   rec.eventSource AS `aws.cloudtrail.eventSource`,
   rec.eventName AS `aws.cloudtrail.eventName`,
   rec.eventCategory AS `aws.cloudtrail.eventCategory`,
