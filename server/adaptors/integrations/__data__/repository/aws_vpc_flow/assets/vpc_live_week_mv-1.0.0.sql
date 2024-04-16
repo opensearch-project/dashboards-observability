@@ -57,9 +57,9 @@ CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
       CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP) >= DATE_SUB(latest.max_start_time, 7)
 WITH (
   auto_refresh = true,
-  refresh_interval = '1 day',
+  refresh_interval = '1 min',
   checkpoint_location = '{s3_checkpoint_location}',
-  watermark_delay = '1 day',
+  watermark_delay = '1 min',
   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
 

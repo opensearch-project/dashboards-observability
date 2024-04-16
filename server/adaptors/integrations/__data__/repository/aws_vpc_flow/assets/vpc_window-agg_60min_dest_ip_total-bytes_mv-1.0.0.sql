@@ -32,9 +32,9 @@ WITH hourly_buckets AS (
     addr_rank ASC
 WITH (
   auto_refresh = true,
-  refresh_interval = '1 day',
+  refresh_interval = '60 min',
   checkpoint_location = '{s3_checkpoint_location}',
-  watermark_delay = '1 day',
+  watermark_delay = '60 min',
   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
 
