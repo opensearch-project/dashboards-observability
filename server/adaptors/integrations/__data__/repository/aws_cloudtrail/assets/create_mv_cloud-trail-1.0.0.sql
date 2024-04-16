@@ -49,6 +49,6 @@ FROM
 WITH (
     auto_refresh = true,
     checkpoint_location = '{s3_checkpoint_location}',
-    watermark_delay = '1 day',
+    watermark_delay = '1 min',
     extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
