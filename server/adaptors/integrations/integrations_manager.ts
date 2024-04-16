@@ -157,7 +157,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
   loadIntegrationInstance = async (
     templateName: string,
     name: string,
-    dataSource: string,
+    indexPattern: string,
     workflows?: string[]
   ): Promise<IntegrationInstance> => {
     const template = await this.repository.getIntegration(templateName);
@@ -171,7 +171,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
       addRequestToMetric('integrations', 'create', 'count');
       const result = await this.instanceBuilder.build(template, {
         name,
-        dataSource,
+        indexPattern,
         workflows,
       });
       const test = await this.client.create('integration-instance', result);
