@@ -93,7 +93,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstancesSearchResult> => {
     addRequestToMetric('integrations', 'get', 'count');
-    const result = await this.client.find({ type: 'integration-instance' });
+    const result = await this.client.find({ type: 'integration-instance', perPage: 1000 });
     return Promise.resolve({
       total: result.total,
       hits: result.saved_objects?.map((x) => ({

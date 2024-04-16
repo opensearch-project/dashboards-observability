@@ -6,7 +6,7 @@ SELECT
     split_part (request, ' ', 3) as `http.flavor`,
     status AS `http.response.status_code`,
     body_bytes_sent AS `http.response.bytes`,
-    'nginx.access' AS `event.domain`
+    'apache.access' AS `event.domain`
 FROM {table_name}
 WITH (
     auto_refresh = 'true',

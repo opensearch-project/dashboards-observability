@@ -514,7 +514,7 @@ const addIntegration = async ({
       integration,
       setCalloutLikeToast,
       config.displayName,
-      `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`,
+      `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
       config.enabledWorkflows,
       setIsInstalling ? true : false
     );

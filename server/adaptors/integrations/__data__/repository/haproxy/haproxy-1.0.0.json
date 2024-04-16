@@ -8,6 +8,20 @@
   "labels": ["Observability", "Logs"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/haproxy/info",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
   "statics": {
     "logo": {
       "annotation": "HAProxy Logo",
@@ -43,7 +57,21 @@
       "name": "haproxy",
       "version": "1.0.0",
       "extension": "ndjson",
-      "type": "savedObjectBundle"
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "create_table",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards"]
     }
   ],
   "sampleData": {
