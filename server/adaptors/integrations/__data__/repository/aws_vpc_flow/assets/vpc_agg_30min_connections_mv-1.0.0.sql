@@ -1,5 +1,5 @@
 -- 30 Min Aggregation MV of VPC connections / bytes / packets
-CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}_agg_30_min_connections_mview AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}__agg_30_min_connections_mview AS
   SELECT
     CAST(from_unixtime(CAST((start_time / 1000) AS BIGINT) DIV 1800 * 1800) AS TIMESTAMP) AS interval_start_time,
     CAST(from_unixtime((CAST((start_time / 1000) AS BIGINT) DIV 1800 * 1800) + 1799) AS TIMESTAMP) AS interval_end_time,
