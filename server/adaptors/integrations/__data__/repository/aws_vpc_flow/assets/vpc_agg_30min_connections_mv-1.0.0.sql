@@ -27,10 +27,6 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}__agg_30_min_connections_mvie
   ORDER BY
     interval_start_time
 WITH (
-  auto_refresh = true,
-  refresh_interval = '30 Minute',
-  checkpoint_location = '{s3_checkpoint_location}',
-  watermark_delay = '1 Minute',
-  extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+  auto_refresh = false
 )
 

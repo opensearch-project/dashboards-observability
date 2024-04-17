@@ -31,10 +31,6 @@ ORDER BY
   interval_start_time ASC,
   bytes_rank ASC
 WITH (
-  auto_refresh = true,
-  refresh_interval = '60 Minute',
-  checkpoint_location = '{s3_checkpoint_location}',
-  watermark_delay = '1 Minute',
-  extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+  auto_refresh = false
 )
 
