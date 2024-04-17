@@ -52,7 +52,7 @@ CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
     accountid AS `aws.vpc.account-id`
   FROM
     {table_name},
-    (SELECT MAX(CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP)) AS max_start_time FROM `vpcflow-db`.vpc_flow) AS latest
+    (SELECT MAX(CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP)) AS max_start_time FROM {table_name}) AS latest
   WHERE
       CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP) >= DATE_SUB(latest.max_start_time, 7)
 WITH (

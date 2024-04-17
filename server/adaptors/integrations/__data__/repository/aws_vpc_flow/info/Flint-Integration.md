@@ -266,8 +266,8 @@ SELECT
   region AS `aws.vpc.region`,
   accountid AS `aws.vpc.account-id`
 FROM
-  `vpcflow-db`.vpc_flow,
-  (SELECT MAX(CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP)) AS max_start_time FROM `vpcflow-db`.vpc_flow) AS latest
+  {table_name},
+  (SELECT MAX(CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP)) AS max_start_time FROM {table_name}) AS latest
 WHERE
   CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP) >= DATE_SUB(latest.max_start_time, 7)
 WITH (
@@ -313,7 +313,7 @@ date_trunc('hour', from_unixtime(start_time / 1000)) + INTERVAL 1 HOUR AS end_ti
         SUM(CAST(IFNULL(traffic.bytes, 0) AS LONG)) AS total_bytes,
         SUM(CAST(IFNULL(traffic.packets, 0) AS LONG)) AS total_packets
     FROM
-        `vpcflow-db`.vpc_flow
+        {table_name}
     WHERE 
         ((`year` = 'StartYear' AND `month` >= 'StartMonth' AND `day` >= 'StartDay') OR
          (`year` = 'EndYear' AND `month` <= 'EndMonth' AND `day` <= 'EndDay'))
@@ -352,7 +352,7 @@ SELECT
        SUM(CAST(IFNULL(traffic.bytes, 0) AS LONG)) AS total_bytes,
        SUM(CAST(IFNULL(traffic.packets, 0) AS LONG)) AS total_packets
   FROM
-    `vpcflow-db`.vpc_flow
+    {table_name}
   WHERE 
       ((`year` = 'StartYear' AND `month` >= 'StartMonth' AND `day` >= 'StartDay') OR
        (`year` = 'EndYear' AND `month` <= 'EndMonth' AND `day` <= 'EndDay'))
@@ -386,7 +386,7 @@ WITH hourly_buckets AS (
     CAST(IFNULL(dst_endpoint.ip, '0.0.0.0') AS STRING)  AS dstaddr,
     SUM(CAST(IFNULL(traffic.bytes, 0) AS LONG)) AS total_bytes
   FROM
-    `vpcflow-db`.vpc_flow
+    {table_name}
   GROUP BY
     hour_bucket,
     dstaddr
@@ -428,7 +428,7 @@ WITH hourly_buckets AS (
     CAST(IFNULL(dst_endpoint.ip, '0.0.0.0') AS STRING)  AS dstaddr,
     COUNT(*) AS total_count
   FROM
-    `vpcflow-db`.vpc_flow
+    {table_name}
   GROUP BY
     hour_bucket,
     dstaddr
