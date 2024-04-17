@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
     SELECT
         CAST(FROM_UNIXTIME(start) AS TIMESTAMP) as `@timestamp`,
         version as `aws.vpc.version`,

@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
 SELECT
   rec.userIdentity.type AS `aws.cloudtrail.userIdentity.type`,
   rec.userIdentity.principalId AS `aws.cloudtrail.userIdentity.principalId`,
@@ -49,6 +49,6 @@ FROM
 WITH (
     auto_refresh = true,
     checkpoint_location = '{s3_checkpoint_location}',
-    watermark_delay = '1 min',
+    watermark_delay = '1 Minute',
     extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
