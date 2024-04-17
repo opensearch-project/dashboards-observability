@@ -51,11 +51,12 @@ CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
     region AS `aws.vpc.region`,
     accountid AS `aws.vpc.account-id`
   FROM
-    {table_name},
-    (SELECT MAX(CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP)) AS max_start_time FROM `vpcflow-db`.vpc_flow) AS latest
-  WHERE
-      CAST(FROM_UNIXTIME(start_time / 1000) AS TIMESTAMP) >= DATE_SUB(latest.max_start_time, 7)
+    {table_name}
 WITH (
-  auto_refresh = false
+  auto_refresh = true,
+  refresh_interval = '1 Minute',
+  checkpoint_location = '{s3_checkpoint_location}',
+  watermark_delay = '10 Second',
+  extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
 

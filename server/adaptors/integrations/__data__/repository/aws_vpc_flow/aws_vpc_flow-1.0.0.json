@@ -96,6 +96,7 @@
       "type": "savedObjectBundle",
       "workflows": ["flint-pre-agg-dashboards"]
     },
+
     {
       "name": "create_table_parquet_vpc",
       "version": "1.0.0",
@@ -104,11 +105,18 @@
       "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
     },
     {
+      "name": "vpc_live_all_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-live-dashboards"]
+    },
+    {
       "name": "vpc_live_week_mv",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
+      "workflows": ["flint-pre-agg-dashboards"]
     },
     {
       "name": "vpc_agg_60min_connections_mv",
@@ -132,6 +140,13 @@
       "workflows": ["flint-pre-agg-dashboards"]
     },
 
+    {
+      "name": "vpc_live_week_refresh",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-refresh"]
+    },
     {
       "name": "vpc_agg_60min_connections_refresh",
       "version": "1.0.0",
