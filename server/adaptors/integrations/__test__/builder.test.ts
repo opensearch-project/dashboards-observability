@@ -58,7 +58,7 @@ describe('IntegrationInstanceBuilder', () => {
   describe('build', () => {
     it('should build an integration instance', async () => {
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
 
@@ -131,7 +131,7 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if integration is not valid', async () => {
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
       jest
@@ -143,7 +143,7 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if getAssets rejects', async () => {
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
 
@@ -160,7 +160,7 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if postAssets throws an error', async () => {
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
       const remappedAssets = [
@@ -297,7 +297,7 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
       const expectedInstance = {
@@ -333,7 +333,7 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const options = {
-        dataSource: 'instance-datasource',
+        indexPattern: 'instance-datasource',
         name: 'instance-name',
       };
 

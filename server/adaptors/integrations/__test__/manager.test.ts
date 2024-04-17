@@ -242,7 +242,7 @@ describe('IntegrationsKibanaBackend', () => {
       expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
       expect(instanceBuilder.build).toHaveBeenCalledWith(template, {
         name,
-        dataSource: 'datasource',
+        indexPattern: 'datasource',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'integration-instance',
