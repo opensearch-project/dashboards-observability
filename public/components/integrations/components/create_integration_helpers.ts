@@ -223,12 +223,14 @@ const createIndexMapping = async (
   });
 };
 
-const createDataSourceMappings = async (
+const createIndexPatternMappings = async (
   targetDataSource: string,
   integrationTemplateId: string,
   integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void
 ): Promise<void> => {
+  // TODO the nested methods still need the dataSource -> indexPattern rename applied, sub-methods
+  // here still have old naming convention
   const http = coreRefs.http!;
   const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
   let error: string | null = null;
@@ -282,25 +284,42 @@ export async function addIntegrationRequest(
   integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
-  dataSource?: string,
+  indexPattern?: string,
   workflows?: string[],
-  skipRedirect?: boolean
+  skipRedirect?: boolean,
+  dataSourceInfo?: { dataSource: string; tableName: string }
 ): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
-    createDataSourceMappings(
+    createIndexPatternMappings(
       `ss4o_${integration.type}-${integrationTemplateId}-*-sample`,
       integrationTemplateId,
       integration,
       setToast
     );
     name = `${integrationTemplateId}-sample`;
-    dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
+    indexPattern = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
+  }
+
+  const createReqBody: {
+    name?: string;
+    indexPattern?: string;
+    workflows?: string[];
+    dataSource?: string;
+    tableName?: string;
+  } = {
+    name,
+    indexPattern,
+    workflows,
+  };
+  if (dataSourceInfo) {
+    createReqBody.dataSource = dataSourceInfo.dataSource;
+    createReqBody.tableName = dataSourceInfo.tableName;
   }
 
   let response: boolean = await http
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
-      body: JSON.stringify({ name, dataSource, workflows }),
+      body: JSON.stringify(createReqBody),
     })
     .then((res) => {
       setToast(`${name} integration successfully added!`, 'success');
@@ -326,13 +345,13 @@ export async function addIntegrationRequest(
     });
   const requestBody =
     data.sampleData
-      .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
+      .map((record) => `{"create": { "_index": "${indexPattern}" } }\n${JSON.stringify(record)}`)
       .join('\n') + '\n';
   response = await http
     .post(CONSOLE_PROXY, {
       body: requestBody,
       query: {
-        path: `${dataSource}/_bulk?refresh=wait_for`,
+        path: `${indexPattern}/_bulk?refresh=wait_for`,
         method: 'POST',
       },
     })
