@@ -39,10 +39,10 @@ describe('The local repository', () => {
   it('Should pass deep validation for all local integrations.', async () => {
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
     await Promise.all(
-      integrations.map(async (i) => {
+      integrations.map(async (i: IntegrationReader) => {
         const result = await deepCheck(i);
         if (!result.ok) {
-          console.error(result.error);
+          console.error(i.directory, result.error);
         }
         expect(result.ok).toBe(true);
       })
