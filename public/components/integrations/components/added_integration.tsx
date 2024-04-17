@@ -226,7 +226,9 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               data-test-subj={`SavedQueryLink`}
               data-click-metric-element="integrations.saved_query_link"
               onClick={() =>
-                window.location.assign(`observability-logs#/explorer/${record.assetId}`)
+                window.location.assign(
+                  `observability-logs#/explorer/observability-search:${record.assetId}`
+                )
               }
             >
               {_.truncate(record.description, { length: 100 })}
