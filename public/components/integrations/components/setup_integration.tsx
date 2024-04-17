@@ -435,11 +435,12 @@ export function SetupIntegrationFormInputs({
   );
 }
 
+const makeTableName = (config: IntegrationSetupInputs): string => {
+  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
+};
+
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
-  let queryStr = query.replaceAll(
-    '{table_name}',
-    `${config.connectionDataSource}.default.${config.connectionTableName}`
-  );
+  let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
   queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
@@ -516,7 +517,8 @@ const addIntegration = async ({
       config.displayName,
       `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
       config.enabledWorkflows,
-      setIsInstalling ? true : false
+      setIsInstalling ? true : false,
+      { dataSource: config.connectionDataSource, tableName: makeTableName(config) }
     );
     if (setIsInstalling) {
       setIsInstalling(false, res);
