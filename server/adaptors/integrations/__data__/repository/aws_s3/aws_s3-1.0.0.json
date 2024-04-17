@@ -57,6 +57,13 @@
       "workflows": ["dashboards"]
     },
     {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
       "name": "create_table",
       "version": "1.0.0",
       "extension": "sql",
