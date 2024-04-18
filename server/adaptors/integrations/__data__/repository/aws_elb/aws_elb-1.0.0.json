@@ -80,6 +80,13 @@
       "extension": "sql",
       "type": "query",
       "workflows": ["dashboards"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
     }
   ],
   "sampleData": {

@@ -1,0 +1,1 @@
+REFRESH MATERIALIZED VIEW {table_name}__window_agg_60_min_network_ip_cardinality_mview

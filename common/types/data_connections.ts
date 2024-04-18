@@ -217,7 +217,7 @@ export interface FormErrorsType {
   watermarkDelayError: string[];
 }
 
-export type AccelerationRefreshType = 'auto' | 'autoInterval' | 'manual' | 'manualIncrement';
+export type AccelerationRefreshType = 'autoInterval' | 'manual' | 'manualIncrement';
 
 export interface CreateAccelerationForm {
   dataSource: string;

@@ -91,7 +91,7 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
-      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*_mview`
+      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*`
     );
     const findIntegrations = async () => {
       // TODO: we just get all results and filter, ideally we send a filtering query to the API
