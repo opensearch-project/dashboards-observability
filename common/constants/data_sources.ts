@@ -33,6 +33,12 @@ export const ACCELERATION_TIME_INTERVAL = [
   { text: 'day(s)', value: 'day' },
   { text: 'week(s)', value: 'week' },
 ];
+export const ACCELERATION_REFRESH_TIME_INTERVAL = [
+  { text: 'minutes(s)', value: 'minute' },
+  { text: 'hour(s)', value: 'hour' },
+  { text: 'day(s)', value: 'day' },
+  { text: 'week(s)', value: 'week' },
+];
 
 export const ACCELERATION_ADD_FIELDS_TEXT = '(add fields here)';
 export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z0-9_]+$/;

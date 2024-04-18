@@ -18,6 +18,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
+  ACCELERATION_REFRESH_TIME_INTERVAL,
   ACCELERATION_TIME_INTERVAL,
 } from '../../../../../../../../common/constants/data_sources';
 import {
@@ -75,15 +76,15 @@ export const CreateAcceleration = ({
     accelerationIndexName: ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
     primaryShardsCount: 1,
     replicaShardsCount: 1,
-    refreshType: 'auto',
+    refreshType: 'autoInterval',
     checkpointLocation: undefined,
     watermarkDelay: {
       delayWindow: 1,
       delayInterval: ACCELERATION_TIME_INTERVAL[2].value, // minutes
     },
     refreshIntervalOptions: {
-      refreshWindow: 1,
-      refreshInterval: ACCELERATION_TIME_INTERVAL[2].value, // minutes
+      refreshWindow: 15,
+      refreshInterval: ACCELERATION_REFRESH_TIME_INTERVAL[0].value, // minutes
     },
     formErrors: {
       dataSourceError: [],
