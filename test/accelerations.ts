@@ -5,6 +5,7 @@
 
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
+  ACCELERATION_REFRESH_TIME_INTERVAL,
   ACCELERATION_TIME_INTERVAL,
 } from '../common/constants/data_sources';
 import {
@@ -102,11 +103,11 @@ export const createAccelerationEmptyDataMock: CreateAccelerationForm = {
   accelerationIndexName: ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   primaryShardsCount: 5,
   replicaShardsCount: 1,
-  refreshType: 'auto',
+  refreshType: 'autoInterval',
   checkpointLocation: undefined,
   refreshIntervalOptions: {
-    refreshWindow: 1,
-    refreshInterval: ACCELERATION_TIME_INTERVAL[1].value,
+    refreshWindow: 15,
+    refreshInterval: ACCELERATION_REFRESH_TIME_INTERVAL[0].value,
   },
   watermarkDelay: {
     delayWindow: 1,
@@ -132,12 +133,17 @@ export const indexOptionsMock1: CreateAccelerationForm = {
   ...createAccelerationEmptyDataMock,
   primaryShardsCount: 3,
   replicaShardsCount: 2,
-  refreshType: 'auto',
+  refreshType: 'autoInterval',
+  refreshIntervalOptions: {
+    refreshWindow: 15,
+    refreshInterval: ACCELERATION_REFRESH_TIME_INTERVAL[0].value,
+  },
 };
 
 export const indexOptionsMockResult1 = `WITH (
 index_settings = '{"number_of_shards":3,"number_of_replicas":2}',
-auto_refresh = true
+auto_refresh = true,
+refresh_interval = '15 minutes'
 )`;
 
 export const indexOptionsMock2: CreateAccelerationForm = {
@@ -147,27 +153,32 @@ export const indexOptionsMock2: CreateAccelerationForm = {
   refreshType: 'autoInterval',
   refreshIntervalOptions: {
     refreshWindow: 10,
-    refreshInterval: 'minute',
+    refreshInterval: ACCELERATION_REFRESH_TIME_INTERVAL[1].value,
   },
 };
 
 export const indexOptionsMockResult2 = `WITH (
 index_settings = '{"number_of_shards":3,"number_of_replicas":2}',
 auto_refresh = true,
-refresh_interval = '10 minutes'
+refresh_interval = '10 hours'
 )`;
 
 export const indexOptionsMock3: CreateAccelerationForm = {
   ...createAccelerationEmptyDataMock,
   primaryShardsCount: 3,
   replicaShardsCount: 2,
-  refreshType: 'auto',
+  refreshType: 'autoInterval',
+  refreshIntervalOptions: {
+    refreshWindow: 10,
+    refreshInterval: ACCELERATION_REFRESH_TIME_INTERVAL[1].value,
+  },
   checkpointLocation: 's3://path/to/checkpoint',
 };
 
 export const indexOptionsMockResult3 = `WITH (
 index_settings = '{"number_of_shards":3,"number_of_replicas":2}',
 auto_refresh = true,
+refresh_interval = '10 hours',
 checkpoint_location = 's3://path/to/checkpoint'
 )`;
 
@@ -294,7 +305,7 @@ export const skippingIndexBuilderMock2: CreateAccelerationForm = {
   ],
   primaryShardsCount: 5,
   replicaShardsCount: 3,
-  refreshType: 'auto',
+  refreshType: 'manual',
   checkpointLocation: 's3://test/',
 };
 
@@ -303,8 +314,8 @@ ON datasource.database.table (
    \`field1\` PARTITION
   ) WITH (
 index_settings = '{"number_of_shards":5,"number_of_replicas":3}',
-auto_refresh = true,
-checkpoint_location = 's3://test/'
+auto_refresh = false,
+incremental_refresh = false
 )`;
 
 export const coveringIndexBuilderMock1: CreateAccelerationForm = {
@@ -345,7 +356,7 @@ export const coveringIndexBuilderMock2: CreateAccelerationForm = {
   coveringIndexQueryData: ['field1'],
   primaryShardsCount: 5,
   replicaShardsCount: 3,
-  refreshType: 'auto',
+  refreshType: 'manualIncrement',
   checkpointLocation: 's3://test/',
 };
 
@@ -354,7 +365,8 @@ ON datasource.database.table (
    \`field1\`
   ) WITH (
 index_settings = '{"number_of_shards":5,"number_of_replicas":3}',
-auto_refresh = true,
+auto_refresh = false,
+incremental_refresh = true,
 checkpoint_location = 's3://test/'
 )`;
 
@@ -427,7 +439,7 @@ export const materializedViewBuilderMock2: CreateAccelerationForm = {
   },
   primaryShardsCount: 5,
   replicaShardsCount: 3,
-  refreshType: 'auto',
+  refreshType: 'manualIncrement',
   checkpointLocation: 's3://test/',
   watermarkDelay: {
     delayWindow: 2,
@@ -442,7 +454,8 @@ FROM datasource.database.table
 GROUP BY TUMBLE (\`timestamp\`, '2 hours')
  WITH (
 index_settings = '{"number_of_shards":5,"number_of_replicas":3}',
-auto_refresh = true,
+auto_refresh = false,
+incremental_refresh = true,
 watermark_delay = '2 minutes',
 checkpoint_location = 's3://test/'
 )`;
