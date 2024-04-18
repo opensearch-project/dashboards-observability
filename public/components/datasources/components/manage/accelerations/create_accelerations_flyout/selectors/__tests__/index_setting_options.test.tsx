@@ -40,7 +40,7 @@ describe('Index settings acceleration components', () => {
       ...createAccelerationEmptyDataMock,
       primaryShardsCount: 1,
       replicaShardsCount: 5,
-      refreshType: 'auto',
+      refreshType: 'manual',
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
