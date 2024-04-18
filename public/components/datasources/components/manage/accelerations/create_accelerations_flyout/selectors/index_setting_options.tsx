@@ -88,7 +88,9 @@ export const IndexSettingOptions = ({
     'autoInterval'
   );
   const [refreshWindow, setRefreshWindow] = useState(15);
-  const [refreshInterval, setRefreshInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
+  const [refreshInterval, setRefreshInterval] = useState(
+    ACCELERATION_REFRESH_TIME_INTERVAL[0].value
+  );
   const [delayWindow, setDelayWindow] = useState(1);
   const [delayInterval, setDelayInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
   const [checkpoint, setCheckpoint] = useState('');
@@ -204,6 +206,17 @@ export const IndexSettingOptions = ({
                 value={refreshInterval}
                 onChange={onChangeRefreshInterval}
                 options={ACCELERATION_REFRESH_TIME_INTERVAL}
+                onBlur={(e) => {
+                  setAccelerationFormData(
+                    producer((accData) => {
+                      accData.formErrors.refreshIntervalError = validateRefreshInterval(
+                        refreshTypeSelected,
+                        refreshWindow,
+                        e.target.value
+                      );
+                    })
+                  );
+                }}
               />
             }
           />

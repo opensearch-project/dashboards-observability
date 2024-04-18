@@ -2244,6 +2244,7 @@ Array [
                               >
                                 <select
                                   className="euiSelect euiFormControlLayout__append"
+                                  onBlur={[Function]}
                                   onChange={[Function]}
                                   onMouseUp={[Function]}
                                   value="minute"
