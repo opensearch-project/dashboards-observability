@@ -583,7 +583,7 @@ Array [
                               <input
                                 id="random_html_id"
                                 type="hidden"
-                                value="auto"
+                                value="autoInterval"
                               />
                               <div
                                 class="euiFormControlLayout"
@@ -595,7 +595,7 @@ Array [
                                     class="euiScreenReaderOnly"
                                     id="random_html_id"
                                   >
-                                    Select an option: Auto, is selected
+                                    Select an option: Auto (Interval), is selected
                                   </span>
                                   <button
                                     aria-describedby="random_html_id-help-0"
@@ -604,7 +604,7 @@ Array [
                                     class="euiSuperSelectControl"
                                     type="button"
                                   >
-                                    Auto
+                                    Auto (Interval)
                                   </button>
                                   <div
                                     class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -638,6 +638,104 @@ Array [
                           id="random_html_id-help-0"
                         >
                           Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid="false"
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Refresh increments
+                        </label>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--group"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-describedby="random_html_id-help-0"
+                              aria-label="Refresh increments"
+                              class="euiFieldNumber euiFieldNumber--inGroup"
+                              id="random_html_id"
+                              min="1"
+                              placeholder="Refresh increments"
+                              type="number"
+                              value="15"
+                            />
+                          </div>
+                          <div
+                            class="euiFormControlLayout"
+                          >
+                            <div
+                              class="euiFormControlLayout__childrenWrapper"
+                            >
+                              <select
+                                class="euiSelect euiFormControlLayout__append"
+                              >
+                                <option
+                                  value="minute"
+                                >
+                                  minutes(s)
+                                </option>
+                                <option
+                                  value="hour"
+                                >
+                                  hour(s)
+                                </option>
+                                <option
+                                  value="day"
+                                >
+                                  day(s)
+                                </option>
+                                <option
+                                  value="week"
+                                >
+                                  week(s)
+                                </option>
+                              </select>
+                              <div
+                                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                              >
+                                <span
+                                  class="euiFormControlLayoutCustomIcon"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Specify how frequent the index gets updated when performing the refresh job.
                         </div>
                       </div>
                     </div>
@@ -2036,7 +2134,7 @@ Array [
                                   <input
                                     id="random_html_id"
                                     type="hidden"
-                                    value="auto"
+                                    value="autoInterval"
                                   />,
                                   <div
                                     className="euiFormControlLayout"
@@ -2048,7 +2146,7 @@ Array [
                                         className="euiScreenReaderOnly"
                                         id="random_html_id"
                                       >
-                                        Select an option: Auto, is selected
+                                        Select an option: Auto (Interval), is selected
                                       </span>
                                       <button
                                         aria-describedby="random_html_id-help-0"
@@ -2061,7 +2159,7 @@ Array [
                                         onKeyDown={[Function]}
                                         type="button"
                                       >
-                                        Auto
+                                        Auto (Interval)
                                       </button>
                                       <div
                                         className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -2097,6 +2195,116 @@ Array [
                             id="random_html_id-help-0"
                           >
                             Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
+                          </div>
+                        </div>
+                      </div>,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Refresh increments
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <input
+                                aria-describedby="random_html_id-help-0"
+                                aria-label="Refresh increments"
+                                className="euiFieldNumber euiFieldNumber--inGroup"
+                                id="random_html_id"
+                                min={1}
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Refresh increments"
+                                type="number"
+                                value={15}
+                              />
+                            </div>
+                            <div
+                              className="euiFormControlLayout"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <select
+                                  className="euiSelect euiFormControlLayout__append"
+                                  onBlur={[Function]}
+                                  onChange={[Function]}
+                                  onMouseUp={[Function]}
+                                  value="minute"
+                                >
+                                  <option
+                                    key="0"
+                                    value="minute"
+                                  >
+                                    minutes(s)
+                                  </option>
+                                  <option
+                                    key="1"
+                                    value="hour"
+                                  >
+                                    hour(s)
+                                  </option>
+                                  <option
+                                    key="2"
+                                    value="day"
+                                  >
+                                    day(s)
+                                  </option>
+                                  <option
+                                    key="3"
+                                    value="week"
+                                  >
+                                    week(s)
+                                  </option>
+                                </select>
+                                <div
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                >
+                                  <span
+                                    className="euiFormControlLayoutCustomIcon"
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      focusable="false"
+                                      height={16}
+                                      role="img"
+                                      style={null}
+                                      viewBox="0 0 16 16"
+                                      width={16}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      />
+                                    </svg>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Specify how frequent the index gets updated when performing the refresh job.
                           </div>
                         </div>
                       </div>,
