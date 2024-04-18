@@ -54,9 +54,9 @@ CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
     {table_name}
 WITH (
   auto_refresh = true,
-  refresh_interval = '1 Minute',
+  refresh_interval = '15 Minute',
   checkpoint_location = '{s3_checkpoint_location}',
-  watermark_delay = '10 Second',
+  watermark_delay = '1 Minute',
   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
 
