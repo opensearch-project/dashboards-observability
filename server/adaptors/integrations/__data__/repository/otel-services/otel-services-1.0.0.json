@@ -1,16 +1,11 @@
 {
-  "name": "OTEL-Services",
+  "name": "otel-services",
   "version": "1.0.0",
   "displayName": "Otel Services Demo",
   "description": "Otel Services Demo App with OpenSearch Observability",
   "license": "Apache-2.0",
-  "type": "logs",
-  "labels": [
-    "log",
-    "traces",
-    "metrics",
-    "Flint S3"
-  ],
+  "type": "traces",
+  "labels": ["log", "traces", "metrics", "Flint S3"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/otel-services/info",
   "workflows": [
