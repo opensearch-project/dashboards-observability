@@ -121,7 +121,8 @@ export const CustomPanelTable = ({
 
   const onCreate = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Dashboard name', 'danger');
+      setToast('Invalid Dashboard Name', 'danger');
+      history.goBack();
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
       dispatch(createPanel(newPanel));
@@ -131,7 +132,7 @@ export const CustomPanelTable = ({
 
   const onRename = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Dashboard name', 'danger');
+      setToast('Invalid Dashboard Name', 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
     }
@@ -140,7 +141,7 @@ export const CustomPanelTable = ({
 
   const onClone = async (newName: string) => {
     if (!isNameValid(newName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Operational Panel Name', 'danger');
     } else {
       let sourcePanel = selectedCustomPanels[0];
       try {
