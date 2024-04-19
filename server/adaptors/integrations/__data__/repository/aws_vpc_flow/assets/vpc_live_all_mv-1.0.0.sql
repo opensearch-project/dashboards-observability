@@ -59,4 +59,3 @@ WITH (
   watermark_delay = '1 Minute',
   extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
 )
-

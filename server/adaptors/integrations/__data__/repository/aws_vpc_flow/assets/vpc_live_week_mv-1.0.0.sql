@@ -58,4 +58,3 @@ CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
 WITH (
   auto_refresh = false
 )
-
