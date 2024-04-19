@@ -62,4 +62,4 @@ LOCATION '{s3_bucket_location}'
 OPTIONS (
   compression='gzip',
   recursivefilelookup='true'
-);
+)
