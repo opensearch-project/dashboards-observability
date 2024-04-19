@@ -29,4 +29,3 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}__agg_60_min_connections_mvie
 WITH (
   auto_refresh = false
 )
-

@@ -29,4 +29,4 @@ USING csv
 OPTIONS (
   sep=' '
 )
-LOCATION '{s3_bucket_location}';
+LOCATION '{s3_bucket_location}'

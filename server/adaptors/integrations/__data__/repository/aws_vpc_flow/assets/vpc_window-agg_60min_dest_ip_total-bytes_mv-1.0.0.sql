@@ -33,4 +33,3 @@ WITH hourly_buckets AS (
 WITH (
   auto_refresh = false
 )
-
