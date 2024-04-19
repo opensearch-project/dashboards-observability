@@ -103,13 +103,6 @@
         "extension": "ndjson",
         "type": "savedObjectBundle",
         "workflows": ["dashboards"]
-      },
-      {
-        "name": "otel-amp-system-metrics-dashboard",
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
       }
     ],
   "sampleData": {
