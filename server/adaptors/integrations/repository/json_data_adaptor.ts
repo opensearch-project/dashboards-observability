@@ -37,7 +37,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
     if (type !== undefined) {
       return {
         ok: false,
-        error: new Error('JSON adaptor does not support subtypes (isConfigLocalized: true)'),
+        error: new Error('JSON5 adaptor does not support subtypes (isConfigLocalized: true)'),
       };
     }
 
@@ -53,7 +53,7 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   async readFileRaw(_filename: string, _type?: IntegrationPart): Promise<Result<Buffer>> {
     return {
       ok: false,
-      error: new Error('JSON adaptor does not support raw files (isConfigLocalized: true)'),
+      error: new Error('JSON5 adaptor does not support raw files (isConfigLocalized: true)'),
     };
   }
 
