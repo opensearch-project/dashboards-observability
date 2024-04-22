@@ -24,9 +24,11 @@ import {
   ACC_LOADING_MSG,
   ACC_PANEL_TITLE,
   ACC_PANEL_DESC,
+  ACC_TABLE_ACTION_DESC,
   getAccelerationName,
   AccelerationActionType,
   CreateAccelerationFlyoutButton,
+  ACC_TABLE_COLUMN_NAMES,
 } from './utils/acceleration_utils';
 import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -213,21 +215,21 @@ export const AccelerationTable = ({
     },
     {
       name: 'Sync',
-      description: 'Manual Sync Data',
+      description: ACC_TABLE_ACTION_DESC.syncAction,
       icon: 'inputOutput',
       onClick: (item: CachedAcceleration) => handleActionClick('sync', item),
       enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
     },
     {
       name: 'Delete',
-      description: 'Delete acceleration',
+      description: ACC_TABLE_ACTION_DESC.deleteAction,
       icon: 'trash',
       onClick: (item: CachedAcceleration) => handleActionClick('delete', item),
       enabled: (item: CachedAcceleration) => item.status !== 'deleted',
     },
     {
       name: 'Vacuum',
-      description: 'Vacuum acceleration',
+      description: ACC_TABLE_ACTION_DESC.vacuumAction,
       icon: 'broom',
       onClick: (item: CachedAcceleration) => handleActionClick('vacuum', item),
       enabled: (item: CachedAcceleration) => item.status === 'deleted',
@@ -237,7 +239,7 @@ export const AccelerationTable = ({
   const accelerationTableColumns = [
     {
       field: 'indexName',
-      name: 'Name',
+      name: ACC_TABLE_COLUMN_NAMES.columnName,
       sortable: true,
       render: (indexName: string, acceleration: CachedAcceleration) => {
         const displayName = getAccelerationName(acceleration);
@@ -254,13 +256,13 @@ export const AccelerationTable = ({
     },
     {
       field: 'status',
-      name: 'Status',
+      name: ACC_TABLE_COLUMN_NAMES.columnStatus,
       sortable: true,
       render: (status: string) => <AccelerationStatus status={status} />,
     },
     {
       field: 'type',
-      name: 'Type',
+      name: ACC_TABLE_COLUMN_NAMES.columnType,
       sortable: true,
       render: (type: string) => {
         let label;
@@ -282,19 +284,19 @@ export const AccelerationTable = ({
     },
     {
       field: 'database',
-      name: 'Database',
+      name: ACC_TABLE_COLUMN_NAMES.columnDatabase,
       sortable: true,
       render: (database: string) => <EuiText size="s">{database}</EuiText>,
     },
     {
       field: 'table',
-      name: 'Table',
+      name: ACC_TABLE_COLUMN_NAMES.columnTable,
       sortable: true,
       render: (table: string) => <EuiText size="s">{table || '-'}</EuiText>,
     },
     {
       field: 'refreshType',
-      name: 'Refresh Type',
+      name: ACC_TABLE_COLUMN_NAMES.columnRefreshType,
       sortable: true,
       render: (autoRefresh: boolean, acceleration: CachedAcceleration) => {
         return <EuiText size="s">{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
@@ -302,7 +304,7 @@ export const AccelerationTable = ({
     },
     {
       field: 'flintIndexName',
-      name: 'Destination Index',
+      name: ACC_TABLE_COLUMN_NAMES.columnDestinationIndex,
       sortable: true,
       render: (flintIndexName: string, acceleration: CachedAcceleration) => {
         if (acceleration.type === 'skipping') {

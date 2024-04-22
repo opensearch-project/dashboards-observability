@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { EuiOverlayMask, EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
 import {
   ACC_DELETE_MSG,
@@ -48,9 +49,14 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
 
   switch (actionType) {
     case 'vacuum':
-      title = `Vacuum acceleration ${displayIndexName} on ${displayFullPath} ?`;
+      title = i18n.translate('accelerationActionOverlay.vacuum.title', {
+        defaultMessage: 'Vacuum acceleration {displayIndexName} on {displayFullPath}?',
+        values: { displayIndexName, displayFullPath },
+      });
       description = ACC_VACUUM_MSG;
-      confirmButtonText = 'Vacuum';
+      confirmButtonText = i18n.translate('accelerationActionOverlay.vacuum.confirmButtonText', {
+        defaultMessage: 'Vacuum',
+      });
       confirmEnabled = confirmationInput === displayIndexName;
       break;
     case 'delete':
@@ -59,10 +65,25 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
       confirmButtonText = 'Delete';
       break;
     case 'sync':
-      title = 'Manual sync data?';
+      title = i18n.translate('accelerationActionOverlay.sync.title', {
+        defaultMessage: 'Manual sync data?',
+      });
       description = ACC_SYNC_MSG;
-      confirmButtonText = 'Sync';
+      confirmButtonText = i18n.translate('accelerationActionOverlay.sync.confirmButtonText', {
+        defaultMessage: 'Sync',
+      });
       break;
+    default:
+      title = i18n.translate('accelerationActionOverlay.unknownAction.title', {
+        defaultMessage: 'Unknown Action',
+      });
+      description = '';
+      confirmButtonText = i18n.translate(
+        'accelerationActionOverlay.unknownAction.confirmButtonText',
+        {
+          defaultMessage: 'Confirm',
+        }
+      );
   }
 
   return (
