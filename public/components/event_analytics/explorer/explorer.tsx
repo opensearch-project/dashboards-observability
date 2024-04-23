@@ -44,6 +44,7 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
+  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -544,7 +545,7 @@ export const Explorer = ({
   const showTimeBasedComponents =
     (isDefaultDataSourceType || appLogEvents) &&
     query[SELECTED_TIMESTAMP] !== '' &&
-    !query[RAW_QUERY].match(PPL_DESCRIBE_INDEX_REGEX);
+    !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX);
 
   const mainContent = useMemo(() => {
     return (
@@ -650,7 +651,7 @@ export const Explorer = ({
                         rowsAll={explorerData.jsonDataAll}
                         explorerFields={explorerFields}
                         timeStampField={
-                          !query[RAW_QUERY].match(PPL_DESCRIBE_INDEX_REGEX)
+                          !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX)
                             ? queryRef.current![SELECTED_TIMESTAMP]
                             : ''
                         }
