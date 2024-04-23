@@ -23,7 +23,10 @@ import {
   TAB_CHART_ID,
 } from '../../../../common/constants/explorer';
 import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
-import { composeFinalQueryWithoutTimestamp } from '../../../components/common/query_utils';
+import {
+  composeFinalQueryWithoutTimestamp,
+  getDescribeQueryIndexFromRawQuery,
+} from '../../../components/common/query_utils';
 
 export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   protected queryIndex: string;
@@ -70,6 +73,13 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
 
+    // check for describe command and execute if possible
+    const describeQueryIndex = getDescribeQueryIndexFromRawQuery(
+      buildRawQuery(query, appBaseQuery)
+    );
+    const queryIsDescribe = !isEmpty(describeQueryIndex);
+    if (queryIsDescribe) this.queryIndex = describeQueryIndex;
+
     if (this.queryIndex === '') return; // Returns if page is refreshed
 
     const {
@@ -87,7 +97,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     await this.processTimestamp(query);
 
-    const noTimestamp = isEmpty(this.timestamp);
+    const noTimestamp = isEmpty(this.timestamp) || queryIsDescribe;
 
     const curStartTime = noTimestamp
       ? undefined
