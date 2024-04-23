@@ -208,24 +208,24 @@ export const updatePromQLQueryFilters = (
   return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
 };
 
-const getPPLIndex = (query: string): string | undefined => {
+const getPPLIndex = (query: string): string => {
   const matches = query.match(PPL_INDEX_REGEX);
   if (matches) {
     return matches[2];
   }
-  return undefined;
+  return '';
 };
 
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
 };
 
-export const getDescribeQueryIndexFromRawQuery = (query: string): string => {
+export const getDescribeQueryIndexFromRawQuery = (query: string): string | undefined => {
   const matches = query.match(PPL_DESCRIBE_INDEX_REGEX);
   if (matches) {
     return matches[2];
   }
-  return '';
+  return undefined;
 };
 
 function extractSpanAndResolution(query: string) {
