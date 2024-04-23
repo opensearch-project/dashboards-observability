@@ -74,6 +74,13 @@
       "workflows": ["dashboards-flint"]
     },
     {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
       "name": "create_table_cloud-trail",
       "version": "1.0.0",
       "extension": "sql",
