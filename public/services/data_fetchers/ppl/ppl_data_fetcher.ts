@@ -77,8 +77,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     const describeQueryIndex = getDescribeQueryIndexFromRawQuery(
       buildRawQuery(query, appBaseQuery)
     );
-    const queryIsDescribe = !isEmpty(describeQueryIndex);
-    if (queryIsDescribe) this.queryIndex = describeQueryIndex;
+    if (describeQueryIndex) this.queryIndex = describeQueryIndex;
 
     if (this.queryIndex === '') return; // Returns if page is refreshed
 
@@ -97,7 +96,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     await this.processTimestamp(query);
 
-    const noTimestamp = isEmpty(this.timestamp) || queryIsDescribe;
+    const noTimestamp = isEmpty(this.timestamp) || describeQueryIndex;
 
     const curStartTime = noTimestamp
       ? undefined
