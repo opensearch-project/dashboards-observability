@@ -267,7 +267,20 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     );
   };
 
-  const startLoading = (dataSourceName: string, databaseName?: string, tableName?: string) => {
+interface StartLoadingParams {
+  dataSourceName: string;
+  dataSourceId?: string;
+  databaseName?: string;
+  tableName?: string;
+}
+
+const startLoading = ({
+  dataSourceName,
+  dataSourceId,
+  databaseName,
+  tableName
+}: StartLoadingParams) => {    
+    console.log(dataSourceName,dataSourceId,databaseName,tableName)
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
@@ -283,9 +296,8 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     if (sessionId) {
       requestPayload = { ...requestPayload, sessionId };
     }
-
     sqlService
-      .fetch(requestPayload)
+      .fetch(requestPayload, dataSourceId)
       .then((result) => {
         setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
         if (result.queryId) {

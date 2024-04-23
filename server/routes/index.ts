@@ -11,8 +11,8 @@ import { QueryService } from '../services/queryService';
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { PanelsRouter } from './custom_panels/panels_router';
 import { VisualizationsRouter } from './custom_panels/visualizations_router';
-import { registerDatasourcesRoute } from './datasources/datasources_router';
 import { registerDataConnectionsRoute } from './data_connections/data_connections_router';
+import { registerDatasourcesRoute } from './datasources/datasources_router';
 import { registerDslRoute } from './dsl';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
@@ -25,7 +25,7 @@ import { registerPplRoute } from './ppl';
 import { registerQueryAssistRoutes } from './query_assist/routes';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 
-export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
+export function setupRoutes({ router, client, dataSourceEnabled }: { router: IRouter; client: ILegacyClusterClient, dataSourceEnabled: boolean }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
@@ -46,6 +46,6 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
   registerMetricsRoute(router);
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router);
-  registerDatasourcesRoute(router);
+  registerDatasourcesRoute(router, dataSourceEnabled);
   registerQueryAssistRoutes(router);
 }

@@ -29,7 +29,7 @@ export const useDirectQuery = () => {
     return sqlService.fetchWithJobId(params);
   }, ASYNC_POLLING_INTERVAL);
 
-  const startLoading = (requestPayload: DirectQueryRequest) => {
+  const startLoading = (requestPayload: DirectQueryRequest,  dataSourceClientId?: string) => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
 
     const sessionId = getAsyncSessionId(requestPayload.datasource);
@@ -38,7 +38,7 @@ export const useDirectQuery = () => {
     }
 
     sqlService
-      .fetch(requestPayload)
+      .fetch(requestPayload,dataSourceClientId)
       .then((result) => {
         setAsyncSessionId(requestPayload.datasource, getObjValue(result, 'sessionId', null));
         if (result.queryId) {
