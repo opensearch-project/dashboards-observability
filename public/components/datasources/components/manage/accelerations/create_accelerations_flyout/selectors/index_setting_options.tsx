@@ -17,6 +17,7 @@ import producer from 'immer';
 import React, { ChangeEvent, Fragment, useState } from 'react';
 import {
   ACC_CHECKPOINT_DOCUMENTATION_URL,
+  ACCELERATION_REFRESH_TIME_INTERVAL,
   ACCELERATION_TIME_INTERVAL,
 } from '../../../../../../../../common/constants/data_sources';
 import {
@@ -41,20 +42,6 @@ export const IndexSettingOptions = ({
   setAccelerationFormData,
 }: IndexSettingOptionsProps) => {
   const refreshOptions = [
-    {
-      value: 'auto',
-      inputDisplay: 'Auto',
-      dropdownDisplay: (
-        <Fragment>
-          <strong>Auto</strong>
-          <EuiText size="s" color="subdued">
-            <p className="EuiTextColor--subdued">
-              Automatically refreshes the index when new data is available.
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
     {
       value: 'autoInterval',
       inputDisplay: 'Auto (Interval)',
@@ -97,9 +84,13 @@ export const IndexSettingOptions = ({
     },
   ];
 
-  const [refreshTypeSelected, setRefreshTypeSelected] = useState<AccelerationRefreshType>('auto');
-  const [refreshWindow, setRefreshWindow] = useState(1);
-  const [refreshInterval, setRefreshInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
+  const [refreshTypeSelected, setRefreshTypeSelected] = useState<AccelerationRefreshType>(
+    'autoInterval'
+  );
+  const [refreshWindow, setRefreshWindow] = useState(15);
+  const [refreshInterval, setRefreshInterval] = useState(
+    ACCELERATION_REFRESH_TIME_INTERVAL[0].value
+  );
   const [delayWindow, setDelayWindow] = useState(1);
   const [delayInterval, setDelayInterval] = useState(ACCELERATION_TIME_INTERVAL[2].value);
   const [checkpoint, setCheckpoint] = useState('');
@@ -204,7 +195,8 @@ export const IndexSettingOptions = ({
                 producer((accData) => {
                   accData.formErrors.refreshIntervalError = validateRefreshInterval(
                     refreshTypeSelected,
-                    parseInt(e.target.value, 10)
+                    parseInt(e.target.value, 10),
+                    refreshInterval
                   );
                 })
               );
@@ -213,7 +205,18 @@ export const IndexSettingOptions = ({
               <EuiSelect
                 value={refreshInterval}
                 onChange={onChangeRefreshInterval}
-                options={ACCELERATION_TIME_INTERVAL}
+                options={ACCELERATION_REFRESH_TIME_INTERVAL}
+                onBlur={(e) => {
+                  setAccelerationFormData(
+                    producer((accData) => {
+                      accData.formErrors.refreshIntervalError = validateRefreshInterval(
+                        refreshTypeSelected,
+                        refreshWindow,
+                        e.target.value
+                      );
+                    })
+                  );
+                }}
               />
             }
           />
