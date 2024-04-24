@@ -465,17 +465,15 @@ const addIntegration = async ({
   let sessionId: string | null = null;
 
   if (config.connectionType === 'index') {
-    const res = await addIntegrationRequest(
-      false,
-      integration.name,
-      config.displayName,
+    const res = await addIntegrationRequest({
+      addSample: false,
+      templateName: integration.name,
       integration,
-      setCalloutLikeToast,
-      config.displayName,
-      config.connectionDataSource,
-      undefined,
-      setIsInstalling ? true : false
-    );
+      setToast: setCalloutLikeToast,
+      name: config.displayName,
+      indexPattern: config.connectionDataSource,
+      skipRedirect: setIsInstalling ? true : false,
+    });
     if (setIsInstalling) {
       setIsInstalling(false, res);
     }
@@ -508,18 +506,17 @@ const addIntegration = async ({
       sessionId = result.value.sessionId ?? sessionId;
     }
     // Once everything is ready, add the integration to the new datasource as usual
-    const res = await addIntegrationRequest(
-      false,
-      integration.name,
-      config.displayName,
+    const res = await addIntegrationRequest({
+      addSample: false,
+      templateName: integration.name,
       integration,
-      setCalloutLikeToast,
-      config.displayName,
-      `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
-      config.enabledWorkflows,
-      setIsInstalling ? true : false,
-      { dataSource: config.connectionDataSource, tableName: makeTableName(config) }
-    );
+      setToast: setCalloutLikeToast,
+      name: config.displayName,
+      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
+      workflows: config.enabledWorkflows,
+      skipRedirect: setIsInstalling ? true : false,
+      dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
+    });
     if (setIsInstalling) {
       setIsInstalling(false, res);
     }
