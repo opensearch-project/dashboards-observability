@@ -18,7 +18,7 @@ import {
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { IntegrationConfigProps } from './setup_integration';
+import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
@@ -128,40 +128,49 @@ export function SetupWorkflowSelector({
   return cards;
 }
 
-export function SetupIntegrationFormInputs({
+export function IntegrationDetailsInputs({
   config,
   updateConfig,
   integration,
-  setupCallout,
+}: {
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
+  integration: IntegrationConfig;
+}) {
+  return (
+    <EuiFormRow
+      label="Display Name"
+      error={['Must be at least 1 character.']}
+      isInvalid={config.displayName.length === 0}
+    >
+      <EuiFieldText
+        value={config.displayName}
+        onChange={(event) => updateConfig({ displayName: event.target.value })}
+        placeholder={`${integration.name} Integration`}
+        isInvalid={config.displayName.length === 0}
+        data-test-subj="new-instance-name"
+      />
+    </EuiFormRow>
+  );
+}
+
+export function IntegrationConnectionInputs({
+  config,
+  updateConfig,
+  integration,
   lockConnectionType,
-}: IntegrationConfigProps) {
+}: {
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
+  integration: IntegrationConfig;
+  lockConnectionType?: boolean;
+}) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
     [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
-  const [isBucketBlurred, setIsBucketBlurred] = useState(false);
-  const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
-
-  const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
-  const toggleWorkflow = (name: string) => {
-    setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
-  };
-
-  useEffect(() => {
-    if (integration.workflows) {
-      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
-    }
-  }, [integration.workflows]);
-
-  useEffect(() => {
-    updateConfig({
-      enabledWorkflows: [...useWorkflows.entries()].filter((w) => w[1]).map((w) => w[0]),
-    });
-    // If we add the updateConfig dep here, rendering crashes with "Maximum update depth exceeded"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useWorkflows]);
 
   useEffect(() => {
     const updateDataSources = async () => {
@@ -175,39 +184,7 @@ export function SetupIntegrationFormInputs({
   }, [config.connectionType]);
 
   return (
-    <EuiForm>
-      <EuiTitle>
-        <h1>Set Up Integration</h1>
-      </EuiTitle>
-      <EuiSpacer />
-      {setupCallout.show ? (
-        <EuiCallOut title={setupCallout.title} color="danger">
-          <p>{setupCallout.text}</p>
-        </EuiCallOut>
-      ) : null}
-      <EuiSpacer />
-      <EuiText>
-        <h3>Integration Details</h3>
-      </EuiText>
-      <EuiSpacer />
-      <EuiFormRow
-        label="Display Name"
-        error={['Must be at least 1 character.']}
-        isInvalid={config.displayName.length === 0}
-      >
-        <EuiFieldText
-          value={config.displayName}
-          onChange={(event) => updateConfig({ displayName: event.target.value })}
-          placeholder={`${integration.name} Integration`}
-          isInvalid={config.displayName.length === 0}
-          data-test-subj="new-instance-name"
-        />
-      </EuiFormRow>
-      <EuiSpacer />
-      <EuiText>
-        <h3>Integration Connection</h3>
-      </EuiText>
-      <EuiSpacer />
+    <>
       <EuiFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
@@ -256,6 +233,156 @@ export function SetupIntegrationFormInputs({
           isDisabled={lockConnectionType}
         />
       </EuiFormRow>
+    </>
+  );
+}
+
+export function IntegrationQueryInputs({
+  config,
+  updateConfig,
+  integration,
+}: {
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
+  integration: IntegrationConfig;
+}) {
+  const [isBucketBlurred, setIsBucketBlurred] = useState(false);
+  const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
+
+  return (
+    <>
+      <EuiFormRow
+        label="Spark Table Name"
+        helpText="Select a table name to associate with your data."
+        error={['Must be at least 1 character.']}
+        isInvalid={config.connectionTableName.length === 0}
+      >
+        <EuiFieldText
+          placeholder={integration.name}
+          value={config.connectionTableName}
+          onChange={(evt) => {
+            updateConfig({ connectionTableName: evt.target.value });
+          }}
+          isInvalid={config.connectionTableName.length === 0}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label="S3 Data Location"
+        isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+        error={["Must be a URL starting with 's3://'."]}
+      >
+        <EuiFieldText
+          value={config.connectionLocation}
+          onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+          placeholder="s3://"
+          isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+          onBlur={() => {
+            setIsBucketBlurred(true);
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label="S3 Checkpoint Location"
+        helpText={
+          'The Checkpoint location must be a unique directory and not the same as the Bucket ' +
+          'location. It will be used for caching intermediary results.'
+        }
+        isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+        error={["Must be a URL starting with 's3://'."]}
+      >
+        <EuiFieldText
+          value={config.checkpointLocation}
+          onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
+          placeholder="s3://"
+          isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
+          onBlur={() => {
+            setIsCheckpointBlurred(true);
+          }}
+        />
+      </EuiFormRow>
+    </>
+  );
+}
+
+export function IntegrationWorkflowsInputs({
+  updateConfig,
+  integration,
+}: {
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
+  integration: IntegrationConfig;
+}) {
+  const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
+  const toggleWorkflow = (name: string) => {
+    setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
+  };
+
+  useEffect(() => {
+    if (integration.workflows) {
+      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
+    }
+  }, [integration.workflows]);
+
+  useEffect(() => {
+    updateConfig({
+      enabledWorkflows: [...useWorkflows.entries()].filter((w) => w[1]).map((w) => w[0]),
+    });
+    // If we add the updateConfig dep here, rendering crashes with "Maximum update depth exceeded"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useWorkflows]);
+
+  return (
+    <EuiFormRow
+      isInvalid={![...useWorkflows.values()].includes(true)}
+      error={['Must select at least one workflow.']}
+    >
+      <SetupWorkflowSelector
+        integration={integration}
+        useWorkflows={useWorkflows}
+        toggleWorkflow={toggleWorkflow}
+      />
+    </EuiFormRow>
+  );
+}
+
+export function SetupIntegrationFormInputs({
+  config,
+  updateConfig,
+  integration,
+  setupCallout,
+  lockConnectionType,
+}: IntegrationConfigProps) {
+  return (
+    <EuiForm>
+      <EuiTitle>
+        <h1>Set Up Integration</h1>
+      </EuiTitle>
+      <EuiSpacer />
+      {setupCallout.show ? (
+        <EuiCallOut title={setupCallout.title} color="danger">
+          <p>{setupCallout.text}</p>
+        </EuiCallOut>
+      ) : null}
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Details</h3>
+      </EuiText>
+      <EuiSpacer />
+      <IntegrationDetailsInputs
+        config={config}
+        updateConfig={updateConfig}
+        integration={integration}
+      />
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Connection</h3>
+      </EuiText>
+      <EuiSpacer />
+      <IntegrationConnectionInputs
+        config={config}
+        updateConfig={updateConfig}
+        integration={integration}
+        lockConnectionType={lockConnectionType}
+      />
       {config.connectionType === 's3' ? (
         <>
           <EuiSpacer />
@@ -271,55 +398,11 @@ export function SetupIntegrationFormInputs({
             </EuiText>
           </EuiFormRow>
           <EuiSpacer />
-          <EuiFormRow
-            label="Spark Table Name"
-            helpText="Select a table name to associate with your data."
-            error={['Must be at least 1 character.']}
-            isInvalid={config.connectionTableName.length === 0}
-          >
-            <EuiFieldText
-              placeholder={integration.name}
-              value={config.connectionTableName}
-              onChange={(evt) => {
-                updateConfig({ connectionTableName: evt.target.value });
-              }}
-              isInvalid={config.connectionTableName.length === 0}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label="S3 Bucket Location"
-            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-            error={["Must be a URL starting with 's3://'."]}
-          >
-            <EuiFieldText
-              value={config.connectionLocation}
-              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-              placeholder="s3://"
-              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-              onBlur={() => {
-                setIsBucketBlurred(true);
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label="S3 Checkpoint Location"
-            helpText={
-              'The Checkpoint location must be a unique directory and not the same as the Bucket ' +
-              'location. It will be used for caching intermediary results.'
-            }
-            isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
-            error={["Must be a URL starting with 's3://'."]}
-          >
-            <EuiFieldText
-              value={config.checkpointLocation}
-              onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
-              placeholder="s3://"
-              isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
-              onBlur={() => {
-                setIsCheckpointBlurred(true);
-              }}
-            />
-          </EuiFormRow>
+          <IntegrationQueryInputs
+            config={config}
+            updateConfig={updateConfig}
+            integration={integration}
+          />
           {integration.workflows ? (
             <>
               <EuiSpacer />
@@ -336,16 +419,7 @@ export function SetupIntegrationFormInputs({
                 </EuiText>
               </EuiFormRow>
               <EuiSpacer />
-              <EuiFormRow
-                isInvalid={![...useWorkflows.values()].includes(true)}
-                error={['Must select at least one workflow.']}
-              >
-                <SetupWorkflowSelector
-                  integration={integration}
-                  useWorkflows={useWorkflows}
-                  toggleWorkflow={toggleWorkflow}
-                />
-              </EuiFormRow>
+              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
             </>
           ) : null}
           {/* Bottom bar will overlap content if there isn't some space at the end */}
