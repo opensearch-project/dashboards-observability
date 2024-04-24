@@ -258,8 +258,21 @@ export function SetupIntegrationFormInputs({
       </EuiFormRow>
       {config.connectionType === 's3' ? (
         <>
+          <EuiSpacer />
+          <EuiText>
+            <h3>Query Fields</h3>
+          </EuiText>
+          <EuiFormRow>
+            <EuiText grow={false} size="xs">
+              <p>
+                To set up the integration, we need to know some information about how to process
+                your data.
+              </p>
+            </EuiText>
+          </EuiFormRow>
+          <EuiSpacer />
           <EuiFormRow
-            label="Flint Table Name"
+            label="Spark Table Name"
             helpText="Select a table name to associate with your data."
             error={['Must be at least 1 character.']}
             isInvalid={config.connectionTableName.length === 0}
@@ -316,13 +329,13 @@ export function SetupIntegrationFormInputs({
               <EuiFormRow>
                 <EuiText grow={false} size="xs">
                   <p>
-                    This integration offers valuable resources compatible with your data source.
-                    These can include dashboards, visualizations, indexes, and queries. Select at
-                    least one of the following options.
+                    This integration offers different kinds of resources compatible with your data
+                    source. These can include dashboards, visualizations, indexes, and queries.
+                    Select at least one of the following options.
                   </p>
                 </EuiText>
               </EuiFormRow>
-              <EuiSpacer size="s" />
+              <EuiSpacer />
               <EuiFormRow
                 isInvalid={![...useWorkflows.values()].includes(true)}
                 error={['Must select at least one workflow.']}
