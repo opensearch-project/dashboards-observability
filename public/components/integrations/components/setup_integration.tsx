@@ -109,7 +109,7 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
   let checkpointLocation = config.checkpointLocation.endsWith('/')
     ? config.checkpointLocation
     : config.checkpointLocation + '/';
-  checkpointLocation += `${config.connectionDataSource}_${config.connectionTableName}_${querySpecificUUID}`;
+  checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
