@@ -96,7 +96,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     await this.processTimestamp(query);
 
-    const noTimestamp = isEmpty(this.timestamp) || describeQueryIndex;
+    const noTimestamp = isEmpty(this.timestamp) || !!describeQueryIndex;
 
     const curStartTime = noTimestamp
       ? undefined
