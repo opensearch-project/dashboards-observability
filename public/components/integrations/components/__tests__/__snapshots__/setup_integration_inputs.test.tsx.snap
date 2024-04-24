@@ -2073,7 +2073,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText="The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results."
+    helpText="The Checkpoint location must be a unique directory and not the same as the Data location. It will be used for caching intermediary results."
     isInvalid={false}
     label="S3 Checkpoint Location"
     labelType="label"
@@ -2148,13 +2148,13 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
-          key="The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results."
+          key="The Checkpoint location must be a unique directory and not the same as the Data location. It will be used for caching intermediary results."
         >
           <div
             className="euiFormHelpText euiFormRow__text"
             id="random_html_id-help-0"
           >
-            The Checkpoint location must be a unique directory and not the same as the Bucket location. It will be used for caching intermediary results.
+            The Checkpoint location must be a unique directory and not the same as the Data location. It will be used for caching intermediary results.
           </div>
         </EuiFormHelpText>
       </div>

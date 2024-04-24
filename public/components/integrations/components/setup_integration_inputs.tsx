@@ -284,7 +284,7 @@ export function IntegrationQueryInputs({
       <EuiFormRow
         label="S3 Checkpoint Location"
         helpText={
-          'The Checkpoint location must be a unique directory and not the same as the Bucket ' +
+          'The Checkpoint location must be a unique directory and not the same as the Data ' +
           'location. It will be used for caching intermediary results.'
         }
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
