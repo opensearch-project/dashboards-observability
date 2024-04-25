@@ -76,6 +76,13 @@
   ],
   "assets": [
     {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
       "name": "aws_vpc_flow",
       "version": "1.0.0",
       "extension": "ndjson",
@@ -139,7 +146,6 @@
       "type": "query",
       "workflows": ["flint-pre-agg-dashboards"]
     },
-
     {
       "name": "vpc_live_week_refresh",
       "version": "1.0.0",
