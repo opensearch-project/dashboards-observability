@@ -313,7 +313,11 @@ export function IntegrationWorkflowsInputs({
 }) {
   const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
   const toggleWorkflow = (name: string) => {
-    setUseWorkflows(new Map(useWorkflows.set(name, !useWorkflows.get(name))));
+    setUseWorkflows((currentWorkflows) => {
+      const newWorkflows = new Map(currentWorkflows);
+      newWorkflows.set(name, !newWorkflows.get(name));
+      return newWorkflows;
+    });
   };
 
   useEffect(() => {
