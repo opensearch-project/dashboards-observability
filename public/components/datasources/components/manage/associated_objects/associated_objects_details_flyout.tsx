@@ -55,6 +55,7 @@ export interface AssociatedObjectsFlyoutProps {
   datasourceName: string;
   resetFlyout: () => void;
   handleRefresh?: () => void;
+  dataSourceMDSId?: string;
 }
 
 export const AssociatedObjectsDetailsFlyout = ({
@@ -62,6 +63,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   datasourceName,
   resetFlyout,
   handleRefresh,
+  dataSourceMDSId,
 }: AssociatedObjectsFlyoutProps) => {
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
@@ -153,7 +155,9 @@ export const AssociatedObjectsDetailsFlyout = ({
         const name = getAccelerationName(item, datasourceName);
         return (
           <EuiLink
-            onClick={() => renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh)}
+            onClick={() =>
+              renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh, dataSourceMDSId)
+            }
           >
             {name}
           </EuiLink>
@@ -237,7 +241,11 @@ export const AssociatedObjectsDetailsFlyout = ({
         if (tables?.columns) {
           setTableColumns(tables?.columns);
         } else {
-          startLoading({dataSourceName:datasourceName, databaseName:tableDetail.database, tableName:tableDetail.name});
+          startLoading({
+            dataSourceName: datasourceName,
+            databaseName: tableDetail.database,
+            tableName: tableDetail.name,
+          });
         }
       } catch (error) {
         console.error(error);

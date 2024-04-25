@@ -21,7 +21,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
       },
     },
     async (context, request, response): Promise<any> => {
-      const dataSourceId = request.url.searchParams.get('dataSourceId')
+      const dataSourceMDSId = request.url.searchParams.get('dataSourceMDSId');
       const params = {
         body: {
           ...request.body,
@@ -29,14 +29,13 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
       };
       try {
         let res;
-        if(dataSourceEnabled && dataSourceId){
-          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceId);
+        if (dataSourceEnabled && dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           res = await client.callAPI('observability.runDirectQuery', params);
-        }
-        else{
+        } else {
           res = await context.observability_plugin.observabilityClient
-          .asScoped(request)
-          .callAsCurrentUser('observability.runDirectQuery', params);
+            .asScoped(request)
+            .callAsCurrentUser('observability.runDirectQuery', params);
         }
         return response.ok({
           body: res,
@@ -53,20 +52,31 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
 
   router.get(
     {
-      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}`,
+      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}/{dataSourceMDSId?}`,
       validate: {
         params: schema.object({
           queryId: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
       },
     },
     async (context, request, response): Promise<any> => {
       try {
-        const res = await context.observability_plugin.observabilityClient
-          .asScoped(request)
-          .callAsCurrentUser('observability.getJobStatus', {
+        let res;
+        if (dataSourceEnabled && request.params.dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(
+            request.params.dataSourceMDSId
+          );
+          res = await client.callAPI('observability.getJobStatus', {
             queryId: request.params.queryId,
           });
+        } else {
+          res = await context.observability_plugin.observabilityClient
+            .asScoped(request)
+            .callAsCurrentUser('observability.getJobStatus', {
+              queryId: request.params.queryId,
+            });
+        }
         return response.ok({
           body: res,
         });

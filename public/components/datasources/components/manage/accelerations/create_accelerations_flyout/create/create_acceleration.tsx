@@ -45,7 +45,7 @@ export interface CreateAccelerationProps {
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
-  dataSourceClientId?: string;
+  dataSourceMDSId?: string;
   refreshHandler?: () => void;
 }
 
@@ -54,7 +54,7 @@ export const CreateAcceleration = ({
   resetFlyout,
   databaseName,
   tableName,
-  dataSourceClientId,
+  dataSourceMDSId,
   refreshHandler,
 }: CreateAccelerationProps) => {
   const { setToast } = useToast();
@@ -103,7 +103,6 @@ export const CreateAcceleration = ({
       watermarkDelayError: [],
     },
   });
-  const [clientId, setClientId] = useState(dataSourceClientId);
   const [tableFieldsLoading, setTableFieldsLoading] = useState(false);
   const {
     loadStatus,
@@ -144,12 +143,22 @@ export const CreateAcceleration = ({
     if (dataTable !== '') {
       setTableFieldsLoading(true);
       try {
-        const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable, clientId);
+        const cachedTable = CatalogCacheManager.getTable(
+          dataSource,
+          database,
+          dataTable,
+          dataSourceMDSId
+        );
         if (cachedTable.columns) {
           loadColumnsToAccelerationForm(cachedTable);
           setTableFieldsLoading(false);
         } else {
-          startLoading({dataSourceName:dataSource, dataSourceId:clientId, databaseName:database, tableName:dataTable});
+          startLoading({
+            dataSourceName: dataSource,
+            dataSourceMDSId,
+            databaseName: database,
+            tableName: dataTable,
+          });
         }
       } catch (error) {
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
@@ -177,7 +186,7 @@ export const CreateAcceleration = ({
           accelerationFormData.dataSource,
           accelerationFormData.database,
           accelerationFormData.dataTable,
-          clientId
+          dataSourceMDSId
         );
       } catch (error) {
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
@@ -239,7 +248,7 @@ export const CreateAcceleration = ({
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               tableFieldsLoading={tableFieldsLoading}
-              dataSourceClientId={clientId}
+              dataSourceMDSId={dataSourceMDSId}
             />
             <EuiSpacer size="xxl" />
             <IndexAdvancedSettings

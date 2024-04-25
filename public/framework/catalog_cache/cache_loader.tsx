@@ -245,6 +245,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.INITIAL
   );
+  const [dataSourceMDSClientId, setDataSourceMDSClientId] = useState<string>('');
 
   const {
     data: pollingResult,
@@ -253,7 +254,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params);
+    return sqlService.fetchWithJobId(params, dataSourceMDSClientId);
   }, ASYNC_POLLING_INTERVAL);
 
   const onLoadingFailed = () => {
@@ -267,24 +268,24 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     );
   };
 
-interface StartLoadingParams {
-  dataSourceName: string;
-  dataSourceId?: string;
-  databaseName?: string;
-  tableName?: string;
-}
+  interface StartLoadingParams {
+    dataSourceName: string;
+    dataSourceMDSId?: string;
+    databaseName?: string;
+    tableName?: string;
+  }
 
-const startLoading = ({
-  dataSourceName,
-  dataSourceId,
-  databaseName,
-  tableName
-}: StartLoadingParams) => {    
-    console.log(dataSourceName,dataSourceId,databaseName,tableName)
+  const startLoading = ({
+    dataSourceName,
+    dataSourceMDSId,
+    databaseName,
+    tableName,
+  }: StartLoadingParams) => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
     setCurrentTableName(tableName);
+    setDataSourceMDSClientId(dataSourceMDSId ? dataSourceMDSId : '');
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
@@ -297,7 +298,7 @@ const startLoading = ({
       requestPayload = { ...requestPayload, sessionId };
     }
     sqlService
-      .fetch(requestPayload, dataSourceId)
+      .fetch(requestPayload, dataSourceMDSId)
       .then((result) => {
         setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
         if (result.queryId) {

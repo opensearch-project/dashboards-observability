@@ -124,7 +124,7 @@ export interface CachedDataSource {
 }
 
 export interface DataSourceCacheData {
-  client_id: string;
+  dataSourceMDSId: string;
   version: string;
   dataSources: CachedDataSource[];
 }
@@ -148,7 +148,7 @@ export interface CachedAccelerationByDataSource {
 
 export interface AccelerationsCacheData {
   version: string;
-  client_id: string;
+  dataSourceMDSId: string;
   dataSources: CachedAccelerationByDataSource[];
 }
 
@@ -241,7 +241,7 @@ export interface CreateAccelerationForm {
 }
 export interface StartLoadingParams {
   dataSourceName: string;
-  dataSourceId?: string;
+  dataSourceMDSId?: string;
   databaseName?: string;
   tableName?: string;
 }

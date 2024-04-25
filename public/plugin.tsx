@@ -109,14 +109,24 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  (acceleration: CachedAcceleration, dataSourceName: string, handleRefresh?: () => void) => void
+  (
+    acceleration: CachedAcceleration,
+    dataSourceName: string,
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
+  ) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
 ] = createGetterSetter<
-  (tableDetail: AssociatedObject, datasourceName: string, handleRefresh?: () => void) => void
+  (
+    tableDetail: AssociatedObject,
+    datasourceName: string,
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
+  ) => void
 >('renderAssociatedObjectsDetailsFlyout');
 
 export const [
@@ -125,7 +135,7 @@ export const [
 ] = createGetterSetter<
   (
     dataSource: string,
-    dataSourceClientId?: string,
+    dataSourceMDSId?: string,
     databaseName?: string,
     tableName?: string,
     handleRefresh?: () => void
@@ -430,7 +440,8 @@ export class ObservabilityPlugin
     const renderAccelerationDetailsFlyout = (
       acceleration: CachedAcceleration,
       dataSourceName: string,
-      handleRefresh?: () => void
+      handleRefresh?: () => void,
+      dataSourceMDSId?: string
     ) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -439,6 +450,7 @@ export class ObservabilityPlugin
             dataSourceName={dataSourceName}
             resetFlyout={() => accelerationDetailsFlyout.close()}
             handleRefresh={handleRefresh}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );
@@ -448,7 +460,8 @@ export class ObservabilityPlugin
     const renderAssociatedObjectsDetailsFlyout = (
       tableDetail: AssociatedObject,
       datasourceName: string,
-      handleRefresh?: () => void
+      handleRefresh?: () => void,
+      dataSourceMDSId?: string
     ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -457,6 +470,7 @@ export class ObservabilityPlugin
             datasourceName={datasourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );
@@ -465,7 +479,7 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
-      dataSourceClientId?: string,
+      dataSourceMDSId?: string,
       databaseName?: string,
       tableName?: string,
       handleRefresh?: () => void
@@ -478,7 +492,7 @@ export class ObservabilityPlugin
             databaseName={databaseName}
             tableName={tableName}
             refreshHandler={handleRefresh}
-            dataSourceClientId={dataSourceClientId}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );

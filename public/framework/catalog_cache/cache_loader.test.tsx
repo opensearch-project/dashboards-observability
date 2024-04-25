@@ -170,7 +170,7 @@ describe('loadCacheTests', () => {
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
         version: CATALOG_CACHE_VERSION,
-        client_id:'',
+        dataSourceMDSId: '',
         dataSources: [
           {
             name: 'sampleDS',
@@ -188,7 +188,7 @@ describe('loadCacheTests', () => {
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
         version: CATALOG_CACHE_VERSION,
-        client_id:'',
+        dataSourceMDSId: '',
         dataSources: [
           {
             name: 'sampleDS',

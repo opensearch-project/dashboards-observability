@@ -12,14 +12,18 @@ export class SQLService {
     this.http = http;
   }
 
-  fetch = async (params: DirectQueryRequest, dataSourceId?: string, errorHandler?: (error: any) => void) => {
-    let query = {
-      dataSourceId: dataSourceId
-    }
+  fetch = async (
+    params: DirectQueryRequest,
+    dataSourceMDSId?: string,
+    errorHandler?: (error: any) => void
+  ) => {
+    const query = {
+      dataSourceMDSId,
+    };
     return this.http
       .post('/api/observability/query/jobs', {
         body: JSON.stringify(params),
-        query 
+        query,
       })
       .catch((error) => {
         console.error('fetch error: ', error.body);
@@ -28,12 +32,18 @@ export class SQLService {
       });
   };
 
-  fetchWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
-    return this.http.get(`/api/observability/query/jobs/${params.queryId}`).catch((error) => {
-      console.error('fetch error: ', error.body);
-      if (errorHandler) errorHandler(error);
-      throw error;
-    });
+  fetchWithJobId = async (
+    params: { queryId: string },
+    dataSourceMDSId?: string,
+    errorHandler?: (error: any) => void
+  ) => {
+    return this.http
+      .get(`/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId}`)
+      .catch((error) => {
+        console.error('fetch error: ', error.body);
+        if (errorHandler) errorHandler(error);
+        throw error;
+      });
   };
 
   deleteWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
