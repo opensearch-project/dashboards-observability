@@ -103,10 +103,21 @@ const makeTableName = (config: IntegrationSetupInputs): string => {
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
+  // To prevent checkpoint collisions, each query needs a unique checkpoint name, we use an enriched
+  // UUID to create subfolders under the given checkpoint location per-query.
+  const querySpecificUUID = crypto.randomUUID();
+  let checkpointLocation = config.checkpointLocation.endsWith('/')
+    ? config.checkpointLocation
+    : config.checkpointLocation + '/';
+  checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
+
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-  queryStr = queryStr.replaceAll('{s3_checkpoint_location}', config.checkpointLocation);
+  queryStr = queryStr.replaceAll('{s3_checkpoint_location}', checkpointLocation);
   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  // TODO spark API only supports single-line queries, but directly replacing all whitespace leads
+  // to issues with single-line comments and quoted strings with more whitespace. A more robust
+  // implementation would remove comments before flattening and ignore strings.
   queryStr = queryStr.replaceAll(/\s+/g, ' ');
   return queryStr;
 };
