@@ -23,14 +23,14 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { useToast } from '../../../../public/components/common/toast';
 import { coreRefs } from '../../../framework/core_refs';
-import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
+import { addIntegrationRequest } from './create_integration_helpers';
 
 export function Integration(props: AvailableIntegrationProps) {
   const http = coreRefs.http!;
   const { integrationTemplateId, chrome } = props;
 
   const { setToast } = useToast();
-  const [integration, setIntegration] = useState({} as IntegrationTemplate);
+  const [integration, setIntegration] = useState({} as IntegrationConfig);
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
@@ -149,13 +149,12 @@ export function Integration(props: AvailableIntegrationProps) {
           }}
           setUpSample={async () => {
             setLoading(true);
-            await addIntegrationRequest(
-              true,
-              integration.name,
-              integrationTemplateId,
+            await addIntegrationRequest({
+              addSample: true,
+              templateName: integration.name,
               integration,
-              setToast
-            );
+              setToast,
+            });
             setLoading(false);
           }}
           loading={loading}
