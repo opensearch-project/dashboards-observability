@@ -21,6 +21,7 @@ import {
   OTEL_DATE_FORMAT,
   OTEL_METRIC_SUBTYPE,
   PROMQL_METRIC_SUBTYPE,
+  PPL_DESCRIBE_INDEX_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
@@ -217,6 +218,14 @@ const getPPLIndex = (query: string): string => {
 
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
+};
+
+export const getDescribeQueryIndexFromRawQuery = (query: string): string | undefined => {
+  const matches = query.match(PPL_DESCRIBE_INDEX_REGEX);
+  if (matches) {
+    return matches[2];
+  }
+  return undefined;
 };
 
 function extractSpanAndResolution(query: string) {
