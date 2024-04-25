@@ -47,11 +47,16 @@ export const validateReplicaCount = (replicaCount: number) => {
 
 export const validateRefreshInterval = (
   refreshType: AccelerationRefreshType,
-  refreshWindow: number
+  refreshWindow: number,
+  refreshInterval: string
 ) => {
-  return refreshType === 'autoInterval' && refreshWindow < 1
-    ? ['refresh window should be greater than 0']
-    : [];
+  if (refreshType === 'autoInterval' && refreshInterval === 'minute' && refreshWindow < 15)
+    return ['refresh window should be greater than 15 minutes'];
+
+  if (refreshType === 'autoInterval' && refreshWindow < 1)
+    return ['refresh window should be greater than 0'];
+
+  return [];
 };
 
 export const validateWatermarkDelay = (
@@ -147,7 +152,8 @@ export const formValidator = (accelerationformData: CreateAccelerationForm) => {
     replicaShardsError: validateReplicaCount(replicaShardsCount),
     refreshIntervalError: validateRefreshInterval(
       refreshType,
-      refreshIntervalOptions.refreshWindow
+      refreshIntervalOptions.refreshWindow,
+      refreshIntervalOptions.refreshInterval
     ),
     checkpointLocationError: validateCheckpointLocation(refreshType, checkpointLocation),
     watermarkDelayError: validateWatermarkDelay(accelerationIndexType, watermarkDelay.delayWindow),

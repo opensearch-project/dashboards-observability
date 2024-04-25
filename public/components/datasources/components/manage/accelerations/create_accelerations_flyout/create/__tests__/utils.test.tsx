@@ -109,24 +109,36 @@ describe('validateReplicaCount', () => {
 
 describe('validateRefreshInterval', () => {
   it('should return an array with an error message when refreshType is "interval" and refreshWindow is less than 1', () => {
-    expect(validateRefreshInterval('autoInterval', 0)).toEqual([
+    expect(validateRefreshInterval('autoInterval', 0, 'hour')).toEqual([
       'refresh window should be greater than 0',
     ]);
-    expect(validateRefreshInterval('autoInterval', -1)).toEqual([
+    expect(validateRefreshInterval('autoInterval', -1, 'day')).toEqual([
       'refresh window should be greater than 0',
     ]);
-    expect(validateRefreshInterval('autoInterval', -10)).toEqual([
+    expect(validateRefreshInterval('autoInterval', -10, 'week')).toEqual([
       'refresh window should be greater than 0',
+    ]);
+    expect(validateRefreshInterval('autoInterval', 14, 'minute')).toEqual([
+      'refresh window should be greater than 15 minutes',
+    ]);
+    expect(validateRefreshInterval('autoInterval', 10, 'minute')).toEqual([
+      'refresh window should be greater than 15 minutes',
+    ]);
+    expect(validateRefreshInterval('autoInterval', 0, 'minute')).toEqual([
+      'refresh window should be greater than 15 minutes',
     ]);
   });
 
   it('should return an empty array when refreshType is not "interval" or when refreshWindow is greater than or equal to 1', () => {
-    expect(validateRefreshInterval('auto', 0)).toEqual([]);
-    expect(validateRefreshInterval('auto', 1)).toEqual([]);
-    expect(validateRefreshInterval('autoInterval', 1)).toEqual([]);
-    expect(validateRefreshInterval('autoInterval', 5)).toEqual([]);
-    expect(validateRefreshInterval('manual', 0)).toEqual([]);
-    expect(validateRefreshInterval('manualIncrement', 0)).toEqual([]);
+    expect(validateRefreshInterval('auto', 0, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('auto', 1, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 15, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 20, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('manual', 0, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('manualIncrement', 0, 'minute')).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 1, 'hour')).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 2, 'day')).toEqual([]);
+    expect(validateRefreshInterval('autoInterval', 3, 'week')).toEqual([]);
   });
 });
 

@@ -17,4 +17,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
 LOCATION '{s3_bucket_location}'
 OPTIONS (
   sep=' '
-);
+)

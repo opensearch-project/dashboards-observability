@@ -20,6 +20,24 @@
       "label": "Dashboards & Visualizations",
       "description": "Dashboards and indices that enable you to easily visualize important metrics.",
       "enabled_by_default": false
+    },
+    {
+      "name": "flint-live-dashboards",
+      "label": "Dashboards & Visualizations For Flint Integrations using live queries",
+      "description": "Dashboards and visualizations aligned with Flint S3 datasource ",
+      "enabled_by_default": false
+    },
+    {
+      "name": "flint-pre-agg-dashboards",
+      "label": "Dashboards & Visualizations For Flint Integrations using pre-aggregated queries",
+      "description": "This step creates the MV pre-aggregated queries without running them, in order to actually update their data select the following `flint-pre-agg-refresh` workflow option ",
+      "enabled_by_default": false
+    },
+    {
+      "name": "flint-pre-agg-refresh",
+      "label": "Refreshing and populate the pre-aggregated projections ",
+      "description": "This step populate the pre-aggregated projections by enabling the REFRESH command to run, this step depends on selection of the previous `flint-pre-agg-dashboards` step",
+      "enabled_by_default": false
     }
   ],
   "statics": {
@@ -65,17 +83,90 @@
       "workflows": ["dashboards"]
     },
     {
-      "name": "create_table_vpc",
+      "name": "aws_vpc_flow_flint-live",
       "version": "1.0.0",
-      "extension": "sql",
-      "type": "query"
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["flint-live-dashboards"]
     },
     {
-      "name": "create_mv_vpc",
+      "name": "aws_vpc_flow_flint-pre_agg",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["flint-pre-agg-dashboards"]
+    },
+
+    {
+      "name": "create_table_parquet_vpc",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["dashboards"]
+      "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
+    },
+    {
+      "name": "vpc_live_all_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-live-dashboards"]
+    },
+    {
+      "name": "vpc_live_week_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-dashboards"]
+    },
+    {
+      "name": "vpc_agg_60min_connections_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-dashboards"]
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_cardinality_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-dashboards"]
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_total-bytes_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-dashboards"]
+    },
+
+    {
+      "name": "vpc_live_week_refresh",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-refresh"]
+    },
+    {
+      "name": "vpc_agg_60min_connections_refresh",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-refresh"]
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_cardinality_refresh",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-refresh"]
+    },
+    {
+      "name": "vpc_window-agg_60min_dest_ip_total-bytes_refresh",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-pre-agg-refresh"]
     }
   ],
   "sampleData": {

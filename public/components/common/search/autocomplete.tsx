@@ -29,6 +29,7 @@ interface AutocompleteProps extends IQueryBarProps {
   possibleCommands?: Array<{ label: string }>;
   append?: any;
   isSuggestionDisabled?: boolean;
+  ignoreShiftEnter?: boolean;
 }
 
 export const Autocomplete = (props: AutocompleteProps) => {
@@ -47,6 +48,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
     possibleCommands,
     append,
     isSuggestionDisabled = false,
+    ignoreShiftEnter = false,
   } = props;
 
   const [autocompleteState, setAutocompleteState] = useState<AutocompleteState<AutocompleteItem>>({
@@ -63,6 +65,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
   const panelsFilter = tabId === 'panels-filter';
 
   useEffect(() => {
+    if (ignoreShiftEnter) return;
     const searchBar = document.getElementById('autocomplete-textarea');
 
     searchBar?.addEventListener('keydown', (e) => {
