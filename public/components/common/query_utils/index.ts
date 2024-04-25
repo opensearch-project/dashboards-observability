@@ -18,6 +18,7 @@ import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
+  PPL_DESCRIBE_INDEX_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 
@@ -204,6 +205,21 @@ const getPPLIndex = (query: string): string => {
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
 };
+
+export const getDescribeQueryIndexFromRawQuery = (query: string): string | undefined => {
+  const matches = query.match(PPL_DESCRIBE_INDEX_REGEX);
+  if (matches) {
+    return matches[2];
+  }
+  return undefined;
+};
+
+function extractSpanAndResolution(query: string) {
+  if (!query) return;
+
+  const match = query.match(SPAN_RESOLUTION_REGEX);
+  return match ? { span: parseInt(match[1], 10), resolution: match[2] } : null;
+}
 
 export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
   // convert to moment

@@ -92,6 +92,7 @@ export const PPL_INDEX_INSERT_POINT_REGEX = /(search source|source|index)\s*=\s*
 export const PPL_INDEX_REGEX = /(search source|source|index)\s*=\s*([^|\s]+)/i;
 export const PPL_WHERE_CLAUSE_REGEX = /\s*where\s+/i;
 export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
+export const PPL_DESCRIBE_INDEX_REGEX = /(describe)\s+([^|\s]+)/i;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
