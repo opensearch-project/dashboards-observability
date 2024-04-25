@@ -214,13 +214,6 @@ export const getDescribeQueryIndexFromRawQuery = (query: string): string | undef
   return undefined;
 };
 
-function extractSpanAndResolution(query: string) {
-  if (!query) return;
-
-  const match = query.match(SPAN_RESOLUTION_REGEX);
-  return match ? { span: parseInt(match[1], 10), resolution: match[2] } : null;
-}
-
 export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
   // convert to moment
   const start = convertDateTime(startTime, true);
