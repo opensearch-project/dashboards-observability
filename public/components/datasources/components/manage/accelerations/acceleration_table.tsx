@@ -24,7 +24,10 @@ import {
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
-import { getRenderAccelerationDetailsFlyout, getRenderCreateAccelerationFlyout } from '../../../../../plugin';
+import {
+  getRenderAccelerationDetailsFlyout,
+  getRenderCreateAccelerationFlyout,
+} from '../../../../../plugin';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
@@ -107,7 +110,7 @@ export const AccelerationTable = ({
       !isCatalogCacheFetching(accelerationsLoadStatus)
     ) {
       setIsRefreshing(true);
-      startLoadingAccelerations({dataSourceName:dataSourceName});
+      startLoadingAccelerations({ dataSourceName });
     } else {
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);

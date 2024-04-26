@@ -31,7 +31,6 @@ export interface ObservabilityPluginSetupDependencies {
   dataSource: DataSourcePluginSetup;
 }
 
-
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
   private readonly logger: Logger;
@@ -51,17 +50,16 @@ export class ObservabilityPlugin
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
 
-    const dataSourceEnabled = !!dataSource
-    let openSearchObservabilityClient: ILegacyClusterClient | undefined = undefined;
-    openSearchObservabilityClient = core.opensearch.legacy.createClient(
+    const dataSourceEnabled = !!dataSource;
+    const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
         plugins: [PPLPlugin, OpenSearchObservabilityPlugin],
       }
     );
     if (dataSourceEnabled) {
-      dataSource.registerCustomApiSchema(PPLPlugin)
-      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin)
+      dataSource.registerCustomApiSchema(PPLPlugin);
+      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
     }
     // @ts-ignore
     core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {

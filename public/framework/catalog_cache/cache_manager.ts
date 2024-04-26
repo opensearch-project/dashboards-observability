@@ -81,9 +81,8 @@ export class CatalogCacheManager {
       const cachedAcclerationData = JSON.parse(accelerationCacheData);
       if (dataSourceMDSId && cachedAcclerationData.dataSourceMDSId === dataSourceMDSId) {
         return cachedAcclerationData;
-      } else {
-        return cachedAcclerationData;
       }
+      return cachedAcclerationData;
     }
     const defaultCacheObject = {
       version: CATALOG_CACHE_VERSION,
