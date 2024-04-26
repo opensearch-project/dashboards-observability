@@ -104,7 +104,13 @@ export const CreateAccelerationFlyoutButton = ({
     <>
       <EuiButton
         onClick={() =>
-          renderCreateAccelerationFlyout(dataSourceName, '', undefined, undefined, handleRefresh)
+          renderCreateAccelerationFlyout(
+            dataSourceName,
+            undefined,
+            undefined,
+            undefined,
+            handleRefresh
+          )
         }
         fill
       >

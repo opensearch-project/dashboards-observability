@@ -100,7 +100,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
-      startLoadingDatabases({databaseName:datasource.name});
+      startLoadingDatabases({ databaseName: datasource.name });
       setIsRefreshing(true);
     }
   };

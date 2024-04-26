@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ASYNC_POLLING_INTERVAL } from '../../../common/constants/data_sources';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../common/utils/query_session_utils';
@@ -18,7 +18,7 @@ export const useDirectQuery = () => {
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.SCHEDULED
   );
-  const [dataSourceMDSClientId, setDataSourceMDSId] = useState<string>('');
+  const dataSourceMDSClientId = useRef('');
 
   const {
     data: pollingResult,
@@ -27,11 +27,11 @@ export const useDirectQuery = () => {
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params, dataSourceMDSClientId);
+    return sqlService.fetchWithJobId(params, dataSourceMDSClientId.current);
   }, ASYNC_POLLING_INTERVAL);
 
   const startLoading = (requestPayload: DirectQueryRequest, dataSourceMDSId?: string) => {
-    setDataSourceMDSId(dataSourceMDSId ? dataSourceMDSId : '');
+    dataSourceMDSClientId.current = dataSourceMDSId || '';
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
 
     const sessionId = getAsyncSessionId(requestPayload.datasource);

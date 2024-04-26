@@ -54,7 +54,7 @@ export class CatalogCacheManager {
       return cachedData;
     }
     const defaultCacheObject = {
-      dataSourceMDSId: dataSourceMDSId || '',
+      ...(dataSourceMDSId && { dataSourceMDSId }),
       version: CATALOG_CACHE_VERSION,
       dataSources: [],
     };
@@ -86,7 +86,7 @@ export class CatalogCacheManager {
     }
     const defaultCacheObject = {
       version: CATALOG_CACHE_VERSION,
-      dataSourceMDSId: dataSourceMDSId || '',
+      ...(dataSourceMDSId && { dataSourceMDSId }),
       dataSources: [],
     };
     this.saveAccelerationsCache(defaultCacheObject);

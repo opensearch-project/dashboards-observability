@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ASYNC_POLLING_INTERVAL,
   SPARK_HIVE_TABLE_REGEX,
@@ -16,6 +16,7 @@ import {
   CachedDataSourceStatus,
   CachedTable,
   LoadCacheType,
+  StartLoadingParams,
 } from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../common/utils/query_session_utils';
@@ -245,7 +246,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.INITIAL
   );
-  const [dataSourceMDSClientId, setDataSourceMDSClientId] = useState<string>('');
+  const dataSourceMDSClientId = useRef('');
 
   const {
     data: pollingResult,
@@ -254,7 +255,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params, dataSourceMDSClientId);
+    return sqlService.fetchWithJobId(params, dataSourceMDSClientId.current);
   }, ASYNC_POLLING_INTERVAL);
 
   const onLoadingFailed = () => {
@@ -268,13 +269,6 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     );
   };
 
-  interface StartLoadingParams {
-    dataSourceName: string;
-    dataSourceMDSId?: string;
-    databaseName?: string;
-    tableName?: string;
-  }
-
   const startLoading = ({
     dataSourceName,
     dataSourceMDSId,
@@ -285,7 +279,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
     setCurrentTableName(tableName);
-    setDataSourceMDSClientId(dataSourceMDSId ? dataSourceMDSId : '');
+    dataSourceMDSClientId.current = dataSourceMDSId || '';
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
