@@ -76,10 +76,24 @@
   ],
   "assets": [
     {
+      "name": "create_table_parquet_vpc",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
+    },
+    {
       "name": "example_queries",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
       "workflows": ["queries"]
     },
     {
@@ -102,14 +116,6 @@
       "extension": "ndjson",
       "type": "savedObjectBundle",
       "workflows": ["flint-pre-agg-dashboards"]
-    },
-
-    {
-      "name": "create_table_parquet_vpc",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
     },
     {
       "name": "vpc_live_all_mv",
