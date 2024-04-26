@@ -1,5 +1,5 @@
 CREATE SKIPPING INDEX ON {table_name} (
-    c_ip MIN_MAX,
+    c_ip BLOOM_FILTER,
     sc_status VALUE_SET,
     time_to_first_byte MIN_MAX
 ) WITH (

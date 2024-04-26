@@ -1,5 +1,5 @@
 CREATE SKIPPING INDEX ON {table_name} (
-    remote_addr MIN_MAX,
+    remote_addr BLOOM_FILTER,
     `status` VALUE_SET
 ) WITH (
     auto_refresh = true,
