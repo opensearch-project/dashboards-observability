@@ -7,22 +7,33 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  ChromeStart,
+  HttpStart,
+  MountPoint,
+  NotificationsStart,
+  SavedObjectsStart,
+} from '../../../../../src/core/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceSelectableConfig,
+} from '../../../../../src/plugins/data_source_management/public';
 import { FilterType } from './components/common/filters/filters';
 import { SearchBarProps } from './components/common/search_bar';
-import { Dashboard } from './components/dashboard';
-import { Services, ServiceView } from './components/services';
-import { Traces, TraceView } from './components/traces';
-import {
-  handleDataPrepperIndicesExistRequest,
-  handleJaegerIndicesExistRequest,
-} from './requests/request_handler';
+import { ServiceView, Services } from './components/services';
+import { TraceView, Traces } from './components/traces';
 import { TraceSideBar } from './trace_side_nav';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumb: ChromeBreadcrumb;
   http: HttpStart;
   chrome: ChromeStart;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: SavedObjectsStart;
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
@@ -80,26 +91,61 @@ export const Home = (props: HomeProps) => {
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
+  const setMDSPicker = () => {
+    return (
+      props.dataSourceEnabled && (
+        <DataSourceMenu
+          setMenuMountPoint={props.setActionMenu}
+          componentType={'DataSourceSelectable'}
+          componentConfig={{
+            savedObjects: props.savedObjectsMDSClient.client,
+            notifications: props.notifications,
+            fullWidth: true,
+            onSelectedDataSources: onSelectedDataSource,
+          }}
+        />
+      )
+    );
+  };
 
+  let [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
+  const [dataSourceMenuVisible, setDataSourceMenuVisible] = useState(false);
+
+  // useEffect(() => {
+  //   if (props.dataSourceEnabled && props.dataSourceManagement) {
+  //     setDataSourceMenuVisible(true);
+  //   }
+  // }, [props.dataSourceEnabled, props.dataSourceManagement]);
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist);
-    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
-  }, []);
+   console.log(dataSourceMDSId,'in effect')
+    // handleDataPrepperIndicesExistRequest(
+    //   props.http,
+    //   setDataPrepperIndicesExist,
+    //   dataSourceMDSId[0].id
+    // );
+    // handleJaegerIndicesExistRequest(
+    //   props.http,
+    //   setJaegerIndicesExist,
+    //   dataSourceMDSId[0].id
+    // );
+  }, [dataSourceMDSId]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
   ];
 
-  useEffect(() => {
-    if (!sessionStorage.getItem('TraceAnalyticsMode')) {
-      if (dataPrepperIndicesExist) {
-        setMode('data_prepper');
-      } else if (jaegerIndicesExist) {
-        setMode('jaeger');
-      }
-    }
-  }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+  // useEffect(() => {
+  //   if (!sessionStorage.getItem('TraceAnalyticsMode')) {
+  //     if (dataPrepperIndicesExist) {
+  //       setMode('data_prepper');
+  //     } else if (jaegerIndicesExist) {
+  //       setMode('jaeger');
+  //     }
+  //   }
+  // }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+
+  // useEffect(() => {}, [dataSourceMDSId]);
 
   const serviceBreadcrumbs = [
     {
@@ -131,7 +177,6 @@ export const Home = (props: HomeProps) => {
     location.assign(`#/traces/${encodeURIComponent(item)}`);
 
   const [appConfigs, _] = useState([]);
-
   const commonProps: TraceAnalyticsComponentDeps = {
     parentBreadcrumb: props.parentBreadcrumb,
     http: props.http,
@@ -152,10 +197,37 @@ export const Home = (props: HomeProps) => {
     },
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    notifications: props.notifications,
+    dataSourceEnabled: props.dataSourceEnabled,
+    dataSourceManagement: props.dataSourceManagement,
+    setActionMenu: props.setActionMenu,
+    savedObjectsMDSClient: props.savedObjectsMDSClient,
+  };
+  const onSelectedDataSource = async (e) => {
+    console.log(e,'in select')
+    const dataConnectionId = e;
+    if(dataConnectionId && dataSourceMDSId[0].id !== dataConnectionId[0].id)
+      setDataSourceMDSId(dataConnectionId)
+    console.log(dataSourceMDSId)
   };
 
+  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
+    DataSourceSelectableConfig
+  >();
   return (
     <>
+      {true && (
+        <DataSourceMenu
+          setMenuMountPoint={props.setActionMenu}
+          componentType={'DataSourceSelectable'}
+          componentConfig={{
+            savedObjects: props.savedObjectsMDSClient.client,
+            notifications: props.notifications,
+            fullWidth: true,
+            onSelectedDataSources: onSelectedDataSource,
+          }}
+        />
+      )}
       <EuiGlobalToastList
         toasts={toasts}
         dismissToast={(removedToast) => {
@@ -173,6 +245,7 @@ export const Home = (props: HomeProps) => {
                 page="traces"
                 childBreadcrumbs={traceBreadcrumbs}
                 traceIdColumnAction={traceIdColumnAction}
+                dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
             </TraceSideBar>
@@ -187,6 +260,7 @@ export const Home = (props: HomeProps) => {
               http={props.http}
               traceId={decodeURIComponent(routerProps.match.params.id)}
               mode={mode}
+              dataSourceMDSId={dataSourceMDSId}
             />
           )}
         />
@@ -201,6 +275,7 @@ export const Home = (props: HomeProps) => {
                 nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
                 toasts={toasts}
+                dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
             </TraceSideBar>
@@ -225,6 +300,7 @@ export const Home = (props: HomeProps) => {
                 const newFilters = [...filters, filter];
                 setFiltersWithStorage(newFilters);
               }}
+              dataSourceMDSId={dataSourceMDSId}
             />
           )}
         />

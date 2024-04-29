@@ -8,6 +8,7 @@ import dateMath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useToast } from '../../../../../public/components/common/toast';
 import {
   handleDashboardErrorRatePltRequest,
   handleDashboardRequest,
@@ -15,25 +16,21 @@ import {
   handleJaegerDashboardRequest,
   handleJaegerErrorDashboardRequest,
 } from '../../requests/dashboard_request_handler';
-import { handleServiceMapRequest } from '../../requests/services_request_handler';
-import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
+import { FilterType } from '../common/filters/filters';
 import {
+  MissingConfigurationMessage,
   filtersToDsl,
   getPercentileFilter,
   milliToNanoSec,
   minFixedInterval,
-  MissingConfigurationMessage,
   processTimeStamp,
 } from '../common/helper_functions';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
-import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ThroughputPlt } from '../common/plots/throughput_plt';
-import { SearchBar } from '../common/search_bar';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
-import { useToast } from '../../../../../public/components/common/toast';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -55,6 +52,7 @@ export function DashboardContent(props: DashboardProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
+    dataSourceMDSId,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -173,6 +171,7 @@ export function DashboardContent(props: DashboardProps) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
+        dataSourceMDSId[0].id,
         setPercentileMap
       ).finally(() => setLoading(false));
       handleJaegerErrorDashboardRequest(
@@ -189,6 +188,7 @@ export function DashboardContent(props: DashboardProps) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
+        dataSourceMDSId[0].id,
         setPercentileMap
       ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {
@@ -201,6 +201,7 @@ export function DashboardContent(props: DashboardProps) {
         setTableItems,
         mode,
         () => setShowTimeoutToast(true),
+        dataSourceMDSId[0].id,
         setPercentileMap
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
@@ -216,7 +217,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       throughputPltItems,
       setThroughputPltItems,
-      mode
+      mode,
+      dataSourceMDSId[0].id
     );
 
     handleDashboardErrorRatePltRequest(
@@ -225,7 +227,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       errorRatePltItems,
       setErrorRatePltItems,
-      mode
+      mode,
+      dataSourceMDSId[0].id
     );
   };
 

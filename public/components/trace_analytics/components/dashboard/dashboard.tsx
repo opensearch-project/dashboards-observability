@@ -6,7 +6,8 @@
 import { EuiBreadcrumb, EuiTitle } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React from 'react';
-import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
+import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { TraceAnalyticsComponentDeps } from '../../home';
 import { DashboardContent } from './dashboard_content';
 import { DataSourcePicker } from './mode_picker';
 
@@ -20,6 +21,7 @@ export interface DashboardProps extends TraceAnalyticsComponentDeps {
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
+  dataSourceMDSId: DataSourceOption[]
 }
 
 export function Dashboard(props: DashboardProps) {
