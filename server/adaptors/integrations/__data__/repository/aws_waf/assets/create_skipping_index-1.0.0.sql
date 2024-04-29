@@ -3,7 +3,8 @@ CREATE SKIPPING INDEX ON {table_name} (
   `webaclId` VALUE_SET, 
   `httpRequest` VALUE_SET, 
   `action` VALUE_SET, 
-  `terminatingRuleType` VALUE_SET
+  `terminatingRuleType` VALUE_SET,
+  `httpSourceId` BLOOM_FILTER
 ) WITH (
   auto_refresh = true,
   refresh_interval = '15 Minutes',
