@@ -203,9 +203,10 @@ export const handleSpansGanttRequest = (
   setSpanDetailData: (spanDetailData: any) => void,
   colorMap: any,
   spanFiltersDSL: any,
-  mode: TraceAnalyticsMode
+  mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode)
+  handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
     .then((newItems) => setSpanDetailData(newItems))
     .catch((error) => console.error(error));

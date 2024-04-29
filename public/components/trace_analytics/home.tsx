@@ -19,10 +19,15 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
+import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { FilterType } from './components/common/filters/filters';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { TraceView, Traces } from './components/traces';
+import {
+  handleDataPrepperIndicesExistRequest,
+  handleJaegerIndicesExistRequest,
+} from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
 
 export interface TraceAnalyticsCoreDeps {
@@ -87,47 +92,20 @@ export const Home = (props: HomeProps) => {
   };
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+  const _setToast = (title: string, color = 'success', text?: ReactChild, _side?: string) => {
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
-  const setMDSPicker = () => {
-    return (
-      props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            savedObjects: props.savedObjectsMDSClient.client,
-            notifications: props.notifications,
-            fullWidth: true,
-            onSelectedDataSources: onSelectedDataSource,
-          }}
-        />
-      )
-    );
-  };
 
   let [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
-  const [dataSourceMenuVisible, setDataSourceMenuVisible] = useState(false);
 
-  // useEffect(() => {
-  //   if (props.dataSourceEnabled && props.dataSourceManagement) {
-  //     setDataSourceMenuVisible(true);
-  //   }
-  // }, [props.dataSourceEnabled, props.dataSourceManagement]);
   useEffect(() => {
-   console.log(dataSourceMDSId,'in effect')
-    // handleDataPrepperIndicesExistRequest(
-    //   props.http,
-    //   setDataPrepperIndicesExist,
-    //   dataSourceMDSId[0].id
-    // );
-    // handleJaegerIndicesExistRequest(
-    //   props.http,
-    //   setJaegerIndicesExist,
-    //   dataSourceMDSId[0].id
-    // );
+    handleDataPrepperIndicesExistRequest(
+      props.http,
+      setDataPrepperIndicesExist,
+      dataSourceMDSId[0].id
+    );
+    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
   }, [dataSourceMDSId]);
 
   const modes = [
@@ -135,17 +113,15 @@ export const Home = (props: HomeProps) => {
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
   ];
 
-  // useEffect(() => {
-  //   if (!sessionStorage.getItem('TraceAnalyticsMode')) {
-  //     if (dataPrepperIndicesExist) {
-  //       setMode('data_prepper');
-  //     } else if (jaegerIndicesExist) {
-  //       setMode('jaeger');
-  //     }
-  //   }
-  // }, [jaegerIndicesExist, dataPrepperIndicesExist]);
-
-  // useEffect(() => {}, [dataSourceMDSId]);
+  useEffect(() => {
+    if (!sessionStorage.getItem('TraceAnalyticsMode')) {
+      if (dataPrepperIndicesExist) {
+        setMode('data_prepper');
+      } else if (jaegerIndicesExist) {
+        setMode('jaeger');
+      }
+    }
+  }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const serviceBreadcrumbs = [
     {
@@ -203,12 +179,11 @@ export const Home = (props: HomeProps) => {
     setActionMenu: props.setActionMenu,
     savedObjectsMDSClient: props.savedObjectsMDSClient,
   };
-  const onSelectedDataSource = async (e) => {
-    console.log(e,'in select')
-    const dataConnectionId = e;
-    if(dataConnectionId && dataSourceMDSId[0].id !== dataConnectionId[0].id)
-      setDataSourceMDSId(dataConnectionId)
-    console.log(dataSourceMDSId)
+  const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
+    const { id = '', label = '' } = dataSources[0] || {};
+    if (dataSourceMDSId[0].id !== id || dataSourceMDSId[0].label !== label) {
+      setDataSourceMDSId([{ id, label }]);
+    }
   };
 
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
@@ -216,7 +191,7 @@ export const Home = (props: HomeProps) => {
   >();
   return (
     <>
-      {true && (
+      {props.dataSourceEnabled && (
         <DataSourceMenu
           setMenuMountPoint={props.setActionMenu}
           componentType={'DataSourceSelectable'}
@@ -224,6 +199,7 @@ export const Home = (props: HomeProps) => {
             savedObjects: props.savedObjectsMDSClient.client,
             notifications: props.notifications,
             fullWidth: true,
+            activeOption: dataSourceMDSId,
             onSelectedDataSources: onSelectedDataSource,
           }}
         />
@@ -239,7 +215,7 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path="/traces"
-          render={(routerProps) => (
+          render={(_routerProps) => (
             <TraceSideBar>
               <Traces
                 page="traces"
@@ -261,13 +237,18 @@ export const Home = (props: HomeProps) => {
               traceId={decodeURIComponent(routerProps.match.params.id)}
               mode={mode}
               dataSourceMDSId={dataSourceMDSId}
+              dataSourceManagement={props.dataSourceManagement}
+              setActionMenu={props.setActionMenu}
+              notifications={props.notifications}
+              dataSourceEnabled={props.dataSourceEnabled}
+              savedObjectsMDSClient={props.savedObjectsMDSClient}
             />
           )}
         />
         <Route
           exact
           path={['/services', '/']}
-          render={(routerProps) => (
+          render={(_routerProps) => (
             <TraceSideBar>
               <Services
                 page="services"

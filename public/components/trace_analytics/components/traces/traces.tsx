@@ -18,7 +18,6 @@ export interface TracesProps extends TraceAnalyticsComponentDeps {
 }
 
 export function Traces(props: TracesProps) {
-  console.log(props.dataSourceMDSId)
   return (
     <>
       <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />

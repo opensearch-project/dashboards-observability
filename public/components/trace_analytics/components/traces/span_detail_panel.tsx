@@ -28,6 +28,7 @@ export function SpanDetailPanel(props: {
   traceId: string;
   colorMap: any;
   mode: TraceAnalyticsMode
+  dataSourceMDSId: string;
   page?: string;
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
@@ -81,7 +82,7 @@ export function SpanDetailPanel(props: {
     if (_.isEmpty(props.colorMap)) return;
     const refreshDSL = spanFiltersToDSL();
     setDSL(refreshDSL);
-    handleSpansGanttRequest(props.traceId, props.http, setData, props.colorMap, refreshDSL, mode);
+    handleSpansGanttRequest(props.traceId, props.http, setData, props.colorMap, refreshDSL, mode, props.dataSourceMDSId);
   }, 150);
 
   const spanFiltersToDSL = () => {

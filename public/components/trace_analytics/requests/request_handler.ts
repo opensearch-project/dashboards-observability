@@ -84,7 +84,6 @@ export async function handleDataPrepperIndicesExistRequest(
   setDataPrepperIndicesExist,
   dataSourceMDSId? : string
 ) {
-  console.log('from post', dataSourceMDSId)
   let query = {
     dataSourceMDSId: dataSourceMDSId
   }

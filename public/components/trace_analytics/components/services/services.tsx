@@ -21,6 +21,7 @@ export interface ServicesProps extends TraceAnalyticsComponentDeps {
 }
 
 export function Services(props: ServicesProps) {
+  console.log(props.dataSourceMDSId)
   return (
     <>
       <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />

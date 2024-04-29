@@ -110,7 +110,7 @@ export function ServiceView(props: ServiceViewProps) {
     setStartTime: SearchBarProps['setStartTime'],
     endTime: SearchBarProps['endTime'],
     setEndTime: SearchBarProps['setEndTime'],
-    addFilter: (filter: FilterType) => void
+    _addFilter: (filter: FilterType) => void
   ) => {
     return (
       <>
@@ -355,6 +355,7 @@ export function ServiceView(props: ServiceViewProps) {
         openFlyout={(spanId: string) => setCurrentSpan(spanId)}
         setTotal={setTotal}
         mode={mode}
+        dataSourceMDSId={props.dataSourceMDSId[0].id}
       />
     ),
     [DSL, setCurrentSpan]

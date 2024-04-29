@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { MountPoint } from '../../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup, DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
@@ -39,6 +40,7 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
   mode: TraceAnalyticsMode;
   dataSourceMDSId: DataSourceOption[];
   dataSourceManagement: DataSourceManagementPluginSetup
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 export function TraceView(props: TraceViewProps) {
@@ -55,22 +57,11 @@ export function TraceView(props: TraceViewProps) {
       </>
     );
   };
-  console.log(props.dataSourceMDSId,'traces')
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const renderOverview = (fields: any) => {
     return (
       <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceView'}
-          componentConfig={{
-            activeOption: [{label: 'test',id:'12345'}],
-            fullWidth: true
-          }}
-        />
-      )}
       <EuiPanel>
         <PanelTitle title="Overview" />
         <EuiHorizontalRule margin="m" />
@@ -241,10 +232,19 @@ export function TraceView(props: TraceViewProps) {
     ]);
     refresh();
   }, [props.mode]);
-
   return (
     <>
       <EuiPage>
+      {props.dataSourceEnabled && (
+          <DataSourceMenu
+            setMenuMountPoint={props.setActionMenu}
+            componentType={'DataSourceView'}
+            componentConfig={{
+              activeOption: props.dataSourceMDSId,
+              fullWidth: true,
+            }}
+          />
+        )}
         <EuiPageBody>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {renderTitle(props.traceId)}
@@ -265,6 +265,7 @@ export function TraceView(props: TraceViewProps) {
                 mode={mode}
                 data={ganttData}
                 setData={setGanttData}
+                dataSourceMDSId={props.dataSourceMDSId[0].id}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
