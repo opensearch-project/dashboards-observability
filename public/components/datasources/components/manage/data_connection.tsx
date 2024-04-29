@@ -227,7 +227,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   ];
 
   const conditionalTabs =
-    datasourceDetails.connector !== 'PROMETHEUS'
+    datasourceDetails.connector === 'S3GLUE'
       ? [
           {
             id: 'associated_objects',
