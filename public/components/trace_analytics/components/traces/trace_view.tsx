@@ -21,7 +21,10 @@ import {
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { MountPoint } from '../../../../../../../src/core/public';
-import { DataSourceManagementPluginSetup, DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceViewConfig,
+} from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
@@ -39,7 +42,7 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: DataSourceOption[];
-  dataSourceManagement: DataSourceManagementPluginSetup
+  dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
@@ -61,7 +64,6 @@ export function TraceView(props: TraceViewProps) {
 
   const renderOverview = (fields: any) => {
     return (
-      <>
       <EuiPanel>
         <PanelTitle title="Overview" />
         <EuiHorizontalRule margin="m" />
@@ -141,7 +143,6 @@ export function TraceView(props: TraceViewProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      </>
     );
   };
 
@@ -169,8 +170,22 @@ export function TraceView(props: TraceViewProps) {
       processTimeStamp('now', mode),
       page
     );
-    handleTraceViewRequest(props.traceId, props.http, fields, setFields, mode, props.dataSourceMDSId[0].id);
-    handlePayloadRequest(props.traceId, props.http, payloadData, setPayloadData, mode, props.dataSourceMDSId[0].id);
+    handleTraceViewRequest(
+      props.traceId,
+      props.http,
+      fields,
+      setFields,
+      mode,
+      props.dataSourceMDSId[0].id
+    );
+    handlePayloadRequest(
+      props.traceId,
+      props.http,
+      payloadData,
+      setPayloadData,
+      mode,
+      props.dataSourceMDSId[0].id
+    );
     handleServicesPieChartRequest(
       props.traceId,
       props.http,
@@ -235,7 +250,7 @@ export function TraceView(props: TraceViewProps) {
   return (
     <>
       <EuiPage>
-      {props.dataSourceEnabled && (
+        {props.dataSourceEnabled && (
           <DataSourceMenu
             setMenuMountPoint={props.setActionMenu}
             componentType={'DataSourceView'}

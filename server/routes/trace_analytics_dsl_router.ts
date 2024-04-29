@@ -24,8 +24,8 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
       validate: {
         body: schema.any(),
         query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' }))
-        })
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (context, request, response) => {
@@ -33,15 +33,17 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
         index: [DATA_PREPPER_INDEX_NAME, DATA_PREPPER_SERVICE_INDEX_NAME],
         allow_no_indices: false,
       };
-      const {dataSourceMDSId}  = request.query;
+      const { dataSourceMDSId } = request.query;
       try {
-        let client;
         let resp;
         if (dataSourceEnabled && dataSourceMDSId) {
-          client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          const client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           resp = await client.callAPI('indices.exists', params);
         } else {
-          resp = await context.core.opensearch.legacy.client.callAsCurrentUser('indices.exists',params)
+          resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
+            'indices.exists',
+            params
+          );
         }
         return response.ok({
           body: resp,
@@ -61,24 +63,26 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
       validate: {
         body: schema.any(),
         query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' }))
-        })
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (context, request, response) => {
-      const {dataSourceMDSId}  = request.query;
+      const { dataSourceMDSId } = request.query;
       const params: RequestParams.IndicesExists = {
         index: [JAEGER_INDEX_NAME, JAEGER_SERVICE_INDEX_NAME],
         allow_no_indices: false,
       };
       try {
-        let client;
         let resp;
         if (dataSourceEnabled && dataSourceMDSId) {
-          client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          const client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           resp = await client.callAPI('indices.exists', params);
         } else {
-          resp = await context.core.opensearch.legacy.client.callAsCurrentUser('indices.exists',params)
+          resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
+            'indices.exists',
+            params
+          );
         }
         return response.ok({
           body: resp,
@@ -124,27 +128,26 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
           script_fields: schema.maybe(schema.any()),
         }),
         query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' }))
-        })
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (context, request, response) => {
       addRequestToMetric('trace_analytics', 'get', 'count');
       const { index, size, ...rest } = request.body;
-      const {dataSourceMDSId}  = request.query;
+      const { dataSourceMDSId } = request.query;
       const params: RequestParams.Search = {
         index: index || DATA_PREPPER_INDEX_NAME,
         size,
         body: rest,
       };
       try {
-        let client;
         let resp;
         if (dataSourceEnabled && dataSourceMDSId) {
-          client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          const client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           resp = await client.callAPI('search', params);
         } else {
-          resp = await context.core.opensearch.legacy.client.callAsCurrentUser('search',params)
+          resp = await context.core.opensearch.legacy.client.callAsCurrentUser('search', params);
         }
         return response.ok({
           body: resp,

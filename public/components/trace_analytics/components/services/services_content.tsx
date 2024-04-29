@@ -7,7 +7,6 @@
 import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
@@ -42,7 +41,6 @@ export function ServicesContent(props: ServicesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
-    dataSourceManagement,
     dataSourceMDSId,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -55,7 +53,6 @@ export function ServicesContent(props: ServicesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [filteredService, setFilteredService] = useState('');
-  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const onToggle = (isOpen) => {
     const newState = isOpen ? 'open' : 'closed';
