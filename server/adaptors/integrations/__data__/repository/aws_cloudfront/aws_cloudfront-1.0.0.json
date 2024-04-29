@@ -54,17 +54,24 @@
   ],
   "assets": [
     {
-      "name": "aws_cloudfront",
-      "version": "1.0.0",
-      "extension": "ndjson",
-      "type": "savedObjectBundle",
-      "workflows": ["dashboards"]
-    },
-    {
       "name": "create_table",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query"
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
     },
     {
       "name": "create_mv",
@@ -74,11 +81,11 @@
       "workflows": ["dashboards"]
     },
     {
-      "name": "example_queries",
+      "name": "aws_cloudfront",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
-      "workflows": ["queries"]
+      "workflows": ["dashboards"]
     }
   ],
   "sampleData": {
