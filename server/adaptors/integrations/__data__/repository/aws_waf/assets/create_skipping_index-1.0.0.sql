@@ -1,5 +1,5 @@
 CREATE SKIPPING INDEX ON {table_name} (
-  `timestamp` VALUE_SET, 
+  `timestamp` MIN_MAX, 
   `webaclId` VALUE_SET, 
   `httpRequest` VALUE_SET, 
   `action` VALUE_SET, 
