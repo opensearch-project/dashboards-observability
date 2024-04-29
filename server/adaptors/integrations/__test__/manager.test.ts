@@ -196,7 +196,10 @@ describe('IntegrationsKibanaBackend', () => {
 
       const result = await backend.getIntegrationInstances();
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({ type: 'integration-instance' });
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'integration-instance',
+        perPage: 1000,
+      });
       expect(result).toEqual({
         total: findResult.total,
         hits: savedObjects.map((obj) => ({ id: obj.id, ...obj.attributes })),
@@ -239,7 +242,7 @@ describe('IntegrationsKibanaBackend', () => {
       expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
       expect(instanceBuilder.build).toHaveBeenCalledWith(template, {
         name,
-        dataSource: 'datasource',
+        indexPattern: 'datasource',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'integration-instance',

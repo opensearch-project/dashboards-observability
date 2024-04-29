@@ -6,11 +6,15 @@
 import { useEffect, useState } from 'react';
 import {
   ASYNC_POLLING_INTERVAL,
-  CATALOG_CACHE_VERSION,
+  SPARK_HIVE_TABLE_REGEX,
+  SPARK_PARTITION_INFO,
 } from '../../../common/constants/data_sources';
 import {
   AsyncPollingResult,
+  CachedAccelerations,
+  CachedColumn,
   CachedDataSourceStatus,
+  CachedTable,
   LoadCacheType,
 } from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
@@ -64,39 +68,47 @@ export const updateTablesToCache = (
   databaseName: string,
   pollingResult: AsyncPollingResult
 ) => {
-  const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
-  const currentTime = new Date().toUTCString();
+  try {
+    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const currentTime = new Date().toUTCString();
 
-  if (!pollingResult) {
+    if (!pollingResult) {
+      CatalogCacheManager.updateDatabase(dataSourceName, {
+        ...cachedDatabase,
+        tables: [],
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Failed,
+      });
+      return;
+    }
+
+    const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
+    const newTables = combinedData
+      .filter((row: any) => !SPARK_HIVE_TABLE_REGEX.test(row.information))
+      .map((row: any) => ({
+        name: row.tableName,
+      }));
+
     CatalogCacheManager.updateDatabase(dataSourceName, {
       ...cachedDatabase,
-      tables: [],
+      tables: newTables,
       lastUpdated: currentTime,
-      status: CachedDataSourceStatus.Failed,
+      status: CachedDataSourceStatus.Updated,
     });
-    return;
+  } catch (error) {
+    console.error(error);
   }
-
-  const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
-  const newTables = combinedData.map((row: any) => ({
-    name: row.tableName,
-    columns: [],
-  }));
-
-  CatalogCacheManager.updateDatabase(dataSourceName, {
-    ...cachedDatabase,
-    tables: newTables,
-    lastUpdated: currentTime,
-    status: CachedDataSourceStatus.Updated,
-  });
 };
 
-export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) => {
+export const updateAccelerationsToCache = (
+  dataSourceName: string,
+  pollingResult: AsyncPollingResult
+) => {
   const currentTime = new Date().toUTCString();
 
   if (!pollingResult) {
-    CatalogCacheManager.saveAccelerationsCache({
-      version: CATALOG_CACHE_VERSION,
+    CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
+      name: dataSourceName,
       accelerations: [],
       lastUpdated: currentTime,
       status: CachedDataSourceStatus.Failed,
@@ -106,7 +118,7 @@ export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) =>
 
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
 
-  const newAccelerations = combinedData.map((row: any) => ({
+  const newAccelerations: CachedAccelerations[] = combinedData.map((row: any) => ({
     flintIndexName: row.flint_index_name,
     type: row.kind === 'mv' ? 'materialized' : row.kind,
     database: row.database,
@@ -116,19 +128,66 @@ export const updateAccelerationsToCache = (pollingResult: AsyncPollingResult) =>
     status: row.status,
   }));
 
-  CatalogCacheManager.saveAccelerationsCache({
-    version: CATALOG_CACHE_VERSION,
+  CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
+    name: dataSourceName,
     accelerations: newAccelerations,
     lastUpdated: currentTime,
     status: CachedDataSourceStatus.Updated,
   });
 };
 
+export const updateTableColumnsToCache = (
+  dataSourceName: string,
+  databaseName: string,
+  tableName: string,
+  pollingResult: AsyncPollingResult
+) => {
+  try {
+    if (!pollingResult) {
+      return;
+    }
+    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const currentTime = new Date().toUTCString();
+
+    const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
+      pollingResult.schema,
+      pollingResult.datarows
+    );
+
+    const tableColumns: CachedColumn[] = [];
+    for (const row of combinedData) {
+      if (row.col_name === SPARK_PARTITION_INFO) {
+        break;
+      }
+      tableColumns.push({
+        fieldName: row.col_name,
+        dataType: row.data_type,
+      });
+    }
+
+    const newTables: CachedTable[] = cachedDatabase.tables.map((ts) =>
+      ts.name === tableName ? { ...ts, columns: tableColumns } : { ...ts }
+    );
+
+    if (cachedDatabase.status === CachedDataSourceStatus.Updated) {
+      CatalogCacheManager.updateDatabase(dataSourceName, {
+        ...cachedDatabase,
+        tables: newTables,
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Updated,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const updateToCache = (
   pollResults: any,
   loadCacheType: LoadCacheType,
   dataSourceName: string,
-  databaseName?: string
+  databaseName?: string,
+  tableName?: string
 ) => {
   switch (loadCacheType) {
     case 'databases':
@@ -138,8 +197,10 @@ export const updateToCache = (
       updateTablesToCache(dataSourceName, databaseName!, pollResults);
       break;
     case 'accelerations':
-      updateAccelerationsToCache(pollResults);
+      updateAccelerationsToCache(dataSourceName, pollResults);
       break;
+    case 'tableColumns':
+      updateTableColumnsToCache(dataSourceName, databaseName!, tableName!, pollResults);
     default:
       break;
   }
@@ -148,7 +209,8 @@ export const updateToCache = (
 export const createLoadQuery = (
   loadCacheType: LoadCacheType,
   dataSourceName: string,
-  databaseName?: string
+  databaseName?: string,
+  tableName?: string
 ) => {
   let query;
   switch (loadCacheType) {
@@ -156,12 +218,17 @@ export const createLoadQuery = (
       query = `SHOW SCHEMAS IN ${addBackticksIfNeeded(dataSourceName)}`;
       break;
     case 'tables':
-      query = `SHOW TABLES IN ${addBackticksIfNeeded(dataSourceName)}.${addBackticksIfNeeded(
-        databaseName!
-      )}`;
+      query = `SHOW TABLE EXTENDED IN ${addBackticksIfNeeded(
+        dataSourceName
+      )}.${addBackticksIfNeeded(databaseName!)} LIKE '*'`;
       break;
     case 'accelerations':
       query = `SHOW FLINT INDEX in ${addBackticksIfNeeded(dataSourceName)}`;
+      break;
+    case 'tableColumns':
+      query = `DESC ${addBackticksIfNeeded(dataSourceName)}.${addBackticksIfNeeded(
+        databaseName!
+      )}.${addBackticksIfNeeded(tableName!)}`;
       break;
     default:
       query = '';
@@ -174,8 +241,9 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   const sqlService = new SQLService(coreRefs.http!);
   const [currentDataSourceName, setCurrentDataSourceName] = useState('');
   const [currentDatabaseName, setCurrentDatabaseName] = useState<string | undefined>('');
+  const [currentTableName, setCurrentTableName] = useState<string | undefined>('');
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
-    DirectQueryLoadingStatus.SCHEDULED
+    DirectQueryLoadingStatus.INITIAL
   );
 
   const {
@@ -188,13 +256,26 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     return sqlService.fetchWithJobId(params);
   }, ASYNC_POLLING_INTERVAL);
 
-  const startLoading = (dataSourceName: string, databaseName?: string) => {
+  const onLoadingFailed = () => {
+    setLoadStatus(DirectQueryLoadingStatus.FAILED);
+    updateToCache(
+      null,
+      loadCacheType,
+      currentDataSourceName,
+      currentDatabaseName,
+      currentTableName
+    );
+  };
+
+  const startLoading = (dataSourceName: string, databaseName?: string, tableName?: string) => {
+    setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
+    setCurrentTableName(tableName);
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
-      query: createLoadQuery(loadCacheType, dataSourceName, databaseName),
+      query: createLoadQuery(loadCacheType, dataSourceName, databaseName, tableName),
       datasource: dataSourceName,
     };
 
@@ -213,17 +294,15 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
           });
         } else {
           console.error('No query id found in response');
-          setLoadStatus(DirectQueryLoadingStatus.FAILED);
-          updateToCache(null, loadCacheType, currentDataSourceName, currentDatabaseName);
+          onLoadingFailed();
         }
       })
       .catch((e) => {
-        setLoadStatus(DirectQueryLoadingStatus.FAILED);
-        updateToCache(null, loadCacheType, currentDataSourceName, currentDatabaseName);
+        onLoadingFailed();
         const formattedError = formatError(
           '',
           'The query failed to execute and the operation could not be complete.',
-          e.body.message
+          e.body?.message
         );
         coreRefs.core?.notifications.toasts.addError(formattedError, {
           title: 'Query Failed',
@@ -241,11 +320,17 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
       setLoadStatus(status);
       stopLoading();
-      updateToCache(pollingResult, loadCacheType, currentDataSourceName, currentDatabaseName);
+      updateToCache(
+        pollingResult,
+        loadCacheType,
+        currentDataSourceName,
+        currentDatabaseName,
+        currentTableName
+      );
     } else if (status === DirectQueryLoadingStatus.FAILED) {
-      setLoadStatus(status);
+      onLoadingFailed();
       stopLoading();
-      updateToCache(null, loadCacheType, currentDataSourceName, currentDatabaseName);
+
       const formattedError = formatError(
         '',
         'The query failed to execute and the operation could not be complete.',
@@ -272,7 +357,12 @@ export const useLoadTablesToCache = () => {
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useAccelerationsToCache = () => {
+export const useLoadTableColumnsToCache = () => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('tableColumns');
+  return { loadStatus, startLoading, stopLoading };
+};
+
+export const useLoadAccelerationsToCache = () => {
   const { loadStatus, startLoading, stopLoading } = useLoadToCache('accelerations');
   return { loadStatus, startLoading, stopLoading };
 };

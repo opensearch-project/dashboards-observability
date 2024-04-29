@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AvailableIntegrationsList } from 'public/components/integrations/components/available_integration_overview_page';
 import { IntegrationSetupInputs } from 'public/components/integrations/components/setup_integration';
 
 export const TEST_SPAN_RESPONSE = {
@@ -566,6 +567,8 @@ export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   connectionDataSource: 'ss4o_logs-nginx-test',
   connectionTableName: '',
   connectionLocation: '',
+  checkpointLocation: '',
+  enabledWorkflows: [],
 };
 
 // TODO fill in the rest of the fields
@@ -574,6 +577,14 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
   version: '2.0.0',
   license: 'Apache-2.0',
   type: 'logs',
+  workflows: [
+    {
+      name: 'workflow1',
+      label: 'Workflow 1',
+      description: 'This is a test workflow.',
+      enabled_by_default: true,
+    },
+  ],
   components: [
     {
       name: 'logs',
@@ -589,6 +600,47 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
     },
   ],
 };
+
+export const TEST_AVAILABLE_INTEGRATIONS: AvailableIntegrationsList = {
+  hits: [
+    TEST_INTEGRATION_CONFIG,
+    { ...TEST_INTEGRATION_CONFIG, name: 'sample2', labels: ['Flint S3'] },
+  ],
+};
+
+export const TEST_INTEGRATION_SEARCH_RESULTS: IntegrationInstanceResult[] = [
+  {
+    id: 'd5b55c60-e08c-11ee-9c80-ff3b93498fea',
+    status: 'available',
+    name: 'aws_waf-sample',
+    templateName: 'aws_waf',
+    dataSource: 'ss4o_logs_waf-aws_waf-sample-sample',
+    creationDate: '2024-03-12T16:23:18.053Z',
+    assets: [
+      {
+        assetType: 'index-pattern',
+        assetId: '9506c132-f466-4ce3-a875-f187ddec587c',
+        status: 'available',
+        isDefaultAsset: false,
+        description: 'ss4o_logs_waf-aws_waf-sample-sample',
+      },
+      {
+        assetType: 'visualization',
+        assetId: '7770e5be-6f10-4435-9773-021c6188bfe5',
+        status: 'available',
+        isDefaultAsset: false,
+        description: 'logs-waf-Top Client IPs',
+      },
+      {
+        assetType: 'dashboard',
+        assetId: '36f26341-22f0-49c5-9820-f787afb4090c',
+        status: 'available',
+        isDefaultAsset: true,
+        description: 'logs-waf-dashboard',
+      },
+    ],
+  },
+];
 
 export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {
   return {

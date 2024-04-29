@@ -21,6 +21,7 @@ import {
   OTEL_DATE_FORMAT,
   OTEL_METRIC_SUBTYPE,
   PROMQL_METRIC_SUBTYPE,
+  PPL_DESCRIBE_INDEX_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
@@ -219,6 +220,14 @@ export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
 };
 
+export const getDescribeQueryIndexFromRawQuery = (query: string): string | undefined => {
+  const matches = query.match(PPL_DESCRIBE_INDEX_REGEX);
+  if (matches) {
+    return matches[2];
+  }
+  return undefined;
+};
+
 function extractSpanAndResolution(query: string) {
   if (!query) return;
 
@@ -364,6 +373,23 @@ export const composeFinalQuery = (
     patternRegex,
     filteredPattern,
   });
+};
+
+export const composeFinalQueryWithoutTimestamp = (
+  curQuery: string,
+  appBaseQuery: string,
+  selectedPatternField?: string,
+  patternRegex?: string,
+  filteredPattern?: string
+) => {
+  let fullQuery = curQuery.includes(appBaseQuery) ? curQuery : buildQuery(appBaseQuery, curQuery);
+  if (isEmpty(fullQuery)) return '';
+
+  // if a pattern is selected as filter, build it into finalQuery
+  if (selectedPatternField && filteredPattern)
+    fullQuery = buildPatternsQuery(fullQuery, selectedPatternField, patternRegex, filteredPattern);
+
+  return fullQuery;
 };
 
 export const removeBacktick = (stringContainsBacktick: string) => {

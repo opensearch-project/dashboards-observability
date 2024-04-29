@@ -13,6 +13,18 @@ interface Properties {
   [key: string]: Properties | object;
 }
 
+interface AddIntegrationRequestParams {
+  addSample: boolean;
+  templateName: string;
+  integration: IntegrationConfig;
+  setToast: (title: string, color?: Color, text?: string | undefined) => void;
+  name?: string;
+  indexPattern?: string;
+  workflows?: string[];
+  skipRedirect?: boolean;
+  dataSourceInfo?: { dataSource: string; tableName: string };
+}
+
 interface ComponentMappingPayload {
   template: { mappings: { _meta: { version: string } } };
   composed_of: string[];
@@ -223,12 +235,14 @@ const createIndexMapping = async (
   });
 };
 
-const createDataSourceMappings = async (
+const createIndexPatternMappings = async (
   targetDataSource: string,
   integrationTemplateId: string,
   integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void
 ): Promise<void> => {
+  // TODO the nested methods still need the dataSource -> indexPattern rename applied, sub-methods
+  // here still have old naming convention
   const http = coreRefs.http!;
   const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
   let error: string | null = null;
@@ -275,34 +289,54 @@ const createDataSourceMappings = async (
   }
 };
 
-export async function addIntegrationRequest(
-  addSample: boolean,
-  templateName: string,
-  integrationTemplateId: string,
-  integration: IntegrationConfig,
-  setToast: (title: string, color?: Color, text?: string | undefined) => void,
-  name?: string,
-  dataSource?: string
-): Promise<boolean> {
+export async function addIntegrationRequest({
+  addSample,
+  templateName,
+  integration,
+  setToast,
+  name,
+  indexPattern,
+  workflows,
+  skipRedirect,
+  dataSourceInfo,
+}: AddIntegrationRequestParams): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
-    createDataSourceMappings(
-      `ss4o_${integration.type}-${integrationTemplateId}-*-sample`,
-      integrationTemplateId,
+    createIndexPatternMappings(
+      `ss4o_${integration.type}-${templateName}-*-sample`,
+      templateName,
       integration,
       setToast
     );
-    name = `${integrationTemplateId}-sample`;
-    dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
+    name = `${templateName}-sample`;
+    indexPattern = `ss4o_${integration.type}-${templateName}-sample-sample`;
+  }
+
+  const createReqBody: {
+    name?: string;
+    indexPattern?: string;
+    workflows?: string[];
+    dataSource?: string;
+    tableName?: string;
+  } = {
+    name,
+    indexPattern,
+    workflows,
+  };
+  if (dataSourceInfo) {
+    createReqBody.dataSource = dataSourceInfo.dataSource;
+    createReqBody.tableName = dataSourceInfo.tableName;
   }
 
   let response: boolean = await http
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
-      body: JSON.stringify({ name, dataSource }),
+      body: JSON.stringify(createReqBody),
     })
     .then((res) => {
       setToast(`${name} integration successfully added!`, 'success');
-      window.location.hash = `#/installed/${res.data?.id}`;
+      if (!skipRedirect) {
+        window.location.hash = `#/installed/${res.data?.id}`;
+      }
       return true;
     })
     .catch((err) => {
@@ -322,13 +356,13 @@ export async function addIntegrationRequest(
     });
   const requestBody =
     data.sampleData
-      .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
+      .map((record) => `{"create": { "_index": "${indexPattern}" } }\n${JSON.stringify(record)}`)
       .join('\n') + '\n';
   response = await http
     .post(CONSOLE_PROXY, {
       body: requestBody,
       query: {
-        path: `${dataSource}/_bulk?refresh=wait_for`,
+        path: `${indexPattern}/_bulk?refresh=wait_for`,
         method: 'POST',
       },
     })

@@ -6,6 +6,8 @@
 
 import { BaseItem } from '@algolia/autocomplete-core';
 
+export const textAreaMaxLength = 16384;
+
 export const firstCommand = [{ label: 'source' }];
 
 export const pipeCommands = [

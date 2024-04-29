@@ -18,13 +18,30 @@ import {
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { i18n } from '@osd/i18n';
+import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
+import {
+  ASYNC_POLLING_INTERVAL,
+  QUERY_LANGUAGE,
+  SANITIZE_QUERY_REGEX,
+} from '../../../../common/constants/data_sources';
+import {
+  APP_ANALYTICS_TAB_ID_REGEX,
+  RAW_QUERY,
+  SELECTED_TIMESTAMP,
+} from '../../../../common/constants/explorer';
+import {
+  PPL_NEWLINE_REGEX,
+  PPL_SPAN_REGEX,
+  TIMESTAMP_DATETIME_TYPES,
+} from '../../../../common/constants/shared';
+import {
+  DirectQueryLoadingStatus,
+  DirectQueryRequest,
+  IDefaultTimestampState,
+} from '../../../../common/types/explorer';
 import { uiSettingsService } from '../../../../common/utils';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
@@ -210,9 +227,10 @@ export const DirectSearch = (props: any) => {
       );
     });
     const sessionId = getAsyncSessionId(explorerSearchMetadata.datasources[0].label);
+    const requestQuery = tempQuery || query;
     const requestPayload = {
       lang: lang.toLowerCase(),
-      query: tempQuery || query,
+      query: requestQuery.replaceAll(SANITIZE_QUERY_REGEX, ' '),
       datasource: explorerSearchMetadata.datasources[0].label,
     } as DirectQueryRequest;
 
@@ -250,6 +268,33 @@ export const DirectSearch = (props: any) => {
       });
   };
 
+  const getDirectQueryTimestamp = (schema: Array<{ name: string; type: string }>) => {
+    const timestamp: IDefaultTimestampState = {
+      hasSchemaConflict: false, // schema conflict bool used for OS index w/ different mappings, not needed here
+      default_timestamp: '',
+      message: i18n.translate(`discover.events.directQuery.noTimeStampFoundMessage`, {
+        defaultMessage: 'Index does not contain a valid time field.',
+      }),
+    };
+
+    for (let i = 0; i < schema.length; i++) {
+      const fieldMapping = schema[i];
+      if (!isEmpty(fieldMapping)) {
+        const fieldName = fieldMapping.name;
+        const fieldType = fieldMapping.type;
+        const isValidTimeType = TIMESTAMP_DATETIME_TYPES.some((dateTimeType) =>
+          isEqual(fieldType, dateTimeType)
+        );
+        if (isValidTimeType && isEmpty(timestamp.default_timestamp)) {
+          timestamp.default_timestamp = fieldName;
+          timestamp.message = '';
+          break;
+        }
+      }
+    }
+    return timestamp;
+  };
+
   useEffect(() => {
     // cancel direct query
     if (!pollingResult) return;
@@ -258,6 +303,16 @@ export const DirectSearch = (props: any) => {
 
     if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
       stopPollingWithStatus(status);
+      // find the timestamp from results
+      const derivedTimestamp = getDirectQueryTimestamp(pollingResult.schema);
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [SELECTED_TIMESTAMP]: derivedTimestamp.default_timestamp,
+          },
+        })
+      );
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
     } else if (status === DirectQueryLoadingStatus.FAILED) {
@@ -334,8 +389,9 @@ export const DirectSearch = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
-            isSuggestionDisabled={queryLang === 'SQL'}
+            isSuggestionDisabled={true}
             isDisabled={explorerSearchMetadata.isPolling}
+            ignoreShiftEnter={true}
           />
           {queryLang === QUERY_LANGUAGE.PPL && (
             <EuiBadge

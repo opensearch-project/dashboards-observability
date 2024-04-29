@@ -12,9 +12,11 @@ import {
   EuiDescriptionListTitle,
   EuiPanel,
   EuiDataGridProps,
+  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import {
   DATE_DISPLAY_FORMAT,
@@ -27,6 +29,7 @@ import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
+import { HitsCounter } from '../hits_counter/hits_counter';
 
 export interface DataGridProps {
   http: HttpSetup;
@@ -39,6 +42,7 @@ export interface DataGridProps {
   requestParams: any;
   startTime: string;
   endTime: string;
+  isDefaultDataSource: boolean;
   storedSelectedColumns: IField[];
   formatGridColumn?: (columns: EuiDataGridColumn[]) => EuiDataGridColumn[];
   OuiDataGridProps?: Partial<EuiDataGridProps>;
@@ -58,6 +62,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    isDefaultDataSource,
     formatGridColumn = defaultFormatGrid,
     OuiDataGridProps,
   } = props;
@@ -65,14 +70,17 @@ export function DataGrid(props: DataGridProps) {
     pplService,
     requestParams,
   });
+
   const selectedColumns =
-    explorerFields.selectedFields.length > 0
+    explorerFields.selectedFields.length > 0 // if any fields are selected use that, otherwise defaults
       ? explorerFields.selectedFields
+      : timeStampField && timeStampField !== '' // if theres a timestamp, include that, otherwise dont
+      ? [{ name: timeStampField, type: 'timestamp' }, ...DEFAULT_EMPTY_EXPLORER_FIELDS]
       : DEFAULT_EMPTY_EXPLORER_FIELDS;
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
-  const pageFields = useRef([0, 100]);
+  const pageFields = useRef([0, 100]); // page num, row length
 
   const [data, setData] = useState(rows);
 
@@ -98,6 +106,8 @@ export function DataGrid(props: DataGridProps) {
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
+    if (!isDefaultDataSource) return; // avoid adjusting query if using s3
+
     redoQuery(
       startTime,
       endTime,
@@ -110,19 +120,42 @@ export function DataGrid(props: DataGridProps) {
     );
   };
 
+  const findTrueIndex = (rowIndex: number) => {
+    // if using default ds, data given to dg will be per page, need to adjust dg expected index and actual data index
+    if (isDefaultDataSource) {
+      // modulo of row length, i.e. pos on current page
+      rowIndex = rowIndex % pageFields.current[1];
+    }
+    return rowIndex;
+  };
+
+  const columnNameTranslate = (name: string) => {
+    return i18n.translate(`discover.events.dataGrid.${name.toLowerCase()}Column`, {
+      defaultMessage: name,
+    });
+  };
+
   // creates the header for each column listing what that column is
   const dataGridColumns = () => {
     const columns: EuiDataGridColumn[] = [];
     selectedColumns.map(({ name }) => {
-      if (name === 'timestamp') {
-        columns.push(DEFAULT_TIMESTAMP_COLUMN);
+      if (name === timeStampField) {
+        columns.push({
+          ...DEFAULT_TIMESTAMP_COLUMN,
+          display: `${columnNameTranslate('Time')} (${timeStampField})`,
+          id: timeStampField,
+          isSortable: isDefaultDataSource, // allow sorting for default ds, dont otherwise
+        });
       } else if (name === '_source') {
-        columns.push(DEFAULT_SOURCE_COLUMN);
+        columns.push({
+          ...DEFAULT_SOURCE_COLUMN,
+          display: columnNameTranslate('Source'),
+        });
       } else {
         columns.push({
           id: name,
           display: name,
-          isSortable: true, // TODO: add functionality here based on type
+          isSortable: isDefaultDataSource,
         });
       }
     });
@@ -160,19 +193,19 @@ export function DataGrid(props: DataGridProps) {
               http={http}
               key={null}
               docId={'undefined'}
-              doc={rows[rowIndex % pageFields.current[1]]}
+              doc={data[findTrueIndex(rowIndex)]}
               selectedCols={explorerFields.queriedFields}
               timeStampField={timeStampField}
               explorerFields={explorerFields}
               pplService={pplService}
               rawQuery={rawQuery}
               onFlyoutOpen={() => {}}
-              dataGridColumns={dataGridColumns}
-              dataGridColumnVisibility={dataGridColumnVisibility}
+              dataGridColumns={dataGridColumns()}
+              dataGridColumnVisibility={dataGridColumnVisibility()}
               selectedIndex={rowIndex}
               sortingFields={sortingFields}
-              rowHeightsOptions={rowHeightsOptions}
-              rows={rows}
+              rowHeightsOptions={rowHeightsOptions()}
+              rows={data}
             />
           );
         },
@@ -183,7 +216,8 @@ export function DataGrid(props: DataGridProps) {
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const trueIndex = rowIndex % pageFields.current[1];
+    const trueIndex = findTrueIndex(rowIndex);
+
     if (trueIndex < data.length) {
       if (columnId === '_source') {
         return (
@@ -201,8 +235,8 @@ export function DataGrid(props: DataGridProps) {
           </EuiDescriptionList>
         );
       }
-      if (columnId === 'timestamp') {
-        return `${moment(data[trueIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+      if (columnId === timeStampField) {
+        return `${moment(data[trueIndex][timeStampField]).format(DATE_DISPLAY_FORMAT)}`;
       }
       return `${data[trueIndex][columnId]}`;
     }
@@ -236,6 +270,12 @@ export function DataGrid(props: DataGridProps) {
 
   return (
     <EuiPanel paddingSize="s">
+      {timeStampField === '' && (
+        <>
+          <HitsCounter hits={totalHits} showResetButton={false} onResetQuery={() => {}} />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div className="dscTable dscTableFixedScroll">
         <EuiDataGrid
           aria-labelledby="aria-labelledby"

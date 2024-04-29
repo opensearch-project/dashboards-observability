@@ -5,9 +5,29 @@
   "description": "Analyze CloudTrail events.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudtrail",
-  "labels": ["Observability", "Logs", "AWS", "Cloud"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudtrail/info",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    },
+    {
+      "name": "dashboards-flint",
+      "label": "Dashboards & Visualizations adapted to Flint",
+      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3",
+      "enabled_by_default": false
+    }
+  ],
   "statics": {
     "logo": {
       "annotation": "CloudTrail Logo",
@@ -43,7 +63,29 @@
       "name": "aws_cloudtrail",
       "version": "1.0.0",
       "extension": "ndjson",
-      "type": "savedObjectBundle"
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "aws_cloudtrail-flint",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_table_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_mv_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
     }
   ],
   "sampleData": {

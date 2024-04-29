@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Create acceleration button component renders create acceleration button component with mv state 1`] = `
+<button
+  className="euiButton euiButton--primary euiButton--fill"
+  disabled={false}
+  onClick={[Function]}
+  style={
+    Object {
+      "minWidth": undefined,
+    }
+  }
+  type="button"
+>
+  <span
+    className="euiButtonContent euiButton__content"
+  >
+    <span
+      className="euiButton__text"
+    >
+      Create acceleration
+    </span>
+  </span>
+</button>
+`;

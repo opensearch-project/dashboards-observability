@@ -4,6 +4,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DirectQueryLoadingStatus } from './explorer';
 
 export type AccelerationStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -34,19 +35,39 @@ export interface Acceleration {
 }
 
 export interface AssociatedObject {
+  tableName: string;
   datasource: string;
   id: string;
   name: string;
   database: string;
-  type: string;
-  createdByIntegration: string;
-  accelerations: Acceleration[];
-  columns: TableColumn[];
+  type: AssociatedObjectIndexType;
+  accelerations: CachedAcceleration[] | AssociatedObject;
+  columns?: CachedColumn[];
 }
 
 export type Role = EuiComboBoxOptionOption;
 
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
+
+export interface DatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+  status: DatasourceStatus;
+}
 
 interface AsyncApiDataResponse {
   status: string;
@@ -66,9 +87,11 @@ export interface AsyncApiResponse {
 
 export type PollingCallback = (statusObj: AsyncApiResponse) => void;
 
+export type AssociatedObjectIndexType = AccelerationIndexType | 'table';
+
 export type AccelerationIndexType = 'skipping' | 'covering' | 'materialized';
 
-export type LoadCacheType = 'databases' | 'tables' | 'accelerations';
+export type LoadCacheType = 'databases' | 'tables' | 'accelerations' | 'tableColumns';
 
 export enum CachedDataSourceStatus {
   Updated = 'Updated',
@@ -77,25 +100,25 @@ export enum CachedDataSourceStatus {
 }
 
 export interface CachedColumn {
-  name: string;
+  fieldName: string;
   dataType: string;
 }
 
 export interface CachedTable {
   name: string;
-  columns: CachedColumn[];
+  columns?: CachedColumn[];
 }
 
 export interface CachedDatabase {
   name: string;
   tables: CachedTable[];
-  lastUpdated: string; // Assuming date string in UTC format
+  lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
 
 export interface CachedDataSource {
   name: string;
-  lastUpdated: string; // Assuming date string in UTC format
+  lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
   databases: CachedDatabase[];
 }
@@ -105,7 +128,7 @@ export interface DataSourceCacheData {
   dataSources: CachedDataSource[];
 }
 
-export interface CachedAccelerations {
+export interface CachedAcceleration {
   flintIndexName: string;
   type: AccelerationIndexType;
   database: string;
@@ -115,11 +138,16 @@ export interface CachedAccelerations {
   status: string;
 }
 
+export interface CachedAccelerationByDataSource {
+  name: string;
+  accelerations: CachedAcceleration[];
+  lastUpdated: string; // date string in UTC format
+  status: CachedDataSourceStatus;
+}
+
 export interface AccelerationsCacheData {
   version: string;
-  accelerations: CachedAccelerations[];
-  lastUpdated: string; // Assuming date string in UTC format
-  status: CachedDataSourceStatus;
+  dataSources: CachedAccelerationByDataSource[];
 }
 
 export interface PollingSuccessResult {
@@ -129,35 +157,16 @@ export interface PollingSuccessResult {
 
 export type AsyncPollingResult = PollingSuccessResult | null;
 
-export interface CreateAccelerationForm {
-  dataSource: string;
-  database: string;
-  dataTable: string;
-  dataTableFields: DataTableFieldsType[];
-  accelerationIndexType: AccelerationIndexType;
-  skippingIndexQueryData: SkippingIndexRowType[];
-  coveringIndexQueryData: string[];
-  materializedViewQueryData: MaterializedViewQueryType;
-  accelerationIndexName: string;
-  primaryShardsCount: number;
-  replicaShardsCount: number;
-  refreshType: AccelerationRefreshType;
-  checkpointLocation: string | undefined;
-  watermarkDelay: WatermarkDelayType;
-  refreshIntervalOptions: RefreshIntervalType;
-  formErrors: FormErrorsType;
-}
-
-export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min';
+export type AggregationFunctionType = 'count' | 'sum' | 'avg' | 'max' | 'min' | 'window.start';
 
 export interface MaterializedViewColumn {
   id: string;
   functionName: AggregationFunctionType;
-  functionParam: string;
+  functionParam?: string;
   fieldAlias?: string;
 }
 
-export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX';
+export type SkippingIndexAccMethodType = 'PARTITION' | 'VALUE_SET' | 'MIN_MAX' | 'BLOOM_FILTER';
 
 export interface SkippingIndexRowType {
   id: string;
@@ -208,7 +217,7 @@ export interface FormErrorsType {
   watermarkDelayError: string[];
 }
 
-export type AccelerationRefreshType = 'auto' | 'interval' | 'manual';
+export type AccelerationRefreshType = 'autoInterval' | 'manual' | 'manualIncrement';
 
 export interface CreateAccelerationForm {
   dataSource: string;
@@ -227,4 +236,10 @@ export interface CreateAccelerationForm {
   watermarkDelay: WatermarkDelayType;
   refreshIntervalOptions: RefreshIntervalType;
   formErrors: FormErrorsType;
+}
+
+export interface LoadCachehookOutput {
+  loadStatus: DirectQueryLoadingStatus;
+  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  stopLoading: () => void;
 }

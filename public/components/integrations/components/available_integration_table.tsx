@@ -16,11 +16,13 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { basePathLink } from '../../../../common/utils/shared';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
+  const setInstallingIntegration = props.setInstallingIntegration;
 
   const toggleButtonsIcons = [
     {
@@ -38,6 +40,9 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('0');
 
   const onChangeIcons = (optionId: string) => {
+    if (!props.setCardView) {
+      return;
+    }
     setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
@@ -52,14 +57,27 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Name',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          href={`#/available/${record.name}`}
-        >
-          {_.truncate(record.displayName || record.name, { length: 100 })}
-        </EuiLink>
-      ),
+      render: (_value, record) => {
+        if (setInstallingIntegration) {
+          return (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              onClick={() => setInstallingIntegration(record.name)}
+            >
+              {_.truncate(record.displayName || record.name, { length: 100 })}
+            </EuiLink>
+          );
+        } else {
+          return (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              href={basePathLink(`/app/integrations#/available/${record.name}`)}
+            >
+              {_.truncate(record.displayName || record.name, { length: 100 })}
+            </EuiLink>
+          );
+        }
+      },
     },
     {
       field: 'description',
@@ -84,16 +102,18 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
   const renderToggle = () => {
     return (
       <EuiFlexGroup>
-        <EuiFlexItem>{props.renderCateogryFilters()}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonGroup
-            legend="Text align"
-            options={toggleButtonsIcons}
-            idSelected={toggleIconIdSelected}
-            onChange={(id) => onChangeIcons(id)}
-            isIconOnly
-          />
-        </EuiFlexItem>
+        <EuiFlexItem>{props.filters}</EuiFlexItem>
+        {props.setCardView ? (
+          <EuiFlexItem>
+            <EuiButtonGroup
+              legend="Text align"
+              options={toggleButtonsIcons}
+              idSelected={toggleIconIdSelected}
+              onChange={(id) => onChangeIcons(id)}
+              isIconOnly
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };

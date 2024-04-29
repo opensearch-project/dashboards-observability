@@ -28,11 +28,7 @@ export const ObservabilitySideBar = ({ tabId, pplService, notifications }) => {
   const explorerFields = useSelector(selectFields)[tabId];
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const requestParams = { tabId };
-  const {
-    isEventsLoading: isPatternLoading,
-    getPatterns,
-    setDefaultPatternsField,
-  } = useFetchPatterns({
+  const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
     requestParams,
   });
@@ -87,7 +83,7 @@ export const ObservabilitySideBar = ({ tabId, pplService, notifications }) => {
       isOverridingTimestamp={isOverridingTimestamp}
       isOverridingPattern={isOverridingPattern}
       isFieldToggleButtonDisabled={
-        isEmpty(explorerData.jsonData) || !isEmpty(query[RAW_QUERY].match(PPL_STATS_REGEX))
+        isEmpty(explorerData.jsonData) || !isEmpty(query[RAW_QUERY]?.match(PPL_STATS_REGEX))
       }
       tabId={tabId}
     />

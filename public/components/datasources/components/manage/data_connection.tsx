@@ -19,41 +19,38 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
-  observabilityIntegrationsID,
-  observabilityLogsID,
+  INTEGRATIONS_BASE,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { DatasourceType } from '../../../../../common/types/data_connections';
+import {
+  DatasourceDetails,
+  PrometheusProperties,
+} from '../../../../../common/types/data_connections';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTablesToCache,
+} from '../../../../../public/framework/catalog_cache/cache_loader';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
-import { mockAssociatedObjects } from './associated_objects/utils/associated_objects_tab_utils';
+import { InactiveDataConnectionCallout } from './inactive_data_connection';
+import {
+  InstallIntegrationFlyout,
+  InstalledIntegrationsTable,
+} from './integrations/installed_integrations_table';
 
-interface DatasourceDetails {
-  allowedRoles: string[];
-  name: string;
-  connector: DatasourceType;
-  description: string;
-  properties: S3GlueProperties | PrometheusProperties;
-}
-
-export interface S3GlueProperties {
-  'glue.indexstore.opensearch.uri': string;
-  'glue.indexstore.opensearch.region': string;
-}
-
-export interface PrometheusProperties {
-  'prometheus.uri': string;
-}
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
-export const DataConnection = (props: any) => {
+export const DataConnection = (props: { dataSource: string }) => {
   const { dataSource } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
@@ -61,38 +58,76 @@ export const DataConnection = (props: any) => {
     description: '',
     connector: 'PROMETHEUS',
     properties: { 'prometheus.uri': 'placeholder' },
+    status: 'ACTIVE',
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
+  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
 
-  // Dummy accelerations variables for mock purposes
-  // Actual accelerations should be retrieved from the backend
-  const sampleSql = 'select * from `httplogs`.`default`.`table2` limit 10';
-  const dummyAccelerations = [
-    {
-      name: 'dummy_acceleration_1',
-      status: 'ACTIVE',
-      type: 'skip',
-      database: 'default',
-      table: 'table1',
-      destination: 'N/A',
-      dateCreated: 1709339290,
-      dateUpdated: 1709339290,
-      index: 'security_logs_2022',
-      sql: sampleSql,
-    },
-  ];
+  const {
+    loadStatus: databasesLoadStatus,
+    startLoading: startLoadingDatabases,
+  } = useLoadDatabasesToCache();
+  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache();
+  const {
+    loadStatus: accelerationsLoadStatus,
+    startLoading: startLoadingAccelerations,
+  } = useLoadAccelerationsToCache();
 
-  const onclickIntegrationsCard = () => {
-    application!.navigateToApp(observabilityIntegrationsID);
+  const cacheLoadingHooks = {
+    databasesLoadStatus,
+    startLoadingDatabases,
+    tablesLoadStatus,
+    startLoadingTables,
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
   };
+
+  const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
+    [] as IntegrationInstanceResult[]
+  );
+  const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
+  const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
+
+  useEffect(() => {
+    const searchDataSourcePattern = new RegExp(
+      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*`
+    );
+    const findIntegrations = async () => {
+      // TODO: we just get all results and filter, ideally we send a filtering query to the API
+      // Should still be probably okay until we get cases of 500+ integration instances
+      const result: { data: IntegrationInstancesSearchResult } = await http!.get(
+        INTEGRATIONS_BASE + `/store`
+      );
+      if (result.data?.hits) {
+        setDataSourceIntegrations(
+          result.data.hits.filter((res) => res.dataSource.match(searchDataSourcePattern))
+        );
+      } else {
+        setDataSourceIntegrations([]);
+      }
+    };
+    findIntegrations();
+  }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
+
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const onclickIntegrationsCard = () => {
+    setShowIntegrationsFlyout(true);
+  };
+  const integrationsFlyout = showIntegrationsFlyout ? (
+    <InstallIntegrationFlyout
+      closeFlyout={() => setShowIntegrationsFlyout(false)}
+      datasourceType={datasourceDetails.connector}
+      datasourceName={datasourceDetails.name}
+    />
+  ) : null;
 
   const onclickAccelerationsCard = () => {
     renderCreateAccelerationFlyout(dataSource);
   };
 
   const onclickDiscoverCard = () => {
-    application!.navigateToApp(observabilityLogsID);
+    redirectToExplorerS3(dataSource);
   };
 
   const DefaultDatasourceCards = () => {
@@ -133,12 +168,30 @@ export const DataConnection = (props: any) => {
             selectable={{
               onClick: onclickDiscoverCard,
               isDisabled: false,
-              children: 'Query in Discover',
+              children: 'Query in Observability Logs',
             }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  };
+
+  const fetchSelectedDatasource = () => {
+    http!
+      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
+      .then((data) => {
+        setDatasourceDetails({
+          allowedRoles: data.allowedRoles,
+          description: data.description,
+          name: data.name,
+          connector: data.connector,
+          properties: data.properties,
+          status: data.status,
+        });
+      })
+      .catch((_err) => {
+        setHasAccess(false);
+      });
   };
 
   useEffect(() => {
@@ -152,20 +205,8 @@ export const DataConnection = (props: any) => {
         href: `#/manage/${dataSource}`,
       },
     ]);
-    http!
-      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
-      .then((data) => {
-        setDatasourceDetails({
-          allowedRoles: data.allowedRoles,
-          description: data.description,
-          name: data.name,
-          connector: data.connector,
-          properties: data.properties,
-        });
-      })
-      .catch((_err) => {
-        setHasAccess(false);
-      });
+    fetchSelectedDatasource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome, http]);
 
   const tabs = [
@@ -173,19 +214,35 @@ export const DataConnection = (props: any) => {
       id: 'associated_objects',
       name: 'Associated Objects',
       disabled: false,
-      content: <AssociatedObjectsTab associatedObjects={mockAssociatedObjects} />,
+      content: (
+        <AssociatedObjectsTab
+          datasource={datasourceDetails}
+          cacheLoadingHooks={cacheLoadingHooks}
+          selectedDatabase={selectedDatabase}
+          setSelectedDatabase={setSelectedDatabase}
+        />
+      ),
     },
     {
       id: 'acceleration_table',
       name: 'Accelerations',
       disabled: false,
-      content: <AccelerationTable accelerations={dummyAccelerations} />,
+      content: (
+        <AccelerationTable dataSourceName={dataSource} cacheLoadingHooks={cacheLoadingHooks} />
+      ),
     },
-    // TODO: Installed integrations page
     {
       id: 'installed_integrations',
       name: 'Installed Integrations',
       disabled: false,
+      content: (
+        <InstalledIntegrationsTable
+          integrations={dataSourceIntegrations}
+          datasourceType={datasourceDetails.connector}
+          datasourceName={datasourceDetails.name}
+          refreshInstances={refreshInstances}
+        />
+      ),
     },
     {
       id: 'access_control',
@@ -324,18 +381,31 @@ export const DataConnection = (props: any) => {
 
         <DatasourceOverview />
         <EuiSpacer />
-        <EuiAccordion
-          id="queryOrAccelerateAccordion"
-          buttonContent={'Get started'}
-          initialIsOpen={true}
-          paddingSize="m"
-        >
-          <QueryOrAccelerateData />
-        </EuiAccordion>
-        <EuiTabbedContent tabs={tabs} />
+
+        {integrationsFlyout}
+
+        {datasourceDetails.status !== 'ACTIVE' ? (
+          <InactiveDataConnectionCallout
+            datasourceDetails={datasourceDetails}
+            fetchSelectedDatasource={fetchSelectedDatasource}
+          />
+        ) : (
+          <>
+            <EuiAccordion
+              id="queryOrAccelerateAccordion"
+              buttonContent={'Get started'}
+              initialIsOpen={true}
+              paddingSize="m"
+            >
+              <QueryOrAccelerateData />
+            </EuiAccordion>
+            <EuiTabbedContent tabs={tabs} />
+          </>
+        )}
 
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>
   );
 };
+export { DatasourceDetails };

@@ -10,7 +10,6 @@ import {
   FILTERED_PATTERN,
   PATTERN_REGEX,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
-  RAW_QUERY,
 } from '../../../../../common/constants/explorer';
 import { PatternTableData, Query as IQuery } from '../../../../../common/types/explorer';
 import { TabContext, useFetchPatterns } from '../../hooks';
@@ -39,7 +38,7 @@ const EventPatterns = ({
   const dispatch = useDispatch();
   const { tabId, pplService, notifications } = useContext<any>(TabContext);
   const patternsData = patterns[tabId];
-  const [viewLogPatterns, setViewLogPatterns] = useState(true);
+  const [viewLogPatterns, setViewLogPatterns] = useState(false);
   const [isPatternConfigPopoverOpen, setIsPatternConfigPopoverOpen] = useState(false);
   const [patternRegexInput, setPatternRegexInput] = useState(PPL_DEFAULT_PATTERN_REGEX_FILETER);
   const { isEventsLoading: isPatternLoading, getPatterns } = useFetchPatterns({

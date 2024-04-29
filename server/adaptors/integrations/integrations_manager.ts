@@ -93,7 +93,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstancesSearchResult> => {
     addRequestToMetric('integrations', 'get', 'count');
-    const result = await this.client.find({ type: 'integration-instance' });
+    const result = await this.client.find({ type: 'integration-instance', perPage: 1000 });
     return Promise.resolve({
       total: result.total,
       hits: result.saved_objects?.map((x) => ({
@@ -157,7 +157,10 @@ export class IntegrationsManager implements IntegrationsAdaptor {
   loadIntegrationInstance = async (
     templateName: string,
     name: string,
-    dataSource: string
+    indexPattern: string,
+    workflows?: string[],
+    dataSource?: string,
+    tableName?: string
   ): Promise<IntegrationInstance> => {
     const template = await this.repository.getIntegration(templateName);
     if (template === null) {
@@ -170,7 +173,10 @@ export class IntegrationsManager implements IntegrationsAdaptor {
       addRequestToMetric('integrations', 'create', 'count');
       const result = await this.instanceBuilder.build(template, {
         name,
+        indexPattern,
+        workflows,
         dataSource,
+        tableName,
       });
       const test = await this.client.create('integration-instance', result);
       return Promise.resolve({ ...result, id: test.id });

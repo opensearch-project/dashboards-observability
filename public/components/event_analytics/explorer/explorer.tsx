@@ -32,6 +32,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { createBrowserHistory } from 'history';
 import { LogExplorerRouterContext } from '..';
 import {
   DEFAULT_DATA_SOURCE_TYPE,
@@ -43,6 +44,7 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
+  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -62,6 +64,7 @@ import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
+  PPL_DESCRIBE_INDEX_REGEX,
   PPL_METRIC_SUBTYPE,
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
@@ -98,7 +101,10 @@ import { findMinInterval } from '../../common/query_utils';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
 import { processMetricsData } from '../../custom_panels/helpers/utils';
-import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
@@ -262,6 +268,44 @@ export const Explorer = ({
       })
     );
   };
+
+  const historyFromRedirection = createBrowserHistory();
+  useEffect(() => {
+    if (!historyFromRedirection.location.state) return;
+    const {
+      datasourceName,
+      datasourceType,
+      queryToRun,
+    }: any = historyFromRedirection.location.state;
+    batch(() => {
+      if (datasourceName && datasourceType) {
+        dispatch(
+          updateSearchMetaData({
+            tabId,
+            data: {
+              datasources: [
+                {
+                  label: datasourceName,
+                  type: datasourceType,
+                  value: datasourceName,
+                  name: datasourceName,
+                },
+              ],
+            },
+          })
+        );
+      }
+      if (queryToRun) {
+        dispatch(
+          changeQuery({
+            tabId,
+            query: { [RAW_QUERY]: queryToRun },
+          })
+        );
+        setTempQuery(queryToRun);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const handleSetBrowserTabFocus = () => {
@@ -498,12 +542,17 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const showTimeBasedComponents =
+    (isDefaultDataSourceType || appLogEvents) &&
+    query[SELECTED_TIMESTAMP] !== '' &&
+    !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX);
+
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
@@ -552,7 +601,7 @@ export const Explorer = ({
                 </EuiFlexItem>
               </>
             )}
-            {(isDefaultDataSourceType || appLogEvents) && (
+            {showTimeBasedComponents && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
@@ -594,17 +643,21 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    {(countDistribution.data?.['count()'] || explorerData?.datarows?.length) && (
+                    {(explorerData?.datarows?.length || countDistribution.data?.['count()']) && (
                       <DataGrid
                         http={http}
                         pplService={pplService}
                         rows={explorerData.jsonData}
                         rowsAll={explorerData.jsonDataAll}
                         explorerFields={explorerFields}
-                        timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                        timeStampField={
+                          !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX)
+                            ? queryRef.current![SELECTED_TIMESTAMP]
+                            : ''
+                        }
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
-                          isDefaultDataSourceType || appLogEvents
+                          showTimeBasedComponents
                             ? _.sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length
@@ -612,6 +665,9 @@ export const Explorer = ({
                         requestParams={requestParams}
                         startTime={startTime}
                         endTime={endTime}
+                        isDefaultDataSource={
+                          explorerSearchMeta?.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE
+                        }
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
