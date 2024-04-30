@@ -3,52 +3,52 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiIcon,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiTitle,
-  EuiTableFieldDataColumnType,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiSpacer,
+  EuiTableFieldDataColumnType,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import React, { useEffect, useState } from 'react';
+import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,
   CachedColumn,
 } from '../../../../../../common/types/data_connections';
-import {
-  isCatalogCacheFetching,
-  redirectToExplorerWithDataSrc,
-} from './utils/associated_objects_tab_utils';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { useToast } from '../../../../../../public/components/common/toast';
+import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
 import {
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../../../plugin';
 import { AccelerationStatus, getAccelerationName } from '../accelerations/utils/acceleration_utils';
 import {
-  ACCE_NO_DATA_TITLE,
   ACCE_NO_DATA_DESCRIPTION,
+  ACCE_NO_DATA_TITLE,
   CREATE_ACCELERATION_DESCRIPTION,
 } from '../associated_objects/utils/associated_objects_tab_utils';
-import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
-import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
-import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
-import { useToast } from '../../../../../../public/components/common/toast';
+import {
+  isCatalogCacheFetching,
+  redirectToExplorerWithDataSrc,
+} from './utils/associated_objects_tab_utils';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -93,6 +93,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         onClick={() =>
           renderCreateAccelerationFlyout(
             datasourceName,
+            '',
             tableDetail.database,
             tableDetail.name,
             handleRefresh
@@ -193,6 +194,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           onClick={() =>
             renderCreateAccelerationFlyout(
               datasourceName,
+              '',
               tableDetail.database,
               tableDetail.name,
               handleRefresh
@@ -235,7 +237,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         if (tables?.columns) {
           setTableColumns(tables?.columns);
         } else {
-          startLoading(datasourceName, tableDetail.database, tableDetail.name);
+          startLoading({dataSourceName:datasourceName, databaseName:tableDetail.database, tableName:tableDetail.name});
         }
       } catch (error) {
         console.error(error);

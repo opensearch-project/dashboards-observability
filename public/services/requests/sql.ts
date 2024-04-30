@@ -12,10 +12,14 @@ export class SQLService {
     this.http = http;
   }
 
-  fetch = async (params: DirectQueryRequest, errorHandler?: (error: any) => void) => {
+  fetch = async (params: DirectQueryRequest, dataSourceId?: string, errorHandler?: (error: any) => void) => {
+    let query = {
+      dataSourceId: dataSourceId
+    }
     return this.http
       .post('/api/observability/query/jobs', {
         body: JSON.stringify(params),
+        query 
       })
       .catch((error) => {
         console.error('fetch error: ', error.body);

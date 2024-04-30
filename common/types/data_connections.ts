@@ -124,6 +124,7 @@ export interface CachedDataSource {
 }
 
 export interface DataSourceCacheData {
+  client_id: string;
   version: string;
   dataSources: CachedDataSource[];
 }
@@ -147,6 +148,7 @@ export interface CachedAccelerationByDataSource {
 
 export interface AccelerationsCacheData {
   version: string;
+  client_id: string;
   dataSources: CachedAccelerationByDataSource[];
 }
 
@@ -237,9 +239,15 @@ export interface CreateAccelerationForm {
   refreshIntervalOptions: RefreshIntervalType;
   formErrors: FormErrorsType;
 }
+export interface StartLoadingParams {
+  dataSourceName: string;
+  dataSourceId?: string;
+  databaseName?: string;
+  tableName?: string;
+}
 
 export interface LoadCachehookOutput {
   loadStatus: DirectQueryLoadingStatus;
-  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  startLoading: (params: StartLoadingParams) => void;
   stopLoading: () => void;
 }

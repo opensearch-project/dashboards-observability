@@ -53,6 +53,7 @@ export interface ObservabilityStart {
   ) => void;
   renderCreateAccelerationFlyout: (
     dataSource: string,
+    dataSourceClientId?: string,
     databaseName?: string,
     tableName?: string,
     handleRefresh?: () => void

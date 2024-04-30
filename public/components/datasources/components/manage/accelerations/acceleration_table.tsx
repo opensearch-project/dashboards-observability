@@ -19,26 +19,25 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  onDiscoverIconClick,
-  AccelerationStatus,
-  ACC_LOADING_MSG,
-  ACC_PANEL_TITLE,
-  ACC_PANEL_DESC,
-  getAccelerationName,
-  AccelerationActionType,
-  CreateAccelerationFlyoutButton,
-} from './utils/acceleration_utils';
-import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
-import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
-import {
   CachedAcceleration,
   CachedDataSourceStatus,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
-import { AccelerationActionOverlay } from './acceleration_action_overlay';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
+import { getRenderAccelerationDetailsFlyout, getRenderCreateAccelerationFlyout } from '../../../../../plugin';
 import { isCatalogCacheFetching } from '../associated_objects/utils/associated_objects_tab_utils';
-import { getRenderCreateAccelerationFlyout } from '../../../../../plugin';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
+import {
+  ACC_LOADING_MSG,
+  ACC_PANEL_DESC,
+  ACC_PANEL_TITLE,
+  AccelerationActionType,
+  AccelerationStatus,
+  CreateAccelerationFlyoutButton,
+  getAccelerationName,
+  onDiscoverIconClick,
+} from './utils/acceleration_utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -108,7 +107,7 @@ export const AccelerationTable = ({
       !isCatalogCacheFetching(accelerationsLoadStatus)
     ) {
       setIsRefreshing(true);
-      startLoadingAccelerations(dataSourceName);
+      startLoadingAccelerations({dataSourceName:dataSourceName});
     } else {
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);

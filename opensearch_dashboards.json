@@ -18,6 +18,6 @@
     "urlForwarding",
     "visualizations"
   ],
-  "optionalPlugins": ["managementOverview", "assistantDashboards", "securityDashboards"],
+  "optionalPlugins": ["managementOverview", "assistantDashboards", "securityDashboards", "dataSourceManagement", "dataSource"],
   "configPath": ["observability"]
 }

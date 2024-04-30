@@ -7,7 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../../src/core/server';
 import { JOBS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 
-export function registerDatasourcesRoute(router: IRouter) {
+export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boolean) {
   router.post(
     {
       path: `${OBSERVABILITY_BASE}${JOBS_BASE}`,
@@ -21,15 +21,23 @@ export function registerDatasourcesRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<any> => {
+      const dataSourceId = request.url.searchParams.get('dataSourceId')
       const params = {
         body: {
           ...request.body,
         },
       };
       try {
-        const res = await context.observability_plugin.observabilityClient
+        let res;
+        if(dataSourceEnabled && dataSourceId){
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceId);
+          res = await client.callAPI('observability.runDirectQuery', params);
+        }
+        else{
+          res = await context.observability_plugin.observabilityClient
           .asScoped(request)
           .callAsCurrentUser('observability.runDirectQuery', params);
+        }
         return response.ok({
           body: res,
         });

@@ -14,12 +14,14 @@ interface QueryVisualEditorProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   tableFieldsLoading: boolean;
+  dataSourceClientId?: string
 }
 
 export const QueryVisualEditor = ({
   accelerationFormData,
   setAccelerationFormData,
   tableFieldsLoading,
+  dataSourceClientId,
 }: QueryVisualEditorProps) => {
   return tableFieldsLoading ? (
     <>
@@ -38,6 +40,7 @@ export const QueryVisualEditor = ({
         <SkippingIndexBuilder
           accelerationFormData={accelerationFormData}
           setAccelerationFormData={setAccelerationFormData}
+          dataSourceClientId={dataSourceClientId}
         />
       )}
       {accelerationFormData.accelerationIndexType === 'covering' && (

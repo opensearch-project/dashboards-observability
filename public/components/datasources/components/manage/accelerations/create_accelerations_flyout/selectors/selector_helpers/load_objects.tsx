@@ -65,8 +65,8 @@ export const SelectorLoadObjects = ({
       tableStatus: true,
       accelerationsStatus: true,
     });
-    startLoadingTables(dataSourceName, databaseName);
-    startLoadingAccelerations(dataSourceName);
+    startLoadingTables({dataSourceName:dataSourceName, databaseName:databaseName});
+    startLoadingAccelerations({dataSourceName:dataSourceName});
   };
 
   useEffect(() => {

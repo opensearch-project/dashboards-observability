@@ -3,19 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiHorizontalRule,
-  EuiSpacer,
+  EuiPanel,
   EuiSelectable,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useToast } from '../../../../../../public/components/common/toast';
+import React, { useEffect, useState } from 'react';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
@@ -27,25 +25,26 @@ import {
   CachedTable,
   DatasourceDetails,
 } from '../../../../../../common/types/data_connections';
-import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
-import {
-  ASSC_OBJ_PANEL_TITLE,
-  ASSC_OBJ_PANEL_DESCRIPTION,
-  ASSC_OBJ_FRESH_MSG,
-  isCatalogCacheFetching,
-} from './utils/associated_objects_tab_utils';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
-import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
-import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
-import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
+import { useToast } from '../../../../../../public/components/common/toast';
 import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
-import { AssociatedObjectsTable } from './modules/associated_objects_table';
+import { getRenderCreateAccelerationFlyout } from '../../../../../../public/plugin';
 import {
   CreateAccelerationFlyoutButton,
   getAccelerationName,
 } from '../accelerations/utils/acceleration_utils';
-import { getRenderCreateAccelerationFlyout } from '../../../../../../public/plugin';
+import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
+import { AssociatedObjectsTable } from './modules/associated_objects_table';
+import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';
+import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
 import { AssociatedObjectsTabFailure } from './utils/associated_objects_tab_failure';
+import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
+import {
+  ASSC_OBJ_FRESH_MSG,
+  ASSC_OBJ_PANEL_DESCRIPTION,
+  ASSC_OBJ_PANEL_TITLE,
+  isCatalogCacheFetching,
+} from './utils/associated_objects_tab_utils';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
@@ -101,7 +100,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
-      startLoadingDatabases(datasource.name);
+      startLoadingDatabases({databaseName:datasource.name});
       setIsRefreshing(true);
     }
   };

@@ -125,7 +125,7 @@ describe('CatalogCacheManager', () => {
     });
 
     it('should return default cache object if cache is not found', () => {
-      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
+      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [],'client_id':'' };
       sessionStorage.removeItem(ASYNC_QUERY_DATASOURCE_CACHE);
       expect(CatalogCacheManager.getDataSourceCache()).toEqual(defaultCacheObject);
     });
@@ -136,6 +136,7 @@ describe('CatalogCacheManager', () => {
       const cacheData: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
         dataSources: [],
+        client_id: ''
       };
       CatalogCacheManager.saveAccelerationsCache(cacheData);
       expect(sessionStorage.setItem).toHaveBeenCalledWith(
@@ -150,6 +151,7 @@ describe('CatalogCacheManager', () => {
       const cacheData: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
         dataSources: [],
+        client_id: ''
       };
       sessionStorage.setItem(ASYNC_QUERY_ACCELERATIONS_CACHE, JSON.stringify(cacheData));
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(cacheData);
@@ -159,6 +161,7 @@ describe('CatalogCacheManager', () => {
       const defaultCacheObject: AccelerationsCacheData = {
         version: CATALOG_CACHE_VERSION,
         dataSources: [],
+        client_id:''
       };
       sessionStorage.removeItem(ASYNC_QUERY_ACCELERATIONS_CACHE);
       expect(CatalogCacheManager.getAccelerationsCache()).toEqual(defaultCacheObject);
@@ -408,6 +411,7 @@ describe('CatalogCacheManager', () => {
         ASYNC_QUERY_ACCELERATIONS_CACHE,
         JSON.stringify({
           version: '1.0',
+          client_id:'',
           dataSources: [{ ...dataSource }],
         })
       );
@@ -435,6 +439,7 @@ describe('CatalogCacheManager', () => {
         ASYNC_QUERY_ACCELERATIONS_CACHE,
         JSON.stringify({
           version: '1.0',
+          client_id:'',
           dataSources: [{ ...updatedDataSource }],
         })
       );

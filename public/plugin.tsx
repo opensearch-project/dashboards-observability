@@ -20,6 +20,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
+  S3_DATASOURCE_TYPE,
   SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
@@ -46,7 +47,6 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
@@ -125,6 +125,7 @@ export const [
 ] = createGetterSetter<
   (
     dataSource: string,
+    dataSourceClientId?: string,
     databaseName?: string,
     tableName?: string,
     handleRefresh?: () => void
@@ -464,6 +465,7 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
+      dataSourceClientId?: string,
       databaseName?: string,
       tableName?: string,
       handleRefresh?: () => void
@@ -476,6 +478,7 @@ export class ObservabilityPlugin
             databaseName={databaseName}
             tableName={tableName}
             refreshHandler={handleRefresh}
+            dataSourceClientId={dataSourceClientId}
           />
         )
       );
