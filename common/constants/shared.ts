@@ -256,7 +256,7 @@ export const VISUALIZATION_ERROR = {
   NO_METRIC: 'Invalid Metric MetaData',
 };
 
-export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
+export const S3_DATA_SOURCE_TYPE = 's3glue';
 
 export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
 export const ASYNC_QUERY_DATASOURCE_CACHE = 'async-query-catalog-cache';
