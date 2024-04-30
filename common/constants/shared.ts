@@ -1,4 +1,4 @@
-/*
+2/*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -216,11 +216,11 @@ export interface DefaultChartStylesProps {
 }
 
 export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
-  DefaultModeLine: 'lines',
+  DefaultModeLine: 'lines+markers',
   Interpolation: 'spline',
   LineWidth: 0,
   FillOpacity: 100,
-  MarkerSize: 5,
+  MarkerSize: 25,
   ShowLegend: 'show',
   LegendPosition: 'v',
   LabelAngle: 0,
