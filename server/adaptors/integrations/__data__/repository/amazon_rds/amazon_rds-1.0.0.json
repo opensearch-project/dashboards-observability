@@ -1,5 +1,5 @@
 {
-  "name": "aws_rds",
+  "name": "amazon_rds",
   "version": "1.0.0",
   "displayName": "Amazon Relational Database Service",
   "description": "Analyze RDS database logs files.",
