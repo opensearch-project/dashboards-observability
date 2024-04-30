@@ -33,10 +33,20 @@ export const ACCELERATION_TIME_INTERVAL = [
   { text: 'day(s)', value: 'day' },
   { text: 'week(s)', value: 'week' },
 ];
+export const ACCELERATION_REFRESH_TIME_INTERVAL = [
+  { text: 'minutes(s)', value: 'minute' },
+  { text: 'hour(s)', value: 'hour' },
+  { text: 'day(s)', value: 'day' },
+  { text: 'week(s)', value: 'week' },
+];
 
 export const ACCELERATION_ADD_FIELDS_TEXT = '(add fields here)';
-export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z][a-z_]*$/;
+export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z0-9_]+$/;
 export const ACCELERATION_S3_URL_REGEX = /^(s3|s3a):\/\/[a-zA-Z0-9.\-]+/;
+export const SPARK_HIVE_TABLE_REGEX = /Provider:\s*hive/;
+export const SANITIZE_QUERY_REGEX = /\s+/g;
+export const SPARK_TIMESTAMP_DATATYPE = 'timestamp';
+export const SPARK_STRING_DATATYPE = 'string';
 
 export const ACCELERATION_INDEX_TYPES = [
   { label: 'Skipping Index', value: 'skipping' },
@@ -46,6 +56,8 @@ export const ACCELERATION_INDEX_TYPES = [
 
 export const ACC_INDEX_TYPE_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md';
+export const ACC_CHECKPOINT_DOCUMENTATION_URL =
+  'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options';
 
 export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices have a naming format of pattern: \`prefix_<index name>_suffix\`. They share a common prefix structure, which is \`flint_<data source name>_<database name>_<table name>_\`. Additionally, they may have a suffix that varies based on the index type. 
 ##### Skipping Index
@@ -58,19 +70,23 @@ export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices
 - 'Materialized View' indices also enable users to define their index name, but they do not have a suffix.
   - An example of a 'Materialized View' index name might look like: \`flint_mydatasource_mydb_mytable_myindexname\`.
 ##### Note:
-- All user given index names must be in lowercase letters. Index name cannot begin with underscores. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed.  
+- All user given index names must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed.  
   `;
 
 export const SKIPPING_INDEX_ACCELERATION_METHODS = [
   { value: 'PARTITION', text: 'Partition' },
   { value: 'VALUE_SET', text: 'Value Set' },
   { value: 'MIN_MAX', text: 'Min Max' },
+  { value: 'BLOOM_FILTER', text: 'Bloom Filter' },
 ];
 
 export const ACCELERATION_AGGREGRATION_FUNCTIONS = [
+  { label: 'window.start' },
   { label: 'count' },
   { label: 'sum' },
   { label: 'avg' },
   { label: 'max' },
   { label: 'min' },
 ];
+
+export const SPARK_PARTITION_INFO = `# Partition Information`;

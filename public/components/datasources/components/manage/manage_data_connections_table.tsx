@@ -6,6 +6,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -17,29 +18,35 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from '../data_connections_header';
-import { HomeProps } from '../../home';
-import { DataConnectionsDescription } from './manage_data_connections_description';
 import {
   DATACONNECTIONS_BASE,
-  observabilityIntegrationsID,
-  observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
-import { useToast } from '../../../common/toast';
-import { DeleteModal } from '../../../common/helpers/delete_modal';
-import S3Logo from '../../icons/s3-logo.svg';
-import PrometheusLogo from '../../icons/prometheus-logo.svg';
-import { DatasourceType } from '../../../../../common/types/data_connections';
+import {
+  DatasourceDetails,
+  DatasourceStatus,
+  DatasourceType,
+} from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
+import { useToast } from '../../../common/toast';
+import { HomeProps } from '../../home';
+import PrometheusLogo from '../../icons/prometheus-logo.svg';
+import S3Logo from '../../icons/s3-logo.svg';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { DataConnectionsDescription } from './manage_data_connections_description';
+import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
+import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 
 interface DataConnection {
   connectionType: DatasourceType;
   name: string;
+  dsStatus: DatasourceStatus;
 }
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
-  const { http, chrome, pplService } = props;
+  const { http, chrome } = props;
   const { application } = coreRefs;
 
   const { setToast } = useToast();
@@ -60,7 +67,27 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         );
       })
       .catch((err) => {
+        console.error(err);
         setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
+      });
+  };
+
+  const fetchDataSources = () => {
+    http!
+      .get(`${DATACONNECTIONS_BASE}`)
+      .then((res: DatasourceDetails[]) => {
+        const dataConnections = res.map((dataConnection: DatasourceDetails) => {
+          return {
+            name: dataConnection.name,
+            connectionType: dataConnection.connector,
+            dsStatus: dataConnection.status,
+          };
+        });
+        setData(dataConnections);
+      })
+      .catch((err) => {
+        console.error(err);
+        setToast(`Could not fetch datasources`, 'danger');
       });
   };
 
@@ -71,18 +98,9 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         href: '#/',
       },
     ]);
-    handleDataRequest();
+    fetchDataSources();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome]);
-
-  async function handleDataRequest() {
-    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
-      setData(
-        dataconnections.jsonData.map((x: any) => {
-          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
-        })
-      )
-    );
-  }
 
   const displayDeleteModal = (connectionName: string) => {
     setModalLayout(
@@ -101,17 +119,10 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     setIsModalVisible(true);
   };
 
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
+
   const actions = [
-    {
-      name: 'Edit',
-      isPrimary: true,
-      icon: 'pencil',
-      type: 'icon',
-      onClick: (datasource: DataConnection) => {
-        window.location.href = `#/manage/${datasource.name}`;
-      },
-      'data-test-subj': 'action-edit',
-    },
     {
       name: (datasource: DataConnection) =>
         `Query in ${
@@ -121,9 +132,11 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'discoverApp',
       type: 'icon',
       onClick: (datasource: DataConnection) => {
-        application!.navigateToApp(
-          datasource.connectionType === 'PROMETHEUS' ? observabilityMetricsID : observabilityLogsID
-        );
+        if (datasource.connectionType === 'PROMETHEUS') {
+          application!.navigateToApp(observabilityMetricsID);
+        } else if (datasource.connectionType === 'S3GLUE') {
+          redirectToExplorerS3(datasource.name);
+        }
       },
       'data-test-subj': 'action-query',
     },
@@ -133,8 +146,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'bolt',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {
-        application!.navigateToApp('opensearch-query-workbench');
+      onClick: (datasource: DataConnection) => {
+        renderCreateAccelerationFlyout(datasource.name);
       },
       'data-test-subj': 'action-accelerate',
     },
@@ -144,8 +157,15 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       icon: 'integrationGeneral',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {
-        application!.navigateToApp(observabilityIntegrationsID);
+      onClick: (datasource: DataConnection) => {
+        setIntegrationsFlyout(
+          <InstallIntegrationFlyout
+            closeFlyout={() => setShowIntegrationsFlyout(false)}
+            datasourceType={datasource.connectionType}
+            datasourceName={datasource.name}
+          />
+        );
+        setShowIntegrationsFlyout(true);
       },
       'data-test-subj': 'action-integrate',
     },
@@ -193,11 +213,23 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
+      field: 'status',
+      name: 'Status',
+      sortable: true,
+      truncateText: true,
+      render: (value, record: DataConnection) =>
+        record.dsStatus === 'ACTIVE' ? (
+          <EuiHealth color="success">Active</EuiHealth>
+        ) : (
+          <EuiHealth color="subdued">Inactive</EuiHealth>
+        ),
+    },
+    {
       field: 'actions',
       name: 'Actions',
       actions,
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ] as Array<EuiTableFieldDataColumnType<unknown>>;
 
   const search = {
     box: {
@@ -208,16 +240,18 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const entries = data.map((dataconnection: DataConnection) => {
     const name = dataconnection.name;
     const connectionType = dataconnection.connectionType;
-    return { connectionType, name, data: { name, connectionType } };
+    const dsStatus = dataconnection.dsStatus;
+    return { connectionType, name, dsStatus, data: { name, connectionType } };
   });
+
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <EuiPage>
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DataConnectionsDescription refresh={handleDataRequest} />
-
+          <DataConnectionsDescription refresh={fetchDataSources} />
           <EuiInMemoryTable
             items={entries}
             itemId="id"
@@ -233,6 +267,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
           />
         </EuiPageContent>
         {isModalVisible && modalLayout}
+        {showIntegrationsFlyout && integrationsFlyout}
       </EuiPageBody>
     </EuiPage>
   );

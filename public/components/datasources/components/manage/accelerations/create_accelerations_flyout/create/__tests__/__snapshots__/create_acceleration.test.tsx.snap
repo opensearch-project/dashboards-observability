@@ -1,0 +1,3123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Create acceleration flyout components renders acceleration flyout component with default options 1`] = `
+Array [
+  "",
+  <Portal
+    containerInfo={
+      <div
+        class="euiOverlayMask euiOverlayMask--belowHeader"
+      >
+        <div
+          aria-hidden="true"
+          data-aria-hidden="true"
+          data-focus-guard="true"
+          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+          tabindex="0"
+        />
+        <div
+          data-focus-lock-disabled="false"
+        >
+          <div
+            aria-labelledby="flyoutTitle"
+            class="euiFlyout euiFlyout--medium euiFlyout--paddingLarge"
+            role="dialog"
+            tabindex="-1"
+          >
+            <button
+              aria-label="Close this dialog"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+              data-test-subj="euiFlyoutCloseButton"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
+            </button>
+            <div
+              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+            >
+              <div>
+                <header
+                  class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+                >
+                  <div
+                    class="euiPageHeaderSection"
+                  >
+                    <h1
+                      class="euiTitle euiTitle--large"
+                      data-test-subj="acceleration-header"
+                    >
+                      Accelerate data
+                    </h1>
+                  </div>
+                </header>
+                <div
+                  class="euiSpacer euiSpacer--s"
+                />
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    Create OpenSearch Indexes from external data connections for better performance.
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Learn more
+                      <svg
+                        aria-hidden="true"
+                        aria-label="External link"
+                        class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                      <span
+                        class="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlyoutBody"
+            >
+              <div
+                class="euiFlyoutBody__overflow"
+                tabindex="0"
+              >
+                <div
+                  class="euiFlyoutBody__overflowContent"
+                >
+                  <div
+                    class="euiForm"
+                    id="acceleration-form"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                      data-test-subj="datasource-selector-header"
+                    >
+                      <h3>
+                        Select data source
+                      </h3>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--s"
+                    />
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      <div
+                        class="euiTextColor euiTextColor--subdued"
+                      >
+                        Select the data source to accelerate data from. External data sources may take time to load.
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--m"
+                    />
+                    <dl
+                      class="euiDescriptionList euiDescriptionList--row"
+                    >
+                      <dt
+                        class="euiDescriptionList__title"
+                      >
+                        Data source
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description"
+                      >
+                        my_glue
+                      </dd>
+                    </dl>
+                    <div
+                      class="euiSpacer euiSpacer--m"
+                    />
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid="false"
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Database
+                        </label>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          aria-describedby="random_html_id-help-0"
+                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          id="random_html_id"
+                        >
+                          <div
+                            class="euiFlexItem"
+                          >
+                            <div
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              class="euiComboBox"
+                              role="combobox"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <div
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                                    data-test-subj="comboBoxInput"
+                                    tabindex="-1"
+                                  >
+                                    <p
+                                      class="euiComboBoxPlaceholder"
+                                    >
+                                      Select a database
+                                    </p>
+                                    <div
+                                      class="euiComboBox__input"
+                                      style="font-size: 14px; display: inline-block;"
+                                    >
+                                      <input
+                                        aria-controls=""
+                                        data-test-subj="comboBoxSearchInput"
+                                        role="textbox"
+                                        style="box-sizing: content-box; width: 2px;"
+                                        value=""
+                                      />
+                                      <div
+                                        style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <button
+                                      aria-label="Open list of options"
+                                      class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                      data-test-subj="comboBoxToggleListButton"
+                                      type="button"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+                              type="button"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                role="img"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Select the database that contains the tables you'd like to use.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid="false"
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Table
+                        </label>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          aria-describedby="random_html_id-help-0"
+                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          id="random_html_id"
+                        >
+                          <div
+                            class="euiFlexItem"
+                          >
+                            <div
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              class="euiComboBox"
+                              role="combobox"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <div
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                                    data-test-subj="comboBoxInput"
+                                    tabindex="-1"
+                                  >
+                                    <p
+                                      class="euiComboBoxPlaceholder"
+                                    >
+                                      Select a table
+                                    </p>
+                                    <div
+                                      class="euiComboBox__input"
+                                      style="font-size: 14px; display: inline-block;"
+                                    >
+                                      <input
+                                        aria-controls=""
+                                        data-test-subj="comboBoxSearchInput"
+                                        role="textbox"
+                                        style="box-sizing: content-box; width: 2px;"
+                                        value=""
+                                      />
+                                      <div
+                                        style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <button
+                                      aria-label="Open list of options"
+                                      class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                      data-test-subj="comboBoxToggleListButton"
+                                      type="button"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+                              type="button"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                role="img"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Select the Spark table that has the data you would like to index.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--xxl"
+                    />
+                    <div
+                      class="euiText euiText--medium"
+                      data-test-subj="acceleration-setting-header"
+                    >
+                      <h3>
+                        Acceleration setting
+                      </h3>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--s"
+                    />
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Acceleration type
+                        </label>
+                         
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          <a
+                            class="euiLink euiLink--primary"
+                            href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            Help
+                            <svg
+                              aria-hidden="true"
+                              aria-label="External link"
+                              class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                            <span
+                              class="euiScreenReaderOnly"
+                            >
+                              (opens in a new tab or window)
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <div>
+                              <input
+                                id="random_html_id"
+                                type="hidden"
+                                value="skipping"
+                              />
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <span
+                                    class="euiScreenReaderOnly"
+                                    id="random_html_id"
+                                  >
+                                    Select an option: Skipping index, is selected
+                                  </span>
+                                  <button
+                                    aria-describedby="random_html_id-help-0"
+                                    aria-haspopup="true"
+                                    aria-labelledby="random_html_id random_html_id"
+                                    class="euiSuperSelectControl"
+                                    type="button"
+                                  >
+                                    Skipping index
+                                  </button>
+                                  <div
+                                    class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Select the type of acceleration according to your use case.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--xxl"
+                    />
+                    <div
+                      class="euiText euiText--medium"
+                      data-test-subj="define-index-header"
+                    >
+                      <h3>
+                        Define Index
+                      </h3>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--s"
+                    />
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Refresh type
+                        </label>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <div>
+                              <input
+                                id="random_html_id"
+                                type="hidden"
+                                value="autoInterval"
+                              />
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <span
+                                    class="euiScreenReaderOnly"
+                                    id="random_html_id"
+                                  >
+                                    Select an option: Auto (Interval), is selected
+                                  </span>
+                                  <button
+                                    aria-describedby="random_html_id-help-0"
+                                    aria-haspopup="true"
+                                    aria-labelledby="random_html_id random_html_id"
+                                    class="euiSuperSelectControl"
+                                    type="button"
+                                  >
+                                    Auto (Interval)
+                                  </button>
+                                  <div
+                                    class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid="false"
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Refresh increments
+                        </label>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--group"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-describedby="random_html_id-help-0"
+                              aria-label="Refresh increments"
+                              class="euiFieldNumber euiFieldNumber--inGroup"
+                              id="random_html_id"
+                              min="1"
+                              placeholder="Refresh increments"
+                              type="number"
+                              value="15"
+                            />
+                          </div>
+                          <div
+                            class="euiFormControlLayout"
+                          >
+                            <div
+                              class="euiFormControlLayout__childrenWrapper"
+                            >
+                              <select
+                                class="euiSelect euiFormControlLayout__append"
+                              >
+                                <option
+                                  value="minute"
+                                >
+                                  minutes(s)
+                                </option>
+                                <option
+                                  value="hour"
+                                >
+                                  hour(s)
+                                </option>
+                                <option
+                                  value="day"
+                                >
+                                  day(s)
+                                </option>
+                                <option
+                                  value="week"
+                                >
+                                  week(s)
+                                </option>
+                              </select>
+                              <div
+                                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                              >
+                                <span
+                                  class="euiFormControlLayoutCustomIcon"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          Specify how frequent the index gets updated when performing the refresh job.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFormRow"
+                      id="random_html_id-row"
+                    >
+                      <div
+                        class="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid="false"
+                          class="euiFormLabel euiFormRow__label"
+                          for="random_html_id"
+                        >
+                          Checkpoint location
+                        </label>
+                         
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          <a
+                            class="euiLink euiLink--primary"
+                            href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            Learn more
+                            <svg
+                              aria-hidden="true"
+                              aria-label="External link"
+                              class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                            <span
+                              class="euiScreenReaderOnly"
+                            >
+                              (opens in a new tab or window)
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiFormControlLayout"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-describedby="random_html_id-help-0"
+                              aria-label="Use aria labels when no actual label is in use"
+                              class="euiFieldText"
+                              id="random_html_id"
+                              placeholder="s3://checkpoint/location"
+                              type="text"
+                              value=""
+                            />
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="random_html_id-help-0"
+                        >
+                          The HDFS compatible file system location path for incremental refresh job checkpoint.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--m"
+                    />
+                    <div
+                      class="euiSpacer euiSpacer--l"
+                    />
+                    <div
+                      class="euiText euiText--medium"
+                      data-test-subj="skipping-index-builder"
+                    >
+                      <h3>
+                        Skipping index definition
+                      </h3>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--s"
+                    />
+                    <div
+                      class="euiBasicTable"
+                      itemid="id"
+                    >
+                      <div>
+                        <div
+                          class="euiTableHeaderMobile"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                          >
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            />
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            />
+                          </div>
+                        </div>
+                        <table
+                          class="euiTable euiTable--responsive"
+                          id="random_html_id"
+                          tabindex="-1"
+                        >
+                          <caption
+                            class="euiScreenReaderOnly euiTableCaption"
+                          />
+                          <thead>
+                            <tr>
+                              <th
+                                class="euiTableHeaderCell"
+                                data-test-subj="tableHeaderCell_fieldName_0"
+                                role="columnheader"
+                                scope="col"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Field name"
+                                  >
+                                    Field name
+                                  </span>
+                                </span>
+                              </th>
+                              <th
+                                class="euiTableHeaderCell"
+                                data-test-subj="tableHeaderCell_dataType_1"
+                                role="columnheader"
+                                scope="col"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Datatype"
+                                  >
+                                    Datatype
+                                  </span>
+                                </span>
+                              </th>
+                              <th
+                                class="euiTableHeaderCell"
+                                data-test-subj="tableHeaderCell_Acceleration method_2"
+                                role="columnheader"
+                                scope="col"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Acceleration method"
+                                  >
+                                    Acceleration method
+                                  </span>
+                                </span>
+                              </th>
+                              <th
+                                class="euiTableHeaderCell"
+                                data-test-subj="tableHeaderCell_Delete_3"
+                                role="columnheader"
+                                scope="col"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Delete"
+                                  >
+                                    Delete
+                                  </span>
+                                </span>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              class="euiTableRow"
+                            >
+                              <td
+                                class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                colspan="4"
+                              >
+                                <div
+                                  class="euiTableCellContent euiTableCellContent--alignCenter"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                  >
+                                    You have no definitions defined.
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButton euiButton--primary"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Add fields
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButton euiButton--danger"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Bulk delete
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <button
+                          class="euiButton euiButton--primary"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              class="euiButton__text"
+                            >
+                              Generate
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--xxl"
+                    />
+                    <div
+                      class="euiAccordion"
+                    >
+                      <div
+                        class="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="accordion1"
+                          aria-expanded="false"
+                          class="euiAccordion__button"
+                          id="random_html_id"
+                          type="button"
+                        >
+                          <span
+                            class="euiAccordion__iconWrapper"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            class="euiIEFlexWrapFix"
+                          >
+                            <div
+                              class="euiText euiText--medium"
+                              data-test-subj="advanced-settings-header"
+                            >
+                              <h3>
+                                Advanced settings
+                              </h3>
+                            </div>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="random_html_id"
+                        class="euiAccordion__childWrapper"
+                        id="accordion1"
+                        role="region"
+                        tabindex="-1"
+                      >
+                        <div>
+                          <div
+                            class="euiAccordion__padding--l"
+                          >
+                            <div
+                              class="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                class="euiFormRow__labelWrapper"
+                              >
+                                <label
+                                  aria-invalid="false"
+                                  class="euiFormLabel euiFormRow__label"
+                                  for="random_html_id"
+                                >
+                                  Index name
+                                </label>
+                                 
+                                <div
+                                  class="euiText euiText--extraSmall"
+                                >
+                                  <button
+                                    class="euiLink euiLink--primary"
+                                    type="button"
+                                  >
+                                    Help
+                                  </button>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  class="euiFormControlLayout euiFormControlLayout--group"
+                                >
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                    for="random_html_id"
+                                  >
+                                    flint_my_glue_{Database Name}_{Table Name}_
+                                  </label>
+                                  <span
+                                    class="euiToolTipAnchor"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      aria-label="Info"
+                                      class="euiIcon euiIcon--medium euiIcon--subdued euiIcon-isLoading"
+                                      focusable="true"
+                                      height="16"
+                                      role="img"
+                                      tabindex="0"
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      />
+                                    </svg>
+                                  </span>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      aria-label="Enter Index Name"
+                                      class="euiFieldText euiFieldText--inGroup"
+                                      disabled=""
+                                      id="random_html_id"
+                                      placeholder="Enter index name"
+                                      type="text"
+                                      value="skipping"
+                                    />
+                                  </div>
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__append"
+                                    for="random_html_id"
+                                  >
+                                    _index
+                                  </label>
+                                </div>
+                                <div
+                                  class="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                class="euiFormRow__labelWrapper"
+                              >
+                                <label
+                                  aria-invalid="false"
+                                  class="euiFormLabel euiFormRow__label"
+                                  for="random_html_id"
+                                >
+                                  Number of primary shards
+                                </label>
+                              </div>
+                              <div
+                                class="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  class="euiFormControlLayout"
+                                >
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      aria-label="Number of primary shards"
+                                      class="euiFieldNumber"
+                                      id="random_html_id"
+                                      max="100"
+                                      min="1"
+                                      placeholder="Number of primary shards"
+                                      type="number"
+                                      value="1"
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  class="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiSpacer euiSpacer--l"
+                            />
+                            <div
+                              class="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                class="euiFormRow__labelWrapper"
+                              >
+                                <label
+                                  aria-invalid="false"
+                                  class="euiFormLabel euiFormRow__label"
+                                  for="random_html_id"
+                                >
+                                  Number of replicas
+                                </label>
+                              </div>
+                              <div
+                                class="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  class="euiFormControlLayout"
+                                >
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      aria-label="Number of replicas"
+                                      class="euiFieldNumber"
+                                      id="random_html_id"
+                                      max="100"
+                                      min="0"
+                                      placeholder="Number of replicas"
+                                      type="number"
+                                      value="1"
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  class="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  Specify the number of replicas each primary shard should have.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--l"
+                    />
+                    <div
+                      class="euiAccordion"
+                    >
+                      <div
+                        class="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="accordion1"
+                          aria-expanded="false"
+                          class="euiAccordion__button"
+                          id="random_html_id"
+                          type="button"
+                        >
+                          <span
+                            class="euiAccordion__iconWrapper"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            class="euiIEFlexWrapFix"
+                          >
+                            <div
+                              class="euiText euiText--medium"
+                              data-test-subj="preview-sql-header"
+                            >
+                              <h3>
+                                Preview SQL definition
+                              </h3>
+                            </div>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="random_html_id"
+                        class="euiAccordion__childWrapper"
+                        id="accordion1"
+                        role="region"
+                        tabindex="-1"
+                      >
+                        <div>
+                          <div
+                            class="euiAccordion__padding--l"
+                          >
+                            <div
+                              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            >
+                              <div
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  class="euiButton euiButton--success"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Generate preview
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              />
+                            </div>
+                            <div
+                              class="euiSpacer euiSpacer--l"
+                            />
+                            <div
+                              class="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+                            >
+                              <pre
+                                class="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+                                tabindex="-1"
+                              >
+                                <code
+                                  class="euiCodeBlock__code sql"
+                                />
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlyoutFooter"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        Cancel
+                      </span>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiButton euiButton--primary euiButton--fill"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text"
+                      >
+                        Create acceleration
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          data-aria-hidden="true"
+          data-focus-guard="true"
+          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+          tabindex="0"
+        />
+      </div>
+    }
+  >
+    Array [
+      Array [
+        <div
+          data-focus-guard={true}
+          key="guard-first"
+          style={
+            Object {
+              "height": "0px",
+              "left": "1px",
+              "overflow": "hidden",
+              "padding": 0,
+              "position": "fixed",
+              "top": "1px",
+              "width": "1px",
+            }
+          }
+          tabIndex={0}
+        />,
+        "",
+        <div
+          data-focus-lock-disabled={false}
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseDown={[Function]}
+          onScrollCapture={[Function]}
+          onTouchMoveCapture={[Function]}
+          onTouchStart={[Function]}
+          onWheelCapture={[Function]}
+        >
+          <div
+            aria-labelledby="flyoutTitle"
+            className="euiFlyout euiFlyout--medium euiFlyout--paddingLarge"
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+            role="dialog"
+            tabIndex={-1}
+          >
+            <button
+              aria-label="Close this dialog"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+              data-test-subj="euiFlyoutCloseButton"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
+            </button>
+            <div
+              className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+            >
+              <div>
+                <header
+                  className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+                >
+                  <div
+                    className="euiPageHeaderSection"
+                  >
+                    <h1
+                      className="euiTitle euiTitle--large"
+                      data-test-subj="acceleration-header"
+                    >
+                      Accelerate data
+                    </h1>
+                  </div>
+                </header>
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+                <div
+                  className="euiText euiText--small"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--subdued"
+                  >
+                    Create OpenSearch Indexes from external data connections for better performance.
+                     
+                    <a
+                      className="euiLink euiLink--primary"
+                      href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Learn more
+                      <svg
+                        aria-hidden={true}
+                        aria-label="External link"
+                        className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                      <span
+                        className="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiFlyoutBody"
+            >
+              <div
+                className="euiFlyoutBody__overflow"
+                tabIndex={0}
+              >
+                <div
+                  className="euiFlyoutBody__overflowContent"
+                >
+                  <div
+                    className="euiForm"
+                    id="acceleration-form"
+                  >
+                    Array [
+                      <div
+                        className="euiText euiText--medium"
+                        data-test-subj="datasource-selector-header"
+                      >
+                        <h3>
+                          Select data source
+                        </h3>
+                      </div>,
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />,
+                      <div
+                        className="euiText euiText--small"
+                      >
+                        <div
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          Select the data source to accelerate data from. External data sources may take time to load.
+                        </div>
+                      </div>,
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />,
+                      <dl
+                        className="euiDescriptionList euiDescriptionList--row"
+                      >
+                        <dt
+                          className="euiDescriptionList__title"
+                        >
+                          Data source
+                        </dt>
+                        <dd
+                          className="euiDescriptionList__description"
+                        >
+                          my_glue
+                        </dd>
+                      </dl>,
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Database
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            aria-describedby="random_html_id-help-0"
+                            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            id="random_html_id"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <div
+                                aria-expanded={false}
+                                aria-haspopup="listbox"
+                                className="euiComboBox"
+                                onKeyDown={[Function]}
+                                role="combobox"
+                              >
+                                <div
+                                  className="euiFormControlLayout"
+                                >
+                                  <div
+                                    className="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <div
+                                      className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                                      data-test-subj="comboBoxInput"
+                                      onClick={[Function]}
+                                      tabIndex={-1}
+                                    >
+                                      <p
+                                        className="euiComboBoxPlaceholder"
+                                      >
+                                        Select a database
+                                      </p>
+                                      <div
+                                        className="euiComboBox__input"
+                                        style={
+                                          Object {
+                                            "display": "inline-block",
+                                            "fontSize": 14,
+                                          }
+                                        }
+                                      >
+                                        <input
+                                          aria-controls=""
+                                          data-test-subj="comboBoxSearchInput"
+                                          disabled={false}
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          role="textbox"
+                                          style={
+                                            Object {
+                                              "boxSizing": "content-box",
+                                              "width": "2px",
+                                            }
+                                          }
+                                          value=""
+                                        />
+                                        <div
+                                          style={
+                                            Object {
+                                              "height": 0,
+                                              "left": 0,
+                                              "overflow": "scroll",
+                                              "position": "absolute",
+                                              "top": 0,
+                                              "visibility": "hidden",
+                                              "whiteSpace": "pre",
+                                            }
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                    >
+                                      <button
+                                        aria-label="Open list of options"
+                                        className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                        data-test-subj="comboBoxToggleListButton"
+                                        disabled={false}
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <svg
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          role="img"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <button
+                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height={16}
+                                  role="img"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width={16}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Select the database that contains the tables you'd like to use.
+                          </div>
+                        </div>
+                      </div>,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Table
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            aria-describedby="random_html_id-help-0"
+                            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            id="random_html_id"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <div
+                                aria-expanded={false}
+                                aria-haspopup="listbox"
+                                className="euiComboBox"
+                                onKeyDown={[Function]}
+                                role="combobox"
+                              >
+                                <div
+                                  className="euiFormControlLayout"
+                                >
+                                  <div
+                                    className="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <div
+                                      className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                                      data-test-subj="comboBoxInput"
+                                      onClick={[Function]}
+                                      tabIndex={-1}
+                                    >
+                                      <p
+                                        className="euiComboBoxPlaceholder"
+                                      >
+                                        Select a table
+                                      </p>
+                                      <div
+                                        className="euiComboBox__input"
+                                        style={
+                                          Object {
+                                            "display": "inline-block",
+                                            "fontSize": 14,
+                                          }
+                                        }
+                                      >
+                                        <input
+                                          aria-controls=""
+                                          data-test-subj="comboBoxSearchInput"
+                                          disabled={false}
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          role="textbox"
+                                          style={
+                                            Object {
+                                              "boxSizing": "content-box",
+                                              "width": "2px",
+                                            }
+                                          }
+                                          value=""
+                                        />
+                                        <div
+                                          style={
+                                            Object {
+                                              "height": 0,
+                                              "left": 0,
+                                              "overflow": "scroll",
+                                              "position": "absolute",
+                                              "top": 0,
+                                              "visibility": "hidden",
+                                              "whiteSpace": "pre",
+                                            }
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                    >
+                                      <button
+                                        aria-label="Open list of options"
+                                        className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                        data-test-subj="comboBoxToggleListButton"
+                                        disabled={false}
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <svg
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          role="img"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <button
+                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height={16}
+                                  role="img"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width={16}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Select the Spark table that has the data you would like to index.
+                          </div>
+                        </div>
+                      </div>,
+                    ]
+                    <div
+                      className="euiSpacer euiSpacer--xxl"
+                    />
+                    Array [
+                      <div
+                        className="euiText euiText--medium"
+                        data-test-subj="acceleration-setting-header"
+                      >
+                        <h3>
+                          Acceleration setting
+                        </h3>
+                      </div>,
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Acceleration type
+                          </label>
+                           
+                          <div
+                            className="euiText euiText--extraSmall"
+                          >
+                            <a
+                              className="euiLink euiLink--primary"
+                              href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              Help
+                              <svg
+                                aria-hidden={true}
+                                aria-label="External link"
+                                className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                              <span
+                                className="euiScreenReaderOnly"
+                              >
+                                (opens in a new tab or window)
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                            onKeyDown={[Function]}
+                            onMouseDown={[Function]}
+                            onMouseUp={[Function]}
+                            onTouchEnd={[Function]}
+                            onTouchStart={[Function]}
+                          >
+                            <div
+                              className="euiPopover__anchor"
+                            >
+                              <div>
+                                Array [
+                                  <input
+                                    id="random_html_id"
+                                    type="hidden"
+                                    value="skipping"
+                                  />,
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <span
+                                        className="euiScreenReaderOnly"
+                                        id="random_html_id"
+                                      >
+                                        Select an option: Skipping index, is selected
+                                      </span>
+                                      <button
+                                        aria-describedby="random_html_id-help-0"
+                                        aria-haspopup="true"
+                                        aria-labelledby="random_html_id random_html_id"
+                                        className="euiSuperSelectControl"
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        onKeyDown={[Function]}
+                                        type="button"
+                                      >
+                                        Skipping index
+                                      </button>
+                                      <div
+                                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                      >
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>,
+                                ]
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Select the type of acceleration according to your use case.
+                          </div>
+                        </div>
+                      </div>,
+                    ]
+                    <div
+                      className="euiSpacer euiSpacer--xxl"
+                    />
+                    Array [
+                      <div
+                        className="euiText euiText--medium"
+                        data-test-subj="define-index-header"
+                      >
+                        <h3>
+                          Define Index
+                        </h3>
+                      </div>,
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Refresh type
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                            onKeyDown={[Function]}
+                            onMouseDown={[Function]}
+                            onMouseUp={[Function]}
+                            onTouchEnd={[Function]}
+                            onTouchStart={[Function]}
+                          >
+                            <div
+                              className="euiPopover__anchor"
+                            >
+                              <div>
+                                Array [
+                                  <input
+                                    id="random_html_id"
+                                    type="hidden"
+                                    value="autoInterval"
+                                  />,
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <span
+                                        className="euiScreenReaderOnly"
+                                        id="random_html_id"
+                                      >
+                                        Select an option: Auto (Interval), is selected
+                                      </span>
+                                      <button
+                                        aria-describedby="random_html_id-help-0"
+                                        aria-haspopup="true"
+                                        aria-labelledby="random_html_id random_html_id"
+                                        className="euiSuperSelectControl"
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        onKeyDown={[Function]}
+                                        type="button"
+                                      >
+                                        Auto (Interval)
+                                      </button>
+                                      <div
+                                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                      >
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>,
+                                ]
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
+                          </div>
+                        </div>
+                      </div>,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Refresh increments
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <input
+                                aria-describedby="random_html_id-help-0"
+                                aria-label="Refresh increments"
+                                className="euiFieldNumber euiFieldNumber--inGroup"
+                                id="random_html_id"
+                                min={1}
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Refresh increments"
+                                type="number"
+                                value={15}
+                              />
+                            </div>
+                            <div
+                              className="euiFormControlLayout"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <select
+                                  className="euiSelect euiFormControlLayout__append"
+                                  onBlur={[Function]}
+                                  onChange={[Function]}
+                                  onMouseUp={[Function]}
+                                  value="minute"
+                                >
+                                  <option
+                                    key="0"
+                                    value="minute"
+                                  >
+                                    minutes(s)
+                                  </option>
+                                  <option
+                                    key="1"
+                                    value="hour"
+                                  >
+                                    hour(s)
+                                  </option>
+                                  <option
+                                    key="2"
+                                    value="day"
+                                  >
+                                    day(s)
+                                  </option>
+                                  <option
+                                    key="3"
+                                    value="week"
+                                  >
+                                    week(s)
+                                  </option>
+                                </select>
+                                <div
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                >
+                                  <span
+                                    className="euiFormControlLayoutCustomIcon"
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      focusable="false"
+                                      height={16}
+                                      role="img"
+                                      style={null}
+                                      viewBox="0 0 16 16"
+                                      width={16}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      />
+                                    </svg>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            Specify how frequent the index gets updated when performing the refresh job.
+                          </div>
+                        </div>
+                      </div>,
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="random_html_id"
+                          >
+                            Checkpoint location
+                          </label>
+                           
+                          <div
+                            className="euiText euiText--extraSmall"
+                          >
+                            <a
+                              className="euiLink euiLink--primary"
+                              href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              Learn more
+                              <svg
+                                aria-hidden={true}
+                                aria-label="External link"
+                                className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                              <span
+                                className="euiScreenReaderOnly"
+                              >
+                                (opens in a new tab or window)
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            className="euiFormControlLayout"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <input
+                                aria-describedby="random_html_id-help-0"
+                                aria-label="Use aria labels when no actual label is in use"
+                                className="euiFieldText"
+                                id="random_html_id"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="s3://checkpoint/location"
+                                type="text"
+                                value=""
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="random_html_id-help-0"
+                          >
+                            The HDFS compatible file system location path for incremental refresh job checkpoint.
+                          </div>
+                        </div>
+                      </div>,
+                    ]
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                    Array [
+                      <div
+                        className="euiSpacer euiSpacer--l"
+                      />,
+                      Array [
+                        <div
+                          className="euiText euiText--medium"
+                          data-test-subj="skipping-index-builder"
+                        >
+                          <h3>
+                            Skipping index definition
+                          </h3>
+                        </div>,
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />,
+                        <div
+                          className="euiBasicTable"
+                          itemID="id"
+                        >
+                          <div>
+                            <div
+                              className="euiTableHeaderMobile"
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                              >
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                />
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                />
+                              </div>
+                            </div>
+                            <table
+                              className="euiTable euiTable--responsive"
+                              id="random_html_id"
+                              tabIndex={-1}
+                            >
+                              <caption
+                                className="euiScreenReaderOnly euiTableCaption"
+                              />
+                              <thead>
+                                <tr>
+                                  <th
+                                    className="euiTableHeaderCell"
+                                    data-test-subj="tableHeaderCell_fieldName_0"
+                                    role="columnheader"
+                                    scope="col"
+                                    style={
+                                      Object {
+                                        "width": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent"
+                                    >
+                                      <span
+                                        className="euiTableCellContent__text"
+                                        title="Field name"
+                                      >
+                                        Field name
+                                      </span>
+                                    </span>
+                                  </th>
+                                  <th
+                                    className="euiTableHeaderCell"
+                                    data-test-subj="tableHeaderCell_dataType_1"
+                                    role="columnheader"
+                                    scope="col"
+                                    style={
+                                      Object {
+                                        "width": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent"
+                                    >
+                                      <span
+                                        className="euiTableCellContent__text"
+                                        title="Datatype"
+                                      >
+                                        Datatype
+                                      </span>
+                                    </span>
+                                  </th>
+                                  <th
+                                    className="euiTableHeaderCell"
+                                    data-test-subj="tableHeaderCell_Acceleration method_2"
+                                    role="columnheader"
+                                    scope="col"
+                                    style={
+                                      Object {
+                                        "width": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent"
+                                    >
+                                      <span
+                                        className="euiTableCellContent__text"
+                                        title="Acceleration method"
+                                      >
+                                        Acceleration method
+                                      </span>
+                                    </span>
+                                  </th>
+                                  <th
+                                    className="euiTableHeaderCell"
+                                    data-test-subj="tableHeaderCell_Delete_3"
+                                    role="columnheader"
+                                    scope="col"
+                                    style={
+                                      Object {
+                                        "width": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent"
+                                    >
+                                      <span
+                                        className="euiTableCellContent__text"
+                                        title="Delete"
+                                      >
+                                        Delete
+                                      </span>
+                                    </span>
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr
+                                  className="euiTableRow"
+                                >
+                                  <td
+                                    className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                    colSpan={4}
+                                    style={
+                                      Object {
+                                        "width": undefined,
+                                      }
+                                    }
+                                  >
+                                    <div
+                                      className="euiTableCellContent euiTableCellContent--alignCenter"
+                                    >
+                                      <span
+                                        className="euiTableCellContent__text"
+                                      >
+                                        You have no definitions defined.
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>,
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  className="euiButton euiButton--primary"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Add fields
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  className="euiButton euiButton--danger"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Bulk delete
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            Array [
+                              <button
+                                className="euiButton euiButton--primary"
+                                disabled={false}
+                                onClick={[Function]}
+                                style={
+                                  Object {
+                                    "minWidth": undefined,
+                                  }
+                                }
+                                type="button"
+                              >
+                                <span
+                                  className="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Generate
+                                  </span>
+                                </span>
+                              </button>,
+                              "",
+                            ]
+                          </div>
+                        </div>,
+                      ],
+                    ]
+                    <div
+                      className="euiSpacer euiSpacer--xxl"
+                    />
+                    <div
+                      className="euiAccordion"
+                    >
+                      <div
+                        className="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="accordion1"
+                          aria-expanded={false}
+                          className="euiAccordion__button"
+                          id="random_html_id"
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            className="euiAccordion__iconWrapper"
+                          >
+                            <svg
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                              focusable="false"
+                              height={16}
+                              role="img"
+                              style={null}
+                              viewBox="0 0 16 16"
+                              width={16}
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            className="euiIEFlexWrapFix"
+                          >
+                            <div
+                              className="euiText euiText--medium"
+                              data-test-subj="advanced-settings-header"
+                            >
+                              <h3>
+                                Advanced settings
+                              </h3>
+                            </div>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="random_html_id"
+                        className="euiAccordion__childWrapper"
+                        id="accordion1"
+                        role="region"
+                        tabIndex={-1}
+                      >
+                        <div>
+                          <div
+                            className="euiAccordion__padding--l"
+                          >
+                            Array [
+                              <div
+                                className="euiFormRow"
+                                id="random_html_id-row"
+                              >
+                                <div
+                                  className="euiFormRow__labelWrapper"
+                                >
+                                  <label
+                                    aria-invalid={false}
+                                    className="euiFormLabel euiFormRow__label"
+                                    htmlFor="random_html_id"
+                                  >
+                                    Index name
+                                  </label>
+                                   
+                                  <div
+                                    className="euiText euiText--extraSmall"
+                                  >
+                                    <button
+                                      className="euiLink euiLink--primary"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      Help
+                                    </button>
+                                  </div>
+                                </div>
+                                <div
+                                  className="euiFormRow__fieldWrapper"
+                                >
+                                  <div
+                                    className="euiFormControlLayout euiFormControlLayout--group"
+                                  >
+                                    <label
+                                      className="euiFormLabel euiFormControlLayout__prepend"
+                                      htmlFor="random_html_id"
+                                    >
+                                      flint_my_glue_{Database Name}_{Table Name}_
+                                    </label>
+                                    <span
+                                      className="euiToolTipAnchor"
+                                      onKeyUp={[Function]}
+                                      onMouseOut={[Function]}
+                                      onMouseOver={[Function]}
+                                    >
+                                      <svg
+                                        aria-hidden={true}
+                                        aria-label="Info"
+                                        className="euiIcon euiIcon--medium euiIcon--subdued euiIcon-isLoading"
+                                        focusable="true"
+                                        height={16}
+                                        onBlur={[Function]}
+                                        onFocus={[Function]}
+                                        role="img"
+                                        style={null}
+                                        tabIndex={0}
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <input
+                                        aria-describedby="random_html_id-help-0"
+                                        aria-label="Enter Index Name"
+                                        className="euiFieldText euiFieldText--inGroup"
+                                        disabled={true}
+                                        id="random_html_id"
+                                        onBlur={[Function]}
+                                        onChange={[Function]}
+                                        onFocus={[Function]}
+                                        placeholder="Enter index name"
+                                        type="text"
+                                        value="skipping"
+                                      />
+                                    </div>
+                                    <label
+                                      className="euiFormLabel euiFormControlLayout__append"
+                                      htmlFor="random_html_id"
+                                    >
+                                      _index
+                                    </label>
+                                  </div>
+                                  <div
+                                    className="euiFormHelpText euiFormRow__text"
+                                    id="random_html_id-help-0"
+                                  >
+                                    Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                                  </div>
+                                </div>
+                              </div>,
+                              "",
+                            ]
+                            <div
+                              className="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                className="euiFormRow__labelWrapper"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="random_html_id"
+                                >
+                                  Number of primary shards
+                                </label>
+                              </div>
+                              <div
+                                className="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  className="euiFormControlLayout"
+                                >
+                                  <div
+                                    className="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      aria-label="Number of primary shards"
+                                      className="euiFieldNumber"
+                                      id="random_html_id"
+                                      max={100}
+                                      min={1}
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      placeholder="Number of primary shards"
+                                      type="number"
+                                      value={1}
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  className="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="euiSpacer euiSpacer--l"
+                            />
+                            <div
+                              className="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                className="euiFormRow__labelWrapper"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="random_html_id"
+                                >
+                                  Number of replicas
+                                </label>
+                              </div>
+                              <div
+                                className="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  className="euiFormControlLayout"
+                                >
+                                  <div
+                                    className="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      aria-label="Number of replicas"
+                                      className="euiFieldNumber"
+                                      id="random_html_id"
+                                      max={100}
+                                      min={0}
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      placeholder="Number of replicas"
+                                      type="number"
+                                      value={1}
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  className="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  Specify the number of replicas each primary shard should have.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="euiSpacer euiSpacer--l"
+                    />
+                    <div
+                      className="euiAccordion"
+                    >
+                      <div
+                        className="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="accordion1"
+                          aria-expanded={false}
+                          className="euiAccordion__button"
+                          id="random_html_id"
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            className="euiAccordion__iconWrapper"
+                          >
+                            <svg
+                              aria-hidden={true}
+                              className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                              focusable="false"
+                              height={16}
+                              role="img"
+                              style={null}
+                              viewBox="0 0 16 16"
+                              width={16}
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            className="euiIEFlexWrapFix"
+                          >
+                            <div
+                              className="euiText euiText--medium"
+                              data-test-subj="preview-sql-header"
+                            >
+                              <h3>
+                                Preview SQL definition
+                              </h3>
+                            </div>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="random_html_id"
+                        className="euiAccordion__childWrapper"
+                        id="accordion1"
+                        role="region"
+                        tabIndex={-1}
+                      >
+                        <div>
+                          <div
+                            className="euiAccordion__padding--l"
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  className="euiButton euiButton--success"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  style={
+                                    Object {
+                                      "minWidth": undefined,
+                                    }
+                                  }
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Generate preview
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              />
+                            </div>
+                            <div
+                              className="euiSpacer euiSpacer--l"
+                            />
+                            <div
+                              className="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+                              style={Object {}}
+                            >
+                              <pre
+                                className="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+                                style={Object {}}
+                                tabIndex={-1}
+                              >
+                                <code
+                                  className="euiCodeBlock__code sql"
+                                />
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiFlyoutFooter"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                    disabled={false}
+                    onClick={[MockFunction]}
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        Cancel
+                      </span>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    className="euiButton euiButton--primary euiButton--fill"
+                    disabled={false}
+                    onClick={[Function]}
+                    style={
+                      Object {
+                        "minWidth": undefined,
+                      }
+                    }
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        className="euiButton__text"
+                      >
+                        Create acceleration
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>,
+        <div
+          data-focus-guard={true}
+          style={
+            Object {
+              "height": "0px",
+              "left": "1px",
+              "overflow": "hidden",
+              "padding": 0,
+              "position": "fixed",
+              "top": "1px",
+              "width": "1px",
+            }
+          }
+          tabIndex={0}
+        />,
+      ],
+      "",
+    ]
+  </Portal>,
+]
+`;

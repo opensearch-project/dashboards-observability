@@ -266,7 +266,7 @@ exports[`Connection Details test Renders connection details for prometheus datas
 exports[`Connection Details test Renders connection details for s3 datasource 1`] = `
 <ConnectionDetails
   connector="S3GLUE"
-  dataConnection="ya"
+  dataConnection="mock_data_source"
   description=""
   properties={
     Object {
@@ -431,7 +431,7 @@ exports[`Connection Details test Renders connection details for s3 datasource 1`
                           <div
                             className="euiText euiText--small overview-content"
                           >
-                            ya
+                            mock_data_source
                           </div>
                         </EuiText>
                       </div>

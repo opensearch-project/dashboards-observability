@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,12 +19,6 @@ import {
   EuiPopoverFooter,
   EuiText,
   EuiToolTip,
-  EuiContextMenuItem,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -50,7 +45,7 @@ import {
   resetSummary,
   selectQueryAssistantSummarization,
 } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
-import { reset } from '../../event_analytics/redux/slices/query_result_slice';
+import { reset, selectQueryResult } from '../../event_analytics/redux/slices/query_result_slice';
 import {
   changeData,
   changeQuery,
@@ -59,11 +54,11 @@ import {
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
+import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
-import './search.scss';
 import { QueryAssistSummarization } from './query_assist_summarization';
-import { Autocomplete } from './autocomplete';
+import './search.scss';
 
 export interface IQueryBarProps {
   query: string;
@@ -128,6 +123,7 @@ export const Search = (props: any) => {
   } = props;
 
   const queryRedux = useSelector(selectQueries)[tabId];
+  const queryResults = useSelector(selectQueryResult)[tabId];
   const queryAssistantSummarization = useSelector(selectQueryAssistantSummarization)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
@@ -136,13 +132,9 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [needsUpdate, setNeedsUpdate] = useState(false);
-  const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
   const [nlqInput, setNlqInput] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
 
   const showQueryArea = !appLogEvents && coreRefs.queryAssistEnabled;
 
@@ -206,7 +198,7 @@ export const Search = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === QUERY_LANGUAGE.DQL) {
-      showModal();
+      redirectToDiscover();
       return;
     }
     dispatch(
@@ -317,36 +309,6 @@ export const Search = (props: any) => {
     application!.navigateToUrl('../app/data-explorer/discover');
   };
 
-  let redirectionModal = null;
-  if (isModalVisible) {
-    redirectionModal = (
-      <EuiModal onClose={closeModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>Open in Discover</h1>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiText>
-            The OpenSearch Dashboards Query Language (DQL) offers a simplified query syntax and
-            support for scripted fields. Selecting this option will open the Discover application.
-          </EuiText>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
-          <EuiButton
-            onClick={() => {
-              redirectToDiscover();
-            }}
-            fill
-          >
-            Open in Discover
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
-
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -392,7 +354,7 @@ export const Search = (props: any) => {
                       placeholder="Select an index"
                       isClearable={true}
                       prepend={<EuiText>Index</EuiText>}
-                      singleSelection={true}
+                      singleSelection={{ asPlainText: true }}
                       isLoading={loading}
                       options={indicesAndIndexPatterns}
                       selectedOptions={selectedIndex}
@@ -427,9 +389,7 @@ export const Search = (props: any) => {
                   tempQuery={tempQuery}
                   baseQuery={baseQuery}
                   handleQueryChange={handleQueryChange}
-                  handleQuerySearch={() => {
-                    onQuerySearch(queryLang);
-                  }}
+                  handleQuerySearch={runChanges}
                   dslService={dslService}
                   getSuggestions={getSuggestions}
                   onItemSelect={onItemSelect}
@@ -448,46 +408,50 @@ export const Search = (props: any) => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
-            <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-              {!isLiveTailOn && (
-                <DatePicker
-                  startTime={startTime}
-                  endTime={endTime}
-                  setStartTime={setStartTime}
-                  setEndTime={setEndTime}
-                  setIsOutputStale={setIsOutputStale}
-                  liveStreamChecked={props.liveStreamChecked}
-                  onLiveStreamChange={props.onLiveStreamChange}
-                  handleTimePickerChange={(tRange: string[]) => {
-                    // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
-                    setNeedsUpdate(
-                      !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
-                        !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
-                    );
-                    // keeps the time range change local, to be used when update pressed
-                    setStartTime(tRange[0]);
-                    setEndTime(tRange[1]);
-                  }}
-                  handleTimeRangePickerRefresh={() => {
-                    onQuerySearch(queryLang);
-                  }}
-                  isAppAnalytics={isAppAnalytics}
-                />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
-                <EuiButton
-                  color={needsUpdate ? 'success' : 'primary'}
-                  iconType={needsUpdate ? 'kqlFunction' : 'play'}
-                  fill={!showQueryArea || fillRun} // keep fill on all the time if not using query assistant
-                  onClick={runChanges}
-                  data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
-                >
-                  {needsUpdate ? 'Update' : 'Run'}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            {!(queryRedux.selectedTimestamp === '' && queryResults?.datarows) && ( // index with no timestamp, dont show timepicker
+              <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+                {!isLiveTailOn && !coreRefs.queryAssistEnabled && (
+                  <DatePicker
+                    startTime={startTime}
+                    endTime={endTime}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    setIsOutputStale={setIsOutputStale}
+                    liveStreamChecked={props.liveStreamChecked}
+                    onLiveStreamChange={props.onLiveStreamChange}
+                    handleTimePickerChange={(tRange: string[]) => {
+                      // modifies run button to look like the update button, if there is a time change, disables timepicker setting update if timepicker is disabled
+                      setNeedsUpdate(
+                        !showQueryArea && // keeps statement false if using query assistant ui, timepicker shouldn't change run button
+                          !(tRange[0] === startTime && tRange[1] === endTime) // checks to see if the time given is different from prev
+                      );
+                      // keeps the time range change local, to be used when update pressed
+                      setStartTime(tRange[0]);
+                      setEndTime(tRange[1]);
+                    }}
+                    handleTimeRangePickerRefresh={() => {
+                      onQuerySearch(queryLang);
+                    }}
+                    isAppAnalytics={isAppAnalytics}
+                  />
+                )}
+              </EuiFlexItem>
+            )}
+            {!showQueryArea && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
+                  <EuiButton
+                    color={needsUpdate ? 'success' : 'primary'}
+                    iconType={needsUpdate ? 'kqlFunction' : 'play'}
+                    fill
+                    onClick={runChanges}
+                    data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
+                  >
+                    {needsUpdate ? 'Update' : 'Run'}
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             {!showQueryArea && showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
                 <EuiPopover
@@ -573,11 +537,11 @@ export const Search = (props: any) => {
                 runQuery={query}
                 tempQuery={tempQuery}
                 setNeedsUpdate={setNeedsUpdate}
-                setFillRun={setFillRun}
                 selectedIndex={selectedIndex}
                 nlqInput={nlqInput}
                 setNlqInput={setNlqInput}
                 pplService={pplService}
+                runChanges={runChanges}
               />
             </EuiFlexItem>
             {(queryAssistantSummarization?.summary?.length > 0 ||
@@ -593,7 +557,6 @@ export const Search = (props: any) => {
           </>
         )}
       </EuiFlexGroup>
-      {redirectionModal}
       {flyout}
     </div>
   );

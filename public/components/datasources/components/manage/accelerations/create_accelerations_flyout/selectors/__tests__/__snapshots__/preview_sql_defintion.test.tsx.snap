@@ -1,0 +1,460 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Preview SQL acceleration components renders Preview SQL settings with default covering index options 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+            fillRule="nonzero"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="preview-sql-header"
+        >
+          <h3>
+            Preview SQL definition
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--success"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Generate preview
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+          style={Object {}}
+        >
+          <pre
+            className="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+            style={Object {}}
+            tabIndex={-1}
+          >
+            <code
+              className="euiCodeBlock__code sql"
+            />
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Preview SQL acceleration components renders Preview SQL settings with default options 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="preview-sql-header"
+        >
+          <h3>
+            Preview SQL definition
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--success"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Generate preview
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+          style={Object {}}
+        >
+          <pre
+            className="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+            style={Object {}}
+            tabIndex={-1}
+          >
+            <code
+              className="euiCodeBlock__code sql"
+            />
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Preview SQL acceleration components renders Preview SQL settings with error state 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+            fillRule="nonzero"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="preview-sql-header"
+        >
+          <h3>
+            Preview SQL definition
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--success"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Generate preview
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+          style={Object {}}
+        >
+          <pre
+            className="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+            style={Object {}}
+            tabIndex={-1}
+          >
+            <code
+              className="euiCodeBlock__code sql"
+            />
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Preview SQL acceleration components renders Preview SQL settings with materialized view options 1`] = `
+<div
+  className="euiAccordion"
+>
+  <div
+    className="euiAccordion__triggerWrapper"
+  >
+    <button
+      aria-controls="accordion1"
+      aria-expanded={false}
+      className="euiAccordion__button"
+      id="random_html_id"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiAccordion__iconWrapper"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiAccordion__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+            fillRule="nonzero"
+          />
+        </svg>
+      </span>
+      <span
+        className="euiIEFlexWrapFix"
+      >
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="preview-sql-header"
+        >
+          <h3>
+            Preview SQL definition
+          </h3>
+        </div>
+      </span>
+    </button>
+  </div>
+  <div
+    aria-labelledby="random_html_id"
+    className="euiAccordion__childWrapper"
+    id="accordion1"
+    role="region"
+    tabIndex={-1}
+  >
+    <div>
+      <div
+        className="euiAccordion__padding--l"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--success"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Generate preview
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+        <div
+          className="euiCodeBlock euiCodeBlock--fontMedium euiCodeBlock--paddingMedium euiCodeBlock--hasControls prismjs language-sql"
+          style={Object {}}
+        >
+          <pre
+            className="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+            style={Object {}}
+            tabIndex={-1}
+          >
+            <code
+              className="euiCodeBlock__code sql"
+            />
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

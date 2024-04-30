@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}_mview AS
+CREATE MATERIALIZED VIEW {table_name}__mview AS
 SELECT
     to_timestamp(trim(BOTH '[]' FROM concat(time_local_1, ' ', time_local_2)), 'dd/MMM/yyyy:HH:mm:ss Z') AS `@timestamp`,
     split_part (request, ' ', 1) as `http.request.method`,
@@ -10,7 +10,8 @@ SELECT
 FROM {table_name}
 WITH (
     auto_refresh = 'true',
+    refresh_interval = '15 Minute',
     checkpoint_location = '{s3_checkpoint_location}',
     watermark_delay = '1 Minute',
     extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
-);
+)

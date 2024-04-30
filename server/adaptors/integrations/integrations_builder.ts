@@ -11,7 +11,10 @@ import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
-  dataSource: string;
+  indexPattern: string;
+  workflows?: string[];
+  dataSource?: string;
+  tableName?: string;
 }
 
 interface SavedObject {
@@ -28,46 +31,109 @@ export class IntegrationInstanceBuilder {
     this.client = client;
   }
 
-  build(integration: IntegrationReader, options: BuilderOptions): Promise<IntegrationInstance> {
-    const instance = deepCheck(integration)
-      .then((result) => {
-        if (!result.ok) {
-          return Promise.reject(result.error);
-        }
-        return integration.getAssets();
-      })
-      .then((assets) => {
-        if (!assets.ok) {
-          return Promise.reject(assets.error);
-        }
-        return assets.value;
-      })
-      .then((assets) =>
-        this.remapIDs(
-          assets
-            .filter((asset) => asset.type === 'savedObjectBundle')
-            .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
-            .flat() as SavedObject[]
-        )
-      )
-      .then((assets) => this.remapDataSource(assets, options.dataSource))
-      .then((assets) => this.postAssets(assets))
-      .then((refs) => this.buildInstance(integration, refs, options));
-    return instance;
+  async build(
+    integration: IntegrationReader,
+    options: BuilderOptions
+  ): Promise<IntegrationInstance> {
+    const instance = await deepCheck(integration);
+    if (!instance.ok) {
+      return Promise.reject(instance.error);
+    }
+    const assets = await integration.getAssets();
+    if (!assets.ok) {
+      return Promise.reject(assets.error);
+    }
+    const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value, options.workflows));
+    const withDataSource = this.remapDataSource(remapped, options.indexPattern);
+    const withSubstitutedQueries = this.substituteQueries(
+      withDataSource,
+      options.dataSource,
+      options.tableName
+    );
+    const refs = await this.postAssets(withSubstitutedQueries as SavedObjectsBulkCreateObject[]);
+    const builtInstance = await this.buildInstance(integration, refs, options);
+    return builtInstance;
   }
 
-  remapDataSource(
-    assets: SavedObject[],
-    dataSource: string | undefined
-  ): Array<{ type: string; attributes: { title: string } }> {
-    if (!dataSource) return assets;
+  // If we have a data source or table specified, hunt for saved queries and update them with the
+  // new DS/table.
+  substituteQueries(assets: SavedObject[], dataSource?: string, tableName?: string): SavedObject[] {
+    if (!dataSource) {
+      return assets;
+    }
+
     assets = assets.map((asset) => {
+      if (asset.type === 'observability-search') {
+        const savedQuery = ((asset.attributes as unknown) as {
+          savedQuery: {
+            // The actual SavedSearchAttributes type uses "dataSources", but when exporting it's
+            // "data_sources". I'm not sure why the discrepancy exists but since that's the exported
+            // format we need to define our own type here.
+            data_sources: string;
+            query: string;
+            query_lang: string;
+          };
+        }).savedQuery;
+        if (!savedQuery.data_sources) {
+          return asset;
+        }
+        const dataSources = JSON.parse(savedQuery.data_sources) as Array<{
+          name: string;
+          type: string;
+          label: string;
+          value: string;
+        }>;
+        for (const ds of dataSources) {
+          if (ds.type !== 's3glue') {
+            continue; // Nothing to do
+          }
+          // TODO is there a distinction between these where we should only set one? They're all
+          // equivalent in every export I've seen.
+          ds.name = dataSource;
+          ds.label = dataSource;
+          ds.value = dataSource;
+        }
+        savedQuery.data_sources = JSON.stringify(dataSources);
+
+        if (savedQuery.query_lang === 'SQL' && tableName) {
+          savedQuery.query = savedQuery.query.replaceAll('{table_name}', tableName);
+        }
+      }
+      return asset;
+    });
+
+    return assets;
+  }
+
+  getSavedObjectBundles(
+    assets: ParsedIntegrationAsset[],
+    includeWorkflows?: string[]
+  ): SavedObject[] {
+    return assets
+      .filter((asset) => {
+        // At this stage we only care about installing bundles
+        if (asset.type !== 'savedObjectBundle') {
+          return false;
+        }
+        // If no workflows present: default to all workflows
+        // Otherwise only install if workflow is present
+        if (!asset.workflows || !includeWorkflows) {
+          return true;
+        }
+        return includeWorkflows.some((w) => asset.workflows?.includes(w));
+      })
+      .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
+      .flat() as SavedObject[];
+  }
+
+  remapDataSource(assets: SavedObject[], dataSource: string | undefined): SavedObject[] {
+    if (!dataSource) return assets;
+    return assets.map((asset) => {
       if (asset.type === 'index-pattern') {
         asset.attributes.title = dataSource;
       }
       return asset;
     });
-    return assets;
   }
 
   remapIDs(assets: SavedObject[]): SavedObject[] {
@@ -123,7 +189,10 @@ export class IntegrationInstanceBuilder {
     return Promise.resolve({
       name: options.name,
       templateName: config.value.name,
-      dataSource: options.dataSource,
+      // Before data sources existed we called the index pattern a data source. Now we need the old
+      // name for BWC but still use the new data sources in building, so we map the variable only
+      // for returned output here
+      dataSource: options.indexPattern,
       creationDate: new Date().toISOString(),
       assets: refs,
     });

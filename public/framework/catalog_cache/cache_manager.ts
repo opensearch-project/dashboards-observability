@@ -10,6 +10,7 @@ import {
 } from '../../../common/constants/shared';
 import {
   AccelerationsCacheData,
+  CachedAccelerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
@@ -36,7 +37,7 @@ export class CatalogCacheManager {
    * @param {DataSourceCacheData} cacheData - The data source cache data to save.
    */
   static saveDataSourceCache(cacheData: DataSourceCacheData): void {
-    localStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -44,7 +45,7 @@ export class CatalogCacheManager {
    * @returns {DataSourceCacheData} The retrieved data source cache.
    */
   static getDataSourceCache(): DataSourceCacheData {
-    const catalogData = localStorage.getItem(this.datasourceCacheKey);
+    const catalogData = sessionStorage.getItem(this.datasourceCacheKey);
 
     if (catalogData) {
       return JSON.parse(catalogData);
@@ -60,7 +61,7 @@ export class CatalogCacheManager {
    * @param {AccelerationsCacheData} cacheData - The accelerations cache data to save.
    */
   static saveAccelerationsCache(cacheData: AccelerationsCacheData): void {
-    localStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -68,19 +69,59 @@ export class CatalogCacheManager {
    * @returns {AccelerationsCacheData} The retrieved accelerations cache.
    */
   static getAccelerationsCache(): AccelerationsCacheData {
-    const accelerationCacheData = localStorage.getItem(this.accelerationsCacheKey);
+    const accelerationCacheData = sessionStorage.getItem(this.accelerationsCacheKey);
 
     if (accelerationCacheData) {
       return JSON.parse(accelerationCacheData);
     } else {
       const defaultCacheObject = {
         version: CATALOG_CACHE_VERSION,
-        accelerations: [],
-        lastUpdated: '',
-        status: CachedDataSourceStatus.Empty,
+        dataSources: [],
       };
       this.saveAccelerationsCache(defaultCacheObject);
       return defaultCacheObject;
+    }
+  }
+
+  /**
+   * Adds or updates a data source in the accelerations cache.
+   * @param {CachedAccelerationByDataSource} dataSource - The data source to add or update.
+   */
+  static addOrUpdateAccelerationsByDataSource(dataSource: CachedAccelerationByDataSource): void {
+    const accCacheData = this.getAccelerationsCache();
+    const index = accCacheData.dataSources.findIndex(
+      (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
+    );
+    if (index !== -1) {
+      accCacheData.dataSources[index] = dataSource;
+    } else {
+      accCacheData.dataSources.push(dataSource);
+    }
+    this.saveAccelerationsCache(accCacheData);
+  }
+
+  /**
+   * Retrieves accelerations cache from local storage by the datasource name.
+   * @param {string} dataSourceName - The name of the data source.
+   * @returns {CachedAccelerationByDataSource} The retrieved accelerations by datasource in cache.
+   * @throws {Error} If the data source is not found.
+   */
+  static getOrCreateAccelerationsByDataSource(
+    dataSourceName: string
+  ): CachedAccelerationByDataSource {
+    const accCacheData = this.getAccelerationsCache();
+    const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+
+    if (cachedDataSource) return cachedDataSource;
+    else {
+      const defaultDataSourceObject = {
+        name: dataSourceName,
+        lastUpdated: '',
+        status: CachedDataSourceStatus.Empty,
+        accelerations: [],
+      };
+      this.addOrUpdateAccelerationsByDataSource(defaultDataSourceObject);
+      return defaultDataSourceObject;
     }
   }
 
@@ -159,7 +200,7 @@ export class CatalogCacheManager {
   static getTable(dataSourceName: string, databaseName: string, tableName: string): CachedTable {
     const cachedDatabase = this.getDatabase(dataSourceName, databaseName);
 
-    const cachedTable = cachedDatabase.tables.find((table) => table.name === tableName);
+    const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
     if (!cachedTable) {
       throw new Error('Table not found exception: ' + tableName);
     }
@@ -193,13 +234,13 @@ export class CatalogCacheManager {
    * Clears the data source cache from local storage.
    */
   static clearDataSourceCache(): void {
-    localStorage.removeItem(this.datasourceCacheKey);
+    sessionStorage.removeItem(this.datasourceCacheKey);
   }
 
   /**
    * Clears the accelerations cache from local storage.
    */
   static clearAccelerationsCache(): void {
-    localStorage.removeItem(this.accelerationsCacheKey);
+    sessionStorage.removeItem(this.accelerationsCacheKey);
   }
 }

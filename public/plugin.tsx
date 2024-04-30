@@ -20,7 +20,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
+  SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
@@ -46,9 +46,10 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
-import { AssociatedObject } from '../common/types/data_connections';
+import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -59,11 +60,8 @@ import {
 import { DirectSearch } from './components/common/search/direct_search';
 import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
-import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create/create_acceleration';
-import {
-  AssociatedObjectsDetailsFlyout,
-  AssociatedObjectsFlyoutProps,
-} from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
+import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
+import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -75,7 +73,14 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
-import { catalogCacheInterceptError } from './framework/catalog_cache/cache_intercept';
+import { catalogRequestIntercept } from './framework/catalog_cache/cache_intercept';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTableColumnsToCache,
+  useLoadTablesToCache,
+} from './framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
@@ -103,19 +108,28 @@ interface PublicConfig {
 export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
-] = createGetterSetter<(acceleration: any) => void>('renderAccelerationDetailsFlyout');
+] = createGetterSetter<
+  (acceleration: CachedAcceleration, dataSourceName: string, handleRefresh?: () => void) => void
+>('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<({ tableDetail }: { tableDetail: AssociatedObject }) => void>(
-  'renderAssociatedObjectsDetailsFlyout'
-);
+] = createGetterSetter<
+  (tableDetail: AssociatedObject, datasourceName: string, handleRefresh?: () => void) => void
+>('renderAssociatedObjectsDetailsFlyout');
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(dataSource: string) => void>('renderCreateAccelerationFlyout');
+] = createGetterSetter<
+  (
+    dataSource: string,
+    databaseName?: string,
+    tableName?: string,
+    handleRefresh?: () => void
+  ) => void
+>('renderCreateAccelerationFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -356,11 +370,13 @@ export class ObservabilityPlugin
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
+    const dslService = new DSLService(core.http);
 
     coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
+    coreRefs.dslService = dslService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
     coreRefs.dataSources = startDeps.data.dataSources;
@@ -368,57 +384,119 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
+    coreRefs.overlays = core.overlays;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
     // register all s3 datasources
-    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-      s3DataSources.map((s3ds) => {
-        dataSourceService.registerDataSource(
-          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-            name: s3ds.name,
-            type: s3ds.connector.toLowerCase(),
-            metadata: s3ds,
-          })
-        );
+    const registerS3Datasource = () => {
+      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+        s3DataSources.map((s3ds) => {
+          dataSourceService.registerDataSource(
+            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+              name: s3ds.name,
+              type: s3ds.connector.toLowerCase(),
+              metadata: s3ds,
+            })
+          );
+        });
       });
-    });
+    };
+
+    if (startDeps.securityDashboards) {
+      core.http
+        .get(SECURITY_PLUGIN_ACCOUNT_API)
+        .then(() => {
+          registerS3Datasource();
+        })
+        .catch((e) => {
+          if (e?.response?.status !== 401) {
+            // accounts api should not return any error status other than 401 if security installed,
+            // this datasource register is included just in case
+            registerS3Datasource();
+          }
+        });
+    } else {
+      registerS3Datasource();
+    }
 
     core.http.intercept({
-      responseError: catalogCacheInterceptError(),
+      request: catalogRequestIntercept(),
     });
 
     // Use overlay service to render flyouts
-    const renderAccelerationDetailsFlyout = (acceleration: any) =>
-      core.overlays.openFlyout(
-        toMountPoint(<AccelerationDetailsFlyout acceleration={acceleration} />)
+    const renderAccelerationDetailsFlyout = (
+      acceleration: CachedAcceleration,
+      dataSourceName: string,
+      handleRefresh?: () => void
+    ) => {
+      const accelerationDetailsFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <AccelerationDetailsFlyout
+            acceleration={acceleration}
+            dataSourceName={dataSourceName}
+            resetFlyout={() => accelerationDetailsFlyout.close()}
+            handleRefresh={handleRefresh}
+          />
+        )
       );
+    };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = (tableDetail: AssociatedObjectsFlyoutProps) =>
-      core.overlays.openFlyout(
-        toMountPoint(<AssociatedObjectsDetailsFlyout tableDetail={tableDetail} />)
+    const renderAssociatedObjectsDetailsFlyout = (
+      tableDetail: AssociatedObject,
+      datasourceName: string,
+      handleRefresh?: () => void
+    ) => {
+      const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <AssociatedObjectsDetailsFlyout
+            tableDetail={tableDetail}
+            datasourceName={datasourceName}
+            resetFlyout={() => associatedObjectsDetailsFlyout.close()}
+            handleRefresh={handleRefresh}
+          />
+        )
       );
+    };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    const renderCreateAccelerationFlyout = (selectedDatasource: string) => {
+    const renderCreateAccelerationFlyout = (
+      selectedDatasource: string,
+      databaseName?: string,
+      tableName?: string,
+      handleRefresh?: () => void
+    ) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={selectedDatasource}
             resetFlyout={() => createAccelerationFlyout.close()}
+            databaseName={databaseName}
+            tableName={tableName}
+            refreshHandler={handleRefresh}
           />
         )
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
 
+    const CatalogCacheManagerInstance = CatalogCacheManager;
+    const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;
+    const useLoadTablesToCacheHook = useLoadTablesToCache;
+    const useLoadTableColumnsToCacheHook = useLoadTableColumnsToCache;
+    const useLoadAccelerationsToCacheHook = useLoadAccelerationsToCache;
     // Export so other plugins can use this flyout
     return {
       renderAccelerationDetailsFlyout,
       renderAssociatedObjectsDetailsFlyout,
       renderCreateAccelerationFlyout,
+      CatalogCacheManagerInstance,
+      useLoadDatabasesToCacheHook,
+      useLoadTablesToCacheHook,
+      useLoadTableColumnsToCacheHook,
+      useLoadAccelerationsToCacheHook,
     };
   }
 

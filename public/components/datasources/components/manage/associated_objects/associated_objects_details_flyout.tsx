@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -24,30 +24,64 @@ import {
   EuiButton,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { AssociatedObject } from 'common/types/data_connections';
 import { i18n } from '@osd/i18n';
 import {
-  onAccelerateButtonClick,
-  onDeleteButtonClick,
-  onDiscoverButtonClick,
+  AssociatedObject,
+  CachedAcceleration,
+  CachedColumn,
+} from '../../../../../../common/types/data_connections';
+import {
+  isCatalogCacheFetching,
+  redirectToExplorerWithDataSrc,
 } from './utils/associated_objects_tab_utils';
-import { getRenderAccelerationDetailsFlyout } from '../../../../../plugin';
-import { AccelerationStatus } from '../accelerations/helpers/utils';
+import {
+  getRenderAccelerationDetailsFlyout,
+  getRenderCreateAccelerationFlyout,
+} from '../../../../../plugin';
+import { AccelerationStatus, getAccelerationName } from '../accelerations/utils/acceleration_utils';
 import {
   ACCE_NO_DATA_TITLE,
   ACCE_NO_DATA_DESCRIPTION,
   CREATE_ACCELERATION_DESCRIPTION,
 } from '../associated_objects/utils/associated_objects_tab_utils';
+import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
+import { useLoadTableColumnsToCache } from '../../../../../../public/framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../../public/framework/catalog_cache/cache_manager';
+import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
+import { useToast } from '../../../../../../public/components/common/toast';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
+  datasourceName: string;
+  resetFlyout: () => void;
+  handleRefresh?: () => void;
 }
 
-export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObjectsFlyoutProps) => {
+export const AssociatedObjectsDetailsFlyout = ({
+  tableDetail,
+  datasourceName,
+  resetFlyout,
+  handleRefresh,
+}: AssociatedObjectsFlyoutProps) => {
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache();
+  const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
+  const [schemaData, setSchemaData] = useState<any>([]);
+  const { setToast } = useToast();
+
   const DiscoverButton = () => {
-    // TODO: display button if can be sent to discover
     return (
-      <EuiButtonEmpty onClick={onDiscoverButtonClick}>
+      <EuiButtonEmpty
+        onClick={() => {
+          if (tableDetail.type !== 'table') return;
+          redirectToExplorerWithDataSrc(
+            tableDetail.datasource,
+            DATA_SOURCE_TYPES.S3Glue,
+            tableDetail.database,
+            tableDetail.name
+          );
+          resetFlyout();
+        }}
+      >
         <EuiIcon type={'discoverApp'} size="m" />
       </EuiButtonEmpty>
     );
@@ -55,16 +89,17 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
 
   const AccelerateButton = () => {
     return (
-      <EuiButtonEmpty onClick={onAccelerateButtonClick}>
+      <EuiButtonEmpty
+        onClick={() =>
+          renderCreateAccelerationFlyout(
+            datasourceName,
+            tableDetail.database,
+            tableDetail.name,
+            handleRefresh
+          )
+        }
+      >
         <EuiIcon type={'bolt'} size="m" />
-      </EuiButtonEmpty>
-    );
-  };
-
-  const DeleteButton = () => {
-    return (
-      <EuiButtonEmpty onClick={onDeleteButtonClick}>
-        <EuiIcon type="trash" size="m" />
       </EuiButtonEmpty>
     );
   };
@@ -108,19 +143,21 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
     id: index,
   }));
 
-  const schemaData = tableDetail.columns.map((column, index) => ({
-    ...column,
-    id: index,
-  }));
-
   const accelerationColumns = [
     {
       field: 'name',
       name: 'Name',
       'data-test-subj': 'accelerationName',
-      render: (name: string, item: AssociatedObject) => (
-        <EuiLink onClick={() => renderAccelerationDetailsFlyout(item)}>{name}</EuiLink>
-      ),
+      render: (_: string, item: CachedAcceleration) => {
+        const name = getAccelerationName(item, datasourceName);
+        return (
+          <EuiLink
+            onClick={() => renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh)}
+          >
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'status',
@@ -153,7 +190,14 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
         <EuiButton
           color="primary"
           fill
-          onClick={() => window.open('https://example.com', '_blank')}
+          onClick={() =>
+            renderCreateAccelerationFlyout(
+              datasourceName,
+              tableDetail.database,
+              tableDetail.name,
+              handleRefresh
+            )
+          }
           iconType="popout"
           iconSide="left"
         >
@@ -180,6 +224,57 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
 
+  useEffect(() => {
+    if (tableDetail && !tableDetail.columns) {
+      try {
+        const tables = CatalogCacheManager.getTable(
+          datasourceName,
+          tableDetail.database,
+          tableDetail.name
+        );
+        if (tables?.columns) {
+          setTableColumns(tables?.columns);
+        } else {
+          startLoading(datasourceName, tableDetail.database, tableDetail.name);
+        }
+      } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+      }
+    } else if (tableDetail && tableDetail.columns) {
+      setTableColumns(tableDetail.columns);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (loadStatus.toLowerCase() === DirectQueryLoadingStatus.SUCCESS) {
+      let columns;
+      try {
+        columns = CatalogCacheManager.getTable(
+          datasourceName,
+          tableDetail.database,
+          tableDetail.name
+        ).columns;
+        setTableColumns(columns);
+      } catch (error) {
+        console.error(error);
+        setToast('Your cache is outdated, refresh databases and tables', 'warning');
+      }
+    }
+  }, [loadStatus]);
+
+  useEffect(() => {
+    setSchemaData(
+      tableColumns?.map((column, index) => ({
+        name: column.fieldName,
+        dataType: column.dataType,
+        id: index,
+      }))
+    );
+  }, [tableColumns]);
+
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -194,9 +289,6 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AccelerateButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DeleteButton />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -223,6 +315,7 @@ export const AssociatedObjectsDetailsFlyout = ({ tableDetail }: AssociatedObject
           columns={schemaColumns}
           pagination={true}
           sorting={true}
+          loading={isCatalogCacheFetching(loadStatus)}
         />
       </EuiFlyoutBody>
     </>

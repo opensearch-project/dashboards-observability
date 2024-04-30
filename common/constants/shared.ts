@@ -10,11 +10,13 @@ export const DSL_BASE = '/api/dsl';
 export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
+export const DSL_SETTINGS = '/indices.getFieldSettings';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EDIT = '/edit';
+export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
@@ -68,6 +70,7 @@ export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
+export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
@@ -90,6 +93,7 @@ export const PPL_INDEX_INSERT_POINT_REGEX = /(search source|source|index)\s*=\s*
 export const PPL_INDEX_REGEX = /(search source|source|index)\s*=\s*([^|\s]+)/i;
 export const PPL_WHERE_CLAUSE_REGEX = /\s*where\s+/i;
 export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
+export const PPL_DESCRIBE_INDEX_REGEX = /(describe)\s+([^|\s]+)/i;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';

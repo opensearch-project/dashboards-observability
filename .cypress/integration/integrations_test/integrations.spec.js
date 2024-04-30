@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable jest/expect-expect */
 
 /// <reference types="cypress" />
 
@@ -39,6 +38,7 @@ describe('Integrations plugin', () => {
     moveToIntegrationsHome();
     cy.get('[data-test-subj="integration_card_nginx"]').click();
     cy.url().should('include', '/available/nginx');
+    cy.get('[data-test-subj="eventHomePageTitle"').should('contain', 'Nginx');
   });
 
   it('Navigates to nginx page and asserts the page to be as expected', () => {
@@ -107,7 +107,7 @@ describe('Add nginx integration instance flow', () => {
 
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
 
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+    cy.get(`input.euiFieldText[placeholder="${testInstance}"]`).focus().type(testInstance, {
       delay: 50,
     });
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');

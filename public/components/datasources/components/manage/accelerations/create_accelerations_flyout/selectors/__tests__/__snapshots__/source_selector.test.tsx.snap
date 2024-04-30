@@ -1,0 +1,448 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Source selector components renders source selector with default options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="datasource-selector-header"
+  >
+    <h3>
+      Select data source
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiText euiText--small"
+  >
+    <div
+      className="euiTextColor euiTextColor--subdued"
+    >
+      Select the data source to accelerate data from. External data sources may take time to load.
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--m"
+  />,
+  <dl
+    className="euiDescriptionList euiDescriptionList--row"
+  >
+    <dt
+      className="euiDescriptionList__title"
+    >
+      Data source
+    </dt>
+    <dd
+      className="euiDescriptionList__description"
+    />
+  </dl>,
+  <div
+    className="euiSpacer euiSpacer--m"
+  />,
+  <div
+    className="euiFormRow"
+    id="random_html_id-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid={false}
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="random_html_id"
+      >
+        Database
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        aria-describedby="random_html_id-help-0"
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+        id="random_html_id"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <div
+            aria-expanded={false}
+            aria-haspopup="listbox"
+            className="euiComboBox"
+            onKeyDown={[Function]}
+            role="combobox"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  onClick={[Function]}
+                  tabIndex={-1}
+                >
+                  <p
+                    className="euiComboBoxPlaceholder"
+                  >
+                    Select a database
+                  </p>
+                  <div
+                    className="euiComboBox__input"
+                    style={
+                      Object {
+                        "display": "inline-block",
+                        "fontSize": 14,
+                      }
+                    }
+                  >
+                    <input
+                      aria-controls=""
+                      data-test-subj="comboBoxSearchInput"
+                      disabled={false}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      role="textbox"
+                      style={
+                        Object {
+                          "boxSizing": "content-box",
+                          "width": "2px",
+                        }
+                      }
+                      value=""
+                    />
+                    <div
+                      style={
+                        Object {
+                          "height": 0,
+                          "left": 0,
+                          "overflow": "scroll",
+                          "position": "absolute",
+                          "top": 0,
+                          "visibility": "hidden",
+                          "whiteSpace": "pre",
+                        }
+                      }
+                    />
+                  </div>
+                </div>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <button
+                    aria-label="Open list of options"
+                    className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        className="euiFormHelpText euiFormRow__text"
+        id="random_html_id-help-0"
+      >
+        Select the database that contains the tables you'd like to use.
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFormRow"
+    id="random_html_id-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid={false}
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="random_html_id"
+      >
+        Table
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        aria-describedby="random_html_id-help-0"
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+        id="random_html_id"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <div
+            aria-expanded={false}
+            aria-haspopup="listbox"
+            className="euiComboBox"
+            onKeyDown={[Function]}
+            role="combobox"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  onClick={[Function]}
+                  tabIndex={-1}
+                >
+                  <p
+                    className="euiComboBoxPlaceholder"
+                  >
+                    Select a table
+                  </p>
+                  <div
+                    className="euiComboBox__input"
+                    style={
+                      Object {
+                        "display": "inline-block",
+                        "fontSize": 14,
+                      }
+                    }
+                  >
+                    <input
+                      aria-controls=""
+                      data-test-subj="comboBoxSearchInput"
+                      disabled={false}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      role="textbox"
+                      style={
+                        Object {
+                          "boxSizing": "content-box",
+                          "width": "2px",
+                        }
+                      }
+                      value=""
+                    />
+                    <div
+                      style={
+                        Object {
+                          "height": 0,
+                          "left": 0,
+                          "overflow": "scroll",
+                          "position": "absolute",
+                          "top": 0,
+                          "visibility": "hidden",
+                          "whiteSpace": "pre",
+                        }
+                      }
+                    />
+                  </div>
+                </div>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <button
+                    aria-label="Open list of options"
+                    className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--medium"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        className="euiFormHelpText euiFormRow__text"
+        id="random_html_id-help-0"
+      >
+        Select the Spark table that has the data you would like to index.
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Source selector components renders source selector with different options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="datasource-selector-header"
+  >
+    <h3>
+      Select data source
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiText euiText--small"
+  >
+    <div
+      className="euiTextColor euiTextColor--subdued"
+    >
+      Select the data source to accelerate data from. External data sources may take time to load.
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--m"
+  />,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem"
+    >
+      <dl
+        className="euiDescriptionList euiDescriptionList--row"
+      >
+        <dt
+          className="euiDescriptionList__title"
+        >
+          Data source
+        </dt>
+        <dd
+          className="euiDescriptionList__description"
+        >
+          ds
+        </dd>
+      </dl>
+    </div>
+    <div
+      className="euiFlexItem"
+    >
+      <dl
+        className="euiDescriptionList euiDescriptionList--row"
+      >
+        <dt
+          className="euiDescriptionList__title"
+        >
+          Database
+        </dt>
+        <dd
+          className="euiDescriptionList__description"
+        >
+          db
+        </dd>
+      </dl>
+    </div>
+    <div
+      className="euiFlexItem"
+    >
+      <dl
+        className="euiDescriptionList euiDescriptionList--row"
+      >
+        <dt
+          className="euiDescriptionList__title"
+        >
+          Table
+        </dt>
+        <dd
+          className="euiDescriptionList__description"
+        >
+          tb
+        </dd>
+      </dl>
+    </div>
+  </div>,
+]
+`;

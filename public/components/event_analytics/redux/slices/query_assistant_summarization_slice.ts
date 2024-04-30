@@ -8,6 +8,7 @@ import { initialTabId } from '../../../../framework/redux/store/shared_state';
 
 const initialState = {
   [initialTabId]: {
+    loading: false,
     responseForSummaryStatus: 'false' as 'false' | 'success' | 'failure',
   },
 };
@@ -30,7 +31,14 @@ export const summarizationSlice = createSlice({
     },
     resetSummary: (state, { payload }) => {
       state[payload.tabId] = {
+        loading: false,
         responseForSummaryStatus: initialState[initialTabId].responseForSummaryStatus,
+      };
+    },
+    setLoading: (state, { payload }) => {
+      state[payload.tabId] = {
+        ...state[payload.tabId],
+        loading: payload.loading,
       };
     },
   },
@@ -40,6 +48,7 @@ export const {
   setResponseForSummaryStatus,
   changeSummary,
   resetSummary,
+  setLoading,
 } = summarizationSlice.actions;
 
 export const selectQueryAssistantSummarization = createSelector(
