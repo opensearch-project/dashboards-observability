@@ -406,28 +406,26 @@ export class ObservabilityPlugin
     const registerDataSources = () => {
       try {
         core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-          [...s3DataSources, { name: 'myspark', connector: 'spark', properties: {} }].map(
-            (s3ds) => {
-              dataSourceService.registerDataSource(
-                dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
-                  id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
-                  name: s3ds.name,
-                  type: s3ds.connector.toLowerCase(),
-                  metadata: {
-                    ...s3ds.properties,
-                    ui: {
-                      label: s3ds.name,
-                      typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
-                      groupType: s3ds.connector.toLowerCase(),
-                      selector: {
-                        displayDatasetsAsSource: false,
-                      },
+          s3DataSources.map((s3ds) => {
+            dataSourceService.registerDataSource(
+              dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
+                id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
+                name: s3ds.name,
+                type: s3ds.connector.toLowerCase(),
+                metadata: {
+                  ...s3ds.properties,
+                  ui: {
+                    label: s3ds.name,
+                    typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
+                    groupType: s3ds.connector.toLowerCase(),
+                    selector: {
+                      displayDatasetsAsSource: false,
                     },
                   },
-                })
-              );
-            }
-          );
+                },
+              })
+            );
+          });
         });
       } catch (error) {
         console.error('Error registering S3 datasources', error);
