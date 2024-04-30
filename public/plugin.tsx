@@ -396,33 +396,42 @@ export class ObservabilityPlugin
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
 
+    const getDataSourceTypeLabel = (type: string) => {
+      if (type === DATA_SOURCE_TYPES.S3Glue) return S3_DATA_SOURCE_GROUP_DISPLAY_NAME;
+      if (type === DATA_SOURCE_TYPES.SPARK) return S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME;
+      return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
+    };
+
     // register all s3 datasources
     const registerDataSources = () => {
-      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-        s3DataSources.map((s3ds) => {
-          dataSourceService.registerDataSource(
-            dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
-              id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(DATA_SOURCE_TYPES.S3Glue),
-              name: s3ds.name,
-              type: s3ds.connector.toLowerCase(),
-              metadata: {
-                ...s3ds.properties,
-                ui: {
-                  label: s3ds.name,
-                  typeLabel:
-                    s3ds.connector.toLowerCase() === DATA_SOURCE_TYPES.S3Glue
-                      ? S3_DATA_SOURCE_GROUP_DISPLAY_NAME
-                      : S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
-                  groupType: s3ds.connector.toLowerCase(),
-                  selector: {
-                    displayDatasetsAsSource: false,
+      try {
+        core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+          [...s3DataSources, { name: 'myspark', connector: 'spark', properties: {} }].map(
+            (s3ds) => {
+              dataSourceService.registerDataSource(
+                dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
+                  id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
+                  name: s3ds.name,
+                  type: s3ds.connector.toLowerCase(),
+                  metadata: {
+                    ...s3ds.properties,
+                    ui: {
+                      label: s3ds.name,
+                      typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
+                      groupType: s3ds.connector.toLowerCase(),
+                      selector: {
+                        displayDatasetsAsSource: false,
+                      },
+                    },
                   },
-                },
-              },
-            })
+                })
+              );
+            }
           );
         });
-      });
+      } catch (error) {
+        console.error('Error registering S3 datasources', error);
+      }
     };
 
     dataSourceService.registerDataSourceFetchers([
