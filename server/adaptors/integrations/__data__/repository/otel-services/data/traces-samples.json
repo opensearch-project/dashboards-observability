@@ -66,23 +66,7 @@
       },
       "db.instance": "ffs",
       "db.name": "ffs",
-      "db.statement": ""
-      "SELECT f0."
-      id
-      ", f0."
-      description
-      ", f0."
-      enabled
-      ", f0."
-      name
-      ", f0."
-      inserted_at
-      ", f0."
-      updated_at
-      " FROM "
-      featureflags
-      " AS f0"
-      "",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
       "db.type": "sql",
       "db.url": "ecto://ffs_postgres",
       "decode_time_microseconds": 216,
@@ -193,23 +177,7 @@
       },
       "db.instance": "ffs",
       "db.name": "ffs",
-      "db.statement": ""
-      "SELECT f0."
-      id
-      ", f0."
-      description
-      ", f0."
-      enabled
-      ", f0."
-      name
-      ", f0."
-      inserted_at
-      ", f0."
-      updated_at
-      " FROM "
-      featureflags
-      " AS f0"
-      "",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
       "db.type": "sql",
       "db.url": "ecto://ffs_postgres",
       "decode_time_microseconds": 24,
@@ -252,7 +220,7 @@
     "@timestamp": "0001-01-01T00:00:00Z",
     "traceId": "e3335d43c7790064a14318ef59602e56",
     "traceState": ""
-  }
+  },
   {
     "attributes": {
       "data_stream": {
@@ -320,23 +288,7 @@
       },
       "db.instance": "ffs",
       "db.name": "ffs",
-      "db.statement": ""
-      "SELECT f0."
-      id
-      ", f0."
-      description
-      ", f0."
-      enabled
-      ", f0."
-      name
-      ", f0."
-      inserted_at
-      ", f0."
-      updated_at
-      " FROM "
-      featureflags
-      " AS f0"
-      "",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
       "db.type": "sql",
       "db.url": "ecto://ffs_postgres",
       "decode_time_microseconds": 11,
@@ -447,23 +399,7 @@
       },
       "db.instance": "ffs",
       "db.name": "ffs",
-      "db.statement": ""
-      "SELECT f0."
-      id
-      ", f0."
-      description
-      ", f0."
-      enabled
-      ", f0."
-      name
-      ", f0."
-      inserted_at
-      ", f0."
-      updated_at
-      " FROM "
-      featureflags
-      " AS f0"
-      "",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
       "db.type": "sql",
       "db.url": "ecto://ffs_postgres",
       "decode_time_microseconds": 104,
@@ -574,23 +510,7 @@
       },
       "db.instance": "ffs",
       "db.name": "ffs",
-      "db.statement": ""
-      "SELECT f0."
-      id
-      ", f0."
-      description
-      ", f0."
-      enabled
-      ", f0."
-      name
-      ", f0."
-      inserted_at
-      ", f0."
-      updated_at
-      " FROM "
-      featureflags
-      " AS f0"
-      "",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
       "db.type": "sql",
       "db.url": "ecto://ffs_postgres",
       "decode_time_microseconds": 10,
