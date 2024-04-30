@@ -407,17 +407,15 @@ export class ObservabilityPlugin
               type: s3ds.connector.toLowerCase(),
               metadata: {
                 ...s3ds.properties,
-                ...{
-                  ui: {
-                    label: s3ds.name,
-                    typeLabel:
-                      s3ds.connector.toLowerCase() === DATA_SOURCE_TYPES.S3Glue
-                        ? S3_DATA_SOURCE_GROUP_DISPLAY_NAME
-                        : S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
-                    groupType: s3ds.connector.toLowerCase(),
-                    selector: {
-                      displayDatasetsAsSource: false,
-                    },
+                ui: {
+                  label: s3ds.name,
+                  typeLabel:
+                    s3ds.connector.toLowerCase() === DATA_SOURCE_TYPES.S3Glue
+                      ? S3_DATA_SOURCE_GROUP_DISPLAY_NAME
+                      : S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
+                  groupType: s3ds.connector.toLowerCase(),
+                  selector: {
+                    displayDatasetsAsSource: false,
                   },
                 },
               },

@@ -90,7 +90,7 @@ export const ACCELERATION_AGGREGRATION_FUNCTIONS = [
 ];
 
 export const SPARK_PARTITION_INFO = `# Partition Information`;
-export const OBS_DEFAULT_CLUSTER = 'observability-default';
-export const OBS_S3_DATA_SOURCE = 'observability-s3';
-export const S3_DATA_SOURCE_GROUP_DISPLAY_NAME = 'Amazon S3';
-export const S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME = 'OpenSearch Spark';
+export const OBS_DEFAULT_CLUSTER = 'observability-default'; // prefix key for generating data source id for default cluster in data selector
+export const OBS_S3_DATA_SOURCE = 'observability-s3'; // prefix key for generating data source id for s3 data sources in data selector
+export const S3_DATA_SOURCE_GROUP_DISPLAY_NAME = 'Amazon S3'; // display group name for Amazon-managed-s3 data sources in data selector
+export const S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME = 'OpenSearch Spark'; // display group name for OpenSearch-spark-s3 data sources in data selector
