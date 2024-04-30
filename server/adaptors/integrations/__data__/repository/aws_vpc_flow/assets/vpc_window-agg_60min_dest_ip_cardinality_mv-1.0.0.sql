@@ -33,4 +33,3 @@ ORDER BY
 WITH (
   auto_refresh = false
 )
-

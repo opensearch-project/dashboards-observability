@@ -13,6 +13,18 @@ interface Properties {
   [key: string]: Properties | object;
 }
 
+interface AddIntegrationRequestParams {
+  addSample: boolean;
+  templateName: string;
+  integration: IntegrationConfig;
+  setToast: (title: string, color?: Color, text?: string | undefined) => void;
+  name?: string;
+  indexPattern?: string;
+  workflows?: string[];
+  skipRedirect?: boolean;
+  dataSourceInfo?: { dataSource: string; tableName: string };
+}
+
 interface ComponentMappingPayload {
   template: { mappings: { _meta: { version: string } } };
   composed_of: string[];
@@ -277,28 +289,27 @@ const createIndexPatternMappings = async (
   }
 };
 
-export async function addIntegrationRequest(
-  addSample: boolean,
-  templateName: string,
-  integrationTemplateId: string,
-  integration: IntegrationConfig,
-  setToast: (title: string, color?: Color, text?: string | undefined) => void,
-  name?: string,
-  indexPattern?: string,
-  workflows?: string[],
-  skipRedirect?: boolean,
-  dataSourceInfo?: { dataSource: string; tableName: string }
-): Promise<boolean> {
+export async function addIntegrationRequest({
+  addSample,
+  templateName,
+  integration,
+  setToast,
+  name,
+  indexPattern,
+  workflows,
+  skipRedirect,
+  dataSourceInfo,
+}: AddIntegrationRequestParams): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
     createIndexPatternMappings(
-      `ss4o_${integration.type}-${integrationTemplateId}-*-sample`,
-      integrationTemplateId,
+      `ss4o_${integration.type}-${templateName}-*-sample`,
+      templateName,
       integration,
       setToast
     );
-    name = `${integrationTemplateId}-sample`;
-    indexPattern = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
+    name = `${templateName}-sample`;
+    indexPattern = `ss4o_${integration.type}-${templateName}-sample-sample`;
   }
 
   const createReqBody: {

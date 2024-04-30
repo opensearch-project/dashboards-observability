@@ -35,4 +35,4 @@ OPTIONS (
   sep=' ',
   compression='gzip',
   recursiveFileLookup='true'
-);
+)
