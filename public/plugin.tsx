@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import React from 'react';
+import { i18n } from '@osd/i18n';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
   AppCategory,
   AppMountParameters,
@@ -95,6 +96,12 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import {
+  DATA_SOURCE_TYPES,
+  OBS_S3_DATA_SOURCE,
+  S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
+  S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
+} from '../common/constants/data_sources';
 
 interface PublicConfig {
   query_assist: {
@@ -398,38 +405,63 @@ export class ObservabilityPlugin
     coreRefs.overlays = core.overlays;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
+    dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
+
+    const getDataSourceTypeLabel = (type: string) => {
+      if (type === DATA_SOURCE_TYPES.S3Glue) return S3_DATA_SOURCE_GROUP_DISPLAY_NAME;
+      if (type === DATA_SOURCE_TYPES.SPARK) return S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME;
+      return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
+    };
 
     // register all s3 datasources
-    const registerS3Datasource = () => {
-      dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-      core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-        s3DataSources.map((s3ds) => {
-          dataSourceService.registerDataSource(
-            dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
-              name: s3ds.name,
-              type: s3ds.connector.toLowerCase(),
-              metadata: s3ds,
-            })
-          );
+    const registerDataSources = () => {
+      try {
+        core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+          s3DataSources.map((s3ds) => {
+            dataSourceService.registerDataSource(
+              dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
+                id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
+                name: s3ds.name,
+                type: s3ds.connector.toLowerCase(),
+                metadata: {
+                  ...s3ds.properties,
+                  ui: {
+                    label: s3ds.name,
+                    typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
+                    groupType: s3ds.connector.toLowerCase(),
+                    selector: {
+                      displayDatasetsAsSource: false,
+                    },
+                  },
+                },
+              })
+            );
+          });
         });
-      });
+      } catch (error) {
+        console.error('Error registering S3 datasources', error);
+      }
     };
+
+    dataSourceService.registerDataSourceFetchers([
+      { type: S3_DATA_SOURCE_TYPE, registerDataSources },
+    ]);
 
     if (startDeps.securityDashboards) {
       core.http
         .get(SECURITY_PLUGIN_ACCOUNT_API)
         .then(() => {
-          registerS3Datasource();
+          registerDataSources();
         })
         .catch((e) => {
           if (e?.response?.status !== 401) {
             // accounts api should not return any error status other than 401 if security installed,
             // this datasource register is included just in case
-            registerS3Datasource();
+            registerDataSources();
           }
         });
     } else {
-      registerS3Datasource();
+      registerDataSources();
     }
 
     core.http.intercept({
