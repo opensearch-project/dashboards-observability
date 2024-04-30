@@ -98,6 +98,7 @@ const getMatchedOption = (
   dataSourceName: string,
   dataSourceType: string
 ) => {
+  if (!dataSourceName || !dataSourceType) return [];
   for (const dsGroup of dataSourceList) {
     const matchedOption = dsGroup.options.find(
       (item) => item.type === dataSourceType && item.name === dataSourceName
@@ -118,8 +119,8 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   const [selectedSources, setSelectedSources] = useState<SelectedDataSource[]>(
     getMatchedOption(
       dataSourceOptionList,
-      explorerSearchMetadata.datasources[0].name,
-      explorerSearchMetadata.datasources[0].type
+      explorerSearchMetadata.datasources?.[0]?.name || '',
+      explorerSearchMetadata.datasources?.[0]?.type || ''
     )
   );
 
@@ -173,8 +174,8 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     setSelectedSources(
       getMatchedOption(
         memorizedDataSourceOptionList,
-        explorerSearchMetadata.datasources[0].name,
-        explorerSearchMetadata.datasources[0].type
+        explorerSearchMetadata.datasources?.[0]?.name || '',
+        explorerSearchMetadata.datasources?.[0]?.type || ''
       )
     );
   }, [explorerSearchMetadata.datasources, dataSourceOptionList]);
