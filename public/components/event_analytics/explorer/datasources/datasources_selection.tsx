@@ -5,8 +5,10 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { htmlIdGenerator } from '@elastic/eui';
 import { LogExplorerRouterContext } from '../..';
 import {
+  DataSource,
   DataSourceGroup,
   DataSourceSelectable,
   DataSourceType,
@@ -20,6 +22,7 @@ import {
   DEFAULT_DATA_SOURCE_TYPE,
   DEFAULT_DATA_SOURCE_TYPE_NAME,
   INDEX_URL_PARAM_KEY,
+  OBS_DEFAULT_CLUSTER,
   OLLY_QUESTION_URL_PARAM_KEY,
   QUERY_LANGUAGE,
 } from '../../../../../common/constants/data_sources';
@@ -90,6 +93,21 @@ const removeDataSourceFromURLParams = (currURL: string) => {
   }
 };
 
+const getMatchedOption = (
+  dataSourceList: DataSourceGroup[],
+  dataSourceName: string,
+  dataSourceType: string
+) => {
+  if (!dataSourceName || !dataSourceType) return [];
+  for (const dsGroup of dataSourceList) {
+    const matchedOption = dsGroup.options.find(
+      (item) => item.type === dataSourceType && item.name === dataSourceName
+    );
+    if (matchedOption !== undefined) return [matchedOption];
+  }
+  return [];
+};
+
 export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   const { dataSources, http } = coreRefs;
   const sqlService = new SQLService(http!);
@@ -99,7 +117,11 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [selectedSources, setSelectedSources] = useState<SelectedDataSource[]>(
-    getDataSourceState(explorerSearchMetadata.datasources)
+    getMatchedOption(
+      dataSourceOptionList,
+      explorerSearchMetadata.datasources?.[0]?.name || '',
+      explorerSearchMetadata.datasources?.[0]?.type || ''
+    )
   );
 
   /**
@@ -149,8 +171,14 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   };
 
   useEffect(() => {
-    setSelectedSources(getDataSourceState(explorerSearchMetadata.datasources));
-  }, [explorerSearchMetadata.datasources]);
+    setSelectedSources(
+      getMatchedOption(
+        memorizedDataSourceOptionList,
+        explorerSearchMetadata.datasources?.[0]?.name || '',
+        explorerSearchMetadata.datasources?.[0]?.type || ''
+      )
+    );
+  }, [explorerSearchMetadata.datasources, dataSourceOptionList]);
 
   const handleDataSetFetchError = useCallback(() => {
     return (error: Error) => {
@@ -162,22 +190,33 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
    * Subscribe to data source updates and manage the active data sources state.
    */
   useEffect(() => {
-    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
-      (currentDataSources) => {
+    const subscription = dataSources.dataSourceService
+      .getDataSources$()
+      .subscribe((currentDataSources: DataSource[]) => {
         // temporary solution for 2.11 to render OpenSearch / default cluster for observability
         // local indices and index patterns, while keep listing all index patterns for data explorer
         // it filters the registered index pattern data sources in data plugin, and attach default cluster
         // for all indices
         setActiveDataSources([
           new ObservabilityDefaultDataSource({
+            id: htmlIdGenerator(OBS_DEFAULT_CLUSTER)(DEFAULT_DATA_SOURCE_TYPE),
             name: DEFAULT_DATA_SOURCE_NAME,
             type: DEFAULT_DATA_SOURCE_TYPE,
-            metadata: null,
+            metadata: {
+              ui: {
+                label: DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
+                groupType: DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
+                selector: {
+                  displayDatasetsAsSource: false, // when true, selector UI will render data sets with source by calling getDataSets()
+                },
+              },
+            },
           }),
-          ...Object.values(currentDataSources).filter((ds) => ds.type !== DEFAULT_DATA_SOURCE_TYPE),
+          ...Object.values(currentDataSources).filter(
+            (ds) => ds.getType() !== DEFAULT_DATA_SOURCE_TYPE
+          ),
         ]);
-      }
-    );
+      });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -259,6 +298,10 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     });
   }, [dataSourceOptionList]);
 
+  const onRefresh = useCallback(() => {
+    dataSources.dataSourceService.reload();
+  }, [dataSources.dataSourceService]);
+
   return (
     <DataSourceSelectable
       className="dsc-selector"
@@ -267,9 +310,10 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       setDataSourceOptionList={setDataSourceOptionList}
       selectedSources={selectedSources}
       onDataSourceSelect={handleSourceChange}
-      onFetchDataSetError={handleDataSetFetchError}
       singleSelection={{ asPlainText: true }}
       dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
+      onGetDataSetError={handleDataSetFetchError}
+      onRefresh={onRefresh}
     />
   );
 };

@@ -1,0 +1,111 @@
+{
+  "name": "otel-services",
+  "version": "1.0.0",
+  "displayName": "Otel Services Demo",
+  "description": "Otel Services Demo App with OpenSearch Observability",
+  "license": "Apache-2.0",
+  "type": "traces",
+  "labels": ["log", "traces", "metrics"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/otel-services/info",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": false
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "OpenTelemetry Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "OTEL Demo Architecture",
+        "path": "dashboard1.png"
+      },
+      {
+        "annotation": "OTEL Demo Tutorial",
+        "path": "dashboard2.png"
+      },
+      {
+        "annotation": "OTEL Services Dashboard - 1",
+        "path": "dashboard3.png"
+      },
+      {
+        "annotation": "OTEL Traces Gantt Dashboard - 2",
+        "path": "dashboard4.png"
+      },
+      {
+        "annotation": "OTEL AMP Metrics Dashboard",
+        "path": "dashboard5.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "logs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "metrics",
+      "version": "1.0.0"
+    },
+    {
+      "name": "services",
+      "version": "1.0.0"
+    },
+    {
+      "name": "traces",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+      {
+        "name": "otel_services_dashboard",
+        "version": "1.0.0",
+        "extension": "ndjson",
+        "type": "savedObjectBundle",
+        "workflows": ["dashboards"]
+      },
+      {
+        "name": "otel_single_service_dashboard",
+        "version": "1.0.0",
+        "extension": "ndjson",
+        "type": "savedObjectBundle",
+        "workflows": ["dashboards"]
+      },
+      {
+        "name": "otel_ingestion_rate_dashboard",
+        "version": "1.0.0",
+        "extension": "ndjson",
+        "type": "savedObjectBundle",
+        "workflows": ["dashboards"]
+      },
+      {
+        "name": "otel_amp_network_metrics_dashboard",
+        "version": "1.0.0",
+        "extension": "ndjson",
+        "type": "savedObjectBundle",
+        "workflows": ["dashboards"]
+      },
+      {
+        "name": "otel_apm_network_services",
+        "version": "1.0.0",
+        "extension": "ndjson",
+        "type": "savedObjectBundle",
+        "workflows": ["dashboards"]
+      }
+    ],
+  "sampleData": {
+    "path": "traces-samples.json"
+  }
+}

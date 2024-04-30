@@ -209,41 +209,7 @@ export const DataConnection = (props: { dataSource: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome, http]);
 
-  const tabs = [
-    {
-      id: 'associated_objects',
-      name: 'Associated Objects',
-      disabled: false,
-      content: (
-        <AssociatedObjectsTab
-          datasource={datasourceDetails}
-          cacheLoadingHooks={cacheLoadingHooks}
-          selectedDatabase={selectedDatabase}
-          setSelectedDatabase={setSelectedDatabase}
-        />
-      ),
-    },
-    {
-      id: 'acceleration_table',
-      name: 'Accelerations',
-      disabled: false,
-      content: (
-        <AccelerationTable dataSourceName={dataSource} cacheLoadingHooks={cacheLoadingHooks} />
-      ),
-    },
-    {
-      id: 'installed_integrations',
-      name: 'Installed Integrations',
-      disabled: false,
-      content: (
-        <InstalledIntegrationsTable
-          integrations={dataSourceIntegrations}
-          datasourceType={datasourceDetails.connector}
-          datasourceName={datasourceDetails.name}
-          refreshInstances={refreshInstances}
-        />
-      ),
-    },
+  const genericTabs = [
     {
       id: 'access_control',
       name: 'Access control',
@@ -259,6 +225,51 @@ export const DataConnection = (props: { dataSource: string }) => {
       ),
     },
   ];
+
+  const conditionalTabs =
+    datasourceDetails.connector === 'S3GLUE'
+      ? [
+          {
+            id: 'associated_objects',
+            name: 'Associated Objects',
+            disabled: false,
+            content: (
+              <AssociatedObjectsTab
+                datasource={datasourceDetails}
+                cacheLoadingHooks={cacheLoadingHooks}
+                selectedDatabase={selectedDatabase}
+                setSelectedDatabase={setSelectedDatabase}
+              />
+            ),
+          },
+          {
+            id: 'acceleration_table',
+            name: 'Accelerations',
+            disabled: false,
+            content: (
+              <AccelerationTable
+                dataSourceName={dataSource}
+                cacheLoadingHooks={cacheLoadingHooks}
+              />
+            ),
+          },
+          {
+            id: 'installed_integrations',
+            name: 'Installed Integrations',
+            disabled: false,
+            content: (
+              <InstalledIntegrationsTable
+                integrations={dataSourceIntegrations}
+                datasourceType={datasourceDetails.connector}
+                datasourceName={datasourceDetails.name}
+                refreshInstances={refreshInstances}
+              />
+            ),
+          },
+        ]
+      : [];
+
+  const tabs = [...conditionalTabs, ...genericTabs];
 
   const QueryOrAccelerateData = () => {
     switch (datasourceDetails.connector) {
