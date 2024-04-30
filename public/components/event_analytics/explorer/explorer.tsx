@@ -44,6 +44,7 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
+  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -63,6 +64,7 @@ import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
+  PPL_DESCRIBE_INDEX_REGEX,
   PPL_METRIC_SUBTYPE,
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
@@ -540,12 +542,17 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const showTimeBasedComponents =
+    (isDefaultDataSourceType || appLogEvents) &&
+    query[SELECTED_TIMESTAMP] !== '' &&
+    !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX);
+
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {(isDefaultDataSourceType || appLogEvents) && query[SELECTED_TIMESTAMP] !== '' && (
+            {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
@@ -594,7 +601,7 @@ export const Explorer = ({
                 </EuiFlexItem>
               </>
             )}
-            {(isDefaultDataSourceType || appLogEvents) && query[SELECTED_TIMESTAMP] !== '' && (
+            {showTimeBasedComponents && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
@@ -643,11 +650,14 @@ export const Explorer = ({
                         rows={explorerData.jsonData}
                         rowsAll={explorerData.jsonDataAll}
                         explorerFields={explorerFields}
-                        timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                        timeStampField={
+                          !query[FINAL_QUERY].match(PPL_DESCRIBE_INDEX_REGEX)
+                            ? queryRef.current![SELECTED_TIMESTAMP]
+                            : ''
+                        }
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
-                          (isDefaultDataSourceType || appLogEvents) &&
-                          query[SELECTED_TIMESTAMP] !== ''
+                          showTimeBasedComponents
                             ? _.sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length
@@ -656,7 +666,7 @@ export const Explorer = ({
                         startTime={startTime}
                         endTime={endTime}
                         isDefaultDataSource={
-                          explorerSearchMeta.datasources[0].type === DEFAULT_DATA_SOURCE_TYPE
+                          explorerSearchMeta?.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE
                         }
                       />
                     )}
