@@ -704,16 +704,25 @@ export const constructOtelMetricsMetaData = () => {
   };
 };
 
+export const parseMetadataUserConfig = (
+  userConfigs?: string | SavedObjectAttributes
+): SavedObjectAttributes => {
+  if (userConfigs === undefined || userConfigs === '') {
+    return {};
+  } else if (typeof userConfigs === 'string') {
+    return JSON.parse(userConfigs);
+  } else {
+    return userConfigs;
+  }
+};
+
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
 
-  if (metaData.userConfigs !== undefined && metaData.userConfigs !== '') {
-    metaData.userConfigs = JSON.parse(metaData.userConfigs);
-  }
-
+  metaData.userConfigs = parseMetadataUserConfig(metaData.userConfigs);
   const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {

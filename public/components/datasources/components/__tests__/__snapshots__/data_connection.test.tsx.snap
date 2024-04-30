@@ -359,8 +359,8 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
         >
           <button
             aria-controls="random_html_id"
-            aria-selected="true"
-            class="euiTab euiTab-isSelected"
+            aria-selected="false"
+            class="euiTab"
             id="associated_objects"
             role="tab"
             type="button"
@@ -401,8 +401,8 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
           </button>
           <button
             aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
             id="access_control"
             role="tab"
             type="button"
@@ -415,7 +415,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
           </button>
         </div>
         <div
-          aria-labelledby="associated_objects"
+          aria-labelledby="access_control"
           id="random_html_id"
           role="tabpanel"
         >
@@ -446,8 +446,17 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               <span
                 class="euiCallOutHeader__title"
               >
-                Accelerations recommended for tables. Setup acceleration or configure integrations
+                Configurations may be managed elsewhere.
               </span>
+            </div>
+            <div
+              class="euiText euiText--small"
+            >
+              <div
+                class="euiTextColor euiTextColor--default"
+              >
+                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
             </div>
           </div>
           <div
@@ -457,7 +466,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
                 class="euiFlexItem"
@@ -468,39 +477,9 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                   <h2
                     class="panel-title"
                   >
-                    Associated objects
+                    Access control
                   </h2>
-                  Manage objects associated with this data sources.
-                </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <div
-                  class="euiText euiText--extraSmall"
-                >
-                  <div
-                    class="euiTextAlign euiTextAlign--right"
-                  >
-                    <div
-                      class="euiTextColor euiTextColor--subdued"
-                    >
-                      Last updated at:
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="euiText euiText--extraSmall"
-                >
-                  <div
-                    class="euiTextAlign euiTextAlign--right"
-                  >
-                    <div
-                      class="euiTextColor euiTextColor--subdued"
-                    >
-                      1/1/2024, 12:00:00 AM
-                    </div>
-                  </div>
+                  Control which OpenSearch users have access to this data source.
                 </div>
               </div>
               <div
@@ -508,38 +487,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               >
                 <button
                   class="euiButton euiButton--primary"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonContent euiButton__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
-                      />
-                    </svg>
-                    <span
-                      class="euiButton__text"
-                    >
-                      Refresh
-                    </span>
-                  </span>
-                </button>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <button
-                  class="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="createButton"
                   type="button"
                 >
                   <span
@@ -548,7 +496,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                     <span
                       class="euiButton__text"
                     >
-                      Create acceleration
+                      Edit
                     </span>
                   </span>
                 </button>
@@ -558,28 +506,35 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
             />
             <div
-              class="euiEmptyPrompt"
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <span
-                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
-              />
               <div
-                class="euiSpacer euiSpacer--m"
-              />
-              <span
-                class="euiTextColor euiTextColor--subdued"
+                class="euiFlexItem"
               >
                 <div
-                  class="euiText euiText--medium"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 >
-                  <p>
-                    Loading 
-                    databases
-                  </p>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiText euiText--medium overview-title"
+                    >
+                      Query access
+                    </div>
+                    <div
+                      class="euiText euiText--small overview-content"
+                    >
+                      Admin only
+                    </div>
+                  </div>
                 </div>
-              </span>
+              </div>
             </div>
           </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
           <div
             class="euiSpacer euiSpacer--l"
           />
