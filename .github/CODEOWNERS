@@ -1,16 +1,10 @@
 # Global Mask: All primary repository owners
-* @pjfitzgibbons @swiddis @mengweieric @kavithacm @paulstn
+* @swiddis @mengweieric @kavithacm @paulstn
 
 # Logs Explorer
 server/routes/event_analytics @mengweieric
 public/components/event_analytics @mengweieric
 .cypress/integration/event_analytics_test @mengweieric
-
-# Panels
-server/adaptors/custom_panels @pjfitzgibbons
-server/routes/custom_panels @pjfitzgibbons
-public/components/custom_panels @pjfitzgibbons
-.cypress/integration/panels_test @pjfitzgibbons
 
 # App Analytics
 server/adaptors/application_analytics @paulstn
@@ -47,4 +41,4 @@ public/components/datasources @RyanL1997
 .cypress/integration/datasources_test @RyanL1997
 
 # Maintainer updates affect everyone (https://github.com/opensearch-project/OpenSearch/pull/11600)
-MAINTAINERS.md @pjfitzgibbons @ps48 @kavithacm @derek-ho @joshuali925 @dai-chen @YANG-DB @rupal-bq @mengweieric @vamsi-amazon @swiddis @penghuo @seankao-az @anirudha @paulstn @sumukhswamy @RyanL1997
+MAINTAINERS.md  @ps48 @kavithacm @derek-ho @joshuali925 @dai-chen @YANG-DB @rupal-bq @mengweieric @vamsi-amazon @swiddis @penghuo @seankao-az @anirudha @paulstn @sumukhswamy @RyanL1997
