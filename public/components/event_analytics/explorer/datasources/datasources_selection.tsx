@@ -299,7 +299,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
 
   const onRefresh = useCallback(() => {
     dataSources.dataSourceService.reload();
-  }, []);
+  }, [dataSources.dataSourceService]);
 
   return (
     <DataSourceSelectable
