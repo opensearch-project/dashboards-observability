@@ -37,6 +37,7 @@ const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegrati
 describe('The Local Serialized Catalog', () => {
   it('Should serialize without errors', async () => {
     const serialized = await fetchSerializedIntegrations();
+    expect(serialized.error).not.toBeDefined();
     expect(serialized.ok).toBe(true);
   });
 
