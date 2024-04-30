@@ -34,7 +34,7 @@ interface ObservabilityAppDeps {
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
-  savedObjectsMDSClient: CoreStart['savedObjects']
+  savedObjectsMDSClient: CoreStart['savedObjects'];
 }
 
 // for cypress to test redux store
@@ -66,7 +66,7 @@ export const App = ({
   dataSourceManagement,
   setActionMenu,
   dataSourceEnabled,
-  savedObjectsMDSClient
+  savedObjectsMDSClient,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {

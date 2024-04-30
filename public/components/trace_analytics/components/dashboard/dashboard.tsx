@@ -21,7 +21,7 @@ export interface DashboardProps extends TraceAnalyticsComponentDeps {
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
-  dataSourceMDSId: DataSourceOption[]
+  dataSourceMDSId: DataSourceOption[];
 }
 
 export function Dashboard(props: DashboardProps) {

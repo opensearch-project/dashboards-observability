@@ -192,6 +192,7 @@ export function DashboardContent(props: DashboardProps) {
         setPercentileMap
       ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {
+      console.log(dataSourceMDSId, 'traces page');
       handleDashboardRequest(
         http,
         DSL,

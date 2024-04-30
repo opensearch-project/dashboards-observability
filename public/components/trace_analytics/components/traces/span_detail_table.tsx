@@ -51,7 +51,15 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       size: tableParams.size,
       sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({ [id]: direction })),
     };
-    handleSpansRequest(props.http, setItems, setTotal, spanSearchParams, props.DSL, mode, props.dataSourceMDSId);
+    handleSpansRequest(
+      props.http,
+      setItems,
+      setTotal,
+      spanSearchParams,
+      props.DSL,
+      mode,
+      props.dataSourceMDSId
+    );
   }, [tableParams, props.DSL]);
 
   useEffect(() => {

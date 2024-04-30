@@ -34,7 +34,6 @@ export function TracesContent(props: TracesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
-    notifications,
     dataSourceManagement,
     dataSourceMDSId,
   } = props;

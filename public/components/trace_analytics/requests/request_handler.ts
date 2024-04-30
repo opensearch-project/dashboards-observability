@@ -19,7 +19,7 @@ export async function handleDslRequest(
   bodyQuery: any,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  setShowTimeoutToast?: () => void,
+  setShowTimeoutToast?: () => void
 ) {
   if (DSL?.query) {
     bodyQuery.query.bool.must.push(...DSL.query.bool.must);
@@ -33,11 +33,10 @@ export async function handleDslRequest(
   if (!bodyQuery.index) {
     body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
   }
-  let query = {
-    dataSourceMDSId: dataSourceMDSId
-  }
+  const query = {
+    dataSourceMDSId: dataSourceMDSId,
+  };
   if (setShowTimeoutToast) {
-    
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
 
     try {
@@ -51,7 +50,6 @@ export async function handleDslRequest(
       clearTimeout(id);
     }
   } else {
-
     try {
       return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
         body: JSON.stringify(body),
@@ -66,14 +64,14 @@ export async function handleDslRequest(
 export async function handleJaegerIndicesExistRequest(
   http: CoreStart['http'],
   setJaegerIndicesExist,
-  dataSourceMDSId? : string
+  dataSourceMDSId?: string
 ) {
-  let query = {
-    dataSourceMDSId: dataSourceMDSId
-  }
+  const query = {
+    dataSourceMDSId: dataSourceMDSId,
+  };
   http
-    .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,{
-      query
+    .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE, {
+      query,
     })
     .then((exists) => setJaegerIndicesExist(exists))
     .catch(() => setJaegerIndicesExist(false));
@@ -82,14 +80,14 @@ export async function handleJaegerIndicesExistRequest(
 export async function handleDataPrepperIndicesExistRequest(
   http: CoreStart['http'],
   setDataPrepperIndicesExist,
-  dataSourceMDSId? : string
+  dataSourceMDSId?: string
 ) {
-  let query = {
-    dataSourceMDSId: dataSourceMDSId
-  }
+  const query = {
+    dataSourceMDSId: dataSourceMDSId,
+  };
   http
-    .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,{
-      query
+    .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE, {
+      query,
     })
     .then((exists) => setDataPrepperIndicesExist(exists))
     .catch(() => setDataPrepperIndicesExist(false));

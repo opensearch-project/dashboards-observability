@@ -27,7 +27,7 @@ export function SpanDetailPanel(props: {
   http: HttpSetup;
   traceId: string;
   colorMap: any;
-  mode: TraceAnalyticsMode
+  mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
   page?: string;
   openSpanFlyout?: any;
@@ -82,41 +82,52 @@ export function SpanDetailPanel(props: {
     if (_.isEmpty(props.colorMap)) return;
     const refreshDSL = spanFiltersToDSL();
     setDSL(refreshDSL);
-    handleSpansGanttRequest(props.traceId, props.http, setData, props.colorMap, refreshDSL, mode, props.dataSourceMDSId);
+    handleSpansGanttRequest(
+      props.traceId,
+      props.http,
+      setData,
+      props.colorMap,
+      refreshDSL,
+      mode,
+      props.dataSourceMDSId
+    );
   }, 150);
 
   const spanFiltersToDSL = () => {
-    const spanDSL: any = mode === 'jaeger' ? {
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                traceID: props.traceId,
+    const spanDSL: any =
+      mode === 'jaeger'
+        ? {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      traceID: props.traceId,
+                    },
+                  },
+                ],
+                filter: [],
+                should: [],
+                must_not: [],
               },
             },
-          ],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      },
-    } : {
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                traceId: props.traceId,
+          }
+        : {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      traceId: props.traceId,
+                    },
+                  },
+                ],
+                filter: [],
+                should: [],
+                must_not: [],
               },
             },
-          ],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      },
-    };
+          };
     spanFilters.map(({ field, value }) => {
       if (value != null) {
         spanDSL.query.bool.must.push({
@@ -165,10 +176,10 @@ export function SpanDetailPanel(props: {
     };
   };
 
-  const layout = useMemo(
-    () => getSpanDetailLayout(data.gantt, data.ganttMaxX),
-    [data.gantt, data.ganttMaxX]
-  );
+  const layout = useMemo(() => getSpanDetailLayout(data.gantt, data.ganttMaxX), [
+    data.gantt,
+    data.ganttMaxX,
+  ]);
 
   const [currentSpan, setCurrentSpan] = useState('');
 
@@ -240,7 +251,7 @@ export function SpanDetailPanel(props: {
 
   return (
     <>
-      <EuiPanel data-test-subj='span-gantt-chart-panel'>
+      <EuiPanel data-test-subj="span-gantt-chart-panel">
         <EuiFlexGroup>
           <EuiFlexItem>
             <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />

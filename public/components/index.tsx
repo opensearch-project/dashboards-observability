@@ -11,7 +11,6 @@ import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_so
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
 
-
 export const Observability = (
   CoreStartProp: CoreStart,
   DepsStart: AppPluginStartDependencies,
@@ -26,7 +25,7 @@ export const Observability = (
   dataSourceManagement: DataSourceManagementPluginSetup,
   savedObjectsMDSClient: CoreStart['savedObjects']
 ) => {
-  const { setHeaderActionMenu } = AppMountParametersProp
+  const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
   ReactDOM.render(
     <App

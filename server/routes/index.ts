@@ -25,7 +25,15 @@ import { registerPplRoute } from './ppl';
 import { registerQueryAssistRoutes } from './query_assist/routes';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 
-export function setupRoutes({ router, client, dataSourceEnabled }: { router: IRouter; client: ILegacyClusterClient, dataSourceEnabled: boolean }) {
+export function setupRoutes({
+  router,
+  client,
+  dataSourceEnabled,
+}: {
+  router: IRouter;
+  client: ILegacyClusterClient;
+  dataSourceEnabled: boolean;
+}) {
   PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });

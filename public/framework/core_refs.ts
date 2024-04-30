@@ -33,7 +33,7 @@ class CoreRefs {
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   public overlays?: OverlayStart;
-  public dataSource?: DataSourcePluginStart
+  public dataSource?: DataSourcePluginStart;
   private constructor() {
     // ...
   }

@@ -97,7 +97,7 @@ export const Home = (props: HomeProps) => {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  let [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
+  const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
