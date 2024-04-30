@@ -90,3 +90,7 @@ export const ACCELERATION_AGGREGRATION_FUNCTIONS = [
 ];
 
 export const SPARK_PARTITION_INFO = `# Partition Information`;
+export const OBS_DEFAULT_CLUSTER = 'observability-default';
+export const OBS_S3_DATA_SOURCE = 'observability-s3';
+export const S3_DATA_SOURCE_GROUP_DISPLAY_NAME = 'Amazon S3';
+export const S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME = 'OpenSearch Spark';
