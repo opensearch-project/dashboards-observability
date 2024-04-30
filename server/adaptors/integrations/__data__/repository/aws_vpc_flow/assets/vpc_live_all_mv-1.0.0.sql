@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {table_name}__week_live_mview AS
+CREATE MATERIALIZED VIEW {table_name}__live_mview AS
   SELECT
     cloud.account_uid AS `aws.vpc.cloud_account_uid`,
     cloud.region AS `aws.vpc.cloud_region`,

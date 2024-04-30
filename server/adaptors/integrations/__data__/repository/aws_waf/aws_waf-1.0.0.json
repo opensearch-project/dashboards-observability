@@ -73,6 +73,20 @@
       "type": "query",
       "workflows": ["dashboards"]
 
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
     }
   ],
   "sampleData": {
