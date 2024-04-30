@@ -18,10 +18,10 @@ export function get<T = unknown>(obj: Record<string, any>, path: string, default
 }
 
 export function addBackticksIfNeeded(input: string): string {
-  // Check if the string already has backticks
   if (input === undefined) {
     return '';
   }
+  // Check if the string already has backticks
   if (input.startsWith('`') && input.endsWith('`')) {
     return input; // Return the string as it is
   } else {

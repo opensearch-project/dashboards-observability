@@ -44,22 +44,16 @@ export class CatalogCacheManager {
    * Retrieves data source cache from local storage.
    * @returns {DataSourceCacheData} The retrieved data source cache.
    */
-  static getDataSourceCache(dataSourceMDSId?: string): DataSourceCacheData {
+  static getDataSourceCache(): DataSourceCacheData {
     const catalogData = sessionStorage.getItem(this.datasourceCacheKey);
+
     if (catalogData) {
-      const cachedData = JSON.parse(catalogData);
-      if (dataSourceMDSId && cachedData.dataSourceMDSId === dataSourceMDSId) {
-        return cachedData;
-      }
-      return cachedData;
+      return JSON.parse(catalogData);
+    } else {
+      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
+      this.saveDataSourceCache(defaultCacheObject);
+      return defaultCacheObject;
     }
-    const defaultCacheObject = {
-      ...(dataSourceMDSId && { dataSourceMDSId }),
-      version: CATALOG_CACHE_VERSION,
-      dataSources: [],
-    };
-    this.saveDataSourceCache(defaultCacheObject);
-    return defaultCacheObject;
   }
 
   /**
@@ -74,23 +68,19 @@ export class CatalogCacheManager {
    * Retrieves accelerations cache from local storage.
    * @returns {AccelerationsCacheData} The retrieved accelerations cache.
    */
-  static getAccelerationsCache(dataSourceMDSId?: string): AccelerationsCacheData {
+  static getAccelerationsCache(): AccelerationsCacheData {
     const accelerationCacheData = sessionStorage.getItem(this.accelerationsCacheKey);
 
     if (accelerationCacheData) {
-      const cachedAcclerationData = JSON.parse(accelerationCacheData);
-      if (dataSourceMDSId && cachedAcclerationData.dataSourceMDSId === dataSourceMDSId) {
-        return cachedAcclerationData;
-      }
-      return cachedAcclerationData;
+      return JSON.parse(accelerationCacheData);
+    } else {
+      const defaultCacheObject = {
+        version: CATALOG_CACHE_VERSION,
+        dataSources: [],
+      };
+      this.saveAccelerationsCache(defaultCacheObject);
+      return defaultCacheObject;
     }
-    const defaultCacheObject = {
-      version: CATALOG_CACHE_VERSION,
-      ...(dataSourceMDSId && { dataSourceMDSId }),
-      dataSources: [],
-    };
-    this.saveAccelerationsCache(defaultCacheObject);
-    return defaultCacheObject;
   }
 
   /**
@@ -101,10 +91,19 @@ export class CatalogCacheManager {
     dataSource: CachedAccelerationByDataSource,
     dataSourceMDSId?: string
   ): void {
-    const accCacheData = this.getAccelerationsCache(dataSourceMDSId);
-    const index = accCacheData.dataSources.findIndex(
-      (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
-    );
+    let index;
+    const accCacheData = this.getAccelerationsCache();
+    if (dataSourceMDSId) {
+      index = accCacheData.dataSources.findIndex(
+        (ds: CachedAccelerationByDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    } else {
+      index = accCacheData.dataSources.findIndex(
+        (ds: CachedAccelerationByDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    }
     if (index !== -1) {
       accCacheData.dataSources[index] = dataSource;
     } else {
@@ -123,17 +122,28 @@ export class CatalogCacheManager {
     dataSourceName: string,
     dataSourceMDSId?: string
   ): CachedAccelerationByDataSource {
-    const accCacheData = this.getAccelerationsCache(dataSourceMDSId);
-    const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+    const accCacheData = this.getAccelerationsCache();
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = accCacheData.dataSources.find(
+        (ds) => ds.name === dataSourceName && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    } else {
+      cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+    }
 
     if (cachedDataSource) return cachedDataSource;
     else {
-      const defaultDataSourceObject = {
+      let defaultDataSourceObject: CachedAccelerationByDataSource = {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
         accelerations: [],
       };
+
+      if (dataSourceMDSId !== '' && dataSourceMDSId !== undefined) {
+        defaultDataSourceObject = { ...defaultDataSourceObject, dataSourceMDSId };
+      }
       this.addOrUpdateAccelerationsByDataSource(defaultDataSourceObject, dataSourceMDSId);
       return defaultDataSourceObject;
     }
@@ -144,11 +154,15 @@ export class CatalogCacheManager {
    * @param {CachedDataSource} dataSource - The data source to add or update.
    */
   static addOrUpdateDataSource(dataSource: CachedDataSource, dataSourceMDSId?: string): void {
-    const cacheData = this.getDataSourceCache(dataSourceMDSId);
-
-    const index = cacheData.dataSources.findIndex(
-      (ds: CachedDataSource) => ds.name === dataSource.name
-    );
+    const cacheData = this.getDataSourceCache();
+    let index;
+    if (dataSourceMDSId) {
+      index = cacheData.dataSources.findIndex(
+        (ds: CachedDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    }
+    index = cacheData.dataSources.findIndex((ds: CachedDataSource) => ds.name === dataSource.name);
     if (index !== -1) {
       cacheData.dataSources[index] = dataSource;
     } else {
@@ -163,19 +177,28 @@ export class CatalogCacheManager {
    * @returns {CachedDataSource} The retrieved or created data source.
    */
   static getOrCreateDataSource(dataSourceName: string, dataSourceMDSId?: string): CachedDataSource {
-    const cacheData = this.getDataSourceCache(dataSourceMDSId);
-    const cachedDataSource = cacheData.dataSources.find(
-      (ds: CachedDataSource) => ds.name === dataSourceName
-    );
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
     if (cachedDataSource) {
       return cachedDataSource;
     } else {
-      const defaultDataSourceObject = {
+      let defaultDataSourceObject: CachedDataSource = {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
         databases: [],
       };
+      if (dataSourceMDSId !== '' && dataSourceMDSId !== undefined) {
+        defaultDataSourceObject = { ...defaultDataSourceObject, dataSourceMDSId };
+      }
       this.addOrUpdateDataSource(defaultDataSourceObject, dataSourceMDSId);
       return defaultDataSourceObject;
     }
@@ -193,9 +216,16 @@ export class CatalogCacheManager {
     databaseName: string,
     dataSourceMDSId?: string
   ): CachedDatabase {
-    const cachedDataSource = this.getDataSourceCache(dataSourceMDSId).dataSources.find(
-      (ds) => ds.name === dataSourceName
-    );
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
     if (!cachedDataSource) {
       throw new Error('DataSource not found exception: ' + dataSourceName);
     }
@@ -237,10 +267,22 @@ export class CatalogCacheManager {
    * @param {CachedDatabase} database - The database to be updated.
    * @throws {Error} If the data source or database is not found.
    */
-  static updateDatabase(dataSourceName: string, database: CachedDatabase): void {
-    const cachedDataSource = this.getDataSourceCache().dataSources.find(
-      (ds) => ds.name === dataSourceName
-    );
+  static updateDatabase(
+    dataSourceName: string,
+    database: CachedDatabase,
+    dataSourceMDSId?: string
+  ): void {
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
+
     if (!cachedDataSource) {
       throw new Error('DataSource not found exception: ' + dataSourceName);
     }
@@ -248,7 +290,7 @@ export class CatalogCacheManager {
     const index = cachedDataSource.databases.findIndex((db) => db.name === database.name);
     if (index !== -1) {
       cachedDataSource.databases[index] = database;
-      this.addOrUpdateDataSource(cachedDataSource);
+      this.addOrUpdateDataSource(cachedDataSource, dataSourceMDSId);
     } else {
       throw new Error('Database not found exception: ' + database.name);
     }

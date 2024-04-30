@@ -121,10 +121,10 @@ export interface CachedDataSource {
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
   databases: CachedDatabase[];
+  dataSourceMDSId?: string;
 }
 
 export interface DataSourceCacheData {
-  dataSourceMDSId?: string;
   version: string;
   dataSources: CachedDataSource[];
 }
@@ -144,11 +144,11 @@ export interface CachedAccelerationByDataSource {
   accelerations: CachedAcceleration[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
+  dataSourceMDSId?: string;
 }
 
 export interface AccelerationsCacheData {
   version: string;
-  dataSourceMDSId?: string;
   dataSources: CachedAccelerationByDataSource[];
 }
 
@@ -238,12 +238,6 @@ export interface CreateAccelerationForm {
   watermarkDelay: WatermarkDelayType;
   refreshIntervalOptions: RefreshIntervalType;
   formErrors: FormErrorsType;
-}
-export interface StartLoadingParams {
-  dataSourceName: string;
-  dataSourceMDSId?: string;
-  databaseName?: string;
-  tableName?: string;
 }
 
 export interface LoadCachehookOutput {

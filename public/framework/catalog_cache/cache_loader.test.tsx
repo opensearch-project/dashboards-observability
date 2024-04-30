@@ -66,12 +66,15 @@ describe('loadCacheTests', () => {
       updateDatabasesToCache(dataSourceName, pollingResult);
 
       // Verify that addOrUpdateDataSource is called with the correct parameters
-      expect(CatalogCacheManager.addOrUpdateDataSource).toHaveBeenCalledWith({
-        name: dataSourceName,
-        databases: [],
-        lastUpdated: expect.any(String),
-        status: CachedDataSourceStatus.Failed,
-      });
+      expect(CatalogCacheManager.addOrUpdateDataSource).toHaveBeenCalledWith(
+        {
+          name: dataSourceName,
+          databases: [],
+          lastUpdated: expect.any(String),
+          status: CachedDataSourceStatus.Failed,
+        },
+        undefined
+      );
     });
 
     it('should update cache with new databases when polling result is not null', () => {
@@ -79,15 +82,28 @@ describe('loadCacheTests', () => {
       updateDatabasesToCache(dataSourceName, mockShowDatabasesPollingResult);
 
       // Verify that addOrUpdateDataSource is called with the correct parameters
-      expect(CatalogCacheManager.addOrUpdateDataSource).toHaveBeenCalledWith({
-        name: dataSourceName,
-        databases: [
-          { name: 'Database1', tables: [], lastUpdated: '', status: CachedDataSourceStatus.Empty },
-          { name: 'Database2', tables: [], lastUpdated: '', status: CachedDataSourceStatus.Empty },
-        ],
-        lastUpdated: expect.any(String),
-        status: CachedDataSourceStatus.Updated,
-      });
+      expect(CatalogCacheManager.addOrUpdateDataSource).toHaveBeenCalledWith(
+        {
+          name: dataSourceName,
+          databases: [
+            {
+              name: 'Database1',
+              tables: [],
+              lastUpdated: '',
+              status: CachedDataSourceStatus.Empty,
+            },
+            {
+              name: 'Database2',
+              tables: [],
+              lastUpdated: '',
+              status: CachedDataSourceStatus.Empty,
+            },
+          ],
+          lastUpdated: expect.any(String),
+          status: CachedDataSourceStatus.Updated,
+        },
+        undefined
+      );
     });
   });
 
@@ -97,19 +113,22 @@ describe('loadCacheTests', () => {
       const databaseName = 'TestDatabase';
       const pollingResult = null;
 
-      CatalogCacheManager.addOrUpdateDataSource({
-        databases: [
-          {
-            name: databaseName,
-            lastUpdated: '',
-            status: CachedDataSourceStatus.Empty,
-            tables: [],
-          },
-        ],
-        name: dataSourceName,
-        lastUpdated: new Date().toUTCString(),
-        status: CachedDataSourceStatus.Updated,
-      });
+      CatalogCacheManager.addOrUpdateDataSource(
+        {
+          databases: [
+            {
+              name: databaseName,
+              lastUpdated: '',
+              status: CachedDataSourceStatus.Empty,
+              tables: [],
+            },
+          ],
+          name: dataSourceName,
+          lastUpdated: new Date().toUTCString(),
+          status: CachedDataSourceStatus.Updated,
+        },
+        undefined
+      );
       updateTablesToCache(dataSourceName, databaseName, pollingResult);
 
       // Verify that updateDatabase is called with the correct parameters
@@ -120,7 +139,8 @@ describe('loadCacheTests', () => {
           tables: [],
           lastUpdated: expect.any(String),
           status: CachedDataSourceStatus.Failed,
-        })
+        }),
+        undefined
       );
     });
 
@@ -151,7 +171,8 @@ describe('loadCacheTests', () => {
           tables: [{ name: 'http_logs1' }, { name: 'http_logs2' }],
           lastUpdated: expect.any(String),
           status: CachedDataSourceStatus.Updated,
-        })
+        }),
+        undefined
       );
     });
   });
@@ -170,7 +191,6 @@ describe('loadCacheTests', () => {
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
         version: CATALOG_CACHE_VERSION,
-        dataSourceMDSId: '',
         dataSources: [
           {
             name: 'sampleDS',
@@ -188,7 +208,6 @@ describe('loadCacheTests', () => {
       // Verify that saveAccelerationsCache is called with the correct parameters
       expect(CatalogCacheManager.saveAccelerationsCache).toHaveBeenCalledWith({
         version: CATALOG_CACHE_VERSION,
-        dataSourceMDSId: '',
         dataSources: [
           {
             name: 'sampleDS',

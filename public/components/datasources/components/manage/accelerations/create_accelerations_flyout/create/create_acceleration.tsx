@@ -231,6 +231,7 @@ export const CreateAcceleration = ({
               selectedDatasource={selectedDatasource}
               dataSourcesPreselected={dataSourcesPreselected}
               tableFieldsLoading={tableFieldsLoading}
+              dataSourceMDSId={dataSourceMDSId}
             />
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
