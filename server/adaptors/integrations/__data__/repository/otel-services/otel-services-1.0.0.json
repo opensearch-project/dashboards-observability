@@ -5,7 +5,7 @@
   "description": "Otel Services Demo App with OpenSearch Observability",
   "license": "Apache-2.0",
   "type": "traces",
-  "labels": ["log", "traces", "metrics", "Flint S3"],
+  "labels": ["log", "traces", "metrics"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/otel-services/info",
   "workflows": [
@@ -70,35 +70,35 @@
   ],
   "assets": [
       {
-        "name": "otel-services-dashboard",
+        "name": "otel_services_dashboard",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
         "workflows": ["dashboards"]
       },
       {
-        "name": "otel-single-service-dashboard",
+        "name": "otel_single_service_dashboard",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
         "workflows": ["dashboards"]
       },
       {
-        "name": "otel-ingestion-rate-dashboard",
+        "name": "otel_ingestion_rate_dashboard",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
         "workflows": ["dashboards"]
       },
       {
-        "name": "otel-amp-network-metrics-dashboard",
+        "name": "otel_amp_network_metrics_dashboard",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
         "workflows": ["dashboards"]
       },
       {
-        "name": "otel-apm-network-services",
+        "name": "otel_apm_network_services",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
