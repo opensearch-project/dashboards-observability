@@ -13,7 +13,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Rupal Mahajan           | [rupal-bq](https://github.com/rupal-bq)           | Amazon      |
 | Derek Ho                | [derek-ho](https://github.com/derek-ho)           | Amazon      |
 | Lior Perry              | [YANG-DB](https://github.com/YANG-DB)             | Amazon      |
-| Peter Fitzgibbons       | [pjfitzgibbons](https://github.com/pjfitzgibbons) | Amazon      |
 | Simeon Widdis           | [swiddis](https://github.com/swiddis)             | Amazon      |
 | Chen Dai                | [dai-chen](https://github.com/dai-chen)           | Amazon      |
 | Vamsi Manohar           | [vamsi-amazon](https://github.com/vamsi-amazon)   | Amazon      |
@@ -34,3 +33,4 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Eugene Lee        | [eugenesk24](https://github.com/eugenesk24)             | Amazon      |
 | Zhongnan Su       | [zhongnansu](https://github.com/zhongnansu)             | Amazon      |
 | Sean Li           | [sejli](https://github.com/sejli)                       | Amazon      |
+| Peter Fitzgibbons | [pjfitzgibbons](https://github.com/pjfitzgibbons)       | Amazon      |
