@@ -21,6 +21,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
+  S3_DATA_SOURCE_TYPE,
   SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
@@ -47,7 +48,6 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  S3_DATA_SOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
@@ -116,14 +116,24 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  (acceleration: CachedAcceleration, dataSourceName: string, handleRefresh?: () => void) => void
+  (
+    acceleration: CachedAcceleration,
+    dataSourceName: string,
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
+  ) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
 ] = createGetterSetter<
-  (tableDetail: AssociatedObject, datasourceName: string, handleRefresh?: () => void) => void
+  (
+    tableDetail: AssociatedObject,
+    datasourceName: string,
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
+  ) => void
 >('renderAssociatedObjectsDetailsFlyout');
 
 export const [
@@ -132,6 +142,7 @@ export const [
 ] = createGetterSetter<
   (
     dataSource: string,
+    dataSourceMDSId?: string,
     databaseName?: string,
     tableName?: string,
     handleRefresh?: () => void
@@ -248,6 +259,7 @@ export class ObservabilityPlugin
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
+      const { dataSourceManagement } = setupDeps;
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -258,7 +270,9 @@ export class ObservabilityPlugin
         timestampUtils,
         qm,
         startPage,
-        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
+        dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
+        dataSourceManagement,
+        coreStart.savedObjects
       );
     };
 
@@ -392,6 +406,7 @@ export class ObservabilityPlugin
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
+    coreRefs.dataSource = startDeps.dataSource;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
@@ -461,7 +476,8 @@ export class ObservabilityPlugin
     const renderAccelerationDetailsFlyout = (
       acceleration: CachedAcceleration,
       dataSourceName: string,
-      handleRefresh?: () => void
+      handleRefresh?: () => void,
+      dataSourceMDSId?: string
     ) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -470,6 +486,7 @@ export class ObservabilityPlugin
             dataSourceName={dataSourceName}
             resetFlyout={() => accelerationDetailsFlyout.close()}
             handleRefresh={handleRefresh}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );
@@ -479,7 +496,8 @@ export class ObservabilityPlugin
     const renderAssociatedObjectsDetailsFlyout = (
       tableDetail: AssociatedObject,
       datasourceName: string,
-      handleRefresh?: () => void
+      handleRefresh?: () => void,
+      dataSourceMDSId?: string
     ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -488,6 +506,7 @@ export class ObservabilityPlugin
             datasourceName={datasourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );
@@ -496,6 +515,7 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
+      dataSourceMDSId?: string,
       databaseName?: string,
       tableName?: string,
       handleRefresh?: () => void
@@ -508,6 +528,7 @@ export class ObservabilityPlugin
             databaseName={databaseName}
             tableName={tableName}
             refreshHandler={handleRefresh}
+            dataSourceMDSId={dataSourceMDSId}
           />
         )
       );
