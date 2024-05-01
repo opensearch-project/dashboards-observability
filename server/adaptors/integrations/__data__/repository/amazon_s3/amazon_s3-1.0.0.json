@@ -1,5 +1,5 @@
 {
-  "name": "aws_s3",
+  "name": "amazon_s3",
   "version": "1.0.0",
   "displayName": "Amazon S3",
   "description": "Analyze Amazon S3 server logs.",
