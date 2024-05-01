@@ -137,6 +137,7 @@ exports[`Trace view component renders trace view 1`] = `
                 "table": Array [],
               }
             }
+            dataSourceMDSId=""
             http={[MockFunction]}
             mode="data_prepper"
             setData={[Function]}
