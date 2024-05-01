@@ -30,11 +30,13 @@ import { GenerateFields } from './generate_fields';
 interface SkippingIndexBuilderProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
+  dataSourceMDSId?: string;
 }
 
 export const SkippingIndexBuilder = ({
   accelerationFormData,
   setAccelerationFormData,
+  dataSourceMDSId,
 }: SkippingIndexBuilderProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -200,6 +202,7 @@ export const SkippingIndexBuilder = ({
             setIsSkippingtableLoading={setIsSkippingtableLoading}
             accelerationFormData={accelerationFormData}
             setAccelerationFormData={setAccelerationFormData}
+            dataSourceMDSId={dataSourceMDSId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
