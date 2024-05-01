@@ -152,6 +152,14 @@ exports[`Traces component renders empty traces page 1`] = `
     }
   }
   dataPrepperIndicesExist={true}
+  dataSourceMDSId={
+    Array [
+      Object {
+        "id": "",
+        "label": "",
+      },
+    ]
+  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -469,6 +477,14 @@ exports[`Traces component renders empty traces page 1`] = `
       }
     }
     dataPrepperIndicesExist={true}
+    dataSourceMDSId={
+      Array [
+        Object {
+          "id": "",
+          "label": "",
+        },
+      ]
+    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
@@ -1638,6 +1654,14 @@ exports[`Traces component renders jaeger traces page 1`] = `
     }
   }
   dataPrepperIndicesExist={false}
+  dataSourceMDSId={
+    Array [
+      Object {
+        "id": "",
+        "label": "",
+      },
+    ]
+  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -1956,6 +1980,14 @@ exports[`Traces component renders jaeger traces page 1`] = `
       }
     }
     dataPrepperIndicesExist={false}
+    dataSourceMDSId={
+      Array [
+        Object {
+          "id": "",
+          "label": "",
+        },
+      ]
+    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
@@ -3132,6 +3164,14 @@ exports[`Traces component renders traces page 1`] = `
     }
   }
   dataPrepperIndicesExist={true}
+  dataSourceMDSId={
+    Array [
+      Object {
+        "id": "",
+        "label": "",
+      },
+    ]
+  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -3449,6 +3489,14 @@ exports[`Traces component renders traces page 1`] = `
       }
     }
     dataPrepperIndicesExist={true}
+    dataSourceMDSId={
+      Array [
+        Object {
+          "id": "",
+          "label": "",
+        },
+      ]
+    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
