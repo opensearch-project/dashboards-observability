@@ -35,7 +35,7 @@ const sessionStorageMock = (() => {
 
 Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
 
-describe('Intercept error handler', () => {
+describe('Intercept logout handler', () => {
   beforeEach(() => {
     jest.spyOn(window.sessionStorage, 'removeItem');
   });
@@ -48,7 +48,7 @@ describe('Intercept error handler', () => {
     path: SECURITY_DASHBOARDS_LOGOUT_URL,
   };
 
-  it('Intercept error handler should clear the cache session', () => {
+  it('Intercept logout handler should clear the cache session', () => {
     const logoutInterceptFn = catalogRequestIntercept();
     logoutInterceptFn(logoutPath, null);
     expect(sessionStorage.removeItem).toBeCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
