@@ -1,13 +1,25 @@
 {
-  "name": "aws_elb",
+  "name": "amazon_cloudfront",
   "version": "1.0.0",
-  "displayName": "Elastic Load Balancing",
-  "description": "Analyze access logs for Elastic Load Balancing.",
+  "displayName": "Amazon CloudFront",
+  "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
-  "type": "logs_elb",
-  "labels": ["Observability", "Logs", "AWS", "Flint S3", "Cloud"],
+  "type": "logs-aws_cloudfront",
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
+  "statics": {
+    "logo": {
+      "annotation": "CloudFront Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS cloudfront Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
   "workflows": [
     {
       "name": "queries",
@@ -22,25 +34,13 @@
       "enabled_by_default": false
     }
   ],
-  "statics": {
-    "logo": {
-      "annotation": "ELB Logo",
-      "path": "logo.svg"
-    },
-    "gallery": [
-      {
-        "annotation": "ELB Dashboard",
-        "path": "dashboard1.png"
-      }
-    ]
-  },
   "components": [
     {
-      "name": "communication",
+      "name": "aws_cloudfront",
       "version": "1.0.0"
     },
     {
-      "name": "http",
+      "name": "aws_s3",
       "version": "1.0.0"
     },
     {
@@ -48,26 +48,11 @@
       "version": "1.0.0"
     },
     {
-      "name": "aws_elb",
-      "version": "1.0.0"
-    },
-    {
-      "name": "url",
-      "version": "1.0.0"
-    },
-    {
-      "name": "logs_elb",
+      "name": "logs-aws_cloudfront",
       "version": "1.0.0"
     }
   ],
   "assets": [
-    {
-      "name": "aws_elb",
-      "version": "1.0.0",
-      "extension": "ndjson",
-      "type": "savedObjectBundle",
-      "workflows": ["dashboards"]
-    },
     {
       "name": "create_table",
       "version": "1.0.0",
@@ -82,6 +67,13 @@
       "workflows": ["queries"]
     },
     {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
       "name": "create_mv",
       "version": "1.0.0",
       "extension": "sql",
@@ -89,11 +81,11 @@
       "workflows": ["dashboards"]
     },
     {
-      "name": "example_queries",
+      "name": "aws_cloudfront",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
-      "workflows": ["queries"]
+      "workflows": ["dashboards"]
     }
   ],
   "sampleData": {
