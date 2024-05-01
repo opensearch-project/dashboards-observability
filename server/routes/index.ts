@@ -45,7 +45,7 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
 
   registerMetricsRoute(router);
   registerIntegrationsRoute(router);
-  registerDataConnectionsRoute(router);
-  registerDatasourcesRoute(router);
+  registerDataConnectionsRoute(router, dataSourceEnabled);
+  registerDatasourcesRoute(router, dataSourceEnabled);
   registerQueryAssistRoutes(router);
 }
