@@ -125,7 +125,10 @@ describe('CatalogCacheManager', () => {
     });
 
     it('should return default cache object if cache is not found', () => {
-      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
+      const defaultCacheObject = {
+        version: CATALOG_CACHE_VERSION,
+        dataSources: [],
+      };
       sessionStorage.removeItem(ASYNC_QUERY_DATASOURCE_CACHE);
       expect(CatalogCacheManager.getDataSourceCache()).toEqual(defaultCacheObject);
     });
