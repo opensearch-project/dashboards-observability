@@ -70,15 +70,12 @@ interface IHomeProps {
 const EventAnalyticsHome = (props: IHomeProps) => {
   const { setToast, http } = props;
   const history = useHistory();
-  const [selectedDateRange, _setSelectedDateRange] = useState<string[]>(['now-40y', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const selectedDateRangeRef = useRef();
-  selectedDateRangeRef.current = selectedDateRange;
 
   const closeModal = () => {
     setIsModalVisible(false);

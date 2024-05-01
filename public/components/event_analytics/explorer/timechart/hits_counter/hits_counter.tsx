@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { formatNumWithCommas } from '../../../common/helpers';
+import { formatNumWithCommas } from '../../../../common/helpers';
 
 export interface HitsCounterProps {
   /**
