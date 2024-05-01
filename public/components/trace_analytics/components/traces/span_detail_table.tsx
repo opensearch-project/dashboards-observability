@@ -12,7 +12,7 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
 import { handleSpansRequest } from '../../requests/traces_request_handler';
-import { NoMatchMessage, microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec, NoMatchMessage } from '../common/helper_functions';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -21,7 +21,6 @@ interface SpanDetailTableProps {
   mode: TraceAnalyticsMode;
   DSL?: any;
   setTotal?: (total: number) => void;
-  dataSourceMDSId: string;
 }
 
 export interface SpanSearchParams {
@@ -51,15 +50,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       size: tableParams.size,
       sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({ [id]: direction })),
     };
-    handleSpansRequest(
-      props.http,
-      setItems,
-      setTotal,
-      spanSearchParams,
-      props.DSL,
-      mode,
-      props.dataSourceMDSId
-    );
+    handleSpansRequest(props.http, setItems, setTotal, spanSearchParams, props.DSL, mode);
   }, [tableParams, props.DSL]);
 
   useEffect(() => {

@@ -21,7 +21,6 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
   SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
@@ -48,6 +47,7 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  S3_DATA_SOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
@@ -259,7 +259,6 @@ export class ObservabilityPlugin
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
-      const { dataSourceManagement } = setupDeps;
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -270,9 +269,7 @@ export class ObservabilityPlugin
         timestampUtils,
         qm,
         startPage,
-        dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
-        dataSourceManagement,
-        coreStart.savedObjects
+        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
       );
     };
 
@@ -406,7 +403,6 @@ export class ObservabilityPlugin
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
-    coreRefs.dataSource = startDeps.dataSource;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);

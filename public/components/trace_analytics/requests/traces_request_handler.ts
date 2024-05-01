@@ -6,12 +6,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
-import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
+import { HttpSetup } from '../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
-import { TraceAnalyticsMode } from '../home';
 import {
   getPayloadQuery,
   getServiceBreakdownQuery,
@@ -23,6 +22,7 @@ import {
   getValidTraceIdsQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+import { TraceAnalyticsMode } from '../home';
 
 export const handleValidTraceIds = (http: HttpSetup, DSL: any, mode: TraceAnalyticsMode) => {
   return handleDslRequest(http, {}, getValidTraceIdsQuery(DSL), mode)
@@ -37,7 +37,6 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string,
   sort?: any
 ) => {
   const binarySearch = (arr: number[], target: number) => {
@@ -58,8 +57,7 @@ export const handleTracesRequest = async (
     http,
     timeFilterDSL,
     getTraceGroupPercentilesQuery(),
-    mode,
-    dataSourceMDSId
+    mode
   ).then((response) => {
     const map: any = {};
     response.aggregations.trace_group_name.buckets.forEach((traceGroup: any) => {
@@ -70,7 +68,7 @@ export const handleTracesRequest = async (
     return map;
   });
 
-  return handleDslRequest(http, DSL, getTracesQuery(mode, undefined, sort), mode, dataSourceMDSId)
+  return handleDslRequest(http, DSL, getTracesQuery(mode, undefined, sort), mode)
     .then((response) => {
       return Promise.all(
         response.aggregations.traces.buckets.map((bucket: any) => {
@@ -109,10 +107,9 @@ export const handleTraceViewRequest = (
   http: HttpSetup,
   fields: {},
   setFields: (fields: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
-  handleDslRequest(http, null, getTracesQuery(mode, traceId), mode, dataSourceMDSId)
+  handleDslRequest(http, null, getTracesQuery(mode, traceId), mode)
     .then(async (response) => {
       const bucket = response.aggregations.traces.buckets[0];
       return {
@@ -139,8 +136,7 @@ export const handleServicesPieChartRequest = async (
   http: HttpSetup,
   setServiceBreakdownData: (serviceBreakdownData: any) => void,
   setColorMap: (colorMap: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
   const colors = [
     '#7492e7',
@@ -158,7 +154,7 @@ export const handleServicesPieChartRequest = async (
   ];
   const colorMap: any = {};
   let index = 0;
-  await handleDslRequest(http, null, getServiceBreakdownQuery(traceId, mode), mode, dataSourceMDSId)
+  await handleDslRequest(http, null, getServiceBreakdownQuery(traceId, mode), mode)
     .then((response) =>
       Promise.all(
         response.aggregations.service_type.buckets.map((bucket: any) => {
@@ -203,10 +199,9 @@ export const handleSpansGanttRequest = (
   setSpanDetailData: (spanDetailData: any) => void,
   colorMap: any,
   spanFiltersDSL: any,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
-  handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode, dataSourceMDSId)
+  handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode)
     .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
     .then((newItems) => setSpanDetailData(newItems))
     .catch((error) => console.error(error));
@@ -216,10 +211,9 @@ export const handleSpansFlyoutRequest = (
   http: HttpSetup,
   spanId: string,
   setItems: (items: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
-  handleDslRequest(http, null, getSpanFlyoutQuery(mode, spanId), mode, dataSourceMDSId)
+  handleDslRequest(http, null, getSpanFlyoutQuery(mode, spanId), mode)
     .then((response) => {
       setItems(response?.hits.hits?.[0]?._source);
     })
@@ -316,10 +310,9 @@ export const handlePayloadRequest = (
   http: HttpSetup,
   payloadData: any,
   setPayloadData: (payloadData: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
-  handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
+  handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode)
     .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
     .catch((error) => console.error(error));
 };
@@ -330,10 +323,9 @@ export const handleSpansRequest = (
   setTotal: (total: number) => void,
   spanSearchParams: SpanSearchParams,
   DSL: any,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  mode: TraceAnalyticsMode
 ) => {
-  handleDslRequest(http, DSL, getSpansQuery(spanSearchParams), mode, dataSourceMDSId)
+  handleDslRequest(http, DSL, getSpansQuery(spanSearchParams), mode)
     .then((response) => {
       setItems(response.hits.hits.map((hit: any) => hit._source));
       setTotal(response.hits.total?.value || 0);

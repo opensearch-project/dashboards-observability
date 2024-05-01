@@ -13,23 +13,16 @@ import {
   SavedObject,
   SavedObjectsType,
 } from '../../../src/core/server';
-import { DataSourcePluginSetup } from '../../../src/plugins/data_source/server/types';
-import { DataSourceManagementPlugin } from '../../../src/plugins/data_source_management/public/plugin';
-import { migrateV1IntegrationToV2Integration } from './adaptors/integrations/migrations';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
-import { PPLParsers } from './parsers/ppl_parser';
 import { setupRoutes } from './routes/index';
 import {
   searchSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
-import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
-
-export interface ObservabilityPluginSetupDependencies {
-  dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
-  dataSource: DataSourcePluginSetup;
-}
+import { ObservabilityPluginSetup, ObservabilityPluginStart, AssistantPluginSetup } from './types';
+import { PPLParsers } from './parsers/ppl_parser';
+import { migrateV1IntegrationToV2Integration } from './adaptors/integrations/migrations';
 
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
@@ -39,28 +32,17 @@ export class ObservabilityPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: {
-      assistantDashboards?: AssistantPluginSetup;
-      dataSource: ObservabilityPluginSetupDependencies;
-    }
-  ) {
-    const { assistantDashboards, dataSource } = deps;
+  public async setup(core: CoreSetup, deps: { assistantDashboards?: AssistantPluginSetup }) {
+    const { assistantDashboards } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
-
-    const dataSourceEnabled = !!dataSource;
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
         plugins: [PPLPlugin, OpenSearchObservabilityPlugin],
       }
     );
-    if (dataSourceEnabled) {
-      dataSource.registerCustomApiSchema(PPLPlugin);
-      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
-    }
+
     // @ts-ignore
     core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
       return {
@@ -214,7 +196,7 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
-    setupRoutes({ router, client: openSearchObservabilityClient, dataSourceEnabled });
+    setupRoutes({ router, client: openSearchObservabilityClient });
 
     core.savedObjects.registerType(visualizationSavedObject);
     core.savedObjects.registerType(searchSavedObject);

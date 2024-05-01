@@ -15,14 +15,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import DSLService from 'public/services/requests/dsl';
-import React, { useEffect, useState } from 'react';
-import { OptionType } from '../../../../../common/types/application_analytics';
+import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { FilterType } from '../../../trace_analytics/components/common/filters/filters';
 import { ServiceObject } from '../../../trace_analytics/components/common/plots/service_map';
 import { ServiceMap } from '../../../trace_analytics/components/services';
 import { handleServiceMapRequest } from '../../../trace_analytics/requests/services_request_handler';
-import { getClearModal } from '../../helpers/modal_containers';
 import { AppAnalyticsComponentDeps } from '../../home';
+import { OptionType } from '../../../../../common/types/application_analytics';
+import { getClearModal } from '../../helpers/modal_containers';
 
 interface ServiceConfigProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -49,7 +50,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   useEffect(() => {
-    handleServiceMapRequest(http, dslService, mode, '', setServiceMap);
+    handleServiceMapRequest(http, dslService, mode, setServiceMap);
   }, []);
 
   useEffect(() => {
