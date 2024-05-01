@@ -1434,7 +1434,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "lines",
+                                  "id": "lines+markers",
                                   "name": "Lines",
                                 },
                               ],
@@ -1508,7 +1508,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 5,
+                            "defaultState": 25,
                             "eleType": "slider",
                             "mapTo": "pointSize",
                             "name": "Point size",
