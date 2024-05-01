@@ -6,17 +6,18 @@
 import { DataSource } from '../../../../../src/plugins/data/public';
 
 interface DataSourceConfig {
+  id: string;
   name: string;
   type: string;
   metadata: any;
 }
 
 export class ObservabilityDefaultDataSource extends DataSource<any, any, any, any, any> {
-  constructor({ name, type, metadata }: DataSourceConfig) {
-    super(name, type, metadata);
+  constructor({ id, name, type, metadata }: DataSourceConfig) {
+    super({ id, name, type, metadata });
   }
 
-  async getDataSet(dataSetParams?: any) {
+  async getDataSet() {
     return ['Default data source'];
   }
 
@@ -24,7 +25,7 @@ export class ObservabilityDefaultDataSource extends DataSource<any, any, any, an
     return true;
   }
 
-  async runQuery(queryParams: any) {
+  async runQuery() {
     return null;
   }
 }

@@ -16,24 +16,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
+import { CachedAcceleration } from '../../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../framework/core_refs';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
+import { useAccelerationOperation } from './acceleration_operation';
 import { AccelerationDetailsTab } from './flyout_modules/acceleration_details_tab';
 import { AccelerationSchemaTab } from './flyout_modules/accelerations_schema_tab';
 import {
-  onDiscoverIconClick,
   AccelerationActionType,
   getAccelerationName,
+  onDiscoverIconClick,
 } from './utils/acceleration_utils';
-import { coreRefs } from '../../../../../framework/core_refs';
-import { OpenSearchDashboardsResponse } from '../../../../../../../../src/core/server/http/router';
-import { CachedAcceleration } from '../../../../../../common/types/data_connections';
-import { useAccelerationOperation } from './acceleration_operation';
-import { AccelerationActionOverlay } from './acceleration_action_overlay';
 
 export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
   dataSourceName: string;
   resetFlyout: () => void;
   handleRefresh?: () => void;
+  dataSourceMDSId?: string;
 }
 
 const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {

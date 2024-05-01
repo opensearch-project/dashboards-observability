@@ -83,7 +83,9 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
+      expect(result.error?.message).toBe(
+        "Unable to parse file 'sample-2.0.0.json' as JSON or NDJson"
+      );
     });
 
     it('should return an error if the integration config does not exist', async () => {
@@ -134,7 +136,9 @@ describe('Integration', () => {
 
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
+      expect(result.error?.message).toBe(
+        "Unable to parse file 'sample-1.0.1.ndjson' as JSON or NDJson"
+      );
     });
   });
 
@@ -262,7 +266,7 @@ describe('Integration', () => {
 
       const result = await integration.getSampleData();
 
-      expect(result.error?.message).toBe('Unable to parse file as JSON or NDJson');
+      expect(result.error?.message).toBe("Unable to parse file 'sample.json' as JSON or NDJson");
     });
   });
 });

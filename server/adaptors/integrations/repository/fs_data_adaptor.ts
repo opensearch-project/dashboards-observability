@@ -55,7 +55,7 @@ export class FileSystemDataAdaptor implements CatalogDataAdaptor {
       }
       return {
         ok: false,
-        error: new Error('Unable to parse file as JSON or NDJson', { cause: err }),
+        error: new Error(`Unable to parse file '${filename}' as JSON or NDJson`, { cause: err }),
       };
     }
   }

@@ -1,5 +1,5 @@
 {
-  "name": "aws_vpc_flow",
+  "name": "amazon_vpc_flow",
   "version": "1.0.0",
   "displayName": "Amazon VPC",
   "description": "Monitor IP traffic with VPC Flow Logs.",

@@ -26,6 +26,7 @@ interface GenerateFieldsProps {
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   isSkippingtableLoading: boolean;
   setIsSkippingtableLoading: React.Dispatch<boolean>;
+  dataSourceMDSId?: string;
 }
 
 export const GenerateFields = ({
@@ -33,6 +34,7 @@ export const GenerateFields = ({
   setAccelerationFormData,
   isSkippingtableLoading,
   setIsSkippingtableLoading,
+  dataSourceMDSId,
 }: GenerateFieldsProps) => {
   const [isGenerateRun, setIsGenerateRun] = useState(false);
   const { loadStatus, startLoading, stopLoading: _stopLoading, pollingResult } = useDirectQuery();
@@ -84,7 +86,7 @@ export const GenerateFields = ({
       )}`,
       datasource: accelerationFormData.dataSource,
     };
-    startLoading(requestPayload);
+    startLoading(requestPayload, dataSourceMDSId);
     setIsSkippingtableLoading(true);
     setIsGenerateRun(true);
     setReplaceDefinitionModal(<></>);

@@ -36,6 +36,7 @@ describe('Service view component', () => {
         setEndTime={setEndTime}
         addFilter={addFilter}
         mode="data_prepper"
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 

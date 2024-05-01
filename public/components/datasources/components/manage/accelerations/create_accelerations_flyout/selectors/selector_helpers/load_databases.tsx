@@ -42,7 +42,7 @@ export const SelectorLoadDatabases = ({
 
   const onClickRefreshDatabases = () => {
     setIsLoading(true);
-    startDatabasesLoading(dataSourceName);
+    startDatabasesLoading({ dataSourceName });
   };
 
   useEffect(() => {

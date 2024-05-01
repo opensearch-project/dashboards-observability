@@ -15,7 +15,7 @@ import {
   EDIT,
 } from '../../../common/constants/shared';
 
-export function registerDataConnectionsRoute(router: IRouter) {
+export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled: boolean) {
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}/{name}`,
@@ -183,14 +183,25 @@ export function registerDataConnectionsRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${DATACONNECTIONS_BASE}`,
-      validate: false,
+      path: `${DATACONNECTIONS_BASE}/dataSourceMDSId={dataSourceMDSId?}`,
+      validate: {
+        params: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
+      },
     },
     async (context, request, response): Promise<any> => {
+      const dataSourceMDSId = request.params.dataSourceMDSId;
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.getDataConnections');
+        let dataConnectionsresponse;
+        if (dataSourceEnabled && dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          dataConnectionsresponse = await client.callAPI('ppl.getDataConnections');
+        } else {
+          dataConnectionsresponse = await context.observability_plugin.observabilityClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.getDataConnections');
+        }
         return response.ok({
           body: dataConnectionsresponse,
         });
