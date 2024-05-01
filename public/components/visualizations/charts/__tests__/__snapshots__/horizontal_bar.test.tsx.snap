@@ -760,6 +760,14 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
           ],
           "height": 220,
           "hovermode": "closest",
+          "layout": Object {
+            "annotations": Array [
+              Object {
+                "showarrow": true,
+                "xanchor": "right",
+              },
+            ],
+          },
           "legend": Object {
             "orientation": "v",
           },
