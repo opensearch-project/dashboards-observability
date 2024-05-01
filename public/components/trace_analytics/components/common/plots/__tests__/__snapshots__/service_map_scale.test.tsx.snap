@@ -170,6 +170,14 @@ exports[`Service map scale component renders service map scale plot 1`] = `
             "barmode": "stack",
             "height": 270,
             "hovermode": "closest",
+            "layout": Object {
+              "annotations": Array [
+                Object {
+                  "showarrow": true,
+                  "xanchor": "right",
+                },
+              ],
+            },
             "legend": Object {
               "orientation": "h",
               "traceorder": "normal",
