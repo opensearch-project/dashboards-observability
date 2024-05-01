@@ -54,6 +54,14 @@ export function Plt(props: PltProps) {
       zeroline: false,
       rangemode: 'normal',
     },
+    layout: {
+      annotations: [
+        {
+          showarrow: true,
+          xanchor: 'right',
+        },
+      ],
+    },
     ...darkLayout,
     ...props.layout,
   };
