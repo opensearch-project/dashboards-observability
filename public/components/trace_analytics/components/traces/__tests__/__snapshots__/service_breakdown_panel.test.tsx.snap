@@ -199,6 +199,14 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                       "barmode": "stack",
                       "height": 200,
                       "hovermode": "closest",
+                      "layout": Object {
+                        "annotations": Array [
+                          Object {
+                            "showarrow": true,
+                            "xanchor": "right",
+                          },
+                        ],
+                      },
                       "legend": Object {
                         "orientation": "h",
                         "traceorder": "normal",
