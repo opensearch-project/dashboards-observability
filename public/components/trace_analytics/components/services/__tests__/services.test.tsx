@@ -56,7 +56,6 @@ describe('Services component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
-        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -103,7 +102,6 @@ describe('Services component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
-        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -151,7 +149,6 @@ describe('Services component', () => {
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         modes={modes}
-        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 

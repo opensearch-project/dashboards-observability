@@ -66,13 +66,12 @@ export function SpanDetailFlyout(props: {
   closeFlyout: () => void;
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
-  dataSourceMDSId: string;
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
 
   useEffect(() => {
-    handleSpansFlyoutRequest(props.http, props.spanId, setSpan, mode, props.dataSourceMDSId);
+    handleSpansFlyoutRequest(props.http, props.spanId, setSpan, mode);
   }, [props.spanId]);
 
   const getListItem = (

@@ -152,14 +152,6 @@ exports[`Services component renders empty services page 1`] = `
     }
   }
   dataPrepperIndicesExist={true}
-  dataSourceMDSId={
-    Array [
-      Object {
-        "id": "",
-        "label": "",
-      },
-    ]
-  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -478,14 +470,6 @@ exports[`Services component renders empty services page 1`] = `
       }
     }
     dataPrepperIndicesExist={true}
-    dataSourceMDSId={
-      Array [
-        Object {
-          "id": "",
-          "label": "",
-        },
-      ]
-    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
@@ -2300,14 +2284,6 @@ exports[`Services component renders jaeger services page 1`] = `
     }
   }
   dataPrepperIndicesExist={false}
-  dataSourceMDSId={
-    Array [
-      Object {
-        "id": "",
-        "label": "",
-      },
-    ]
-  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -2627,14 +2603,6 @@ exports[`Services component renders jaeger services page 1`] = `
       }
     }
     dataPrepperIndicesExist={false}
-    dataSourceMDSId={
-      Array [
-        Object {
-          "id": "",
-          "label": "",
-        },
-      ]
-    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
@@ -3931,14 +3899,6 @@ exports[`Services component renders services page 1`] = `
     }
   }
   dataPrepperIndicesExist={true}
-  dataSourceMDSId={
-    Array [
-      Object {
-        "id": "",
-        "label": "",
-      },
-    ]
-  }
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
@@ -4257,14 +4217,6 @@ exports[`Services component renders services page 1`] = `
       }
     }
     dataPrepperIndicesExist={true}
-    dataSourceMDSId={
-      Array [
-        Object {
-          "id": "",
-          "label": "",
-        },
-      ]
-    }
     endTime="now"
     filters={Array []}
     http={[MockFunction]}

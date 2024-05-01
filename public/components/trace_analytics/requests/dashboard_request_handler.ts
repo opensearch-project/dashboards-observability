@@ -6,11 +6,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
-import {
-  fixedIntervalToMilli,
-  microToMilliSec,
-  nanoToMilliSec,
-} from '../components/common/helper_functions';
+import { fixedIntervalToMilli, microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import {
   getDashboardQuery,
   getDashboardThroughputPltQuery,
@@ -33,7 +29,6 @@ export const handleDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
   setPercentileMap?
 ) => {
   // latency_variance should only be affected by timefilter
@@ -41,8 +36,7 @@ export const handleDashboardRequest = async (
     http,
     timeFilterDSL,
     getDashboardTraceGroupPercentiles(mode),
-    mode,
-    dataSourceMDSId
+    mode
   )
     .then((response) => {
       const map: any = {};
@@ -56,13 +50,7 @@ export const handleDashboardRequest = async (
     .catch((error) => console.error(error));
   if (setPercentileMap) setPercentileMap(latencyVariances);
 
-  const latencyTrends = await handleDslRequest(
-    http,
-    latencyTrendDSL,
-    getLatencyTrendQuery(),
-    mode,
-    setShowTimeoutToast
-  )
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -117,7 +105,7 @@ export const handleDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getDashboardQuery(), mode, dataSourceMDSId, setShowTimeoutToast)
+  await handleDslRequest(http, DSL, getDashboardQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -148,17 +136,9 @@ export const handleJaegerDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
   setPercentileMap?
 ) => {
-  const latencyTrends = await handleDslRequest(
-    http,
-    latencyTrendDSL,
-    getJaegerLatencyTrendQuery(),
-    mode,
-    dataSourceMDSId,
-    setShowTimeoutToast
-  )
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -215,14 +195,7 @@ export const handleJaegerDashboardRequest = async (
       console.error(error);
     });
 
-  await handleDslRequest(
-    http,
-    DSL,
-    getJaegerDashboardQuery(),
-    mode,
-    dataSourceMDSId,
-    setShowTimeoutToast
-  )
+  await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -242,13 +215,10 @@ export const handleJaegerDashboardRequest = async (
       const latencies = await handleDslRequest(
         http,
         timeFilterDSL,
-        getDashboardTraceGroupPercentiles(
-          mode,
-          newItems.map((a) => a.dashboard_trace_group_name)
-        ),
+        getDashboardTraceGroupPercentiles(mode, newItems.map(a => a.dashboard_trace_group_name)),
         mode,
         true,
-        setShowTimeoutToast
+        setShowTimeoutToast,
       )
         .then((response) => {
           const map: any = {};
@@ -260,10 +230,10 @@ export const handleJaegerDashboardRequest = async (
           return map;
         })
         .catch((error) => console.error(error));
-      newItems.forEach((item) => {
-        item.dashboard_latency_variance = latencies[item.dashboard_key_as_string];
-      });
-      setItems(newItems);
+        newItems.forEach((item) => {
+          item.dashboard_latency_variance = latencies[item.dashboard_key_as_string]
+        })
+        setItems(newItems);
     })
     .catch((error) => console.error(error));
 };
@@ -277,17 +247,9 @@ export const handleJaegerErrorDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
   setPercentileMap?
 ) => {
-  const errorTrends = await handleDslRequest(
-    http,
-    latencyTrendDSL,
-    getJaegerErrorTrendQuery(),
-    mode,
-    dataSourceMDSId,
-    setShowTimeoutToast
-  )
+  const errorTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerErrorTrendQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -342,14 +304,7 @@ export const handleJaegerErrorDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(
-    http,
-    DSL,
-    getJaegerErrorDashboardQuery(),
-    mode,
-    dataSourceMDSId,
-    setShowTimeoutToast
-  )
+  await handleDslRequest(http, DSL, getJaegerErrorDashboardQuery(), mode, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -370,22 +325,8 @@ export const handleJaegerErrorDashboardRequest = async (
     .catch((error) => console.error(error));
 };
 
-export const handleDashboardThroughputPltRequest = (
-  http,
-  DSL,
-  fixedInterval,
-  items,
-  setItems,
-  mode,
-  dataSourceMDSId?
-) => {
-  return handleDslRequest(
-    http,
-    DSL,
-    getDashboardThroughputPltQuery(mode, fixedInterval),
-    mode,
-    dataSourceMDSId
-  )
+export const handleDashboardThroughputPltRequest = (http, DSL, fixedInterval, items, setItems, mode) => {
+  return handleDslRequest(http, DSL, getDashboardThroughputPltQuery(mode, fixedInterval), mode)
     .then((response) => {
       const buckets = response.aggregations.throughput.buckets;
       const texts = buckets.map(
@@ -417,22 +358,8 @@ export const handleDashboardThroughputPltRequest = (
     .catch((error) => console.error(error));
 };
 
-export const handleDashboardErrorRatePltRequest = (
-  http,
-  DSL,
-  fixedInterval,
-  items,
-  setItems,
-  mode,
-  dataSourceMDSId?
-) => {
-  return handleDslRequest(
-    http,
-    DSL,
-    getErrorRatePltQuery(mode, fixedInterval),
-    mode,
-    dataSourceMDSId
-  )
+export const handleDashboardErrorRatePltRequest = (http, DSL, fixedInterval, items, setItems, mode) => {
+  return handleDslRequest(http, DSL, getErrorRatePltQuery(mode, fixedInterval), mode)
     .then((response) => {
       const buckets = response.aggregations.error_rate.buckets;
       const texts = buckets.map(

@@ -6,7 +6,6 @@
 
 import { EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
@@ -34,14 +33,11 @@ export function TracesContent(props: TracesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
-    dataSourceManagement,
-    dataSourceMDSId,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'traces');
@@ -82,31 +78,12 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
-    await handleTracesRequest(
-      http,
-      DSL,
-      timeFilterDSL,
-      tableItems,
-      setTableItems,
-      mode,
-      props.dataSourceMDSId[0].id,
-      sort
-    );
+    await handleTracesRequest(http, DSL, timeFilterDSL, tableItems, setTableItems, mode, sort);
     setLoading(false);
   };
 
   return (
     <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceView'}
-          componentConfig={{
-            activeOption: dataSourceMDSId,
-            fullWidth: true,
-          }}
-        />
-      )}
       <SearchBar
         query={query}
         filters={filters}

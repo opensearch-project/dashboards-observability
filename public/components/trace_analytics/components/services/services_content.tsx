@@ -10,15 +10,17 @@ import React, { useEffect, useState } from 'react';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
+  handleTraceGroupsRequest,
 } from '../../requests/services_request_handler';
-import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { FilterType } from '../common/filters/filters';
+import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
-import { DashboardContent } from '../dashboard/dashboard_content';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
+import { OptionType } from '../../../../../common/types/application_analytics';
+import { DashboardContent } from '../dashboard/dashboard_content';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -41,7 +43,6 @@ export function ServicesContent(props: ServicesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
-    dataSourceMDSId,
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
@@ -106,12 +107,11 @@ export function ServicesContent(props: ServicesProps) {
       (must: any) => must?.term?.serviceName == null
     );
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
+      handleServicesRequest(http, DSL, setTableItems, mode),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
-        dataSourceMDSId[0].id,
         setServiceMap,
         currService || filteredService
       ),
