@@ -4,9 +4,9 @@
  */
 
 import { EuiBreadcrumb } from '@elastic/eui';
-import _ from 'lodash';
-import React from 'react';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import React from 'react';
+import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import { DataSourcePicker } from '../dashboard/mode_picker';
 import { ServicesContent } from './services_content';
@@ -17,6 +17,7 @@ export interface ServicesProps extends TraceAnalyticsComponentDeps {
   traceColumnAction: any;
   page: 'services' | 'app';
   toasts: Toast[];
+  dataSourceMDSId: DataSourceOption[];
 }
 
 export function Services(props: ServicesProps) {
