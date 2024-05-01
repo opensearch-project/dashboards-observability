@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiButton, EuiHealth } from '@elastic/eui';
+import React from 'react';
+import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
 import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
 import {
   redirectToExplorerOSIdx,
   redirectToExplorerWithDataSrc,
 } from '../../associated_objects/utils/associated_objects_tab_utils';
-import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
 
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
@@ -93,6 +93,7 @@ export const CreateAccelerationFlyoutButton = ({
   dataSourceName: string;
   renderCreateAccelerationFlyout: (
     dataSource: string,
+    dataSourceMDSId?: string,
     databaseName?: string,
     tableName?: string,
     handleRefresh?: () => void
@@ -103,7 +104,13 @@ export const CreateAccelerationFlyoutButton = ({
     <>
       <EuiButton
         onClick={() =>
-          renderCreateAccelerationFlyout(dataSourceName, undefined, undefined, handleRefresh)
+          renderCreateAccelerationFlyout(
+            dataSourceName,
+            undefined,
+            undefined,
+            undefined,
+            handleRefresh
+          )
         }
         fill
       >
