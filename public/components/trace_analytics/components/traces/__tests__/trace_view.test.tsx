@@ -21,6 +21,7 @@ describe('Trace view component', () => {
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         traceId="test"
         mode="data_prepper"
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
     expect(wrapper).toMatchSnapshot();
