@@ -21,7 +21,7 @@ import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_u
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
+  S3_DATA_SOURCE_TYPE,
   SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
