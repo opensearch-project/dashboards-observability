@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ASYNC_POLLING_INTERVAL,
   SPARK_HIVE_TABLE_REGEX,
@@ -16,6 +16,7 @@ import {
   CachedDataSourceStatus,
   CachedTable,
   LoadCacheType,
+  StartLoadingParams,
 } from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../common/utils/query_session_utils';
@@ -32,18 +33,26 @@ import { CatalogCacheManager } from './cache_manager';
 
 export const updateDatabasesToCache = (
   dataSourceName: string,
-  pollingResult: AsyncPollingResult
+  pollingResult: AsyncPollingResult,
+  dataSourceMDSId?: string
 ) => {
-  const cachedDataSource = CatalogCacheManager.getOrCreateDataSource(dataSourceName);
+  const cachedDataSource = CatalogCacheManager.getOrCreateDataSource(
+    dataSourceName,
+    dataSourceMDSId
+  );
   const currentTime = new Date().toUTCString();
 
   if (!pollingResult) {
-    CatalogCacheManager.addOrUpdateDataSource({
-      ...cachedDataSource,
-      databases: [],
-      lastUpdated: currentTime,
-      status: CachedDataSourceStatus.Failed,
-    });
+    CatalogCacheManager.addOrUpdateDataSource(
+      {
+        ...cachedDataSource,
+        databases: [],
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Failed,
+        ...(dataSourceMDSId && { dataSourceMDSId }),
+      },
+      dataSourceMDSId
+    );
     return;
   }
 
@@ -55,30 +64,43 @@ export const updateDatabasesToCache = (
     status: CachedDataSourceStatus.Empty,
   }));
 
-  CatalogCacheManager.addOrUpdateDataSource({
-    ...cachedDataSource,
-    databases: newDatabases,
-    lastUpdated: currentTime,
-    status: CachedDataSourceStatus.Updated,
-  });
+  CatalogCacheManager.addOrUpdateDataSource(
+    {
+      ...cachedDataSource,
+      databases: newDatabases,
+      lastUpdated: currentTime,
+      status: CachedDataSourceStatus.Updated,
+      ...(dataSourceMDSId && { dataSourceMDSId }),
+    },
+    dataSourceMDSId
+  );
 };
 
 export const updateTablesToCache = (
   dataSourceName: string,
   databaseName: string,
-  pollingResult: AsyncPollingResult
+  pollingResult: AsyncPollingResult,
+  dataSourceMDSId?: string
 ) => {
   try {
-    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const cachedDatabase = CatalogCacheManager.getDatabase(
+      dataSourceName,
+      databaseName,
+      dataSourceMDSId
+    );
     const currentTime = new Date().toUTCString();
 
     if (!pollingResult) {
-      CatalogCacheManager.updateDatabase(dataSourceName, {
-        ...cachedDatabase,
-        tables: [],
-        lastUpdated: currentTime,
-        status: CachedDataSourceStatus.Failed,
-      });
+      CatalogCacheManager.updateDatabase(
+        dataSourceName,
+        {
+          ...cachedDatabase,
+          tables: [],
+          lastUpdated: currentTime,
+          status: CachedDataSourceStatus.Failed,
+        },
+        dataSourceMDSId
+      );
       return;
     }
 
@@ -89,12 +111,16 @@ export const updateTablesToCache = (
         name: row.tableName,
       }));
 
-    CatalogCacheManager.updateDatabase(dataSourceName, {
-      ...cachedDatabase,
-      tables: newTables,
-      lastUpdated: currentTime,
-      status: CachedDataSourceStatus.Updated,
-    });
+    CatalogCacheManager.updateDatabase(
+      dataSourceName,
+      {
+        ...cachedDatabase,
+        tables: newTables,
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Updated,
+      },
+      dataSourceMDSId
+    );
   } catch (error) {
     console.error(error);
   }
@@ -102,7 +128,8 @@ export const updateTablesToCache = (
 
 export const updateAccelerationsToCache = (
   dataSourceName: string,
-  pollingResult: AsyncPollingResult
+  pollingResult: AsyncPollingResult,
+  dataSourceMDSId?: string
 ) => {
   const currentTime = new Date().toUTCString();
 
@@ -112,6 +139,7 @@ export const updateAccelerationsToCache = (
       accelerations: [],
       lastUpdated: currentTime,
       status: CachedDataSourceStatus.Failed,
+      ...(dataSourceMDSId && { dataSourceMDSId }),
     });
     return;
   }
@@ -133,6 +161,7 @@ export const updateAccelerationsToCache = (
     accelerations: newAccelerations,
     lastUpdated: currentTime,
     status: CachedDataSourceStatus.Updated,
+    ...(dataSourceMDSId && { dataSourceMDSId }),
   });
 };
 
@@ -140,13 +169,18 @@ export const updateTableColumnsToCache = (
   dataSourceName: string,
   databaseName: string,
   tableName: string,
-  pollingResult: AsyncPollingResult
+  pollingResult: AsyncPollingResult,
+  dataSourceMDSId?: string
 ) => {
   try {
     if (!pollingResult) {
       return;
     }
-    const cachedDatabase = CatalogCacheManager.getDatabase(dataSourceName, databaseName);
+    const cachedDatabase = CatalogCacheManager.getDatabase(
+      dataSourceName,
+      databaseName,
+      dataSourceMDSId
+    );
     const currentTime = new Date().toUTCString();
 
     const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
@@ -170,12 +204,16 @@ export const updateTableColumnsToCache = (
     );
 
     if (cachedDatabase.status === CachedDataSourceStatus.Updated) {
-      CatalogCacheManager.updateDatabase(dataSourceName, {
-        ...cachedDatabase,
-        tables: newTables,
-        lastUpdated: currentTime,
-        status: CachedDataSourceStatus.Updated,
-      });
+      CatalogCacheManager.updateDatabase(
+        dataSourceName,
+        {
+          ...cachedDatabase,
+          tables: newTables,
+          lastUpdated: currentTime,
+          status: CachedDataSourceStatus.Updated,
+        },
+        dataSourceMDSId
+      );
     }
   } catch (error) {
     console.error(error);
@@ -187,20 +225,27 @@ export const updateToCache = (
   loadCacheType: LoadCacheType,
   dataSourceName: string,
   databaseName?: string,
-  tableName?: string
+  tableName?: string,
+  dataSourceMDSId?: string
 ) => {
   switch (loadCacheType) {
     case 'databases':
-      updateDatabasesToCache(dataSourceName, pollResults);
+      updateDatabasesToCache(dataSourceName, pollResults, dataSourceMDSId);
       break;
     case 'tables':
-      updateTablesToCache(dataSourceName, databaseName!, pollResults);
+      updateTablesToCache(dataSourceName, databaseName!, pollResults, dataSourceMDSId);
       break;
     case 'accelerations':
-      updateAccelerationsToCache(dataSourceName, pollResults);
+      updateAccelerationsToCache(dataSourceName, pollResults, dataSourceMDSId);
       break;
     case 'tableColumns':
-      updateTableColumnsToCache(dataSourceName, databaseName!, tableName!, pollResults);
+      updateTableColumnsToCache(
+        dataSourceName,
+        databaseName!,
+        tableName!,
+        pollResults,
+        dataSourceMDSId
+      );
     default:
       break;
   }
@@ -245,6 +290,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.INITIAL
   );
+  const dataSourceMDSClientId = useRef('');
 
   const {
     data: pollingResult,
@@ -253,7 +299,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params);
+    return sqlService.fetchWithJobId(params, dataSourceMDSClientId.current);
   }, ASYNC_POLLING_INTERVAL);
 
   const onLoadingFailed = () => {
@@ -263,15 +309,22 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
       loadCacheType,
       currentDataSourceName,
       currentDatabaseName,
-      currentTableName
+      currentTableName,
+      dataSourceMDSClientId.current
     );
   };
 
-  const startLoading = (dataSourceName: string, databaseName?: string, tableName?: string) => {
+  const startLoading = ({
+    dataSourceName,
+    dataSourceMDSId,
+    databaseName,
+    tableName,
+  }: StartLoadingParams) => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
     setCurrentTableName(tableName);
+    dataSourceMDSClientId.current = dataSourceMDSId || '';
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
@@ -283,10 +336,10 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     if (sessionId) {
       requestPayload = { ...requestPayload, sessionId };
     }
-
     sqlService
-      .fetch(requestPayload)
+      .fetch(requestPayload, dataSourceMDSId)
       .then((result) => {
+        console.log(result);
         setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
         if (result.queryId) {
           startPolling({
@@ -325,7 +378,8 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
         loadCacheType,
         currentDataSourceName,
         currentDatabaseName,
-        currentTableName
+        currentTableName,
+        dataSourceMDSClientId.current
       );
     } else if (status === DirectQueryLoadingStatus.FAILED) {
       onLoadingFailed();

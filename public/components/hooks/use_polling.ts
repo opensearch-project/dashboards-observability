@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
 
@@ -111,7 +111,7 @@ export function usePolling<T, P = void>(
     try {
       const result = await fetchFunction(params);
       setData(result);
-
+      console.log(result);
       // Check the success condition and stop polling if it's met
       if (onPollingSuccess && onPollingSuccess(result, configurations)) {
         stopPolling();
