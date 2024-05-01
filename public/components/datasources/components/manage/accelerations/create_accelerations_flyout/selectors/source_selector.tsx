@@ -20,13 +20,13 @@ import React, { useEffect, useState } from 'react';
 import { CoreStart } from '../../../../../../../../../../src/core/public';
 import { DATACONNECTIONS_BASE } from '../../../../../../../../common/constants/shared';
 import {
-  CachedDatabase,
   CachedDataSourceStatus,
+  CachedDatabase,
   CreateAccelerationForm,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
-import { hasError, validateDatabase, validateDataTable } from '../create/utils';
+import { hasError, validateDataTable, validateDatabase } from '../create/utils';
 import { SelectorLoadDatabases } from './selector_helpers/load_databases';
 import { SelectorLoadObjects } from './selector_helpers/load_objects';
 
@@ -37,6 +37,7 @@ interface AccelerationDataSourceSelectorProps {
   selectedDatasource: string;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
+  dataSourceMDSId?: string;
 }
 
 export const AccelerationDataSourceSelector = ({
@@ -46,6 +47,7 @@ export const AccelerationDataSourceSelector = ({
   selectedDatasource,
   dataSourcesPreselected,
   tableFieldsLoading,
+  dataSourceMDSId,
 }: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -72,7 +74,7 @@ export const AccelerationDataSourceSelector = ({
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(DATACONNECTIONS_BASE)
+      .get(DATACONNECTIONS_BASE + `/dataSourceMDSId=${dataSourceMDSId}`)
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
