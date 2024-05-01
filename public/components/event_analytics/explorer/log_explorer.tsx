@@ -79,9 +79,7 @@ export const LogExplorer = ({
     });
   };
 
-  const dateRange = coreRefs.queryAssistEnabled
-    ? [QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]
-    : getDateRange(undefined, undefined, queries[tabIds[0]]);
+  const dateRange = getDateRange(undefined, undefined, queries[tabIds[0]]);
   const [startTime, setStartTime] = useState(dateRange[0]);
   const [endTime, setEndTime] = useState(dateRange[1]);
 
