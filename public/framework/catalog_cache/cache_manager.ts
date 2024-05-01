@@ -87,11 +87,23 @@ export class CatalogCacheManager {
    * Adds or updates a data source in the accelerations cache.
    * @param {CachedAccelerationByDataSource} dataSource - The data source to add or update.
    */
-  static addOrUpdateAccelerationsByDataSource(dataSource: CachedAccelerationByDataSource): void {
+  static addOrUpdateAccelerationsByDataSource(
+    dataSource: CachedAccelerationByDataSource,
+    dataSourceMDSId?: string
+  ): void {
+    let index;
     const accCacheData = this.getAccelerationsCache();
-    const index = accCacheData.dataSources.findIndex(
-      (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
-    );
+    if (dataSourceMDSId) {
+      index = accCacheData.dataSources.findIndex(
+        (ds: CachedAccelerationByDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    } else {
+      index = accCacheData.dataSources.findIndex(
+        (ds: CachedAccelerationByDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    }
     if (index !== -1) {
       accCacheData.dataSources[index] = dataSource;
     } else {
@@ -107,20 +119,32 @@ export class CatalogCacheManager {
    * @throws {Error} If the data source is not found.
    */
   static getOrCreateAccelerationsByDataSource(
-    dataSourceName: string
+    dataSourceName: string,
+    dataSourceMDSId?: string
   ): CachedAccelerationByDataSource {
     const accCacheData = this.getAccelerationsCache();
-    const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = accCacheData.dataSources.find(
+        (ds) => ds.name === dataSourceName && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    } else {
+      cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+    }
 
     if (cachedDataSource) return cachedDataSource;
     else {
-      const defaultDataSourceObject = {
+      let defaultDataSourceObject: CachedAccelerationByDataSource = {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
         accelerations: [],
       };
-      this.addOrUpdateAccelerationsByDataSource(defaultDataSourceObject);
+
+      if (dataSourceMDSId !== '' && dataSourceMDSId !== undefined) {
+        defaultDataSourceObject = { ...defaultDataSourceObject, dataSourceMDSId };
+      }
+      this.addOrUpdateAccelerationsByDataSource(defaultDataSourceObject, dataSourceMDSId);
       return defaultDataSourceObject;
     }
   }
@@ -129,11 +153,16 @@ export class CatalogCacheManager {
    * Adds or updates a data source in the cache.
    * @param {CachedDataSource} dataSource - The data source to add or update.
    */
-  static addOrUpdateDataSource(dataSource: CachedDataSource): void {
+  static addOrUpdateDataSource(dataSource: CachedDataSource, dataSourceMDSId?: string): void {
     const cacheData = this.getDataSourceCache();
-    const index = cacheData.dataSources.findIndex(
-      (ds: CachedDataSource) => ds.name === dataSource.name
-    );
+    let index;
+    if (dataSourceMDSId) {
+      index = cacheData.dataSources.findIndex(
+        (ds: CachedDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    }
+    index = cacheData.dataSources.findIndex((ds: CachedDataSource) => ds.name === dataSource.name);
     if (index !== -1) {
       cacheData.dataSources[index] = dataSource;
     } else {
@@ -147,21 +176,30 @@ export class CatalogCacheManager {
    * @param {string} dataSourceName - The name of the data source.
    * @returns {CachedDataSource} The retrieved or created data source.
    */
-  static getOrCreateDataSource(dataSourceName: string): CachedDataSource {
-    const cacheData = this.getDataSourceCache();
-    const cachedDataSource = cacheData.dataSources.find(
-      (ds: CachedDataSource) => ds.name === dataSourceName
-    );
+  static getOrCreateDataSource(dataSourceName: string, dataSourceMDSId?: string): CachedDataSource {
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
     if (cachedDataSource) {
       return cachedDataSource;
     } else {
-      const defaultDataSourceObject = {
+      let defaultDataSourceObject: CachedDataSource = {
         name: dataSourceName,
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
         databases: [],
       };
-      this.addOrUpdateDataSource(defaultDataSourceObject);
+      if (dataSourceMDSId !== '' && dataSourceMDSId !== undefined) {
+        defaultDataSourceObject = { ...defaultDataSourceObject, dataSourceMDSId };
+      }
+      this.addOrUpdateDataSource(defaultDataSourceObject, dataSourceMDSId);
       return defaultDataSourceObject;
     }
   }
@@ -173,10 +211,21 @@ export class CatalogCacheManager {
    * @returns {CachedDatabase} The retrieved database.
    * @throws {Error} If the data source or database is not found.
    */
-  static getDatabase(dataSourceName: string, databaseName: string): CachedDatabase {
-    const cachedDataSource = this.getDataSourceCache().dataSources.find(
-      (ds) => ds.name === dataSourceName
-    );
+  static getDatabase(
+    dataSourceName: string,
+    databaseName: string,
+    dataSourceMDSId?: string
+  ): CachedDatabase {
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
     if (!cachedDataSource) {
       throw new Error('DataSource not found exception: ' + dataSourceName);
     }
@@ -197,8 +246,13 @@ export class CatalogCacheManager {
    * @returns {Cachedtable} The retrieved database.
    * @throws {Error} If the data source, database or table is not found.
    */
-  static getTable(dataSourceName: string, databaseName: string, tableName: string): CachedTable {
-    const cachedDatabase = this.getDatabase(dataSourceName, databaseName);
+  static getTable(
+    dataSourceName: string,
+    databaseName: string,
+    tableName: string,
+    dataSourceMDSId?: string
+  ): CachedTable {
+    const cachedDatabase = this.getDatabase(dataSourceName, databaseName, dataSourceMDSId);
 
     const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
     if (!cachedTable) {
@@ -213,10 +267,22 @@ export class CatalogCacheManager {
    * @param {CachedDatabase} database - The database to be updated.
    * @throws {Error} If the data source or database is not found.
    */
-  static updateDatabase(dataSourceName: string, database: CachedDatabase): void {
-    const cachedDataSource = this.getDataSourceCache().dataSources.find(
-      (ds) => ds.name === dataSourceName
-    );
+  static updateDatabase(
+    dataSourceName: string,
+    database: CachedDatabase,
+    dataSourceMDSId?: string
+  ): void {
+    let cachedDataSource;
+    if (dataSourceMDSId) {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.dataSourceMDSId === dataSourceMDSId && ds.name === dataSourceName
+      );
+    } else {
+      cachedDataSource = this.getDataSourceCache().dataSources.find(
+        (ds) => ds.name === dataSourceName
+      );
+    }
+
     if (!cachedDataSource) {
       throw new Error('DataSource not found exception: ' + dataSourceName);
     }
@@ -224,7 +290,7 @@ export class CatalogCacheManager {
     const index = cachedDataSource.databases.findIndex((db) => db.name === database.name);
     if (index !== -1) {
       cachedDataSource.databases[index] = database;
-      this.addOrUpdateDataSource(cachedDataSource);
+      this.addOrUpdateDataSource(cachedDataSource, dataSourceMDSId);
     } else {
       throw new Error('Database not found exception: ' + database.name);
     }
