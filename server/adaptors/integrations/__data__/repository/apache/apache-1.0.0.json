@@ -70,6 +70,13 @@
       "type": "query"
     },
     {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
       "name": "create_mv",
       "version": "1.0.0",
       "extension": "sql",
