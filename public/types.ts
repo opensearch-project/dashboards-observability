@@ -6,6 +6,11 @@
 import { SavedObjectsClient } from '../../../src/core/server';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
+import {
+  DataSourcePluginSetup,
+  DataSourcePluginStart,
+} from '../../../src/plugins/data_source/public';
+import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_source_management/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_overview/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
@@ -26,6 +31,7 @@ export interface AppPluginStartDependencies {
   savedObjectsClient: SavedObjectsClient;
   data: DataPublicPluginStart;
   securityDashboards?: {};
+  dataSource: DataSourcePluginStart;
 }
 
 export interface SetupDependencies {
@@ -35,6 +41,8 @@ export interface SetupDependencies {
   uiActions: UiActionsStart;
   managementOverview?: ManagementOverViewPluginSetup;
   assistantDashboards?: AssistantSetup;
+  dataSource: DataSourcePluginSetup;
+  dataSourceManagement: DataSourceManagementPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
