@@ -4,7 +4,7 @@ exports[`Callouts spec EmptyQueryCallOut should match snapshot 1`] = `
 <div>
   <div
     class="euiCallOut euiCallOut--warning euiCallOut--small"
-    data-test-subj="query-assist-empty-callout"
+    data-test-subj="query-assist-empty-query-callout"
   >
     <div
       class="euiCallOutHeader"

@@ -35,7 +35,7 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from './callouts';
+import { EmptyIndexCallOut, EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from './callouts';
 
 class ProhibitedQueryError extends Error {
   constructor(message?: string) {
@@ -116,6 +116,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
   const loading = summaryData.loading;
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedIndex = props.selectedIndex[0]?.label || '';
 
   useEffect(() => {
     if (
@@ -162,7 +163,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     const generatedPPL = await getOSDHttp().post(QUERY_ASSIST_API.GENERATE_PPL, {
       body: JSON.stringify({
         question: props.nlqInput,
-        index: props.selectedIndex[0].label,
+        index: selectedIndex,
       }),
     });
     await props.handleQueryChange(generatedPPL);
@@ -182,7 +183,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const generatePPL = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
-    if (!props.selectedIndex.length) return;
+    if (!selectedIndex) {
+      props.setCallOut(<EmptyIndexCallOut onDismiss={dismissCallOut} />);
+      return;
+    }
     if (props.nlqInput.trim().length === 0) {
       props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
@@ -208,7 +212,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
         question: props.nlqInput,
-        index: props.selectedIndex[0].label,
+        index: selectedIndex,
         isError,
         query: queryRedux.rawQuery,
         response: isError
@@ -273,7 +277,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const runAndSummarize = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
-    if (!props.selectedIndex.length) return;
+    if (!selectedIndex) {
+      props.setCallOut(<EmptyIndexCallOut onDismiss={dismissCallOut} />);
+      return;
+    }
     if (props.nlqInput.trim().length === 0) {
       props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
@@ -309,8 +316,8 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
               <EuiFieldText
                 inputRef={inputRef}
                 placeholder={
-                  props.selectedIndex[0]?.label
-                    ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
+                  selectedIndex
+                    ? `Ask a natural language question about ${selectedIndex} to generate a query`
                     : 'Select a data source or index to ask a question.'
                 }
                 disabled={loading}
@@ -340,7 +347,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
             }}
           >
             <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-              {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
+              {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question) => (
                 <EuiListGroupItem
                   onClick={() => {
                     props.setNlqInput(question);
