@@ -42,7 +42,7 @@ export function setupRoutes({
   registerAppAnalyticsRouter(router);
 
   // TODO remove trace analytics route when DSL route for autocomplete is added
-  registerTraceAnalyticsDslRouter(router);
+  registerTraceAnalyticsDslRouter(router, dataSourceEnabled);
 
   // notebooks routes
   registerParaRoute(router);

@@ -259,6 +259,7 @@ export class ObservabilityPlugin
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
+      const { dataSourceManagement } = setupDeps;
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -269,7 +270,9 @@ export class ObservabilityPlugin
         timestampUtils,
         qm,
         startPage,
-        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
+        dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
+        dataSourceManagement,
+        coreStart.savedObjects
       );
     };
 
@@ -403,6 +406,7 @@ export class ObservabilityPlugin
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
+    coreRefs.dataSource = startDeps.dataSource;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
