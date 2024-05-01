@@ -9,7 +9,7 @@ import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart, SavedObjectAttributes } from '../../../../../../src/core/public';
 import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
@@ -513,16 +513,39 @@ export const prepareMetricsData = (schema: any, dataConfig: any) => {
   };
 };
 
+export const constructOtelMetricsMetaData = () => {
+  const otelMetricSeries: any[] = [];
+  const otelMetricDimension: any[] = [];
+
+  otelMetricDimension.push({ name: 'xAxis', label: 'xAxis', customLabel: '' });
+  otelMetricSeries.push({ name: '', label: '', aggregation: 'count', customLabel: '' });
+
+  return {
+    series: otelMetricSeries,
+    dimensions: otelMetricDimension,
+    span: {},
+  };
+};
+
+export const parseMetadataUserConfig = (
+  userConfigs?: string | SavedObjectAttributes
+): SavedObjectAttributes => {
+  if (userConfigs === undefined || userConfigs === '') {
+    return {};
+  } else if (typeof userConfigs === 'string') {
+    return JSON.parse(userConfigs);
+  } else {
+    return userConfigs;
+  }
+};
+
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
 
-  if (metaData.userConfigs !== undefined && metaData.userConfigs !== '') {
-    metaData.userConfigs = JSON.parse(metaData.userConfigs);
-  }
-
+  metaData.userConfigs = parseMetadataUserConfig(metaData.userConfigs);
   const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
