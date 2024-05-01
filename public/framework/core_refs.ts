@@ -14,7 +14,6 @@ import {
   SavedObjectsClientContract,
 } from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
 import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
@@ -33,7 +32,6 @@ class CoreRefs {
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   public overlays?: OverlayStart;
-  public dataSource?: DataSourcePluginStart;
   private constructor() {
     // ...
   }
