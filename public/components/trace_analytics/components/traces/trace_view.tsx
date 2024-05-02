@@ -161,7 +161,6 @@ export function TraceView(props: TraceViewProps) {
       processTimeStamp('now', mode),
       page
     );
-    console.log('tenant', tenant);
     handleTraceViewRequest(props.traceId, props.http, fields, setFields, mode, tenant);
     handlePayloadRequest(props.traceId, props.http, payloadData, setPayloadData, mode, tenant);
     handleServicesPieChartRequest(
