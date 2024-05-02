@@ -68,7 +68,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
     {
       path: TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
       validate: {
-        body: chema.object({
+        body: schema.object({
           tenant: schema.maybe(schema.string()),
         }),
         query: schema.object({

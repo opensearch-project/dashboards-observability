@@ -108,7 +108,7 @@ export const Home = (props: HomeProps) => {
 
   useEffect(() => {
     if (!tenantLoaded)
-      loadTenantInfo(props.config.multitenancy.enabled).then((tenant) => {
+      loadTenantInfo(props.http, props.config.multitenancy.enabled).then((tenant) => {
         setTenantLoaded(true);
         setTenantName(tenant);
         handleDataPrepperIndicesExistRequest(
@@ -118,7 +118,7 @@ export const Home = (props: HomeProps) => {
           dataSourceMDSId[0].id
         );
         handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, tenant);
-      }, dataSourceMDSId[0].id);
+      });
   }, [props.config.multitenancy.enabled, tenantLoaded, dataSourceMDSId]);
 
   const modes = [

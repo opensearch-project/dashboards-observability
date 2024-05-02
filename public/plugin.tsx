@@ -269,7 +269,8 @@ export class ObservabilityPlugin
         startPage,
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
-        coreStart.savedObjects
+        coreStart.savedObjects,
+        this.config
       );
     };
 
