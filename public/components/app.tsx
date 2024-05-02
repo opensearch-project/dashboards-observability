@@ -7,20 +7,20 @@ import { I18nProvider } from '@osd/i18n/react';
 import { QueryManager } from 'common/query_manager';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { CoreStart } from '../../../../src/core/public';
+import { CoreStart, MountPoint } from '../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import { store } from '../framework/redux/store';
 import { AppPluginStartDependencies } from '../types';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
-import { Home as IntegrationsHome } from './integrations/home';
 import { MetricsListener } from './common/metrics_listener';
 import { Home as CustomPanelsHome } from './custom_panels/home';
+import { Home as DataConnectionsHome } from './datasources/home';
 import { EventAnalytics } from './event_analytics';
+import { Home as IntegrationsHome } from './integrations/home';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
-import { Home as DataConnectionsHome } from './datasources/home';
-import { PublicConfig } from '../plugin';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -32,6 +32,10 @@ interface ObservabilityAppDeps {
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: CoreStart['savedObjects'];
 }
 
 // for cypress to test redux store
@@ -61,6 +65,10 @@ export const App = ({
   queryManager,
   startPage,
   dataSourcePluggables,
+  dataSourceManagement,
+  setActionMenu,
+  dataSourceEnabled,
+  savedObjectsMDSClient,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications } = CoreStartProp;
   const parentBreadcrumb = {
@@ -93,6 +101,10 @@ export const App = ({
             parentBreadcrumbs={[parentBreadcrumb]}
             setBreadcrumbs={chrome.setBreadcrumbs}
             dataSourcePluggables={dataSourcePluggables}
+            dataSourceManagement={dataSourceManagement}
+            dataSourceEnabled={dataSourceEnabled}
+            setActionMenu={setActionMenu}
+            savedObjectsMDSClient={savedObjectsMDSClient}
           />
         </MetricsListener>
       </I18nProvider>

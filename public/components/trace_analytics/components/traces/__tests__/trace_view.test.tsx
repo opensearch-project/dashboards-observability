@@ -7,6 +7,7 @@ import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { TraceView } from '..';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Trace view component', () => {
@@ -21,6 +22,7 @@ describe('Trace view component', () => {
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         traceId="test"
         mode="data_prepper"
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
     expect(wrapper).toMatchSnapshot();

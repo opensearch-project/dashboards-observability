@@ -7,7 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Dashboard } from '..';
-import { CoreStart } from '../../../../../../../../src/core/public';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Dashboard component', () => {
@@ -56,6 +56,7 @@ describe('Dashboard component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -102,6 +103,7 @@ describe('Dashboard component', () => {
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -147,6 +149,7 @@ describe('Dashboard component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 

@@ -121,6 +121,7 @@ export interface CachedDataSource {
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
   databases: CachedDatabase[];
+  dataSourceMDSId?: string;
 }
 
 export interface DataSourceCacheData {
@@ -143,6 +144,7 @@ export interface CachedAccelerationByDataSource {
   accelerations: CachedAcceleration[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
+  dataSourceMDSId?: string;
 }
 
 export interface AccelerationsCacheData {
@@ -240,6 +242,13 @@ export interface CreateAccelerationForm {
 
 export interface LoadCachehookOutput {
   loadStatus: DirectQueryLoadingStatus;
-  startLoading: (dataSourceName: string, databaseName?: string, tableName?: string) => void;
+  startLoading: (params: StartLoadingParams) => void;
   stopLoading: () => void;
+}
+
+export interface StartLoadingParams {
+  dataSourceName: string;
+  dataSourceMDSId?: string;
+  databaseName?: string;
+  tableName?: string;
 }

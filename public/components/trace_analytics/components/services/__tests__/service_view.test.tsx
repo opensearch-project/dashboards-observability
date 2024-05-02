@@ -7,6 +7,7 @@ import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { ServiceView } from '..';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Service view component', () => {
@@ -36,6 +37,7 @@ describe('Service view component', () => {
         setEndTime={setEndTime}
         addFilter={addFilter}
         mode="data_prepper"
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 

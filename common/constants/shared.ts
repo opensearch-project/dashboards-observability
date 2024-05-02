@@ -216,11 +216,11 @@ export interface DefaultChartStylesProps {
 }
 
 export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
-  DefaultModeLine: 'lines',
+  DefaultModeLine: 'lines+markers',
   Interpolation: 'spline',
   LineWidth: 0,
   FillOpacity: 100,
-  MarkerSize: 5,
+  MarkerSize: 25,
   ShowLegend: 'show',
   LegendPosition: 'v',
   LabelAngle: 0,
@@ -258,7 +258,7 @@ export const VISUALIZATION_ERROR = {
   NO_METRIC: 'Invalid Metric MetaData',
 };
 
-export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
+export const S3_DATA_SOURCE_TYPE = 's3glue';
 
 export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
 export const ASYNC_QUERY_DATASOURCE_CACHE = 'async-query-catalog-cache';

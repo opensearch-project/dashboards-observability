@@ -28,6 +28,7 @@ export function SpanDetailPanel(props: {
   traceId: string;
   colorMap: any;
   mode: TraceAnalyticsMode;
+  dataSourceMDSId: string;
   page?: string;
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
@@ -90,6 +91,7 @@ export function SpanDetailPanel(props: {
       props.colorMap,
       refreshDSL,
       mode,
+      props.dataSourceMDSId,
       tenant
     );
   }, 150);

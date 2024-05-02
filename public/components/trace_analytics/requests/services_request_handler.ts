@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
 import dateMath from '@elastic/datemath';
+import _ from 'lodash';
 import DSLService from 'public/services/requests/dsl';
+import { HttpSetup } from '../../../../../../src/core/public';
 import { ServiceObject } from '../components/common/plots/service_map';
+import { TraceAnalyticsMode } from '../home';
 import {
   getRelatedServicesQuery,
   getServiceEdgesQuery,
@@ -15,24 +17,33 @@ import {
   getServicesQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
-import { HttpSetup } from '../../../../../../src/core/public';
-import { TraceAnalyticsMode } from '../home';
 
 export const handleServicesRequest = async (
   http: HttpSetup,
   DSL: any,
   setItems: any,
   mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
   setServiceMap?: any,
   serviceNameFilter?: string,
   tenant?: string
 ) => {
-  return handleDslRequest(http, DSL, getServicesQuery(mode, serviceNameFilter, DSL), mode)
+  return handleDslRequest(
+    http,
+    DSL,
+    getServicesQuery(mode, serviceNameFilter, DSL),
+    mode,
+    dataSourceMDSId,
+    setServiceMap,
+    undefined,
+    tenant
+  )
     .then(async (response) => {
       const serviceObject: ServiceObject = await handleServiceMapRequest(
         http,
         DSL,
         mode,
+        dataSourceMDSId,
         setServiceMap,
         undefined,
         tenant
@@ -67,6 +78,7 @@ export const handleServiceMapRequest = async (
   http: HttpSetup,
   DSL: DSLService | any,
   mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
   setItems?: any,
   currService?: string,
   tenant?: string
@@ -80,7 +92,7 @@ export const handleServiceMapRequest = async (
   }
   const map: ServiceObject = {};
   let id = 1;
-  await handleDslRequest(http, null, getServiceNodesQuery(mode, tenant), mode)
+  await handleDslRequest(http, null, getServiceNodesQuery(mode, tenant), mode, dataSourceMDSId)
     .then((response) =>
       response.aggregations.service_name.buckets.map(
         (bucket: any) =>
@@ -99,7 +111,13 @@ export const handleServiceMapRequest = async (
     .catch((error) => console.error(error));
 
   const targets = {};
-  await handleDslRequest(http, null, getServiceEdgesQuery('target', mode, tenant), mode)
+  await handleDslRequest(
+    http,
+    null,
+    getServiceEdgesQuery('target', mode, tenant),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) =>
       response.aggregations.service_name.buckets.map((bucket: any) => {
         bucket.resource.buckets.map((resource: any) => {
@@ -110,7 +128,13 @@ export const handleServiceMapRequest = async (
       })
     )
     .catch((error) => console.error(error));
-  await handleDslRequest(http, null, getServiceEdgesQuery('destination', mode, tenant), mode)
+  await handleDslRequest(
+    http,
+    null,
+    getServiceEdgesQuery('destination', mode, tenant),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) =>
       Promise.all(
         response.aggregations.service_name.buckets.map((bucket: any) => {
@@ -136,6 +160,7 @@ export const handleServiceMapRequest = async (
     DSL,
     getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
     mode,
+    dataSourceMDSId,
     undefined,
     tenant
   );
@@ -148,7 +173,15 @@ export const handleServiceMapRequest = async (
   });
 
   if (currService) {
-    await handleDslRequest(http, DSL, getRelatedServicesQuery(currService), mode, undefined, tenant)
+    await handleDslRequest(
+      http,
+      DSL,
+      getRelatedServicesQuery(currService),
+      mode,
+      dataSourceMDSId,
+      undefined,
+      tenant
+    )
       .then((response) =>
         response.aggregations.traces.buckets.filter((bucket: any) => bucket.service.doc_count > 0)
       )
@@ -174,9 +207,18 @@ export const handleServiceViewRequest = (
   DSL: any,
   setFields: any,
   mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
   tenant?: string
 ) => {
-  handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode, undefined, tenant)
+  handleDslRequest(
+    http,
+    DSL,
+    getServicesQuery(mode, serviceName),
+    mode,
+    dataSourceMDSId,
+    undefined,
+    tenant
+  )
     .then(async (response) => {
       const bucket = response.aggregations.service.buckets[0];
       if (!bucket) return {};
@@ -184,6 +226,7 @@ export const handleServiceViewRequest = (
         http,
         DSL,
         mode,
+        dataSourceMDSId,
         undefined,
         undefined,
         tenant

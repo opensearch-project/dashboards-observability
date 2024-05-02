@@ -794,6 +794,14 @@ exports[`Treemap component Renders treemap component 1`] = `
           ],
           "height": 220,
           "hovermode": "closest",
+          "layout": Object {
+            "annotations": Array [
+              Object {
+                "showarrow": true,
+                "xanchor": "right",
+              },
+            ],
+          },
           "legend": Object {
             "orientation": "h",
             "traceorder": "normal",

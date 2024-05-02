@@ -405,17 +405,17 @@ exports[`Explorer Search component renders basic component 1`] = `
                           onTimeChange={[Function]}
                           recentlyUsedRanges={Array []}
                           refreshInterval={0}
-                          showUpdateButton={true}
+                          showUpdateButton={false}
                           start="now-15m"
                           timeFormat="HH:mm"
                         >
                           <EuiFlexGroup
-                            className="euiSuperDatePicker__flexWrapper"
+                            className="euiSuperDatePicker__flexWrapper euiSuperDatePicker__flexWrapper--noUpdateButton"
                             gutterSize="s"
                             responsive={false}
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper euiSuperDatePicker__flexWrapper--noUpdateButton"
                             >
                               <EuiFlexItem>
                                 <div
@@ -722,146 +722,6 @@ exports[`Explorer Search component renders basic component 1`] = `
                                       </div>
                                     </div>
                                   </EuiFormControlLayout>
-                                </div>
-                              </EuiFlexItem>
-                              <EuiFlexItem
-                                grow={false}
-                              >
-                                <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                                >
-                                  <EuiSuperUpdateButton
-                                    data-test-subj="superDatePickerApplyTimeButton"
-                                    isDisabled={false}
-                                    isLoading={false}
-                                    needsUpdate={false}
-                                    onClick={[Function]}
-                                    showTooltip={true}
-                                  >
-                                    <EuiToolTip
-                                      delay="regular"
-                                      position="bottom"
-                                    >
-                                      <span
-                                        className="euiToolTipAnchor"
-                                        onKeyUp={[Function]}
-                                        onMouseOut={[Function]}
-                                        onMouseOver={[Function]}
-                                      >
-                                        <EuiButton
-                                          className="euiSuperUpdateButton"
-                                          color="primary"
-                                          data-test-subj="superDatePickerApplyTimeButton"
-                                          fill={true}
-                                          iconType="refresh"
-                                          isDisabled={false}
-                                          isLoading={false}
-                                          onBlur={[Function]}
-                                          onClick={[Function]}
-                                          onFocus={[Function]}
-                                          textProps={
-                                            Object {
-                                              "className": "euiSuperUpdateButton__text",
-                                            }
-                                          }
-                                        >
-                                          <EuiButtonDisplay
-                                            baseClassName="euiButton"
-                                            className="euiSuperUpdateButton"
-                                            color="primary"
-                                            data-test-subj="superDatePickerApplyTimeButton"
-                                            disabled={false}
-                                            element="button"
-                                            fill={true}
-                                            iconType="refresh"
-                                            isDisabled={false}
-                                            isLoading={false}
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            textProps={
-                                              Object {
-                                                "className": "euiSuperUpdateButton__text",
-                                              }
-                                            }
-                                            type="button"
-                                          >
-                                            <button
-                                              className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
-                                              data-test-subj="superDatePickerApplyTimeButton"
-                                              disabled={false}
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              style={
-                                                Object {
-                                                  "minWidth": undefined,
-                                                }
-                                              }
-                                              type="button"
-                                            >
-                                              <EuiButtonContent
-                                                className="euiButton__content"
-                                                iconSide="left"
-                                                iconType="refresh"
-                                                isLoading={false}
-                                                textProps={
-                                                  Object {
-                                                    "className": "euiButton__text euiSuperUpdateButton__text",
-                                                  }
-                                                }
-                                              >
-                                                <span
-                                                  className="euiButtonContent euiButton__content"
-                                                >
-                                                  <EuiIcon
-                                                    className="euiButtonContent__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="refresh"
-                                                  >
-                                                    <EuiIconBeaker
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
-                                                    >
-                                                      <svg
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                        focusable="false"
-                                                        height={16}
-                                                        role="img"
-                                                        style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                      >
-                                                        <path
-                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconBeaker>
-                                                  </EuiIcon>
-                                                  <span
-                                                    className="euiButton__text euiSuperUpdateButton__text"
-                                                  >
-                                                    <EuiI18n
-                                                      default="Refresh"
-                                                      token="euiSuperUpdateButton.refreshButtonLabel"
-                                                    >
-                                                      Refresh
-                                                    </EuiI18n>
-                                                  </span>
-                                                </span>
-                                              </EuiButtonContent>
-                                            </button>
-                                          </EuiButtonDisplay>
-                                        </EuiButton>
-                                      </span>
-                                    </EuiToolTip>
-                                  </EuiSuperUpdateButton>
                                 </div>
                               </EuiFlexItem>
                             </div>

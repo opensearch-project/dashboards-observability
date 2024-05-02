@@ -11,14 +11,14 @@ import {
   handleServiceMapRequest,
   handleServicesRequest,
 } from '../../requests/services_request_handler';
-import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
+import { FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
+import { DashboardContent } from '../dashboard/dashboard_content';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
-import { DashboardContent } from '../dashboard/dashboard_content';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -41,6 +41,7 @@ export function ServicesContent(props: ServicesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    dataSourceMDSId,
     tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -106,11 +107,21 @@ export function ServicesContent(props: ServicesProps) {
       (must: any) => must?.term?.serviceName == null
     );
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode, undefined, tenant),
+      handleServicesRequest(
+        http,
+        DSL,
+        setTableItems,
+        mode,
+        dataSourceMDSId[0].id,
+        undefined,
+        undefined,
+        tenant
+      ),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
+        dataSourceMDSId[0].id,
         setServiceMap,
         currService || filteredService,
         tenant

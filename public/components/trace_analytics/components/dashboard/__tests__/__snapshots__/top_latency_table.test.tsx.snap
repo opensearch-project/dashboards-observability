@@ -2379,6 +2379,14 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                               "barmode": "stack",
                                               "height": 15,
                                               "hovermode": "closest",
+                                              "layout": Object {
+                                                "annotations": Array [
+                                                  Object {
+                                                    "showarrow": true,
+                                                    "xanchor": "right",
+                                                  },
+                                                ],
+                                              },
                                               "legend": Object {
                                                 "orientation": "h",
                                                 "traceorder": "normal",

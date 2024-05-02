@@ -45,6 +45,7 @@ export interface CreateAccelerationProps {
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
+  dataSourceMDSId?: string;
   refreshHandler?: () => void;
 }
 
@@ -53,6 +54,7 @@ export const CreateAcceleration = ({
   resetFlyout,
   databaseName,
   tableName,
+  dataSourceMDSId,
   refreshHandler,
 }: CreateAccelerationProps) => {
   const { setToast } = useToast();
@@ -141,12 +143,22 @@ export const CreateAcceleration = ({
     if (dataTable !== '') {
       setTableFieldsLoading(true);
       try {
-        const cachedTable = CatalogCacheManager.getTable(dataSource, database, dataTable);
+        const cachedTable = CatalogCacheManager.getTable(
+          dataSource,
+          database,
+          dataTable,
+          dataSourceMDSId
+        );
         if (cachedTable.columns) {
           loadColumnsToAccelerationForm(cachedTable);
           setTableFieldsLoading(false);
         } else {
-          startLoading(dataSource, database, dataTable);
+          startLoading({
+            dataSourceName: dataSource,
+            dataSourceMDSId,
+            databaseName: database,
+            tableName: dataTable,
+          });
         }
       } catch (error) {
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
@@ -173,7 +185,8 @@ export const CreateAcceleration = ({
         cachedTable = CatalogCacheManager.getTable(
           accelerationFormData.dataSource,
           accelerationFormData.database,
-          accelerationFormData.dataTable
+          accelerationFormData.dataTable,
+          dataSourceMDSId
         );
       } catch (error) {
         setToast('Your cache is outdated, refresh databases and tables', 'warning');
@@ -218,6 +231,7 @@ export const CreateAcceleration = ({
               selectedDatasource={selectedDatasource}
               dataSourcesPreselected={dataSourcesPreselected}
               tableFieldsLoading={tableFieldsLoading}
+              dataSourceMDSId={dataSourceMDSId}
             />
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
@@ -235,6 +249,7 @@ export const CreateAcceleration = ({
               accelerationFormData={accelerationFormData}
               setAccelerationFormData={setAccelerationFormData}
               tableFieldsLoading={tableFieldsLoading}
+              dataSourceMDSId={dataSourceMDSId}
             />
             <EuiSpacer size="xxl" />
             <IndexAdvancedSettings

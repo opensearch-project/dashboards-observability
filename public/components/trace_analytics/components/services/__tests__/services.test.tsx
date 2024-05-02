@@ -7,6 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Services } from '..';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Services component', () => {
@@ -56,6 +57,7 @@ describe('Services component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -102,6 +104,7 @@ describe('Services component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -149,6 +152,7 @@ describe('Services component', () => {
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 

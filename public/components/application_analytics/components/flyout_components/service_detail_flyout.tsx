@@ -4,7 +4,6 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import _ from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -14,19 +13,20 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  handleServiceMapRequest,
-  handleServiceViewRequest,
-} from '../../../../../public/components/trace_analytics/requests/services_request_handler';
 import {
   filtersToDsl,
   processTimeStamp,
 } from '../../../../../public/components/trace_analytics/components/common/helper_functions';
-import { ServiceMap } from '../../../../../public/components/trace_analytics/components/services';
 import { ServiceObject } from '../../../../../public/components/trace_analytics/components/common/plots/service_map';
+import { ServiceMap } from '../../../../../public/components/trace_analytics/components/services';
 import { SpanDetailTable } from '../../../../../public/components/trace_analytics/components/traces/span_detail_table';
 import { TraceAnalyticsComponentDeps } from '../../../../../public/components/trace_analytics/home';
+import {
+  handleServiceMapRequest,
+  handleServiceViewRequest,
+} from '../../../../../public/components/trace_analytics/requests/services_request_handler';
 import { getListItem } from '../../helpers/utils';
 
 interface ServiceFlyoutProps extends TraceAnalyticsComponentDeps {
@@ -132,7 +132,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       appConfigs
     );
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
-    handleServiceMapRequest(http, serviceDSL, mode, setServiceMap, serviceName, tenant);
+    handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap, serviceName, tenant);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.must.push({
       term: {

@@ -1,13 +1,13 @@
 {
-  "name": "aws_s3",
+  "name": "amazon_elb",
   "version": "1.0.0",
-  "displayName": "Amazon S3",
-  "description": "Analyze Amazon S3 server logs.",
+  "displayName": "Elastic Load Balancing",
+  "description": "Analyze access logs for Elastic Load Balancing.",
   "license": "Apache-2.0",
-  "type": "logs_s3",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "type": "logs_elb",
+  "labels": ["Observability", "Logs", "AWS", "Flint S3", "Cloud"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_s3/info",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
   "workflows": [
     {
       "name": "queries",
@@ -24,44 +24,49 @@
   ],
   "statics": {
     "logo": {
-      "annotation": "S3 Logo",
-      "path": "logo.png"
+      "annotation": "ELB Logo",
+      "path": "logo.svg"
     },
     "gallery": [
       {
-        "annotation": "AWS S3 Dashboard",
-        "path": "dashboard.png"
+        "annotation": "ELB Dashboard",
+        "path": "dashboard1.png"
       }
     ]
   },
   "components": [
     {
-      "name": "aws_s3",
+      "name": "communication",
       "version": "1.0.0"
     },
     {
-      "name": "logs_s3",
+      "name": "http",
       "version": "1.0.0"
     },
     {
       "name": "cloud",
       "version": "1.0.0"
+    },
+    {
+      "name": "aws_elb",
+      "version": "1.0.0"
+    },
+    {
+      "name": "url",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_elb",
+      "version": "1.0.0"
     }
   ],
   "assets": [
     {
-      "name": "aws_s3",
+      "name": "aws_elb",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
       "workflows": ["dashboards"]
-    },
-    {
-      "name": "example_queries",
-      "version": "1.0.0",
-      "extension": "ndjson",
-      "type": "savedObjectBundle",
-      "workflows": ["queries"]
     },
     {
       "name": "create_table",
@@ -70,11 +75,25 @@
       "type": "query"
     },
     {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
       "name": "create_mv",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
       "workflows": ["dashboards"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
     }
   ],
   "sampleData": {

@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import React from 'react';
 import { Traces } from '..';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Traces component', () => {
@@ -54,6 +55,7 @@ describe('Traces component', () => {
         mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -98,6 +100,7 @@ describe('Traces component', () => {
         page="traces"
         modes={modes}
         dataPrepperIndicesExist={true}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
@@ -143,6 +146,7 @@ describe('Traces component', () => {
         modes={modes}
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
+        dataSourceMDSId={[{ id: '', label: '' }]}
       />
     );
 
