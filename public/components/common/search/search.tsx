@@ -30,7 +30,11 @@ import {
   OLLY_QUERY_ASSISTANT,
   RAW_QUERY,
 } from '../../../../common/constants/explorer';
-import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_SPAN_REGEX,
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
@@ -277,7 +281,11 @@ export const Search = (props: any) => {
       dispatch(changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery } }));
     });
     onQuerySearch(queryLang);
-    handleTimePickerChange([startTime, endTime]);
+    if (coreRefs.queryAssistEnabled) {
+      handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
+    } else {
+      handleTimePickerChange([startTime, endTime]);
+    }
     setNeedsUpdate(false);
   };
 
@@ -299,7 +307,10 @@ export const Search = (props: any) => {
     const sampleLogOption = indicesAndIndexPatterns.find(
       (option) => option.label === 'opensearch_dashboards_sample_data_logs'
     );
-    if (sampleLogOption) setSelectedIndex([sampleLogOption]);
+    if (sampleLogOption) {
+      setSelectedIndex([sampleLogOption]);
+      return;
+    }
     const sampleDataOption = indicesAndIndexPatterns.find((option) =>
       option.label.startsWith('opensearch_dashboards_sample_data_')
     );

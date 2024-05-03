@@ -22,7 +22,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
-import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
+import {
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -35,7 +38,12 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { EmptyIndexCallOut, EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from './callouts';
+import {
+  EmptyIndexCallOut,
+  EmptyQueryCallOut,
+  PPLGeneratedCallOut,
+  ProhibitedQueryCallOut,
+} from './callouts';
 
 class ProhibitedQueryError extends Error {
   constructor(message?: string) {
@@ -289,7 +297,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
       dismissCallOut();
       await request();
-      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
+      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (err) {
       const error = formatError(err);
