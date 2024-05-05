@@ -39,54 +39,54 @@ During this phase the index-templates for the OTEL entities is generated
 Once logged in - navigate to the Integration sections and select the OTEL-Demo Integration
 
 - Select the OTEL-Demo Integration
-
-![](...)
+![integration-otel-services-selection.png](img%2Fintegration-otel-services-selection.png)
+![integration-otel-services-info.png](img%2Fintegration-otel-services-info.png)
 
 - Run the set-up integration and choose the `otel-*` index name as the integration data source
 
-![]()
+![integration-otel-services-setup.png](img%2Fintegration-otel-services-setup.png)
 
  - View all the Generated Dashboards:
 
-![]()
+![integration-otel-services-dashboards.png](img%2Fintegration-otel-services-dashboards.png)
 
 ## Ingestion Rate Dashboard
 This dashboard show the 3 signals ingestion rate as they are shipped via data-prepper into OpenSearch indices
 
-![]()
+![otel-ingestion-rate-dashboard.png](img%2Fotel-ingestion-rate-dashboard.png)
 
 ## Services High Level Dashboards View
 This dashboard show the 3 signals ingestion rate as they are shipped via data-prepper into OpenSearch indices
-
-![]()
+![services-general-dashboard.png](img%2Fservices-general-dashboard.png)
 
 ## Single Service Details Dashboards View
 This dashboard show the specific service details including associated high level view of the metrics collected for the service 
-
-![]()
+![specific-service-dashboard.png](img%2Fspecific-service-dashboard.png)
 
 ## Service Metrics View
 
 ### Service Metrics system projection Dashboards 
 This dashboard show the specific service details in particular the system related metrics collected for the service
 
-![]()
+![amp-services-system-metrics-details.png](img%2Famp-services-system-metrics-details.png)
 
 ### Service Metrics network projection Dashboards 
 This dashboard show the specific service details in particular the network related metrics collected for the service
 
-![]()
+![amp-services-network-metrics-details.png](img%2Famp-services-network-metrics-details.png)
 
 ## Metrics Analytics
 
 ### Setting Up Prometheus `datasource`
-...
+![configure-prometheus-datasource.png](img%2Fconfigure-prometheus-datasource.png)
 
 ### Query Prometheus OTEL metrics
-...
+![metrics-analytics-prometheus.png](img%2Fmetrics-analytics-prometheus.png)
+![metrics-analytics-prometheus-select-metrics.png](img%2Fmetrics-analytics-prometheus-select-metrics.png)
 
 ### Query OpenSearch OTEL metrics
-...
+![metrics-analytics-opensearch-otel-metrics.png](img%2Fmetrics-analytics-opensearch-otel-metrics.png)
+![metrics-analytics-opensearch-otel-metrics-select-metrics.png](img%2Fmetrics-analytics-opensearch-otel-metrics-select-metrics.png)
 
 ## Discover - Log Exploration
-...
+![logs-discovery-otel.png](img%2Flogs-discovery-otel.png)
