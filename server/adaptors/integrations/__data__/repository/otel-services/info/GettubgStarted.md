@@ -29,10 +29,14 @@ Once all services are up and running - log-in to the Dashboard and enter the nex
 ## Store URLs in session storage
 Enable Store URLs in session storage for allowing to view and edit Vega based visualizations 
 
-![]()
+![store-url-in-session.png](img%2Fstore-url-in-session.png)
 
 ## Loading the OTEL Schema Manually
 During this phase the index-templates for the OTEL entities is generated  
+
+![import-dev-console-sense-notebook.png](img%2Fimport-dev-console-sense-notebook.png)
+![dev-tool-schema-notebook.png](img%2Fdev-tool-schema-notebook.png)
+
 
 ## Installing OTEL Services Demo 
 
