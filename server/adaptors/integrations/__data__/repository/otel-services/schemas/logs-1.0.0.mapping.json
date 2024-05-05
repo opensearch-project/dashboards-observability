@@ -8,7 +8,6 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": ["log", "http", "communication"],
         "correlations": [
           {
             "field": "spanId",
@@ -199,6 +198,9 @@
         },
         "refresh_interval": "5s"
       }
+    },
+    "aliases" : {
+      "otel-events" : {}
     }
   },
   "composed_of": [],

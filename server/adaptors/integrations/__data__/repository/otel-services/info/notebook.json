@@ -66,14 +66,6 @@ PUT  _index_template/ss4o_traces_template
             },
             "path_match": "instrumentationScope.attributes.*"
           }
-        },
-        {
-          "resources_map": {
-            "mapping": {
-              "type": "keyword"
-            },
-            "path_match": "resource.*"
-          }
         }
       ],
       "_source": {
@@ -267,14 +259,6 @@ PUT  _index_template/ss4o_logs_template
         "enabled": true
       },
       "dynamic_templates": [
-        {
-          "resources_map": {
-            "mapping": {
-              "type": "keyword"
-            },
-            "path_match": "resource.*"
-          }
-        },
         {
           "instrumentation_scope_attributes_map": {
             "mapping": {
@@ -488,14 +472,6 @@ PUT  _index_template/ss4o_metrics_template
         "enabled": true
       },
       "dynamic_templates": [
-        {
-          "resources_map": {
-            "mapping": {
-              "type": "keyword"
-            },
-            "path_match": "resource.*"
-          }
-        },
         {
           "exemplar_attributes_map": {
             "mapping": {
