@@ -6,10 +6,13 @@ Getting started with the OTEL demo including running the OpenSearch Server and D
 The following web-pages can be directly access to review the load generator
  - http://localhost:8089/
 
+ - Here the synthetic testing process can be started 
+
 ![](./img/load-generator.png)
 
 The following web-pages can be directly access to actually simulate store purchase
 - http://localhost:8080/ (front-end) OR  http://localhost:90 (nginx-forntend proxy) 
+- Here the actual shop demo can be used (simulated demo shop ...) 
 
 ![](./img/demo-app.png)
 
@@ -23,16 +26,18 @@ Once all services are up and running - log-in to the Dashboard and enter the nex
 **User: `admin`  | Password:  `my_%New%_passW0rd!@#`** 
 
 - http://localhost:5601/
+- OpenSearch Dashboard login
 
 ![dashboard-login.png](img%2Fdashboard-login.png)
 
 ## Store URLs in session storage
 Enable Store URLs in session storage for allowing to view and edit Vega based visualizations 
-
+- Once logged in, go to [Advanced Setting](http://localhost:5601/app/management/opensearch-dashboards/settings)
 ![store-url-in-session.png](img%2Fstore-url-in-session.png)
 
 ## Loading the OTEL Schema Manually
-During this phase the index-templates for the OTEL entities is generated  
+To install the OTEL schema manually using the [Simple Schema for Observability](https://github.com/opensearch-project/opensearch-catalog/tree/main/docs/schema/observability) load the schema creation command 
+- Go to the [Dev Console](http://localhost:5601/app/dev_tools#/console) and import the next [sense file](../assets/sense.json)
 
 ![import-dev-console-sense-notebook.png](img%2Fimport-dev-console-sense-notebook.png)
 ![dev-tool-schema-notebook.png](img%2Fdev-tool-schema-notebook.png)
@@ -40,9 +45,9 @@ During this phase the index-templates for the OTEL entities is generated
 
 ## Installing OTEL Services Demo 
 
-Once logged in - navigate to the Integration sections and select the OTEL-Demo Integration
-
-- Select the OTEL-Demo Integration
+Install OpenTelemetry Integration - navigate to the Integration sections and select the OTEL-Demo Integration
+- Go to the [available integrations ](http://localhost:5601/app/integrations#/available) dialog
+- Select the [OTEL-Demo Integration](http://localhost:5601/app/integrations#/available/otel-services)  
 ![integration-otel-services-selection.png](img%2Fintegration-otel-services-selection.png)
 ![integration-otel-services-info.png](img%2Fintegration-otel-services-info.png)
 
@@ -82,15 +87,19 @@ This dashboard show the specific service details in particular the network relat
 ## Metrics Analytics
 
 ### Setting Up Prometheus `datasource`
+- First [setup](http://localhost:5601/app/datasources#/new) the Prometheus datasource we wanted to connect with 
 ![configure-prometheus-datasource.png](img%2Fconfigure-prometheus-datasource.png)
 
 ### Query Prometheus OTEL metrics
+- [Select the OTEL metrics](http://localhost:5601/app/observability-metrics#/) (Prometheus / OpenSearch) we want to display 
 ![metrics-analytics-prometheus.png](img%2Fmetrics-analytics-prometheus.png)
 ![metrics-analytics-prometheus-select-metrics.png](img%2Fmetrics-analytics-prometheus-select-metrics.png)
 
 ### Query OpenSearch OTEL metrics
+- Select the `ss4o_metrics-*-*` based index to view the OTEL metrics stored in OpenSearch:
 ![metrics-analytics-opensearch-otel-metrics.png](img%2Fmetrics-analytics-opensearch-otel-metrics.png)
 ![metrics-analytics-opensearch-otel-metrics-select-metrics.png](img%2Fmetrics-analytics-opensearch-otel-metrics-select-metrics.png)
 
 ## Discover - Log Exploration
+- [Discover](http://localhost:5601/app/data-explorer/discover) the OTEL logs stored inside OpenSearch
 ![logs-discovery-otel.png](img%2Flogs-discovery-otel.png)
