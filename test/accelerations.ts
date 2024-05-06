@@ -411,7 +411,7 @@ AS SELECT
    count(*) AS \`counter1\`, 
    sum(\`field2\`), 
    avg(\`field3\`) AS \`average\`, 
-   \`window.start\` AS \`start\`
+   window.start AS \`start\`
 FROM datasource.database.table
 GROUP BY TUMBLE (\`timestamp\`, '1 minute')
  WITH (
