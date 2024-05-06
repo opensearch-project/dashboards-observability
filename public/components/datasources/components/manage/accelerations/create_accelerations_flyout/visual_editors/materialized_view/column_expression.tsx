@@ -115,34 +115,39 @@ export const ColumnExpression = ({
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Aggregation field">
-                    <EuiComboBox
-                      singleSelection={{ asPlainText: true }}
-                      options={[
-                        {
-                          label: '*',
-                          disabled: currentColumnExpressionValue.functionName !== 'count',
-                        },
-                        ...accelerationFormData.dataTableFields.map((x) => ({
-                          label: x.fieldName,
-                        })),
-                      ]}
-                      selectedOptions={[
-                        {
-                          label: currentColumnExpressionValue.functionParam,
-                        },
-                      ]}
-                      onChange={(fieldOption) =>
-                        updateColumnExpressionValue(
-                          { ...currentColumnExpressionValue, functionParam: fieldOption[0].label },
-                          index
-                        )
-                      }
-                      isClearable={false}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+                {currentColumnExpressionValue.functionName !== 'window.start' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow label="Aggregation field">
+                      <EuiComboBox
+                        singleSelection={{ asPlainText: true }}
+                        options={[
+                          {
+                            label: '*',
+                            disabled: currentColumnExpressionValue.functionName !== 'count',
+                          },
+                          ...accelerationFormData.dataTableFields.map((x) => ({
+                            label: x.fieldName,
+                          })),
+                        ]}
+                        selectedOptions={[
+                          {
+                            label: currentColumnExpressionValue.functionParam,
+                          },
+                        ]}
+                        onChange={(fieldOption) =>
+                          updateColumnExpressionValue(
+                            {
+                              ...currentColumnExpressionValue,
+                              functionParam: fieldOption[0].label,
+                            },
+                            index
+                          )
+                        }
+                        isClearable={false}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </>
           </EuiPopover>
