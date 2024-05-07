@@ -5,14 +5,13 @@
 
 import path from 'path';
 import { addRequestToMetric } from '../../common/metrics/metrics_helper';
-import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { TemplateManager } from './repository/repository';
 import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
 import { IndexDataAdaptor } from './repository/index_data_adaptor';
 
-export class IntegrationsManager implements IntegrationsAdaptor {
+export class IntegrationsManager {
   client: SavedObjectsClientContract;
   instanceBuilder: IntegrationInstanceBuilder;
   repository: TemplateManager;
