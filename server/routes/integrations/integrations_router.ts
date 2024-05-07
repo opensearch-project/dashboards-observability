@@ -23,18 +23,18 @@ import { IntegrationsManager } from '../../adaptors/integrations/integrations_ma
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
  * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
  *
- * @param {IntegrationsManager} adaptor The adaptor instance to use for making requests.
+ * @param {IntegrationsManager} manager The integration manager instance to use for making requests.
  * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
  * @callback callback A callback that will invoke a request on a provided adaptor.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
 export const handleWithCallback = async <T>(
-  adaptor: IntegrationsManager,
+  manager: IntegrationsManager,
   response: OpenSearchDashboardsResponseFactory,
   callback: (a: IntegrationsManager) => Promise<T>
 ): Promise<OpenSearchDashboardsResponse<{ data: T } | string>> => {
   try {
-    const data = await callback(adaptor);
+    const data = await callback(manager);
     return response.ok({
       body: {
         data,
