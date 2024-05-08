@@ -1,0 +1,94 @@
+{
+  "name": "amazon_cloudfront",
+  "version": "1.0.0",
+  "displayName": "Amazon CloudFront",
+  "description": "Analyze access logs for Amazon CloudFront.",
+  "license": "Apache-2.0",
+  "type": "logs-aws_cloudfront",
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
+  "statics": {
+    "logo": {
+      "annotation": "CloudFront Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS cloudfront Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "components": [
+    {
+      "name": "aws_cloudfront",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs-aws_cloudfront",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "create_table",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query"
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "create_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "aws_cloudfront",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
+    }
+  ],
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

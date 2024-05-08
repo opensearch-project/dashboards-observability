@@ -1,0 +1,52 @@
+{
+  "name": "amazon_rds",
+  "version": "1.0.0",
+  "displayName": "Amazon Relational Database Service",
+  "description": "Analyze RDS database logs files.",
+  "license": "Apache-2.0",
+  "type": "logs_rds",
+  "labels": ["Observability", "Logs", "AWS", "Cloud"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_rds/info",
+  "statics": {
+    "logo": {
+      "annotation": "RDS Logo",
+      "path": "aws-rds-icon.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS RDS Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_rds",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_rds",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "aws_rds",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle"
+    }
+  ],
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

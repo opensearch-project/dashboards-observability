@@ -20,21 +20,29 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceViewConfig,
+} from '../../../../../../../src/plugins/data_source_management/public';
+import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
-import { filtersToDsl, PanelTitle, processTimeStamp } from '../common/helper_functions';
+import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
-import { renderDatePicker, SearchBarProps } from '../common/search_bar';
+import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
   addFilter: (filter: FilterType) => void;
+  dataSourceMDSId: DataSourceOption[];
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  dataSourceEnabled: boolean;
 }
 
 export function ServiceView(props: ServiceViewProps) {
@@ -54,9 +62,23 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    handleServiceViewRequest(props.serviceName, props.http, DSL, setFields, mode);
+    handleServiceViewRequest(
+      props.serviceName,
+      props.http,
+      DSL,
+      setFields,
+      mode,
+      props.dataSourceMDSId[0].id
+    );
     if (mode === 'data_prepper') {
-      handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName);
+      handleServiceMapRequest(
+        props.http,
+        DSL,
+        mode,
+        props.dataSourceMDSId[0].id,
+        setServiceMap,
+        props.serviceName
+      );
     }
   };
 
@@ -88,7 +110,7 @@ export function ServiceView(props: ServiceViewProps) {
     setStartTime: SearchBarProps['setStartTime'],
     endTime: SearchBarProps['endTime'],
     setEndTime: SearchBarProps['setEndTime'],
-    addFilter: (filter: FilterType) => void
+    _addFilter: (filter: FilterType) => void
   ) => {
     return (
       <>
@@ -104,110 +126,122 @@ export function ServiceView(props: ServiceViewProps) {
       </>
     );
   };
-
+  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
   const renderOverview = () => {
     return (
-      <EuiPanel>
-        <PanelTitle title="Overview" />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Name</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {props.serviceName || '-'}
-                </EuiText>
-              </EuiFlexItem>
-              {mode === 'data_prepper' ? (
+      <>
+        {props.dataSourceEnabled && (
+          <DataSourceMenu
+            setMenuMountPoint={props.setActionMenu}
+            componentType={'DataSourceView'}
+            componentConfig={{
+              activeOption: props.dataSourceMDSId,
+              fullWidth: true,
+            }}
+          />
+        )}
+        <EuiPanel>
+          <PanelTitle title="Overview" />
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column">
                 <EuiFlexItem grow={false}>
-                  <EuiText className="overview-title">Number of connected services</EuiText>
+                  <EuiText className="overview-title">Name</EuiText>
                   <EuiText size="s" className="overview-content">
-                    {fields.number_of_connected_services !== undefined
-                      ? fields.number_of_connected_services
-                      : 0}
+                    {props.serviceName || '-'}
                   </EuiText>
                 </EuiFlexItem>
-              ) : (
-                <EuiFlexItem />
-              )}
-              {mode === 'data_prepper' ? (
+                {mode === 'data_prepper' ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Number of connected services</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {fields.number_of_connected_services !== undefined
+                        ? fields.number_of_connected_services
+                        : 0}
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem />
+                )}
+                {mode === 'data_prepper' ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Connected services</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {fields.connected_services && fields.connected_services.length
+                        ? fields.connected_services
+                            .map((service: string) => (
+                              <EuiLink href={`#/services/${service}`} key={service}>
+                                {service}
+                              </EuiLink>
+                            ))
+                            .reduce((prev: React.ReactNode, curr: React.ReactNode) => {
+                              return [prev, ', ', curr];
+                            })
+                        : '-'}
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem />
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column">
                 <EuiFlexItem grow={false}>
-                  <EuiText className="overview-title">Connected services</EuiText>
+                  <EuiText className="overview-title">Average duration (ms)</EuiText>
                   <EuiText size="s" className="overview-content">
-                    {fields.connected_services && fields.connected_services.length
-                      ? fields.connected_services
-                          .map((service: string) => (
-                            <EuiLink href={`#/services/${service}`} key={service}>
-                              {service}
-                            </EuiLink>
-                          ))
-                          .reduce((prev: React.ReactNode, curr: React.ReactNode) => {
-                            return [prev, ', ', curr];
-                          })
+                    {fields.average_latency !== undefined ? fields.average_latency : '-'}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText className="overview-title">Error rate</EuiText>
+                  <EuiText size="s" className="overview-content">
+                    {fields.error_rate !== undefined
+                      ? _.round(fields.error_rate, 2).toString() + '%'
                       : '-'}
                   </EuiText>
                 </EuiFlexItem>
-              ) : (
-                <EuiFlexItem />
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Average duration (ms)</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.average_latency !== undefined ? fields.average_latency : '-'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Error rate</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.error_rate !== undefined
-                    ? _.round(fields.error_rate, 2).toString() + '%'
-                    : '-'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Request rate</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.throughput !== undefined ? (
-                    <EuiI18nNumber value={fields.throughput} />
-                  ) : (
-                    '-'
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Traces</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.traces === 0 || fields.traces ? (
-                    <EuiLink
-                      onClick={() => {
-                        setRedirect(true);
-                        props.addFilter({
-                          field: 'process.serviceName',
-                          operator: 'is',
-                          value: props.serviceName,
-                          inverted: false,
-                          disabled: false,
-                        });
-                        location.assign('#/traces');
-                      }}
-                    >
-                      <EuiI18nNumber value={fields.traces} />
-                    </EuiLink>
-                  ) : (
-                    '-'
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </EuiPanel>
+                <EuiFlexItem grow={false}>
+                  <EuiText className="overview-title">Request rate</EuiText>
+                  <EuiText size="s" className="overview-content">
+                    {fields.throughput !== undefined ? (
+                      <EuiI18nNumber value={fields.throughput} />
+                    ) : (
+                      '-'
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText className="overview-title">Traces</EuiText>
+                  <EuiText size="s" className="overview-content">
+                    {fields.traces === 0 || fields.traces ? (
+                      <EuiLink
+                        onClick={() => {
+                          setRedirect(true);
+                          props.addFilter({
+                            field: 'process.serviceName',
+                            operator: 'is',
+                            value: props.serviceName,
+                            inverted: false,
+                            disabled: false,
+                          });
+                          location.assign('#/traces');
+                        }}
+                      >
+                        <EuiI18nNumber value={fields.traces} />
+                      </EuiLink>
+                    ) : (
+                      '-'
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </EuiPanel>
+      </>
     );
   };
 
@@ -321,6 +355,7 @@ export function ServiceView(props: ServiceViewProps) {
         openFlyout={(spanId: string) => setCurrentSpan(spanId)}
         setTotal={setTotal}
         mode={mode}
+        dataSourceMDSId={props.dataSourceMDSId[0].id}
       />
     ),
     [DSL, setCurrentSpan]
@@ -374,6 +409,7 @@ export function ServiceView(props: ServiceViewProps) {
               closeFlyout={() => setCurrentSpan('')}
               addSpanFilter={addSpanFilter}
               mode={mode}
+              dataSourceMDSId={props.dataSourceMDSId[0].id}
             />
           )}
         </EuiPageBody>

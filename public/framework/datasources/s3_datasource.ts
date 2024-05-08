@@ -9,22 +9,23 @@ interface DataSourceConfig {
   name: string;
   type: string;
   metadata: any;
+  id: string;
 }
 
-export class S3DataSource extends DataSource<any, any, any, any, any> {
-  constructor({ name, type, metadata }: DataSourceConfig) {
-    super(name, type, metadata);
+export class S3DataSource extends DataSource {
+  constructor({ id, name, type, metadata }: DataSourceConfig) {
+    super({ id, name, type, metadata });
   }
 
-  async getDataSet(dataSetParams?: any) {
-    return [this.getName()];
+  async getDataSet() {
+    return { dataSets: [this.getName()] };
   }
 
-  async testConnection(): Promise<void> {
-    throw new Error('This operation is not supported for this class.');
+  async testConnection(): Promise<boolean> {
+    return true;
   }
 
-  async runQuery(queryParams: any) {
-    return null;
+  async runQuery() {
+    return { data: {} };
   }
 }

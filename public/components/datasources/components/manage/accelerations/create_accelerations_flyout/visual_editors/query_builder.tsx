@@ -148,7 +148,7 @@ const buildMaterializedViewColumns = (columnsValues: MaterializedViewColumn[]) =
         `   ${
           column.functionName !== 'window.start'
             ? `${column.functionName}(${buildMaterializedViewColumnName(column.functionParam!)})`
-            : `\`${column.functionName}\``
+            : `${column.functionName}`
         }${column.fieldAlias ? ` AS \`${column.fieldAlias}\`` : ``}`
     )
     .join(', \n');

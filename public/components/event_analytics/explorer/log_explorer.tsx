@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { batch, useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { LogExplorerRouterContext } from '..';
 import {
@@ -25,14 +25,6 @@ import {
   QUERY_ASSIST_START_TIME,
 } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../../public/framework/core_refs';
-
-import { init as initFields } from '../../event_analytics/redux/slices/field_slice';
-import { init as initPatterns } from '../../event_analytics/redux/slices/patterns_slice';
-import { init as initQueryResult } from '../../event_analytics/redux/slices/query_result_slice';
-import { init as initQuery } from '../../event_analytics/redux/slices/query_slice';
-import { init as initVisualizationConfig } from '../../event_analytics/redux/slices/viualization_config_slice';
-import { resetSummary as initQueryAssistSummary } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
-import { init as initSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -60,7 +52,6 @@ export const LogExplorer = ({
   dataSourcePluggables,
 }: ILogExplorerProps) => {
   const history = useHistory();
-  const dispatch = useDispatch();
   const routerContext = useContext(LogExplorerRouterContext);
   const tabIds = useSelector(selectQueryTabs).queryTabIds.filter(
     (tabid: string) => !tabid.match(APP_ANALYTICS_TAB_ID_REGEX)
@@ -88,29 +79,15 @@ export const LogExplorer = ({
     });
   };
 
-  const dateRange = coreRefs.queryAssistEnabled
-    ? [QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]
-    : getDateRange(undefined, undefined, queries[tabIds[0]]);
+  const dateRange = getDateRange(undefined, undefined, queries[tabIds[0]]);
   const [startTime, setStartTime] = useState(dateRange[0]);
   const [endTime, setEndTime] = useState(dateRange[1]);
 
   useEffect(() => {
     if (!isEmpty(savedObjectId)) {
       dispatchSavedObjectId();
-    } else {
-      // below piece of code was added to simulate creating a new tab if saved obj isn't being loaded,
-      // since tabs being visually removed means 'new tab' cannot be created any other way
-      const tabId = tabIds[0];
-      batch(() => {
-        dispatch(initQuery({ tabId }));
-        dispatch(initQueryResult({ tabId }));
-        dispatch(initFields({ tabId }));
-        dispatch(initVisualizationConfig({ tabId }));
-        dispatch(initPatterns({ tabId }));
-        dispatch(initQueryAssistSummary({ tabId }));
-        dispatch(initSearchMetaData({ tabId }));
-      });
     }
+
     if (routerContext && routerContext.searchParams.has(CREATE_TAB_PARAM_KEY)) {
       // need to wait for current redux event loop to finish
       setImmediate(() => {

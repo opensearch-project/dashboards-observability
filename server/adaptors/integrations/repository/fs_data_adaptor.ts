@@ -5,6 +5,7 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
+import JSON5 from 'json5';
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 import { tryParseNDJson } from './utils';
 
@@ -45,7 +46,7 @@ export class FileSystemDataAdaptor implements CatalogDataAdaptor {
     }
     // First try to parse as JSON, then NDJSON, then fail.
     try {
-      const parsed = JSON.parse(content);
+      const parsed = JSON5.parse(content);
       return { ok: true, value: parsed };
     } catch (err) {
       const parsed = await tryParseNDJson(content);
@@ -54,7 +55,7 @@ export class FileSystemDataAdaptor implements CatalogDataAdaptor {
       }
       return {
         ok: false,
-        error: new Error('Unable to parse file as JSON or NDJson', { cause: err }),
+        error: new Error(`Unable to parse file '${filename}' as JSON or NDJson`, { cause: err }),
       };
     }
   }

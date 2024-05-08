@@ -93,6 +93,7 @@ export const PPL_INDEX_INSERT_POINT_REGEX = /(search source|source|index)\s*=\s*
 export const PPL_INDEX_REGEX = /(search source|source|index)\s*=\s*([^|\s]+)/i;
 export const PPL_WHERE_CLAUSE_REGEX = /\s*where\s+/i;
 export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
+export const PPL_DESCRIBE_INDEX_REGEX = /(describe)\s+([^|\s]+)/i;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
@@ -215,11 +216,11 @@ export interface DefaultChartStylesProps {
 }
 
 export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
-  DefaultModeLine: 'lines',
+  DefaultModeLine: 'lines+markers',
   Interpolation: 'spline',
   LineWidth: 0,
   FillOpacity: 100,
-  MarkerSize: 5,
+  MarkerSize: 25,
   ShowLegend: 'show',
   LegendPosition: 'v',
   LabelAngle: 0,
@@ -257,7 +258,7 @@ export const VISUALIZATION_ERROR = {
   NO_METRIC: 'Invalid Metric MetaData',
 };
 
-export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
+export const S3_DATA_SOURCE_TYPE = 's3glue';
 
 export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
 export const ASYNC_QUERY_DATASOURCE_CACHE = 'async-query-catalog-cache';
