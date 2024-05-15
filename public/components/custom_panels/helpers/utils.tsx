@@ -5,7 +5,11 @@
 
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { forEach, isEmpty, min } from 'lodash';
+import differenceWith from 'lodash/differenceWith';
+import forEach from 'lodash/forEach';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import min from 'lodash/min';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -215,7 +219,7 @@ export const renderSavedVisualization = async ({
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  if (_.isEmpty(visualization)) {
+  if (isEmpty(visualization)) {
     setIsLoading(false);
     return;
   }
@@ -724,7 +728,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   metaData.userConfigs = parseMetadataUserConfig(metaData.userConfigs);
   const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
-  const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
+  const hasBreakdowns = !isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
   };
@@ -733,8 +737,8 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   // filter out breakdowns from dimnesions
   if (hasBreakdowns) {
-    finalDimensions = _.differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
-      _.isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
+    finalDimensions = differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
+      isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
     );
   }
 

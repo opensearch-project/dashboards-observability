@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createSelector } from '@reduxjs/toolkit';
-import { assign } from 'lodash';
+import assign from 'lodash/assign';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import {
   SELECTED_QUERY_TAB,

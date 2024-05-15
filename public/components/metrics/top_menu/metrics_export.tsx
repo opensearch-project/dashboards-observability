@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { max } from 'lodash';
+import max from 'lodash/max';
 import semver from 'semver';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';

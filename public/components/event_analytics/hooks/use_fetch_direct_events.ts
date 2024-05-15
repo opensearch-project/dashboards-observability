@@ -5,7 +5,7 @@
 
 import { useState, useRef } from 'react';
 import { batch } from 'react-redux';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useDispatch, useSelector } from 'react-redux';
 import { IField } from 'common/types/explorer';
 import {

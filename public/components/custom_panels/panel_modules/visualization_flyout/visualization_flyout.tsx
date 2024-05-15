@@ -32,7 +32,7 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
@@ -382,7 +382,7 @@ export const VisaulizationFlyout = ({
           <EuiFlexItem>
             {previewLoading ? (
               <EuiLoadingChart size="xl" mono className="visualization-loading-chart-preview" />
-            ) : !_.isEmpty(isPreviewError) ? (
+            ) : !isEmpty(isPreviewError) ? (
               <div className="visualization-error-div">
                 <EuiIcon type="alert" color="danger" size="s" />
                 <EuiSpacer size="s" />

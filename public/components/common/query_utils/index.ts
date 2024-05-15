@@ -5,7 +5,7 @@
 
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
-import _, { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,

@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';

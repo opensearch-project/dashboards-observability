@@ -31,7 +31,8 @@ import {
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
-import _ from 'lodash';
+import last from 'lodash/last';
+import truncate from 'lodash/truncate';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { coreRefs } from '../../framework/core_refs';
@@ -315,8 +316,8 @@ export const CustomPanelTable = ({
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink href={`${_.last(parentBreadcrumbs)!.href}${record.id}`}>
-          {_.truncate(value, { length: 100 })}
+        <EuiLink href={`${last(parentBreadcrumbs)!.href}${record.id}`}>
+          {truncate(value, { length: 100 })}
         </EuiLink>
       ),
     },

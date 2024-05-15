@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
 import {
   handleServiceMapRequest,
@@ -101,7 +101,7 @@ export function ServicesContent(props: ServicesProps) {
       appConfigs
     );
     // service map should not be filtered by service name
-    const serviceMapDSL = _.cloneDeep(DSL);
+    const serviceMapDSL = cloneDeep(DSL);
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
       (must: any) => must?.term?.serviceName == null
     );

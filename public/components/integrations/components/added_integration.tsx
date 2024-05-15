@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
@@ -183,7 +183,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               data-click-metric-element="integrations.dashboard_link"
               onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
             >
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiLink>
           );
         case 'index-pattern':
@@ -197,7 +197,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 )
               }
             >
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiLink>
           );
         case 'search':
@@ -207,7 +207,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               data-click-metric-element="integrations.search_link"
               onClick={() => window.location.assign(`discover#/view/${record.assetId}`)}
             >
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiLink>
           );
         case 'visualization':
@@ -217,7 +217,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               data-click-metric-element="integrations.viz-link"
               onClick={() => window.location.assign(`visualize#/edit/${record.assetId}`)}
             >
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiLink>
           );
         case 'observability-search':
@@ -231,13 +231,13 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 )
               }
             >
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiLink>
           );
         default:
           return (
             <EuiText data-test-subj={`IntegrationAssetText`}>
-              {_.truncate(record.description, { length: 100 })}
+              {truncate(record.description, { length: 100 })}
             </EuiText>
           );
       }
@@ -279,7 +279,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         truncateText: true,
         render: (_value, record) => (
           <EuiText data-test-subj={`${record.assetType}AssetTypeDescription`}>
-            {_.truncate(record.assetType, { length: 100 })}
+            {truncate(record.assetType, { length: 100 })}
           </EuiText>
         ),
       },

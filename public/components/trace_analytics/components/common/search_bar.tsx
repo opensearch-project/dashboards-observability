@@ -11,7 +11,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import _ from 'lodash';
+import debounce from 'lodash/debounce';
 import React, { useState } from 'react';
 import { uiSettingsService } from '../../../../../common/utils';
 import { Filters, FiltersProps } from './filters/filters';
@@ -54,7 +54,7 @@ interface SearchBarOwnProps extends SearchBarProps {
 export function SearchBar(props: SearchBarOwnProps) {
   // use another query state to avoid typing delay
   const [query, setQuery] = useState(props.query);
-  const setGlobalQuery = _.debounce((q) => props.setQuery(q), 50);
+  const setGlobalQuery = debounce((q) => props.setQuery(q), 50);
 
   return (
     <>
