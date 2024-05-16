@@ -100,7 +100,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
-      startLoadingDatabases({ databaseName: datasource.name });
+      startLoadingDatabases({ dataSourceName: datasource.name });
       setIsRefreshing(true);
     }
   };
@@ -167,7 +167,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           datasourceCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(databasesLoadStatus)
       ) {
-        startLoadingDatabases(datasource.name);
+        startLoadingDatabases({ dataSourceName: datasource.name });
       } else if (datasourceCache.status === CachedDataSourceStatus.Updated) {
         setCachedDatabases(datasourceCache.databases);
         setIsFirstTimeLoading(false);
@@ -224,7 +224,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           databaseCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(tablesLoadStatus)
       ) {
-        startLoadingTables(datasource.name, selectedDatabase);
+        startLoadingTables({ dataSourceName: datasource.name, databaseName: selectedDatabase });
         setIsObjectsLoading(true);
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
@@ -235,7 +235,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           isRefreshing) &&
         !isCatalogCacheFetching(accelerationsLoadStatus)
       ) {
-        startLoadingAccelerations(datasource.name);
+        startLoadingAccelerations({ dataSourceName: datasource.name });
         setIsObjectsLoading(true);
       } else if (accelerationsCache.status === CachedDataSourceStatus.Updated) {
         setCachedAccelerations(accelerationsCache.accelerations);
