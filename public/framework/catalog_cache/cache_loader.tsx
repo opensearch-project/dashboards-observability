@@ -339,7 +339,6 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
     sqlService
       .fetch(requestPayload, dataSourceMDSId)
       .then((result) => {
-        console.log(result);
         setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
         if (result.queryId) {
           startPolling({

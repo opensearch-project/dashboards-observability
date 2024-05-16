@@ -134,7 +134,7 @@ export const AccelerationTable = ({
   const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
-      startLoadingAccelerations(dataSourceName);
+      startLoadingAccelerations({ dataSourceName });
     }
   }, [accelerationsLoadStatus]);
 

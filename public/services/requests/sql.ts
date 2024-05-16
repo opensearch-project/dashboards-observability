@@ -37,13 +37,17 @@ export class SQLService {
     dataSourceMDSId?: string,
     errorHandler?: (error: any) => void
   ) => {
-    return this.http
-      .get(`/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId}`)
-      .catch((error) => {
-        console.error('fetch error: ', error.body);
-        if (errorHandler) errorHandler(error);
-        throw error;
-      });
+    let path;
+    if (dataSourceMDSId) {
+      path = `/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId}`;
+    } else {
+      path = `/api/observability/query/jobs/${params.queryId}/`;
+    }
+    return this.http.get(path).catch((error) => {
+      console.error('fetch error: ', error.body);
+      if (errorHandler) errorHandler(error);
+      throw error;
+    });
   };
 
   deleteWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
