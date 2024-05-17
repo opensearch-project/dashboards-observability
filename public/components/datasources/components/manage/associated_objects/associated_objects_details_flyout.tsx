@@ -95,10 +95,10 @@ export const AssociatedObjectsDetailsFlyout = ({
         onClick={() =>
           renderCreateAccelerationFlyout(
             datasourceName,
-            '',
             tableDetail.database,
             tableDetail.name,
-            handleRefresh
+            handleRefresh,
+            ''
           )
         }
       >
@@ -198,10 +198,10 @@ export const AssociatedObjectsDetailsFlyout = ({
           onClick={() =>
             renderCreateAccelerationFlyout(
               datasourceName,
-              '',
               tableDetail.database,
               tableDetail.name,
-              handleRefresh
+              handleRefresh,
+              ''
             )
           }
           iconType="popout"

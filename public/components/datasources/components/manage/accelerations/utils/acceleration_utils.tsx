@@ -93,10 +93,10 @@ export const CreateAccelerationFlyoutButton = ({
   dataSourceName: string;
   renderCreateAccelerationFlyout: (
     dataSource: string,
-    dataSourceMDSId?: string,
     databaseName?: string,
     tableName?: string,
-    handleRefresh?: () => void
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
   ) => void;
   handleRefresh: () => void;
 }) => {
@@ -104,13 +104,7 @@ export const CreateAccelerationFlyoutButton = ({
     <>
       <EuiButton
         onClick={() =>
-          renderCreateAccelerationFlyout(
-            dataSourceName,
-            undefined,
-            undefined,
-            undefined,
-            handleRefresh
-          )
+          renderCreateAccelerationFlyout(dataSourceName, undefined, undefined, handleRefresh, '')
         }
         fill
       >

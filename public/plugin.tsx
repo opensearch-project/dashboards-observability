@@ -142,10 +142,10 @@ export const [
 ] = createGetterSetter<
   (
     dataSource: string,
-    dataSourceMDSId?: string,
     databaseName?: string,
     tableName?: string,
-    handleRefresh?: () => void
+    handleRefresh?: () => void,
+    dataSourceMDSId?: string
   ) => void
 >('renderCreateAccelerationFlyout');
 
