@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -18,6 +18,12 @@ import {
 } from '../../../src/core/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import {
+  DATA_SOURCE_TYPES,
+  OBS_S3_DATA_SOURCE,
+  S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
+  S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
+} from '../common/constants/data_sources';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
@@ -96,12 +102,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import {
-  DATA_SOURCE_TYPES,
-  OBS_S3_DATA_SOURCE,
-  S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
-  S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
-} from '../common/constants/data_sources';
 
 interface PublicConfig {
   query_assist: {
@@ -515,10 +515,10 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = (
       selectedDatasource: string,
-      dataSourceMDSId?: string,
       databaseName?: string,
       tableName?: string,
-      handleRefresh?: () => void
+      handleRefresh?: () => void,
+      dataSourceMDSId?: string
     ) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(

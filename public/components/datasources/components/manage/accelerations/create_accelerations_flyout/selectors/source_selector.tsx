@@ -74,7 +74,11 @@ export const AccelerationDataSourceSelector = ({
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(DATACONNECTIONS_BASE + `/dataSourceMDSId=${dataSourceMDSId}`)
+      .get(
+        dataSourceMDSId
+          ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId}`
+          : DATACONNECTIONS_BASE
+      )
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
