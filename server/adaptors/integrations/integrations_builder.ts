@@ -19,6 +19,7 @@ interface BuilderOptions {
 
 interface SavedObject {
   id: string;
+  override: boolean;
   type: string;
   attributes: { title: string };
   references: Array<{ id: string }>;
@@ -122,8 +123,14 @@ export class IntegrationInstanceBuilder {
         }
         return includeWorkflows.some((w) => asset.workflows?.includes(w));
       })
-      .map((asset) => (asset as { type: 'savedObjectBundle'; data: object[] }).data)
-      .flat() as SavedObject[];
+      .flatMap((asset) =>
+        (asset as { type: 'savedObjectBundle'; data: object[]; override: boolean }).data.map(
+          (item) => ({
+            ...item,
+            override: asset.override ?? false, // default to false
+          })
+        )
+      ) as SavedObject[];
   }
 
   remapDataSource(assets: SavedObject[], dataSource: string | undefined): SavedObject[] {
@@ -140,21 +147,22 @@ export class IntegrationInstanceBuilder {
     const toRemap = assets.filter((asset) => asset.id);
     const idMap = new Map<string, string>();
     return toRemap.map((item) => {
-      if (!idMap.has(item.id)) {
-        idMap.set(item.id, uuidv4());
-      }
-      item.id = idMap.get(item.id)!;
-      for (let ref = 0; ref < item.references.length; ref++) {
-        const refId = item.references[ref].id;
-        if (!idMap.has(refId)) {
-          idMap.set(refId, uuidv4());
+      if (!item.override) {
+        if (!idMap.has(item.id)) {
+          idMap.set(item.id, uuidv4());
         }
-        item.references[ref].id = idMap.get(refId)!;
+        item.id = idMap.get(item.id)!;
+        for (let ref = 0; ref < item.references.length; ref++) {
+          const refId = item.references[ref].id;
+          if (!idMap.has(refId)) {
+            idMap.set(refId, uuidv4());
+          }
+          item.references[ref].id = idMap.get(refId)!;
+        }
       }
       return item;
     });
   }
-
   async postAssets(assets: SavedObjectsBulkCreateObject[]): Promise<AssetReference[]> {
     try {
       const response = await this.client.bulkCreate(assets);

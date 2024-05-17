@@ -202,6 +202,7 @@ export class IntegrationReader {
         case 'savedObjectBundle':
           resultValue.push({
             type: 'savedObjectBundle',
+            override: asset.override,
             workflows: asset.workflows,
             data: JSON.parse(serializedResult.value.data),
           });
