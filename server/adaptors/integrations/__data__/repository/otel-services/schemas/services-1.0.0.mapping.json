@@ -5,7 +5,7 @@
   "template": {
     "mappings": {
       "_meta": {
-        "version": "1.0.0",
+        "version": "1.0.1",
         "catalog": "observability",
         "type": "traces",
         "component": "services",
@@ -62,9 +62,6 @@
           "ignore_above": 1024
         }
       }
-    },
-    "aliases" : {
-      "open otel-v1-apm-service-map" : {}
     },
     "settings": {
       "index": {
