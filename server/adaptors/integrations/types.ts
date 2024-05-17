@@ -58,7 +58,6 @@ interface IntegrationAsset {
   version: string;
   extension: string;
   type: SupportedAssetType;
-  override: boolean;
   workflows?: string[];
 }
 
@@ -70,7 +69,7 @@ interface IntegrationWorkflow {
 }
 
 type ParsedIntegrationAsset =
-  | { type: 'savedObjectBundle'; workflows?: string[]; data: object[]; override?: boolean }
+  | { type: 'savedObjectBundle'; workflows?: string[]; data: object[] }
   | { type: 'query'; workflows?: string[]; query: string; language: string };
 
 interface SerializedIntegrationAsset extends IntegrationAsset {
