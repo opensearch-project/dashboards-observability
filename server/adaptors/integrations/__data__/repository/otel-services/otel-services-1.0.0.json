@@ -75,7 +75,6 @@
   "assets": [
     {
       "name": "otel-service-flow-use-case-integration",
-      "override": true,
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
