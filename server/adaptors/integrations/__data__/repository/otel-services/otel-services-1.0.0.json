@@ -5,7 +5,11 @@
   "description": "Otel Services Demo Use Case with OpenSearch Observability",
   "license": "Apache-2.0",
   "type": "traces",
-  "labels": ["log", "traces", "metrics"],
+  "labels": [
+    "log",
+    "traces",
+    "metrics"
+  ],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/otel-services/info",
   "workflows": [
@@ -69,15 +73,35 @@
     }
   ],
   "assets": [
-      {
-        "name": "otel-service-flow-use-case-integration",
-        "override": true,
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
-      }
-    ],
+    {
+      "name": "otel-service-flow-use-case-integration",
+      "override": true,
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    },
+    {
+      "name": "demo-langing-page",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    },
+    {
+      "name": "otel-architecture",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    }
+  ],
   "sampleData": {
     "path": "traces-samples.json"
   }
