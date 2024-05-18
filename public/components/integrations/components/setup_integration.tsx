@@ -41,6 +41,7 @@ export interface IntegrationConfigProps {
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
   lockConnectionType?: boolean;
+  isS3ConnectionWithLakeFormation?: boolean;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -330,6 +331,9 @@ export function SetupIntegrationForm({
   forceConnection?: {
     name: string;
     type: string;
+    properties?: {
+      lakeFormationEnabled?: boolean;
+    };
   };
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -381,6 +385,7 @@ export function SetupIntegrationForm({
                 integration={template}
                 setupCallout={setupCallout}
                 lockConnectionType={forceConnection !== undefined}
+                isS3ConnectionWithLakeFormation={forceConnection?.properties?.lakeFormationEnabled}
               />
             )}
           </EuiPageContentBody>
@@ -411,6 +416,7 @@ export function SetupIntegrationForm({
               integration={template}
               setupCallout={setupCallout}
               lockConnectionType={forceConnection !== undefined}
+              isS3ConnectionWithLakeFormation={forceConnection?.properties?.lakeFormationEnabled}
             />
           )}
         </EuiFlyoutBody>

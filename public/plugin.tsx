@@ -102,6 +102,7 @@ import {
   S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
   S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
 } from '../common/constants/data_sources';
+import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 
 interface PublicConfig {
   query_assist: {
@@ -132,7 +133,8 @@ export const [
     tableDetail: AssociatedObject,
     datasourceName: string,
     handleRefresh?: () => void,
-    dataSourceMDSId?: string
+    dataSourceMDSId?: string,
+    isS3ConnectionWithLakeFormation?: boolean
   ) => void
 >('renderAssociatedObjectsDetailsFlyout');
 
@@ -148,6 +150,11 @@ export const [
     handleRefresh?: () => void
   ) => void
 >('renderCreateAccelerationFlyout');
+
+export const [
+  getRenderLogExplorerTablesFlyout,
+  setRenderLogExplorerTablesFlyout,
+] = createGetterSetter<(dataSourceName: string) => void>('renderLogExplorerTablesFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -497,7 +504,8 @@ export class ObservabilityPlugin
       tableDetail: AssociatedObject,
       datasourceName: string,
       handleRefresh?: () => void,
-      dataSourceMDSId?: string
+      dataSourceMDSId?: string,
+      isS3ConnectionWithLakeFormation?: boolean
     ) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -507,6 +515,7 @@ export class ObservabilityPlugin
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
+            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
           />
         )
       );
@@ -534,6 +543,18 @@ export class ObservabilityPlugin
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
+
+    const renderLogExplorerTablesFlyout = (dataSourceName: string) => {
+      const createLogExplorerTablesFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <TablesFlyout
+            dataSourceName={dataSourceName}
+            resetFlyout={() => createLogExplorerTablesFlyout.close()}
+          />
+        )
+      );
+    };
+    setRenderLogExplorerTablesFlyout(renderLogExplorerTablesFlyout);
 
     const CatalogCacheManagerInstance = CatalogCacheManager;
     const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;

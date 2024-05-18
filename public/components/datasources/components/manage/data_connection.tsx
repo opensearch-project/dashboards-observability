@@ -18,6 +18,7 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -47,6 +48,7 @@ import {
   InstallIntegrationFlyout,
   InstalledIntegrationsTable,
 } from './integrations/installed_integrations_table';
+import { checkIsConnectionWithLakeFormation } from '../../utils/helpers';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
@@ -60,9 +62,14 @@ export const DataConnection = (props: { dataSource: string }) => {
     properties: { 'prometheus.uri': 'placeholder' },
     status: 'ACTIVE',
   });
+  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState<boolean>(
+    false
+  );
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const accessControlTabId = 'access_control';
+  const [selectedTabId, setSelectedTabId] = useState<string>(accessControlTabId);
 
   const {
     loadStatus: databasesLoadStatus,
@@ -88,6 +95,10 @@ export const DataConnection = (props: { dataSource: string }) => {
   );
   const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
   const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
+
+  useEffect(() => {
+    setIsS3ConnectionWithLakeFormation(checkIsConnectionWithLakeFormation(datasourceDetails));
+  }, [datasourceDetails]);
 
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
@@ -119,6 +130,7 @@ export const DataConnection = (props: { dataSource: string }) => {
       closeFlyout={() => setShowIntegrationsFlyout(false)}
       datasourceType={datasourceDetails.connector}
       datasourceName={datasourceDetails.name}
+      isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
     />
   ) : null;
 
@@ -130,19 +142,45 @@ export const DataConnection = (props: { dataSource: string }) => {
     redirectToExplorerS3(dataSource);
   };
 
+  const dataSourceCardsText = isS3ConnectionWithLakeFormation
+    ? {
+        integrationCard: {
+          title: 'Add dashbaords and queries',
+          description: 'Gain instant insights with preconfigured log dashboards and queries',
+          childTitle: 'Add dashbaords and queries from integrations',
+        },
+        queryCard: {
+          title: 'Query data',
+          description: 'Turn your data into actionable insights',
+          childTitle: 'Query in Log Explorer',
+        },
+      }
+    : {
+        integrationCard: {
+          title: 'Configure Integrations',
+          description: 'Connect to common application log types using integrations',
+          childTitle: 'Add Integrations',
+        },
+        queryCard: {
+          title: 'Query data',
+          description: 'Uncover insights from your data or better understand it',
+          childTitle: 'Query in Log Explorer',
+        },
+      };
+
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-            title={'Configure Integrations'}
-            description="Connect to common application log types using integrations"
+            title={dataSourceCardsText.integrationCard.title}
+            description={dataSourceCardsText.integrationCard.description}
             onClick={onclickIntegrationsCard}
             selectable={{
               onClick: onclickIntegrationsCard,
               isDisabled: false,
-              children: 'Add Integrations',
+              children: dataSourceCardsText.integrationCard.childTitle,
             }}
           />
         </EuiFlexItem>
@@ -162,13 +200,13 @@ export const DataConnection = (props: { dataSource: string }) => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Uncover insights from your data or better understand it"
+            title={dataSourceCardsText.queryCard.title}
+            description={dataSourceCardsText.queryCard.description}
             onClick={onclickDiscoverCard}
             selectable={{
               onClick: onclickDiscoverCard,
               isDisabled: false,
-              children: 'Query in Observability Logs',
+              children: dataSourceCardsText.queryCard.childTitle,
             }}
           />
         </EuiFlexItem>
@@ -211,7 +249,7 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   const genericTabs = [
     {
-      id: 'access_control',
+      id: accessControlTabId,
       name: 'Access control',
       disabled: false,
       content: (
@@ -231,7 +269,7 @@ export const DataConnection = (props: { dataSource: string }) => {
       ? [
           {
             id: 'associated_objects',
-            name: 'Associated Objects',
+            name: isS3ConnectionWithLakeFormation ? 'Tables' : 'Associated Objects',
             disabled: false,
             content: (
               <AssociatedObjectsTab
@@ -250,6 +288,7 @@ export const DataConnection = (props: { dataSource: string }) => {
               <AccelerationTable
                 dataSourceName={dataSource}
                 cacheLoadingHooks={cacheLoadingHooks}
+                isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
               />
             ),
           },
@@ -262,6 +301,7 @@ export const DataConnection = (props: { dataSource: string }) => {
                 integrations={dataSourceIntegrations}
                 datasourceType={datasourceDetails.connector}
                 datasourceName={datasourceDetails.name}
+                isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
                 refreshInstances={refreshInstances}
               />
             ),
@@ -309,14 +349,22 @@ export const DataConnection = (props: { dataSource: string }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup direction="column">
+            <EuiText className="overview-title">Query Access</EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query Access</EuiText>
                 <EuiText size="s" className="overview-content">
                   {datasourceDetails.allowedRoles.length > 0
                     ? `Restricted to ${datasourceDetails.allowedRoles.join(', ')}`
                     : 'Admin only'}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType={'pencil'}
+                  onClick={() => setSelectedTabId(accessControlTabId)}
+                >
+                  Edit
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -368,6 +416,8 @@ export const DataConnection = (props: { dataSource: string }) => {
         return <S3DatasourceOverview />;
       case 'PROMETHEUS':
         return <PrometheusDatasourceOverview />;
+      default:
+        return null;
     }
   };
 
@@ -410,7 +460,11 @@ export const DataConnection = (props: { dataSource: string }) => {
             >
               <QueryOrAccelerateData />
             </EuiAccordion>
-            <EuiTabbedContent tabs={tabs} />
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={tabs.find(({ id }) => id === selectedTabId)}
+              onTabClick={({ id }) => setSelectedTabId(id)}
+            />
           </>
         )}
 

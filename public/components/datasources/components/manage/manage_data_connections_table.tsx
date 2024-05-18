@@ -38,11 +38,13 @@ import { DataConnectionsDescription } from './manage_data_connections_descriptio
 import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
 import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
+import { checkIsConnectionWithLakeFormation } from '../../utils/helpers';
 
 interface DataConnection {
   connectionType: DatasourceType;
   name: string;
   dsStatus: DatasourceStatus;
+  isConnectionWithLakeFormation: boolean;
 }
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
@@ -76,13 +78,18 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
       .then((res: DatasourceDetails[]) => {
-        const dataConnections = res.map((dataConnection: DatasourceDetails) => {
-          return {
-            name: dataConnection.name,
-            connectionType: dataConnection.connector,
-            dsStatus: dataConnection.status,
-          };
-        });
+        const dataConnections: DataConnection[] = res.map(
+          (dataSourceDetails: DatasourceDetails): DataConnection => {
+            const { name, status, connector } = dataSourceDetails;
+
+            return {
+              name,
+              connectionType: connector,
+              dsStatus: status,
+              isConnectionWithLakeFormation: checkIsConnectionWithLakeFormation(dataSourceDetails),
+            };
+          }
+        );
         setData(dataConnections);
       })
       .catch((err) => {
@@ -163,6 +170,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
             closeFlyout={() => setShowIntegrationsFlyout(false)}
             datasourceType={datasource.connectionType}
             datasourceName={datasource.name}
+            isS3ConnectionWithLakeFormation={datasource.isConnectionWithLakeFormation}
           />
         );
         setShowIntegrationsFlyout(true);
@@ -213,8 +221,23 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
+      name: 'Type',
+      render: (connection: DataConnection) => {
+        switch (connection.connectionType) {
+          case 'PROMETHEUS':
+            return 'Prometheus';
+          case 'S3GLUE':
+            return connection.isConnectionWithLakeFormation
+              ? 'Amazon S3 with Lake Formation'
+              : 'Amazon S3 with AWS Glue Data Catalog';
+          default:
+            return '-';
+        }
+      },
+    },
+    {
       field: 'status',
-      name: 'Status',
+      name: 'Connection status',
       sortable: true,
       truncateText: true,
       render: (value, record: DataConnection) =>
@@ -237,12 +260,17 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     },
   };
 
-  const entries = data.map((dataconnection: DataConnection) => {
-    const name = dataconnection.name;
-    const connectionType = dataconnection.connectionType;
-    const dsStatus = dataconnection.dsStatus;
-    return { connectionType, name, dsStatus, data: { name, connectionType } };
-  });
+  const entries = data.map(
+    ({ name, connectionType, dsStatus, isConnectionWithLakeFormation }: DataConnection) => {
+      return {
+        connectionType,
+        name,
+        dsStatus,
+        data: { name, connectionType },
+        isConnectionWithLakeFormation,
+      };
+    }
+  );
 
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 

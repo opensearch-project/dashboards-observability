@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
@@ -111,17 +112,20 @@ export function SetupWorkflowSelector({
 
   const cards = integration.workflows.map((workflow) => {
     return (
-      <EuiCheckableCard
-        id={`workflow-checkbox-${workflow.name}`}
-        key={workflow.name}
-        label={workflow.label}
-        checkableType="checkbox"
-        value={workflow.name}
-        checked={useWorkflows.get(workflow.name)}
-        onChange={() => toggleWorkflow(workflow.name)}
-      >
-        {workflow.description}
-      </EuiCheckableCard>
+      <>
+        <EuiCheckableCard
+          id={`workflow-checkbox-${workflow.name}`}
+          key={workflow.name}
+          label={workflow.label}
+          checkableType="checkbox"
+          value={workflow.name}
+          checked={useWorkflows.get(workflow.name)}
+          onChange={() => toggleWorkflow(workflow.name)}
+        >
+          {workflow.description}
+        </EuiCheckableCard>
+        <EuiSpacer size="s" />
+      </>
     );
   });
 
@@ -132,14 +136,16 @@ export function IntegrationDetailsInputs({
   config,
   updateConfig,
   integration,
+  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   return (
     <EuiFormRow
-      label="Display Name"
+      label={isS3ConnectionWithLakeFormation ? 'Integration display name' : 'Display Name'}
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
@@ -241,51 +247,59 @@ export function IntegrationQueryInputs({
   config,
   updateConfig,
   integration,
+  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
   return (
     <>
+      {!isS3ConnectionWithLakeFormation && (
+        <>
+          <EuiFormRow
+            label="Spark Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Data Location"
+            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBucketBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiFormRow
-        label="Spark Table Name"
-        helpText="Select a table name to associate with your data."
-        error={['Must be at least 1 character.']}
-        isInvalid={config.connectionTableName.length === 0}
-      >
-        <EuiFieldText
-          placeholder={integration.name}
-          value={config.connectionTableName}
-          onChange={(evt) => {
-            updateConfig({ connectionTableName: evt.target.value });
-          }}
-          isInvalid={config.connectionTableName.length === 0}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Data Location"
-        isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-        error={["Must be a URL starting with 's3://'."]}
-      >
-        <EuiFieldText
-          value={config.connectionLocation}
-          onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-          placeholder="s3://"
-          isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-          onBlur={() => {
-            setIsBucketBlurred(true);
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Checkpoint Location"
+        label={`S3 Checkpoint ${isS3ConnectionWithLakeFormation ? '' : 'Location'}`}
         helpText={
-          'The Checkpoint location must be a unique directory and not the same as the Data ' +
-          'location. It will be used for caching intermediary results.'
+          isS3ConnectionWithLakeFormation
+            ? 'The checkpoint location for caching intermediary results.'
+            : 'The Checkpoint location must be a unique directory and not the same as the Data ' +
+              'location. It will be used for caching intermediary results.'
         }
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
@@ -354,9 +368,70 @@ export function SetupIntegrationFormInputs({
   integration,
   setupCallout,
   lockConnectionType,
+  isS3ConnectionWithLakeFormation,
 }: IntegrationConfigProps) {
-  return (
-    <EuiForm>
+  const integrationFormWithLakeFormation = (
+    <>
+      <EuiTitle>
+        <h1>Add integration</h1>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+      {setupCallout.show ? (
+        <>
+          <EuiCallOut title={setupCallout.title} color="danger">
+            <p>{setupCallout.text}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      <IntegrationDetailsInputs
+        config={config}
+        updateConfig={updateConfig}
+        integration={integration}
+        isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+      />
+      <EuiSpacer />
+      {config.connectionType === 's3' ? (
+        <>
+          <EuiText>
+            <h3>Integration data location</h3>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <IntegrationQueryInputs
+            config={config}
+            updateConfig={updateConfig}
+            integration={integration}
+            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+          />
+          {integration.workflows ? (
+            <>
+              <EuiSpacer />
+              <EuiText>
+                <h3>Included resources</h3>
+              </EuiText>
+              <EuiFormRow>
+                <EuiText grow={false} size="xs">
+                  <p>
+                    This integration offers resources compatible with your data source. These can
+                    include dashboards, visualizations, indexes, and queries. Select at least one of
+                    the following options.
+                  </p>
+                </EuiText>
+              </EuiFormRow>
+              <EuiSpacer />
+              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
+            </>
+          ) : null}
+          {/* Bottom bar will overlap content if there isn't some space at the end */}
+          <EuiSpacer />
+          <EuiSpacer />
+        </>
+      ) : null}
+    </>
+  );
+
+  const integrationFormWithoutLakeFormation = (
+    <>
       <EuiTitle>
         <h1>Set Up Integration</h1>
       </EuiTitle>
@@ -431,6 +506,14 @@ export function SetupIntegrationFormInputs({
           <EuiSpacer />
         </>
       ) : null}
+    </>
+  );
+
+  return (
+    <EuiForm>
+      {isS3ConnectionWithLakeFormation
+        ? integrationFormWithLakeFormation
+        : integrationFormWithoutLakeFormation}
     </EuiForm>
   );
 }

@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
@@ -13,8 +21,19 @@ import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../redux/slices/search_meta_data_slice';
+import { AccelerateCallout } from './accelerate_callout';
 
-export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
+interface DirectQueryRunningProps {
+  tabId: string;
+  isS3ConnectionWithLakeFormation: boolean;
+  onCreateAcceleration: () => void;
+}
+
+export const DirectQueryRunning = ({
+  tabId,
+  isS3ConnectionWithLakeFormation,
+  onCreateAcceleration,
+}: DirectQueryRunningProps) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
   const sqlService = new SQLService(coreRefs.http);
@@ -39,20 +58,36 @@ export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   };
 
   return (
-    <EuiEmptyPrompt
-      icon={<EuiProgress size="xs" color="accent" />}
-      title={<h2>Query Processing</h2>}
-      body={
-        <>
-          <EuiText>
-            Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButton color="success" onClick={cancelQuery}>
-            Cancel
-          </EuiButton>
-        </>
-      }
-    />
+    <>
+      {isS3ConnectionWithLakeFormation && (
+        <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
+      )}
+      <EuiEmptyPrompt
+        icon={<EuiProgress size="xs" color="accent" />}
+        title={<h2>Query Processing</h2>}
+        body={
+          <>
+            <EuiText>
+              Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButton color="success" onClick={cancelQuery}>
+                  Cancel
+                </EuiButton>
+              </EuiFlexItem>
+              {isS3ConnectionWithLakeFormation && (
+                <EuiFlexItem>
+                  <EuiButton fill onClick={onCreateAcceleration}>
+                    Create acceleration
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        }
+      />
+    </>
   );
 };

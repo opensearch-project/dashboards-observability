@@ -62,6 +62,7 @@ import {
 } from '../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
+  DATACONNECTIONS_BASE,
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_DESCRIBE_INDEX_REGEX,
@@ -135,6 +136,12 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import {
+  getRenderCreateAccelerationFlyout,
+  getRenderLogExplorerTablesFlyout,
+} from '../../../plugin';
+import { S3GlueProperties } from '../../../../common/types/data_connections';
+import { AccelerateCallout } from './accelerate_callout';
 
 export const Explorer = ({
   pplService,
@@ -206,6 +213,11 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
+  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState(false);
+  const onCreateAcceleration = () => renderCreateAccelerationFlyout(dataSourceName);
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -333,6 +345,18 @@ export const Explorer = ({
         });
     }
   }, []);
+
+  const updateDataSourceConnectionInfo = () => {
+    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${dataSourceName}`).then((data: any) => {
+      setIsS3ConnectionWithLakeFormation(
+        !!(data.properties as S3GlueProperties)['glue.lakeformation.enabled']
+      );
+    });
+  };
+
+  useEffect(() => {
+    updateDataSourceConnectionInfo();
+  }, [dataSourceName]);
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
@@ -552,6 +576,11 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
+            {isS3ConnectionWithLakeFormation && (
+              <EuiFlexItem>
+                <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
+              </EuiFlexItem>
+            )}
             {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
@@ -693,6 +722,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
+    isS3ConnectionWithLakeFormation,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -742,6 +772,8 @@ export const Explorer = ({
         currentDataSource={
           explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
         }
+        isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+        onCreateAcceleration={onCreateAcceleration}
       />
     );
   }, [
@@ -752,6 +784,8 @@ export const Explorer = ({
     explorerData,
     visualizations,
     explorerSearchMeta.datasources,
+    isS3ConnectionWithLakeFormation,
+    onCreateAcceleration,
   ]);
 
   const contentTabs = [
@@ -1065,8 +1099,25 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
+                {isS3ConnectionWithLakeFormation && (
+                  <>
+                    <EuiLink
+                      style={{ paddingLeft: 130 }}
+                      onClick={() => {
+                        renderTablesFlyout(dataSourceName);
+                      }}
+                    >
+                      View databases and tables
+                    </EuiLink>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {explorerSearchMeta.isPolling ? (
-                  <DirectQueryRunning tabId={tabId} />
+                  <DirectQueryRunning
+                    tabId={tabId}
+                    isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+                    onCreateAcceleration={onCreateAcceleration}
+                  />
                 ) : (
                   <EuiTabbedContent
                     className="mainContentTabs"
