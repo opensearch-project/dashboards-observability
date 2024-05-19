@@ -1,0 +1,84 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "log-ocsf",
+      "labels": [
+        "ocsf"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings": {
+      "properties": {
+        "_time": {"type": "date"},
+        "activity": {"type": "keyword"},
+        "activity_id": {"type": "short"},
+        "api.operation": {"type": "keyword"},
+        "api.request.uid": {"type": "keyword"},
+        "api.response.error": {"type": "keyword"},
+        "api.response.error_message": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+        "api.response.message": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+        "api.response.uid": {"type": "keyword"},
+        "api.version": {"type": "keyword"},
+        "category": {"type": "keyword"},
+        "category_name": {"type": "keyword"},
+        "category_uid": {"type": "short"},
+        "class_name": {"type": "keyword"},
+        "class_uid": {"type": "short"},
+        "cloud.account_uid": {"type": "keyword"},
+        "count": {"type": "long"},
+        "dst_endpoint.ip": {"type": "ip"},
+        "dst_endpoint.port": {"type": "integer"},
+        "duration": {"type": "long"},
+        "end_time": {"type": "date"},
+        "finding.created_time": {"type": "date"},
+        "finding.first_seen_time": {"type": "date"},
+        "finding.last_seen_time": {"type": "date"},
+        "finding.modified_time": {"type": "date"},
+        "finding.title": {"type": "keyword"},
+        "finding.uid": {"type": "keyword"},
+        "http_request.user_agent": {"type": "keyword"},
+        "identity.session.created_time": {"type": "date"},
+        "identity.user.account_uid": {"type": "keyword"},
+        "message": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+        "metadata.logged_time": {"type": "date"},
+        "metadata.modified_time": {"type": "date"},
+        "metadata.processed_time": {"type": "date"},
+        "metadata.product.name": {"type": "keyword"},
+        "metadata.product.vendor_name": {"type": "keyword"},
+        "metadata.product.version": {"type": "keyword"},
+        "metadata.version": {"type": "keyword"},
+        "product.lang": {"type": "keyword"},
+        "product.uid": {"type": "keyword"},
+        "product.name": {"type": "keyword"},
+        "product.version": {"type": "keyword"},
+        "query_time": {"type": "date"},
+        "response_time": {"type": "date"},
+        "severity": {"type": "keyword"},
+        "severity_id": {"type": "short"},
+        "status": {"type": "keyword"},
+        "status_id": {"type": "short"},
+        "origin.cloud.account_uid": {"type": "keyword"},
+        "origin.cloud.region": {"type": "keyword"},
+        "ref_time": {"type": "keyword"},
+        "src_endpoint.domain": {"type": "keyword"},
+        "src_endpoint.ip": {"type": "ip"},
+        "src_endpoint.port": {"type": "integer"},
+        "start_time": {"type": "date"},
+        "time": {"type": "date"},
+        "timezone_offset": {"type": "integer"},
+        "type_uid": {"type": "integer"},
+        "type_name": {"type": "keyword"},
+        "update_time": {"type": "date"}
+      }
+    }
+
+
+  }
+}
+

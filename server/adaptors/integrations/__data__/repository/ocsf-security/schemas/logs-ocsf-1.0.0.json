@@ -1,0 +1,9 @@
+{
+  "index_patterns": ["log-ocsf-*"],
+  "template": {},
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "log-ocsf"
+  ]
+}

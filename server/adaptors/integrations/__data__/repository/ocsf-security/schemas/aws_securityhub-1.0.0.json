@@ -1,0 +1,29 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_securityhub",
+      "labels": [
+        "aws",
+        "securityhub"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "ProductFields.aws/inspector/inspectorScore": {"type": "float"},
+        "ProductFields.aws/inspector/ProductVersion": {"type": "keyword"},
+        "Vulnerabilities.Cvss.BaseScore": {"type": "float"},
+        "Vulnerabilities.VulnerablePackages.Epoch": {"type": "date", "format": "epoch_second"},
+        "Vulnerabilities.VulnerablePackages.Release": {"type": "keyword"},
+        "Vulnerabilities.VulnerablePackages.Version": {"type": "keyword"}
+      }
+    }
+  }
+}
+

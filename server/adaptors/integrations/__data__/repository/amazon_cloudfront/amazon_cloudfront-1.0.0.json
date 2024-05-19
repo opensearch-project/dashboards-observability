@@ -5,7 +5,13 @@
   "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudfront",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": [
+    "Observability",
+    "Logs",
+    "AWS",
+    "Cloud",
+    "Flint S3"
+  ],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
   "statics": {
@@ -36,19 +42,207 @@
   ],
   "components": [
     {
+      "name": "aws_config",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_clientvpn",
+      "version": "1.0.0"
+    },
+    {
       "name": "aws_cloudfront",
       "version": "1.0.0"
     },
     {
-      "name": "aws_s3",
+      "name": "aws_cloudhsm",
       "version": "1.0.0"
     },
     {
-      "name": "cloud",
+      "name": "aws_cloudtrail",
       "version": "1.0.0"
     },
     {
-      "name": "logs-aws_cloudfront",
+      "name": "aws_elasticache",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_elb",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_guardduty",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_inspector",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_msk",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_networkfirewall",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_opensearch",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_r53resolver",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_rds",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3accesslog",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_securityhub",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_trustedadvisor",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_vpcflowlogs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_waf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_workspace",
+      "version": "1.0.0"
+    },
+    {
+      "name": "log_ecs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "log_linux",
+      "version": "1.0.0"
+    },
+    {
+      "name": "log_ocsf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "log_win",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_clientvpc",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_cloudfront",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_cloudhsm",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_cloudtrail",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_config",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_elasticache",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_elb",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_guardduty",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_inspector",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_msk",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_networkfirewall",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_opensearch",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_r53resolver",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_rds",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_s3accesslog",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_securityhub",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_trustedadvisor",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_vpcflowlogs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_waf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_aws_workspaces",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_linux",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_ocsf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_win",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_win_directory_service",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_win_fsx",
+      "version": "1.0.0"
+    },
+    {
+      "name": "metrics_opensearch",
+      "version": "1.0.0"
+    },
+    {
+      "name": "opensearch",
       "version": "1.0.0"
     }
   ],
@@ -64,28 +258,36 @@
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["queries"]
+      "workflows": [
+        "queries"
+      ]
     },
     {
       "name": "example_queries",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
-      "workflows": ["queries"]
+      "workflows": [
+        "queries"
+      ]
     },
     {
       "name": "create_mv",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["dashboards"]
+      "workflows": [
+        "dashboards"
+      ]
     },
     {
       "name": "aws_cloudfront",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
-      "workflows": ["dashboards"]
+      "workflows": [
+        "dashboards"
+      ]
     }
   ],
   "sampleData": {

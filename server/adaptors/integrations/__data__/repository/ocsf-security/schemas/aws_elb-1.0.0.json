@@ -1,0 +1,46 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_elb",
+      "labels": [
+        "aws",
+        "elb"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "backend_ip": {"type": "ip"},
+        "backend_port": {"type": "integer"},
+        "backend_processing_time": {"type": "half_float"},
+        "backend_status_code": {"type": "short"},
+        "client_ip": {"type": "ip"},
+        "client_port": {"type": "integer"},
+        "connection_time": {"type": "integer"},
+        "destination_ip": {"type": "ip"},
+        "destination_port": {"type": "integer"},
+        "elb_status_code": {"type": "short"},
+        "http_port": {"type": "integer"},
+        "http_version": {"type": "keyword"},
+        "matched_rule_priority": {"type": "integer"},
+        "received_bytes": {"type": "integer"},
+        "request_creation_time": {"type": "date"},
+        "request_processing_time": {"type": "half_float"},
+        "response_processing_time": {"type": "half_float"},
+        "sent_bytes": {"type": "integer"},
+        "target_ip": {"type": "ip"},
+        "target_port": {"type": "integer"},
+        "target_processing_time": {"type": "half_float"},
+        "target_status_code": {"type": "short"},
+        "timestamp": {"type": "date"}
+      }
+    }
+  }
+}
+

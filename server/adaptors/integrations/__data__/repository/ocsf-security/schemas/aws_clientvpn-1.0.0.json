@@ -1,0 +1,40 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_clientVPN",
+      "labels": ["aws", "clientVPN"]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "clientvpn.client-ip": {"type": "ip"},
+        "clientvpn.client-vpn-endpoint-id": {"type": "keyword"},
+        "clientvpn.common-name": {"type": "keyword"},
+        "clientvpn.connection-attempt-failure-reason": {"type": "keyword"},
+        "clientvpn.connection-attempt-status": {"type": "keyword"},
+        "clientvpn.connection-duration-seconds": {"type": "keyword"},
+        "clientvpn.connection-end-time": {"type": "date"},
+        "clientvpn.connection-id": {"type": "keyword"},
+        "clientvpn.connection-last-update-time": {"type": "date"},
+        "clientvpn.connection-log-type": {"type": "keyword"},
+        "clientvpn.connection-reset-status": {"type": "keyword"},
+        "clientvpn.connection-start-time": {"type": "date"},
+        "clientvpn.device-ip": {"type": "ip"},
+        "clientvpn.device-type": {"type": "keyword"},
+        "clientvpn.egress-bytes": {"type": "long"},
+        "clientvpn.egress-packets": {"type": "long"},
+        "clientvpn.ingress-bytes": {"type": "long"},
+        "clientvpn.ingress-packets": {"type": "long"},
+        "clientvpn.port": {"type": "long"},
+        "clientvpn.transport-protocol": {"type": "keyword"},
+        "clientvpn.username": {"type": "keyword"}
+      }
+    }
+  }
+}

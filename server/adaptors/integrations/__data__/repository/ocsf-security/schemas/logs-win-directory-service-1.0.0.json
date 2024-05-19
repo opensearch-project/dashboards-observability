@@ -1,0 +1,17 @@
+{
+  "index_patterns": [
+    "log-directory-service-*"
+  ],
+  "priority": 100,
+  "template": {
+    "aliases": {
+      "log-win-aws-directory-service": {
+        "is_write_index": false
+      }
+    }
+  },
+  "composed_of": [
+    "log-ecs",
+    "log-win"
+  ]
+}

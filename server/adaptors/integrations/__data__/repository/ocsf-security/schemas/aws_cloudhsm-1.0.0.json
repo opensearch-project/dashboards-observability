@@ -1,0 +1,80 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_cloudhsm",
+      "labels": [
+        "aws",
+        "cloudhsm"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings": {
+      "properties": {
+        "cloudhsm.command_type_hex": {
+          "type": "keyword"
+        },
+        "cloudhsm.key_handle": {
+          "type": "keyword"
+        },
+        "cloudhsm.host_time": {
+          "type": "date_nanos",
+          "format": "MM/dd/yy HH:mm:ss.SSSSSS||strict_date_optional_time_nanos"
+        },
+        "cloudhsm.host_time_usec": {
+          "type": "long"
+        },
+        "cloudhsm.local_time": {
+          "type": "date_nanos",
+          "format": "MM/dd/yy HH:mm:ss.SSSSSS||strict_date_optional_time_nanos"
+        },
+        "cloudhsm.local_time_usec": {
+          "type": "long"
+        },
+        "cloudhsm.log_type_code": {
+          "type": "keyword"
+        },
+        "cloudhsm.opcode_hex": {
+          "type": "keyword"
+        },
+        "cloudhsm.priv_secret_key_handle": {
+          "type": "keyword"
+        },
+        "cloudhsm.propagation_delay": {
+          "type": "long"
+        },
+        "cloudhsm.public_key_handle": {
+          "type": "keyword"
+        },
+        "cloudhsm.reboot_counter": {
+          "type": "long"
+        },
+        "cloudhsm.response": {
+          "type": "keyword"
+        },
+        "cloudhsm.sequence_no": {
+          "type": "long"
+        },
+        "cloudhsm.session_handle": {
+          "type": "keyword"
+        },
+        "cloudhsm.timestamp": {
+          "type": "date_nanos",
+          "format": "MM/dd/yy HH:mm:ss.SSSSSS||strict_date_optional_time_nanos"
+        },
+        "cloudhsm.timestamp_usec": {
+          "type": "long"
+        },
+        "cloudhsm.unknown_field_value": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+

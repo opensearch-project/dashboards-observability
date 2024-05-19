@@ -1,0 +1,71 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "log-win",
+      "labels": [
+        "win"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "Event.EventData.Data.0": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+        "Event.EventData.Data.1": {"type": "keyword"},
+        "Event.EventData.Data.2": {"type": "keyword"},
+        "Event.EventData.Data.3": {"type": "keyword"},
+        "Event.EventData.Data.4": {"type": "keyword"},
+        "Event.EventData.Data.5": {"type": "keyword"},
+        "Event.EventData.Data.6": {"type": "keyword"},
+        "Event.EventData.Data.7": {"type": "keyword"},
+        "Event.EventData.Data.8": {"type": "keyword"},
+        "Event.EventData.Data.9": {"type": "keyword"},
+        "Event.EventData.Data.10": {"type": "keyword"},
+        "Event.EventData.Data.11": {"type": "keyword"},
+        "Event.EventData.Data.12": {"type": "keyword"},
+        "Event.EventData.Data.13": {"type": "keyword"},
+        "Event.EventData.Data.14": {"type": "keyword"},
+        "Event.EventData.Data.15": {"type": "keyword"},
+        "Event.EventData.Data.16": {"type": "keyword"},
+        "Event.EventData.Data.17": {"type": "keyword"},
+        "Event.EventData.Data.18": {"type": "keyword"},
+        "Event.EventData.Data.19": {"type": "keyword"},
+        "Event.EventData.Data.20": {"type": "keyword"},
+        "Event.EventData.Data.AccountExpires": {"type": "keyword"},
+        "Event.EventData.Data.BitlockerUserInputTime": {"type": "keyword"},
+        "Event.EventData.Data.ClientCreationTime": {"type": "keyword"},
+        "Event.EventData.Data.CreationUtcTime": {"type": "keyword"},
+        "Event.EventData.Data.DestAddress": {"type": "ip"},
+        "Event.EventData.Data.DestPort": {"type": "integer"},
+        "Event.EventData.Data.DeviceTime": {"type": "keyword"},
+        "Event.EventData.Data.IpAddress": {"type": "ip"},
+        "Event.EventData.Data.IpPort": {"type": "integer"},
+        "Event.EventData.Data.NewTime": {"type": "keyword"},
+        "Event.EventData.Data.OldTime": {"type": "keyword"},
+        "Event.EventData.Data.PasswordLastSet": {"type": "keyword"},
+        "Event.EventData.Data.PreviousCreationUtcTime": {"type": "keyword"},
+        "Event.EventData.Data.PreviousTime": {"type": "keyword"},
+        "Event.EventData.Data.ProcessingTimeInMilliseconds": {"type": "keyword"},
+        "Event.EventData.Data.SourceAddress": {"type": "ip"},
+        "Event.EventData.Data.SourcePort": {"type": "integer"},
+        "Event.EventData.Data.StartTime": {"type": "keyword"},
+        "Event.EventData.Data.StopTime": {"type": "keyword"},
+        "Event.EventData.Data.TimeSource": {"type": "keyword"},
+        "Event.EventData.Data.TimeSourceRefId": {"type": "keyword"},
+        "Event.RenderingInfo.Message": {"type": "text"},
+        "Event.System.EventID": {"type": "keyword"},
+        "Event.System.Execution.ProcessID": {"type": "long"},
+        "Event.System.Execution.ThreadID": {"type": "long"},
+        "Event.System.TimeCreated.SystemTime": {"type": "date"}
+      }
+    }
+
+
+  }
+}
+

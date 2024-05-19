@@ -1,0 +1,9 @@
+{
+  "index_patterns": ["log-aws-inspector-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_inspector"
+  ],
+  "version": 1
+}

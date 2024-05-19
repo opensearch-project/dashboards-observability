@@ -1,0 +1,8 @@
+{
+  "priority": 100,
+  "index_patterns": ["log-aws-elasticache-*"],
+  "composed_of": [
+    "log-ecs",
+    "aws_elasticache"],
+  "version": 1
+}

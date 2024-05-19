@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-workspaces-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_workspaces"],
+  "version": 1
+}

@@ -1,0 +1,27 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_workspace",
+      "labels": [
+        "aws",
+        "workspace"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "ConnectionStateCheckTimestamp": {"type": "date"},
+        "LastKnownUserConnectionTimestamp": {"type": "date"},
+        "clientIpAddress": {"type": "ip"},
+        "loginTime": {"type": "date"}
+      }
+    }
+  }
+}
+

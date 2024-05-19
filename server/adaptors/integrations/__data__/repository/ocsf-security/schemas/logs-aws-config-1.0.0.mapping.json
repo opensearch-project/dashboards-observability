@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-config-*"],
+  "priority": 2,
+  "composed_of": [
+    "log-ecs",
+    "aws_config"],
+  "version": 1
+}

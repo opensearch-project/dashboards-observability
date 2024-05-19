@@ -1,0 +1,11 @@
+{
+  "index_patterns": [
+    "log-aws-clientvpn-*"
+  ],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_clientvpn"
+  ],
+  "version": 1
+}

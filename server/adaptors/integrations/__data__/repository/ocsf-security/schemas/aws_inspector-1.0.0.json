@@ -1,0 +1,34 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_inspector",
+      "labels": [
+        "aws",
+        "inspector"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "inspector.awsAccountId": {"type": "keyword"},
+        "inspector.firstObservedAt": {"type": "date"},
+        "inspector.inspectorScore": {"type": "float"},
+        "inspector.inspectorScoreDetails.adjustedCvss.score": {"type": "float"},
+        "inspector.inspectorScoreDetails.adjustedCvss.version": {"type": "keyword"},
+        "inspector.lastObservedAt": {"type": "date"},
+        "inspector.packageVulnerabilityDetails.cvss": {"type": "nested", "properties": {
+          "baseScore": {"type": "float"},
+          "version": {"type": "keyword"}}},
+        "inspector.packageVulnerabilityDetails.vulnerablePackages": {"type": "nested"},
+        "inspector.updatedAt": {"type": "date"}
+      }
+    }
+  }
+}
+

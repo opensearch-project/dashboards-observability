@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-waf-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_waf"],
+  "version": 1
+}
