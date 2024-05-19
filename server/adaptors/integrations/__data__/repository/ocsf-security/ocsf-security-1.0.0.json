@@ -1,0 +1,116 @@
+{
+  "name": "OCSF-Security",
+  "version": "1.0.0",
+  "displayName": "OCSF Security SIEM Services Dashboards",
+  "description": "OCSF & AES based security SIEM dashboards logs  using the following dashboards",
+  "license": "Apache-2.0",
+  "type": "security",
+  "labels": [
+    "log",
+    "ocsf",
+    "aws",
+    "metrics"
+  ],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/ocsf-security/info",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "OCSF Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS WAF",
+        "path": "dashboard-awswaf.jpg"
+      },
+      {
+        "annotation": "AWS Client VPN",
+        "path": "dashboard-clientvpn.jpg"
+      },
+      {
+        "annotation": "AWS Cloud-Front",
+        "path": "dashboard-cloudfront.jpg"
+      },
+      {
+        "annotation": "AWS Cloud-HSM (hardware security modules)",
+        "path": "dashboard-cloudhsm.jpg"
+      },
+      {
+        "annotation": "AWS Cloud-Trail",
+        "path": "dashboard-cloudtrail.jpg"
+      },
+      {
+        "annotation": "AWS ELB (Elastic Load Balancer)",
+        "path": "dashboard-elb.jpg"
+      },
+      {
+        "annotation": "AWS Guard Duty",
+        "path": "dashboard-guardduty.jpg"
+      },
+      {
+        "annotation": "OpenSearch Metrics",
+        "path": "dashboard-opensearch-metrics.jpg"
+      },
+      {
+        "annotation": "AWS RDS (Relational DataStore)",
+        "path": "dashboard-rds.jpg"
+      },
+      {
+        "annotation": "AWS S3 Access Log",
+        "path": "dashboard-s3accesslog.jpg"
+      },
+      {
+        "annotation": "AWS Workspace",
+        "path": "dashboard-workspaces.jpg"
+      },
+      {
+        "annotation": "AWS Security Hub",
+        "path": "dashboard-securityhub.jpg"
+      },
+      {
+        "annotation": "AWS VPC Flow log",
+        "path": "dashboard-vpcflowlogs.jpg"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "logs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "metrics",
+      "version": "1.0.0"
+    },
+    {
+      "name": "services",
+      "version": "1.0.0"
+    },
+    {
+      "name": "traces",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "dashboard",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    }
+  ],
+  "sampleData": {
+    "path": "ocsf-samples.json"
+  }
+}
