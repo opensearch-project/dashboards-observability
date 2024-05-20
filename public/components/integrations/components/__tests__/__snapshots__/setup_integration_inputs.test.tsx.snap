@@ -2366,6 +2366,13 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
               </EuiPanel>
             </_EuiSplitPanelOuter>
           </EuiCheckableCard>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
         </SetupWorkflowSelector>
       </div>
     </div>
