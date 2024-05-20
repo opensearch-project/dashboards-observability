@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import get from 'lodash/get';
 import round from 'lodash/round';
+import isEmpty from 'lodash/isEmpty';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
@@ -105,7 +106,7 @@ export function SpanDetailFlyout(props: {
     );
   };
 
-  const isEmpty = (value) => {
+  const _isEmpty = (value) => {
     return (
       value == null ||
       (value.hasOwnProperty('length') && value.length === 0) ||
@@ -229,14 +230,14 @@ export function SpanDetailFlyout(props: {
     const attributesList = Object.keys(span)
       .filter((key) => !ignoredKeys.has(key))
       .sort((keyA, keyB) => {
-        const isANull = isEmpty(span[keyA]);
-        const isBNull = isEmpty(span[keyB]);
+        const isANull = _isEmpty(span[keyA]);
+        const isBNull = _isEmpty(span[keyB]);
         if ((isANull && isBNull) || (!isANull && !isBNull)) return keyA < keyB ? -1 : 1;
         if (isANull) return 1;
         return -1;
       })
       .map((key) => {
-        if (isEmpty(span[key])) return getListItem(key, key, '-');
+        if (_isEmpty(span[key])) return getListItem(key, key, '-');
         let value = span[key];
         if (typeof value === 'object') value = JSON.stringify(value);
         return getListItem(key, key, value);

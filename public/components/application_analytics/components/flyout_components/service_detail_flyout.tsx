@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   filtersToDsl,
@@ -79,7 +79,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       ),
       getListItem(
         'Error rate',
-        fields.error_rate !== undefined ? _.round(fields.error_rate, 2).toString() + '%' : '-'
+        fields.error_rate !== undefined ? round(fields.error_rate, 2).toString() + '%' : '-'
       ),
       getListItem('Throughput', fields.throughput !== undefined ? fields.throughput : '-'),
       getListItem('Traces', fields.traces === 0 || fields.traces ? fields.traces : '-'),

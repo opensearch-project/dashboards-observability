@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useRef, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {

@@ -21,7 +21,7 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-import _ from 'lodash';
+import filter from 'lodash/filter';
 import moment from 'moment';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -161,7 +161,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     ];
     setVisOptions(allVisualizations);
 
-    const selectedObject = _.filter([...opt1, ...opt2], {
+    const selectedObject = filter([...opt1, ...opt2], {
       key: para.visSavedObjId,
     });
     if (selectedObject.length > 0) {

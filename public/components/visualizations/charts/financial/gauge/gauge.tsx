@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { find, isEmpty } from 'lodash';
+import find from 'lodash/find';
+import isEmpty from 'lodash/isEmpty';
 import Plotly from 'plotly.js-dist';
 import React, { useMemo } from 'react';
 import {

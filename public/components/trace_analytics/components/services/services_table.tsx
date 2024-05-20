@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { truncate } from 'lodash';
+import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';

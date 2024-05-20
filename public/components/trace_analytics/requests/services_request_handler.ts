@@ -5,8 +5,8 @@
 
 import dateMath from '@elastic/datemath';
 import { htmlIdGenerator } from '@elastic/eui';
-import { round } from 'lodash';
 import moment from 'moment';
+import round from 'lodash/round';
 import DSLService from 'public/services/requests/dsl';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
@@ -161,7 +161,7 @@ export const handleServiceMapRequest = async (
     map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
     map[bucket.key].throughput = bucket.doc_count;
     if (minutesInDateRange != null)
-      map[bucket.key].throughputPerMinute = _.round(bucket.doc_count / minutesInDateRange, 2);
+      map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
   });
 
   if (currService) {

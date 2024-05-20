@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useMemo, useState } from 'react';
+import isEmpty from 'lodash/isEmpty';
 import { useSelector } from 'react-redux';
 import {
   OTEL_METRIC_SUBTYPE,

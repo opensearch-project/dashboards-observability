@@ -4,7 +4,9 @@
  */
 /* eslint-disable no-unused-vars */
 
-import { has, isArray, isEmpty } from 'lodash';
+import has from 'lodash/has';
+import isArray from 'lodash/isArray';
+import isEmpty from 'lodash/isEmpty';
 import { IField } from '../../../../common/types/explorer';
 import {
   EVENT_ANALYTICS,

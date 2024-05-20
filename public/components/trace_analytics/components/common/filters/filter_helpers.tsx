@@ -10,7 +10,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import _ from 'lodash';
+import get from 'lodash/get';
 import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
 
@@ -93,7 +93,7 @@ const getType = (field: string): string | null => {
     endTime: 'date_nanos',
     startTime: 'date_nanos',
   };
-  const type = _.get(typeMapping, field, 'keyword');
+  const type = get(typeMapping, field, 'keyword');
   return typeof type === 'string' ? type : null;
 };
 
@@ -142,7 +142,7 @@ export const getOperatorOptions = (field: string) => {
   };
   const operators = [
     ...operatorMapping.default_first,
-    ..._.get(operatorMapping, type),
+    ...get(operatorMapping, type),
     ...operatorMapping.default_last,
   ];
   return operators;

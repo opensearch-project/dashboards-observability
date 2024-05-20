@@ -7,7 +7,8 @@
 import dateMath from '@elastic/datemath';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
-import { isEmpty, round } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import round from 'lodash/round';
 import React from 'react';
 import {
   DATA_PREPPER_INDEX_NAME,
