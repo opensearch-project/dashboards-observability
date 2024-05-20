@@ -122,7 +122,8 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const explorerData = useSelector(selectQueryResult)[props.tabId];
   // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
-  const loading = summaryData.loading;
+  const [generatingPPL, setGeneratingPPL] = useState(false);
+  const loading = summaryData.loading || generatingPPL;
   const inputRef = useRef<HTMLInputElement>(null);
   const selectedIndex = props.selectedIndex[0]?.label || '';
 
@@ -200,7 +201,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       return;
     }
     try {
-      dispatch(setLoading({ tabId: props.tabId, loading: true }));
+      setGeneratingPPL(true);
       dismissCallOut();
       await request();
     } catch (err) {
@@ -211,7 +212,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
-      dispatch(setLoading({ tabId: props.tabId, loading: false }));
+      setGeneratingPPL(false);
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
@@ -296,7 +297,9 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
       dismissCallOut();
+      setGeneratingPPL(true);
       await request();
+      setGeneratingPPL(false);
       await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (err) {
@@ -311,6 +314,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
+      setGeneratingPPL(false);
       dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
