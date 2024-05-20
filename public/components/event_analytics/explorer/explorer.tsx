@@ -545,8 +545,8 @@ export const Explorer = ({
     if (isLiveTailOn && countDistribution?.data) {
       const hits = reduce(
         countDistribution.data['count()'],
-        (sum, n) => {
-          return sum + n;
+        (total, n) => {
+          return total + n;
         },
         liveHits
       );

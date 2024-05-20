@@ -24,7 +24,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
