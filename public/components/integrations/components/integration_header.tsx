@@ -13,7 +13,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
 

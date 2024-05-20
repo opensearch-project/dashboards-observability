@@ -31,7 +31,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
 import { DeleteModal } from '../../common/helpers/delete_modal';
@@ -222,7 +222,7 @@ export function AppTable(props: AppTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiLink data-test-subj={`${record.name}ApplicationLink`} href={`#/${record.id}`}>
-          {_.truncate(record.name, { length: 100 })}
+          {truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
     },

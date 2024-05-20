@@ -4,7 +4,8 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { indexOf, last } from 'lodash';
+import indexOf from 'lodash/indexOf';
+import last from 'lodash/last';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
 import { getIndexPatternFromRawQuery } from '../../../common/query_utils';
 import { coreRefs } from '../../../../framework/core_refs';

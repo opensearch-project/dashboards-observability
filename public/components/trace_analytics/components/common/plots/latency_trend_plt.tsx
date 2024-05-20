@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
 
@@ -67,7 +67,7 @@ export function LatencyPlt(props: { data: Plotly.Data[] }) {
             arrowhead: 0,
             xref: 'x',
             yref: 'y',
-            text: `Now: ${_.round(props.data[0].y[props.data[0].y.length - 1] as number, 2)}ms`,
+            text: `Now: ${round(props.data[0].y[props.data[0].y.length - 1] as number, 2)}ms`,
             ax: 0,
             ay: -140,
             borderpad: 10,

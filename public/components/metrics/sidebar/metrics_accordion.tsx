@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
-import { min } from 'lodash';
+import min from 'lodash/min';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {

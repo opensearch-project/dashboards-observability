@@ -14,7 +14,6 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { uniqueId } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';

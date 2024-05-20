@@ -6,7 +6,7 @@
 import { EuiSearchBar } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { searchSelector, setSearch } from '../redux/slices/metrics_slice';
 
 export const SearchBar = () => {

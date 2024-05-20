@@ -21,7 +21,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import _, { isEmpty, isEqual, reduce } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import reduce from 'lodash/reduce';
+import sum from 'lodash/sum';
 import React, {
   ReactElement,
   useCallback,
@@ -559,7 +562,7 @@ export const Explorer = ({
                     {countDistribution?.data && !isLiveTailOnRef.current && (
                       <EuiPanel>
                         <HitsCounter
-                          hits={_.sum(countDistribution.data?.['count()'])}
+                          hits={sum(countDistribution.data?.['count()'])}
                           showResetButton={false}
                           onResetQuery={() => {}}
                         />
@@ -658,7 +661,7 @@ export const Explorer = ({
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
                           showTimeBasedComponents
-                            ? _.sum(countDistribution.data?.['count()']) ||
+                            ? sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length
                         }

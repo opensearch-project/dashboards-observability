@@ -6,7 +6,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, toArray } from 'rxjs/operators';
-import { forEach } from 'lodash';
+import forEach from 'lodash/forEach';
 import {
   createDemoPanel,
   CUSTOM_PANELS_API_PREFIX,

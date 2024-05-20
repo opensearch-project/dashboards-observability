@@ -19,7 +19,7 @@ import {
   htmlIdGenerator,
   EuiText,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { AvailabilityInfoFlyout } from '../../../../../../application_analytics/components/flyout_components/availability_info_flyout';
 import { PPL_SPAN_REGEX } from '../../../../../../../../common/constants/shared';
 

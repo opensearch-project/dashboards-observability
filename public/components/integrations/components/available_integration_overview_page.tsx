@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';

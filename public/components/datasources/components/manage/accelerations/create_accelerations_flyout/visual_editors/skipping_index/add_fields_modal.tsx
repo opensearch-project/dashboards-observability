@@ -14,7 +14,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import producer from 'immer';
-import _ from 'lodash';
+import differenceBy from 'lodash/differenceBy';
 import React, { useState } from 'react';
 import {
   CreateAccelerationForm,
@@ -66,7 +66,7 @@ export const AddFieldsModal = ({
 
       <EuiModalBody>
         <EuiInMemoryTable
-          items={_.differenceBy(
+          items={differenceBy(
             accelerationFormData.dataTableFields,
             accelerationFormData.skippingIndexQueryData,
             'id'
