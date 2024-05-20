@@ -12,7 +12,7 @@ import datemath from '@elastic/datemath';
 import {
   DATE_DISPLAY_FORMAT,
   DEFAULT_DATETIME_STRING,
-} from '../../../../../common/constants/explorer';
+} from '../../../../../../common/constants/explorer';
 
 function reformatDate(inputDate: string | undefined) {
   return moment(datemath.parse(inputDate ?? DEFAULT_DATETIME_STRING)).format(DATE_DISPLAY_FORMAT);
