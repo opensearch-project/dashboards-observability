@@ -5,7 +5,11 @@
 
 import moment from 'moment';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
-import { toPairs, uniqueId, has, forEach, isEqual } from 'lodash';
+import toPairs from 'lodash/toPairs';
+import uniqueId from 'lodash/uniqueId';
+import has from 'lodash/has';
+import forEach from 'lodash/forEach';
+import isEqual from 'lodash/isEqual';
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';

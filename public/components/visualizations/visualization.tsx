@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { VisualizationChart } from './visualization_chart';
 import { VisWorkspaceDefault } from '../event_analytics/explorer/visualizations/shared_components';
 import { IVisualizationContainerProps } from '../../../common/types/explorer';

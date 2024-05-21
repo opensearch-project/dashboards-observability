@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   DataSourceManagementPluginSetup,
@@ -200,7 +200,7 @@ export function ServiceView(props: ServiceViewProps) {
                   <EuiText className="overview-title">Error rate</EuiText>
                   <EuiText size="s" className="overview-content">
                     {fields.error_rate !== undefined
-                      ? _.round(fields.error_rate, 2).toString() + '%'
+                      ? round(fields.error_rate, 2).toString() + '%'
                       : '-'}
                   </EuiText>
                 </EuiFlexItem>

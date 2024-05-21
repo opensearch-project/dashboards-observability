@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import round from 'lodash/round';
 import moment from 'moment';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import {
@@ -52,7 +52,7 @@ export const handleDashboardRequest = async (
       response.aggregations.trace_group.buckets.forEach((traceGroup) => {
         map[traceGroup.key] = Object.values(
           traceGroup.latency_variance_nanos.values
-        ).map((nano: number) => _.round(nanoToMilliSec(Math.max(0, nano)), 2));
+        ).map((nano: number) => round(nanoToMilliSec(Math.max(0, nano)), 2));
       });
       return map;
     })
@@ -272,7 +272,7 @@ export const handleJaegerDashboardRequest = async (
           response.aggregations.trace_group.buckets.forEach((traceGroup) => {
             map[traceGroup.key_as_string] = Object.values(
               traceGroup.latency_variance_micros.values
-            ).map((nano: number) => _.round(microToMilliSec(Math.max(0, nano)), 2));
+            ).map((nano: number) => round(microToMilliSec(Math.max(0, nano)), 2));
           });
           return map;
         })
@@ -450,7 +450,7 @@ export const handleDashboardErrorRatePltRequest = (
           ? [
               {
                 x: buckets.map((bucket) => bucket.key),
-                y: buckets.map((bucket) => _.round(bucket.error_rate?.value || 0, 2)),
+                y: buckets.map((bucket) => round(bucket.error_rate?.value || 0, 2)),
                 marker: {
                   color: '#fad963',
                 },

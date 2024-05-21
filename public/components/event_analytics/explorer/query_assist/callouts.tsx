@@ -20,9 +20,21 @@ export const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props)
   />
 );
 
+export const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
+  <EuiCallOut
+    data-test-subj="query-assist-empty-index-callout"
+    title="Select a data source or index to ask a question."
+    size="s"
+    color="warning"
+    iconType="iInCircle"
+    dismissible
+    onDismiss={props.onDismiss}
+  />
+);
+
 export const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
-    data-test-subj="query-assist-empty-callout"
+    data-test-subj="query-assist-empty-query-callout"
     title="Enter a natural language question to automatically generate a query to view results."
     size="s"
     color="warning"

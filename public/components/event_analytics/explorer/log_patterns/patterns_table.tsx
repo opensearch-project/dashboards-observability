@@ -12,7 +12,7 @@ import {
   SortDirection,
 } from '@elastic/eui';
 import { IQuery, PatternTableData } from 'common/types/explorer';
-import { round } from 'lodash';
+import round from 'lodash/round';
 import React from 'react';
 import { FILTERED_PATTERN } from '../../../../../common/constants/explorer';
 import { PPL_DOCUMENTATION_URL } from '../../../../../common/constants/shared';

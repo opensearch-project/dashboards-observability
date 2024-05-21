@@ -4,7 +4,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import _ from 'lodash';
+import round from 'lodash/round';
 import DSLService from 'public/services/requests/dsl';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { ServiceObject } from '../components/common/plots/service_map';
@@ -166,10 +166,10 @@ export const handleServiceMapRequest = async (
   );
   latencies.aggregations.service_name.buckets.map((bucket: any) => {
     map[bucket.key].latency = bucket.average_latency.value;
-    map[bucket.key].error_rate = _.round(bucket.error_rate.value, 2) || 0;
+    map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
     map[bucket.key].throughput = bucket.doc_count;
     if (minutesInDateRange != null)
-      map[bucket.key].throughputPerMinute = _.round(bucket.doc_count / minutesInDateRange, 2);
+      map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
   });
 
   if (currService) {

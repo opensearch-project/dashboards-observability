@@ -14,7 +14,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import producer from 'immer';
-import _ from 'lodash';
+import filter from 'lodash/filter';
 import React, { useState } from 'react';
 import { ACCELERATION_AGGREGRATION_FUNCTIONS } from '../../../../../../../../../common/constants/data_sources';
 import {
@@ -51,7 +51,7 @@ export const ColumnExpression = ({
 
   const onDeleteColumnExpression = () => {
     const newColumnExpresionValue = [
-      ..._.filter(columnExpressionValues, (o) => o.id !== currentColumnExpressionValue.id),
+      ...filter(columnExpressionValues, (o) => o.id !== currentColumnExpressionValue.id),
     ];
     setAccelerationFormData(
       producer((accData) => {
@@ -115,34 +115,39 @@ export const ColumnExpression = ({
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Aggregation field">
-                    <EuiComboBox
-                      singleSelection={{ asPlainText: true }}
-                      options={[
-                        {
-                          label: '*',
-                          disabled: currentColumnExpressionValue.functionName !== 'count',
-                        },
-                        ...accelerationFormData.dataTableFields.map((x) => ({
-                          label: x.fieldName,
-                        })),
-                      ]}
-                      selectedOptions={[
-                        {
-                          label: currentColumnExpressionValue.functionParam,
-                        },
-                      ]}
-                      onChange={(fieldOption) =>
-                        updateColumnExpressionValue(
-                          { ...currentColumnExpressionValue, functionParam: fieldOption[0].label },
-                          index
-                        )
-                      }
-                      isClearable={false}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+                {currentColumnExpressionValue.functionName !== 'window.start' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow label="Aggregation field">
+                      <EuiComboBox
+                        singleSelection={{ asPlainText: true }}
+                        options={[
+                          {
+                            label: '*',
+                            disabled: currentColumnExpressionValue.functionName !== 'count',
+                          },
+                          ...accelerationFormData.dataTableFields.map((x) => ({
+                            label: x.fieldName,
+                          })),
+                        ]}
+                        selectedOptions={[
+                          {
+                            label: currentColumnExpressionValue.functionParam,
+                          },
+                        ]}
+                        onChange={(fieldOption) =>
+                          updateColumnExpressionValue(
+                            {
+                              ...currentColumnExpressionValue,
+                              functionParam: fieldOption[0].label,
+                            },
+                            index
+                          )
+                        }
+                        isClearable={false}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </>
           </EuiPopover>

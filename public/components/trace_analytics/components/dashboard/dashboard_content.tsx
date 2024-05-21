@@ -6,7 +6,7 @@
 
 import dateMath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../../public/components/common/toast';
 import {
@@ -191,7 +191,7 @@ export function DashboardContent(props: DashboardProps) {
         tenant
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
-      const serviceMapDSL = _.cloneDeep(DSL);
+      const serviceMapDSL = cloneDeep(DSL);
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
         (must: any) => must?.term?.serviceName == null
       );

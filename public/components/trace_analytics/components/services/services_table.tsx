@@ -16,7 +16,8 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
 import { TraceAnalyticsMode } from '../../home';
 import { FilterType } from '../common/filters/filters';
@@ -72,7 +73,7 @@ export function ServicesTable(props: ServicesTableProps) {
           sortable: true,
           render: (item: any) => (
             <EuiLink data-test-subj="service-link" onClick={() => nameColumnAction(item)}>
-              {item.length < 24 ? item : <div title={item}>{_.truncate(item, { length: 24 })}</div>}
+              {item.length < 24 ? item : <div title={item}>{truncate(item, { length: 24 })}</div>}
             </EuiLink>
           ),
         },
@@ -81,7 +82,7 @@ export function ServicesTable(props: ServicesTableProps) {
           name: 'Average duration (ms)',
           align: 'right',
           sortable: true,
-          render: (item: any) => (item === 0 || item ? _.round(item, 2) : '-'),
+          render: (item: any) => (item === 0 || item ? round(item, 2) : '-'),
         },
         {
           field: 'error_rate',
@@ -89,7 +90,7 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'right',
           sortable: true,
           render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}%`}</EuiText> : '-',
+            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-',
         },
         {
           field: 'throughput',
@@ -122,7 +123,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 truncateText: true,
                 render: (item: any) =>
                   item ? (
-                    <EuiText size="s">{_.truncate(item.join(', '), { length: 50 })}</EuiText>
+                    <EuiText size="s">{truncate(item.join(', '), { length: 50 })}</EuiText>
                   ) : (
                     '-'
                   ),

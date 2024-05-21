@@ -6,11 +6,9 @@
 import { schema } from '@osd/config-schema';
 import * as mime from 'mime';
 import sanitize from 'sanitize-filename';
-import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
+import { IRouter } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
-import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
 import {
-  OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
@@ -19,24 +17,24 @@ import { IntegrationsManager } from '../../adaptors/integrations/integrations_ma
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
  * This is a convenience method that handles common error handling and response formatting.
- * The callback must accept a `IntegrationsAdaptor` as its first argument.
+ * The callback must accept a `IntegrationsManager` as its first argument.
  *
  * If the callback throws an error,
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
  * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
  *
- * @param {IntegrationsAdaptor} adaptor The adaptor instance to use for making requests.
+ * @param {IntegrationsManager} manager The integration manager instance to use for making requests.
  * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
  * @callback callback A callback that will invoke a request on a provided adaptor.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
 export const handleWithCallback = async <T>(
-  adaptor: IntegrationsAdaptor,
+  manager: IntegrationsManager,
   response: OpenSearchDashboardsResponseFactory,
-  callback: (a: IntegrationsAdaptor) => Promise<T>
+  callback: (a: IntegrationsManager) => Promise<T>
 ): Promise<OpenSearchDashboardsResponse<{ data: T } | string>> => {
   try {
-    const data = await callback(adaptor);
+    const data = await callback(manager);
     return response.ok({
       body: {
         data,
@@ -51,13 +49,6 @@ export const handleWithCallback = async <T>(
   }
 };
 
-const getAdaptor = (
-  context: RequestHandlerContext,
-  _request: OpenSearchDashboardsRequest
-): IntegrationsAdaptor => {
-  return new IntegrationsManager(context.core.savedObjects.client);
-};
-
 export function registerIntegrationsRoute(router: IRouter) {
   router.get(
     {
@@ -65,8 +56,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getIntegrationTemplates()
       );
     }
@@ -89,8 +80,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) => {
         return a.loadIntegrationInstance(
           request.params.templateName,
           request.body.name,
@@ -113,11 +104,11 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
       return handleWithCallback(
         adaptor,
         response,
-        async (a: IntegrationsAdaptor) =>
+        async (a: IntegrationsManager) =>
           (
             await a.getIntegrationTemplates({
               name: request.params.name,
@@ -138,7 +129,7 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
       try {
         const requestPath = sanitize(request.params.path);
         const result = await adaptor.getStatic(request.params.id, requestPath);
@@ -167,8 +158,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getSchemas(request.params.id)
       );
     }
@@ -184,8 +175,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getAssets(request.params.id)
       );
     }
@@ -201,8 +192,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getSampleData(request.params.id)
       );
     }
@@ -214,8 +205,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getIntegrationInstances({})
       );
     }
@@ -231,8 +222,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.deleteIntegrationInstance(request.params.id)
       );
     }
@@ -248,8 +239,8 @@ export function registerIntegrationsRoute(router: IRouter) {
       },
     },
     async (context, request, response): Promise<OpenSearchDashboardsResponse> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+      const adaptor = new IntegrationsManager(context.core.savedObjects.client);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsManager) =>
         a.getIntegrationInstance({
           id: request.params.id,
         })

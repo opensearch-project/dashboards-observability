@@ -13,7 +13,8 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import _ from 'lodash';
+import debounce from 'lodash/debounce';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { Plt } from '../../../visualizations/plotly/plot';
@@ -80,8 +81,8 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  const refresh = _.debounce(() => {
-    if (_.isEmpty(props.colorMap)) return;
+  const refresh = debounce(() => {
+    if (isEmpty(props.colorMap)) return;
     const refreshDSL = spanFiltersToDSL();
     setDSL(refreshDSL);
     handleSpansGanttRequest(

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import get from 'lodash/get';
+import round from 'lodash/round';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -285,14 +286,14 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         : nanoToMilliSec(hit.sort[0]) - minStartTime;
     const duration =
       mode === 'jaeger'
-        ? _.round(microToMilliSec(hit._source.duration), 2)
-        : _.round(nanoToMilliSec(hit._source.durationInNanos), 2);
+        ? round(microToMilliSec(hit._source.duration), 2)
+        : round(nanoToMilliSec(hit._source.durationInNanos), 2);
     const serviceName =
       mode === 'jaeger'
-        ? _.get(hit, ['_source', 'process']).serviceName
-        : _.get(hit, ['_source', 'serviceName']);
+        ? get(hit, ['_source', 'process']).serviceName
+        : get(hit, ['_source', 'serviceName']);
     const name =
-      mode === 'jaeger' ? _.get(hit, '_source.operationName') : _.get(hit, '_source.name');
+      mode === 'jaeger' ? get(hit, '_source.operationName') : get(hit, '_source.name');
     const error =
       mode === 'jaeger'
         ? hit._source.tag?.['error'] === true

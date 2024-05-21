@@ -12,7 +12,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import hjson from 'hjson';
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { ENABLED_VIS_TYPES } from '../../../../../../common/constants/shared';
 import { getVisTypeData } from '../../../../visualizations/charts/helpers/viz_types';
 import { TabContext } from '../../../hooks';

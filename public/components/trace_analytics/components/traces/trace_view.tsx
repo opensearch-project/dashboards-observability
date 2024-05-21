@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
 import { MountPoint } from '../../../../../../../src/core/public';
 import {
@@ -228,8 +228,8 @@ export function TraceView(props: TraceViewProps) {
     Object.entries(services).forEach(([serviceName, service]: [string, any]) => {
       if (!serviceMap[serviceName]) return;
       filteredServiceMap[serviceName] = serviceMap[serviceName];
-      filteredServiceMap[serviceName].latency = _.round(service.latency / service.throughput, 2);
-      filteredServiceMap[serviceName].error_rate = _.round(
+      filteredServiceMap[serviceName].latency = round(service.latency / service.throughput, 2);
+      filteredServiceMap[serviceName].error_rate = round(
         (service.errors / service.throughput) * 100,
         2
       );
