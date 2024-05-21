@@ -4,7 +4,9 @@
  */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import differenceWith from 'lodash/differenceWith';
 import React, { useEffect, useState } from 'react';
 import { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
 import { QueryManager } from '../../../common/query_manager';
@@ -49,7 +51,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
     };
     const userConfigs = getUserConfigFrom(metaData);
     const dataConfig = { ...(userConfigs.dataConfig || {}) };
-    const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
+    const hasBreakdowns = !isEmpty(dataConfig.breakdowns);
     const realTimeParsedStats = isPromqlMetric
       ? getMetricVisConfig(metaData)
       : {
@@ -61,8 +63,8 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
 
     // filter out breakdowns from dimnesions
     if (hasBreakdowns) {
-      finalDimensions = _.differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
-        _.isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
+      finalDimensions = differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
+        isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
       );
     }
 

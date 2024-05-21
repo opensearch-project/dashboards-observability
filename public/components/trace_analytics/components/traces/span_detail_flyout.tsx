@@ -17,7 +17,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import get from 'lodash/get';
+import round from 'lodash/round';
+import isEmpty from 'lodash/isEmpty';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
@@ -56,7 +58,7 @@ const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_
 const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) => {
   const fieldKey = getSpanFieldKey(mode, field);
   if (fieldKey === undefined) return undefined;
-  return _.get(span, fieldKey);
+  return get(span, fieldKey);
 };
 
 export function SpanDetailFlyout(props: {
@@ -86,13 +88,13 @@ export function SpanDetailFlyout(props: {
         description={description}
         key={`list-item-${title}`}
         addSpanFilter={
-          fieldKey ? () => props.addSpanFilter(fieldKey, _.get(span, fieldKey)) : undefined
+          fieldKey ? () => props.addSpanFilter(fieldKey, get(span, fieldKey)) : undefined
         }
       />
     );
   };
 
-  const isEmpty = (value) => {
+  const _isEmpty = (value) => {
     return (
       value == null ||
       (value.hasOwnProperty('length') && value.length === 0) ||
@@ -101,7 +103,7 @@ export function SpanDetailFlyout(props: {
   };
 
   const renderContent = () => {
-    if (!span || _.isEmpty(span)) return '-';
+    if (!span || isEmpty(span)) return '-';
     const overviewList = [
       getListItem(
         getSpanFieldKey(mode, 'SPAN_ID'),
@@ -158,8 +160,8 @@ export function SpanDetailFlyout(props: {
         'Duration',
         `${
           mode === 'data_prepper'
-            ? _.round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
-            : _.round(microToMilliSec(Math.max(0, span.duration)), 2)
+            ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
+            : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
       ),
       getListItem(
@@ -167,7 +169,7 @@ export function SpanDetailFlyout(props: {
         'Start time',
         mode === 'data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
@@ -176,7 +178,7 @@ export function SpanDetailFlyout(props: {
         'End time',
         mode === 'data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
@@ -216,20 +218,20 @@ export function SpanDetailFlyout(props: {
     const attributesList = Object.keys(span)
       .filter((key) => !ignoredKeys.has(key))
       .sort((keyA, keyB) => {
-        const isANull = isEmpty(span[keyA]);
-        const isBNull = isEmpty(span[keyB]);
+        const isANull = _isEmpty(span[keyA]);
+        const isBNull = _isEmpty(span[keyB]);
         if ((isANull && isBNull) || (!isANull && !isBNull)) return keyA < keyB ? -1 : 1;
         if (isANull) return 1;
         return -1;
       })
       .map((key) => {
-        if (isEmpty(span[key])) return getListItem(key, key, '-');
+        if (_isEmpty(span[key])) return getListItem(key, key, '-');
         let value = span[key];
         if (typeof value === 'object') value = JSON.stringify(value);
         return getListItem(key, key, value);
       });
 
-    const eventsComponent = _.isEmpty(span.events) ? null : (
+    const eventsComponent = isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
           <span className="panel-title">Event</span>

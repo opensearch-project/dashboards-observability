@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 import { SavedObject } from '../../../../../../src/core/types';
 
@@ -49,7 +49,7 @@ export function IntegrationAssets(props: {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.id}IntegrationLink`}>
-          {_.truncate(record.name, {
+          {truncate(record.name, {
             length: 100,
           })}
         </EuiText>
@@ -61,7 +61,7 @@ export function IntegrationAssets(props: {
       truncateText: true,
       render: (_value, record) => (
         <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
-          {_.truncate(record.type, { length: 100 })}
+          {truncate(record.type, { length: 100 })}
         </EuiText>
       ),
     },

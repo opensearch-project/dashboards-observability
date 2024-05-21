@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { EuiPanel, EuiSwitch } from '@elastic/eui';
 import { Visualization } from '../../../../visualizations/visualization';
 import { DataTable } from '../../../../visualizations/charts/data_table/data_table';

@@ -15,7 +15,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import React, { useState } from 'react';
 import {
   AddedIntegrationType,
@@ -41,7 +41,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiLink data-test-subj={`${record.name}IntegrationLink`} href={`#/installed/${record.id}`}>
-          {_.truncate(record.name, { length: 100 })}
+          {truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
     },
@@ -55,7 +55,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           data-test-subj={`${record.templateName}IntegrationDescription`}
           href={`#/available/${record.templateName}`}
         >
-          {_.truncate(record.templateName, { length: 100 })}
+          {truncate(record.templateName, { length: 100 })}
         </EuiLink>
       ),
     },
@@ -66,7 +66,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {_.truncate(record.creationDate, { length: 100 })}
+          {truncate(record.creationDate, { length: 100 })}
         </EuiText>
       ),
     },
