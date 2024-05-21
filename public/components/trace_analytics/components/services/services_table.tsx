@@ -9,6 +9,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiI18nNumber,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
@@ -128,6 +129,7 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             ]
           : []),
+
         {
           field: 'traces',
           name: 'Traces',
@@ -155,6 +157,18 @@ export function ServicesTable(props: ServicesTableProps) {
               ) : (
                 '-'
               )}
+            </>
+          ),
+        },
+        {
+          field: 'actions',
+          name: 'Actions',
+          align: 'center',
+          sortable: true,
+          truncateText: true,
+          render: (_item: any, _row: any) => (
+            <>
+              <EuiIcon type="inspect" />
             </>
           ),
         },

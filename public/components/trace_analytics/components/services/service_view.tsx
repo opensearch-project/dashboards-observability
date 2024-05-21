@@ -219,8 +219,10 @@ export function ServiceView(props: ServiceViewProps) {
                       <EuiLink
                         onClick={() => {
                           setRedirect(true);
+                          const filterField =
+                            mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
                           props.addFilter({
-                            field: 'process.serviceName',
+                            field: filterField,
                             operator: 'is',
                             value: props.serviceName,
                             inverted: false,

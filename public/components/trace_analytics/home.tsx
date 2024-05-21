@@ -221,6 +221,7 @@ export const Home = (props: HomeProps) => {
                 page="traces"
                 childBreadcrumbs={traceBreadcrumbs}
                 traceIdColumnAction={traceIdColumnAction}
+                toasts={toasts}
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />

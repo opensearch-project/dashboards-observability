@@ -88,6 +88,7 @@ export function DashboardContent(props: DashboardProps) {
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
     let newFilteredService = '';
     for (const filter of filters) {
       if (mode === 'data_prepper') {
@@ -102,12 +103,14 @@ export function DashboardContent(props: DashboardProps) {
         }
       }
     }
+=======
+>>>>>>> 52965002 (move trace group to traces, fix service filter bug, fix traces view breadcrumb)
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
-      refresh(newFilteredService);
+      refresh();
   }, [
     filters,
     startTime,
@@ -119,7 +122,11 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
   ]);
 
+<<<<<<< HEAD
   const refresh = async (_currService?: string) => {
+=======
+  const refresh = async () => {
+>>>>>>> 52965002 (move trace group to traces, fix service filter bug, fix traces view breadcrumb)
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
