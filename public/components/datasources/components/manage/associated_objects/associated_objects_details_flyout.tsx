@@ -93,13 +93,12 @@ export const AssociatedObjectsDetailsFlyout = ({
     return (
       <EuiButtonEmpty
         onClick={() =>
-          renderCreateAccelerationFlyout(
-            datasourceName,
-            tableDetail.database,
-            tableDetail.name,
+          renderCreateAccelerationFlyout({
+            dataSource: datasourceName,
+            databaseName: tableDetail.database,
+            tableName: tableDetail.name,
             handleRefresh,
-            ''
-          )
+          })
         }
       >
         <EuiIcon type={'bolt'} size="m" />
@@ -156,7 +155,12 @@ export const AssociatedObjectsDetailsFlyout = ({
         return (
           <EuiLink
             onClick={() =>
-              renderAccelerationDetailsFlyout(item, datasourceName, handleRefresh, dataSourceMDSId)
+              renderAccelerationDetailsFlyout({
+                acceleration: item,
+                dataSourceName: datasourceName,
+                handleRefresh,
+                dataSourceMDSId,
+              })
             }
           >
             {name}
@@ -196,13 +200,12 @@ export const AssociatedObjectsDetailsFlyout = ({
           color="primary"
           fill
           onClick={() =>
-            renderCreateAccelerationFlyout(
-              datasourceName,
-              tableDetail.database,
-              tableDetail.name,
+            renderCreateAccelerationFlyout({
+              dataSource: datasourceName,
+              databaseName: tableDetail.database,
+              tableName: tableDetail.name,
               handleRefresh,
-              ''
-            )
+            })
           }
           iconType="popout"
           iconSide="left"

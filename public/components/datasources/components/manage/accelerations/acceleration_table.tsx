@@ -246,7 +246,11 @@ export const AccelerationTable = ({
         return (
           <EuiLink
             onClick={() => {
-              renderAccelerationDetailsFlyout(acceleration, dataSourceName, handleRefresh);
+              renderAccelerationDetailsFlyout({
+                acceleration,
+                dataSourceName,
+                handleRefresh,
+              });
             }}
           >
             {displayName}

@@ -17,9 +17,10 @@ import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/pub
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
 import {
-  AssociatedObject,
-  CachedAcceleration,
   LoadCachehookOutput,
+  RenderAccelerationDetailsFlyoutParams,
+  RenderAccelerationFlyoutParams,
+  RenderAssociatedObjectsDetailsFlyoutParams,
 } from '../common/types/data_connections';
 import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
@@ -49,23 +50,24 @@ export interface SetupDependencies {
 export interface ObservabilitySetup {}
 
 export interface ObservabilityStart {
-  renderAccelerationDetailsFlyout: (
-    acceleration: CachedAcceleration,
-    datasourceName: string,
-    handleRefresh?: () => void
-  ) => void;
-  renderAssociatedObjectsDetailsFlyout: (
-    tableDetail: AssociatedObject,
-    datasourceName: string,
-    handleRefresh?: () => void
-  ) => void;
-  renderCreateAccelerationFlyout: (
-    dataSource: string,
-    databaseName?: string,
-    tableName?: string,
-    handleRefresh?: () => void,
-    dataSourceMDSId?: string
-  ) => void;
+  renderAccelerationDetailsFlyout: ({
+    acceleration,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationDetailsFlyoutParams) => void;
+  renderAssociatedObjectsDetailsFlyout: ({
+    tableDetail,
+    dataSourceName,
+    handleRefresh,
+  }: RenderAssociatedObjectsDetailsFlyoutParams) => void;
+  renderCreateAccelerationFlyout: ({
+    dataSource,
+    dataSourceMDSId,
+    databaseName,
+    tableName,
+    handleRefresh,
+  }: RenderAccelerationFlyoutParams) => void;
   CatalogCacheManagerInstance: typeof CatalogCacheManager;
   useLoadDatabasesToCacheHook: () => LoadCachehookOutput;
   useLoadTablesToCacheHook: () => LoadCachehookOutput;
