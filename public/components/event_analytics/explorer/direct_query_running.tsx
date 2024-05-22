@@ -25,13 +25,13 @@ import { AccelerateCallout } from './accelerate_callout';
 
 interface DirectQueryRunningProps {
   tabId: string;
-  isS3ConnectionWithLakeFormation: boolean;
+  isS3Connection: boolean;
   onCreateAcceleration: () => void;
 }
 
 export const DirectQueryRunning = ({
   tabId,
-  isS3ConnectionWithLakeFormation,
+  isS3Connection,
   onCreateAcceleration,
 }: DirectQueryRunningProps) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
@@ -59,9 +59,7 @@ export const DirectQueryRunning = ({
 
   return (
     <>
-      {isS3ConnectionWithLakeFormation && (
-        <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
-      )}
+      {isS3Connection && <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />}
       <EuiEmptyPrompt
         icon={<EuiProgress size="xs" color="accent" />}
         title={<h2>Query Processing</h2>}
@@ -77,7 +75,7 @@ export const DirectQueryRunning = ({
                   Cancel
                 </EuiButton>
               </EuiFlexItem>
-              {isS3ConnectionWithLakeFormation && (
+              {isS3Connection && (
                 <EuiFlexItem>
                   <EuiButton fill onClick={onCreateAcceleration}>
                     Create acceleration

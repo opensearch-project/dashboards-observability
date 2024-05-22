@@ -33,6 +33,7 @@ export interface IntegrationSetupInputs {
   checkpointLocation: string;
   connectionTableName: string;
   enabledWorkflows: string[];
+  connectionDatabaseName?: string;
 }
 
 export interface IntegrationConfigProps {
@@ -100,7 +101,9 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
+  return `${config.connectionDataSource}.${config.connectionDatabaseName ?? 'default'}.${
+    config.connectionTableName
+  }`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {

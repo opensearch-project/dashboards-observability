@@ -33,6 +33,7 @@ import { useToast } from '../../../common/toast';
 import { HomeProps } from '../../home';
 import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import S3Logo from '../../icons/s3-logo.svg';
+import SecurityLakeLogo from '../../icons/security-lake-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
@@ -192,7 +193,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
       case 'S3GLUE':
-        return <EuiIcon type={S3Logo} />;
+        return <EuiIcon type={record.isConnectionWithLakeFormation ? SecurityLakeLogo : S3Logo} />;
       case 'PROMETHEUS':
         return <EuiIcon type={PrometheusLogo} />;
       default:
@@ -228,7 +229,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
             return 'Prometheus';
           case 'S3GLUE':
             return connection.isConnectionWithLakeFormation
-              ? 'Amazon S3 with Lake Formation'
+              ? 'Amazon Security Lake'
               : 'Amazon S3 with AWS Glue Data Catalog';
           default:
             return '-';

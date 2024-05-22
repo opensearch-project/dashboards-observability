@@ -34,7 +34,8 @@ export const IndexTypeSelector = ({
 
   useEffect(() => {
     if (!valueSetAlready.current) {
-      setValue(isS3ConnectionWithLakeFormation ? 'materialized' : 'skipping');
+      const defaultSelectedOption = isS3ConnectionWithLakeFormation ? 'materialized' : 'skipping';
+      updateState(defaultSelectedOption);
     }
   }, [isS3ConnectionWithLakeFormation]);
 
@@ -46,7 +47,7 @@ export const IndexTypeSelector = ({
     );
   }, [accelerationFormData.dataTable]);
 
-  const onChangeSupeSelect = (indexType: string) => {
+  const updateState = (indexType: string) => {
     setAccelerationFormData({
       ...accelerationFormData,
       accelerationIndexType: indexType as AccelerationIndexType,
@@ -54,6 +55,10 @@ export const IndexTypeSelector = ({
         indexType === 'skipping' ? ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME : '',
     });
     setValue(indexType);
+  };
+
+  const onChangeSupeSelect = (indexType: string) => {
+    updateState(indexType);
     valueSetAlready.current = true;
   };
 

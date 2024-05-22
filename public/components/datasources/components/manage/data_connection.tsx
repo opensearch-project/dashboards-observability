@@ -142,45 +142,19 @@ export const DataConnection = (props: { dataSource: string }) => {
     redirectToExplorerS3(dataSource);
   };
 
-  const dataSourceCardsText = isS3ConnectionWithLakeFormation
-    ? {
-        integrationCard: {
-          title: 'Add dashbaords and queries',
-          description: 'Gain instant insights with preconfigured log dashboards and queries',
-          childTitle: 'Add dashbaords and queries from integrations',
-        },
-        queryCard: {
-          title: 'Query data',
-          description: 'Turn your data into actionable insights',
-          childTitle: 'Query in Log Explorer',
-        },
-      }
-    : {
-        integrationCard: {
-          title: 'Configure Integrations',
-          description: 'Connect to common application log types using integrations',
-          childTitle: 'Add Integrations',
-        },
-        queryCard: {
-          title: 'Query data',
-          description: 'Uncover insights from your data or better understand it',
-          childTitle: 'Query in Log Explorer',
-        },
-      };
-
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-            title={dataSourceCardsText.integrationCard.title}
-            description={dataSourceCardsText.integrationCard.description}
+            title={'Configure Integrations'}
+            description="Connect to common application log types using integrations"
             onClick={onclickIntegrationsCard}
             selectable={{
               onClick: onclickIntegrationsCard,
               isDisabled: false,
-              children: dataSourceCardsText.integrationCard.childTitle,
+              children: 'Add Integrations',
             }}
           />
         </EuiFlexItem>
@@ -200,13 +174,13 @@ export const DataConnection = (props: { dataSource: string }) => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={dataSourceCardsText.queryCard.title}
-            description={dataSourceCardsText.queryCard.description}
+            title={'Query data'}
+            description="Uncover insights from your data or better understand it"
             onClick={onclickDiscoverCard}
             selectable={{
               onClick: onclickDiscoverCard,
               isDisabled: false,
-              children: dataSourceCardsText.queryCard.childTitle,
+              children: 'Query in Log Explorer',
             }}
           />
         </EuiFlexItem>

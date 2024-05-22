@@ -62,7 +62,6 @@ import {
 } from '../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
-  DATACONNECTIONS_BASE,
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_DESCRIBE_INDEX_REGEX,
@@ -140,7 +139,6 @@ import {
   getRenderCreateAccelerationFlyout,
   getRenderLogExplorerTablesFlyout,
 } from '../../../plugin';
-import { S3GlueProperties } from '../../../../common/types/data_connections';
 import { AccelerateCallout } from './accelerate_callout';
 
 export const Explorer = ({
@@ -216,7 +214,7 @@ export const Explorer = ({
   const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
   const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
-  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState(false);
+  const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
   const onCreateAcceleration = () => renderCreateAccelerationFlyout(dataSourceName);
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
@@ -345,18 +343,6 @@ export const Explorer = ({
         });
     }
   }, []);
-
-  const updateDataSourceConnectionInfo = () => {
-    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${dataSourceName}`).then((data: any) => {
-      setIsS3ConnectionWithLakeFormation(
-        !!(data.properties as S3GlueProperties)['glue.lakeformation.enabled']
-      );
-    });
-  };
-
-  useEffect(() => {
-    updateDataSourceConnectionInfo();
-  }, [dataSourceName]);
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
@@ -576,7 +562,7 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {isS3ConnectionWithLakeFormation && (
+            {isS3Connection && (
               <EuiFlexItem>
                 <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
               </EuiFlexItem>
@@ -722,7 +708,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
-    isS3ConnectionWithLakeFormation,
+    isS3Connection,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -768,13 +754,7 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization
-        currentDataSource={
-          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
-        }
-        isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
-        onCreateAcceleration={onCreateAcceleration}
-      />
+      <DirectQueryVisualization onCreateAcceleration={onCreateAcceleration} />
     );
   }, [
     query,
@@ -783,8 +763,6 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    explorerSearchMeta.datasources,
-    isS3ConnectionWithLakeFormation,
     onCreateAcceleration,
   ]);
 
@@ -1099,7 +1077,7 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
-                {isS3ConnectionWithLakeFormation && (
+                {isS3Connection && (
                   <>
                     <EuiLink
                       style={{ paddingLeft: 130 }}
@@ -1115,7 +1093,7 @@ export const Explorer = ({
                 {explorerSearchMeta.isPolling ? (
                   <DirectQueryRunning
                     tabId={tabId}
-                    isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+                    isS3Connection={isS3Connection}
                     onCreateAcceleration={onCreateAcceleration}
                   />
                 ) : (
