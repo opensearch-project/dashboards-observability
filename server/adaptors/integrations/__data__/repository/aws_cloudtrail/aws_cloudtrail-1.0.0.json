@@ -25,6 +25,12 @@
       "name": "dashboards-flint",
       "label": "Dashboards & Visualizations adapted to Flint",
       "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards-flint-records",
+      "label": "Dashboards & Visualizations adapted to Flint",
+      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3 (Multi-Records)",
       "enabled_by_default": false
     }
   ],
@@ -60,11 +66,39 @@
   ],
   "assets": [
     {
+      "name": "create_table_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_table_cloud-trail-records",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint-records"]
+    },
+    {
       "name": "create_skipping_index",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
       "workflows": ["queries"]
+    },
+    {
+      "name": "create_mv_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_mv_cloud-trail-records",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint-records"]
     },
     {
       "name": "aws_cloudtrail",
@@ -78,7 +112,7 @@
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
-      "workflows": ["dashboards-flint"]
+      "workflows": ["dashboards-flint","dashboards-flint-records"]
     },
     {
       "name": "example_queries",
@@ -88,18 +122,11 @@
       "workflows": ["queries"]
     },
     {
-      "name": "create_table_cloud-trail",
+      "name": "example_queries-records",
       "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["dashboards-flint"]
-    },
-    {
-      "name": "create_mv_cloud-trail",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["dashboards-flint"]
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards-flint-records"]
     }
   ],
   "sampleData": {
