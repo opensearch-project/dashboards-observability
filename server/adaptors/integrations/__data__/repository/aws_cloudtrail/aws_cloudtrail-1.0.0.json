@@ -60,6 +60,13 @@
   ],
   "assets": [
     {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
       "name": "aws_cloudtrail",
       "version": "1.0.0",
       "extension": "ndjson",
@@ -72,13 +79,6 @@
       "extension": "ndjson",
       "type": "savedObjectBundle",
       "workflows": ["dashboards-flint"]
-    },
-    {
-      "name": "create_skipping_index",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["queries"]
     },
     {
       "name": "example_queries",
