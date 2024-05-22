@@ -13,7 +13,7 @@
       "name": "queries",
       "label": "Queries (recommended)",
       "description": "Tables and pre-written queries for quickly getting insights on your data.",
-      "enabled_by_default": true
+      "enabled_by_default": false
     },
     {
       "name": "dashboards",
@@ -25,13 +25,13 @@
       "name": "dashboards-flint",
       "label": "Dashboards & Visualizations adapted to Flint",
       "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3",
-      "enabled_by_default": true
+      "enabled_by_default": false
     },
     {
       "name": "dashboards-flint-records",
-      "label": "Dashboards & Visualizations adapted to Flint",
-      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3 (Multi-Records)",
-      "enabled_by_default": false
+      "label": "Dashboards & Visualizations adapted to Flint (Multi-Records Protocol)",
+      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3 (Multi-Records Protocol)",
+      "enabled_by_default": true
     }
   ],
   "statics": {
