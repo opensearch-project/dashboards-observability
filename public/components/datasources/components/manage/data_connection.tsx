@@ -20,7 +20,7 @@ import {
   EuiTitle,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import _ from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
 import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
@@ -102,7 +102,7 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
-      `flint_${_.escapeRegExp(datasourceDetails.name)}_default_.*`
+      `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
     );
     const findIntegrations = async () => {
       // TODO: we just get all results and filter, ideally we send a filtering query to the API

@@ -25,7 +25,6 @@ import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { last } from 'lodash';
 import { VisualizationType } from 'common/types/custom_panels';
 import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
 import { DashboardContent } from '../../../components/trace_analytics/components/dashboard/dashboard_content';

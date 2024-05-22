@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, take } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import take from 'lodash/take';
 import {
   AGGREGATIONS,
   CUSTOM_LABEL,

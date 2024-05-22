@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiFlyout,
 } from '@elastic/eui';
-import _ from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
@@ -220,7 +220,7 @@ export const InstalledIntegrationsTable = ({
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
     .map(instanceToTableEntry)
-    .filter((i) => i.name.match(new RegExp(_.escapeRegExp(query), 'i')));
+    .filter((i) => i.name.match(new RegExp(escapeRegExp(query), 'i')));
 
   const [showAvailableFlyout, setShowAvailableFlyout] = useState(false);
   const toggleFlyout = () => setShowAvailableFlyout((prev) => !prev);

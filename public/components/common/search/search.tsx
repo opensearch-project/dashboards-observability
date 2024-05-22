@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
@@ -30,7 +30,11 @@ import {
   OLLY_QUERY_ASSISTANT,
   RAW_QUERY,
 } from '../../../../common/constants/explorer';
-import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_SPAN_REGEX,
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
@@ -277,14 +281,16 @@ export const Search = (props: any) => {
       dispatch(changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery } }));
     });
     onQuerySearch(queryLang);
-    handleTimePickerChange([startTime, endTime]);
+    if (coreRefs.queryAssistEnabled) {
+      handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
+    } else {
+      handleTimePickerChange([startTime, endTime]);
+    }
     setNeedsUpdate(false);
   };
 
   //  STATE FOR LANG PICKER AND INDEX PICKER
-  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: 'opensearch_dashboards_sample_data_logs' },
-  ]);
+  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([]);
   const { data: indices, loading: indicesLoading } = useCatIndices();
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const indicesAndIndexPatterns =
@@ -292,8 +298,24 @@ export const Search = (props: any) => {
       ? [...indexPatterns, ...indices].filter(
           (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
         )
-      : undefined;
+      : [];
   const loading = indicesLoading || indexPatternsLoading;
+
+  useEffect(() => {
+    if (selectedIndex.length || !indicesAndIndexPatterns.length) return;
+    // pre-fill selected index with sample logs or other sample data index
+    const sampleLogOption = indicesAndIndexPatterns.find(
+      (option) => option.label === 'opensearch_dashboards_sample_data_logs'
+    );
+    if (sampleLogOption) {
+      setSelectedIndex([sampleLogOption]);
+      return;
+    }
+    const sampleDataOption = indicesAndIndexPatterns.find((option) =>
+      option.label.startsWith('opensearch_dashboards_sample_data_')
+    );
+    if (sampleDataOption) setSelectedIndex([sampleDataOption]);
+  }, [indicesAndIndexPatterns]);
 
   const onLanguagePopoverClick = () => {
     setLanguagePopoverOpen(!_isLanguagePopoverOpen);
@@ -352,7 +374,7 @@ export const Search = (props: any) => {
                   <EuiFlexItem>
                     <EuiComboBox
                       placeholder="Select an index"
-                      isClearable={true}
+                      isClearable={false}
                       prepend={<EuiText>Index</EuiText>}
                       singleSelection={{ asPlainText: true }}
                       isLoading={loading}

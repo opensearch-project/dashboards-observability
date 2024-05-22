@@ -15,7 +15,7 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import {
   ADD_SERIES_POSITION_TEXT,
   AGGREGATIONS,

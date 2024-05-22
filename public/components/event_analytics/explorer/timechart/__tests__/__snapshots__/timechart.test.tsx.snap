@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Timechart /> spec should match snapshot 1`] = `
+<div>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiText euiText--medium"
+      >
+        <strong
+          data-test-subj="discoverQueryHits"
+        >
+          194
+        </strong>
+         
+        hits
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        class="euiToolTipAnchor"
+      >
+        <div
+          class="euiText euiText--small"
+          data-test-subj="discoverIntervalDateRange"
+        >
+          Jan 1, 2024 @ 00:00:00.000 - Jan 1, 2024 @ 00:00:00.000
+        </div>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <select
+            aria-label="Time interval"
+            class="euiSelect euiSelect--compressed"
+            data-test-subj="eventAnalytics__EventIntervalSelect"
+            id="dscResultsIntervalSelector"
+          >
+            <option
+              value="m"
+            >
+              Minute
+            </option>
+            <option
+              value="h"
+            >
+              Hour
+            </option>
+            <option
+              value="d"
+            >
+              Day
+            </option>
+            <option
+              value="w"
+            >
+              Week
+            </option>
+            <option
+              value="M"
+            >
+              Month
+            </option>
+            <option
+              value="y"
+            >
+              Year
+            </option>
+          </select>
+          <div
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                  fill-rule="non-zero"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    id="explorerPlotComponent"
+    style="width: 100%; height: 100%;"
+  />
+</div>
+`;

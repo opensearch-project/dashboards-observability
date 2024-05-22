@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createSelector } from '@reduxjs/toolkit';
-import { forEach } from 'lodash';
+import forEach from 'lodash/forEach';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import {
   SELECTED_FIELDS,

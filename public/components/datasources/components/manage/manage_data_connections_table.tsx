@@ -16,7 +16,7 @@ import {
   EuiPageContent,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import React, { useEffect, useState } from 'react';
 import {
   DATACONNECTIONS_BASE,
@@ -215,7 +215,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
               data-test-subj={`${record.name}DataConnectionsLink`}
               href={`#/manage/${record.name}`}
             >
-              {_.truncate(record.name, { length: 100 })}
+              {truncate(record.name, { length: 100 })}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
