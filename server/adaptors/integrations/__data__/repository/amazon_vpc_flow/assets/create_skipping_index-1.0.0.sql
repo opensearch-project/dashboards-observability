@@ -6,7 +6,7 @@ CREATE SKIPPING INDEX ON {table_name} (
     `dst_endpoint.ip` BLOOM_FILTER,
     `src_endpoint.svc_name` VALUE_SET,
     `dst_endpoint.svc_name` VALUE_SET,
-    traffic.bytes MIN_MAX
+    `traffic.bytes` MIN_MAX
 ) WITH (
     auto_refresh = true,
     refresh_interval = '15 Minutes',

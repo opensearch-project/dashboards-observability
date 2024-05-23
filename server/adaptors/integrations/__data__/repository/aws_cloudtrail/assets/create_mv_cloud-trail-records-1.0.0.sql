@@ -45,7 +45,7 @@ SELECT
   rec.tlsDetails.clientProvidedHostHeader AS `aws.cloudtrail.tlsDetailsclient_provided_host_header`
 FROM
   {table_name}
-  LATERAL VIEW explode(Records) myTable AS rec
+  LATERAL VIEW explode(Records) explodedCloudTrailsTable AS rec
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',
