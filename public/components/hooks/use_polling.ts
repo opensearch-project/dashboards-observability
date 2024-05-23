@@ -111,7 +111,6 @@ export function usePolling<T, P = void>(
     try {
       const result = await fetchFunction(params);
       setData(result);
-      console.log(result);
       // Check the success condition and stop polling if it's met
       if (onPollingSuccess && onPollingSuccess(result, configurations)) {
         stopPolling();
