@@ -3,15 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
 import {
   EuiInMemoryTable,
   EuiLink,
-  SearchFilterConfig,
   EuiTableFieldDataColumnType,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import React, { useEffect, useState } from 'react';
+import {
+  ACCELERATION_INDEX_TYPES,
+  DATA_SOURCE_TYPES,
+} from '../../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,
@@ -21,6 +24,7 @@ import {
   getRenderAssociatedObjectsDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../../../../plugin';
+import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,
@@ -28,11 +32,6 @@ import {
   redirectToExplorerOSIdx,
   redirectToExplorerWithDataSrc,
 } from '../utils/associated_objects_tab_utils';
-import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
-import {
-  ACCELERATION_INDEX_TYPES,
-  DATA_SOURCE_TYPES,
-} from '../../../../../../../common/constants/data_sources';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -70,11 +69,18 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         <EuiLink
           onClick={() => {
             if (item.type === 'table') {
-              renderAssociatedObjectsDetailsFlyout(item, datasourceName, handleRefresh);
+              renderAssociatedObjectsDetailsFlyout({
+                tableDetail: item,
+                dataSourceName: datasourceName,
+                handleRefresh,
+              });
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
               if (acceleration) {
-                renderAccelerationDetailsFlyout(acceleration, datasourceName);
+                renderAccelerationDetailsFlyout({
+                  acceleration,
+                  dataSourceName: datasourceName,
+                });
               }
             }
           }}
@@ -109,7 +115,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             return (
               <EuiLink
                 onClick={() =>
-                  renderAccelerationDetailsFlyout(accelerations[0], datasourceName, handleRefresh)
+                  renderAccelerationDetailsFlyout({
+                    acceleration: accelerations[0],
+                    dataSourceName: datasourceName,
+                    handleRefresh,
+                  })
                 }
               >
                 {name}
@@ -119,7 +129,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           return (
             <EuiLink
               onClick={() =>
-                renderAssociatedObjectsDetailsFlyout(obj, datasourceName, handleRefresh)
+                renderAssociatedObjectsDetailsFlyout({
+                  tableDetail: obj,
+                  dataSourceName: datasourceName,
+                  handleRefresh,
+                })
               }
             >
               View all {accelerations.length}
@@ -129,7 +143,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           return (
             <EuiLink
               onClick={() =>
-                renderAssociatedObjectsDetailsFlyout(accelerations, datasourceName, handleRefresh)
+                renderAssociatedObjectsDetailsFlyout({
+                  tableDetail: accelerations,
+                  dataSourceName: datasourceName,
+                  handleRefresh,
+                })
               }
             >
               {accelerations.name}
@@ -186,7 +204,12 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           icon: 'bolt',
           available: (item: AssociatedObject) => item.type === 'table',
           onClick: (item: AssociatedObject) =>
-            renderCreateAccelerationFlyout(datasourceName, item.database, item.name, handleRefresh),
+            renderCreateAccelerationFlyout({
+              dataSource: datasourceName,
+              databaseName: item.database,
+              tableName: item.tableName,
+              handleRefresh,
+            }),
         },
       ],
     },

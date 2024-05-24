@@ -6,12 +6,14 @@
 import { EuiButton, EuiHealth } from '@elastic/eui';
 import React from 'react';
 import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
-import { CachedAcceleration } from '../../../../../../../common/types/data_connections';
+import {
+  CachedAcceleration,
+  RenderAccelerationFlyoutParams,
+} from '../../../../../../../common/types/data_connections';
 import {
   redirectToExplorerOSIdx,
   redirectToExplorerWithDataSrc,
 } from '../../associated_objects/utils/associated_objects_tab_utils';
-
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
@@ -91,26 +93,23 @@ export const CreateAccelerationFlyoutButton = ({
   handleRefresh,
 }: {
   dataSourceName: string;
-  renderCreateAccelerationFlyout: (
-    dataSource: string,
-    dataSourceMDSId?: string,
-    databaseName?: string,
-    tableName?: string,
-    handleRefresh?: () => void
-  ) => void;
+  renderCreateAccelerationFlyout: ({
+    dataSource,
+    databaseName,
+    tableName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationFlyoutParams) => void;
   handleRefresh: () => void;
 }) => {
   return (
     <>
       <EuiButton
         onClick={() =>
-          renderCreateAccelerationFlyout(
-            dataSourceName,
-            undefined,
-            undefined,
-            undefined,
-            handleRefresh
-          )
+          renderCreateAccelerationFlyout({
+            dataSource: dataSourceName,
+            handleRefresh,
+          })
         }
         fill
       >
