@@ -32,12 +32,6 @@
       "label": "Dashboards & Visualizations For Flint Integrations using pre-aggregated queries",
       "description": "This step creates the MV pre-aggregated queries without running them, in order to actually update their data select the following `flint-pre-agg-refresh` workflow option ",
       "enabled_by_default": false
-    },
-    {
-      "name": "flint-pre-agg-refresh",
-      "label": "Refreshing and populate the pre-aggregated projections ",
-      "description": "This step populate the pre-aggregated projections by enabling the REFRESH command to run, this step depends on selection of the previous `flint-pre-agg-dashboards` step",
-      "enabled_by_default": false
     }
   ],
   "statics": {
@@ -76,7 +70,7 @@
   ],
   "assets": [
     {
-      "name": "create_table_parquet_vpc",
+      "name": "create_table_vpc_schema",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
@@ -118,67 +112,53 @@
       "workflows": ["flint-pre-agg-dashboards"]
     },
     {
-      "name": "vpc_live_all_mv",
+      "name": "vpc_live_stream_mv_schema",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["flint-live-dashboards"]
+      "workflows": ["flint-live-dashboards","flint-pre-agg-dashboards"]
     },
     {
-      "name": "vpc_live_week_mv",
+      "name": "vpc_agg_60min_connections_mv_schema",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
       "workflows": ["flint-pre-agg-dashboards"]
     },
     {
-      "name": "vpc_agg_60min_connections_mv",
+      "name": "vpc_window-agg_60min_dest_ip_cardinality_mv_schema",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
       "workflows": ["flint-pre-agg-dashboards"]
     },
     {
-      "name": "vpc_window-agg_60min_dest_ip_cardinality_mv",
+      "name": "vpc_window-agg_60min_dest_ip_total-bytes_mv_schema",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
       "workflows": ["flint-pre-agg-dashboards"]
-    },
-    {
-      "name": "vpc_window-agg_60min_dest_ip_total-bytes_mv",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["flint-pre-agg-dashboards"]
-    },
-    {
-      "name": "vpc_live_week_refresh",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["flint-pre-agg-refresh"]
     },
     {
       "name": "vpc_agg_60min_connections_refresh",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["flint-pre-agg-refresh"]
+      "workflows": ["flint-pre-agg-dashboards"]
     },
     {
       "name": "vpc_window-agg_60min_dest_ip_cardinality_refresh",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["flint-pre-agg-refresh"]
+      "workflows": ["flint-pre-agg-dashboards"]
     },
     {
       "name": "vpc_window-agg_60min_dest_ip_total-bytes_refresh",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query",
-      "workflows": ["flint-pre-agg-refresh"]
+      "workflows": ["flint-pre-agg-dashboards"]
     }
   ],
   "sampleData": {
