@@ -1,52 +1,52 @@
 {
-  name: "apache",
-  version: "1.0.0",
-  displayName: "Apache Access Logs",
-  description: "Insights on applications using the standard Apache access log format.",
-  license: "Apache-2.0",
-  type: "logs_apache",
-  labels: ["Observability", "Logs", "Flint S3"],
-  author: "OpenSearch",
-  sourceUrl: "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
-  workflows: [
+  "name": "apache",
+  "version": "1.0.0",
+  "displayName": "Apache Access Logs",
+  "description": "Insights on applications using the standard Apache access log format.",
+  "license": "Apache-2.0",
+  "type": "logs_apache",
+  "labels": ["Observability", "Logs", "Flint S3"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
+  "workflows": [
     {
-      name: "queries",
-      label: "Queries (recommended)",
-      description: "Tables and pre-written queries for quickly getting insights on your data.",
-      enabled_by_default: true
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
     },
     {
-      name: "dashboards",
-      label: "Dashboards & Visualizations",
-      description: "Dashboards and indices that enable you to easily visualize important metrics.",
-      enabled_by_default: false
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
     }
   ],
-  statics: {
-    logo: {
-      annotation: "Apache Logo",
-      path: "logo.png"
+  "statics": {
+    "logo": {
+      "annotation": "Apache Logo",
+      "path": "logo.png"
     },
-    gallery: [
+    "gallery": [
       {
-        annotation: "Apache Dashboard",
-        path: "dashboard1.png"
+        "annotation": "Apache Dashboard",
+        "path": "dashboard1.png"
       }
     ]
   },
-  components: [
-    { name: "communication", version: "1.0.0" },
-    { name: "http", version: "1.0.0" },
-    { name: "logs_apache", version: "1.0.0" }
+  "components": [
+    { "name": "communication", "version": "1.0.0" },
+    { "name": "http", "version": "1.0.0" },
+    { "name": "logs_apache", "version": "1.0.0" }
   ],
-  assets: [
-    { name: "apache", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["dashboards"] },
-    { name: "example_queries", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["queries"] },
-    { name: "create_table", version: "1.0.0", extension: "sql", type: "query" },
-    { name: "create_skipping_index", version: "1.0.0", extension: "sql", type: "query", workflows: ["queries"] },
-    { name: "create_mv", version: "1.0.0", extension: "sql", type: "query", workflows: ["dashboards"] }
+  "assets": [
+    { "name": "apache", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["dashboards"] },
+    { "name": "example_queries", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["queries"] },
+    { "name": "create_table", "version": "1.0.0", "extension": "sql", "type": "query" },
+    { "name": "create_skipping_index", "version": "1.0.0", "extension": "sql", "type": "query", "workflows": ["queries"] },
+    { "name": "create_mv", "version": "1.0.0", "extension": "sql", "type": "query", "workflows": ["dashboards"] }
   ],
-  sampleData: {
-    path: "sample.json"
+  "sampleData": {
+    "path": "sample.json"
   }
 }
