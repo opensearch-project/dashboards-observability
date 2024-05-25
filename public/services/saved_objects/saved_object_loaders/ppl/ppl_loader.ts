@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { batch as Batch } from 'react-redux';
 import { updateFields as updateFieldsAction } from '../../../../components/event_analytics/redux/slices/field_slice';
 import { changeQuery as changeQueryAction } from '../../../../components/event_analytics/redux/slices/query_slice';

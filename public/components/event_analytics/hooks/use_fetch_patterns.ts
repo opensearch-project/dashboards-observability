@@ -4,7 +4,7 @@
  */
 
 import { IField, PatternTableData } from 'common/types/explorer';
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 import PPLService from 'public/services/requests/ppl';
 import { useRef } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';

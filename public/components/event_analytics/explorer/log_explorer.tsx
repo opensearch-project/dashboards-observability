@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -18,13 +18,8 @@ import { EmptyTabParams, ILogExplorerProps } from '../../../../common/types/expl
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs } from '../redux/slices/query_tab_slice';
-import { Explorer } from './explorer';
 import { getDateRange } from '../utils/utils';
-import {
-  QUERY_ASSIST_END_TIME,
-  QUERY_ASSIST_START_TIME,
-} from '../../../../common/constants/shared';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { Explorer } from './explorer';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {

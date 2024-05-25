@@ -29,6 +29,7 @@ interface SelectorLoadDatabasesProps {
     }>
   >;
   tableFieldsLoading: boolean;
+  dataSourceMDSId?: string;
 }
 
 export const SelectorLoadObjects = ({
@@ -38,6 +39,7 @@ export const SelectorLoadObjects = ({
   loadingComboBoxes,
   setLoadingComboBoxes,
   tableFieldsLoading,
+  dataSourceMDSId,
 }: SelectorLoadDatabasesProps) => {
   const { setToast } = useToast();
   const [isLoading, setIsLoading] = useState({
@@ -65,8 +67,8 @@ export const SelectorLoadObjects = ({
       tableStatus: true,
       accelerationsStatus: true,
     });
-    startLoadingTables({ dataSourceName, databaseName });
-    startLoadingAccelerations({ dataSourceName });
+    startLoadingTables({ dataSourceName, databaseName, dataSourceMDSId });
+    startLoadingAccelerations({ dataSourceName, dataSourceMDSId });
   };
 
   useEffect(() => {

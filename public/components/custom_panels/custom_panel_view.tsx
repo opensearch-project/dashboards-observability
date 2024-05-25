@@ -25,11 +25,11 @@ import {
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
-import { last } from 'lodash';
+import last from 'lodash/last';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
-import _ from 'lodash';
 import { useDispatch } from 'react-redux';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
@@ -392,7 +392,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         (error: VizContainerError) => setToast(error.errorMessage, 'danger')
       );
 
-      if (!_.isEmpty(visData)) {
+      if (!isEmpty(visData)) {
         const moreIndices = parseForIndices(visData.query);
         for (let j = 0; j < moreIndices.length; j++) {
           if (!indices.includes(moreIndices[j])) {

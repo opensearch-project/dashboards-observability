@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { PanelTitle } from '../common/helper_functions';
@@ -54,7 +54,7 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
           <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="m" responsive={false}>
             {props.data[0].values.map((value, i) => (
               <EuiFlexItem key={`value-${i}`}>
-                <EuiText size="s">{_.round(value, 2)}%</EuiText>
+                <EuiText size="s">{round(value, 2)}%</EuiText>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
