@@ -44,9 +44,11 @@
         }
       ],
       "properties": {
+        "serviceName": {
+          "type": "keyword"
+        },
         "name": {
-          "type": "keyword",
-          "ignore_above": 256
+            "type": "keyword"
         },
         "attributes": {
           "type": "object",
@@ -220,12 +222,22 @@
         "instrumentationScope": {
           "properties": {
             "name": {
-              "type": "keyword",
-              "ignore_above": 256
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 128
+                }
+              }
             },
             "version": {
-              "type": "keyword",
-              "ignore_above": 256
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
             },
             "droppedAttributesCount": {
               "type": "integer"
@@ -251,9 +263,6 @@
           }
         }
       }
-    },
-    "aliases" : {
-      "otel-metrics" : {}
     },
     "settings": {
       "index": {
