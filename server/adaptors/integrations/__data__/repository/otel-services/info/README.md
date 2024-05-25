@@ -50,5 +50,5 @@ Happy Learning!
 
 #### 2. [Observability Introduction](Observability Introduction.md) 
 
-#### 3. [DemoLandingPage.md](DemoLandingPage.md) 
+#### 3. [GettingStarted.md](GettingStarted.md) 
 

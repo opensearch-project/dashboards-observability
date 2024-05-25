@@ -15,7 +15,7 @@
       "description": "Tables and pre-written queries for quickly getting insights on your data.",
       "enabled_by_default": true
     },
-    {
+
       "name": "dashboards",
       "label": "Dashboards & Visualizations",
       "description": "Dashboards and indices that enable you to easily visualize important metrics.",
