@@ -1,56 +1,56 @@
 {
-  name: "nginx",
-  version: "1.0.0",
-  displayName: "Nginx",
-  description: "Analyze Nginx access logs.",
-  license: "Apache-2.0",
-  type: "logs",
-  labels: ["Observability", "Logs", "Flint S3"],
-  author: "OpenSearch",
-  sourceUrl: "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
-  workflows: [
+  "name": "nginx",
+  "version": "1.0.0",
+  "displayName": "Nginx",
+  "description": "Analyze Nginx access logs.",
+  "license": "Apache-2.0",
+  "type": "logs",
+  "labels": ["Observability", "Logs", "Flint S3"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
+  "workflows": [
     {
-      name: "queries",
-      label: "Queries (recommended)",
-      description: "Tables and pre-written queries for quickly getting insights on your data.",
-      enabled_by_default: true
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
     },
     {
-      name: "dashboards",
-      label: "Dashboards & Visualizations",
-      description: "Dashboards and indices that enable you to easily visualize important metrics.",
-      enabled_by_default: false
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
     }
   ],
-  statics: {
-    logo: {
-      annotation: "NginX Logo",
-      path: "logo.svg"
+  "statics": {
+    "logo": {
+      "annotation": "NginX Logo",
+      "path": "logo.svg"
     },
-    gallery: [
+    "gallery": [
       {
-        annotation: "NginX Dashboard",
-        path: "dashboard1.png"
+        "annotation": "NginX Dashboard",
+        "path": "dashboard1.png"
       },
       {
-        annotation: "NginX Dashboard view",
-        path: "dashboard2.png"
+        "annotation": "NginX Dashboard view",
+        "path": "dashboard2.png"
       }
     ]
   },
-  components: [
-    { name: "communication", version: "1.0.0" },
-    { name: "http", version: "1.0.0" },
-    { name: "logs", version: "1.0.0" }
+  "components": [
+    { "name": "communication", "version": "1.0.0" },
+    { "name": "http", "version": "1.0.0" },
+    { "name": "logs", "version": "1.0.0" }
   ],
-  assets: [
-    { name: "nginx", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["dashboards"] },
-    { name: "create_table", version: "1.0.0", extension: "sql", type: "query" },
-    { name: "create_skipping_index", version: "1.0.0", extension: "sql", type: "query", workflows: ["queries"] },
-    { name: "create_mv", version: "1.0.0", extension: "sql", type: "query", workflows: ["dashboards"] },
-    { name: "example_queries", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["queries"] }
+  "assets": [
+    { "name": "nginx", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["dashboards"] },
+    { "name": "create_table", "version": "1.0.0", "extension": "sql", "type": "query" },
+    { "name": "create_skipping_index", "version": "1.0.0", "extension": "sql", "type": "query", "workflows": ["queries"] },
+    { "name": "create_mv", "version": "1.0.0", "extension": "sql", "type": "query", "workflows": ["dashboards"] },
+    { "name": "example_queries", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["queries"] }
   ],
-  sampleData: {
-    path: "sample.json"
+  "sampleData": {
+    "path": "sample.json"
   }
 }
