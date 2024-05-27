@@ -114,8 +114,8 @@ export const Home = (props: HomeProps) => {
         handleDataPrepperIndicesExistRequest(
           props.http,
           setDataPrepperIndicesExist,
-          tenant,
-          dataSourceMDSId[0].id
+          dataSourceMDSId[0].id,
+          tenant
         );
         handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, tenant);
       });
