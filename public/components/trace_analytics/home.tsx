@@ -117,7 +117,7 @@ export const Home = (props: HomeProps) => {
           tenant,
           dataSourceMDSId[0].id
         );
-        handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, tenant);
+        handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id, tenant);
       });
   }, [props.config.multitenancy.enabled, tenantLoaded, dataSourceMDSId]);
 
