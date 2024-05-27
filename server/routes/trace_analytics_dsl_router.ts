@@ -148,7 +148,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
     },
     async (context, request, response) => {
       addRequestToMetric('trace_analytics', 'get', 'count');
-      const { index, size, ...rest } = request.body;
+      const { index, size, tenant, ...rest } = request.body;
       const { dataSourceMDSId } = request.query;
       const params: RequestParams.Search = {
         index: index || getTenantIndexName(DATA_PREPPER_INDEX_NAME, tenant),

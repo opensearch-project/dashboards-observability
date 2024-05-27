@@ -394,9 +394,16 @@ export const handleDashboardThroughputPltRequest = (
   fixedInterval,
   items,
   setItems,
-  mode
+  mode,
+  dataSourceMDSId?
 ) => {
-  return handleDslRequest(http, DSL, getDashboardThroughputPltQuery(mode, fixedInterval), mode)
+  return handleDslRequest(
+    http,
+    DSL,
+    getDashboardThroughputPltQuery(mode, fixedInterval),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) => {
       const buckets = response.aggregations.throughput.buckets;
       const texts = buckets.map(
