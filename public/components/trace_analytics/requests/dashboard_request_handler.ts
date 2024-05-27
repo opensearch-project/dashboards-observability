@@ -441,9 +441,16 @@ export const handleDashboardErrorRatePltRequest = (
   fixedInterval,
   items,
   setItems,
-  mode
+  mode,
+  dataSourceMDSId?
 ) => {
-  return handleDslRequest(http, DSL, getErrorRatePltQuery(mode, fixedInterval), mode)
+  return handleDslRequest(
+    http,
+    DSL,
+    getErrorRatePltQuery(mode, fixedInterval),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) => {
       const buckets = response.aggregations.error_rate.buckets;
       const texts = buckets.map(
