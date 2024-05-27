@@ -24,6 +24,7 @@ interface SelectorLoadDatabasesProps {
     }>
   >;
   tableFieldsLoading: boolean;
+  dataSourceMDSId?: string;
 }
 
 export const SelectorLoadDatabases = ({
@@ -32,6 +33,7 @@ export const SelectorLoadDatabases = ({
   loadingComboBoxes,
   setLoadingComboBoxes,
   tableFieldsLoading,
+  dataSourceMDSId,
 }: SelectorLoadDatabasesProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -42,7 +44,7 @@ export const SelectorLoadDatabases = ({
 
   const onClickRefreshDatabases = () => {
     setIsLoading(true);
-    startDatabasesLoading({ dataSourceName });
+    startDatabasesLoading({ dataSourceName, dataSourceMDSId });
   };
 
   useEffect(() => {

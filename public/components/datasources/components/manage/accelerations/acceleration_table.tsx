@@ -134,7 +134,7 @@ export const AccelerationTable = ({
   const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
-      startLoadingAccelerations(dataSourceName);
+      startLoadingAccelerations({ dataSourceName });
     }
   }, [accelerationsLoadStatus]);
 
@@ -246,7 +246,11 @@ export const AccelerationTable = ({
         return (
           <EuiLink
             onClick={() => {
-              renderAccelerationDetailsFlyout(acceleration, dataSourceName, handleRefresh);
+              renderAccelerationDetailsFlyout({
+                acceleration,
+                dataSourceName,
+                handleRefresh,
+              });
             }}
           >
             {displayName}
