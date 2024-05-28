@@ -43,6 +43,7 @@ interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   dataSourceMDSId: DataSourceOption[];
   dataSourceManagement: DataSourceManagementPluginSetup;
   dataSourceEnabled: boolean;
+  page?: string;
 }
 
 export function ServiceView(props: ServiceViewProps) {

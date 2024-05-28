@@ -36,6 +36,7 @@ export interface FiltersProps {
   appConfigs?: FilterType[];
   setFilters: (filters: FilterType[]) => void;
   mode: TraceAnalyticsMode;
+  attributesFilterFields: string[];
 }
 
 interface FiltersOwnProps extends FiltersProps {
@@ -52,10 +53,16 @@ export function Filters(props: FiltersOwnProps) {
     props.setFilters(newFilters);
   };
 
-  const validFilterFields = useMemo(() => getValidFilterFields(props.mode, props.page), [props.page, props.mode]);
+  const validFilterFields = useMemo(() => getValidFilterFields(props.mode, props.page), [
+    props.page,
+    props.mode,
+  ]);
   const filterFieldOptions = useMemo(
-    () => getFilterFields(props.mode, props.page).map((field) => ({ label: field })),
-    [props.page]
+    () =>
+      getFilterFields(props.mode, props.page, props.attributesFilterFields).map((field) => ({
+        label: field,
+      })),
+    [props.page, props.attributesFilterFields]
   );
 
   const globalPopoverPanels = [
@@ -168,7 +175,7 @@ export function Filters(props: FiltersOwnProps) {
     },
     {
       id: 1,
-      width: 430,
+      width: 530,
       title: 'Edit filter',
       content: (
         <div style={{ margin: 15 }}>
@@ -201,7 +208,7 @@ export function Filters(props: FiltersOwnProps) {
         anchorPosition="rightUp"
         panelPaddingSize="none"
         withTitle
-        data-test-subj='global-filter-button'
+        data-test-subj="global-filter-button"
       >
         <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} />
       </EuiPopover>
@@ -252,9 +259,9 @@ export function Filters(props: FiltersOwnProps) {
       const value =
         typeof filter.value === 'string'
           ? filter.value
-          : Array.isArray(filter.value)  // combo box
+          : Array.isArray(filter.value) // combo box
           ? filter.value[0].label
-          : `${filter.value.from} to ${filter.value.to}`;  // range selector
+          : `${filter.value.from} to ${filter.value.to}`; // range selector
       const filterLabel = filter.inverted ? (
         <>
           <EuiTextColor color={disabled ? 'default' : 'danger'}>{'NOT '}</EuiTextColor>

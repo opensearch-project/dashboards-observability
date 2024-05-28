@@ -13,9 +13,9 @@ import React from 'react';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
-  TRACE_ANALYTICS_DOCUMENTATION_LINK,
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
+  TRACE_ANALYTICS_DOCUMENTATION_LINK,
 } from '../../../../../common/constants/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
 import { TraceAnalyticsMode } from '../../home';
@@ -475,4 +475,55 @@ export const filtersToDsl = (
   }
 
   return DSL;
+};
+
+interface AttributeMapping {
+  properties: {
+    [key: string]: {
+      type?: string;
+      properties?: AttributeMapping['properties'];
+    };
+  };
+}
+
+interface JsonMapping {
+  [key: string]: {
+    mappings: {
+      properties: AttributeMapping['properties'];
+    };
+  };
+}
+
+export const extractAttributes = (
+  mapping: AttributeMapping['properties'],
+  prefix: string
+): string[] => {
+  let attributes: string[] = [];
+
+  for (const [key, value] of Object.entries(mapping)) {
+    if (value.properties) {
+      attributes = attributes.concat(extractAttributes(value.properties, `${prefix}.${key}`));
+    } else {
+      attributes.push(`${prefix}.${key}`);
+    }
+  }
+
+  return attributes;
+};
+
+export const getAttributes = (jsonMapping: JsonMapping): string[] => {
+  if (Object.keys(jsonMapping)[0] !== undefined) {
+    const spanMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.span?.properties?.attributes
+        ?.properties;
+    const resourceMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.resource?.properties
+        ?.attributes?.properties;
+
+    const spanAttributes = extractAttributes(spanMapping!, 'span.attributes');
+    const resourceAttributes = extractAttributes(resourceMapping!, 'resource.attributes');
+
+    return [...spanAttributes, ...resourceAttributes];
+  }
+  return [];
 };

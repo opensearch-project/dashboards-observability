@@ -5,6 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,6 +17,7 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import truncate from 'lodash/truncate';
@@ -30,9 +32,13 @@ import {
 
 interface ServicesTableProps {
   items: any[];
+  selectedItems: any[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
+  addServicesGroupFilter: () => void;
   loading: boolean;
   nameColumnAction: (item: any) => any;
   traceColumnAction: any;
+  onClickAction: (row: any) => void;
   addFilter: (filter: FilterType) => void;
   setRedirect: (redirect: boolean) => void;
   mode: TraceAnalyticsMode;
@@ -43,20 +49,47 @@ interface ServicesTableProps {
 export function ServicesTable(props: ServicesTableProps) {
   const {
     items,
+    selectedItems,
+    setSelectedItems,
+    addServicesGroupFilter,
     mode,
     loading,
     nameColumnAction,
     traceColumnAction,
+    onClickAction,
     addFilter,
     setRedirect,
     jaegerIndicesExist,
     dataPrepperIndicesExist,
   } = props;
+
+  const selectionValue = {
+    onSelectionChange: (selections: any[]) => setSelectedItems(selections),
+  };
+
   const renderTitleBar = (totalItems?: number) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={10}>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
           <PanelTitle title="Services" totalItems={totalItems} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiToolTip position="top" content="Select services to filter">
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={addServicesGroupFilter}
+                  isDisabled={selectedItems.length < 1}
+                >
+                  Filter services
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonEmpty size="xs">Show 24 hour trends</EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -166,9 +199,9 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'center',
           sortable: true,
           truncateText: true,
-          render: (_item: any, _row: any) => (
+          render: (_item: any, row: any) => (
             <>
-              <EuiIcon type="inspect" />
+              <EuiIcon type="inspect" onClick={() => onClickAction(row)} />
             </>
           ),
         },
@@ -176,7 +209,7 @@ export function ServicesTable(props: ServicesTableProps) {
     [items]
   );
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
+  const titleBar = useMemo(() => renderTitleBar(items?.length), [items, selectedItems]);
 
   return (
     <>
@@ -205,6 +238,9 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             }}
             loading={loading}
+            selection={selectionValue}
+            isSelectable={true}
+            itemId="itemId"
           />
         ) : (
           <NoMatchMessage size="xl" />

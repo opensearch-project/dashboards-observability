@@ -20,9 +20,13 @@ import {
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
+import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
+import { getAttributes } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
+import { ServiceFlyout } from './components/services/service_flyout';
 import { TraceView, Traces } from './components/traces';
 import {
   handleDataPrepperIndicesExistRequest,
@@ -54,11 +58,13 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  attributesFilterFields: string[];
 }
 
 export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
+  const [attributesFilterFields, setAttributesFilterFields] = useState<string[]>([]);
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
@@ -98,6 +104,7 @@ export const Home = (props: HomeProps) => {
   };
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
+  const [serviceFlyoutComponent, setServiceFlyoutComponent] = useState(<></>);
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -113,10 +120,21 @@ export const Home = (props: HomeProps) => {
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
   ];
 
+  const fetchAttributesFields = () => {
+    coreRefs.dslService
+      ?.fetchFields(DATA_PREPPER_INDEX_NAME)
+      .then((res) => {
+        const attributes = getAttributes(res);
+        setAttributesFilterFields(attributes);
+      })
+      .catch((error) => console.error('fetching attributes field failed', error));
+  };
+
   useEffect(() => {
     if (!sessionStorage.getItem('TraceAnalyticsMode')) {
       if (dataPrepperIndicesExist) {
         setMode('data_prepper');
+        fetchAttributesFields();
       } else if (jaegerIndicesExist) {
         setMode('jaeger');
       }
@@ -146,9 +164,18 @@ export const Home = (props: HomeProps) => {
   ];
 
   const nameColumnAction = (item: any) => location.assign(`#/services/${encodeURIComponent(item)}`);
-
   const traceColumnAction = () => location.assign('#/traces');
-
+  const onClickAction = (row: any) => {
+    console.log('action clicked', row);
+    setServiceFlyoutComponent(
+      <ServiceFlyout
+        serviceName={row.name}
+        dataSourceMDSId={dataSourceMDSId}
+        onClose={async () => setServiceFlyoutComponent(<></>)}
+        commonProps={commonProps}
+      />
+    );
+  };
   const traceIdColumnAction = (item: any) =>
     location.assign(`#/traces/${encodeURIComponent(item)}`);
 
@@ -178,6 +205,7 @@ export const Home = (props: HomeProps) => {
     dataSourceManagement: props.dataSourceManagement,
     setActionMenu: props.setActionMenu,
     savedObjectsMDSClient: props.savedObjectsMDSClient,
+    attributesFilterFields,
   };
   const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
     const { id = '', label = '' } = dataSources[0] || {};
@@ -256,6 +284,7 @@ export const Home = (props: HomeProps) => {
                 childBreadcrumbs={serviceBreadcrumbs}
                 nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
+                onClickAction={onClickAction}
                 toasts={toasts}
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
@@ -287,6 +316,7 @@ export const Home = (props: HomeProps) => {
           )}
         />
       </HashRouter>
+      {serviceFlyoutComponent}
     </>
   );
 };

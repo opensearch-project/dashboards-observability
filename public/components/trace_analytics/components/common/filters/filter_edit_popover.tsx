@@ -14,8 +14,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { FilterType } from './filters';
 import { getInvertedOperator, getOperatorOptions, getValueComponent } from './filter_helpers';
+import { FilterType } from './filters';
 
 export function FilterEditPopover(props: {
   filter?: FilterType;
@@ -37,7 +37,7 @@ export function FilterEditPopover(props: {
   const [filterValue, setFilterValue] = useState(props.filter?.value || '');
 
   return (
-    <div style={{ width: 400 }}>
+    <div style={{ width: 500 }}>
       {/* invisible button workaround to prevent auto focus on context menu panel switch */}
       <button style={{ width: 0, height: 0, position: 'fixed', marginLeft: -1000, bottom: 0 }} />
       <EuiFlexGroup gutterSize="s">

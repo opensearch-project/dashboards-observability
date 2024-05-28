@@ -37,6 +37,7 @@ export function TracesContent(props: TracesProps) {
     jaegerIndicesExist,
     dataSourceManagement,
     dataSourceMDSId,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [redirect, setRedirect] = useState(true);
@@ -131,6 +132,7 @@ export function TracesContent(props: TracesProps) {
         refresh={refresh}
         page={page}
         mode={mode}
+        attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
       <EuiPanel>

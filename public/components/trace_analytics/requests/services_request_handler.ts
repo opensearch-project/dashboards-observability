@@ -2,9 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
+import { htmlIdGenerator } from '@elastic/eui';
 import round from 'lodash/round';
 import DSLService from 'public/services/requests/dsl';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -52,6 +52,7 @@ export const handleServicesRequest = async (
               ...serviceObject[bucket.key].destServices,
             ];
             return {
+              itemId: htmlIdGenerator('trace_service')(),
               name: bucket.key,
               average_latency: serviceObject[bucket.key].latency,
               error_rate: serviceObject[bucket.key].error_rate,

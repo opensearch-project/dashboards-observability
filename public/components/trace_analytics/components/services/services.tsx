@@ -15,6 +15,7 @@ export interface ServicesProps extends TraceAnalyticsComponentDeps {
   childBreadcrumbs: EuiBreadcrumb[];
   nameColumnAction: any;
   traceColumnAction: any;
+  onClickAction: (row: any) => void;
   page: 'services' | 'app';
   toasts: Toast[];
   dataSourceMDSId: DataSourceOption[];

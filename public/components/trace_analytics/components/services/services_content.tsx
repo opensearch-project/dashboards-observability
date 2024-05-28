@@ -6,7 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
@@ -33,6 +33,7 @@ export function ServicesContent(props: ServicesProps) {
     parentBreadcrumb,
     nameColumnAction,
     traceColumnAction,
+    onClickAction,
     setFilters,
     setQuery,
     setStartTime,
@@ -41,6 +42,7 @@ export function ServicesContent(props: ServicesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     dataSourceMDSId,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
@@ -82,12 +84,13 @@ export function ServicesContent(props: ServicesProps) {
       refresh(newFilteredService);
   }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
-  const refresh = async (currService?: string) => {
+  const refresh = async (currService?: string, overrideQuery?: string) => {
+    const filterQuery = overrideQuery ?? query;
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
       filters,
-      query,
+      filterQuery,
       processTimeStamp(startTime, mode),
       processTimeStamp(endTime, mode),
       page,
@@ -127,9 +130,26 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
+
+  const updateSearchQuery = (newQuery: string) => {
+    if (searchBarRef.current) {
+      searchBarRef.current.updateQuery(newQuery);
+    }
+  };
+
+  const addServicesGroupFilter = () => {
+    const groupFilter = selectedItems.map((item) => 'serviceName: ' + item.name);
+    const filterQuery = groupFilter.join(' OR ');
+    const newQuery = query ? `${query} AND (${filterQuery})` : `(${filterQuery})`;
+    updateSearchQuery(newQuery);
+  };
+
   return (
     <>
       <SearchBar
+        ref={searchBarRef}
         query={query}
         filters={filters}
         appConfigs={appConfigs}
@@ -142,16 +162,21 @@ export function ServicesContent(props: ServicesProps) {
         refresh={refresh}
         page={page}
         mode={mode}
+        attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
       <ServicesTable
         items={tableItems}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        addServicesGroupFilter={addServicesGroupFilter}
         addFilter={addFilter}
         setRedirect={setRedirect}
         mode={mode}
         loading={loading}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
+        onClickAction={onClickAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
       />
