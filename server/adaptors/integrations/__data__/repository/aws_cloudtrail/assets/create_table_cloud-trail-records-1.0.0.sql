@@ -1,4 +1,5 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS  {table_name} (
+  Records ARRAY<STRUCT<
     eventVersion STRING,
     userIdentity STRUCT<
       type:STRING,
@@ -55,10 +56,12 @@ CREATE EXTERNAL TABLE IF NOT EXISTS  {table_name} (
       cipherSuite:STRING,
       clientProvidedHostHeader:STRING
     >
+  >>
 )
 USING json
+LOCATION '{s3_bucket_location}'
 OPTIONS (
-   PATH '{s3_bucket_location}',
+   compression='gzip',
    recursivefilelookup='true',
    multiline 'true'
 )
