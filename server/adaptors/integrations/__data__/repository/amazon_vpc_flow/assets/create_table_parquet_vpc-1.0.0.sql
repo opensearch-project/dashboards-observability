@@ -58,5 +58,5 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   accountid STRING,
   eventday STRING
 )
-USING json
+USING parquet
 LOCATION '{s3_bucket_location}'
