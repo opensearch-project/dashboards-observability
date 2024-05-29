@@ -244,6 +244,7 @@ export function SpanDetailPanel(props: {
             setCurrentSpan(spanId);
           }
         }}
+        dataSourceMDSId={props.dataSourceMDSId}
       />
     ),
     [DSL, setCurrentSpan]
@@ -296,6 +297,7 @@ export function SpanDetailPanel(props: {
           closeFlyout={() => setCurrentSpan('')}
           addSpanFilter={addSpanFilter}
           mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId}
         />
       )}
     </>
