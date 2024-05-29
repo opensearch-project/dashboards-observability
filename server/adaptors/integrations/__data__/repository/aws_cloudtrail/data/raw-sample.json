@@ -1,0 +1,44 @@
+{
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "principalId": "***:Palisade-UDD",
+        "arn": "arn***/assumed-role/AwsSecurityAudit/Palisade",
+        "accountId": "700***",
+        "accessKeyId": "ASIA2***",
+        "sessionContext": {
+          "sessionIssuer": {
+            "type": "Role",
+            "principalId": "***45X7ON",
+            "arn": "arn***/AwsSecurityAudit",
+            "accountId": "700***",
+            "userName": "AwsSecurityAudit"
+          },
+          "webIdFederationData": {},
+          "attributes": {
+            "creationDate": "2024-05-22T06:35:53Z",
+            "mfaAuthenticated": "false"
+          }
+        }
+      },
+      "eventTime": "2024-05-22T06:35:54Z",
+      "eventSource": "es.amazonaws.com",
+      "eventName": "ListDomainNames",
+      "awsRegion": "ap-northeast-1",
+      "sourceIPAddress": "30.*.0.210",
+      "userAgent": "Boto3/1.34.108 md/Botocore#1.34.108 md/internal ua/2.0 os/linux#5.10.215-203.850.amzn2.x86_64 md/arch#x86_64 lang/python#3.8.19 md/pyimpl#CPython exec-env/AWS_ECS_FARGATE cfg/retry-mode#standard Botocore/1.34.108",
+      "requestParameters": null,
+      "responseElements": null,
+      "requestID": "8567e078-0cd7-433e-91c3-d75639736545",
+      "eventID": "07d7cb7a-597b-4420-8f83-32180384417c",
+      "readOnly": true,
+      "eventType": "AwsApiCall",
+      "managementEvent": true,
+      "recipientAccountId": "700***",
+      "eventCategory": "Management",
+      "tlsDetails": {
+        "tlsVersion": "TLSv1.3",
+        "cipherSuite": "TLS_AES_128_GCM_SHA256",
+        "clientProvidedHostHeader": "es.ap-northeast-1.amazonaws.com"
+      }
+}
