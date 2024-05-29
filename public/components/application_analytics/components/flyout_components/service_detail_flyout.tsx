@@ -48,6 +48,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
     closeServiceFlyout,
     openSpanFlyout,
     mode,
+    tenant,
   } = props;
   const [fields, setFields] = useState<any>({});
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
@@ -131,7 +132,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       appConfigs
     );
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
-    handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap, serviceName);
+    handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap, serviceName, tenant);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.must.push({
       term: {

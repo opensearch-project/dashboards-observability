@@ -107,11 +107,14 @@ import {
   SetupDependencies,
 } from './types';
 
-interface PublicConfig {
+export interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
   summarize: {
+    enabled: boolean;
+  };
+  multitenancy: {
     enabled: boolean;
   };
 }
@@ -276,7 +279,8 @@ export class ObservabilityPlugin
         startPage,
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
-        coreStart.savedObjects
+        coreStart.savedObjects,
+        this.config
       );
     };
 

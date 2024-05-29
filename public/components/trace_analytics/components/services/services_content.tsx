@@ -42,6 +42,7 @@ export function ServicesContent(props: ServicesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     dataSourceMDSId,
+    tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
@@ -106,14 +107,24 @@ export function ServicesContent(props: ServicesProps) {
       (must: any) => must?.term?.serviceName == null
     );
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
+      handleServicesRequest(
+        http,
+        DSL,
+        setTableItems,
+        mode,
+        dataSourceMDSId[0].id,
+        undefined,
+        undefined,
+        tenant
+      ),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
         dataSourceMDSId[0].id,
         setServiceMap,
-        currService || filteredService
+        currService || filteredService,
+        tenant
       ),
     ]);
     setLoading(false);
@@ -165,6 +176,7 @@ export function ServicesContent(props: ServicesProps) {
         traceColumnAction={traceColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        tenant={tenant}
       />
       <EuiSpacer size="m" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (

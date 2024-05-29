@@ -34,24 +34,26 @@ export function SpanDetailPanel(props: {
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
   setData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  tenant?: string;
 }) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const fromApp = props.page === 'app';
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
+  const [_data, _setData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
+    gantt: [],
+    table: [],
+    ganttMaxX: 0,
+  });
   const [DSL, setDSL] = useState<any>({});
-  let data: { gantt: any[]; table: any[]; ganttMaxX: number },
-    setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  let data: { gantt: any[]; table: any[]; ganttMaxX: number };
+  let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   if (props.data && props.setData) {
     [data, setData] = [props.data, props.setData];
   } else {
-    [data, setData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
-      gantt: [],
-      table: [],
-      ganttMaxX: 0,
-    });
+    [data, setData] = [_data, _setData];
   }
 
   const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
@@ -90,7 +92,8 @@ export function SpanDetailPanel(props: {
       props.colorMap,
       refreshDSL,
       mode,
-      props.dataSourceMDSId
+      props.dataSourceMDSId,
+      tenant
     );
   }, 150);
 

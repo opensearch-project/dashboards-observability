@@ -34,7 +34,8 @@ export const handleDashboardRequest = async (
   mode,
   setShowTimeoutToast,
   dataSourceMDSId?,
-  setPercentileMap?
+  setPercentileMap?,
+  tenant?: string
 ) => {
   // latency_variance should only be affected by timefilter
   const latencyVariances = await handleDslRequest(
@@ -42,7 +43,9 @@ export const handleDashboardRequest = async (
     timeFilterDSL,
     getDashboardTraceGroupPercentiles(mode),
     mode,
-    dataSourceMDSId
+    dataSourceMDSId,
+    undefined,
+    tenant
   )
     .then((response) => {
       const map: any = {};
@@ -61,17 +64,22 @@ export const handleDashboardRequest = async (
     latencyTrendDSL,
     getLatencyTrendQuery(),
     mode,
-    setShowTimeoutToast
+    undefined,
+    setShowTimeoutToast,
+    tenant
   )
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
         const latencyTrend = bucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.average_latency?.value || bucket.average_latency?.value === 0);
+          .filter(
+            (latencyBucket) =>
+              latencyBucket.average_latency?.value || latencyBucket.average_latency?.value === 0
+          );
         const values = {
-          x: latencyTrend.map((bucket) => bucket.key),
-          y: latencyTrend.map((bucket) => bucket.average_latency?.value || 0),
+          x: latencyTrend.map((latencyXBucket) => latencyXBucket.key),
+          y: latencyTrend.map((latencyYBucket) => latencyYBucket.average_latency?.value || 0),
         };
         const latencyTrendData =
           values.x?.length > 0
@@ -117,7 +125,15 @@ export const handleDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getDashboardQuery(), mode, dataSourceMDSId, setShowTimeoutToast)
+  await handleDslRequest(
+    http,
+    DSL,
+    getDashboardQuery(),
+    mode,
+    dataSourceMDSId,
+    setShowTimeoutToast,
+    tenant
+  )
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -148,15 +164,13 @@ export const handleJaegerDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
-  setPercentileMap?
+  dataSourceMDSId?
 ) => {
   const latencyTrends = await handleDslRequest(
     http,
     latencyTrendDSL,
     getJaegerLatencyTrendQuery(),
     mode,
-    dataSourceMDSId,
     setShowTimeoutToast
   )
     .then((response) => {
@@ -164,10 +178,13 @@ export const handleJaegerDashboardRequest = async (
       response.aggregations.trace_group_name.buckets.map((bucket) => {
         const latencyTrend = bucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.average_latency?.value || bucket.average_latency?.value === 0);
+          .filter(
+            (latencyBucket) =>
+              latencyBucket.average_latency?.value || latencyBucket.average_latency?.value === 0
+          );
         const values = {
-          x: latencyTrend.map((bucket) => bucket.key),
-          y: latencyTrend.map((bucket) => bucket.average_latency?.value || 0),
+          x: latencyTrend.map((latencyXBucket) => latencyXBucket.key),
+          y: latencyTrend.map((latencyYBucket) => latencyYBucket.average_latency?.value || 0),
         };
         const latencyTrendData =
           values.x?.length > 0
@@ -277,15 +294,13 @@ export const handleJaegerErrorDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
-  setPercentileMap?
+  dataSourceMDSId?
 ) => {
   const errorTrends = await handleDslRequest(
     http,
     latencyTrendDSL,
     getJaegerErrorTrendQuery(),
     mode,
-    dataSourceMDSId,
     setShowTimeoutToast
   )
     .then((response) => {
@@ -293,10 +308,13 @@ export const handleJaegerErrorDashboardRequest = async (
       response.aggregations.trace_group_name.buckets.map((bucket) => {
         const errorTrend = bucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.error_rate?.value || bucket.error_rate?.value === 0);
+          .filter(
+            (latencyBucket) =>
+              latencyBucket.error_rate?.value || latencyBucket.error_rate?.value === 0
+          );
         const values = {
-          x: errorTrend.map((bucket) => bucket.key),
-          y: errorTrend.map((bucket) => bucket.error_rate?.value || 0),
+          x: errorTrend.map((latencyXBucket) => latencyXBucket.key),
+          y: errorTrend.map((latencyYBucket) => latencyYBucket.error_rate?.value || 0),
         };
         const errorTrendData =
           values.x?.length > 0
@@ -412,7 +430,7 @@ export const handleDashboardThroughputPltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };
@@ -459,7 +477,7 @@ export const handleDashboardErrorRatePltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };

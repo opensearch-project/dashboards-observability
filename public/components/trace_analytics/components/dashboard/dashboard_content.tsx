@@ -46,13 +46,13 @@ export function DashboardContent(props: DashboardProps) {
     filters,
     setStartTime,
     setEndTime,
-    setQuery,
     setFilters,
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
     dataSourceMDSId,
+    tenant,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -60,7 +60,6 @@ export function DashboardContent(props: DashboardProps) {
   const [throughputPltItems, setThroughputPltItems] = useState({ items: [], fixedInterval: '1h' });
   const [errorRatePltItems, setErrorRatePltItems] = useState({ items: [], fixedInterval: '1h' });
   const [percentileMap, setPercentileMap] = useState<{ [traceGroup: string]: number[] }>({});
-  const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
@@ -90,27 +89,12 @@ export function DashboardContent(props: DashboardProps) {
   }, []);
 
   useEffect(() => {
-    let newFilteredService = '';
-    for (const filter of filters) {
-      if (mode === 'data_prepper') {
-        if (filter.field === 'serviceName') {
-          newFilteredService = filter.value;
-          break;
-        }
-      } else if (mode === 'jaeger') {
-        if (filter.field === 'process.serviceName') {
-          newFilteredService = filter.value;
-          break;
-        }
-      }
-    }
-    setFilteredService(newFilteredService);
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
-      refresh(newFilteredService);
+      refresh();
   }, [
     filters,
     startTime,
@@ -122,7 +106,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
   ]);
 
-  const refresh = async (currService?: string) => {
+  const refresh = async () => {
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
@@ -202,7 +186,8 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         dataSourceMDSId[0].id,
-        setPercentileMap
+        setPercentileMap,
+        tenant
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
       const serviceMapDSL = cloneDeep(DSL);
@@ -218,7 +203,8 @@ export function DashboardContent(props: DashboardProps) {
       throughputPltItems,
       setThroughputPltItems,
       mode,
-      dataSourceMDSId[0].id
+      dataSourceMDSId[0].id,
+      tenant
     );
 
     handleDashboardErrorRatePltRequest(
@@ -228,7 +214,8 @@ export function DashboardContent(props: DashboardProps) {
       errorRatePltItems,
       setErrorRatePltItems,
       mode,
-      dataSourceMDSId[0].id
+      dataSourceMDSId[0].id,
+      tenant
     );
   };
 
@@ -347,7 +334,7 @@ export function DashboardContent(props: DashboardProps) {
           )}
         </div>
       ) : (
-        <MissingConfigurationMessage mode={mode} />
+        <MissingConfigurationMessage mode={mode} tenant={tenant} />
       )}
     </>
   );

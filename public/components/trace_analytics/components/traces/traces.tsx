@@ -15,6 +15,7 @@ export interface TracesProps extends TraceAnalyticsComponentDeps {
   childBreadcrumbs: EuiBreadcrumb[];
   traceIdColumnAction: any;
   dataSourceMDSId: DataSourceOption[];
+  tenant?: string;
 }
 
 export function Traces(props: TracesProps) {

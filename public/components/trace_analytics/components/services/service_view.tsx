@@ -46,7 +46,7 @@ interface ServiceViewProps extends TraceAnalyticsComponentDeps {
 }
 
 export function ServiceView(props: ServiceViewProps) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const [fields, setFields] = useState<any>({});
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
@@ -68,7 +68,8 @@ export function ServiceView(props: ServiceViewProps) {
       DSL,
       setFields,
       mode,
-      props.dataSourceMDSId[0].id
+      props.dataSourceMDSId[0].id,
+      tenant
     );
     if (mode === 'data_prepper') {
       handleServiceMapRequest(
@@ -77,7 +78,8 @@ export function ServiceView(props: ServiceViewProps) {
         mode,
         props.dataSourceMDSId[0].id,
         setServiceMap,
-        props.serviceName
+        props.serviceName,
+        tenant
       );
     }
   };

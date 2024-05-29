@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
 import round from 'lodash/round';
@@ -26,14 +25,18 @@ export const handleServicesRequest = async (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
   setServiceMap?: any,
-  serviceNameFilter?: string
+  serviceNameFilter?: string,
+  tenant?: string
 ) => {
   return handleDslRequest(
     http,
     DSL,
     getServicesQuery(mode, serviceNameFilter, DSL),
     mode,
-    dataSourceMDSId
+    dataSourceMDSId,
+    setServiceMap,
+    undefined,
+    tenant
   )
     .then(async (response) => {
       const serviceObject: ServiceObject = await handleServiceMapRequest(
@@ -41,7 +44,9 @@ export const handleServicesRequest = async (
         DSL,
         mode,
         dataSourceMDSId,
-        setServiceMap
+        setServiceMap,
+        undefined,
+        tenant
       );
       return Promise.all(
         response.aggregations.service.buckets
@@ -75,7 +80,8 @@ export const handleServiceMapRequest = async (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
   setItems?: any,
-  currService?: string
+  currService?: string,
+  tenant?: string
 ) => {
   let minutesInDateRange: number;
   const startTime = DSL.custom?.timeFilter?.[0]?.range?.startTime;
@@ -86,7 +92,7 @@ export const handleServiceMapRequest = async (
   }
   const map: ServiceObject = {};
   let id = 1;
-  await handleDslRequest(http, null, getServiceNodesQuery(mode), mode, dataSourceMDSId)
+  await handleDslRequest(http, null, getServiceNodesQuery(mode, tenant), mode, dataSourceMDSId)
     .then((response) =>
       response.aggregations.service_name.buckets.map(
         (bucket: any) =>
@@ -105,7 +111,13 @@ export const handleServiceMapRequest = async (
     .catch((error) => console.error(error));
 
   const targets = {};
-  await handleDslRequest(http, null, getServiceEdgesQuery('target', mode), mode, dataSourceMDSId)
+  await handleDslRequest(
+    http,
+    null,
+    getServiceEdgesQuery('target', mode, tenant),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) =>
       response.aggregations.service_name.buckets.map((bucket: any) => {
         bucket.resource.buckets.map((resource: any) => {
@@ -119,7 +131,7 @@ export const handleServiceMapRequest = async (
   await handleDslRequest(
     http,
     null,
-    getServiceEdgesQuery('destination', mode),
+    getServiceEdgesQuery('destination', mode, tenant),
     mode,
     dataSourceMDSId
   )
@@ -148,7 +160,9 @@ export const handleServiceMapRequest = async (
     DSL,
     getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
     mode,
-    dataSourceMDSId
+    dataSourceMDSId,
+    undefined,
+    tenant
   );
   latencies.aggregations.service_name.buckets.map((bucket: any) => {
     map[bucket.key].latency = bucket.average_latency.value;
@@ -159,7 +173,15 @@ export const handleServiceMapRequest = async (
   });
 
   if (currService) {
-    await handleDslRequest(http, DSL, getRelatedServicesQuery(currService), mode, dataSourceMDSId)
+    await handleDslRequest(
+      http,
+      DSL,
+      getRelatedServicesQuery(currService),
+      mode,
+      dataSourceMDSId,
+      undefined,
+      tenant
+    )
       .then((response) =>
         response.aggregations.traces.buckets.filter((bucket: any) => bucket.service.doc_count > 0)
       )
@@ -185,9 +207,18 @@ export const handleServiceViewRequest = (
   DSL: any,
   setFields: any,
   mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
+  dataSourceMDSId?: string,
+  tenant?: string
 ) => {
-  handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode, dataSourceMDSId)
+  handleDslRequest(
+    http,
+    DSL,
+    getServicesQuery(mode, serviceName),
+    mode,
+    dataSourceMDSId,
+    undefined,
+    tenant
+  )
     .then(async (response) => {
       const bucket = response.aggregations.service.buckets[0];
       if (!bucket) return {};
@@ -195,7 +226,10 @@ export const handleServiceViewRequest = (
         http,
         DSL,
         mode,
-        dataSourceMDSId
+        dataSourceMDSId,
+        undefined,
+        undefined,
+        tenant
       );
       const connectedServices = [
         ...serviceObject[bucket.key].targetServices,

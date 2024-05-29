@@ -5,7 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
@@ -29,6 +29,8 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
+import { loadTenantInfo } from './components/common/indices';
+import { PublicConfig } from '../../plugin';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -41,7 +43,9 @@ export interface TraceAnalyticsCoreDeps {
   savedObjectsMDSClient: SavedObjectsStart;
 }
 
-interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
+interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {
+  config: PublicConfig;
+}
 
 export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
@@ -54,6 +58,7 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  tenant?: string;
 }
 
 export const Home = (props: HomeProps) => {
@@ -62,6 +67,8 @@ export const Home = (props: HomeProps) => {
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
+  const [tenantLoaded, setTenantLoaded] = useState(false);
+  const [tenantName, setTenantName] = useState<string | undefined>();
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
   const [filters, setFilters] = useState<FilterType[]>(
@@ -100,13 +107,24 @@ export const Home = (props: HomeProps) => {
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
 
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(
-      props.http,
-      setDataPrepperIndicesExist,
-      dataSourceMDSId[0].id
-    );
-    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
-  }, [dataSourceMDSId]);
+    if (!tenantLoaded)
+      loadTenantInfo(props.http, props.config.multitenancy.enabled).then((tenant) => {
+        setTenantLoaded(true);
+        setTenantName(tenant);
+        handleDataPrepperIndicesExistRequest(
+          props.http,
+          setDataPrepperIndicesExist,
+          dataSourceMDSId[0].id,
+          tenant
+        );
+        handleJaegerIndicesExistRequest(
+          props.http,
+          setJaegerIndicesExist,
+          dataSourceMDSId[0].id,
+          tenant
+        );
+      });
+  }, [props.config.multitenancy.enabled, tenantLoaded, dataSourceMDSId]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
@@ -173,6 +191,7 @@ export const Home = (props: HomeProps) => {
     },
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    tenant: tenantName,
     notifications: props.notifications,
     dataSourceEnabled: props.dataSourceEnabled,
     dataSourceManagement: props.dataSourceManagement,
@@ -229,36 +248,41 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           path="/traces/:id+"
-          render={(routerProps) => (
-            <TraceView
-              parentBreadcrumb={props.parentBreadcrumb}
-              chrome={props.chrome}
-              http={props.http}
-              traceId={decodeURIComponent(routerProps.match.params.id)}
-              mode={mode}
-              dataSourceMDSId={dataSourceMDSId}
-              dataSourceManagement={props.dataSourceManagement}
-              setActionMenu={props.setActionMenu}
-              notifications={props.notifications}
-              dataSourceEnabled={props.dataSourceEnabled}
-              savedObjectsMDSClient={props.savedObjectsMDSClient}
-            />
-          )}
+          render={(routerProps) =>
+            tenantLoaded && (
+              <TraceView
+                parentBreadcrumb={props.parentBreadcrumb}
+                chrome={props.chrome}
+                http={props.http}
+                traceId={decodeURIComponent(routerProps.match.params.id)}
+                mode={mode}
+                tenant={tenantName}
+                dataSourceMDSId={dataSourceMDSId}
+                dataSourceManagement={props.dataSourceManagement}
+                setActionMenu={props.setActionMenu}
+                notifications={props.notifications}
+                dataSourceEnabled={props.dataSourceEnabled}
+                savedObjectsMDSClient={props.savedObjectsMDSClient}
+              />
+            )
+          }
         />
         <Route
           exact
           path={['/services', '/']}
           render={(_routerProps) => (
             <TraceSideBar>
-              <Services
-                page="services"
-                childBreadcrumbs={serviceBreadcrumbs}
-                nameColumnAction={nameColumnAction}
-                traceColumnAction={traceColumnAction}
-                toasts={toasts}
-                dataSourceMDSId={dataSourceMDSId}
-                {...commonProps}
-              />
+              {tenantLoaded && (
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  nameColumnAction={nameColumnAction}
+                  traceColumnAction={traceColumnAction}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              )}
             </TraceSideBar>
           )}
         />
