@@ -740,6 +740,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                 }
                 datasourceName="mock_data_source"
                 handleRefresh={[Function]}
+                isS3ConnectionWithLakeFormation={false}
               >
                 <EuiInMemoryTable
                   columns={
