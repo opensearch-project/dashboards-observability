@@ -19,7 +19,6 @@ import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
-import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
@@ -129,23 +128,21 @@ export function SetupWorkflowSelector({
     );
   });
 
-  return cards;
+  return <>{cards}</>;
 }
 
 export function IntegrationDetailsInputs({
   config,
   updateConfig,
   integration,
-  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
-  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   return (
     <EuiFormRow
-      label={isS3ConnectionWithLakeFormation ? 'Integration display name' : 'Display Name'}
+      label={'Integration display Name'}
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
@@ -294,7 +291,7 @@ export function IntegrationQueryInputs({
         </>
       )}
       <EuiFormRow
-        label={`S3 Checkpoint ${isS3ConnectionWithLakeFormation ? '' : 'Location'}`}
+        label={`S3 Checkpoint Location`}
         helpText={
           isS3ConnectionWithLakeFormation
             ? 'The checkpoint location for caching intermediary results.'
@@ -363,100 +360,84 @@ export function IntegrationWorkflowsInputs({
 }
 
 export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
-  const {
-    config,
-    updateConfig,
-    integration,
-    setupCallout,
-    lockConnectionType,
-    isS3ConnectionWithLakeFormation,
-  } = props;
+  const { config, updateConfig, integration, setupCallout, lockConnectionType } = props;
 
   return (
     <EuiForm>
-      {isS3ConnectionWithLakeFormation ? (
-        <SetupIntegrationInputsForSecurityLake {...props} />
-      ) : (
+      <EuiTitle>
+        <h1>Set Up Integration</h1>
+      </EuiTitle>
+      <EuiSpacer />
+      {setupCallout.show ? (
+        <EuiCallOut title={setupCallout.title} color="danger">
+          <p>{setupCallout.text}</p>
+        </EuiCallOut>
+      ) : null}
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Details</h3>
+      </EuiText>
+      <EuiSpacer />
+      <IntegrationDetailsInputs
+        config={config}
+        updateConfig={updateConfig}
+        integration={integration}
+      />
+      <EuiSpacer />
+      <EuiText>
+        <h3>Integration Connection</h3>
+      </EuiText>
+      <EuiSpacer />
+      <IntegrationConnectionInputs
+        config={config}
+        updateConfig={updateConfig}
+        integration={integration}
+        lockConnectionType={lockConnectionType}
+      />
+      {config.connectionType === 's3' ? (
         <>
-          <EuiTitle>
-            <h1>Set Up Integration</h1>
-          </EuiTitle>
-          <EuiSpacer />
-          {setupCallout.show ? (
-            <EuiCallOut title={setupCallout.title} color="danger">
-              <p>{setupCallout.text}</p>
-            </EuiCallOut>
-          ) : null}
           <EuiSpacer />
           <EuiText>
-            <h3>Integration Details</h3>
+            <h3>Query Fields</h3>
           </EuiText>
+          <EuiFormRow>
+            <EuiText grow={false} size="xs">
+              <p>
+                To set up the integration, we need to know some information about how to process
+                your data.
+              </p>
+            </EuiText>
+          </EuiFormRow>
           <EuiSpacer />
-          <IntegrationDetailsInputs
+          <IntegrationQueryInputs
             config={config}
             updateConfig={updateConfig}
             integration={integration}
           />
-          <EuiSpacer />
-          <EuiText>
-            <h3>Integration Connection</h3>
-          </EuiText>
-          <EuiSpacer />
-          <IntegrationConnectionInputs
-            config={config}
-            updateConfig={updateConfig}
-            integration={integration}
-            lockConnectionType={lockConnectionType}
-          />
-          {config.connectionType === 's3' ? (
+          {integration.workflows ? (
             <>
               <EuiSpacer />
               <EuiText>
-                <h3>Query Fields</h3>
+                <h3>Integration Resources</h3>
               </EuiText>
               <EuiFormRow>
                 <EuiText grow={false} size="xs">
                   <p>
-                    To set up the integration, we need to know some information about how to process
-                    your data.
+                    This integration offers different kinds of resources compatible with your data
+                    source. These can include dashboards, visualizations, indexes, and queries.
+                    Select at least one of the following options.
                   </p>
                 </EuiText>
               </EuiFormRow>
               <EuiSpacer />
-              <IntegrationQueryInputs
-                config={config}
-                updateConfig={updateConfig}
-                integration={integration}
-              />
-              {integration.workflows ? (
-                <>
-                  <EuiSpacer />
-                  <EuiText>
-                    <h3>Integration Resources</h3>
-                  </EuiText>
-                  <EuiFormRow>
-                    <EuiText grow={false} size="xs">
-                      <p>
-                        This integration offers different kinds of resources compatible with your
-                        data source. These can include dashboards, visualizations, indexes, and
-                        queries. Select at least one of the following options.
-                      </p>
-                    </EuiText>
-                  </EuiFormRow>
-                  <EuiSpacer />
-                  <IntegrationWorkflowsInputs
-                    updateConfig={updateConfig}
-                    integration={integration}
-                  />
-                </>
-              ) : null}
-              {/* Bottom bar will overlap content if there isn't some space at the end */}
-              <EuiSpacer />
-              <EuiSpacer />
+              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
             </>
           ) : null}
+          {/* Bottom bar will overlap content if there isn't some space at the end */}
+          <EuiSpacer />
+          <EuiSpacer />
         </>
-      )}
+      ) : null}
     </EuiForm>
   );
 }

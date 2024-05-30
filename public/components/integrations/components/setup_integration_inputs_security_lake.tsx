@@ -29,7 +29,6 @@ export const SetupIntegrationInputsForSecurityLake = ({
   updateConfig,
   integration,
   setupCallout,
-  isS3ConnectionWithLakeFormation,
 }: IntegrationConfigProps) => {
   const http = coreRefs.http!;
   const [dataSourceFormData, setDataSourceFormData] = useState<BaseDataSourceForm>({
@@ -64,7 +63,6 @@ export const SetupIntegrationInputsForSecurityLake = ({
         config={config}
         updateConfig={updateConfig}
         integration={integration}
-        isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
       />
       <EuiSpacer />
       {config.connectionType === 's3' ? (
@@ -84,6 +82,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
             selectedDatasource={config.connectionDataSource}
             dataSourcesPreselected={false}
             tableFieldsLoading={false}
+            hideHeader={true}
           />
 
           <EuiSpacer size="m" />
@@ -92,7 +91,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
             config={config}
             updateConfig={updateConfig}
             integration={integration}
-            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+            isS3ConnectionWithLakeFormation={true}
           />
           {integration.workflows ? (
             <>

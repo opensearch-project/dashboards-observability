@@ -101,9 +101,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   }, [datasourceDetails]);
 
   useEffect(() => {
-    const searchDataSourcePattern = new RegExp(
-      `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
-    );
+    const searchDataSourcePattern = new RegExp(`flint_${escapeRegExp(datasourceDetails.name)}_.*`);
     const findIntegrations = async () => {
       // TODO: we just get all results and filter, ideally we send a filtering query to the API
       // Should still be probably okay until we get cases of 500+ integration instances
