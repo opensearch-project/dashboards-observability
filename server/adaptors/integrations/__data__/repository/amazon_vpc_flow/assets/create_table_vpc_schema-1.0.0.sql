@@ -28,5 +28,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
     pkt_dst_aws_service string,
     flow_direction string,
     traffic_path int
-) USING parquet
+)
+USING parquet
+OPTIONS (
+  recursiveFileLookup='true'
+)
 LOCATION '{s3_bucket_location}'
