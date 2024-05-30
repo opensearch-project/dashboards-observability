@@ -10,5 +10,5 @@ export function checkIsConnectionWithLakeFormation({
   connector,
   properties,
 }: DatasourceDetails): boolean {
-  return connector === 'S3GLUE' && (properties as S3GlueProperties)['glue.lakeformation.enabled'];
+  return connector === 'S3GLUE' && !!(properties as S3GlueProperties)['glue.lakeformation.enabled'];
 }
