@@ -1,1 +1,0 @@
-REFRESH MATERIALIZED VIEW {table_name}__agg_30_min_connections_mview

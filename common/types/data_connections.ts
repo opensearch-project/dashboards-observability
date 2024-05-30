@@ -253,3 +253,26 @@ export interface StartLoadingParams {
   databaseName?: string;
   tableName?: string;
 }
+
+export interface RenderAccelerationFlyoutParams {
+  dataSource: string;
+  dataSourceMDSId?: string;
+  databaseName?: string;
+  tableName?: string;
+  handleRefresh?: () => void;
+}
+
+export interface RenderAssociatedObjectsDetailsFlyoutParams {
+  tableDetail: AssociatedObject;
+  dataSourceName: string;
+  handleRefresh?: () => void;
+  dataSourceMDSId?: string;
+  isS3ConnectionWithLakeFormation?: boolean;
+}
+
+export interface RenderAccelerationDetailsFlyoutParams {
+  acceleration: CachedAcceleration;
+  dataSourceName: string;
+  handleRefresh?: () => void;
+  dataSourceMDSId?: string;
+}

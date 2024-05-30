@@ -28,6 +28,7 @@ import {
   DatasourceType,
 } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
+import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import { useToast } from '../../../common/toast';
 import { HomeProps } from '../../home';
@@ -35,11 +36,10 @@ import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import S3Logo from '../../icons/s3-logo.svg';
 import SecurityLakeLogo from '../../icons/security-lake-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
-import { DataConnectionsDescription } from './manage_data_connections_description';
-import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
-import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { checkIsConnectionWithLakeFormation } from '../../utils/helpers';
+import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
+import { DataConnectionsDescription } from './manage_data_connections_description';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -155,7 +155,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
       onClick: (datasource: DataConnection) => {
-        renderCreateAccelerationFlyout(datasource.name);
+        renderCreateAccelerationFlyout({ dataSource: datasource.name });
       },
       'data-test-subj': 'action-accelerate',
     },

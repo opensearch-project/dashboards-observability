@@ -87,7 +87,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(DATACONNECTIONS_BASE + `/dataSourceMDSId=${dataSourceMDSId}`)
+      .get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`)
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
@@ -245,6 +245,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -294,6 +295,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
