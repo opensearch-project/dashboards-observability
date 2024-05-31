@@ -1,13 +1,25 @@
 {
-  "name": "aws_waf",
-  "version": "1.0.0",
-  "displayName": "AWS Web Application Firewall",
-  "description": "Analyze AWS WAF web ACL traffic.",
+  "name": "amazon_cloudfront",
+  "version": "1.1.0",
+  "displayName": "Amazon CloudFront",
+  "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
-  "type": "logs_waf",
+  "type": "logs-aws_cloudfront",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_waf/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/amazon_cloudfront/info",
+  "statics": {
+    "logo": {
+      "annotation": "CloudFront Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS cloudfront Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
   "workflows": [
     {
       "name": "queries",
@@ -22,21 +34,13 @@
       "enabled_by_default": false
     }
   ],
-  "statics": {
-    "logo": {
-      "annotation": "AWS WAF Logo",
-      "path": "logo.png"
-    },
-    "gallery": [
-      {
-        "annotation": "AWS waf Log Dashboard",
-        "path": "dashboard.png"
-      }
-    ]
-  },
   "components": [
     {
-      "name": "aws_waf",
+      "name": "aws_cloudfront",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
       "version": "1.0.0"
     },
     {
@@ -44,35 +48,16 @@
       "version": "1.0.0"
     },
     {
-      "name": "logs_waf",
-      "version": "1.0.0"
-    },
-    {
-      "name": "aws_s3",
+      "name": "logs-aws_cloudfront",
       "version": "1.0.0"
     }
   ],
   "assets": [
     {
-      "name": "aws_waf",
-      "version": "1.0.0",
-      "extension": "ndjson",
-      "type": "savedObjectBundle",
-      "workflows": ["dashboards"]
-    },
-    {
       "name": "create_table",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query"
-    },
-    {
-      "name": "create_mv",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["dashboards"]
-
     },
     {
       "name": "create_skipping_index",
@@ -87,9 +72,23 @@
       "extension": "ndjson",
       "type": "savedObjectBundle",
       "workflows": ["queries"]
+    },
+    {
+      "name": "create_mv",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "aws_cloudfront",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
     }
   ],
   "sampleData": {
-    "path": "samples.json"
+    "path": "sample.json"
   }
 }

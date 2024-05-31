@@ -1,13 +1,13 @@
 {
-  "name": "amazon_s3",
-  "version": "1.0.0",
-  "displayName": "Amazon S3",
-  "description": "Analyze Amazon S3 server logs.",
+  "name": "haproxy",
+  "version": "1.1.0",
+  "displayName": "HAProxy",
+  "description": "Analyze HAProxy access logs.",
   "license": "Apache-2.0",
-  "type": "logs_s3",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "type": "logs",
+  "labels": ["Observability", "Logs", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_s3/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/haproxy/info",
   "workflows": [
     {
       "name": "queries",
@@ -24,57 +24,47 @@
   ],
   "statics": {
     "logo": {
-      "annotation": "S3 Logo",
-      "path": "logo.png"
+      "annotation": "HAProxy Logo",
+      "path": "logo.svg"
     },
     "gallery": [
       {
-        "annotation": "AWS S3 Dashboard",
-        "path": "dashboard.png"
+        "annotation": "HAProxy Dashboard",
+        "path": "dashboard1.png"
+      },
+      {
+        "annotation": "HAProxy Dashboard view",
+        "path": "dashboard2.png"
       }
     ]
   },
   "components": [
     {
-      "name": "aws_s3",
+      "name": "communication",
       "version": "1.0.0"
     },
     {
-      "name": "logs_s3",
+      "name": "http",
       "version": "1.0.0"
     },
     {
-      "name": "cloud",
+      "name": "logs",
       "version": "1.0.0"
     }
   ],
   "assets": [
     {
-      "name": "aws_s3",
+      "name": "haproxy",
       "version": "1.0.0",
       "extension": "ndjson",
       "type": "savedObjectBundle",
       "workflows": ["dashboards"]
     },
     {
-      "name": "example_queries",
-      "version": "1.0.0",
-      "extension": "ndjson",
-      "type": "savedObjectBundle",
-      "workflows": ["queries"]
-    },
-    {
       "name": "create_table",
       "version": "1.0.0",
       "extension": "sql",
       "type": "query"
-    },
-    {
-      "name": "create_skipping_index",
-      "version": "1.0.0",
-      "extension": "sql",
-      "type": "query",
-      "workflows": ["queries"]
     },
     {
       "name": "create_mv",

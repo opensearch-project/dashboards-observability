@@ -1,13 +1,13 @@
 {
-  name: "nginx",
-  version: "1.0.0",
-  displayName: "Nginx",
-  description: "Analyze Nginx access logs.",
+  name: "apache",
+  version: "1.1.0",
+  displayName: "Apache Access Logs",
+  description: "Insights on applications using the standard Apache access log format.",
   license: "Apache-2.0",
-  type: "logs",
+  type: "logs_apache",
   labels: ["Observability", "Logs", "Flint S3"],
   author: "OpenSearch",
-  sourceUrl: "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
+  sourceUrl: "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/apache/info",
   workflows: [
     {
       name: "queries",
@@ -24,31 +24,27 @@
   ],
   statics: {
     logo: {
-      annotation: "NginX Logo",
-      path: "logo.svg"
+      annotation: "Apache Logo",
+      path: "logo.png"
     },
     gallery: [
       {
-        annotation: "NginX Dashboard",
+        annotation: "Apache Dashboard",
         path: "dashboard1.png"
-      },
-      {
-        annotation: "NginX Dashboard view",
-        path: "dashboard2.png"
       }
     ]
   },
   components: [
     { name: "communication", version: "1.0.0" },
     { name: "http", version: "1.0.0" },
-    { name: "logs", version: "1.0.0" }
+    { name: "logs_apache", version: "1.0.0" }
   ],
   assets: [
-    { name: "nginx", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["dashboards"] },
+    { name: "apache", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["dashboards"] },
+    { name: "example_queries", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["queries"] },
     { name: "create_table", version: "1.0.0", extension: "sql", type: "query" },
     { name: "create_skipping_index", version: "1.0.0", extension: "sql", type: "query", workflows: ["queries"] },
-    { name: "create_mv", version: "1.0.0", extension: "sql", type: "query", workflows: ["dashboards"] },
-    { name: "example_queries", version: "1.0.0", extension: "ndjson", type: "savedObjectBundle", workflows: ["queries"] }
+    { name: "create_mv", version: "1.0.0", extension: "sql", type: "query", workflows: ["dashboards"] }
   ],
   sampleData: {
     path: "sample.json"
