@@ -14,7 +14,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
+import {
+  OPENSEARCH_DOCUMENTATION_URL,
+  OPENSEARCH_INTEGRATION_CATALOG_URL,
+} from '../../../../common/constants/integrations';
 
 export function IntegrationHeader() {
   const tabs = [
@@ -65,6 +68,13 @@ export function IntegrationHeader() {
         View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
         <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        Integrations release catalog page.{' '}
+        <EuiLink external={true} href={OPENSEARCH_INTEGRATION_CATALOG_URL} target="blank">
+          Catalog Page Link
         </EuiLink>
       </EuiText>
       <EuiSpacer size="l" />
