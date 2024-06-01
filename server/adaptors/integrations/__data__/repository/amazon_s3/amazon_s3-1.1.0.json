@@ -7,7 +7,7 @@
   "type": "logs_s3",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/amazon_s3/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_s3_access-logs-1.1.0",
   "workflows": [
     {
       "name": "queries",

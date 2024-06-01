@@ -7,7 +7,7 @@
   "type": "logs",
   "labels": ["Observability", "Logs", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/haproxy/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/haproxy-1.0.0",
   "workflows": [
     {
       "name": "queries",

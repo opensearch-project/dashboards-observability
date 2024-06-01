@@ -7,7 +7,7 @@
   "type": "logs_vpc",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/amazon_vpc_flow/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_vpc_flow_1.1.0",
   "workflows": [
     {
       "name": "queries",
