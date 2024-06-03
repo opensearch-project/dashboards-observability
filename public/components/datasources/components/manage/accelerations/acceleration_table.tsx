@@ -14,8 +14,8 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
   EuiText,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -45,6 +45,7 @@ import {
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
+  isS3ConnectionWithLakeFormation: boolean;
 }
 
 interface ModalState {
@@ -55,6 +56,7 @@ interface ModalState {
 export const AccelerationTable = ({
   dataSourceName,
   cacheLoadingHooks,
+  isS3ConnectionWithLakeFormation,
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
@@ -236,8 +238,10 @@ export const AccelerationTable = ({
     },
   ];
 
-  const accelerationTableColumns = [
-    {
+  const accelerationTableColumnsCollection: {
+    [columnKey: string]: EuiBasicTableColumn<CachedAcceleration>;
+  } = {
+    name: {
       field: 'indexName',
       name: 'Name',
       sortable: true,
@@ -258,13 +262,13 @@ export const AccelerationTable = ({
         );
       },
     },
-    {
+    status: {
       field: 'status',
       name: 'Status',
       sortable: true,
       render: (status: string) => <AccelerationStatus status={status} />,
     },
-    {
+    type: {
       field: 'type',
       name: 'Type',
       sortable: true,
@@ -286,19 +290,19 @@ export const AccelerationTable = ({
         return <EuiText size="s">{label}</EuiText>;
       },
     },
-    {
+    database: {
       field: 'database',
       name: 'Database',
       sortable: true,
       render: (database: string) => <EuiText size="s">{database}</EuiText>,
     },
-    {
+    table: {
       field: 'table',
       name: 'Table',
       sortable: true,
       render: (table: string) => <EuiText size="s">{table || '-'}</EuiText>,
     },
-    {
+    refreshType: {
       field: 'refreshType',
       name: 'Refresh Type',
       sortable: true,
@@ -306,7 +310,7 @@ export const AccelerationTable = ({
         return <EuiText size="s">{acceleration.autoRefresh ? 'Auto refresh' : 'Manual'}</EuiText>;
       },
     },
-    {
+    flintIndexName: {
       field: 'flintIndexName',
       name: 'Destination Index',
       sortable: true,
@@ -317,11 +321,17 @@ export const AccelerationTable = ({
         return flintIndexName || '-';
       },
     },
-    {
+    actions: {
       name: 'Actions',
       actions: tableActions,
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  };
+
+  const accelerationTableColumns = !isS3ConnectionWithLakeFormation
+    ? Object.values(accelerationTableColumnsCollection)
+    : Object.entries(accelerationTableColumnsCollection)
+        .filter(([key]) => key !== 'database' && key !== 'table')
+        .map(([_key, val]) => val);
 
   const pagination = {
     initialPageSize: 10,

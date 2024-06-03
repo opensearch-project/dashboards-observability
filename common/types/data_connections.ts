@@ -52,6 +52,7 @@ export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
 export interface S3GlueProperties {
   'glue.indexstore.opensearch.uri': string;
   'glue.indexstore.opensearch.region': string;
+  'glue.lakeformation.enabled'?: boolean;
 }
 
 export interface PrometheusProperties {
@@ -266,6 +267,7 @@ export interface RenderAssociatedObjectsDetailsFlyoutParams {
   dataSourceName: string;
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
+  isS3ConnectionWithLakeFormation?: boolean;
 }
 
 export interface RenderAccelerationDetailsFlyoutParams {

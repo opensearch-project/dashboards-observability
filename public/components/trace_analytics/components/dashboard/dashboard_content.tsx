@@ -46,7 +46,6 @@ export function DashboardContent(props: DashboardProps) {
     filters,
     setStartTime,
     setEndTime,
-    setQuery,
     setFilters,
     mode,
     dataPrepperIndicesExist,
@@ -60,7 +59,6 @@ export function DashboardContent(props: DashboardProps) {
   const [throughputPltItems, setThroughputPltItems] = useState({ items: [], fixedInterval: '1h' });
   const [errorRatePltItems, setErrorRatePltItems] = useState({ items: [], fixedInterval: '1h' });
   const [percentileMap, setPercentileMap] = useState<{ [traceGroup: string]: number[] }>({});
-  const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
@@ -104,7 +102,6 @@ export function DashboardContent(props: DashboardProps) {
         }
       }
     }
-    setFilteredService(newFilteredService);
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
@@ -122,7 +119,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
   ]);
 
-  const refresh = async (currService?: string) => {
+  const refresh = async (_currService?: string) => {
     setLoading(true);
     const DSL = filtersToDsl(
       mode,

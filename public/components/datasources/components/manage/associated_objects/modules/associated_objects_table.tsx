@@ -27,6 +27,7 @@ import {
 import { getAccelerationName } from '../../accelerations/utils/acceleration_utils';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
+  ASSC_OBJ_TABLE_FOR_S3_WITH_LAKE_FORMATION_SEARCH_HINT,
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
   redirectToExplorerOSIdx,
@@ -37,6 +38,7 @@ interface AssociatedObjectsTableProps {
   datasourceName: string;
   associatedObjects: AssociatedObject[];
   cachedAccelerations: CachedAcceleration[];
+  isS3ConnectionWithLakeFormation: boolean;
   handleRefresh: () => void;
 }
 
@@ -52,8 +54,13 @@ interface AssociatedTableFilter {
   value: string;
 }
 
-export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
-  const { datasourceName, associatedObjects, cachedAccelerations, handleRefresh } = props;
+export const AssociatedObjectsTable = ({
+  datasourceName,
+  associatedObjects,
+  cachedAccelerations,
+  isS3ConnectionWithLakeFormation,
+  handleRefresh,
+}: AssociatedObjectsTableProps) => {
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
@@ -61,7 +68,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     {
       field: 'name',
       name: i18n.translate('datasources.associatedObjectsTab.column.name', {
-        defaultMessage: 'Name',
+        defaultMessage: isS3ConnectionWithLakeFormation ? 'Table' : 'Name',
       }),
       sortable: true,
       'data-test-subj': 'nameCell',
@@ -72,6 +79,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               renderAssociatedObjectsDetailsFlyout({
                 tableDetail: item,
                 dataSourceName: datasourceName,
+                isS3ConnectionWithLakeFormation,
                 handleRefresh,
               });
             } else {
@@ -90,20 +98,9 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       ),
     },
     {
-      field: 'type',
-      name: i18n.translate('datasources.associatedObjectsTab.column.type', {
-        defaultMessage: 'Type',
-      }),
-      sortable: true,
-      render: (type) => {
-        if (type === 'table') return 'Table';
-        return ACCELERATION_INDEX_TYPES.find((accType) => type === accType.value)!.label;
-      },
-    },
-    {
       field: 'accelerations',
       name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
-        defaultMessage: 'Associations',
+        defaultMessage: isS3ConnectionWithLakeFormation ? 'Accelerations' : 'Associations',
       }),
       sortable: true,
       render: (accelerations: CachedAcceleration[] | AssociatedObject, obj: AssociatedObject) => {
@@ -132,6 +129,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                 renderAssociatedObjectsDetailsFlyout({
                   tableDetail: obj,
                   dataSourceName: datasourceName,
+                  isS3ConnectionWithLakeFormation,
                   handleRefresh,
                 })
               }
@@ -146,6 +144,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                 renderAssociatedObjectsDetailsFlyout({
                   tableDetail: accelerations,
                   dataSourceName: datasourceName,
+                  isS3ConnectionWithLakeFormation,
                   handleRefresh,
                 })
               }
@@ -161,6 +160,27 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Actions',
       }),
       actions: [
+        {
+          name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
+            defaultMessage: 'Accelerate',
+          }),
+          description: i18n.translate(
+            'datasources.associatedObjectsTab.action.accelerate.description',
+            {
+              defaultMessage: 'Accelerate this object',
+            }
+          ),
+          type: 'icon',
+          icon: 'bolt',
+          available: (item: AssociatedObject) => item.type === 'table',
+          onClick: (item: AssociatedObject) =>
+            renderCreateAccelerationFlyout({
+              dataSource: datasourceName,
+              databaseName: item.database,
+              tableName: item.tableName,
+              handleRefresh,
+            }),
+        },
         {
           name: i18n.translate('datasources.associatedObjectsTab.action.discover.name', {
             defaultMessage: 'Discover',
@@ -190,30 +210,23 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             }
           },
         },
-        {
-          name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
-            defaultMessage: 'Accelerate',
-          }),
-          description: i18n.translate(
-            'datasources.associatedObjectsTab.action.accelerate.description',
-            {
-              defaultMessage: 'Accelerate this object',
-            }
-          ),
-          type: 'icon',
-          icon: 'bolt',
-          available: (item: AssociatedObject) => item.type === 'table',
-          onClick: (item: AssociatedObject) =>
-            renderCreateAccelerationFlyout({
-              dataSource: datasourceName,
-              databaseName: item.database,
-              tableName: item.tableName,
-              handleRefresh,
-            }),
-        },
       ],
     },
   ] as Array<EuiTableFieldDataColumnType<AssociatedObject>>;
+
+  if (!isS3ConnectionWithLakeFormation) {
+    columns.splice(1, 0, {
+      field: 'type',
+      name: i18n.translate('datasources.associatedObjectsTab.column.type', {
+        defaultMessage: 'Type',
+      }),
+      sortable: true,
+      render: (type) => {
+        if (type === 'table') return 'Table';
+        return ACCELERATION_INDEX_TYPES.find((accType) => type === accType.value)!.label;
+      },
+    });
+  }
 
   const onSearchChange = ({ query, error }) => {
     if (error) {
@@ -261,7 +274,9 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     filters: searchFilters,
     box: {
       incremental: true,
-      placeholder: ASSC_OBJ_TABLE_SEARCH_HINT,
+      placeholder: isS3ConnectionWithLakeFormation
+        ? ASSC_OBJ_TABLE_FOR_S3_WITH_LAKE_FORMATION_SEARCH_HINT
+        : ASSC_OBJ_TABLE_SEARCH_HINT,
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },
