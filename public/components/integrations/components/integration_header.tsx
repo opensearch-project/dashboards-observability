@@ -72,7 +72,7 @@ export function IntegrationHeader() {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Integrations release catalog page.{' '}
+        Integrations release catalog.{' '}
         <EuiLink external={true} href={OPENSEARCH_INTEGRATION_CATALOG_URL} target="blank">
           Catalog Page Link
         </EuiLink>
