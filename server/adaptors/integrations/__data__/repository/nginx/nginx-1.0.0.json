@@ -1,6 +1,6 @@
 {
   "name": "nginx",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "displayName": "Nginx",
   "description": "Analyze Nginx access logs.",
   "license": "Apache-2.0",

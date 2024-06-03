@@ -1,6 +1,6 @@
 {
   "name": "apache",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "displayName": "Apache Access Logs",
   "description": "Insights on applications using the standard Apache access log format.",
   "license": "Apache-2.0",
