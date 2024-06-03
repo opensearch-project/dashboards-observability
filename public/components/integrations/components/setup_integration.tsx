@@ -143,6 +143,14 @@ const addIntegration = async ({
   let sessionId: string | null = null;
 
   if (config.connectionType === 'index') {
+    let enabledWorkflows: string[] | undefined;
+    if (integration.workflows) {
+      enabledWorkflows = integration.workflows
+        .filter((w) =>
+          w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
+        )
+        .map((w) => w.name);
+    }
     const res = await addIntegrationRequest({
       addSample: false,
       templateName: integration.name,
@@ -151,6 +159,7 @@ const addIntegration = async ({
       name: config.displayName,
       indexPattern: config.connectionDataSource,
       skipRedirect: setIsInstalling ? true : false,
+      workflows: enabledWorkflows,
     });
     if (setIsInstalling) {
       setIsInstalling(false, res);
