@@ -1,0 +1,31 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_s3accesslog",
+      "labels": [
+        "aws",
+        "s3accesslog"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "BytesSent": {"type": "integer"},
+        "HTTPstatus": {"type": "short"},
+        "ObjectSize": {"type": "integer"},
+        "RemoteIP": {"type": "ip"},
+        "RequestDateTime": {"type": "date", "format": "dd/MMM/yyyy:HH:mm:ss a"},
+        "TotalTime": {"type": "integer"},
+        "TurnAroundTime": {"type": "integer"}
+      }
+    }
+
+  }
+}
+

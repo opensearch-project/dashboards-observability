@@ -1,0 +1,28 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_msk",
+      "labels": [
+        "aws",
+        "msk"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "msk.broker_id": {"type": "keyword"},
+        "msk.max_lag": {"type": "long"},
+        "msk.message": {"type": "text"},
+        "msk.sum_lag": {"type": "long"},
+        "msk.time_lag": {"type": "long"}
+      }
+    }
+  }
+}
+

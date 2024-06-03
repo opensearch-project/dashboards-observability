@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-s3accesslog-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_s3accesslog"],
+  "version": 1
+}

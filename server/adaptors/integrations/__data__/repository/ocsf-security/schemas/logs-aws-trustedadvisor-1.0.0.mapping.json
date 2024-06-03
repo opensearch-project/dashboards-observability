@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-trustedadvisor-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_trustedadvisor"],
+  "version": 1
+}

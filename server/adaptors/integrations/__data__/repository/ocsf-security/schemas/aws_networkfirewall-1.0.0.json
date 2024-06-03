@@ -1,0 +1,36 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_networkfirewall",
+      "labels": [
+        "aws",
+        "networkfirewall"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "event.alert.rev": {"type": "keyword"},
+        "event.alert.severity": {"type": "long"},
+        "event.alert.signature_id": {"type": "keyword"},
+        "event.dest_ip": {"type": "ip"},
+        "event.dest_port": {"type": "long"},
+        "event.http.length": {"type": "long"},
+        "event.netflow.bytes": {"type": "long"},
+        "event.netflow.max_ttl": {"type": "long"},
+        "event.netflow.min_ttl": {"type": "long"},
+        "event.netflow.pkts": {"type": "long"},
+        "event.src_ip": {"type": "ip"},
+        "event.src_port": {"type": "long"},
+        "event.tcp.tcp_flag": {"type": "keyword"}
+      }
+    }
+  }
+}
+

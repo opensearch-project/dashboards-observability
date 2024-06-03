@@ -1,0 +1,28 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_r53resolver",
+      "labels": [
+        "aws",
+        "r53resolver"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "answers": {"type": "object"},
+        "query_timestamp": {"type": "date"},
+        "srcaddr": {"type": "ip"},
+        "srcport": {"type": "integer"},
+        "version": {"type": "keyword"}
+      }
+    }
+  }
+}
+

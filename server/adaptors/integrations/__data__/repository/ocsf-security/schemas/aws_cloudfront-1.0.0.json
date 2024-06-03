@@ -1,0 +1,32 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_cloudfront",
+      "labels": ["aws", "cloudfront"]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "c_ip": {"type": "ip"},
+        "c_port": {"type": "integer"},
+        "cs_bytes": {"type": "long"},
+        "cs_headers_count": {"type": "short"},
+        "date_time": {"type": "date"},
+        "sc-range-end": {"type": "long"},
+        "sc-range-start": {"type": "long"},
+        "sc_bytes": {"type": "long"},
+        "sc_content_len": {"type": "long"},
+        "sc_status": {"type": "keyword"},
+        "time_taken": {"type": "half_float"},
+        "time_to_first_byte": {"type": "half_float"},
+        "timestamp": {"type": "date", "format": "epoch_second"}
+      }
+    }
+  }
+}

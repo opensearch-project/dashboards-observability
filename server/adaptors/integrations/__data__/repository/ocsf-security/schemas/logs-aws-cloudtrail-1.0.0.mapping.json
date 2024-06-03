@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-cloudtrail-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_cloudtrail"],
+  "version": 1
+}

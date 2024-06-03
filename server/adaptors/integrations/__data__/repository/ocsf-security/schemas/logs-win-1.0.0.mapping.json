@@ -1,0 +1,8 @@
+{
+  "priority": 100,
+  "index_patterns": ["log-win-*"],
+  "composed_of": [
+    "log-ecs",
+    "log-win"],
+  "version": 1
+}

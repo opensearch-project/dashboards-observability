@@ -1,0 +1,47 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_rds",
+      "labels": [
+        "aws",
+        "rds"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "mysql.lock_time": {"type": "float"},
+        "mysql.message": {"type": "text"},
+        "mysql.object": {"type": "keyword"},
+        "mysql.query": {"type": "text"},
+        "mysql.query_id": {"type": "long"},
+        "mysql.query_time": {"type": "float"},
+        "mysql.retcode": {"type": "keyword"},
+        "mysql.source_ip": {"type": "ip"},
+        "mysql.thread_id": {"type": "long"},
+        "mysql.timestamp": {"type": "date", "format": "date_optional_time||uMMdd [ ]H:m:s||epoch_second||u-MM-dd [ ]H:m:s"},
+        "postgresql.duration_ms": {"type": "float"},
+        "postgresql.message": {"type": "text"},
+        "postgresql.pid": {"type": "integer"},
+        "postgresql.query": {"type": "text"},
+        "postgresql.session_time_seconds": {"type": "float"},
+        "postgresql.source_port": {"type": "integer"},
+        "postgresql.thread_id": {"type": "integer"},
+        "postgresql.timestamp": {"type": "date"},
+        "rds.cluster_identifier": {"type": "keyword"},
+        "rds.database_name": {"type": "keyword"},
+        "rds.instance_identifier": {"type": "keyword"},
+        "rds.message": {"type": "text"},
+        "rds.query": {"type": "text"},
+        "rds.query_time": {"type": "float"}
+      }
+    }
+  }
+}
+

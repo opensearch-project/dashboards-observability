@@ -1,0 +1,13 @@
+{
+  "index_patterns": [
+    "log-fsx-win-*"
+  ],
+  "priority": 100,
+  "template": {
+    "aliases": {"log-win-aws-fsx-win": {"is_write_index": false}}
+  },
+  "composed_of": [
+    "log-ecs",
+    "log-win"
+  ]
+}

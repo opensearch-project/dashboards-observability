@@ -1,0 +1,8 @@
+{
+  "priority": 100,
+  "index_patterns": ["log-linux-*"],
+  "composed_of": [
+    "log-ecs",
+    "log-linux"],
+  "version": 1
+}

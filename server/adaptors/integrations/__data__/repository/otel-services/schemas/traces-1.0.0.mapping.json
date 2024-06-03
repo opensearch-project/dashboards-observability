@@ -47,9 +47,6 @@
         "enabled": true
       },
       "properties": {
-        "serviceName": {
-          "type": "keyword"
-        },
         "traceId": {
           "ignore_above": 256,
           "type": "keyword"
@@ -107,8 +104,12 @@
         },
         "attributes": {
           "type": "object",
-          "data_stream": {
-            "properties": {
+          "properties": {
+            "serviceName": {
+              "type": "keyword"
+            },
+            "data_stream": {
+              "properties": {
                 "dataset": {
                   "ignore_above": 128,
                   "type": "keyword"
@@ -183,6 +184,10 @@
         }
       }
     },
+    "aliases" : {
+      "otel-v1-apm-span" : {}
+    }
+  },
   "composed_of": [],
   "version": 1,
   "_meta": {

@@ -1,0 +1,8 @@
+{
+  "index_patterns": ["log-aws-guardduty-*"],
+  "priority": 100,
+  "composed_of": [
+    "log-ecs",
+    "aws_guardduty"],
+  "version": 1
+}

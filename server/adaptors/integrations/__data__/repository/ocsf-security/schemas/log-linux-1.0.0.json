@@ -1,0 +1,26 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "log-linux",
+      "labels": [
+        "linux"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings" : {
+      "properties": {
+        "syslog_message": {"type": "text"},
+        "syslog_timestamp": {"type": "keyword"},
+        "pid": {"type": "integer"}
+      }
+    }
+
+  }
+}
+

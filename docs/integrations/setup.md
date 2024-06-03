@@ -34,4 +34,4 @@ If working on S3-based integrations, it's worth noting that queries have some va
 - `{object_name}` used for giving tables a unique name per-integration to avoid collisions.
 
 For some query examples, it can be worth looking at the assets for the
-[VPC integration](https://github.com/opensearch-project/dashboards-observability/blob/4e1e0e585/server/adaptors/integrations/__data__/repository/aws_vpc_flow/assets/README.md).
+[VPC integration](https://github.com/opensearch-project/dashboards-observability/blob/main/server/adaptors/integrations/__data__/repository/amazon_vpc_flow/info/README.md).

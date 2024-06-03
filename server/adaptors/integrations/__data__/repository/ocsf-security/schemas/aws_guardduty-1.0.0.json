@@ -1,0 +1,54 @@
+{
+  "template": {
+    "_meta": {
+      "version": "1.0.0",
+      "catalog": "security",
+      "type": "logs",
+      "component": "aws_guardduty",
+      "labels": [
+        "aws",
+        "guardduty"
+      ]
+    },
+    "settings": {
+      "refresh_interval": "30s",
+      "number_of_shards": "1"
+    },
+    "mappings": {
+      "properties": {
+        "description": {"type": "text"},
+        "resource.instanceDetails.launchTime": {"type": "date"},
+        "resource.instanceDetails.networkInterfaces.privateIpAddress": {"type": "ip"},
+        "resource.instanceDetails.networkInterfaces.privateIpAddresses.privateIpAddress": {"type": "ip"},
+        "resource.instanceDetails.networkInterfaces.publicIp": {"type": "ip"},
+        "service.action.awsApiCallAction.remoteIpDetails.geoLocation": {"type": "geo_point"},
+        "service.action.awsApiCallAction.remoteIpDetails.ipAddressV4": {"type": "ip"},
+        "service.action.awsApiCallAction.remoteIpDetails.ipAddressV6": {"type": "ip"},
+        "service.action.awsApiCallAction.remoteIpDetails.organization.asn": {"type": "integer"},
+        "service.action.networkConnectionAction.localIpDetails.ipAddressV4": {"type": "ip"},
+        "service.action.networkConnectionAction.localPortDetails.port": {"type": "integer"},
+        "service.action.networkConnectionAction.remoteIpDetails.geoLocation": {"type": "geo_point"},
+        "service.action.networkConnectionAction.remoteIpDetails.ipAddressV4": {"type": "ip"},
+        "service.action.networkConnectionAction.remoteIpDetails.organization.asn": {"type": "integer"},
+        "service.action.portProbeAction.portProbeDetails.localIpDetails.ipAddressV4": {"type": "ip"},
+        "service.action.portProbeAction.portProbeDetails.remoteIpDetails.geoLocation": {"type": "geo_point"},
+        "service.action.portProbeAction.portProbeDetails.remoteIpDetails.ipAddressV4": {"type": "ip"},
+        "service.additionalInfo.apiCalls.firstSeen": {"type": "date"},
+        "service.additionalInfo.apiCalls.lastSeen": {"type": "date"},
+        "service.additionalInfo.inBytes": {"type": "long"},
+        "service.additionalInfo.localPort": {"type": "integer"},
+        "service.additionalInfo.newPolicy.maxPasswordAge": {"type": "short"},
+        "service.additionalInfo.newPolicy.minimumPasswordLength": {"type": "short"},
+        "service.additionalInfo.newPolicy.passwordReusePrevention": {"type": "short"},
+        "service.additionalInfo.oldPolicy.maxPasswordAge": {"type": "short"},
+        "service.additionalInfo.oldPolicy.minimumPasswordLength": {"type": "short"},
+        "service.additionalInfo.oldPolicy.passwordReusePrevention": {"type": "short"},
+        "service.additionalInfo.outBytes": {"type": "long"},
+        "service.additionalInfo.recentCredentials.ipAddressV4": {"type": "ip"},
+        "service.additionalInfo.unusual": {"type": "text"}
+      }
+    }
+
+  }
+}
+
