@@ -100,33 +100,41 @@ export function SetupWorkflowSelector({
   integration,
   useWorkflows,
   toggleWorkflow,
+  config,
 }: {
   integration: IntegrationConfig;
   useWorkflows: Map<string, boolean>;
   toggleWorkflow: (name: string) => void;
+  config: IntegrationSetupInputs;
 }) {
   if (!integration.workflows) {
     return null;
   }
 
-  const cards = integration.workflows.map((workflow) => {
-    return (
-      <>
-        <EuiCheckableCard
-          id={`workflow-checkbox-${workflow.name}`}
-          key={workflow.name}
-          label={workflow.label}
-          checkableType="checkbox"
-          value={workflow.name}
-          checked={useWorkflows.get(workflow.name)}
-          onChange={() => toggleWorkflow(workflow.name)}
-        >
-          {workflow.description}
-        </EuiCheckableCard>
-        <EuiSpacer size="s" />
-      </>
-    );
-  });
+  const cards = integration.workflows
+    .filter((workflow) =>
+      workflow.applicable_data_sources
+        ? workflow.applicable_data_sources.includes(config.connectionType)
+        : true
+    )
+    .map((workflow) => {
+      return (
+        <>
+          <EuiCheckableCard
+            id={`workflow-checkbox-${workflow.name}`}
+            key={workflow.name}
+            label={workflow.label}
+            checkableType="checkbox"
+            value={workflow.name}
+            checked={useWorkflows.get(workflow.name)}
+            onChange={() => toggleWorkflow(workflow.name)}
+          >
+            {workflow.description}
+          </EuiCheckableCard>
+          <EuiSpacer size="s" />
+        </>
+      );
+    });
 
   return <>{cards}</>;
 }
@@ -316,9 +324,11 @@ export function IntegrationQueryInputs({
 }
 
 export function IntegrationWorkflowsInputs({
+  config,
   updateConfig,
   integration,
 }: {
+  config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
 }) {
@@ -351,6 +361,7 @@ export function IntegrationWorkflowsInputs({
       error={['Must select at least one workflow.']}
     >
       <SetupWorkflowSelector
+        config={config}
         integration={integration}
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
@@ -430,7 +441,11 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
                 </EuiText>
               </EuiFormRow>
               <EuiSpacer />
-              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
+              <IntegrationWorkflowsInputs
+                config={config}
+                updateConfig={updateConfig}
+                integration={integration}
+              />
             </>
           ) : null}
           {/* Bottom bar will overlap content if there isn't some space at the end */}
