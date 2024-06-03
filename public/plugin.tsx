@@ -57,6 +57,7 @@ import {
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
+  ObjectLoaderDataSourceType,
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
   RenderAssociatedObjectsDetailsFlyoutParams,
@@ -157,7 +158,9 @@ export const [
 export const [
   getRenderLogExplorerTablesFlyout,
   setRenderLogExplorerTablesFlyout,
-] = createGetterSetter<(dataSourceName: string) => void>('renderLogExplorerTablesFlyout');
+] = createGetterSetter<
+  (dataSourceName: string, dataSourceType: ObjectLoaderDataSourceType) => void
+>('renderLogExplorerTablesFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -547,11 +550,15 @@ export class ObservabilityPlugin
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
 
-    const renderLogExplorerTablesFlyout = (dataSourceName: string) => {
+    const renderLogExplorerTablesFlyout = (
+      dataSourceName: string,
+      dataSourceType: ObjectLoaderDataSourceType
+    ) => {
       const createLogExplorerTablesFlyout = core.overlays.openFlyout(
         toMountPoint(
           <TablesFlyout
             dataSourceName={dataSourceName}
+            dataSourceType={dataSourceType}
             resetFlyout={() => createLogExplorerTablesFlyout.close()}
           />
         )

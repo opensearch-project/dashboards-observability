@@ -16,6 +16,7 @@ import {
   CachedDataSourceStatus,
   CachedTable,
   LoadCacheType,
+  ObjectLoaderDataSourceType,
   StartLoadingParams,
 } from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
@@ -255,7 +256,8 @@ export const createLoadQuery = (
   loadCacheType: LoadCacheType,
   dataSourceName: string,
   databaseName?: string,
-  tableName?: string
+  tableName?: string,
+  dataSourceType?: ObjectLoaderDataSourceType
 ) => {
   let query;
   switch (loadCacheType) {
@@ -263,7 +265,9 @@ export const createLoadQuery = (
       query = `SHOW SCHEMAS IN ${addBackticksIfNeeded(dataSourceName)}`;
       break;
     case 'tables':
-      query = `SHOW TABLE EXTENDED IN ${addBackticksIfNeeded(
+      const showTableQueryBase =
+        dataSourceType === 'SecurityLake' ? 'SHOW TABLE' : 'SHOW TABLE EXTENDED';
+      query = `${showTableQueryBase} IN ${addBackticksIfNeeded(
         dataSourceName
       )}.${addBackticksIfNeeded(databaseName!)} LIKE '*'`;
       break;
@@ -316,6 +320,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
 
   const startLoading = ({
     dataSourceName,
+    dataSourceType,
     dataSourceMDSId,
     databaseName,
     tableName,
@@ -328,7 +333,13 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
-      query: createLoadQuery(loadCacheType, dataSourceName, databaseName, tableName),
+      query: createLoadQuery(
+        loadCacheType,
+        dataSourceName,
+        databaseName,
+        tableName,
+        dataSourceType
+      ),
       datasource: dataSourceName,
     };
 

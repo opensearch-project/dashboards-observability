@@ -30,6 +30,7 @@ import {
 import {
   DatasourceDetails,
   PrometheusProperties,
+  StartLoadingParams,
 } from '../../../../../common/types/data_connections';
 import {
   useLoadAccelerationsToCache,
@@ -85,7 +86,12 @@ export const DataConnection = (props: { dataSource: string }) => {
     databasesLoadStatus,
     startLoadingDatabases,
     tablesLoadStatus,
-    startLoadingTables,
+    startLoadingTables: (loadingParams: StartLoadingParams) => {
+      startLoadingTables({
+        ...loadingParams,
+        dataSourceType: isS3ConnectionWithLakeFormation ? 'SecurityLake' : 'Other',
+      });
+    },
     accelerationsLoadStatus,
     startLoadingAccelerations,
   };

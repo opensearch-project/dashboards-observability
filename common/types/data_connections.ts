@@ -247,11 +247,14 @@ export interface LoadCachehookOutput {
   stopLoading: () => void;
 }
 
+export type ObjectLoaderDataSourceType = 'SecurityLake' | 'Other';
+
 export interface StartLoadingParams {
   dataSourceName: string;
   dataSourceMDSId?: string;
   databaseName?: string;
   tableName?: string;
+  dataSourceType?: ObjectLoaderDataSourceType;
 }
 
 export interface RenderAccelerationFlyoutParams {

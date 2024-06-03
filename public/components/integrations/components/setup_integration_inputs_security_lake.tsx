@@ -80,6 +80,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
               setDataSourceFormData,
             }}
             selectedDatasource={config.connectionDataSource}
+            selectedDataSourceType="SecurityLake"
             dataSourcesPreselected={false}
             tableFieldsLoading={false}
             hideHeader={true}

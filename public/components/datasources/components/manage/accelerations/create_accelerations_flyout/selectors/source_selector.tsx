@@ -23,6 +23,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CreateAccelerationForm,
+  ObjectLoaderDataSourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
@@ -51,6 +52,7 @@ interface DataSourceSelectorProps {
   http: CoreStart['http'];
   dataSourceFormProps: DataSourceFormProps;
   selectedDatasource: string;
+  selectedDataSourceType: ObjectLoaderDataSourceType;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
@@ -61,6 +63,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   http,
   dataSourceFormProps: { dataSourceFormData, setDataSourceFormData },
   selectedDatasource,
+  selectedDataSourceType,
   dataSourcesPreselected,
   tableFieldsLoading,
   dataSourceMDSId,
@@ -296,6 +299,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               <EuiFlexItem grow={false}>
                 <SelectorLoadObjects
                   dataSourceName={dataSourceFormData.dataSource}
+                  dataSourceType={selectedDataSourceType}
                   databaseName={dataSourceFormData.database}
                   loadTables={loadTables}
                   loadingComboBoxes={loadingComboBoxes}
