@@ -29,6 +29,7 @@ import { AvailableIntegrationsList } from '../../../../integrations/components/a
 import { DatasourceType } from '../../../../../../common/types/data_connections';
 
 interface IntegrationInstanceTableEntry {
+  id: string;
   name: string;
   locator: {
     name: string;
@@ -79,6 +80,7 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
+    id: instance.id,
     name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
@@ -128,7 +130,7 @@ export interface InstallIntegrationFlyoutProps {
   datasourceName: string;
   isS3ConnectionWithLakeFormation?: boolean;
   closeFlyout: () => void;
-  refreshInstances: () => void;
+  refreshInstances?: () => void;
 }
 
 export const InstallIntegrationFlyout = ({
@@ -153,9 +155,13 @@ export const InstallIntegrationFlyout = ({
     });
   }, []);
 
-  const s3FilteredIntegrations = {
+  const integrationLabelToCheck = isS3ConnectionWithLakeFormation
+    ? 'Security Lake'
+    : labelFromDataSourceType(datasourceType);
+
+  const integrationsFilteredByLabel = {
     hits: availableIntegrations.hits.filter((config) =>
-      config.labels?.includes(labelFromDataSourceType(datasourceType) ?? '')
+      config.labels?.includes(integrationLabelToCheck ?? '')
     ),
   };
 
@@ -171,7 +177,7 @@ export const InstallIntegrationFlyout = ({
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
-          data={s3FilteredIntegrations}
+          data={integrationsFilteredByLabel}
           isCardView={true}
           setInstallingIntegration={setInstallingIntegration}
         />
@@ -184,10 +190,7 @@ export const InstallIntegrationFlyout = ({
             datasourceType === 'S3GLUE'
               ? {
                   name: datasourceName,
-                  type: 's3',
-                  properties: {
-                    lakeFormationEnabled: isS3ConnectionWithLakeFormation,
-                  },
+                  type: isS3ConnectionWithLakeFormation ? 'securityLake' : 's3',
                 }
               : undefined
           }
@@ -195,7 +198,7 @@ export const InstallIntegrationFlyout = ({
             setIsInstalling(installing);
             if (success) {
               closeFlyout();
-              refreshInstances();
+              refreshInstances?.();
             }
           }}
         />

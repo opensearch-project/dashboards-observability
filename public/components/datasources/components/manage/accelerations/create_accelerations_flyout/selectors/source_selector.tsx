@@ -57,17 +57,19 @@ interface DataSourceSelectorProps {
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
   hideHeader?: boolean;
+  hideDataSourceDescription?: boolean;
 }
 
 export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   http,
-  dataSourceFormProps: { dataSourceFormData, setDataSourceFormData },
+  dataSourceFormProps: { dataSourceFormData, formType, setDataSourceFormData },
   selectedDatasource,
   selectedDataSourceType,
   dataSourcesPreselected,
   tableFieldsLoading,
   dataSourceMDSId,
   hideHeader,
+  hideDataSourceDescription,
 }) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -82,7 +84,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     dataTable: false,
   });
 
-  const dataSourceDescription = (
+  const dataSourceDescription = hideDataSourceDescription ? null : (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>{dataSourceFormData.dataSource}</EuiDescriptionListDescription>
@@ -90,6 +92,9 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   );
 
   const loadDataSource = () => {
+    if (formType === 'SetupIntegration') {
+      return;
+    }
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
       .get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`)

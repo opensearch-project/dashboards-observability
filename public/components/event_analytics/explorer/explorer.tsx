@@ -36,7 +36,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { checkIsConnectionWithLakeFormation } from 'public/components/datasources/utils/helpers';
+import { checkIsConnectionWithLakeFormation } from '../../datasources/utils/helpers';
 import { LogExplorerRouterContext } from '..';
 import {
   DEFAULT_DATA_SOURCE_TYPE,
