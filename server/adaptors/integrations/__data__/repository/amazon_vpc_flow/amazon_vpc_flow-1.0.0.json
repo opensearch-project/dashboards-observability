@@ -24,8 +24,8 @@
     },
     {
       "name": "flint-live-dashboards",
-      "label": "Dashboards & Visualizations For Flint Integrations using live queries",
-      "description": "Dashboards and visualizations aligned with Flint S3 datasource ",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
       "enabled_by_default": false,
       "applicable_data_sources": ["s3"]
     }
