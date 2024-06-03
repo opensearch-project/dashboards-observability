@@ -10,9 +10,11 @@ CREATE EXTERNAL TABLE {table_name} (
   http_referer STRING,
   http_user_agent STRING,
   gzip_ratio STRING
-) USING csv
-LOCATION '{s3_bucket_location}'
+)
+USING csv
 OPTIONS (
   sep=' ',
-  nullValue='-'
+  nullValue='-',
+  recursiveFileLookup='true'
 )
+LOCATION '{s3_bucket_location}'

@@ -1,13 +1,13 @@
 {
   "name": "amazon_cloudfront",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Amazon CloudFront",
   "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudfront",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_cloudfront-1.0.0",
   "statics": {
     "logo": {
       "annotation": "CloudFront Logo",

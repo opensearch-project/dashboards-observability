@@ -1,13 +1,13 @@
 {
   "name": "aws_waf",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "AWS Web Application Firewall",
   "description": "Analyze AWS WAF web ACL traffic.",
   "license": "Apache-2.0",
   "type": "logs_waf",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_waf/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/aws_waf-1.0.0",
   "workflows": [
     {
       "name": "queries",
