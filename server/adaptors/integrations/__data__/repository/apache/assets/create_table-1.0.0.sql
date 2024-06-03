@@ -9,9 +9,11 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   body_bytes_sent INT,
   http_referer STRING,
   http_user_agent STRING
-) USING csv
-LOCATION '{s3_bucket_location}'
+)
+USING csv
 OPTIONS (
   sep=' ',
-  nullValue='-'
+  nullValue='-',
+  recursiveFileLookup='true'
 )
+LOCATION '{s3_bucket_location}'

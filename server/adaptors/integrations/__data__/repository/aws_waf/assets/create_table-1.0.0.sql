@@ -125,4 +125,7 @@ CREATE EXTERNAL TABLE {table_name} (
   `ja3Fingerprint` string
 )
 USING json
+OPTIONS (
+  recursiveFileLookup='true'
+)
 LOCATION '{s3_bucket_location}'
