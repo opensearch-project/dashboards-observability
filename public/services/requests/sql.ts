@@ -38,7 +38,7 @@ export class SQLService {
     errorHandler?: (error: any) => void
   ) => {
     return this.http
-      .get(`/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId}`)
+      .get(`/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId ?? ''}`)
       .catch((error) => {
         console.error('fetch error: ', error.body);
         if (errorHandler) errorHandler(error);

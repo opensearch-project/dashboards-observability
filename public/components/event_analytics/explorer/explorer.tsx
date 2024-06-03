@@ -136,6 +136,11 @@ import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { getTimeRangeFromCountDistribution, HitsCounter, Timechart } from './timechart';
 import { ExplorerVisualizations } from './visualizations';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import {
+  getRenderCreateAccelerationFlyout,
+  getRenderLogExplorerTablesFlyout,
+} from '../../../plugin';
+import { AccelerateCallout } from './accelerate_callout';
 
 export const Explorer = ({
   pplService,
@@ -207,6 +212,11 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
+  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
+  const onCreateAcceleration = () => renderCreateAccelerationFlyout(dataSourceName);
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -566,6 +576,11 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
+            {isS3Connection && (
+              <EuiFlexItem>
+                <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
+              </EuiFlexItem>
+            )}
             {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
@@ -693,6 +708,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
+    isS3Connection,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -738,11 +754,7 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization
-        currentDataSource={
-          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
-        }
-      />
+      <DirectQueryVisualization onCreateAcceleration={onCreateAcceleration} />
     );
   }, [
     query,
@@ -751,7 +763,7 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    explorerSearchMeta.datasources,
+    onCreateAcceleration,
   ]);
 
   const contentTabs = [
@@ -1065,8 +1077,25 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
+                {isS3Connection && (
+                  <>
+                    <EuiLink
+                      style={{ paddingLeft: 130 }}
+                      onClick={() => {
+                        renderTablesFlyout(dataSourceName);
+                      }}
+                    >
+                      View databases and tables
+                    </EuiLink>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {explorerSearchMeta.isPolling ? (
-                  <DirectQueryRunning tabId={tabId} />
+                  <DirectQueryRunning
+                    tabId={tabId}
+                    isS3Connection={isS3Connection}
+                    onCreateAcceleration={onCreateAcceleration}
+                  />
                 ) : (
                   <EuiTabbedContent
                     className="mainContentTabs"

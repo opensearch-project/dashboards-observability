@@ -111,21 +111,24 @@ export function SetupWorkflowSelector({
 
   const cards = integration.workflows.map((workflow) => {
     return (
-      <EuiCheckableCard
-        id={`workflow-checkbox-${workflow.name}`}
-        key={workflow.name}
-        label={workflow.label}
-        checkableType="checkbox"
-        value={workflow.name}
-        checked={useWorkflows.get(workflow.name)}
-        onChange={() => toggleWorkflow(workflow.name)}
-      >
-        {workflow.description}
-      </EuiCheckableCard>
+      <>
+        <EuiCheckableCard
+          id={`workflow-checkbox-${workflow.name}`}
+          key={workflow.name}
+          label={workflow.label}
+          checkableType="checkbox"
+          value={workflow.name}
+          checked={useWorkflows.get(workflow.name)}
+          onChange={() => toggleWorkflow(workflow.name)}
+        >
+          {workflow.description}
+        </EuiCheckableCard>
+        <EuiSpacer size="s" />
+      </>
     );
   });
 
-  return cards;
+  return <>{cards}</>;
 }
 
 export function IntegrationDetailsInputs({
@@ -139,7 +142,7 @@ export function IntegrationDetailsInputs({
 }) {
   return (
     <EuiFormRow
-      label="Display Name"
+      label={'Integration display Name'}
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
@@ -241,51 +244,59 @@ export function IntegrationQueryInputs({
   config,
   updateConfig,
   integration,
+  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
   return (
     <>
+      {!isS3ConnectionWithLakeFormation && (
+        <>
+          <EuiFormRow
+            label="Spark Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Data Location"
+            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBucketBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiFormRow
-        label="Spark Table Name"
-        helpText="Select a table name to associate with your data."
-        error={['Must be at least 1 character.']}
-        isInvalid={config.connectionTableName.length === 0}
-      >
-        <EuiFieldText
-          placeholder={integration.name}
-          value={config.connectionTableName}
-          onChange={(evt) => {
-            updateConfig({ connectionTableName: evt.target.value });
-          }}
-          isInvalid={config.connectionTableName.length === 0}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Data Location"
-        isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-        error={["Must be a URL starting with 's3://'."]}
-      >
-        <EuiFieldText
-          value={config.connectionLocation}
-          onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-          placeholder="s3://"
-          isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-          onBlur={() => {
-            setIsBucketBlurred(true);
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Checkpoint Location"
+        label={`S3 Checkpoint Location`}
         helpText={
-          'The Checkpoint location must be a unique directory and not the same as the Data ' +
-          'location. It will be used for caching intermediary results.'
+          isS3ConnectionWithLakeFormation
+            ? 'The checkpoint location for caching intermediary results.'
+            : 'The Checkpoint location must be a unique directory and not the same as the Data ' +
+              'location. It will be used for caching intermediary results.'
         }
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
@@ -348,13 +359,9 @@ export function IntegrationWorkflowsInputs({
   );
 }
 
-export function SetupIntegrationFormInputs({
-  config,
-  updateConfig,
-  integration,
-  setupCallout,
-  lockConnectionType,
-}: IntegrationConfigProps) {
+export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
+  const { config, updateConfig, integration, setupCallout, lockConnectionType } = props;
+
   return (
     <EuiForm>
       <EuiTitle>

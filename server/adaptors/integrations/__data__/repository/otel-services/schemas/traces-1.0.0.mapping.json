@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_traces-*-*"
-  ],
+  "index_patterns": ["ss4o_traces-*-*"],
   "template": {
     "mappings": {
       "_meta": {
@@ -107,8 +105,9 @@
         },
         "attributes": {
           "type": "object",
-          "data_stream": {
-            "properties": {
+          "properties": {
+            "data_stream": {
+              "properties": {
                 "dataset": {
                   "ignore_above": 128,
                   "type": "keyword"
@@ -182,7 +181,8 @@
           "type": "keyword"
         }
       }
-    },
+    }
+  },
   "composed_of": [],
   "version": 1,
   "_meta": {
