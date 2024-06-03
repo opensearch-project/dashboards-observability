@@ -203,6 +203,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
   </EuiFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
+    config={
+      Object {
+        "checkpointLocation": "",
+        "connectionDataSource": "ss4o_logs-nginx-test",
+        "connectionLocation": "",
+        "connectionTableName": "",
+        "connectionType": "s3",
+        "displayName": "Test Instance Name",
+        "enabledWorkflows": Array [],
+      }
+    }
     integration={
       Object {
         "assets": Array [
@@ -443,6 +454,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
   </EuiFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
+    config={
+      Object {
+        "checkpointLocation": "",
+        "connectionDataSource": "ss4o_logs-nginx-test",
+        "connectionLocation": "",
+        "connectionTableName": "",
+        "connectionType": "s3",
+        "displayName": "Test Instance Name",
+        "enabledWorkflows": Array [],
+      }
+    }
     integration={
       Object {
         "assets": Array [
@@ -2165,6 +2187,17 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
 
 exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
 <IntegrationWorkflowsInputs
+  config={
+    Object {
+      "checkpointLocation": "",
+      "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
+      "connectionType": "index",
+      "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
+    }
+  }
   integration={
     Object {
       "assets": Array [
@@ -2219,6 +2252,17 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
         className="euiFormRow__fieldWrapper"
       >
         <SetupWorkflowSelector
+          config={
+            Object {
+              "checkpointLocation": "",
+              "connectionDataSource": "ss4o_logs-nginx-test",
+              "connectionLocation": "",
+              "connectionTableName": "",
+              "connectionType": "index",
+              "displayName": "Test Instance Name",
+              "enabledWorkflows": Array [],
+            }
+          }
           id="random_html_id"
           integration={
             Object {
@@ -2257,6 +2301,267 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
             Array [
               Array [
                 "workflow1",
+                true,
+              ],
+            ]
+          }
+        >
+          <EuiCheckableCard
+            checkableType="checkbox"
+            checked={true}
+            id="workflow-checkbox-workflow1"
+            key="workflow1"
+            label="Workflow 1"
+            onChange={[Function]}
+            value="workflow1"
+          >
+            <_EuiSplitPanelOuter
+              className="euiCheckableCard euiCheckableCard-isChecked"
+              direction="row"
+              hasBorder={true}
+              responsive={false}
+            >
+              <EuiPanel
+                className="euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+                grow={false}
+                hasBorder={true}
+                paddingSize="none"
+              >
+                <div
+                  className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+                >
+                  <_EuiSplitPanelInner
+                    color="primary"
+                    grow={false}
+                    onClick={[Function]}
+                  >
+                    <EuiPanel
+                      borderRadius="none"
+                      className="euiSplitPanel__inner"
+                      color="primary"
+                      element="div"
+                      grow={false}
+                      hasBorder={false}
+                      hasShadow={false}
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+                        onClick={[Function]}
+                      >
+                        <EuiCheckbox
+                          checked={true}
+                          compressed={false}
+                          disabled={false}
+                          id="workflow-checkbox-workflow1"
+                          indeterminate={false}
+                          onChange={[Function]}
+                          value="workflow1"
+                        >
+                          <div
+                            className="euiCheckbox euiCheckbox--noLabel"
+                          >
+                            <input
+                              checked={true}
+                              className="euiCheckbox__input"
+                              disabled={false}
+                              id="workflow-checkbox-workflow1"
+                              onChange={[Function]}
+                              type="checkbox"
+                              value="workflow1"
+                            />
+                            <div
+                              className="euiCheckbox__square"
+                            />
+                          </div>
+                        </EuiCheckbox>
+                      </div>
+                    </EuiPanel>
+                  </_EuiSplitPanelInner>
+                  <_EuiSplitPanelInner>
+                    <EuiPanel
+                      borderRadius="none"
+                      className="euiSplitPanel__inner"
+                      color="transparent"
+                      element="div"
+                      hasBorder={false}
+                      hasShadow={false}
+                    >
+                      <div
+                        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      >
+                        <label
+                          aria-describedby="workflow-checkbox-workflow1-details"
+                          className="euiCheckableCard__label"
+                          htmlFor="workflow-checkbox-workflow1"
+                        >
+                          Workflow 1
+                        </label>
+                        <div
+                          className="euiCheckableCard__children"
+                          id="workflow-checkbox-workflow1-details"
+                        >
+                          This is a test workflow.
+                        </div>
+                      </div>
+                    </EuiPanel>
+                  </_EuiSplitPanelInner>
+                </div>
+              </EuiPanel>
+            </_EuiSplitPanelOuter>
+          </EuiCheckableCard>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
+        </SetupWorkflowSelector>
+      </div>
+    </div>
+  </EuiFormRow>
+</IntegrationWorkflowsInputs>
+`;
+
+exports[`Integration Setup Inputs Renders the workflows inputs with conditional workflows 1`] = `
+<IntegrationWorkflowsInputs
+  config={
+    Object {
+      "checkpointLocation": "",
+      "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
+      "connectionType": "s3",
+      "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
+    }
+  }
+  integration={
+    Object {
+      "assets": Array [
+        Object {
+          "extension": "ndjson",
+          "name": "sample",
+          "type": "savedObjectBundle",
+          "version": "1.0.1",
+        },
+      ],
+      "components": Array [
+        Object {
+          "name": "logs",
+          "version": "1.0.0",
+        },
+      ],
+      "license": "Apache-2.0",
+      "name": "sample",
+      "type": "logs",
+      "version": "2.0.0",
+      "workflows": Array [
+        Object {
+          "description": "This is a test workflow.",
+          "enabled_by_default": true,
+          "label": "Workflow 1",
+          "name": "workflow1",
+        },
+        Object {
+          "applicable_data_sources": Array [
+            "index",
+          ],
+          "description": "This should not render.",
+          "enabled_by_default": true,
+          "label": "Workflow 2",
+          "name": "workflow2",
+        },
+      ],
+    }
+  }
+  updateConfig={[Function]}
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Must select at least one workflow.",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    labelType="label"
+  >
+    <div
+      className="euiFormRow"
+      id="random_html_id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <SetupWorkflowSelector
+          config={
+            Object {
+              "checkpointLocation": "",
+              "connectionDataSource": "ss4o_logs-nginx-test",
+              "connectionLocation": "",
+              "connectionTableName": "",
+              "connectionType": "s3",
+              "displayName": "Test Instance Name",
+              "enabledWorkflows": Array [],
+            }
+          }
+          id="random_html_id"
+          integration={
+            Object {
+              "assets": Array [
+                Object {
+                  "extension": "ndjson",
+                  "name": "sample",
+                  "type": "savedObjectBundle",
+                  "version": "1.0.1",
+                },
+              ],
+              "components": Array [
+                Object {
+                  "name": "logs",
+                  "version": "1.0.0",
+                },
+              ],
+              "license": "Apache-2.0",
+              "name": "sample",
+              "type": "logs",
+              "version": "2.0.0",
+              "workflows": Array [
+                Object {
+                  "description": "This is a test workflow.",
+                  "enabled_by_default": true,
+                  "label": "Workflow 1",
+                  "name": "workflow1",
+                },
+                Object {
+                  "applicable_data_sources": Array [
+                    "index",
+                  ],
+                  "description": "This should not render.",
+                  "enabled_by_default": true,
+                  "label": "Workflow 2",
+                  "name": "workflow2",
+                },
+              ],
+            }
+          }
+          onBlur={[Function]}
+          onFocus={[Function]}
+          toggleWorkflow={[Function]}
+          useWorkflows={
+            Array [
+              Array [
+                "workflow1",
+                true,
+              ],
+              Array [
+                "workflow2",
                 true,
               ],
             ]
