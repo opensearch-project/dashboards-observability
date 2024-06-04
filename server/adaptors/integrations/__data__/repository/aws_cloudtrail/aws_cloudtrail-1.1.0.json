@@ -1,13 +1,13 @@
 {
   "name": "aws_cloudtrail",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "AWS CloudTrail",
   "description": "Analyze CloudTrail events.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudtrail",
   "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudtrail/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/aws_cloudtrail-1.1.0",
   "workflows": [
     {
       "name": "dashboards",
