@@ -3,8 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import {
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+  EuiText,
+} from '@elastic/eui';
+import React, { Fragment, useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACC_INDEX_TYPE_DOCUMENTATION_URL,
@@ -28,17 +35,9 @@ export const IndexTypeSelector = ({
   setAccelerationFormData,
   initiateColumnLoad,
 }: IndexTypeSelectorProps) => {
-  const [value, setValue] = useState('skipping');
-  // This is used to track if user changed the value
-  // If so, we skip changing it based on 'dataSourceType' in the effect below
-  const valueSetAlready = useRef(false);
-
-  useEffect(() => {
-    if (!valueSetAlready.current) {
-      const defaultSelectedOption = dataSourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping';
-      updateState(defaultSelectedOption);
-    }
-  }, [dataSourceType]);
+  const [value, setValue] = useState<AccelerationIndexType>(
+    dataSourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping'
+  );
 
   useEffect(() => {
     initiateColumnLoad(
@@ -48,22 +47,21 @@ export const IndexTypeSelector = ({
     );
   }, [accelerationFormData.dataTable]);
 
-  const updateState = (indexType: string) => {
+  const updateState = (indexType: AccelerationIndexType) => {
     setAccelerationFormData({
       ...accelerationFormData,
-      accelerationIndexType: indexType as AccelerationIndexType,
+      accelerationIndexType: indexType,
       accelerationIndexName:
         indexType === 'skipping' ? ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME : '',
     });
     setValue(indexType);
   };
 
-  const onChangeSupeSelect = (indexType: string) => {
+  const onChangeSupeSelect = (indexType: AccelerationIndexType) => {
     updateState(indexType);
-    valueSetAlready.current = true;
   };
 
-  const baseOptions =
+  const baseOptions: Array<EuiSuperSelectOption<AccelerationIndexType>> =
     dataSourceType.toUpperCase() !== 'SECURITYLAKE'
       ? [
           {
@@ -83,7 +81,7 @@ export const IndexTypeSelector = ({
         ]
       : [];
 
-  const superSelectOptions = [
+  const superSelectOptions: Array<EuiSuperSelectOption<AccelerationIndexType>> = [
     ...baseOptions,
     {
       value: 'covering',
