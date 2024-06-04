@@ -20,9 +20,6 @@ The main service is open to user interactions:
 _**The shopping App**_
 ![](https://opentelemetry.io/docs/demo/screenshots/frontend-1.png)
 
-_**The feature flag**_
-![](https://opentelemetry.io/docs/demo/screenshots/feature-flag-ui.png)
-
 _**The load generator**_
 ![](https://opentelemetry.io/docs/demo/screenshots/load-generator-ui.png)
 

@@ -2,7 +2,7 @@
 
 ## Setup OpenSearch & OpenSearch Dashboards dev environment and use the plugin with Zeppelin
 
-- Please follow [README.md](../../../../../../DEVELOPER_GUIDE.md) for build instructions.
+- Please follow [README.md](../../../../../DEVELOPER_GUIDE.md) for build instructions.
 
 - Start OpenSearch Dashboards
 
