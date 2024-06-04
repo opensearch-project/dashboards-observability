@@ -216,7 +216,12 @@ export function IntegrationConnectionInputs({
       >
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
-            if (item.value === 's3' || item.value === 'securityLake') {
+            if (item.value === 'securityLake') {
+              return (
+                integration.assets.some((asset) => asset.type === 'query') &&
+                integration.workflows?.some((workflow) => workflow.name.includes('security-lake'))
+              );
+            } else if (item.value === 's3') {
               return integration.assets.some((asset) => asset.type === 'query');
             } else if (item.value === 'index') {
               return integration.assets.some((asset) => asset.type === 'savedObjectBundle');
