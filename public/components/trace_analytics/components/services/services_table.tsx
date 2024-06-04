@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import round from 'lodash/round';
 import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
@@ -30,6 +29,7 @@ import {
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { ServiceTrendsPlots } from './service_trends_plots';
 
 interface ServicesTableProps {
   items: any[];
@@ -98,7 +98,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 size="xs"
                 onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
               >
-                {isServiceTrendEnabled ? 'Show 24 hour trends' : 'Hide 24 hour trends'}
+                {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -126,15 +126,30 @@ export function ServicesTable(props: ServicesTableProps) {
           name: 'Average duration (ms)',
           align: 'right',
           sortable: true,
-          render: (item: any) => (item === 0 || item ? round(item, 2) : '-'),
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="average_latency"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         {
           field: 'error_rate',
           name: 'Error rate',
           align: 'right',
           sortable: true,
-          render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-',
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="error_rate"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         {
           field: 'throughput',
@@ -142,7 +157,15 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'right',
           sortable: true,
           truncateText: true,
-          render: (item: any) => (item === 0 || item ? <EuiI18nNumber value={item} /> : '-'),
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="throughput"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         ...(mode === 'data_prepper'
           ? [
@@ -223,7 +246,11 @@ export function ServicesTable(props: ServicesTableProps) {
     [items]
   );
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [items, selectedItems]);
+  const titleBar = useMemo(() => renderTitleBar(items?.length), [
+    items,
+    selectedItems,
+    isServiceTrendEnabled,
+  ]);
 
   return (
     <>

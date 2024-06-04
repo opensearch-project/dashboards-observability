@@ -90,6 +90,10 @@ export function ServicesContent(props: ServicesProps) {
       refresh(newFilteredService);
   }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
+  useEffect(() => {
+    refresh();
+  }, [isServiceTrendEnabled]);
+
   const refresh = async (currService?: string, overrideQuery?: string) => {
     const filterQuery = overrideQuery ?? query;
     setLoading(true);
@@ -107,17 +111,6 @@ export function ServicesContent(props: ServicesProps) {
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
       (must: any) => must?.term?.serviceName == null
     );
-    await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
-      handleServiceMapRequest(
-        http,
-        serviceMapDSL,
-        mode,
-        dataSourceMDSId[0].id,
-        setServiceMap,
-        currService || filteredService
-      ),
-    ]);
 
     if (isServiceTrendEnabled) {
       // const serviceFilter = [
@@ -136,6 +129,17 @@ export function ServicesContent(props: ServicesProps) {
         dataSourceMDSId[0].id
       );
     }
+    await Promise.all([
+      handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
+      handleServiceMapRequest(
+        http,
+        serviceMapDSL,
+        mode,
+        dataSourceMDSId[0].id,
+        setServiceMap,
+        currService || filteredService
+      ),
+    ]);
 
     setLoading(false);
   };

@@ -14,19 +14,14 @@ import {
   PanelTitle,
 } from '../helper_functions';
 
-export function ThroughputPlt(props: {
-  title?: string;
+export function ThroughputTrendPlt(props: {
+  onClick: (event: any) => void;
   items: { items: Plotly.Data[]; fixedInterval: string };
-  setStartTime: (startTime: string) => void;
-  setEndTime: (endTime: string) => void;
-  setIdSelected: (mode: string) => void;
-  idSelected: string;
-  toggleButtons: any[];
+  isPanel: boolean;
 }) {
   const layout = useMemo(
     () =>
       ({
-        height: 217,
         margin: {
           l: 50,
           r: 5,
@@ -46,7 +41,7 @@ export function ThroughputPlt(props: {
               undefined
             )}`,
             ax: 0,
-            ay: -160,
+            ay: -140,
             borderpad: 10,
             arrowwidth: 0.7,
             font: {
@@ -75,10 +70,37 @@ export function ThroughputPlt(props: {
           visible: true,
           color: '#899195',
         },
+        ...(!props.isPanel ? { height: 200 } : { height: 217 }),
+        ...(!props.isPanel && { width: 400 }),
       } as Partial<Plotly.Layout>),
     [props.items]
   );
+  return (
+    <>
+      {' '}
+      {props.items?.items?.length > 0 ? (
+        <Plt
+          data={props.items.items}
+          layout={layout}
+          onClickHandler={props.onClick}
+          height={props.isPanel ? '217' : '200'}
+        />
+      ) : (
+        <NoMatchMessage size="s" />
+      )}
+    </>
+  );
+}
 
+export function ThroughputPlt(props: {
+  title?: string;
+  items: { items: Plotly.Data[]; fixedInterval: string };
+  setStartTime: (startTime: string) => void;
+  setEndTime: (endTime: string) => void;
+  setIdSelected: (mode: string) => void;
+  idSelected: string;
+  toggleButtons: any[];
+}) {
   const onClick = (event) => {
     if (!event?.points) return;
     const point = event.points[0];
@@ -103,11 +125,7 @@ export function ThroughputPlt(props: {
           />
         </EuiFlexGroup>
         <EuiHorizontalRule margin="m" />
-        {props.items?.items?.length > 0 ? (
-          <Plt data={props.items.items} layout={layout} onClickHandler={onClick} />
-        ) : (
-          <NoMatchMessage size="s" />
-        )}
+        <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
       </EuiPanel>
     </>
   );

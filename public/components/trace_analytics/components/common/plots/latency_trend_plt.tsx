@@ -74,6 +74,9 @@ export function LatencyPlt(props: { data: Plotly.Data[]; isPanel?: boolean }) {
             ay: -140,
             borderpad: 10,
             arrowwidth: 0.7,
+            font: {
+              color: '#899195',
+            },
           },
         ],
         margin: {
@@ -83,7 +86,7 @@ export function LatencyPlt(props: { data: Plotly.Data[]; isPanel?: boolean }) {
           t: 30,
           pad: 0,
         },
-        ...(props.isPanel ? { height: 217 } : { height: 200 }),
+        ...(!props.isPanel ? { height: 200 } : { height: 217 }),
         ...(!props.isPanel && { width: 400 }),
       } as Partial<Plotly.Layout>),
     [props.data]
