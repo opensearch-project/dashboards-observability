@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiCopy,
@@ -18,17 +19,24 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import round from 'lodash/round';
 import isEmpty from 'lodash/isEmpty';
+import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { SpanField } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
+import './span_detail_flyout.scss';
 
 const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
   data_prepper: {
@@ -69,6 +77,10 @@ export function SpanDetailFlyout(props: {
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  serviceName?: string;
+  setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
+  startTime?: string;
+  endTime?: string;
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
@@ -266,13 +278,54 @@ export function SpanDetailFlyout(props: {
     );
   };
 
+  const redirectToExplorer = () => {
+    const spanId = getSpanValue(span, mode, 'SPAN_ID');
+    const spanField = getSpanFieldKey(mode, 'SPAN_ID');
+    coreRefs?.application!.navigateToApp(observabilityLogsID, {
+      path: `#/explorer`,
+      state: {
+        DEFAULT_DATA_SOURCE_NAME,
+        DEFAULT_DATA_SOURCE_TYPE,
+        queryToRun: `source = otel-* | where ${spanField}='${spanId}'`,
+        startTimeRange: props.startTime,
+        endTimeRange: props.endTime,
+      },
+    });
+  };
+
   return (
     <>
       <EuiFlyout data-test-subj="spanDetailFlyout" onClose={props.closeFlyout} size="s">
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle>
-            <h2>Span detail</h2>
-          </EuiTitle>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>Span detail</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                View associated logs
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {props.serviceName && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  className="span-flyout-back-btn"
+                  color="text"
+                  size="xs"
+                  aria-label="backToServiceFlyout"
+                  title="Back"
+                  iconType="sortRight"
+                  onClick={() => {
+                    props.setCurrentSelectedService &&
+                      props.setCurrentSelectedService(props.serviceName);
+                    props.closeFlyout();
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{renderContent()}</EuiFlyoutBody>
       </EuiFlyout>

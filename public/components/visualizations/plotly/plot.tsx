@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import Plotly from 'plotly.js-dist';
 import React from 'react';
 import plotComponentFactory from 'react-plotly.js/factory';
-import Plotly from 'plotly.js-dist';
 import { uiSettingsService } from '../../../../common/utils';
 
 interface PltProps {
@@ -62,7 +62,9 @@ export function Plt(props: PltProps) {
         },
       ],
     },
-    ...darkLayout,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    // ...darkLayout,
     ...props.layout,
   };
 

@@ -28,6 +28,7 @@ import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
 import { TraceView, Traces } from './components/traces';
+import { SpanDetailFlyout } from './components/traces/span_detail_flyout';
 import {
   handleDataPrepperIndicesExistRequest,
   handleJaegerIndicesExistRequest,
@@ -59,6 +60,21 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
   attributesFilterFields: string[];
+  setSpanFlyout: ({
+    spanId,
+    isFlyoutVisible,
+    addSpanFilter,
+    closeFlyout,
+    mode,
+    dataSourceMDSId,
+  }: {
+    spanId: string;
+    isFlyoutVisible: boolean;
+    closeFlyout: () => void;
+    addSpanFilter: (field: string, value: any) => void;
+    mode: TraceAnalyticsMode;
+    dataSourceMDSId: string;
+  }) => void;
 }
 
 export const Home = (props: HomeProps) => {
@@ -104,7 +120,7 @@ export const Home = (props: HomeProps) => {
   };
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
-  const [serviceFlyoutComponent, setServiceFlyoutComponent] = useState(<></>);
+  const [currentSelectedService, setCurrentSelectedService] = useState('');
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -166,18 +182,41 @@ export const Home = (props: HomeProps) => {
   const nameColumnAction = (item: any) => location.assign(`#/services/${encodeURIComponent(item)}`);
   const traceColumnAction = () => location.assign('#/traces');
   const onClickAction = (row: any) => {
-    console.log('action clicked', row);
-    setServiceFlyoutComponent(
-      <ServiceFlyout
-        serviceName={row.name}
+    setCurrentSelectedService(row.name);
+  };
+
+  const traceIdColumnAction = (item: any) =>
+    location.assign(`#/traces/${encodeURIComponent(item)}`);
+
+  const [spanFlyoutComponent, setSpanFlyoutComponent] = useState(<></>);
+
+  const setSpanFlyout = ({
+    spanId,
+    isFlyoutVisible,
+    closeFlyout,
+    addSpanFilter,
+    mode,
+    dataSourceMDSId,
+  }: {
+    spanId: string;
+    isFlyoutVisible: boolean;
+    closeFlyout: () => void;
+    addSpanFilter: (field: string, value: any) => void;
+    mode: TraceAnalyticsMode;
+    dataSourceMDSId: string;
+  }) => {
+    setSpanFlyoutComponent(
+      <SpanDetailFlyout
+        http={props.http}
+        spanId={spanId}
+        isFlyoutVisible={isFlyoutVisible}
+        closeFlyout={() => setSpanFlyoutComponent(<></>)}
+        addSpanFilter={addSpanFilter}
+        mode={mode}
         dataSourceMDSId={dataSourceMDSId}
-        onClose={async () => setServiceFlyoutComponent(<></>)}
-        commonProps={commonProps}
       />
     );
   };
-  const traceIdColumnAction = (item: any) =>
-    location.assign(`#/traces/${encodeURIComponent(item)}`);
 
   const [appConfigs, _] = useState([]);
   const commonProps: TraceAnalyticsComponentDeps = {
@@ -206,7 +245,9 @@ export const Home = (props: HomeProps) => {
     setActionMenu: props.setActionMenu,
     savedObjectsMDSClient: props.savedObjectsMDSClient,
     attributesFilterFields,
+    setSpanFlyout,
   };
+
   const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
     const { id = '', label = '' } = dataSources[0] || {};
     if (dataSourceMDSId[0].id !== id || dataSourceMDSId[0].label !== label) {
@@ -217,6 +258,23 @@ export const Home = (props: HomeProps) => {
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
     DataSourceSelectableConfig
   >();
+
+  let flyout;
+
+  if (currentSelectedService !== '') {
+    flyout = (
+      <ServiceFlyout
+        serviceName={currentSelectedService}
+        setCurrentSelectedService={setCurrentSelectedService}
+        dataSourceMDSId={dataSourceMDSId}
+        onClose={async () => {
+          setCurrentSelectedService('');
+        }}
+        commonProps={commonProps}
+      />
+    );
+  }
+
   return (
     <>
       {props.dataSourceEnabled && (
@@ -316,7 +374,8 @@ export const Home = (props: HomeProps) => {
           )}
         />
       </HashRouter>
-      {serviceFlyoutComponent}
+      {flyout}
+      {spanFlyoutComponent}
     </>
   );
 };

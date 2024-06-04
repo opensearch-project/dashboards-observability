@@ -7,9 +7,11 @@
 import { EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
+import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
+  handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { FilterType } from '../common/filters/filters';
@@ -53,6 +55,10 @@ export function ServicesContent(props: ServicesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [filteredService, setFilteredService] = useState('');
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [isServiceTrendEnabled, setIsServiceTrendEnabled] = useState(false);
+  const [serviceTrends, setServiceTrends] = useState<ServiceTrends>({});
+  const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
 
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
@@ -112,6 +118,25 @@ export function ServicesContent(props: ServicesProps) {
         currService || filteredService
       ),
     ]);
+
+    if (isServiceTrendEnabled) {
+      // const serviceFilter = [
+      //   {
+      //     terms: {
+      //       serviceName: [...],
+      //     },
+      //   },
+      // ];
+      await handleServiceTrendsRequest(
+        http,
+        '1h',
+        setServiceTrends,
+        mode,
+        [],
+        dataSourceMDSId[0].id
+      );
+    }
+
     setLoading(false);
   };
 
@@ -130,9 +155,6 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
-  const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
-
   const updateSearchQuery = (newQuery: string) => {
     if (searchBarRef.current) {
       searchBarRef.current.updateQuery(newQuery);
@@ -142,7 +164,7 @@ export function ServicesContent(props: ServicesProps) {
   const addServicesGroupFilter = () => {
     const groupFilter = selectedItems.map((item) => 'serviceName: ' + item.name);
     const filterQuery = groupFilter.join(' OR ');
-    const newQuery = query ? `${query} AND (${filterQuery})` : `(${filterQuery})`;
+    const newQuery = query ? `(${query}) AND (${filterQuery})` : `(${filterQuery})`;
     updateSearchQuery(newQuery);
   };
 
@@ -179,6 +201,9 @@ export function ServicesContent(props: ServicesProps) {
         onClickAction={onClickAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        isServiceTrendEnabled={isServiceTrendEnabled}
+        setIsServiceTrendEnabled={setIsServiceTrendEnabled}
+        serviceTrends={serviceTrends}
       />
       <EuiSpacer size="m" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (

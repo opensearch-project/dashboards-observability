@@ -94,6 +94,7 @@ export const handleDashboardRequest = async (
                       ...values,
                       type: 'scatter',
                       mode: 'lines+markers',
+                      fill: 'tozeroy',
                       hovertemplate: '%{x}<br>Average latency: %{y}<extra></extra>',
                       hoverlabel: {
                         bgcolor: '#d7c2ff',

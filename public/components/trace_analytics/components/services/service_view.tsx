@@ -6,14 +6,21 @@
 
 import {
   EuiBadge,
+  EuiButton,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiI18nNumber,
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,6 +32,12 @@ import {
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
@@ -36,6 +49,7 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
+import { ServiceMetrics } from './service_metrics';
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -44,16 +58,18 @@ interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   dataSourceEnabled: boolean;
   page?: string;
+  setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export function ServiceView(props: ServiceViewProps) {
-  const { mode } = props;
+  const { mode, page, setCurrentSelectedService } = props;
   const [fields, setFields] = useState<any>({});
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
   >('latency');
   const [redirect, setRedirect] = useState(false);
+  const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
 
   const refresh = () => {
     const DSL = filtersToDsl(
@@ -84,26 +100,81 @@ export function ServiceView(props: ServiceViewProps) {
   };
 
   useEffect(() => {
-    props.chrome.setBreadcrumbs([
-      props.parentBreadcrumb,
-      {
-        text: 'Trace analytics',
-        href: '#/',
-      },
-      {
-        text: 'Services',
-        href: '#/services',
-      },
-      {
-        text: props.serviceName,
-        href: `#/services/${encodeURIComponent(props.serviceName)}`,
-      },
-    ]);
+    if (page !== 'serviceFlyout')
+      props.chrome.setBreadcrumbs([
+        props.parentBreadcrumb,
+        {
+          text: 'Trace analytics',
+          href: '#/',
+        },
+        {
+          text: 'Services',
+          href: '#/services',
+        },
+        {
+          text: props.serviceName,
+          href: `#/services/${encodeURIComponent(props.serviceName)}`,
+        },
+      ]);
   }, [props.serviceName]);
+
+  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
+  const redirectToServicePage = (service: string) => {
+    window.location.href = `#/services/${service}`;
+  };
+
+  const onClickConnectedService = (service: string) => {
+    if (page !== 'serviceFlyout') redirectToServicePage(service);
+    else setCurrentSelectedService && setCurrentSelectedService(service);
+  };
 
   useEffect(() => {
     if (!redirect) refresh();
   }, [props.startTime, props.endTime, props.serviceName, props.mode]);
+
+  const actionsButton = (
+    <EuiButton
+      data-test-subj="ActionContextMenu"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={() => setActionsMenuPopover(true)}
+    >
+      Actions
+    </EuiButton>
+  );
+
+  const actionsMenu: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: [
+        {
+          name: 'View associated logs',
+          'data-test-subj': 'viewLogsButton',
+          onClick: () => {
+            coreRefs?.application!.navigateToApp(observabilityLogsID, {
+              path: `#/explorer`,
+              state: {
+                DEFAULT_DATA_SOURCE_NAME,
+                DEFAULT_DATA_SOURCE_TYPE,
+                queryToRun: `source = otel-* | where serviceName='${props.serviceName}'`,
+                startTimeRange: props.startTime,
+                endTimeRange: props.endTime,
+              },
+            });
+          },
+        },
+        {
+          name: 'View in services page',
+          'data-test-subj': 'viewServiceButton',
+          onClick: () => {
+            setCurrentSelectedService && setCurrentSelectedService('');
+            redirectToServicePage(props.serviceName);
+          },
+        },
+      ],
+    },
+  ];
 
   const renderTitle = (
     serviceName: string,
@@ -111,23 +182,54 @@ export function ServiceView(props: ServiceViewProps) {
     setStartTime: SearchBarProps['setStartTime'],
     endTime: SearchBarProps['endTime'],
     setEndTime: SearchBarProps['setEndTime'],
-    _addFilter: (filter: FilterType) => void
+    _addFilter: (filter: FilterType) => void,
+    page?: string
   ) => {
     return (
       <>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2 className="overview-content">{serviceName}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} />
+        {page === 'serviceFlyout' ? (
+          <EuiFlyoutHeader style={{ padding: 0 }}>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiTitle size="l">
+                  <h2 className="overview-content">{serviceName}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      panelPaddingSize="none"
+                      button={actionsButton}
+                      isOpen={actionsMenuPopover}
+                      closePopover={() => setActionsMenuPopover(false)}
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+        ) : (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle size="l">
+                <h2 className="overview-content">{serviceName}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </>
     );
   };
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
   const renderOverview = () => {
     return (
       <>
@@ -172,7 +274,10 @@ export function ServiceView(props: ServiceViewProps) {
                       {fields.connected_services && fields.connected_services.length
                         ? fields.connected_services
                             .map((service: string) => (
-                              <EuiLink href={`#/services/${service}`} key={service}>
+                              <EuiLink
+                                onClick={() => onClickConnectedService(service)}
+                                key={service}
+                              >
                                 {service}
                               </EuiLink>
                             ))
@@ -219,6 +324,7 @@ export function ServiceView(props: ServiceViewProps) {
                     {fields.traces === 0 || fields.traces ? (
                       <EuiLink
                         onClick={() => {
+                          setCurrentSelectedService && setCurrentSelectedService('');
                           setRedirect(true);
                           const filterField =
                             mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
@@ -258,9 +364,10 @@ export function ServiceView(props: ServiceViewProps) {
         props.setStartTime,
         props.endTime,
         props.setEndTime,
-        props.addFilter
+        props.addFilter,
+        page
       ),
-    [props.serviceName, props.startTime, props.endTime]
+    [props.serviceName, props.startTime, props.endTime, page, actionsMenuPopover]
   );
 
   const activeFilters = useMemo(
@@ -361,62 +468,102 @@ export function ServiceView(props: ServiceViewProps) {
         dataSourceMDSId={props.dataSourceMDSId[0].id}
       />
     ),
-    [DSL, setCurrentSpan]
+    [DSL, setCurrentSpan, spanFilters]
+  );
+
+  const pageToRender = (
+    <>
+      {activeFilters.length > 0 && (
+        <EuiText textAlign="right" style={{ marginRight: 20 }} color="subdued">
+          results are filtered by {activeFilters.map((filter) => filter.field).join(', ')}
+        </EuiText>
+      )}
+      <EuiSpacer size="xl" />
+      {overview}
+      <EuiSpacer />
+      <ServiceMetrics
+        serviceName={props.serviceName}
+        fixedInterval={'1h'}
+        mode={mode}
+        dataSourceMDSId={props.dataSourceMDSId}
+        startTime={props.startTime}
+        endTime={props.endTime}
+        setStartTime={props.setStartTime}
+        setEndTime={props.setEndTime}
+        page={props.page}
+      />
+      <EuiSpacer />
+      {mode === 'data_prepper' ? (
+        <ServiceMap
+          serviceMap={serviceMap}
+          idSelected={serviceMapIdSelected}
+          setIdSelected={setServiceMapIdSelected}
+          currService={props.serviceName}
+          page="serviceView"
+        />
+      ) : (
+        <div />
+      )}
+      <EuiSpacer />
+      <EuiPanel>
+        <PanelTitle title="Spans" totalItems={total} />
+        {spanFilters.length > 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" wrap>
+              {renderFilters}
+            </EuiFlexGroup>
+          </>
+        )}
+        <EuiHorizontalRule margin="m" />
+        <div>{spanDetailTable}</div>
+      </EuiPanel>
+    </>
   );
 
   return (
     <>
-      <EuiPage>
-        <EuiPageBody>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+      {page === 'serviceFlyout' ? (
+        !!currentSpan ? (
+          <SpanDetailFlyout
+            http={props.http}
+            spanId={currentSpan}
+            isFlyoutVisible={!!currentSpan}
+            closeFlyout={() => setCurrentSpan('')}
+            addSpanFilter={addSpanFilter}
+            mode={mode}
+            dataSourceMDSId={props.dataSourceMDSId[0].id}
+          />
+        ) : (
+          <EuiFlyout
+            ownFocus
+            onClose={() => props.setCurrentSelectedService && props.setCurrentSelectedService('')}
+          >
+            <EuiFlyoutBody>
+              {title}
+              {pageToRender}
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        )
+      ) : (
+        <EuiPage>
+          <EuiPageBody>
             {title}
-          </EuiFlexGroup>
-          {activeFilters.length > 0 && (
-            <EuiText textAlign="right" style={{ marginRight: 20 }} color="subdued">
-              results are filtered by {activeFilters.map((filter) => filter.field).join(', ')}
-            </EuiText>
-          )}
-          <EuiSpacer size="xl" />
-          {overview}
-          <EuiSpacer />
-          {mode === 'data_prepper' ? (
-            <ServiceMap
-              serviceMap={serviceMap}
-              idSelected={serviceMapIdSelected}
-              setIdSelected={setServiceMapIdSelected}
-              currService={props.serviceName}
-              page="serviceView"
-            />
-          ) : (
-            <div />
-          )}
-          <EuiSpacer />
-          <EuiPanel>
-            <PanelTitle title="Spans" totalItems={total} />
-            {spanFilters.length > 0 && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" wrap>
-                  {renderFilters}
-                </EuiFlexGroup>
-              </>
+            {pageToRender}
+            {!!currentSpan && (
+              <SpanDetailFlyout
+                http={props.http}
+                spanId={currentSpan}
+                isFlyoutVisible={!!currentSpan}
+                closeFlyout={() => setCurrentSpan('')}
+                addSpanFilter={addSpanFilter}
+                mode={mode}
+                dataSourceMDSId={props.dataSourceMDSId[0].id}
+              />
             )}
-            <EuiHorizontalRule margin="m" />
-            <div>{spanDetailTable}</div>
-          </EuiPanel>
-          {!!currentSpan && (
-            <SpanDetailFlyout
-              http={props.http}
-              spanId={currentSpan}
-              isFlyoutVisible={!!currentSpan}
-              closeFlyout={() => setCurrentSpan('')}
-              addSpanFilter={addSpanFilter}
-              mode={mode}
-              dataSourceMDSId={props.dataSourceMDSId[0].id}
-            />
-          )}
-        </EuiPageBody>
-      </EuiPage>
+          </EuiPageBody>
+        </EuiPage>
+      )}
     </>
   );
 }

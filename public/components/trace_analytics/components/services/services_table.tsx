@@ -22,6 +22,7 @@ import {
 import round from 'lodash/round';
 import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
+import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
 import { FilterType } from '../common/filters/filters';
 import {
@@ -44,6 +45,9 @@ interface ServicesTableProps {
   mode: TraceAnalyticsMode;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  isServiceTrendEnabled: boolean;
+  setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  serviceTrends: ServiceTrends;
 }
 
 export function ServicesTable(props: ServicesTableProps) {
@@ -61,6 +65,9 @@ export function ServicesTable(props: ServicesTableProps) {
     setRedirect,
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    isServiceTrendEnabled,
+    setIsServiceTrendEnabled,
+    serviceTrends,
   } = props;
 
   const selectionValue = {
@@ -87,7 +94,12 @@ export function ServicesTable(props: ServicesTableProps) {
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonEmpty size="xs">Show 24 hour trends</EuiButtonEmpty>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
+              >
+                {isServiceTrendEnabled ? 'Show 24 hour trends' : 'Hide 24 hour trends'}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -197,12 +209,14 @@ export function ServicesTable(props: ServicesTableProps) {
           field: 'actions',
           name: 'Actions',
           align: 'center',
-          sortable: true,
-          truncateText: true,
           render: (_item: any, row: any) => (
-            <>
-              <EuiIcon type="inspect" onClick={() => onClickAction(row)} />
-            </>
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false} onClick={() => onClickAction(row)}>
+                <EuiLink>
+                  <EuiIcon type="inspect" color="primary" />
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
         },
       ] as Array<EuiTableFieldDataColumnType<any>>,

@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
+import { NoMatchMessage, PanelTitle } from '../helper_functions';
 
 export function LinePlt(props: { data: Plotly.Data[] }) {
   const maxY = props.data[0]?.y ? Math.max(...props.data[0].y) : 0;
@@ -39,7 +41,7 @@ export function LinePlt(props: { data: Plotly.Data[] }) {
   return props.data[0].x.length > 1 ? <Plt data={props.data} layout={layout} /> : <div>-</div>;
 }
 
-export function LatencyPlt(props: { data: Plotly.Data[] }) {
+export function LatencyPlt(props: { data: Plotly.Data[]; isPanel?: boolean }) {
   const layout = useMemo(
     () =>
       ({
@@ -56,7 +58,7 @@ export function LatencyPlt(props: { data: Plotly.Data[] }) {
               size: 12,
             },
           },
-          gridcolor: '#d9d9d9',
+          gridcolor: 'rgba(217, 217, 217, 0.2)',
           color: '#899195',
         },
         annotations: [
@@ -81,14 +83,26 @@ export function LatencyPlt(props: { data: Plotly.Data[] }) {
           t: 30,
           pad: 0,
         },
-        height: 200,
-        width: 400,
+        ...(props.isPanel ? { height: 217 } : { height: 200 }),
+        ...(!props.isPanel && { width: 400 }),
       } as Partial<Plotly.Layout>),
     [props.data]
   );
   return (
     <>
-      <Plt data={props.data} layout={layout} />
+      <Plt data={props.data} layout={layout} height={props.isPanel ? '217' : '200'} />
     </>
+  );
+}
+
+export function LatencyPltPanel(props: { data: Plotly.Data[]; isPanel?: boolean }) {
+  return (
+    <EuiPanel style={{ minWidth: 433, minHeight: 308, maxHeight: 560 }}>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+        <PanelTitle title="24hr latency trend" />
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
+      {props.data ? <LatencyPlt data={[props.data]} isPanel={true} /> : <NoMatchMessage size="s" />}
+    </EuiPanel>
   );
 }

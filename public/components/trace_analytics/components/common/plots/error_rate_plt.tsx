@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonGroup, EuiHorizontalRule, EuiPanel, EuiFlexGroup, EuiSpacer, EuiButtonGroupOptionProps } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiPanel,
+} from '@elastic/eui';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
 import {
   fixedIntervalToMilli,
@@ -15,6 +21,7 @@ import {
 } from '../helper_functions';
 
 export function ErrorRatePlt(props: {
+  title?: string;
   items: { items: Plotly.Data[]; fixedInterval: string };
   setStartTime: (startTime: string) => void;
   setEndTime: (endTime: string) => void;
@@ -45,6 +52,9 @@ export function ErrorRatePlt(props: {
           ay: -160,
           borderpad: 10,
           arrowwidth: 0.7,
+          font: {
+            color: '#899195',
+          },
         },
       ],
       showlegend: false,
@@ -70,7 +80,7 @@ export function ErrorRatePlt(props: {
         ],
         fixedrange: true,
         ticksuffix: '%',
-        gridcolor: '#d9d9d9',
+        gridcolor: 'rgba(217, 217, 217, 0.2)',
         showgrid: true,
         visible: true,
         color: '#899195',
@@ -91,18 +101,18 @@ export function ErrorRatePlt(props: {
 
   return (
     <>
-      <EuiPanel style={{ minWidth: 433, minHeight: 308 }}>
-        <EuiFlexGroup justifyContent='spaceBetween' gutterSize='xs'>  
-          <PanelTitle title="Trace error rate over time" />
+      <EuiPanel style={{ minWidth: 433, minHeight: 308, maxHeight: 560 }}>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+          <PanelTitle title={props.title ? props.title : 'Trace error rate over time'} />
           <EuiButtonGroup
-              options={props.toggleButtons}
-              idSelected={props.idSelected}
-              onChange={(id) => props.setIdSelected(id as 'error_rate' | 'throughput')}
-              buttonSize="s"
-              color="text"
-            />
+            options={props.toggleButtons}
+            idSelected={props.idSelected}
+            onChange={(id) => props.setIdSelected(id as 'error_rate' | 'throughput')}
+            buttonSize="s"
+            color="text"
+          />
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="m" />
         {props.items?.items?.length > 0 ? (
           <Plt data={props.items.items} layout={layout} onClickHandler={onClick} />
         ) : (
