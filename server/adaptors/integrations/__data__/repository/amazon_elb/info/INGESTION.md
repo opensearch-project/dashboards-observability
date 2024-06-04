@@ -10,7 +10,7 @@ This is a brief overview of a sample ingestion pipeline for the AWS ELB integrat
 
 ### OpenSearch and FluentBit Setup
 
-1. Look at [docker-compose.yaml](<[docker-compose.yaml](https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml)https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml>) to create FluentBit and OpenSearch Docker images and run them in the `opensearch-net` Docker network.
+1. Look at [docker-compose.yaml](https://github.com/opensearch-project/data-prepper/blob/d2aa114f538da2f05d887b9c1ad4b77486267776/examples/log-ingestion/docker-compose.yaml) to create FluentBit and OpenSearch Docker images and run them in the `opensearch-net` Docker network.
 2. Create the FluentBit as follows:
 
 ```

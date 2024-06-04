@@ -12,15 +12,9 @@ The purpose of this demo is to demonstrate the different capabilities of OpenSea
 ### Services
 [OTEL DEMO](https://opentelemetry.io/docs/demo/services/) Describes the list of services that are composing the Astronomy Shop.
 
-The main services that are open to user interactions:
+The main service is open to user interactions:
 
 - [Dashboards](https://observability.playground.opensearch.org/)
-
-- [Demo Proxy](https://observability.playground.demo-proxy.opensearch.org/)
-
-- [Demo loader](https://observability.playground.demo-loader.opensearch.org/)
-
-- [Demo feature-flag](https://observability.playground.demo-feature-flag.opensearch.org/)
 
 ### Screenshots
 _**The shopping App**_
