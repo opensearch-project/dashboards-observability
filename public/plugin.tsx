@@ -57,7 +57,7 @@ import {
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
-  ObjectLoaderDataSourceType,
+  DatasourceType,
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
   RenderAssociatedObjectsDetailsFlyoutParams,
@@ -148,6 +148,7 @@ export const [
 ] = createGetterSetter<
   ({
     dataSource,
+    dataSourceType,
     dataSourceMDSId,
     databaseName,
     tableName,
@@ -158,9 +159,9 @@ export const [
 export const [
   getRenderLogExplorerTablesFlyout,
   setRenderLogExplorerTablesFlyout,
-] = createGetterSetter<
-  (dataSourceName: string, dataSourceType: ObjectLoaderDataSourceType) => void
->('renderLogExplorerTablesFlyout');
+] = createGetterSetter<(dataSourceName: string, dataSourceType: DatasourceType) => void>(
+  'renderLogExplorerTablesFlyout'
+);
 
 export class ObservabilityPlugin
   implements
@@ -511,7 +512,7 @@ export class ObservabilityPlugin
       dataSourceName,
       handleRefresh,
       dataSourceMDSId,
-      isS3ConnectionWithLakeFormation,
+      dataSourceType,
     }: RenderAssociatedObjectsDetailsFlyoutParams) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -521,7 +522,7 @@ export class ObservabilityPlugin
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
-            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
+            dataSourceType={dataSourceType}
           />
         )
       );
@@ -530,6 +531,7 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = ({
       dataSource,
+      dataSourceType,
       databaseName,
       tableName,
       handleRefresh,
@@ -539,6 +541,7 @@ export class ObservabilityPlugin
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={dataSource}
+            selectedDatasourceType={dataSourceType}
             resetFlyout={() => createAccelerationFlyout.close()}
             databaseName={databaseName}
             tableName={tableName}
@@ -552,7 +555,7 @@ export class ObservabilityPlugin
 
     const renderLogExplorerTablesFlyout = (
       dataSourceName: string,
-      dataSourceType: ObjectLoaderDataSourceType
+      dataSourceType: DatasourceType
     ) => {
       const createLogExplorerTablesFlyout = core.overlays.openFlyout(
         toMountPoint(

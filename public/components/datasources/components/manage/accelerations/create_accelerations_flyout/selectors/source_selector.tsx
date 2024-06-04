@@ -23,7 +23,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CreateAccelerationForm,
-  ObjectLoaderDataSourceType,
+  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
@@ -52,7 +52,7 @@ interface DataSourceSelectorProps {
   http: CoreStart['http'];
   dataSourceFormProps: DataSourceFormProps;
   selectedDatasource: string;
-  selectedDataSourceType: ObjectLoaderDataSourceType;
+  selectedDataSourceType: DatasourceType;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
@@ -101,7 +101,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
-            connection.connector.toUpperCase() === 'S3GLUE' &&
+            ['S3GLUE', 'SECURITYLAKE'].includes(connection.connector.toUpperCase()) &&
             connection.name === selectedDatasource
         );
 

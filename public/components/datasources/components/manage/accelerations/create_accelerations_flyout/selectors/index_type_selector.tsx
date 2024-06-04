@@ -12,32 +12,33 @@ import {
 import {
   AccelerationIndexType,
   CreateAccelerationForm,
+  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
-  isS3ConnectionWithLakeFormation: boolean;
+  dataSourceType: DatasourceType;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   initiateColumnLoad: (dataSource: string, database: string, dataTable: string) => void;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
-  isS3ConnectionWithLakeFormation,
+  dataSourceType,
   setAccelerationFormData,
   initiateColumnLoad,
 }: IndexTypeSelectorProps) => {
   const [value, setValue] = useState('skipping');
   // This is used to track if user changed the value
-  // If so, we skip changing it based on 'isS3ConnectionWithLakeFormation' in the effect below
+  // If so, we skip changing it based on 'dataSourceType' in the effect below
   const valueSetAlready = useRef(false);
 
   useEffect(() => {
     if (!valueSetAlready.current) {
-      const defaultSelectedOption = isS3ConnectionWithLakeFormation ? 'materialized' : 'skipping';
+      const defaultSelectedOption = dataSourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping';
       updateState(defaultSelectedOption);
     }
-  }, [isS3ConnectionWithLakeFormation]);
+  }, [dataSourceType]);
 
   useEffect(() => {
     initiateColumnLoad(
@@ -62,24 +63,25 @@ export const IndexTypeSelector = ({
     valueSetAlready.current = true;
   };
 
-  const baseOptions = !isS3ConnectionWithLakeFormation
-    ? [
-        {
-          value: 'skipping',
-          inputDisplay: 'Skipping index',
-          dropdownDisplay: (
-            <Fragment>
-              <strong>Skipping index</strong>
-              <EuiText size="s" color="subdued">
-                <p className="EuiTextColor--subdued">
-                  Accelerate direct queries by storing table meta-data in OpenSearch.
-                </p>
-              </EuiText>
-            </Fragment>
-          ),
-        },
-      ]
-    : [];
+  const baseOptions =
+    dataSourceType.toUpperCase() !== 'SECURITYLAKE'
+      ? [
+          {
+            value: 'skipping',
+            inputDisplay: 'Skipping index',
+            dropdownDisplay: (
+              <Fragment>
+                <strong>Skipping index</strong>
+                <EuiText size="s" color="subdued">
+                  <p className="EuiTextColor--subdued">
+                    Accelerate direct queries by storing table meta-data in OpenSearch.
+                  </p>
+                </EuiText>
+              </Fragment>
+            ),
+          },
+        ]
+      : [];
 
   const superSelectOptions = [
     ...baseOptions,

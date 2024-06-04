@@ -11,11 +11,11 @@ import {
   useLoadTablesToCache,
 } from '../../../../../../../../framework/catalog_cache/cache_loader';
 import { useToast } from '../../../../../../../common/toast';
-import { ObjectLoaderDataSourceType } from '../../../../../../../../../common/types/data_connections';
+import { DatasourceType } from '../../../../../../../../../common/types/data_connections';
 
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;
-  dataSourceType: ObjectLoaderDataSourceType;
+  dataSourceType: DatasourceType;
   databaseName: string;
   loadTables: () => void;
   loadingComboBoxes: {

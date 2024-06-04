@@ -20,7 +20,6 @@ import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 import { IntegrationConnectionType } from '../../../../common/types/integrations';
-import { checkIsConnectionWithLakeFormation } from '../../datasources/utils/helpers';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
@@ -101,7 +100,7 @@ const suggestDataSources = async (
       const filterCondition =
         type === 's3'
           ? (item: any) => item.connector === 'S3GLUE'
-          : (item: any) => checkIsConnectionWithLakeFormation(item);
+          : (item: any) => item.connector === 'SECURITYLAKE';
 
       return (
         result?.filter(filterCondition).map((item) => {
@@ -274,19 +273,17 @@ export function IntegrationQueryInputs({
   config,
   updateConfig,
   integration,
-  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
-  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
   return (
     <>
-      {!isS3ConnectionWithLakeFormation && (
+      {config.connectionType !== 'securityLake' && (
         <>
           <EuiFormRow
             label="Spark Table Name"
@@ -323,7 +320,7 @@ export function IntegrationQueryInputs({
       <EuiFormRow
         label={`S3 Checkpoint Location`}
         helpText={
-          isS3ConnectionWithLakeFormation
+          config.connectionType === 'securityLake'
             ? 'The checkpoint location for caching intermediary results.'
             : 'The Checkpoint location must be a unique directory and not the same as the Data ' +
               'location. It will be used for caching intermediary results.'

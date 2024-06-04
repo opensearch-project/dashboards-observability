@@ -27,6 +27,7 @@ import { AvailableIntegrationsTable } from '../../../../integrations/components/
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { DatasourceType } from '../../../../../../common/types/data_connections';
+import { isS3Connection } from '../../../utils/helpers';
 
 interface IntegrationInstanceTableEntry {
   id: string;
@@ -41,6 +42,8 @@ interface IntegrationInstanceTableEntry {
 
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
+    case 'SECURITYLAKE':
+      return 'Amazon Security Lake';
     case 'S3GLUE':
       return 'Flint S3';
     case 'PROMETHEUS':
@@ -128,7 +131,6 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
 export interface InstallIntegrationFlyoutProps {
   datasourceType: DatasourceType;
   datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
   closeFlyout: () => void;
   refreshInstances?: () => void;
 }
@@ -136,7 +138,6 @@ export interface InstallIntegrationFlyoutProps {
 export const InstallIntegrationFlyout = ({
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
   closeFlyout,
   refreshInstances,
 }: InstallIntegrationFlyoutProps) => {
@@ -155,9 +156,8 @@ export const InstallIntegrationFlyout = ({
     });
   }, []);
 
-  const integrationLabelToCheck = isS3ConnectionWithLakeFormation
-    ? 'Security Lake'
-    : labelFromDataSourceType(datasourceType);
+  const integrationLabelToCheck =
+    datasourceType === 'SECURITYLAKE' ? 'Security Lake' : labelFromDataSourceType(datasourceType);
 
   const integrationsFilteredByLabel = {
     hits: availableIntegrations.hits.filter((config) =>
@@ -187,10 +187,10 @@ export const InstallIntegrationFlyout = ({
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
           forceConnection={
-            datasourceType === 'S3GLUE'
+            isS3Connection(datasourceType)
               ? {
                   name: datasourceName,
-                  type: isS3ConnectionWithLakeFormation ? 'securityLake' : 's3',
+                  type: datasourceType.toLowerCase() === 'securitylake' ? 'securityLake' : 's3',
                 }
               : undefined
           }
@@ -211,13 +211,11 @@ export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
   refreshInstances,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
   datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
   refreshInstances: () => void;
 }) => {
   const [query, setQuery] = useState('');
@@ -268,7 +266,6 @@ export const InstalledIntegrationsTable = ({
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
           datasourceName={datasourceName}
-          isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
           refreshInstances={refreshInstances}
         />
       ) : null}

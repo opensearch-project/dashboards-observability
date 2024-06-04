@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   CachedAcceleration,
   CachedDataSourceStatus,
+  DatasourceType,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
@@ -45,7 +46,7 @@ import {
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
-  isS3ConnectionWithLakeFormation: boolean;
+  dataSourceType: DatasourceType;
 }
 
 interface ModalState {
@@ -56,7 +57,7 @@ interface ModalState {
 export const AccelerationTable = ({
   dataSourceName,
   cacheLoadingHooks,
-  isS3ConnectionWithLakeFormation,
+  dataSourceType,
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
@@ -171,6 +172,7 @@ export const AccelerationTable = ({
               <EuiFlexItem grow={false}>
                 <CreateAccelerationFlyoutButton
                   dataSourceName={dataSourceName}
+                  dataSourceType={dataSourceType}
                   renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
                   handleRefresh={handleRefresh}
                 />
@@ -327,11 +329,12 @@ export const AccelerationTable = ({
     },
   };
 
-  const accelerationTableColumns = !isS3ConnectionWithLakeFormation
-    ? Object.values(accelerationTableColumnsCollection)
-    : Object.entries(accelerationTableColumnsCollection)
-        .filter(([key]) => key !== 'database' && key !== 'table')
-        .map(([_key, val]) => val);
+  const accelerationTableColumns =
+    dataSourceType.toUpperCase() === 'SECURITYLAKE'
+      ? Object.entries(accelerationTableColumnsCollection)
+          .filter(([key]) => key !== 'database' && key !== 'table')
+          .map(([_key, val]) => val)
+      : Object.values(accelerationTableColumnsCollection);
 
   const pagination = {
     initialPageSize: 10,

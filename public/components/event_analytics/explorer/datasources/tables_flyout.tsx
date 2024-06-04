@@ -30,7 +30,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CachedTable,
-  ObjectLoaderDataSourceType,
+  DatasourceType,
 } from '../../../../../common/types/data_connections';
 import { isCatalogCacheFetching } from '../../../datasources/components/manage/associated_objects/utils/associated_objects_tab_utils';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
@@ -41,7 +41,7 @@ import { AssociatedObjectsTabEmpty } from '../../../datasources/components/manag
 
 export interface TablesFlyoutProps {
   dataSourceName: string;
-  dataSourceType: ObjectLoaderDataSourceType;
+  dataSourceType: DatasourceType;
   resetFlyout: () => void;
 }
 

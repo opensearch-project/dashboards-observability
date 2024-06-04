@@ -110,7 +110,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
           setDataSourceFormData,
         }}
         selectedDatasource={config.connectionDataSource}
-        selectedDataSourceType="SecurityLake"
+        selectedDataSourceType="SECURITYLAKE"
         dataSourcesPreselected={false}
         tableFieldsLoading={false}
         hideHeader={true}
@@ -123,7 +123,6 @@ export const SetupIntegrationInputsForSecurityLake = ({
         config={config}
         updateConfig={updateConfig}
         integration={integration}
-        isS3ConnectionWithLakeFormation={true}
       />
       {securityLakeWorkflows && (
         <>

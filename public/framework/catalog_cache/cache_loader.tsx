@@ -11,12 +11,12 @@ import {
 } from '../../../common/constants/data_sources';
 import {
   AsyncPollingResult,
-  CachedAccelerations,
+  CachedAcceleration,
   CachedColumn,
   CachedDataSourceStatus,
   CachedTable,
+  DatasourceType,
   LoadCacheType,
-  ObjectLoaderDataSourceType,
   StartLoadingParams,
 } from '../../../common/types/data_connections';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../common/types/explorer';
@@ -147,7 +147,7 @@ export const updateAccelerationsToCache = (
 
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
 
-  const newAccelerations: CachedAccelerations[] = combinedData.map((row: any) => ({
+  const newAccelerations: CachedAcceleration[] = combinedData.map((row: any) => ({
     flintIndexName: row.flint_index_name,
     type: row.kind === 'mv' ? 'materialized' : row.kind,
     database: row.database,
@@ -257,7 +257,7 @@ export const createLoadQuery = (
   dataSourceName: string,
   databaseName?: string,
   tableName?: string,
-  dataSourceType?: ObjectLoaderDataSourceType
+  dataSourceType?: DatasourceType
 ) => {
   let query;
   switch (loadCacheType) {
@@ -266,7 +266,7 @@ export const createLoadQuery = (
       break;
     case 'tables':
       const showTableQueryBase =
-        dataSourceType === 'SecurityLake' ? 'SHOW TABLE' : 'SHOW TABLE EXTENDED';
+        dataSourceType?.toLowerCase() === 'securitylake' ? 'SHOW TABLES' : 'SHOW TABLE EXTENDED';
       query = `${showTableQueryBase} IN ${addBackticksIfNeeded(
         dataSourceName
       )}.${addBackticksIfNeeded(databaseName!)} LIKE '*'`;
