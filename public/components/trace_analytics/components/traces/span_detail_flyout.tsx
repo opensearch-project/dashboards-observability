@@ -22,10 +22,42 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
+import { SpanField } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
+
+const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
+  data_prepper: {
+    SPAN_ID: 'spanId',
+    PARENT_SPAN_ID: 'parentSpanId',
+    SERVICE: 'serviceName',
+    OPERATION: 'name',
+    DURATION: 'durationInNanos',
+    START_TIME: 'startTime',
+    END_TIME: 'endTime',
+    ERRORS: 'status.code',
+  },
+  jaeger: {
+    SPAN_ID: 'spanID',
+    PARENT_SPAN_ID: undefined,
+    SERVICE: 'process.serviceName',
+    OPERATION: 'operationName',
+    DURATION: 'duration',
+    START_TIME: 'startTime',
+    END_TIME: undefined,
+    ERRORS: 'tag.error',
+  },
+};
+
+const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_FIELDS[mode][field];
+
+const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) => {
+  const fieldKey = getSpanFieldKey(mode, field);
+  if (fieldKey === undefined) return undefined;
+  return _.get(span, fieldKey);
+};
 
 export function SpanDetailFlyout(props: {
   http: HttpSetup;
@@ -42,13 +74,19 @@ export function SpanDetailFlyout(props: {
     handleSpansFlyoutRequest(props.http, props.spanId, setSpan, mode);
   }, [props.spanId]);
 
-  const getListItem = (field: string, title: React.ReactNode, description: React.ReactNode) => {
+  const getListItem = (
+    fieldKey: string | undefined,
+    title: React.ReactNode,
+    description: React.ReactNode
+  ) => {
     return (
       <FlyoutListItem
         title={title}
         description={description}
         key={`list-item-${title}`}
-        addSpanFilter={() => props.addSpanFilter(field, span[field])}
+        addSpanFilter={
+          fieldKey ? () => props.addSpanFilter(fieldKey, _.get(span, fieldKey)) : undefined
+        }
       />
     );
   };
@@ -65,27 +103,27 @@ export function SpanDetailFlyout(props: {
     if (!span || _.isEmpty(span)) return '-';
     const overviewList = [
       getListItem(
-        'spanId',
+        getSpanFieldKey(mode, 'SPAN_ID'),
         'Span ID',
-        (mode === 'data_prepper' ? span.spanId : span.spanID) ? (
+        getSpanValue(span, mode, 'SPAN_ID') ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={mode === 'data_prepper' ? span.spanId : span.spanID}>
+              <EuiCopy textToCopy={getSpanValue(span, mode, 'SPAN_ID')}>
                 {(copy) => (
                   <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
                 )}
               </EuiCopy>
             </EuiFlexItem>
-            <EuiFlexItem>{mode === 'data_prepper' ? span.spanId : span.spanID}</EuiFlexItem>
+            <EuiFlexItem>{getSpanValue(span, mode, 'SPAN_ID')}</EuiFlexItem>
           </EuiFlexGroup>
         ) : (
           '-'
         )
       ),
       getListItem(
-        'parentSpanId',
+        getSpanFieldKey(mode, 'PARENT_SPAN_ID'),
         'Parent span ID',
-        (mode === 'data_prepper' ? span.parentSpanId : span.references.length) ? (
+        getSpanValue(span, mode, 'PARENT_SPAN_ID') ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy
@@ -105,17 +143,17 @@ export function SpanDetailFlyout(props: {
         )
       ),
       getListItem(
-        'serviceName',
+        getSpanFieldKey(mode, 'SERVICE'),
         'Service',
-        (mode === 'data_prepper' ? span.serviceName : span.process.serviceName) || '-'
+        getSpanValue(span, mode, 'SERVICE') || '-'
       ),
       getListItem(
-        'name',
+        getSpanFieldKey(mode, 'OPERATION'),
         'Operation',
-        (mode === 'data_prepper' ? span.name : span.operationName) || '-'
+        getSpanValue(span, mode, 'OPERATION') || '-'
       ),
       getListItem(
-        'durationInNanos',
+        getSpanFieldKey(mode, 'DURATION'),
         'Duration',
         `${
           mode === 'data_prepper'
@@ -124,7 +162,7 @@ export function SpanDetailFlyout(props: {
         } ms`
       ),
       getListItem(
-        'startTime',
+        getSpanFieldKey(mode, 'START_TIME'),
         'Start time',
         mode === 'data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
@@ -133,7 +171,7 @@ export function SpanDetailFlyout(props: {
             )
       ),
       getListItem(
-        'endTime',
+        getSpanFieldKey(mode, 'END_TIME'),
         'End time',
         mode === 'data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
@@ -142,9 +180,9 @@ export function SpanDetailFlyout(props: {
             )
       ),
       getListItem(
-        'status.code',
+        getSpanFieldKey(mode, 'ERRORS'),
         'Errors',
-        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag.error) ? (
+        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag?.error) ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
