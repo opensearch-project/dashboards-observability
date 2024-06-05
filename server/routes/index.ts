@@ -51,7 +51,7 @@ export function setupRoutes({
   const queryService = new QueryService(client);
   registerSqlRoute(router, queryService);
 
-  registerMetricsRoute(router);
+  registerMetricsRoute(router, dataSourceEnabled);
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);

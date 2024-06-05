@@ -219,11 +219,13 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
         let dataConnectionsresponse;
         if (dataSourceEnabled && dataSourceMDSId) {
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          console.log(client);
           dataConnectionsresponse = await client.callAPI('ppl.getDataConnections');
         } else {
-          dataConnectionsresponse = await context.observability_plugin.observabilityClient
-            .asScoped(request)
-            .callAsCurrentUser('ppl.getDataConnections');
+          dataConnectionsresponse = await context.observability_plugin.observabilityClient.asScoped(
+            request
+          );
+          console.log(dataConnectionsresponse);
         }
         return response.ok({
           body: dataConnectionsresponse,
