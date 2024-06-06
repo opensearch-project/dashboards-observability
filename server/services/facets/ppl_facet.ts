@@ -10,14 +10,13 @@ export class PPLFacet {
     this.client = client;
   }
 
-  private fetch = async (context: any, request: any, format: string) => {
+  private fetch = async (context: any, request: any, format: string, _responseFormat: string) => {
     const res = {
       success: false,
       data: {},
     };
     try {
       const dataSourceMDSId = request.query.dataSourceMDSId;
-      console.log('here2', dataSourceMDSId);
       const params = {
         body: {
           query: request.body.query,

@@ -23,7 +23,6 @@ export function registerPplRoute({ router, facet }: { router: IRouter; facet: PP
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      console.log('lol', req.query.dataSourceMDSId);
       const queryRes: any = await facet.describeQuery(context, req);
       if (queryRes.success) {
         const result: any = {

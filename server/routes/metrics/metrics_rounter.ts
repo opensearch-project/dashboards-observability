@@ -138,7 +138,7 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
         const resp = await metricsAnalyticsBackend.queryToFetchDocumentNames(
           opensearchNotebooksClient,
           request.params.index,
-          dataSourceEnabled
+          dataSourceMDSId
         );
         return response.ok({
           body: resp,

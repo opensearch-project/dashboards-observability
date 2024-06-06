@@ -6,10 +6,10 @@
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 
 export class MetricsAnalyticsAdaptor {
-  fetch = async function (client, query: any, index: string, dataSourceEnabled?: boolean) {
+  fetch = async function (client, query: any, index: string, dataSourceMDSId?: string) {
     try {
       let response;
-      if (dataSourceEnabled) {
+      if (dataSourceMDSId) {
         response = await client.callAPI('search', {
           body: query,
           index,
@@ -122,7 +122,7 @@ export class MetricsAnalyticsAdaptor {
       throw new Error('Fetch Sample Document Error:' + error);
     }
   };
-  queryToFetchDocumentNames = async (client, index: string, dataSourceEnabled?: boolean) => {
+  queryToFetchDocumentNames = async (client, index: string, dataSourceMDSId?: string) => {
     const metricsQuery = {
       size: 0,
       query: {
@@ -147,7 +147,7 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index, dataSourceEnabled);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response;
     } catch (error) {
       throw new Error('Fetch Document Names Error:' + error);

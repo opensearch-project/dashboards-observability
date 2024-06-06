@@ -185,7 +185,6 @@ const fetchRemoteMetrics = (remoteDataSources: string[], dataSourceMDSId: string
 
 export const fetchOpenTelemetryIndices = async (dataSourceMDSId: string) => {
   const http = getOSDHttp();
-  console.log(dataSourceMDSId, 'here-indices');
   return http
     .get(`${OBSERVABILITY_BASE}/search/indices/${dataSourceMDSId ?? ''}`, {
       query: {
@@ -302,7 +301,6 @@ export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 const getAvailableAttributes = (id, metricIndex, dataSourceMDSId: string) => async (dispatch) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
-  console.log(dataSourceMDSId, 'slice');
   try {
     const columnSchema = await pplService.fetch(
       {

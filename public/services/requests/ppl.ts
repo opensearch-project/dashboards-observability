@@ -22,7 +22,6 @@ export default class PPLService {
     dataSourceMDSId?: string,
     errorHandler?: (error: any) => void
   ) => {
-    console.log(dataSourceMDSId);
     return this.http
       .post(`${PPL_BASE}${PPL_SEARCH}`, {
         body: JSON.stringify(params),

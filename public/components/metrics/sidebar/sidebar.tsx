@@ -75,13 +75,11 @@ export const Sidebar = ({
 
   useEffect(() => {
     batch(() => {
-      console.log(dataSourceMDSId, 'indices');
       dispatch(loadOTIndices(dataSourceMDSId));
     });
   }, [dispatch, selectedDataSource, dataSourceMDSId]);
 
   useEffect(() => {
-    console.log(dataSourceMDSId, 'new');
     if (additionalMetric) {
       (async function () {
         await dispatch(clearSelectedMetrics());
@@ -98,7 +96,10 @@ export const Sidebar = ({
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
       const fetchOtelDocuments = async () => {
         try {
-          const documentNames = await fetchOpenTelemetryDocumentNames(selectedOTIndex[0]?.label)();
+          const documentNames = await fetchOpenTelemetryDocumentNames(
+            selectedOTIndex[0]?.label,
+            dataSourceMDSId
+          )();
           const availableOtelDocuments = documentNames?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
               return {
@@ -149,7 +150,6 @@ export const Sidebar = ({
   ]);
 
   const handleAddMetric = (metric: any) => {
-    console.log('here now', dataSourceMDSId);
     dispatch(addSelectedMetric(metric, dataSourceMDSId));
   };
 

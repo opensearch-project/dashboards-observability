@@ -73,15 +73,8 @@ export const Home = ({
   const dispatch = useDispatch();
 
   const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
-    console.log(dataSources);
     const id = dataSources[0] ? dataSources[0].id : '';
-    console.log(id);
     setDataSourceMDSId(id);
-    // // const { id = '', label = '' } = dataSources[0] || {};
-    // if (dataSourceMDSId[0].id !== id || dataSourceMDSId[0].label !== label) {
-    //   setDataSourceMDSId([{ id, label }]);
-    // }
-    // console.log(dataSourceMDSId)
     debounce(() => {
       dispatch(setSelectedDataSourceMDSId(id));
     }, 300);

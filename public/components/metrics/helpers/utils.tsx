@@ -41,7 +41,6 @@ export const pplServiceRequestor = (
   finalQuery: string,
   dataSourceMDSId?: string
 ) => {
-  console.log(dataSourceMDSId);
   return pplService
     .fetch({ query: finalQuery, format: VISUALIZATION }, dataSourceMDSId)
     .then((res) => {
