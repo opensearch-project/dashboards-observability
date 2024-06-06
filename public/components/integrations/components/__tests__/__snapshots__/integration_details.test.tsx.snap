@@ -37,22 +37,81 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 </h4>
               </div>
             </EuiText>
-            <EuiSpacer
-              size="m"
+            <EuiFlexGroup
+              direction="column"
             >
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiText
-              size="m"
-            >
-              <div
-                className="euiText euiText--medium"
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
-                1.0.1
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiFlexGroup
+                      alignItems="flexEnd"
+                      justifyContent="spaceBetween"
+                      responsive={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              size="m"
+                            >
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                1.0.1
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              size="xs"
+                            >
+                              <div
+                                className="euiText euiText--extraSmall"
+                              >
+                                <EuiLink
+                                  href="https://github.com/opensearch-project/opensearch-catalog/releases"
+                                >
+                                  <a
+                                    className="euiLink euiLink--primary"
+                                    href="https://github.com/opensearch-project/opensearch-catalog/releases"
+                                    rel="noreferrer"
+                                  >
+                                    Check for new versions
+                                  </a>
+                                </EuiLink>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  />
+                </EuiFlexItem>
               </div>
-            </EuiText>
+            </EuiFlexGroup>
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -68,13 +127,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 </h4>
               </div>
             </EuiText>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
             <EuiBadgeGroup>
               <div
                 className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
@@ -95,13 +147,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 </h4>
               </div>
             </EuiText>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
             <EuiLink
               external={true}
               href="https://github.com/"
@@ -163,13 +208,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 </h4>
               </div>
             </EuiText>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
             <EuiText
               size="m"
             >
@@ -196,13 +234,6 @@ exports[`Available Integration Table View Test Renders nginx integration table v
             </h4>
           </div>
         </EuiText>
-        <EuiSpacer
-          size="m"
-        >
-          <div
-            className="euiSpacer euiSpacer--m"
-          />
-        </EuiSpacer>
         <EuiText
           size="m"
         >
