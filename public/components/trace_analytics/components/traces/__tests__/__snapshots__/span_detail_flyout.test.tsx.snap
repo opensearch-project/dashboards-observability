@@ -13,7 +13,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
 >
   <EuiFlyout
     data-test-subj="spanDetailFlyout"
-    onClose={[MockFunction]}
+    onClose={[Function]}
     size="s"
   >
     <OuiWindowEvent
@@ -22,7 +22,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
     />
     <EuiOverlayMask
       headerZindexLocation="below"
-      onClick={[MockFunction]}
+      onClick={[Function]}
     >
       <Portal
         containerInfo={

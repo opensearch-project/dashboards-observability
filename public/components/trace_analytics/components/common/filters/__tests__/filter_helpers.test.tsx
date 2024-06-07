@@ -17,14 +17,8 @@ describe('Filter helper functions', () => {
   configure({ adapter: new Adapter() });
 
   it('returns fields by page', () => {
-    const fields = getFilterFields('data_prepper', 'dashboard');
-    expect(fields).toEqual([
-      'traceGroup',
-      'serviceName',
-      'error',
-      'status.message',
-      'latency',
-    ]);
+    const fields = getFilterFields('data_prepper', 'dashboard', []);
+    expect(fields).toEqual(['traceGroup', 'serviceName', 'error', 'status.message', 'latency']);
   });
 
   it('returns valid fields by page', () => {
@@ -81,7 +75,7 @@ describe('Filter helper functions', () => {
   });
 
   it('renders textfield filter', () => {
-    const setValue = jest.fn((v) => {});
+    const setValue = jest.fn((_v) => {});
     const wrapper = mount(getValueComponent('serviceName', 'is', 0, setValue));
     expect(wrapper).toMatchSnapshot();
 
@@ -90,7 +84,7 @@ describe('Filter helper functions', () => {
   });
 
   it('renders range field filter', () => {
-    const setValue = jest.fn((v) => {});
+    const setValue = jest.fn((_v) => {});
     const wrapper = mount(
       getValueComponent('latency', 'is not between', { from: '0', to: '100' }, setValue)
     );

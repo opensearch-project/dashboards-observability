@@ -211,9 +211,7 @@ export function getServiceMapGraph(
 
     const throughput =
       (map[service].throughput! >= 0 ? `Request rate: ${map[service].throughput}` : 'N/A') +
-      (map[service].throughputPerMinute !== null
-        ? ` (${map[service].throughputPerMinute} per minute)`
-        : '');
+      (map[service].throughputPerMinute ? ` (${map[service].throughputPerMinute} per minute)` : '');
 
     const hover = `${service}\n\n ${averageLatency} \n ${errorRate} \n ${throughput}`;
 

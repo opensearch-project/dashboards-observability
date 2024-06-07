@@ -65,7 +65,15 @@ exports[`Service map component renders service map 1`] = `
       gutterSize="none"
       responsive={false}
     >
-      <EuiFlexItem />
+      <EuiFlexItem>
+        <div
+          style={
+            Object {
+              "position": "relative",
+            }
+          }
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
@@ -357,5 +365,8 @@ exports[`Service map component renders service map 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
+  <EuiSpacer
+    size="xl"
+  />
 </Fragment>
 `;
