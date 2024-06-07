@@ -22,6 +22,8 @@ export function ThroughputTrendPlt(props: {
   const layout = useMemo(
     () =>
       ({
+        plot_bgcolor: 'rgba(0, 0, 0, 0)',
+        paper_bgcolor: 'rgba(0, 0, 0, 0)',
         margin: {
           l: 50,
           r: 5,

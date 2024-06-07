@@ -62,9 +62,7 @@ export function Plt(props: PltProps) {
         },
       ],
     },
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)',
-    // ...darkLayout,
+    ...darkLayout,
     ...props.layout,
   };
 

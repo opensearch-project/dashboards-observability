@@ -27,6 +27,8 @@ export function ErrorTrendPlt(props: {
 }) {
   const getLayout = () =>
     ({
+      plot_bgcolor: 'rgba(0, 0, 0, 0)',
+      paper_bgcolor: 'rgba(0, 0, 0, 0)',
       margin: {
         l: 57,
         r: 5,
