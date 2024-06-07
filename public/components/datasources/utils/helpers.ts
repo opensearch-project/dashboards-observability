@@ -3,12 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { S3GlueProperties } from 'common/types/data_connections';
-import { DatasourceDetails } from '../components/manage/data_connection';
+import { DatasourceType } from '../../../../common/types/data_connections';
 
-export function checkIsConnectionWithLakeFormation({
-  connector,
-  properties,
-}: DatasourceDetails): boolean {
-  return connector === 'S3GLUE' && !!(properties as S3GlueProperties)['glue.lakeformation.enabled'];
+export function isS3Connection(dataSourceType: DatasourceType): boolean {
+  return ['s3glue', 'securitylake'].includes(dataSourceType?.toLowerCase());
 }

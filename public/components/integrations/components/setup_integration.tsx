@@ -25,10 +25,11 @@ import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
+import { IntegrationConnectionType } from '../../../../common/types/integrations';
 
 export interface IntegrationSetupInputs {
   displayName: string;
-  connectionType: string;
+  connectionType: IntegrationConnectionType;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
@@ -335,10 +336,7 @@ export function SetupIntegrationForm({
   unsetIntegration?: () => void;
   forceConnection?: {
     name: string;
-    type: string;
-    properties?: {
-      lakeFormationEnabled?: boolean;
-    };
+    type: IntegrationConnectionType;
   };
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -376,9 +374,10 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-  const IntegrationInputFormComponent = forceConnection?.properties?.lakeFormationEnabled
-    ? SetupIntegrationInputsForSecurityLake
-    : SetupIntegrationFormInputs;
+  const IntegrationInputFormComponent =
+    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
+      ? SetupIntegrationInputsForSecurityLake
+      : SetupIntegrationFormInputs;
 
   const content = (
     <>
