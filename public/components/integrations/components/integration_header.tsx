@@ -4,9 +4,16 @@
  */
 
 import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -14,9 +21,70 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
+import {
+  OPENSEARCH_CATALOG_URL,
+  OPENSEARCH_DOCUMENTATION_URL,
+} from '../../../../common/constants/integrations';
 
-export function IntegrationHeader() {
+export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h1>Upload Integrations</h1>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiText>
+          <p>Test</p>
+        </EuiText>
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
+export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () => void }) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const onButtonClick = () => {
+    setPopover((isOpen) => !isOpen);
+  };
+
+  const items = [
+    <EuiContextMenuItem
+      onClick={() => {
+        closePopover(); // If the popover isn't closed, it overlays over the flyout
+        onShowUpload();
+      }}
+    >
+      Upload Integrations
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem href={OPENSEARCH_CATALOG_URL}>View Catalog</EuiContextMenuItem>,
+  ];
+  const button = (
+    <EuiButton iconType="arrowDown" fill={true} onClick={onButtonClick}>
+      Catalog
+    </EuiButton>
+  );
+  return (
+    <EuiPopover
+      id="integHeaderActionsPanel"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
+  );
+};
+
+export const IntegrationHeader = () => {
   const tabs = [
     {
       id: 'installed',
@@ -33,8 +101,9 @@ export function IntegrationHeader() {
   const [selectedTabId, setSelectedTabId] = useState(
     window.location.hash.substring(2) ? window.location.hash.substring(2) : 'installed'
   );
+  const [showUploadFlyout, setShowUploadFlyout] = useState(false);
 
-  const onSelectedTabChanged = (id) => {
+  const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
     window.location.hash = id;
   };
@@ -51,6 +120,7 @@ export function IntegrationHeader() {
       </EuiTab>
     ));
   };
+
   return (
     <div>
       <EuiPageHeader>
@@ -58,6 +128,9 @@ export function IntegrationHeader() {
           <EuiTitle size="l" data-test-subj="integrations-header">
             <h1>Integrations</h1>
           </EuiTitle>
+        </EuiPageHeaderSection>
+        <EuiPageHeaderSection>
+          <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiSpacer size="s" />
@@ -70,6 +143,9 @@ export function IntegrationHeader() {
       <EuiSpacer size="l" />
       <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
       <EuiSpacer size="s" />
+      {showUploadFlyout ? (
+        <IntegrationUploadFlyout onClose={() => setShowUploadFlyout(false)} />
+      ) : null}
     </div>
   );
-}
+};
