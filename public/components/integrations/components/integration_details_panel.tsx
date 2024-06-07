@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { OPENSEARCH_CATALOG_URL } from '../../../../common/constants/integrations';
 
 export function IntegrationDetails(props: { integration: IntegrationConfig }) {
   const config = props.integration;
@@ -48,9 +49,7 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    <EuiLink href="https://github.com/opensearch-project/opensearch-catalog/releases">
-                      Check for new versions
-                    </EuiLink>
+                    <EuiLink href={OPENSEARCH_CATALOG_URL}>Check for new versions</EuiLink>
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
