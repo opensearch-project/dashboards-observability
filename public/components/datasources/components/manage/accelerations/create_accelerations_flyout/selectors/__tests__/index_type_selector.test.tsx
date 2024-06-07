@@ -21,9 +21,9 @@ describe('Index type selector components', () => {
     const wrapper = mount(
       <IndexTypeSelector
         accelerationFormData={accelerationFormData}
+        dataSourceType="S3GLUE"
         setAccelerationFormData={setAccelerationFormData}
         initiateColumnLoad={jest.fn()}
-        loading={false}
       />
     );
     wrapper.update();
@@ -46,9 +46,9 @@ describe('Index type selector components', () => {
     const wrapper = mount(
       <IndexTypeSelector
         accelerationFormData={accelerationFormData}
+        dataSourceType="S3GLUE"
         setAccelerationFormData={setAccelerationFormData}
         initiateColumnLoad={jest.fn()}
-        loading={true}
       />
     );
     wrapper.update();

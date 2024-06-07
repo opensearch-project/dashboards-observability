@@ -23,6 +23,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CreateAccelerationForm,
+  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
@@ -51,20 +52,24 @@ interface DataSourceSelectorProps {
   http: CoreStart['http'];
   dataSourceFormProps: DataSourceFormProps;
   selectedDatasource: string;
+  selectedDataSourceType: DatasourceType;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
   hideHeader?: boolean;
+  hideDataSourceDescription?: boolean;
 }
 
 export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   http,
-  dataSourceFormProps: { dataSourceFormData, setDataSourceFormData },
+  dataSourceFormProps: { dataSourceFormData, formType, setDataSourceFormData },
   selectedDatasource,
+  selectedDataSourceType,
   dataSourcesPreselected,
   tableFieldsLoading,
   dataSourceMDSId,
   hideHeader,
+  hideDataSourceDescription,
 }) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -79,7 +84,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     dataTable: false,
   });
 
-  const dataSourceDescription = (
+  const dataSourceDescription = hideDataSourceDescription ? null : (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>{dataSourceFormData.dataSource}</EuiDescriptionListDescription>
@@ -87,13 +92,16 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   );
 
   const loadDataSource = () => {
+    if (formType === 'SetupIntegration') {
+      return;
+    }
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
       .get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`)
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
-            connection.connector.toUpperCase() === 'S3GLUE' &&
+            ['S3GLUE', 'SECURITYLAKE'].includes(connection.connector.toUpperCase()) &&
             connection.name === selectedDatasource
         );
 
@@ -296,6 +304,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               <EuiFlexItem grow={false}>
                 <SelectorLoadObjects
                   dataSourceName={dataSourceFormData.dataSource}
+                  dataSourceType={selectedDataSourceType}
                   databaseName={dataSourceFormData.database}
                   loadTables={loadTables}
                   loadingComboBoxes={loadingComboBoxes}

@@ -25,11 +25,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
+import { isArray } from 'lodash';
 import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,
   CachedColumn,
+  DatasourceType,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { useToast } from '../../../../../../public/components/common/toast';
@@ -53,10 +55,10 @@ import {
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
   datasourceName: string;
+  dataSourceType: DatasourceType;
   resetFlyout: () => void;
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
-  isS3ConnectionWithLakeFormation?: boolean;
 }
 
 export const AssociatedObjectsDetailsFlyout = ({
@@ -65,7 +67,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   resetFlyout,
   handleRefresh,
   dataSourceMDSId,
-  isS3ConnectionWithLakeFormation,
+  dataSourceType,
 }: AssociatedObjectsFlyoutProps) => {
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
@@ -96,6 +98,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   const onCreateAcceleration = () =>
     renderCreateAccelerationFlyout({
       dataSource: datasourceName,
+      dataSourceType,
       databaseName: tableDetail.database,
       tableName: tableDetail.name,
       handleRefresh,
@@ -148,10 +151,17 @@ export const AssociatedObjectsDetailsFlyout = ({
     );
   };
 
-  const accelerationData = tableDetail.accelerations.map((acc, index) => ({
-    ...acc,
-    id: index,
-  }));
+  const accelerationData = isArray(tableDetail.accelerations)
+    ? tableDetail.accelerations.map((acc, index) => ({
+        ...acc,
+        id: index,
+      }))
+    : [
+        {
+          ...tableDetail.accelerations,
+          id: 0,
+        },
+      ];
 
   const accelerationColumns = [
     {
@@ -159,7 +169,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       name: 'Name',
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
-        const name = getAccelerationName(item, datasourceName);
+        const name = getAccelerationName(item);
         return (
           <EuiLink
             onClick={() =>
@@ -210,6 +220,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           onClick={() =>
             renderCreateAccelerationFlyout({
               dataSource: datasourceName,
+              dataSourceType,
               databaseName: tableDetail.database,
               tableName: tableDetail.name,
               handleRefresh,
@@ -321,14 +332,14 @@ export const AssociatedObjectsDetailsFlyout = ({
             <TableTitleComponent
               title="Accelerations"
               description={
-                isS3ConnectionWithLakeFormation
+                dataSourceType === 'SECURITYLAKE'
                   ? 'Security Lake tables include basic acceleration with skipping index.'
                   : undefined
               }
-              horizontalRuleBottom={!isS3ConnectionWithLakeFormation}
+              horizontalRuleBottom={dataSourceType !== 'SECURITYLAKE'}
             />
           </EuiFlexItem>
-          {isS3ConnectionWithLakeFormation && (
+          {dataSourceType === 'SECURITYLAKE' && (
             <EuiFlexItem grow={false}>
               <EuiButton onClick={onCreateAcceleration}>Create acceleration</EuiButton>
             </EuiFlexItem>

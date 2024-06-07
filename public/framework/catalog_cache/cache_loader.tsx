@@ -11,10 +11,11 @@ import {
 } from '../../../common/constants/data_sources';
 import {
   AsyncPollingResult,
-  CachedAccelerations,
+  CachedAcceleration,
   CachedColumn,
   CachedDataSourceStatus,
   CachedTable,
+  DatasourceType,
   LoadCacheType,
   StartLoadingParams,
 } from '../../../common/types/data_connections';
@@ -146,7 +147,7 @@ export const updateAccelerationsToCache = (
 
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
 
-  const newAccelerations: CachedAccelerations[] = combinedData.map((row: any) => ({
+  const newAccelerations: CachedAcceleration[] = combinedData.map((row: any) => ({
     flintIndexName: row.flint_index_name,
     type: row.kind === 'mv' ? 'materialized' : row.kind,
     database: row.database,
@@ -255,7 +256,8 @@ export const createLoadQuery = (
   loadCacheType: LoadCacheType,
   dataSourceName: string,
   databaseName?: string,
-  tableName?: string
+  tableName?: string,
+  dataSourceType?: DatasourceType
 ) => {
   let query;
   switch (loadCacheType) {
@@ -263,7 +265,9 @@ export const createLoadQuery = (
       query = `SHOW SCHEMAS IN ${addBackticksIfNeeded(dataSourceName)}`;
       break;
     case 'tables':
-      query = `SHOW TABLE EXTENDED IN ${addBackticksIfNeeded(
+      const showTableQueryBase =
+        dataSourceType?.toLowerCase() === 'securitylake' ? 'SHOW TABLES' : 'SHOW TABLE EXTENDED';
+      query = `${showTableQueryBase} IN ${addBackticksIfNeeded(
         dataSourceName
       )}.${addBackticksIfNeeded(databaseName!)} LIKE '*'`;
       break;
@@ -316,6 +320,7 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
 
   const startLoading = ({
     dataSourceName,
+    dataSourceType,
     dataSourceMDSId,
     databaseName,
     tableName,
@@ -328,7 +333,13 @@ export const useLoadToCache = (loadCacheType: LoadCacheType) => {
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
-      query: createLoadQuery(loadCacheType, dataSourceName, databaseName, tableName),
+      query: createLoadQuery(
+        loadCacheType,
+        dataSourceName,
+        databaseName,
+        tableName,
+        dataSourceType
+      ),
       datasource: dataSourceName,
     };
 

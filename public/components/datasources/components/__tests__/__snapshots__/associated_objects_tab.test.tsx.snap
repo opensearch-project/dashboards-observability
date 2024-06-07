@@ -319,6 +319,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  dataSourceType="S3GLUE"
                   handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
@@ -738,9 +739,9 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                     },
                   ]
                 }
+                dataSourceType="S3GLUE"
                 datasourceName="mock_data_source"
                 handleRefresh={[Function]}
-                isS3ConnectionWithLakeFormation={false}
               >
                 <EuiInMemoryTable
                   columns={
@@ -5197,6 +5198,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
               >
                 <CreateAccelerationFlyoutButton
                   dataSourceName="mock_data_source"
+                  dataSourceType="S3GLUE"
                   handleRefresh={[Function]}
                   renderCreateAccelerationFlyout={[MockFunction]}
                 >
