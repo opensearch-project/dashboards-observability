@@ -21,6 +21,8 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
   const layout = useMemo(
     () =>
       ({
+        plot_bgcolor: 'rgba(0, 0, 0, 0)',
+        paper_bgcolor: 'rgba(0, 0, 0, 0)',
         height: 200,
         width: 200,
         showlegend: false,
@@ -68,7 +70,7 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
   return (
     <>
       <EuiPanel>
-        <PanelTitle title="Time spent by service" data-test-subj='time-spent-by-service-panel'/>
+        <PanelTitle title="Time spent by service" data-test-subj="time-spent-by-service-panel" />
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" alignItems="center">
           <EuiFlexItem>
