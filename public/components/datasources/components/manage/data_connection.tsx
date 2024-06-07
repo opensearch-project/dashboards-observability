@@ -30,6 +30,7 @@ import {
 import {
   DatasourceDetails,
   PrometheusProperties,
+  StartLoadingParams,
 } from '../../../../../common/types/data_connections';
 import {
   useLoadAccelerationsToCache,
@@ -48,7 +49,6 @@ import {
   InstallIntegrationFlyout,
   InstalledIntegrationsTable,
 } from './integrations/installed_integrations_table';
-import { checkIsConnectionWithLakeFormation } from '../../utils/helpers';
 
 const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
@@ -62,9 +62,6 @@ export const DataConnection = (props: { dataSource: string }) => {
     properties: { 'prometheus.uri': 'placeholder' },
     status: 'ACTIVE',
   });
-  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState<boolean>(
-    false
-  );
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
@@ -85,7 +82,12 @@ export const DataConnection = (props: { dataSource: string }) => {
     databasesLoadStatus,
     startLoadingDatabases,
     tablesLoadStatus,
-    startLoadingTables,
+    startLoadingTables: (loadingParams: StartLoadingParams) => {
+      startLoadingTables({
+        ...loadingParams,
+        dataSourceType: datasourceDetails.connector,
+      });
+    },
     accelerationsLoadStatus,
     startLoadingAccelerations,
   };
@@ -95,10 +97,6 @@ export const DataConnection = (props: { dataSource: string }) => {
   );
   const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
   const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
-
-  useEffect(() => {
-    setIsS3ConnectionWithLakeFormation(checkIsConnectionWithLakeFormation(datasourceDetails));
-  }, [datasourceDetails]);
 
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(`flint_${escapeRegExp(datasourceDetails.name)}_.*`);
@@ -128,12 +126,11 @@ export const DataConnection = (props: { dataSource: string }) => {
       closeFlyout={() => setShowIntegrationsFlyout(false)}
       datasourceType={datasourceDetails.connector}
       datasourceName={datasourceDetails.name}
-      isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
     />
   ) : null;
 
   const onclickAccelerationsCard = () => {
-    renderCreateAccelerationFlyout({ dataSource });
+    renderCreateAccelerationFlyout({ dataSource, dataSourceType: datasourceDetails.connector });
   };
 
   const onclickDiscoverCard = () => {
@@ -236,55 +233,54 @@ export const DataConnection = (props: { dataSource: string }) => {
     },
   ];
 
-  const conditionalTabs =
-    datasourceDetails.connector === 'S3GLUE'
-      ? [
-          {
-            id: 'associated_objects',
-            name: isS3ConnectionWithLakeFormation ? 'Tables' : 'Associated Objects',
-            disabled: false,
-            content: (
-              <AssociatedObjectsTab
-                datasource={datasourceDetails}
-                cacheLoadingHooks={cacheLoadingHooks}
-                selectedDatabase={selectedDatabase}
-                setSelectedDatabase={setSelectedDatabase}
-              />
-            ),
-          },
-          {
-            id: 'acceleration_table',
-            name: 'Accelerations',
-            disabled: false,
-            content: (
-              <AccelerationTable
-                dataSourceName={dataSource}
-                cacheLoadingHooks={cacheLoadingHooks}
-                isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
-              />
-            ),
-          },
-          {
-            id: 'installed_integrations',
-            name: 'Installed Integrations',
-            disabled: false,
-            content: (
-              <InstalledIntegrationsTable
-                integrations={dataSourceIntegrations}
-                datasourceType={datasourceDetails.connector}
-                datasourceName={datasourceDetails.name}
-                isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
-                refreshInstances={refreshInstances}
-              />
-            ),
-          },
-        ]
-      : [];
+  const conditionalTabs = ['S3GLUE', 'SECURITYLAKE'].includes(datasourceDetails.connector)
+    ? [
+        {
+          id: 'associated_objects',
+          name: datasourceDetails.connector === 'SECURITYLAKE' ? 'Tables' : 'Associated Objects',
+          disabled: false,
+          content: (
+            <AssociatedObjectsTab
+              datasource={datasourceDetails}
+              cacheLoadingHooks={cacheLoadingHooks}
+              selectedDatabase={selectedDatabase}
+              setSelectedDatabase={setSelectedDatabase}
+            />
+          ),
+        },
+        {
+          id: 'acceleration_table',
+          name: 'Accelerations',
+          disabled: false,
+          content: (
+            <AccelerationTable
+              dataSourceName={dataSource}
+              dataSourceType={datasourceDetails.connector}
+              cacheLoadingHooks={cacheLoadingHooks}
+            />
+          ),
+        },
+        {
+          id: 'installed_integrations',
+          name: 'Installed Integrations',
+          disabled: false,
+          content: (
+            <InstalledIntegrationsTable
+              integrations={dataSourceIntegrations}
+              datasourceType={datasourceDetails.connector}
+              datasourceName={datasourceDetails.name}
+              refreshInstances={refreshInstances}
+            />
+          ),
+        },
+      ]
+    : [];
 
   const tabs = [...conditionalTabs, ...genericTabs];
 
   const QueryOrAccelerateData = () => {
     switch (datasourceDetails.connector) {
+      case 'SECURITYLAKE':
       case 'S3GLUE':
         return <DefaultDatasourceCards />;
       case 'PROMETHEUS':
@@ -384,6 +380,7 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   const DatasourceOverview = () => {
     switch (datasourceDetails.connector) {
+      case 'SECURITYLAKE':
       case 'S3GLUE':
         return <S3DatasourceOverview />;
       case 'PROMETHEUS':

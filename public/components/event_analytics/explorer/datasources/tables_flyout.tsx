@@ -30,6 +30,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CachedTable,
+  DatasourceType,
 } from '../../../../../common/types/data_connections';
 import { isCatalogCacheFetching } from '../../../datasources/components/manage/associated_objects/utils/associated_objects_tab_utils';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
@@ -40,6 +41,7 @@ import { AssociatedObjectsTabEmpty } from '../../../datasources/components/manag
 
 export interface TablesFlyoutProps {
   dataSourceName: string;
+  dataSourceType: DatasourceType;
   resetFlyout: () => void;
 }
 
@@ -48,7 +50,11 @@ interface TableItemType {
   type: string;
 }
 
-export const TablesFlyout = ({ dataSourceName, resetFlyout }: TablesFlyoutProps) => {
+export const TablesFlyout = ({
+  dataSourceName,
+  dataSourceType,
+  resetFlyout,
+}: TablesFlyoutProps) => {
   const { setToast } = useToast();
   const {
     loadStatus: databasesLoadStatus,
@@ -140,7 +146,7 @@ export const TablesFlyout = ({ dataSourceName, resetFlyout }: TablesFlyoutProps)
           databaseCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(tablesLoadStatus)
       ) {
-        startLoadingTables({ dataSourceName, databaseName: selectedDatabase });
+        startLoadingTables({ dataSourceName, databaseName: selectedDatabase, dataSourceType });
         setIsObjectsLoading(true);
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);

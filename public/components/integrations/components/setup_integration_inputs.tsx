@@ -19,10 +19,11 @@ import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
+import { IntegrationConnectionType } from '../../../../common/types/integrations';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
-  string,
+  IntegrationConnectionType,
   {
     title: string;
     lower: string;
@@ -31,6 +32,14 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
 > = new Map([
   [
     's3',
+    {
+      title: 'Data Source',
+      lower: 'data_source',
+      help: 'Select a data source to pull the data from.',
+    },
+  ],
+  [
+    'securityLake',
     {
       title: 'Data Source',
       lower: 'data_source',
@@ -47,7 +56,10 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   ],
 ]);
 
-const integrationConnectionSelectorItems = [
+const integrationConnectionSelectorItems: Array<{
+  value: 's3' | 'index' | 'securityLake';
+  text: string;
+}> = [
   {
     value: 's3',
     text: 'S3 Connection',
@@ -56,9 +68,15 @@ const integrationConnectionSelectorItems = [
     value: 'index',
     text: 'OpenSearch Index',
   },
+  {
+    value: 'securityLake',
+    text: 'Security Lake Connection',
+  },
 ];
 
-const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
+const suggestDataSources = async (
+  type: IntegrationConnectionType
+): Promise<Array<{ label: string }>> => {
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -74,17 +92,20 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
           return { label: item.name };
         }) ?? []
       );
-    } else if (type === 's3') {
+    } else if (type === 's3' || type === 'securityLake') {
       const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
         name: string;
         connector: string;
       }>;
+      const filterCondition =
+        type === 's3'
+          ? (item: { connector: string }) => item.connector === 'S3GLUE'
+          : (item: { connector: string }) => item.connector === 'SECURITYLAKE';
+
       return (
-        result
-          ?.filter((item) => item.connector === 'S3GLUE')
-          .map((item) => {
-            return { label: item.name };
-          }) ?? []
+        result?.filter(filterCondition).map((item) => {
+          return { label: item.name };
+        }) ?? []
       );
     } else {
       console.error(`Unknown connection type: ${type}`);
@@ -97,21 +118,21 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
 };
 
 export function SetupWorkflowSelector({
-  integration,
+  integrationWorkflows,
   useWorkflows,
   toggleWorkflow,
   config,
 }: {
-  integration: IntegrationConfig;
+  integrationWorkflows?: IntegrationWorkflow[];
   useWorkflows: Map<string, boolean>;
   toggleWorkflow: (name: string) => void;
   config: IntegrationSetupInputs;
 }) {
-  if (!integration.workflows) {
+  if (!integrationWorkflows) {
     return null;
   }
 
-  const cards = integration.workflows
+  const cards = integrationWorkflows
     .filter((workflow) =>
       workflow.applicable_data_sources
         ? workflow.applicable_data_sources.includes(config.connectionType)
@@ -202,7 +223,12 @@ export function IntegrationConnectionInputs({
       >
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
-            if (item.value === 's3') {
+            if (item.value === 'securityLake') {
+              return (
+                integration.assets.some((asset) => asset.type === 'query') &&
+                integration.workflows?.some((workflow) => workflow.name.includes('security-lake'))
+              );
+            } else if (item.value === 's3') {
               return integration.assets.some((asset) => asset.type === 'query');
             } else if (item.value === 'index') {
               return integration.assets.some((asset) => asset.type === 'savedObjectBundle');
@@ -212,7 +238,10 @@ export function IntegrationConnectionInputs({
           })}
           value={config.connectionType}
           onChange={(event) =>
-            updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
+            updateConfig({
+              connectionType: event.target.value as IntegrationConnectionType,
+              connectionDataSource: '',
+            })
           }
           disabled={lockConnectionType}
         />
@@ -252,19 +281,17 @@ export function IntegrationQueryInputs({
   config,
   updateConfig,
   integration,
-  isS3ConnectionWithLakeFormation,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
-  isS3ConnectionWithLakeFormation?: boolean;
 }) {
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
   return (
     <>
-      {!isS3ConnectionWithLakeFormation && (
+      {config.connectionType !== 'securityLake' && (
         <>
           <EuiFormRow
             label="Spark Table Name"
@@ -301,7 +328,7 @@ export function IntegrationQueryInputs({
       <EuiFormRow
         label={`S3 Checkpoint Location`}
         helpText={
-          isS3ConnectionWithLakeFormation
+          config.connectionType === 'securityLake'
             ? 'The checkpoint location for caching intermediary results.'
             : 'The Checkpoint location must be a unique directory and not the same as the Data ' +
               'location. It will be used for caching intermediary results.'
@@ -326,11 +353,11 @@ export function IntegrationQueryInputs({
 export function IntegrationWorkflowsInputs({
   config,
   updateConfig,
-  integration,
+  workflows,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
-  integration: IntegrationConfig;
+  workflows?: IntegrationWorkflow[];
 }) {
   const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
   const toggleWorkflow = (name: string) => {
@@ -342,10 +369,10 @@ export function IntegrationWorkflowsInputs({
   };
 
   useEffect(() => {
-    if (integration.workflows) {
-      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
+    if (workflows) {
+      setUseWorkflows(new Map(workflows.map((w) => [w.name, w.enabled_by_default])));
     }
-  }, [integration.workflows]);
+  }, [workflows]);
 
   useEffect(() => {
     updateConfig({
@@ -362,7 +389,7 @@ export function IntegrationWorkflowsInputs({
     >
       <SetupWorkflowSelector
         config={config}
-        integration={integration}
+        integrationWorkflows={workflows}
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
       />
@@ -444,7 +471,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
               <IntegrationWorkflowsInputs
                 config={config}
                 updateConfig={updateConfig}
-                integration={integration}
+                workflows={integration.workflows}
               />
             </>
           ) : null}

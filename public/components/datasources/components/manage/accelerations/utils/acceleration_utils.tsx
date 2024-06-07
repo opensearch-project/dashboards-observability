@@ -8,6 +8,7 @@ import React from 'react';
 import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
 import {
   CachedAcceleration,
+  DatasourceType,
   RenderAccelerationFlyoutParams,
 } from '../../../../../../../common/types/data_connections';
 import {
@@ -89,10 +90,12 @@ export const generateAccelerationOperationQuery = (
 
 export const CreateAccelerationFlyoutButton = ({
   dataSourceName,
+  dataSourceType,
   renderCreateAccelerationFlyout,
   handleRefresh,
 }: {
   dataSourceName: string;
+  dataSourceType: DatasourceType;
   renderCreateAccelerationFlyout: ({
     dataSource,
     databaseName,
@@ -108,6 +111,7 @@ export const CreateAccelerationFlyoutButton = ({
         onClick={() =>
           renderCreateAccelerationFlyout({
             dataSource: dataSourceName,
+            dataSourceType,
             handleRefresh,
           })
         }

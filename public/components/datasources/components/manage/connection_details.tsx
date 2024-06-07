@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiHorizontalRule } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
 import { PrometheusProperties, S3GlueProperties } from './data_connection';
@@ -113,7 +113,7 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
       <EuiPanel>
         <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        {connector === 'S3GLUE' ? (
+        {connector === 'S3GLUE' || connector === 'SECURITYLAKE' ? (
           <S3ConnectionConfigurationView />
         ) : (
           <PrometheusConnectionConfigurationView />

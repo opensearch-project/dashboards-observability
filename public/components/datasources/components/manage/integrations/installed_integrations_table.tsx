@@ -27,8 +27,10 @@ import { AvailableIntegrationsTable } from '../../../../integrations/components/
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { DatasourceType } from '../../../../../../common/types/data_connections';
+import { isS3Connection } from '../../../utils/helpers';
 
 interface IntegrationInstanceTableEntry {
+  id: string;
   name: string;
   locator: {
     name: string;
@@ -40,6 +42,8 @@ interface IntegrationInstanceTableEntry {
 
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
+    case 'SECURITYLAKE':
+      return 'Amazon Security Lake';
     case 'S3GLUE':
       return 'Flint S3';
     case 'PROMETHEUS':
@@ -79,6 +83,7 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
+    id: instance.id,
     name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
@@ -126,15 +131,13 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
 export interface InstallIntegrationFlyoutProps {
   datasourceType: DatasourceType;
   datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
   closeFlyout: () => void;
-  refreshInstances: () => void;
+  refreshInstances?: () => void;
 }
 
 export const InstallIntegrationFlyout = ({
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
   closeFlyout,
   refreshInstances,
 }: InstallIntegrationFlyoutProps) => {
@@ -153,9 +156,12 @@ export const InstallIntegrationFlyout = ({
     });
   }, []);
 
-  const s3FilteredIntegrations = {
+  const integrationLabelToCheck =
+    datasourceType === 'SECURITYLAKE' ? 'Security Lake' : labelFromDataSourceType(datasourceType);
+
+  const integrationsFilteredByLabel = {
     hits: availableIntegrations.hits.filter((config) =>
-      config.labels?.includes(labelFromDataSourceType(datasourceType) ?? '')
+      config.labels?.includes(integrationLabelToCheck ?? '')
     ),
   };
 
@@ -171,7 +177,7 @@ export const InstallIntegrationFlyout = ({
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
-          data={s3FilteredIntegrations}
+          data={integrationsFilteredByLabel}
           isCardView={true}
           setInstallingIntegration={setInstallingIntegration}
         />
@@ -181,13 +187,10 @@ export const InstallIntegrationFlyout = ({
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
           forceConnection={
-            datasourceType === 'S3GLUE'
+            isS3Connection(datasourceType)
               ? {
                   name: datasourceName,
-                  type: 's3',
-                  properties: {
-                    lakeFormationEnabled: isS3ConnectionWithLakeFormation,
-                  },
+                  type: datasourceType.toLowerCase() === 'securitylake' ? 'securityLake' : 's3',
                 }
               : undefined
           }
@@ -195,7 +198,7 @@ export const InstallIntegrationFlyout = ({
             setIsInstalling(installing);
             if (success) {
               closeFlyout();
-              refreshInstances();
+              refreshInstances?.();
             }
           }}
         />
@@ -208,13 +211,11 @@ export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
   refreshInstances,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
   datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
   refreshInstances: () => void;
 }) => {
   const [query, setQuery] = useState('');
@@ -265,7 +266,6 @@ export const InstalledIntegrationsTable = ({
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
           datasourceName={datasourceName}
-          isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
           refreshInstances={refreshInstances}
         />
       ) : null}

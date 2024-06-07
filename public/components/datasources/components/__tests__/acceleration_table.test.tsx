@@ -95,7 +95,11 @@ describe('AccelerationTable Component', () => {
 
   it('renders without crashing', () => {
     const wrapper = mount(
-      <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+      <AccelerationTable
+        dataSourceName="testDataSource"
+        cacheLoadingHooks={cacheLoadingHooks}
+        dataSourceType="S3GLUE"
+      />
     );
     expect(wrapper).toBeDefined();
   });
@@ -111,7 +115,11 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
-        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+        <AccelerationTable
+          dataSourceName="testDataSource"
+          cacheLoadingHooks={cacheLoadingHooks}
+          dataSourceType="S3GLUE"
+        />
       );
     });
 
@@ -132,7 +140,11 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
-        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+        <AccelerationTable
+          dataSourceName="testDataSource"
+          cacheLoadingHooks={cacheLoadingHooks}
+          dataSourceType="S3GLUE"
+        />
       );
     });
     wrapper!.update();
@@ -152,7 +164,11 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
-        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+        <AccelerationTable
+          dataSourceName="testDataSource"
+          cacheLoadingHooks={cacheLoadingHooks}
+          dataSourceType="S3GLUE"
+        />
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
       wrapper!.update();
@@ -172,7 +188,11 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
-        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
+        <AccelerationTable
+          dataSourceName="testDataSource"
+          cacheLoadingHooks={cacheLoadingHooks}
+          dataSourceType="S3GLUE"
+        />
       );
     });
     wrapper!.update();
