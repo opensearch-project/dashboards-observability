@@ -5,11 +5,7 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
-import {
-  ILegacyScopedClusterClient,
-  IOpenSearchDashboardsResponse,
-  IRouter,
-} from '../../../../../src/core/server';
+import { IOpenSearchDashboardsResponse, IRouter } from '../../../../../src/core/server';
 import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/metrics';
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { MetricsAnalyticsAdaptor } from '../../adaptors/metrics/metrics_analytics_adaptor';
@@ -155,11 +151,12 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
 
   router.get(
     {
-      path: `${OBSERVABILITY_BASE}/metrics/otel/{index}/{histogramSampleDocument}`,
+      path: `${OBSERVABILITY_BASE}/metrics/otel/{index}/{histogramSampleDocument}/{dataSourceMDSId?}`,
       validate: {
         params: schema.object({
           histogramSampleDocument: schema.string(),
           index: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
       },
     },
@@ -168,15 +165,21 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-
+      const dataSourceMDSId = request.params.dataSourceMDSId;
+      let opensearchNotebooksClient;
+      if (dataSourceEnabled && dataSourceMDSId) {
+        opensearchNotebooksClient = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+      } else {
+        opensearchNotebooksClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
+      }
       try {
         const resp = await metricsAnalyticsBackend.queryToFetchSampleDocument(
           opensearchNotebooksClient,
           request.params.histogramSampleDocument,
-          request.params.index
+          request.params.index,
+          dataSourceMDSId
         );
         return response.ok({
           body: resp.hits,
@@ -202,6 +205,7 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
           endTime: schema.string(),
           documentName: schema.string(),
           index: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
       },
     },
@@ -210,10 +214,16 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
+      const dataSourceMDSId = request.body.dataSourceMDSId;
+      let opensearchNotebooksClient;
 
+      if (dataSourceEnabled && dataSourceMDSId) {
+        opensearchNotebooksClient = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+      } else {
+        opensearchNotebooksClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
+      }
       try {
         const resp = await metricsAnalyticsBackend.queryToFetchBinCount(
           opensearchNotebooksClient,
@@ -222,7 +232,8 @@ export function registerMetricsRoute(router: IRouter, dataSourceEnabled: boolean
           request.body.startTime,
           request.body.endTime,
           request.body.documentName,
-          request.body.index
+          request.body.index,
+          dataSourceMDSId
         );
         return response.ok({
           body: resp,

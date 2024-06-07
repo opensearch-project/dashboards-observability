@@ -127,7 +127,7 @@ export const Home = ({
                             <EuiResizableButton />
 
                             <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
-                              <MetricsGrid key="metricGrid" />
+                              <MetricsGrid key="metricGrid" dataSourceMDSId={dataSourceMDSId} />
                             </EuiResizablePanel>
                           </>
                         )}

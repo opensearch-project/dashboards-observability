@@ -63,6 +63,8 @@ export const Sidebar = ({
 
   useEffect(() => {
     (async function () {
+      setSelectedDataSource([]);
+      setSelectedOTIndex([]);
       await dispatch(clearSelectedMetrics());
     })();
   }, [dataSourceMDSId]);
@@ -134,7 +136,7 @@ export const Sidebar = ({
     if (isOpenTelemetry) {
       return <IndexPicker otelIndices={otelIndices} setSelectedOTIndex={setSelectedOTIndex} />;
     }
-  }, [selectedDataSource]);
+  }, [selectedDataSource, dataSourceMDSId]);
 
   const availableMetrics = useMemo(() => {
     if (selectedDataSource[0]?.label === 'OpenTelemetry' && selectedOTIndex.length > 0)
@@ -175,6 +177,7 @@ export const Sidebar = ({
             headerName="Selected Metrics"
             handleClick={handleRemoveMetric}
             dataTestSubj="metricsListItems_selectedMetrics"
+            dataSourceMDSId={dataSourceMDSId}
           />
           <EuiSpacer size="s" />
           <MetricsAccordion
@@ -182,6 +185,7 @@ export const Sidebar = ({
             headerName="Available Metrics"
             handleClick={handleAddMetric}
             dataTestSubj="metricsListItems_availableMetrics"
+            dataSourceMDSId={dataSourceMDSId}
           />
         </section>
       </div>

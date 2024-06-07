@@ -32,7 +32,8 @@ export class MetricsAnalyticsAdaptor {
     startTime: string,
     endTime: string,
     documentName: string,
-    index: string
+    index: string,
+    dataSourceMDSId?: string
   ) => {
     const metricsQuery = {
       size: 0,
@@ -86,7 +87,7 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response.aggregations;
     } catch (error) {
       throw new Error('Fetch Bin count Error:' + error);
@@ -96,7 +97,8 @@ export class MetricsAnalyticsAdaptor {
   queryToFetchSampleDocument = async (
     client: ILegacyScopedClusterClient,
     documentName: string,
-    index: string
+    index: string,
+    dataSourceMDSId?: string
   ) => {
     const metricsQuery = {
       size: 1,
@@ -116,7 +118,7 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response;
     } catch (error) {
       throw new Error('Fetch Sample Document Error:' + error);
