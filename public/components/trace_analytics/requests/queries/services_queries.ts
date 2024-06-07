@@ -70,7 +70,7 @@ export const getServicesQuery = (
     if (serviceName) {
       query.query.bool.must.push({
         term: {
-          serviceName: serviceName,
+          serviceName,
         },
       });
     }
@@ -122,7 +122,7 @@ export const getRelatedServicesQuery = (serviceName: string) => {
                 must: [
                   {
                     term: {
-                      serviceName: serviceName,
+                      serviceName,
                     },
                   },
                 ],
@@ -463,214 +463,8 @@ export const getServiceMetricsQuery = (
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
-export const getServicesThroughputPltQuery = (
-  mode: TraceAnalyticsMode,
-  fixedInterval: string,
-  serviceName?: string
-) => {
-  let query = {
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      service_throughput_trend: {
-        terms: {
-          field: 'serviceName',
-          size: 10000,
-        },
-        aggs: {
-          throughput: {
-            date_histogram: {
-              field: 'startTime',
-              fixed_interval: fixedInterval,
-            },
-            aggs: {
-              trace_count: {
-                cardinality: {
-                  field: 'traceId',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  if (mode === 'data_prepper' && serviceName) {
-    query.query.bool.must.push({
-      term: {
-        serviceName: serviceName,
-      },
-    });
-  }
-  console.log('DSL query for throughput', query);
-
-  return query;
-};
-
-export const getServicesErrorRatePltQuery = (
-  mode: TraceAnalyticsMode,
-  fixedInterval: string,
-  serviceName?: string
-) => {
-  let query = {
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      service_error_trend: {
-        terms: {
-          field: 'serviceName',
-        },
-        aggs: {
-          error_rate: {
-            date_histogram: {
-              field: 'startTime',
-              fixed_interval: '1h',
-            },
-            aggs: {
-              error_count: {
-                filter: {
-                  term: {
-                    'status.code': '2',
-                  },
-                },
-                aggs: {
-                  trace_count: {
-                    cardinality: {
-                      field: 'traceId',
-                    },
-                  },
-                  error_rate: {
-                    bucket_script: {
-                      buckets_path: {
-                        total: 'trace_count.value',
-                        errors: 'error_count>trace_count.value',
-                      },
-                      script: 'params.errors / params.total * 100',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  if (mode === 'data_prepper' && serviceName) {
-    query.query.bool.must.push({
-      term: {
-        serviceName: serviceName,
-      },
-    });
-  }
-  console.log('DSL query for error rate', query);
-  return query;
-};
-
-export const getServiceLatencyTrendQuery = (
-  mode: TraceAnalyticsMode,
-  fixedInterval: string,
-  serviceName?: string
-) => {
-  const query = {
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      trace_group_name: {
-        terms: {
-          field: 'serviceName',
-          size: 10000,
-        },
-        aggs: {
-          group_by_hour: {
-            date_histogram: {
-              field: 'endTime',
-              fixed_interval: fixedInterval,
-            },
-            aggs: {
-              average_latency: {
-                scripted_metric: {
-                  init_script: 'state.traceIdToLatencyMap = [:];',
-                  map_script: `
-                    if (doc.containsKey('traceGroupFields.durationInNanos') && !doc['traceGroupFields.durationInNanos'].empty) {
-                      def traceId = doc['traceId'].value;
-                      if (!state.traceIdToLatencyMap.containsKey(traceId)) {
-                        state.traceIdToLatencyMap[traceId] = doc['traceGroupFields.durationInNanos'].value;
-                      }
-                    }
-                  `,
-                  combine_script: 'return state.traceIdToLatencyMap',
-                  reduce_script: `
-                    def seenTraceIdsMap = [:];
-                    def totalLatency = 0.0;
-                    def traceCount = 0.0;
-
-                    for (s in states) {
-                      if (s == null) {
-                        continue;
-                      }
-
-                      for (entry in s.entrySet()) {
-                        def traceId = entry.getKey();
-                        def traceLatency = entry.getValue();
-                        if (!seenTraceIdsMap.containsKey(traceId)) {
-                          seenTraceIdsMap[traceId] = true;
-                          totalLatency += traceLatency;
-                          traceCount++;
-                        }
-                      }
-                    }
-
-                    def average_latency_nanos = totalLatency / traceCount;
-                    return Math.round(average_latency_nanos / 10000) / 100.0;
-                  `,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  if (mode === 'data_prepper' && serviceName) {
-    query.query.bool.must.push({
-      term: {
-        serviceName: serviceName,
-      },
-    });
-  }
-
-  console.log('DSL query for latency', query);
-
-  return query;
-};
-
 export const getServiceTrendsQuery = (_mode: TraceAnalyticsMode, serviceFilter: any) => {
-  let query = {
+  const query = {
     size: 0,
     query: {
       bool: {
@@ -747,16 +541,6 @@ export const getServiceTrendsQuery = (_mode: TraceAnalyticsMode, serviceFilter: 
       },
     },
   };
-
-  // if (mode === 'data_prepper' && serviceName) {
-  //   query.query.bool.must.push({
-  //     term: {
-  //       serviceName: serviceName,
-  //     },
-  //   });
-  // }
-
-  console.log('DSL query for latency', query);
 
   return query;
 };

@@ -64,16 +64,14 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
     spanId,
     isFlyoutVisible,
     addSpanFilter,
-    closeFlyout,
-    mode,
-    dataSourceMDSId,
+    spanMode,
+    spanDataSourceMDSId,
   }: {
     spanId: string;
     isFlyoutVisible: boolean;
-    closeFlyout: () => void;
     addSpanFilter: (field: string, value: any) => void;
-    mode: TraceAnalyticsMode;
-    dataSourceMDSId: string;
+    spanMode: TraceAnalyticsMode;
+    spanDataSourceMDSId: string;
   }) => void;
 }
 
@@ -179,11 +177,7 @@ export const Home = (props: HomeProps) => {
     },
   ];
 
-  const nameColumnAction = (item: any) => location.assign(`#/services/${encodeURIComponent(item)}`);
   const traceColumnAction = () => location.assign('#/traces');
-  const onClickAction = (row: any) => {
-    setCurrentSelectedService(row.name);
-  };
 
   const traceIdColumnAction = (item: any) =>
     location.assign(`#/traces/${encodeURIComponent(item)}`);
@@ -193,17 +187,15 @@ export const Home = (props: HomeProps) => {
   const setSpanFlyout = ({
     spanId,
     isFlyoutVisible,
-    closeFlyout,
     addSpanFilter,
-    mode,
-    dataSourceMDSId,
+    spanMode,
+    spanDataSourceMDSId,
   }: {
     spanId: string;
     isFlyoutVisible: boolean;
-    closeFlyout: () => void;
     addSpanFilter: (field: string, value: any) => void;
-    mode: TraceAnalyticsMode;
-    dataSourceMDSId: string;
+    spanMode: TraceAnalyticsMode;
+    spanDataSourceMDSId: string;
   }) => {
     setSpanFlyoutComponent(
       <SpanDetailFlyout
@@ -212,8 +204,8 @@ export const Home = (props: HomeProps) => {
         isFlyoutVisible={isFlyoutVisible}
         closeFlyout={() => setSpanFlyoutComponent(<></>)}
         addSpanFilter={addSpanFilter}
-        mode={mode}
-        dataSourceMDSId={dataSourceMDSId}
+        mode={spanMode}
+        dataSourceMDSId={spanDataSourceMDSId}
       />
     );
   };
@@ -340,9 +332,8 @@ export const Home = (props: HomeProps) => {
               <Services
                 page="services"
                 childBreadcrumbs={serviceBreadcrumbs}
-                nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
-                onClickAction={onClickAction}
+                setCurrentSelectedService={setCurrentSelectedService}
                 toasts={toasts}
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}

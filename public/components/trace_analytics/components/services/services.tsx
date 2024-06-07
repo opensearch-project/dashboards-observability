@@ -13,9 +13,8 @@ import { ServicesContent } from './services_content';
 
 export interface ServicesProps extends TraceAnalyticsComponentDeps {
   childBreadcrumbs: EuiBreadcrumb[];
-  nameColumnAction: any;
   traceColumnAction: any;
-  onClickAction: (row: any) => void;
+  setCurrentSelectedService: (value: React.SetStateAction<string>) => void;
   page: 'services' | 'app';
   toasts: Toast[];
   dataSourceMDSId: DataSourceOption[];

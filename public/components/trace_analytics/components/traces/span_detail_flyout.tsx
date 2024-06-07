@@ -36,7 +36,6 @@ import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
-import './span_detail_flyout.scss';
 
 const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
   data_prepper: {
@@ -81,6 +80,7 @@ export function SpanDetailFlyout(props: {
   setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
   startTime?: string;
   endTime?: string;
+  setCurrentSpan?: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
@@ -295,7 +295,13 @@ export function SpanDetailFlyout(props: {
 
   return (
     <>
-      <EuiFlyout data-test-subj="spanDetailFlyout" onClose={props.closeFlyout} size="s">
+      <EuiFlyout
+        data-test-subj="spanDetailFlyout"
+        onClose={() => {
+          props.closeFlyout();
+        }}
+        size="s"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
@@ -310,19 +316,16 @@ export function SpanDetailFlyout(props: {
             </EuiFlexItem>
             {props.serviceName && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  className="span-flyout-back-btn"
-                  color="text"
+                <EuiButtonEmpty
+                  style={{ position: 'absolute', right: '38px', top: '8px', zIndex: 3 }}
+                  color="primary"
+                  onClick={() => props.setCurrentSpan && props.setCurrentSpan('')}
+                  iconType="arrowLeft"
+                  iconSide="left"
                   size="xs"
-                  aria-label="backToServiceFlyout"
-                  title="Back"
-                  iconType="sortRight"
-                  onClick={() => {
-                    props.setCurrentSelectedService &&
-                      props.setCurrentSelectedService(props.serviceName);
-                    props.closeFlyout();
-                  }}
-                />
+                >
+                  Back
+                </EuiButtonEmpty>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

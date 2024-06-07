@@ -27,33 +27,25 @@ interface ServiceMetricsProps {
 }
 
 export const ServiceMetrics = ({
-  fixedInterval,
   mode,
   dataSourceMDSId,
-  startTime,
-  endTime,
   setStartTime,
   setEndTime,
   page,
   serviceName,
 }: ServiceMetricsProps) => {
   const [trends, setTrends] = useState<ServiceTrends>({});
-  const [loading, setLoading] = useState(false);
   const { http } = coreRefs;
 
   const serviceFilter = [
     {
       term: {
-        serviceName: serviceName,
+        serviceName,
       },
     },
   ];
 
   const fetchMetrics = async () => {
-    setLoading(true);
-
-    console.log('service name in metrics: ', serviceName);
-
     await handleServiceTrendsRequest(
       http,
       '1h',
@@ -62,13 +54,11 @@ export const ServiceMetrics = ({
       serviceFilter,
       dataSourceMDSId[0].id
     );
-
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchMetrics();
-  }, []);
+  }, [serviceName]);
 
   const metricsView = page === 'serviceFlyout' ? 'column' : 'row';
 

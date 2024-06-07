@@ -80,9 +80,6 @@ exports[`Service view component renders service view 1`] = `
             timeFormat="HH:mm"
           />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        />
       </EuiFlexGroup>
       <EuiSpacer
         size="xl"
@@ -215,6 +212,24 @@ exports[`Service view component renders service view 1`] = `
         </EuiFlexGroup>
         <EuiSpacer />
       </EuiPanel>
+      <EuiSpacer />
+      <ServiceMetrics
+        dataSourceMDSId={
+          Array [
+            Object {
+              "id": "",
+              "label": "",
+            },
+          ]
+        }
+        endTime="now"
+        fixedInterval="1h"
+        mode="data_prepper"
+        serviceName="order"
+        setEndTime={[MockFunction]}
+        setStartTime={[MockFunction]}
+        startTime="now-5m"
+      />
       <EuiSpacer />
       <ServiceMap
         currService="order"

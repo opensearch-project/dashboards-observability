@@ -478,6 +478,8 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                   "r": 5,
                   "t": 30,
                 },
+                "paper_bgcolor": "rgba(0,0,0,0)",
+                "plot_bgcolor": "rgba(0,0,0,0)",
                 "showlegend": false,
                 "width": 800,
                 "xaxis": Object {

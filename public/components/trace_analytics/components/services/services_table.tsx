@@ -37,9 +37,8 @@ interface ServicesTableProps {
   setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
   addServicesGroupFilter: () => void;
   loading: boolean;
-  nameColumnAction: (item: any) => any;
   traceColumnAction: any;
-  onClickAction: (row: any) => void;
+  setCurrentSelectedService: (value: React.SetStateAction<string>) => void;
   addFilter: (filter: FilterType) => void;
   setRedirect: (redirect: boolean) => void;
   mode: TraceAnalyticsMode;
@@ -58,9 +57,8 @@ export function ServicesTable(props: ServicesTableProps) {
     addServicesGroupFilter,
     mode,
     loading,
-    nameColumnAction,
     traceColumnAction,
-    onClickAction,
+    setCurrentSelectedService,
     addFilter,
     setRedirect,
     jaegerIndicesExist,
@@ -72,6 +70,16 @@ export function ServicesTable(props: ServicesTableProps) {
 
   const selectionValue = {
     onSelectionChange: (selections: any[]) => setSelectedItems(selections),
+  };
+
+  const nameColumnAction = (serviceName: string) => {
+    addFilter({
+      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+      operator: 'is',
+      value: serviceName,
+      inverted: false,
+      disabled: false,
+    });
   };
 
   const renderTitleBar = (totalItems?: number) => {
@@ -234,7 +242,7 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'center',
           render: (_item: any, row: any) => (
             <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false} onClick={() => onClickAction(row)}>
+              <EuiFlexItem grow={false} onClick={() => setCurrentSelectedService(row.name)}>
                 <EuiLink>
                   <EuiIcon type="inspect" color="primary" />
                 </EuiLink>

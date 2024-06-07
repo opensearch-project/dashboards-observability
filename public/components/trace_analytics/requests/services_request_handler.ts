@@ -320,7 +320,6 @@ export const handleServiceTrendsRequest = (
           }
         );
       });
-      console.log('parsedResult', parsedResult);
       setItems(parsedResult);
     })
     .catch((error) => console.error(error));

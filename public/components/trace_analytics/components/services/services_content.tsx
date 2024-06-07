@@ -33,9 +33,8 @@ export function ServicesContent(props: ServicesProps) {
     appConfigs = [],
     childBreadcrumbs,
     parentBreadcrumb,
-    nameColumnAction,
     traceColumnAction,
-    onClickAction,
+    setCurrentSelectedService,
     setFilters,
     setQuery,
     setStartTime,
@@ -88,11 +87,15 @@ export function ServicesContent(props: ServicesProps) {
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh(newFilteredService);
-  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
-
-  useEffect(() => {
-    refresh();
-  }, [isServiceTrendEnabled]);
+  }, [
+    filters,
+    appConfigs,
+    redirect,
+    mode,
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
+    isServiceTrendEnabled,
+  ]);
 
   const refresh = async (currService?: string, overrideQuery?: string) => {
     const filterQuery = overrideQuery ?? query;
@@ -113,13 +116,6 @@ export function ServicesContent(props: ServicesProps) {
     );
 
     if (isServiceTrendEnabled) {
-      // const serviceFilter = [
-      //   {
-      //     terms: {
-      //       serviceName: [...],
-      //     },
-      //   },
-      // ];
       await handleServiceTrendsRequest(
         http,
         '1h',
@@ -200,9 +196,8 @@ export function ServicesContent(props: ServicesProps) {
         setRedirect={setRedirect}
         mode={mode}
         loading={loading}
-        nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        onClickAction={onClickAction}
+        setCurrentSelectedService={setCurrentSelectedService}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
         isServiceTrendEnabled={isServiceTrendEnabled}
@@ -218,6 +213,7 @@ export function ServicesContent(props: ServicesProps) {
           setIdSelected={setServiceMapIdSelected}
           currService={filteredService}
           page={page}
+          setCurrentSelectedService={setCurrentSelectedService}
         />
       ) : (
         <div />

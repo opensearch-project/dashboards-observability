@@ -814,6 +814,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                         <EuiPanel
                           style={
                             Object {
+                              "maxHeight": 560,
                               "minHeight": 308,
                               "minWidth": 433,
                             }
@@ -823,6 +824,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                             style={
                               Object {
+                                "maxHeight": 560,
                                 "minHeight": 308,
                                 "minWidth": 433,
                               }
@@ -873,85 +875,96 @@ exports[`Dashboard component renders dashboard 1`] = `
                                 </EuiButtonGroup>
                               </div>
                             </EuiFlexGroup>
-                            <EuiSpacer
-                              size="m"
+                            <EuiHorizontalRule
+                              margin="m"
                             >
-                              <div
-                                className="euiSpacer euiSpacer--m"
+                              <hr
+                                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                               />
-                            </EuiSpacer>
-                            <NoMatchMessage
-                              size="s"
+                            </EuiHorizontalRule>
+                            <ErrorTrendPlt
+                              isPanel={true}
+                              items={
+                                Object {
+                                  "fixedInterval": "1h",
+                                  "items": Array [],
+                                }
+                              }
+                              onClick={[Function]}
                             >
-                              <EuiSpacer
+                              <NoMatchMessage
                                 size="s"
                               >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                              <EuiEmptyPrompt
-                                body={
-                                  <EuiText>
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </EuiText>
-                                }
-                                title={
-                                  <h2>
-                                    No matches
-                                  </h2>
-                                }
-                              >
-                                <div
-                                  className="euiEmptyPrompt"
+                                <EuiSpacer
+                                  size="s"
                                 >
-                                  <EuiTitle
-                                    size="m"
-                                  >
-                                    <h2
-                                      className="euiTitle euiTitle--medium"
-                                    >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                                <EuiEmptyPrompt
+                                  body={
+                                    <EuiText>
+                                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                    </EuiText>
+                                  }
+                                  title={
+                                    <h2>
                                       No matches
                                     </h2>
-                                  </EuiTitle>
-                                  <EuiTextColor
-                                    color="subdued"
+                                  }
+                                >
+                                  <div
+                                    className="euiEmptyPrompt"
                                   >
-                                    <span
-                                      className="euiTextColor euiTextColor--subdued"
+                                    <EuiTitle
+                                      size="m"
                                     >
-                                      <EuiSpacer
-                                        size="m"
+                                      <h2
+                                        className="euiTitle euiTitle--medium"
                                       >
-                                        <div
-                                          className="euiSpacer euiSpacer--m"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiText>
-                                        <div
-                                          className="euiText euiText--medium"
+                                        No matches
+                                      </h2>
+                                    </EuiTitle>
+                                    <EuiTextColor
+                                      color="subdued"
+                                    >
+                                      <span
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <EuiSpacer
+                                          size="m"
                                         >
-                                          <EuiText>
-                                            <div
-                                              className="euiText euiText--medium"
-                                            >
-                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                            </div>
-                                          </EuiText>
-                                        </div>
-                                      </EuiText>
-                                    </span>
-                                  </EuiTextColor>
-                                </div>
-                              </EuiEmptyPrompt>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </NoMatchMessage>
+                                          <div
+                                            className="euiSpacer euiSpacer--m"
+                                          />
+                                        </EuiSpacer>
+                                        <EuiText>
+                                          <div
+                                            className="euiText euiText--medium"
+                                          >
+                                            <EuiText>
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </EuiText>
+                                      </span>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiEmptyPrompt>
+                                <EuiSpacer
+                                  size="s"
+                                >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                              </NoMatchMessage>
+                            </ErrorTrendPlt>
                           </div>
                         </EuiPanel>
                       </ErrorRatePlt>
@@ -974,6 +987,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                         <EuiPanel
                           style={
                             Object {
+                              "maxHeight": 560,
                               "minHeight": 308,
                               "minWidth": 433,
                             }
@@ -983,6 +997,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                             style={
                               Object {
+                                "maxHeight": 560,
                                 "minHeight": 308,
                                 "minWidth": 433,
                               }
@@ -1040,78 +1055,90 @@ exports[`Dashboard component renders dashboard 1`] = `
                                 className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                               />
                             </EuiHorizontalRule>
-                            <NoMatchMessage
-                              size="s"
+                            <ThroughputTrendPlt
+                              isPanel={true}
+                              items={
+                                Object {
+                                  "fixedInterval": "1h",
+                                  "items": Array [],
+                                }
+                              }
+                              onClick={[Function]}
                             >
-                              <EuiSpacer
+                               
+                              <NoMatchMessage
                                 size="s"
                               >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                              <EuiEmptyPrompt
-                                body={
-                                  <EuiText>
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </EuiText>
-                                }
-                                title={
-                                  <h2>
-                                    No matches
-                                  </h2>
-                                }
-                              >
-                                <div
-                                  className="euiEmptyPrompt"
+                                <EuiSpacer
+                                  size="s"
                                 >
-                                  <EuiTitle
-                                    size="m"
-                                  >
-                                    <h2
-                                      className="euiTitle euiTitle--medium"
-                                    >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                                <EuiEmptyPrompt
+                                  body={
+                                    <EuiText>
+                                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                    </EuiText>
+                                  }
+                                  title={
+                                    <h2>
                                       No matches
                                     </h2>
-                                  </EuiTitle>
-                                  <EuiTextColor
-                                    color="subdued"
+                                  }
+                                >
+                                  <div
+                                    className="euiEmptyPrompt"
                                   >
-                                    <span
-                                      className="euiTextColor euiTextColor--subdued"
+                                    <EuiTitle
+                                      size="m"
                                     >
-                                      <EuiSpacer
-                                        size="m"
+                                      <h2
+                                        className="euiTitle euiTitle--medium"
                                       >
-                                        <div
-                                          className="euiSpacer euiSpacer--m"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiText>
-                                        <div
-                                          className="euiText euiText--medium"
+                                        No matches
+                                      </h2>
+                                    </EuiTitle>
+                                    <EuiTextColor
+                                      color="subdued"
+                                    >
+                                      <span
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <EuiSpacer
+                                          size="m"
                                         >
-                                          <EuiText>
-                                            <div
-                                              className="euiText euiText--medium"
-                                            >
-                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                            </div>
-                                          </EuiText>
-                                        </div>
-                                      </EuiText>
-                                    </span>
-                                  </EuiTextColor>
-                                </div>
-                              </EuiEmptyPrompt>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </NoMatchMessage>
+                                          <div
+                                            className="euiSpacer euiSpacer--m"
+                                          />
+                                        </EuiSpacer>
+                                        <EuiText>
+                                          <div
+                                            className="euiText euiText--medium"
+                                          >
+                                            <EuiText>
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </EuiText>
+                                      </span>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiEmptyPrompt>
+                                <EuiSpacer
+                                  size="s"
+                                >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                              </NoMatchMessage>
+                            </ThroughputTrendPlt>
                           </div>
                         </EuiPanel>
                       </ThroughputPlt>
@@ -1941,6 +1968,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                         <EuiPanel
                           style={
                             Object {
+                              "maxHeight": 560,
                               "minHeight": 308,
                               "minWidth": 433,
                             }
@@ -1950,6 +1978,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                             style={
                               Object {
+                                "maxHeight": 560,
                                 "minHeight": 308,
                                 "minWidth": 433,
                               }
@@ -2000,85 +2029,96 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                 </EuiButtonGroup>
                               </div>
                             </EuiFlexGroup>
-                            <EuiSpacer
-                              size="m"
+                            <EuiHorizontalRule
+                              margin="m"
                             >
-                              <div
-                                className="euiSpacer euiSpacer--m"
+                              <hr
+                                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                               />
-                            </EuiSpacer>
-                            <NoMatchMessage
-                              size="s"
+                            </EuiHorizontalRule>
+                            <ErrorTrendPlt
+                              isPanel={true}
+                              items={
+                                Object {
+                                  "fixedInterval": "1h",
+                                  "items": Array [],
+                                }
+                              }
+                              onClick={[Function]}
                             >
-                              <EuiSpacer
+                              <NoMatchMessage
                                 size="s"
                               >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                              <EuiEmptyPrompt
-                                body={
-                                  <EuiText>
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </EuiText>
-                                }
-                                title={
-                                  <h2>
-                                    No matches
-                                  </h2>
-                                }
-                              >
-                                <div
-                                  className="euiEmptyPrompt"
+                                <EuiSpacer
+                                  size="s"
                                 >
-                                  <EuiTitle
-                                    size="m"
-                                  >
-                                    <h2
-                                      className="euiTitle euiTitle--medium"
-                                    >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                                <EuiEmptyPrompt
+                                  body={
+                                    <EuiText>
+                                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                    </EuiText>
+                                  }
+                                  title={
+                                    <h2>
                                       No matches
                                     </h2>
-                                  </EuiTitle>
-                                  <EuiTextColor
-                                    color="subdued"
+                                  }
+                                >
+                                  <div
+                                    className="euiEmptyPrompt"
                                   >
-                                    <span
-                                      className="euiTextColor euiTextColor--subdued"
+                                    <EuiTitle
+                                      size="m"
                                     >
-                                      <EuiSpacer
-                                        size="m"
+                                      <h2
+                                        className="euiTitle euiTitle--medium"
                                       >
-                                        <div
-                                          className="euiSpacer euiSpacer--m"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiText>
-                                        <div
-                                          className="euiText euiText--medium"
+                                        No matches
+                                      </h2>
+                                    </EuiTitle>
+                                    <EuiTextColor
+                                      color="subdued"
+                                    >
+                                      <span
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <EuiSpacer
+                                          size="m"
                                         >
-                                          <EuiText>
-                                            <div
-                                              className="euiText euiText--medium"
-                                            >
-                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                            </div>
-                                          </EuiText>
-                                        </div>
-                                      </EuiText>
-                                    </span>
-                                  </EuiTextColor>
-                                </div>
-                              </EuiEmptyPrompt>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </NoMatchMessage>
+                                          <div
+                                            className="euiSpacer euiSpacer--m"
+                                          />
+                                        </EuiSpacer>
+                                        <EuiText>
+                                          <div
+                                            className="euiText euiText--medium"
+                                          >
+                                            <EuiText>
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </EuiText>
+                                      </span>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiEmptyPrompt>
+                                <EuiSpacer
+                                  size="s"
+                                >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                              </NoMatchMessage>
+                            </ErrorTrendPlt>
                           </div>
                         </EuiPanel>
                       </ErrorRatePlt>
@@ -2101,6 +2141,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                         <EuiPanel
                           style={
                             Object {
+                              "maxHeight": 560,
                               "minHeight": 308,
                               "minWidth": 433,
                             }
@@ -2110,6 +2151,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                             style={
                               Object {
+                                "maxHeight": 560,
                                 "minHeight": 308,
                                 "minWidth": 433,
                               }
@@ -2167,78 +2209,90 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                 className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                               />
                             </EuiHorizontalRule>
-                            <NoMatchMessage
-                              size="s"
+                            <ThroughputTrendPlt
+                              isPanel={true}
+                              items={
+                                Object {
+                                  "fixedInterval": "1h",
+                                  "items": Array [],
+                                }
+                              }
+                              onClick={[Function]}
                             >
-                              <EuiSpacer
+                               
+                              <NoMatchMessage
                                 size="s"
                               >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                              <EuiEmptyPrompt
-                                body={
-                                  <EuiText>
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </EuiText>
-                                }
-                                title={
-                                  <h2>
-                                    No matches
-                                  </h2>
-                                }
-                              >
-                                <div
-                                  className="euiEmptyPrompt"
+                                <EuiSpacer
+                                  size="s"
                                 >
-                                  <EuiTitle
-                                    size="m"
-                                  >
-                                    <h2
-                                      className="euiTitle euiTitle--medium"
-                                    >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                                <EuiEmptyPrompt
+                                  body={
+                                    <EuiText>
+                                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                    </EuiText>
+                                  }
+                                  title={
+                                    <h2>
                                       No matches
                                     </h2>
-                                  </EuiTitle>
-                                  <EuiTextColor
-                                    color="subdued"
+                                  }
+                                >
+                                  <div
+                                    className="euiEmptyPrompt"
                                   >
-                                    <span
-                                      className="euiTextColor euiTextColor--subdued"
+                                    <EuiTitle
+                                      size="m"
                                     >
-                                      <EuiSpacer
-                                        size="m"
+                                      <h2
+                                        className="euiTitle euiTitle--medium"
                                       >
-                                        <div
-                                          className="euiSpacer euiSpacer--m"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiText>
-                                        <div
-                                          className="euiText euiText--medium"
+                                        No matches
+                                      </h2>
+                                    </EuiTitle>
+                                    <EuiTextColor
+                                      color="subdued"
+                                    >
+                                      <span
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <EuiSpacer
+                                          size="m"
                                         >
-                                          <EuiText>
-                                            <div
-                                              className="euiText euiText--medium"
-                                            >
-                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                            </div>
-                                          </EuiText>
-                                        </div>
-                                      </EuiText>
-                                    </span>
-                                  </EuiTextColor>
-                                </div>
-                              </EuiEmptyPrompt>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </NoMatchMessage>
+                                          <div
+                                            className="euiSpacer euiSpacer--m"
+                                          />
+                                        </EuiSpacer>
+                                        <EuiText>
+                                          <div
+                                            className="euiText euiText--medium"
+                                          >
+                                            <EuiText>
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </EuiText>
+                                      </span>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiEmptyPrompt>
+                                <EuiSpacer
+                                  size="s"
+                                >
+                                  <div
+                                    className="euiSpacer euiSpacer--s"
+                                  />
+                                </EuiSpacer>
+                              </NoMatchMessage>
+                            </ThroughputTrendPlt>
                           </div>
                         </EuiPanel>
                       </ThroughputPlt>
@@ -2860,6 +2914,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           <EuiPanel
             style={
               Object {
+                "maxHeight": 560,
                 "minHeight": 308,
                 "minWidth": 433,
               }
@@ -2869,6 +2924,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
               className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
               style={
                 Object {
+                  "maxHeight": 560,
                   "minHeight": 308,
                   "minWidth": 433,
                 }
@@ -3101,85 +3157,96 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                   </EuiButtonGroup>
                 </div>
               </EuiFlexGroup>
-              <EuiSpacer
-                size="m"
+              <EuiHorizontalRule
+                margin="m"
               >
-                <div
-                  className="euiSpacer euiSpacer--m"
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                 />
-              </EuiSpacer>
-              <NoMatchMessage
-                size="s"
+              </EuiHorizontalRule>
+              <ErrorTrendPlt
+                isPanel={true}
+                items={
+                  Object {
+                    "fixedInterval": "1h",
+                    "items": Array [],
+                  }
+                }
+                onClick={[Function]}
               >
-                <EuiSpacer
+                <NoMatchMessage
                   size="s"
                 >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiEmptyPrompt
-                  body={
-                    <EuiText>
-                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                    </EuiText>
-                  }
-                  title={
-                    <h2>
-                      No matches
-                    </h2>
-                  }
-                >
-                  <div
-                    className="euiEmptyPrompt"
+                  <EuiSpacer
+                    size="s"
                   >
-                    <EuiTitle
-                      size="m"
-                    >
-                      <h2
-                        className="euiTitle euiTitle--medium"
-                      >
+                    <div
+                      className="euiSpacer euiSpacer--s"
+                    />
+                  </EuiSpacer>
+                  <EuiEmptyPrompt
+                    body={
+                      <EuiText>
+                        No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                      </EuiText>
+                    }
+                    title={
+                      <h2>
                         No matches
                       </h2>
-                    </EuiTitle>
-                    <EuiTextColor
-                      color="subdued"
+                    }
+                  >
+                    <div
+                      className="euiEmptyPrompt"
                     >
-                      <span
-                        className="euiTextColor euiTextColor--subdued"
+                      <EuiTitle
+                        size="m"
                       >
-                        <EuiSpacer
-                          size="m"
+                        <h2
+                          className="euiTitle euiTitle--medium"
                         >
-                          <div
-                            className="euiSpacer euiSpacer--m"
-                          />
-                        </EuiSpacer>
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
+                          No matches
+                        </h2>
+                      </EuiTitle>
+                      <EuiTextColor
+                        color="subdued"
+                      >
+                        <span
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          <EuiSpacer
+                            size="m"
                           >
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                              </div>
-                            </EuiText>
-                          </div>
-                        </EuiText>
-                      </span>
-                    </EuiTextColor>
-                  </div>
-                </EuiEmptyPrompt>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-              </NoMatchMessage>
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <EuiText>
+                                <div
+                                  className="euiText euiText--medium"
+                                >
+                                  No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                </div>
+                              </EuiText>
+                            </div>
+                          </EuiText>
+                        </span>
+                      </EuiTextColor>
+                    </div>
+                  </EuiEmptyPrompt>
+                  <EuiSpacer
+                    size="s"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--s"
+                    />
+                  </EuiSpacer>
+                </NoMatchMessage>
+              </ErrorTrendPlt>
             </div>
           </EuiPanel>
         </ErrorRatePlt>

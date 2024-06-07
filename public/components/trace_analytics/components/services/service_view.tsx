@@ -126,7 +126,21 @@ export function ServiceView(props: ServiceViewProps) {
 
   const onClickConnectedService = (service: string) => {
     if (page !== 'serviceFlyout') redirectToServicePage(service);
-    else setCurrentSelectedService && setCurrentSelectedService(service);
+    else if (setCurrentSelectedService) setCurrentSelectedService(service);
+  };
+
+  const redirectToServiceTraces = () => {
+    if (setCurrentSelectedService) setCurrentSelectedService('');
+    setRedirect(true);
+    const filterField = mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
+    props.addFilter({
+      field: filterField,
+      operator: 'is',
+      value: props.serviceName,
+      inverted: false,
+      disabled: false,
+    });
+    location.assign('#/traces');
   };
 
   useEffect(() => {
@@ -149,7 +163,7 @@ export function ServiceView(props: ServiceViewProps) {
       id: 0,
       items: [
         {
-          name: 'View associated logs',
+          name: 'View logs',
           'data-test-subj': 'viewLogsButton',
           onClick: () => {
             coreRefs?.application!.navigateToApp(observabilityLogsID, {
@@ -165,10 +179,15 @@ export function ServiceView(props: ServiceViewProps) {
           },
         },
         {
+          name: 'View traces',
+          'data-test-subj': 'viewTracesButton',
+          onClick: redirectToServiceTraces,
+        },
+        {
           name: 'View in services page',
           'data-test-subj': 'viewServiceButton',
           onClick: () => {
-            setCurrentSelectedService && setCurrentSelectedService('');
+            if (setCurrentSelectedService) setCurrentSelectedService('');
             redirectToServicePage(props.serviceName);
           },
         },
@@ -183,11 +202,11 @@ export function ServiceView(props: ServiceViewProps) {
     endTime: SearchBarProps['endTime'],
     setEndTime: SearchBarProps['setEndTime'],
     _addFilter: (filter: FilterType) => void,
-    page?: string
+    _page?: string
   ) => {
     return (
       <>
-        {page === 'serviceFlyout' ? (
+        {_page === 'serviceFlyout' ? (
           <EuiFlyoutHeader style={{ padding: 0 }}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
@@ -322,22 +341,7 @@ export function ServiceView(props: ServiceViewProps) {
                   <EuiText className="overview-title">Traces</EuiText>
                   <EuiText size="s" className="overview-content">
                     {fields.traces === 0 || fields.traces ? (
-                      <EuiLink
-                        onClick={() => {
-                          setCurrentSelectedService && setCurrentSelectedService('');
-                          setRedirect(true);
-                          const filterField =
-                            mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
-                          props.addFilter({
-                            field: filterField,
-                            operator: 'is',
-                            value: props.serviceName,
-                            inverted: false,
-                            disabled: false,
-                          });
-                          location.assign('#/traces');
-                        }}
-                      >
+                      <EuiLink onClick={redirectToServiceTraces}>
                         <EuiI18nNumber value={fields.traces} />
                       </EuiLink>
                     ) : (
@@ -483,11 +487,8 @@ export function ServiceView(props: ServiceViewProps) {
       <EuiSpacer />
       <ServiceMetrics
         serviceName={props.serviceName}
-        fixedInterval={'1h'}
         mode={mode}
         dataSourceMDSId={props.dataSourceMDSId}
-        startTime={props.startTime}
-        endTime={props.endTime}
         setStartTime={props.setStartTime}
         setEndTime={props.setEndTime}
         page={props.page}
@@ -500,6 +501,7 @@ export function ServiceView(props: ServiceViewProps) {
           setIdSelected={setServiceMapIdSelected}
           currService={props.serviceName}
           page="serviceView"
+          filterByCurrService={true}
         />
       ) : (
         <div />
@@ -529,10 +531,17 @@ export function ServiceView(props: ServiceViewProps) {
             http={props.http}
             spanId={currentSpan}
             isFlyoutVisible={!!currentSpan}
-            closeFlyout={() => setCurrentSpan('')}
+            closeFlyout={() => {
+              setCurrentSpan('');
+              if (props.setCurrentSelectedService) props.setCurrentSelectedService('');
+            }}
             addSpanFilter={addSpanFilter}
             mode={mode}
+            serviceName={props.serviceName}
             dataSourceMDSId={props.dataSourceMDSId[0].id}
+            startTime={props.startTime}
+            endTime={props.endTime}
+            setCurrentSpan={setCurrentSpan}
           />
         ) : (
           <EuiFlyout

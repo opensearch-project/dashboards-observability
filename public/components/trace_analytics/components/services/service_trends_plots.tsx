@@ -24,7 +24,7 @@ interface ServiceTrendsPlotsProps {
   row: any;
   isServiceTrendEnabled: boolean;
   fieldType: 'average_latency' | 'error_rate' | 'throughput';
-  serviceTrends: ServiceTrends;
+  serviceTrends?: ServiceTrends;
 }
 
 export const ServiceTrendsPlots = ({
@@ -39,24 +39,23 @@ export const ServiceTrendsPlots = ({
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        {fieldType === 'average_latency' && (item === 0 || item ? round(item, 2) : '-')}
-        {fieldType === 'error_rate' &&
-          (item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-')}
-        {fieldType === 'throughput' && (item === 0 || item ? <EuiI18nNumber value={item} /> : '-')}
+        <EuiText
+          color={isServiceTrendEnabled && !isPopoverOpen ? 'success' : 'default'}
+          onMouseEnter={() => setIsPopoverOpen(true)}
+          onMouseLeave={() => setIsPopoverOpen(false)}
+        >
+          {fieldType === 'average_latency' && (item === 0 || item ? round(item, 2) : '-')}
+          {fieldType === 'error_rate' &&
+            (item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-')}
+          {fieldType === 'throughput' &&
+            (item === 0 || item ? <EuiI18nNumber value={item} /> : '-')}
+        </EuiText>
       </EuiFlexItem>
       {isServiceTrendEnabled && serviceTrends && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             ownFocus
             anchorPosition="downCenter"
-            button={
-              <EuiButtonIcon
-                aria-label="Open popover"
-                onClick={() => setIsPopoverOpen(true)}
-                iconType="magnifyWithPlus"
-                size="s"
-              />
-            }
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
           >
