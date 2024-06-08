@@ -6,9 +6,16 @@
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 
 export class MetricsAnalyticsAdaptor {
-  fetch = async function (client: ILegacyScopedClusterClient, query: any, index: string) {
+  fetch = async function (client, query: any, index: string, dataSourceMDSId?: string) {
     try {
-      const response = await client.callAsCurrentUser('search', {
+      let response;
+      if (dataSourceMDSId) {
+        response = await client.callAPI('search', {
+          body: query,
+          index,
+        });
+      }
+      response = await client.callAsCurrentUser('search', {
         body: query,
         index,
       });
@@ -25,7 +32,8 @@ export class MetricsAnalyticsAdaptor {
     startTime: string,
     endTime: string,
     documentName: string,
-    index: string
+    index: string,
+    dataSourceMDSId?: string
   ) => {
     const metricsQuery = {
       size: 0,
@@ -79,7 +87,7 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response.aggregations;
     } catch (error) {
       throw new Error('Fetch Bin count Error:' + error);
@@ -89,7 +97,8 @@ export class MetricsAnalyticsAdaptor {
   queryToFetchSampleDocument = async (
     client: ILegacyScopedClusterClient,
     documentName: string,
-    index: string
+    index: string,
+    dataSourceMDSId?: string
   ) => {
     const metricsQuery = {
       size: 1,
@@ -109,14 +118,13 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response;
     } catch (error) {
       throw new Error('Fetch Sample Document Error:' + error);
     }
   };
-
-  queryToFetchDocumentNames = async (client: ILegacyScopedClusterClient, index: string) => {
+  queryToFetchDocumentNames = async (client, index: string, dataSourceMDSId?: string) => {
     const metricsQuery = {
       size: 0,
       query: {
@@ -141,7 +149,7 @@ export class MetricsAnalyticsAdaptor {
     };
 
     try {
-      const response = await this.fetch(client, metricsQuery, index);
+      const response = await this.fetch(client, metricsQuery, index, dataSourceMDSId);
       return response;
     } catch (error) {
       throw new Error('Fetch Document Names Error:' + error);

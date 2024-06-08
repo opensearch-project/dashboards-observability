@@ -10,12 +10,12 @@ import { Layout } from 'react-grid-layout';
 import { VISUALIZATION } from '../../../../common/constants/metrics';
 import {
   OTEL_METRIC_SUBTYPE,
-  PROMQL_METRIC_SUBTYPE,
   PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
 } from '../../../../common/constants/shared';
-import PPLService from '../../../services/requests/ppl';
-import { MetricType } from '../../../../common/types/metrics';
 import { VisualizationType } from '../../../../common/types/custom_panels';
+import { MetricType } from '../../../../common/types/metrics';
+import PPLService from '../../../services/requests/ppl';
 
 export const onTimeChange = (
   start: ShortDate,
@@ -36,9 +36,13 @@ export const onTimeChange = (
 };
 
 // PPL Service requestor
-export const pplServiceRequestor = (pplService: PPLService, finalQuery: string) => {
+export const pplServiceRequestor = (
+  pplService: PPLService,
+  finalQuery: string,
+  dataSourceMDSId?: string
+) => {
   return pplService
-    .fetch({ query: finalQuery, format: VISUALIZATION })
+    .fetch({ query: finalQuery, format: VISUALIZATION }, dataSourceMDSId)
     .then((res) => {
       return res;
     })

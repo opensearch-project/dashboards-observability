@@ -68,6 +68,7 @@ const initialState = {
   selectedDataSource: '',
   otelIndices: [],
   otelDocumentNames: [],
+  dataSourceMDSId: '',
 };
 
 const mergeMetricCustomizer = function (objValue, srcValue) {
@@ -87,10 +88,14 @@ export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
   dispatch(setMetrics(mergedMetrics));
 };
 
-export const loadMetrics = () => async (dispatch) => {
+export const loadMetrics = (dataSourceMDSId: string) => async (dispatch) => {
   const pplService = getPPLService();
   const customDataRequest = fetchCustomMetrics();
-  const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
+  const remoteDataSourcesResponse = await pplServiceRequestor(
+    pplService!,
+    PPL_DATASOURCES_REQUEST,
+    dataSourceMDSId
+  );
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
@@ -100,7 +105,7 @@ export const loadMetrics = () => async (dispatch) => {
     )
   );
 
-  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
+  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources, dataSourceMDSId);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
@@ -110,8 +115,8 @@ export const loadMetrics = () => async (dispatch) => {
   await dispatch(setSortedIds(sortedIds));
 };
 
-export const loadOTIndices = () => async (dispatch) => {
-  const fetchOTindices = await fetchOpenTelemetryIndices();
+export const loadOTIndices = (dataSourceMDSId: string) => async (dispatch) => {
+  const fetchOTindices = await fetchOpenTelemetryIndices(dataSourceMDSId);
   dispatch(setOtelIndices(fetchOTindices));
 };
 
@@ -139,18 +144,19 @@ const fetchCustomMetrics = async () => {
   }));
 };
 
-const fetchRemoteDataSource = async (dataSource) => {
+const fetchRemoteDataSource = async (dataSource, dataSourceMDSId: string) => {
   const pplService = getPPLService();
   const response = await pplServiceRequestor(
     pplService,
-    `source = ${dataSource}.information_schema.tables`
+    `source = ${dataSource}.information_schema.tables`,
+    dataSourceMDSId
   );
   return { jsonData: response.jsonData, dataSource };
 };
 
-const fetchRemoteMetrics = (remoteDataSources: string[]) =>
+const fetchRemoteMetrics = (remoteDataSources: string[], dataSourceMDSId: string) =>
   remoteDataSources.map((dataSource) =>
-    fetchRemoteDataSource(dataSource).then(({ jsonData }) =>
+    fetchRemoteDataSource(dataSource, dataSourceMDSId).then(({ jsonData }) =>
       jsonData.map((obj: any) => ({
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
@@ -170,10 +176,10 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
     )
   );
 
-export const fetchOpenTelemetryIndices = async () => {
+export const fetchOpenTelemetryIndices = async (dataSourceMDSId: string) => {
   const http = getOSDHttp();
   return http
-    .get(`${OBSERVABILITY_BASE}/search/indices`, {
+    .get(`${OBSERVABILITY_BASE}/search/indices/${dataSourceMDSId ?? ''}`, {
       query: {
         format: 'json',
       },
@@ -181,10 +187,17 @@ export const fetchOpenTelemetryIndices = async () => {
     .catch((error) => console.error(error));
 };
 
-export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => async () => {
+export const fetchOpenTelemetryDocumentNames = (
+  selectedOtelIndex: string,
+  dataSourceMDSId: string
+) => async () => {
   const http = getOSDHttp();
   return http
-    .get(`${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/documentNames`)
+    .get(
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/documentNames/${
+        dataSourceMDSId ?? ''
+      }`
+    )
     .catch((error) => console.error(error));
 };
 
@@ -251,6 +264,9 @@ export const metricSlice = createSlice({
     setOtelDocumentNames: (state, { payload }) => {
       state.otelDocumentNames = payload;
     },
+    setSelectedDataSourceMDSId: (state, { payload }) => {
+      state.dataSourceMDSId = payload;
+    },
   },
 });
 
@@ -268,21 +284,24 @@ export const {
   setSelectedDataSource,
   setOtelIndices,
   setOtelDocumentNames,
+  setSelectedDataSourceMDSId,
 } = metricSlice.actions;
 
 /** private actions */
 
 export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
-const getAvailableAttributes = (id, metricIndex) => async (dispatch) => {
+const getAvailableAttributes = (id, metricIndex, dataSourceMDSId: string) => async (dispatch) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
-
   try {
-    const columnSchema = await pplService.fetch({
-      query: 'describe ' + metricIndex + ' | fields COLUMN_NAME',
-      format: 'jdbc',
-    });
+    const columnSchema = await pplService.fetch(
+      {
+        query: 'describe ' + metricIndex + ' | fields COLUMN_NAME',
+        format: 'jdbc',
+      },
+      dataSourceMDSId
+    );
     const availableAttributes = columnSchema.jsonData
       .map((sch) => sch.COLUMN_NAME)
       .filter((col) => col[0] !== '@');
@@ -294,12 +313,15 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch) => {
   }
 };
 
-export const addSelectedMetric = (metric: MetricType) => async (dispatch, getState) => {
+export const addSelectedMetric = (metric: MetricType, dataSourceMDSId: string) => async (
+  dispatch,
+  getState
+) => {
   const currentSelectedIds = getState().metrics.selectedIds;
   if (currentSelectedIds.includes(metric.id)) return;
 
   if (metric.metricType === PROMQL_METRIC_SUBTYPE) {
-    await dispatch(getAvailableAttributes(metric.id, metric.index));
+    await dispatch(getAvailableAttributes(metric.id, metric.index, dataSourceMDSId));
   }
   await dispatch(selectMetric(metric));
 };
@@ -368,3 +390,5 @@ export const otelIndexSelector = (state) => state.metrics.otelIndices;
 export const otelDocumentNamesSelector = (state) => state.metrics.otelDocumentNames;
 
 export const metricsReducers = metricSlice.reducer;
+
+export const selectedDataSourceMDSId = (state) => state.metrics.dataSourceMDSId;

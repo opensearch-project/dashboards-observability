@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
 import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
-import { useObservable } from 'react-use';
+import React, { useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
+import { useObservable } from 'react-use';
 import { CoreStart } from '../../../../../../src/core/public';
-import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { updateCatalogVisualizationQuery } from '../../common/query_utils';
+import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import {
   allMetricsSelector,
   dateSpanFilterSelector,
@@ -19,21 +19,22 @@ import {
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 
-import './metrics_grid.scss';
-import { coreRefs } from '../../../framework/core_refs';
 import {
-  PROMQL_METRIC_SUBTYPE,
   OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
   observabilityLogsID,
 } from '../../../../common/constants/shared';
+import { coreRefs } from '../../../framework/core_refs';
 import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
 import { EmptyMetricsView } from './empty_view';
+import './metrics_grid.scss';
 
 // HOC container to provide dynamic width for Grid layout
 
 interface MetricsGridProps {
   chrome: CoreStart['chrome'];
   moveToEvents: (savedVisualizationId: string) => any;
+  dataSourceMDSId: string;
 }
 
 const visualizationFromPromethesMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
@@ -87,7 +88,14 @@ const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
   window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
 };
 
-export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
+export const InnerGridVisualization = ({
+  id,
+  idx,
+  dateSpanFilter,
+  metric,
+  refresh,
+  dataSourceMDSId,
+}) => {
   if (!metric) return <></>;
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
@@ -114,6 +122,7 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
         actionMenuType="metricsGrid"
         metricType={metric.subType}
         panelVisualization={metric}
+        dataSourceMDSId={dataSourceMDSId}
       />
     </EuiDraggable>
   );
@@ -128,6 +137,7 @@ export const InnerMetricsGrid = ({
   selectedMetricsIds,
   moveMetric,
   allMetrics,
+  dataSourceMDSId,
 }: MetricsGridProps) => {
   const { chrome } = coreRefs;
   const isLocked = useObservable(chrome!.getIsNavDrawerLocked$());
@@ -148,6 +158,7 @@ export const InnerMetricsGrid = ({
           key={id}
           dateSpanFilter={dateSpanFilter}
           metric={metric}
+          dataSourceMDSId={dataSourceMDSId}
         />
       );
     });
