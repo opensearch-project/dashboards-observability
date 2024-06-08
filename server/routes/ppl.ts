@@ -4,9 +4,9 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, IOpenSearchDashboardsResponse, ResponseError } from '../../../../src/core/server';
-import { PPLFacet } from '../services/facets/ppl_facet';
+import { IOpenSearchDashboardsResponse, IRouter, ResponseError } from '../../../../src/core/server';
 import { PPL_BASE, PPL_SEARCH } from '../../common/constants/shared';
+import { PPLFacet } from '../services/facets/ppl_facet';
 
 export function registerPplRoute({ router, facet }: { router: IRouter; facet: PPLFacet }) {
   router.post(
@@ -17,10 +17,13 @@ export function registerPplRoute({ router, facet }: { router: IRouter; facet: PP
           query: schema.string(),
           format: schema.string(),
         }),
+        query: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const queryRes: any = await facet.describeQuery(req);
+      const queryRes: any = await facet.describeQuery(context, req);
       if (queryRes.success) {
         const result: any = {
           body: {
