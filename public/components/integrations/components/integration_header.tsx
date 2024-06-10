@@ -18,34 +18,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { coreRefs } from '../../../../public/framework/core_refs';
 import {
   OPENSEARCH_CATALOG_URL,
   OPENSEARCH_DOCUMENTATION_URL,
 } from '../../../../common/constants/integrations';
-// The saved object import flyout
-import { Flyout } from '../../../../../../src/plugins/saved_objects_management/public/management_section/objects_table/components';
-
-export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <Flyout
-      serviceRegistry={{} as any}
-      allowedTypes={['integration-template']}
-      close={onClose}
-      done={() => {
-        console.log('hit done');
-      }}
-      newIndexPatternUrl={''}
-      indexPatterns={{} as any}
-      overlays={coreRefs.core?.overlays}
-      http={coreRefs.http}
-      search={{} as any}
-      dataSourceEnabled={!!coreRefs.dataSource}
-      savedObjects={coreRefs.core?.savedObjects.client}
-      notifications={coreRefs.core?.notifications}
-    />
-  );
-};
+import { IntegrationUploadFlyout } from './upload_flyout';
 
 export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () => void }) => {
   const [isPopoverOpen, setPopover] = useState(false);
