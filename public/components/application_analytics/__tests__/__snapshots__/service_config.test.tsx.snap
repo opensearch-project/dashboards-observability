@@ -1175,6 +1175,13 @@ exports[`Service Config component renders empty service config 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
+                  <EuiSpacer
+                    size="xl"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--xl"
+                    />
+                  </EuiSpacer>
                 </ServiceMap>
               </div>
             </div>
@@ -2377,6 +2384,13 @@ exports[`Service Config component renders with one service selected 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
+                  <EuiSpacer
+                    size="xl"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--xl"
+                    />
+                  </EuiSpacer>
                 </ServiceMap>
               </div>
             </div>

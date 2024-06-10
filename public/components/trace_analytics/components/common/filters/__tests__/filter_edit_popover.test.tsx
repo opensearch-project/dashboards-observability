@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
+import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import React from 'react';
 import { FilterEditPopover } from '../filter_edit_popover';
 import { getFilterFields } from '../filter_helpers';
 
@@ -16,7 +15,10 @@ describe('Filter popover component', () => {
   it('renders filter popover', () => {
     const setFilter = jest.fn();
     const closePopover = jest.fn();
-    const filterFieldOptions = getFilterFields('data_prepper', 'dashboard').map((field) => ({ label: field }));
+    const filterFieldOptions = getFilterFields('data_prepper', 'dashboard', [
+      'resource.attribute.language',
+      'service.attribute@scope',
+    ]).map((field) => ({ label: field }));
     const wrapper = mount(
       <FilterEditPopover
         filterFieldOptions={filterFieldOptions}

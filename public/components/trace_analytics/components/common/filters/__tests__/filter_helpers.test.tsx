@@ -17,19 +17,19 @@ describe('Filter helper functions', () => {
   configure({ adapter: new Adapter() });
 
   it('returns fields by page', () => {
-    const fields = getFilterFields('data_prepper', 'dashboard');
-    expect(fields).toEqual([
-      'traceGroup',
-      'serviceName',
-      'error',
-      'status.message',
-      'latency',
-    ]);
+    const fields = getFilterFields('data_prepper', 'dashboard', []);
+    expect(fields).toEqual(['traceGroup', 'serviceName', 'error', 'status.message', 'latency']);
   });
 
   it('returns valid fields by page', () => {
-    const dashboardFields = getValidFilterFields('data_prepper', 'dashboard');
-    const servicesFields = getValidFilterFields('data_prepper', 'services');
+    const dashboardFields = getValidFilterFields('data_prepper', 'dashboard', [
+      'resource.attribute.language',
+      'service.attribute@scope',
+    ]);
+    const servicesFields = getValidFilterFields('data_prepper', 'services', [
+      'resource.attribute.language',
+      'service.attribute@scope',
+    ]);
     expect(dashboardFields).toEqual([
       'traceGroup',
       'serviceName',
@@ -44,6 +44,8 @@ describe('Filter helper functions', () => {
       'error',
       'status.message',
       'latency',
+      'resource.attribute.language',
+      'service.attribute@scope',
     ]);
   });
 
@@ -81,7 +83,7 @@ describe('Filter helper functions', () => {
   });
 
   it('renders textfield filter', () => {
-    const setValue = jest.fn((v) => {});
+    const setValue = jest.fn((_v) => {});
     const wrapper = mount(getValueComponent('serviceName', 'is', 0, setValue));
     expect(wrapper).toMatchSnapshot();
 
@@ -90,7 +92,7 @@ describe('Filter helper functions', () => {
   });
 
   it('renders range field filter', () => {
-    const setValue = jest.fn((v) => {});
+    const setValue = jest.fn((_v) => {});
     const wrapper = mount(
       getValueComponent('latency', 'is not between', { from: '0', to: '100' }, setValue)
     );

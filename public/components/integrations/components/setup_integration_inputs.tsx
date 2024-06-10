@@ -99,8 +99,8 @@ const suggestDataSources = async (
       }>;
       const filterCondition =
         type === 's3'
-          ? (item: any) => item.connector === 'S3GLUE'
-          : (item: any) => item.connector === 'SECURITYLAKE';
+          ? (item: { connector: string }) => item.connector === 'S3GLUE'
+          : (item: { connector: string }) => item.connector === 'SECURITYLAKE';
 
       return (
         result?.filter(filterCondition).map((item) => {
@@ -121,33 +121,41 @@ export function SetupWorkflowSelector({
   integrationWorkflows,
   useWorkflows,
   toggleWorkflow,
+  config,
 }: {
   integrationWorkflows?: IntegrationWorkflow[];
   useWorkflows: Map<string, boolean>;
   toggleWorkflow: (name: string) => void;
+  config: IntegrationSetupInputs;
 }) {
   if (!integrationWorkflows) {
     return null;
   }
 
-  const cards = integrationWorkflows.map((workflow) => {
-    return (
-      <>
-        <EuiCheckableCard
-          id={`workflow-checkbox-${workflow.name}`}
-          key={workflow.name}
-          label={workflow.label}
-          checkableType="checkbox"
-          value={workflow.name}
-          checked={useWorkflows.get(workflow.name)}
-          onChange={() => toggleWorkflow(workflow.name)}
-        >
-          {workflow.description}
-        </EuiCheckableCard>
-        <EuiSpacer size="s" />
-      </>
-    );
-  });
+  const cards = integrationWorkflows
+    .filter((workflow) =>
+      workflow.applicable_data_sources
+        ? workflow.applicable_data_sources.includes(config.connectionType)
+        : true
+    )
+    .map((workflow) => {
+      return (
+        <>
+          <EuiCheckableCard
+            id={`workflow-checkbox-${workflow.name}`}
+            key={workflow.name}
+            label={workflow.label}
+            checkableType="checkbox"
+            value={workflow.name}
+            checked={useWorkflows.get(workflow.name)}
+            onChange={() => toggleWorkflow(workflow.name)}
+          >
+            {workflow.description}
+          </EuiCheckableCard>
+          <EuiSpacer size="s" />
+        </>
+      );
+    });
 
   return <>{cards}</>;
 }
@@ -343,9 +351,11 @@ export function IntegrationQueryInputs({
 }
 
 export function IntegrationWorkflowsInputs({
+  config,
   updateConfig,
   workflows,
 }: {
+  config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   workflows?: IntegrationWorkflow[];
 }) {
@@ -378,6 +388,7 @@ export function IntegrationWorkflowsInputs({
       error={['Must select at least one workflow.']}
     >
       <SetupWorkflowSelector
+        config={config}
         integrationWorkflows={workflows}
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
@@ -458,6 +469,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
               </EuiFormRow>
               <EuiSpacer />
               <IntegrationWorkflowsInputs
+                config={config}
                 updateConfig={updateConfig}
                 workflows={integration.workflows}
               />

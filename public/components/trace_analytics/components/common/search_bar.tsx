@@ -12,7 +12,7 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { uiSettingsService } from '../../../../../common/utils';
 import { Filters, FiltersProps } from './filters/filters';
 
@@ -46,15 +46,26 @@ export interface SearchBarProps extends FiltersProps {
 }
 
 interface SearchBarOwnProps extends SearchBarProps {
-  refresh: () => void;
+  refresh: (currService?: string, overrideQuery?: string) => Promise<void>;
   page: 'dashboard' | 'traces' | 'services' | 'app';
   datepickerOnly?: boolean;
 }
 
-export function SearchBar(props: SearchBarOwnProps) {
+export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
   // use another query state to avoid typing delay
   const [query, setQuery] = useState(props.query);
-  const setGlobalQuery = debounce((q) => props.setQuery(q), 50);
+  const setGlobalQuery = debounce((q) => {
+    props.setQuery(q);
+  }, 50);
+
+  // Expose a method to update the local query state
+  useImperativeHandle(ref, () => ({
+    updateQuery(newQuery: string) {
+      setQuery(newQuery);
+      setGlobalQuery(newQuery);
+      props.refresh(undefined, newQuery);
+    },
+  }));
 
   return (
     <>
@@ -83,7 +94,7 @@ export function SearchBar(props: SearchBarOwnProps) {
             data-test-subj="superDatePickerApplyTimeButton"
             data-click-metric-element="trace_analytics.refresh_button"
             iconType="refresh"
-            onClick={props.refresh}
+            onClick={() => props.refresh()}
           >
             Refresh
           </EuiButton>
@@ -99,9 +110,10 @@ export function SearchBar(props: SearchBarOwnProps) {
             setFilters={props.setFilters}
             appConfigs={props.appConfigs}
             mode={props.mode}
+            attributesFilterFields={props.attributesFilterFields}
           />
         </>
       )}
     </>
   );
-}
+});

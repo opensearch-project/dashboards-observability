@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
 import { PPLDataSource } from '../../adaptors/ppl_datasource';
 
 export class PPLFacet {
@@ -11,12 +10,13 @@ export class PPLFacet {
     this.client = client;
   }
 
-  private fetch = async (request: any, format: string, responseFormat: string) => {
+  private fetch = async (context: any, request: any, format: string, _responseFormat: string) => {
     const res = {
       success: false,
       data: {},
     };
     try {
+      const dataSourceMDSId = request.query.dataSourceMDSId;
       const params = {
         body: {
           query: request.body.query,
@@ -25,7 +25,13 @@ export class PPLFacet {
       if (request.body.format !== 'jdbc') {
         params.format = request.body.format;
       }
-      const queryRes = await this.client.asScoped(request).callAsCurrentUser(format, params);
+      let queryRes;
+      if (dataSourceMDSId) {
+        const mdsClient = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+        queryRes = await mdsClient.callAPI(format, params);
+      } else {
+        queryRes = await this.client.asScoped(request).callAsCurrentUser(format, params);
+      }
       const pplDataSource = new PPLDataSource(queryRes, request.body.format);
       res.success = true;
       res.data = pplDataSource.getDataSource();
@@ -36,7 +42,7 @@ export class PPLFacet {
     return res;
   };
 
-  describeQuery = async (request: any) => {
-    return this.fetch(request, 'ppl.pplQuery', 'json');
+  describeQuery = async (context, request: any) => {
+    return this.fetch(context, request, 'ppl.pplQuery', 'json');
   };
 }

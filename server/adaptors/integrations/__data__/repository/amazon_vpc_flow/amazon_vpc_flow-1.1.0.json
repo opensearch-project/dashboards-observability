@@ -19,13 +19,15 @@
       "name": "dashboards",
       "label": "Dashboards & Visualizations",
       "description": "Dashboards and indices that enable you to easily visualize important metrics.",
-      "enabled_by_default": false
+      "enabled_by_default": false,
+      "applicable_data_sources": ["index"]
     },
     {
       "name": "flint-live-dashboards",
-      "label": "Dashboards & Visualizations For S3 Glue Integrations using live queries",
-      "description": "Dashboards and visualizations aligned with S3 Glue datasource ",
-      "enabled_by_default": false
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false,
+      "applicable_data_sources": ["s3"]
     }
   ],
   "statics": {
