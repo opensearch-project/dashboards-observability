@@ -203,6 +203,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
   </EuiFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
+    config={
+      Object {
+        "checkpointLocation": "",
+        "connectionDataSource": "ss4o_logs-nginx-test",
+        "connectionLocation": "",
+        "connectionTableName": "",
+        "connectionType": "s3",
+        "displayName": "Test Instance Name",
+        "enabledWorkflows": Array [],
+      }
+    }
     updateConfig={[Function]}
     workflows={
       Array [
@@ -423,6 +434,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
   </EuiFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
+    config={
+      Object {
+        "checkpointLocation": "",
+        "connectionDataSource": "ss4o_logs-nginx-test",
+        "connectionLocation": "",
+        "connectionTableName": "",
+        "connectionType": "s3",
+        "displayName": "Test Instance Name",
+        "enabledWorkflows": Array [],
+      }
+    }
     updateConfig={[Function]}
     workflows={
       Array [
@@ -2125,6 +2147,17 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
 
 exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
 <IntegrationWorkflowsInputs
+  config={
+    Object {
+      "checkpointLocation": "",
+      "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
+      "connectionType": "index",
+      "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
+    }
+  }
   integration={
     Object {
       "assets": Array [
@@ -2180,6 +2213,130 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
       >
         <SetupWorkflowSelector
           aria-describedby="random_html_id-error-0"
+          config={
+            Object {
+              "checkpointLocation": "",
+              "connectionDataSource": "ss4o_logs-nginx-test",
+              "connectionLocation": "",
+              "connectionTableName": "",
+              "connectionType": "index",
+              "displayName": "Test Instance Name",
+              "enabledWorkflows": Array [],
+            }
+          }
+          id="random_html_id"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          toggleWorkflow={[Function]}
+          useWorkflows={Array []}
+        />
+        <EuiFormErrorText
+          className="euiFormRow__text"
+          id="random_html_id-error-0"
+          key="Must select at least one workflow."
+        >
+          <div
+            aria-live="polite"
+            className="euiFormErrorText euiFormRow__text"
+            id="random_html_id-error-0"
+          >
+            Must select at least one workflow.
+          </div>
+        </EuiFormErrorText>
+      </div>
+    </div>
+  </EuiFormRow>
+</IntegrationWorkflowsInputs>
+`;
+
+exports[`Integration Setup Inputs Renders the workflows inputs with conditional workflows 1`] = `
+<IntegrationWorkflowsInputs
+  config={
+    Object {
+      "checkpointLocation": "",
+      "connectionDataSource": "ss4o_logs-nginx-test",
+      "connectionLocation": "",
+      "connectionTableName": "",
+      "connectionType": "s3",
+      "displayName": "Test Instance Name",
+      "enabledWorkflows": Array [],
+    }
+  }
+  integration={
+    Object {
+      "assets": Array [
+        Object {
+          "extension": "ndjson",
+          "name": "sample",
+          "type": "savedObjectBundle",
+          "version": "1.0.1",
+        },
+      ],
+      "components": Array [
+        Object {
+          "name": "logs",
+          "version": "1.0.0",
+        },
+      ],
+      "license": "Apache-2.0",
+      "name": "sample",
+      "type": "logs",
+      "version": "2.0.0",
+      "workflows": Array [
+        Object {
+          "description": "This is a test workflow.",
+          "enabled_by_default": true,
+          "label": "Workflow 1",
+          "name": "workflow1",
+        },
+        Object {
+          "applicable_data_sources": Array [
+            "index",
+          ],
+          "description": "This should not render.",
+          "enabled_by_default": true,
+          "label": "Workflow 2",
+          "name": "workflow2",
+        },
+      ],
+    }
+  }
+  updateConfig={[Function]}
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Must select at least one workflow.",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    labelType="label"
+  >
+    <div
+      className="euiFormRow"
+      id="random_html_id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <SetupWorkflowSelector
+          aria-describedby="random_html_id-error-0"
+          config={
+            Object {
+              "checkpointLocation": "",
+              "connectionDataSource": "ss4o_logs-nginx-test",
+              "connectionLocation": "",
+              "connectionTableName": "",
+              "connectionType": "s3",
+              "displayName": "Test Instance Name",
+              "enabledWorkflows": Array [],
+            }
+          }
           id="random_html_id"
           onBlur={[Function]}
           onFocus={[Function]}

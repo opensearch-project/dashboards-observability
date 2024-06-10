@@ -40,6 +40,13 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
           label: { type: 'string' },
           description: { type: 'string' },
           enabled_by_default: { type: 'boolean' },
+          applicable_data_sources: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            nullable: true,
+          },
         },
         required: ['name', 'label', 'description', 'enabled_by_default'],
       },
@@ -110,6 +117,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
     templateName: { type: 'string' },
     dataSource: { type: 'string' },
     creationDate: { type: 'string' },
+    status: { type: 'string', nullable: true },
     assets: {
       type: 'array',
       items: {
@@ -119,6 +127,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
           assetId: { type: 'string' },
           isDefaultAsset: { type: 'boolean' },
           description: { type: 'string' },
+          status: { type: 'string', nullable: true },
         },
         required: ['assetType', 'assetId', 'isDefaultAsset', 'description'],
       },
