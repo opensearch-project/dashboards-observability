@@ -3,6 +3,7 @@
 exports[`Dashboard component renders dashboard 1`] = `
 <Dashboard
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -341,6 +342,7 @@ exports[`Dashboard component renders dashboard 1`] = `
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -1158,6 +1160,7 @@ exports[`Dashboard component renders dashboard 1`] = `
 exports[`Dashboard component renders empty dashboard 1`] = `
 <Dashboard
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -1495,6 +1498,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -2312,6 +2316,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
 exports[`Dashboard component renders empty jaeger dashboard 1`] = `
 <Dashboard
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -2651,6 +2656,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {

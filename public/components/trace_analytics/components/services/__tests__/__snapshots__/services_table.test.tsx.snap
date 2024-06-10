@@ -117,44 +117,6 @@ exports[`Services table component renders empty jaeger services table message 1`
                       </EuiToolTip>
                     </div>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiButtonEmpty
-                        onClick={[Function]}
-                        size="xs"
-                      >
-                        <button
-                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                          disabled={false}
-                          onClick={[Function]}
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButtonEmpty__content"
-                            iconSide="left"
-                            iconSize="s"
-                            textProps={
-                              Object {
-                                "className": "euiButtonEmpty__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
-                              >
-                                Show 24 hour trends
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonEmpty>
-                    </div>
-                  </EuiFlexItem>
                 </div>
               </EuiFlexGroup>
             </div>
@@ -629,44 +591,6 @@ exports[`Services table component renders jaeger services table 1`] = `
                           </EuiButtonEmpty>
                         </span>
                       </EuiToolTip>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiButtonEmpty
-                        onClick={[Function]}
-                        size="xs"
-                      >
-                        <button
-                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                          disabled={false}
-                          onClick={[Function]}
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButtonEmpty__content"
-                            iconSide="left"
-                            iconSize="s"
-                            textProps={
-                              Object {
-                                "className": "euiButtonEmpty__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
-                              >
-                                Show 24 hour trends
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonEmpty>
                     </div>
                   </EuiFlexItem>
                 </div>

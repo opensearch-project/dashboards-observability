@@ -70,6 +70,9 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                   class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                 >
                   <div
+                    class="euiSpacer euiSpacer--s"
+                  />
+                  <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
@@ -244,6 +247,9 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                           class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                         >
                           <div
+                            class="euiSpacer euiSpacer--s"
+                          />
+                          <div
                             class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
                             <div
@@ -349,6 +355,9 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                           <div
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
+                            <div
+                              class="euiSpacer euiSpacer--s"
+                            />
                             <div
                               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
@@ -456,6 +465,9 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
                               <div
+                                class="euiSpacer euiSpacer--s"
+                              />
+                              <div
                                 class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
                                 <div
@@ -549,6 +561,9 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               <div
                                 class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                               >
+                                <div
+                                  class="euiSpacer euiSpacer--s"
+                                />
                                 <div
                                   class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                                 >
@@ -703,6 +718,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                           <div
                             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
+                            <EuiSpacer
+                              size="s"
+                            >
+                              <div
+                                className="euiSpacer euiSpacer--s"
+                              />
+                            </EuiSpacer>
                             <EuiFlexGroup
                               alignItems="center"
                               justifyContent="spaceBetween"

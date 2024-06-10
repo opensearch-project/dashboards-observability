@@ -22,8 +22,14 @@ describe('Filter helper functions', () => {
   });
 
   it('returns valid fields by page', () => {
-    const dashboardFields = getValidFilterFields('data_prepper', 'dashboard');
-    const servicesFields = getValidFilterFields('data_prepper', 'services');
+    const dashboardFields = getValidFilterFields('data_prepper', 'dashboard', [
+      'resource.attribute.language',
+      'service.attribute@scope',
+    ]);
+    const servicesFields = getValidFilterFields('data_prepper', 'services', [
+      'resource.attribute.language',
+      'service.attribute@scope',
+    ]);
     expect(dashboardFields).toEqual([
       'traceGroup',
       'serviceName',
@@ -38,6 +44,8 @@ describe('Filter helper functions', () => {
       'error',
       'status.message',
       'latency',
+      'resource.attribute.language',
+      'service.attribute@scope',
     ]);
   });
 

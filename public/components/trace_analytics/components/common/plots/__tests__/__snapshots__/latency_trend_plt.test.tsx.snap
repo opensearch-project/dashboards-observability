@@ -63,6 +63,8 @@ exports[`Latency trend plot component renders latency plot 1`] = `
           "r": 30,
           "t": 30,
         },
+        "paper_bgcolor": "rgba(0, 0, 0, 0)",
+        "plot_bgcolor": "rgba(0, 0, 0, 0)",
         "width": 400,
         "xaxis": Object {
           "color": "#899195",
