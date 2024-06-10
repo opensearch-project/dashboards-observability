@@ -4,19 +4,20 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
-import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import cloneDeep from 'lodash/cloneDeep';
+import React, { useEffect, useRef, useState } from 'react';
+import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
+  handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
-import { DashboardContent } from '../dashboard/dashboard_content';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
 
@@ -32,8 +33,8 @@ export function ServicesContent(props: ServicesProps) {
     appConfigs = [],
     childBreadcrumbs,
     parentBreadcrumb,
-    nameColumnAction,
     traceColumnAction,
+    setCurrentSelectedService,
     setFilters,
     setQuery,
     setStartTime,
@@ -42,10 +43,10 @@ export function ServicesContent(props: ServicesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     dataSourceMDSId,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
-  const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
@@ -53,15 +54,14 @@ export function ServicesContent(props: ServicesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [filteredService, setFilteredService] = useState('');
-
-  const onToggle = (isOpen) => {
-    const newState = isOpen ? 'open' : 'closed';
-    setTrigger(newState);
-  };
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [isServiceTrendEnabled, setIsServiceTrendEnabled] = useState(false);
+  const [serviceTrends, setServiceTrends] = useState<ServiceTrends>({});
+  const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
 
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, 'services');
+    const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
     setFilters([
       ...filters.map((filter) => ({
@@ -87,24 +87,44 @@ export function ServicesContent(props: ServicesProps) {
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh(newFilteredService);
-  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
+  }, [
+    filters,
+    appConfigs,
+    redirect,
+    mode,
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
+    isServiceTrendEnabled,
+  ]);
 
-  const refresh = async (currService?: string) => {
+  const refresh = async (currService?: string, overrideQuery?: string) => {
+    const filterQuery = overrideQuery ?? query;
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
       filters,
-      query,
+      filterQuery,
       processTimeStamp(startTime, mode),
       processTimeStamp(endTime, mode),
       page,
       appConfigs
     );
     // service map should not be filtered by service name
-    const serviceMapDSL = _.cloneDeep(DSL);
+    const serviceMapDSL = cloneDeep(DSL);
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
       (must: any) => must?.term?.serviceName == null
     );
+
+    if (isServiceTrendEnabled) {
+      await handleServiceTrendsRequest(
+        http,
+        '1h',
+        setServiceTrends,
+        mode,
+        [],
+        dataSourceMDSId[0].id
+      );
+    }
     await Promise.all([
       handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
       handleServiceMapRequest(
@@ -116,6 +136,7 @@ export function ServicesContent(props: ServicesProps) {
         currService || filteredService
       ),
     ]);
+
     setLoading(false);
   };
 
@@ -134,13 +155,25 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
-  const dashboardContent = () => {
-    return <DashboardContent {...props} />;
+  const updateSearchQuery = (newQuery: string) => {
+    if (searchBarRef.current) {
+      searchBarRef.current.updateQuery(newQuery);
+    }
+  };
+
+  const addServicesGroupFilter = () => {
+    const groupFilter = selectedItems.map(
+      (row) => (mode === 'jaeger' ? 'process.serviceName: ' : 'serviceName: ') + row.name
+    );
+    const filterQuery = groupFilter.join(' OR ');
+    const newQuery = query ? `(${query}) AND (${filterQuery})` : `(${filterQuery})`;
+    updateSearchQuery(newQuery);
   };
 
   return (
     <>
       <SearchBar
+        ref={searchBarRef}
         query={query}
         filters={filters}
         appConfigs={appConfigs}
@@ -153,18 +186,25 @@ export function ServicesContent(props: ServicesProps) {
         refresh={refresh}
         page={page}
         mode={mode}
+        attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
       <ServicesTable
         items={tableItems}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        addServicesGroupFilter={addServicesGroupFilter}
         addFilter={addFilter}
         setRedirect={setRedirect}
         mode={mode}
         loading={loading}
-        nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
+        setCurrentSelectedService={setCurrentSelectedService}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        isServiceTrendEnabled={isServiceTrendEnabled}
+        setIsServiceTrendEnabled={setIsServiceTrendEnabled}
+        serviceTrends={serviceTrends}
       />
       <EuiSpacer size="m" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (
@@ -175,23 +215,11 @@ export function ServicesContent(props: ServicesProps) {
           setIdSelected={setServiceMapIdSelected}
           currService={filteredService}
           page={page}
+          setCurrentSelectedService={setCurrentSelectedService}
         />
       ) : (
         <div />
       )}
-      <EuiSpacer size="m" />
-      <EuiPanel>
-        <EuiAccordion
-          id="accordion1"
-          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
-          forceState={trigger}
-          onToggle={onToggle}
-          data-test-subj="trace-groups-service-operation-accordian"
-        >
-          <EuiSpacer size="m" />
-          {trigger === 'open' && dashboardContent()}
-        </EuiAccordion>
-      </EuiPanel>
     </>
   );
 }

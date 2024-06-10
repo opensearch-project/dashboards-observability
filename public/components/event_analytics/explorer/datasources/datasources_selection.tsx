@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { htmlIdGenerator } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { htmlIdGenerator } from '@elastic/eui';
 import { LogExplorerRouterContext } from '../..';
 import {
   DataSource,

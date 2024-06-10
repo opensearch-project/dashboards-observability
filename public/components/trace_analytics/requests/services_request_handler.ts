@@ -2,12 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
-import _ from 'lodash';
+import { htmlIdGenerator } from '@elastic/eui';
+import { round } from 'lodash';
+import moment from 'moment';
 import DSLService from 'public/services/requests/dsl';
-import { HttpSetup } from '../../../../../../src/core/public';
+import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
+import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { ServiceTrends } from '../../../../common/types/trace_analytics';
+import { fixedIntervalToMilli } from '../components/common/helper_functions';
 import { ServiceObject } from '../components/common/plots/service_map';
 import { TraceAnalyticsMode } from '../home';
 import {
@@ -16,6 +20,7 @@ import {
   getServiceMetricsQuery,
   getServiceNodesQuery,
   getServicesQuery,
+  getServiceTrendsQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
 
@@ -52,6 +57,7 @@ export const handleServicesRequest = async (
               ...serviceObject[bucket.key].destServices,
             ];
             return {
+              itemId: htmlIdGenerator('trace_service')(),
               name: bucket.key,
               average_latency: serviceObject[bucket.key].latency,
               error_rate: serviceObject[bucket.key].error_rate,
@@ -152,7 +158,7 @@ export const handleServiceMapRequest = async (
   );
   latencies.aggregations.service_name.buckets.map((bucket: any) => {
     map[bucket.key].latency = bucket.average_latency.value;
-    map[bucket.key].error_rate = _.round(bucket.error_rate.value, 2) || 0;
+    map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
     map[bucket.key].throughput = bucket.doc_count;
     if (minutesInDateRange != null)
       map[bucket.key].throughputPerMinute = _.round(bucket.doc_count / minutesInDateRange, 2);
@@ -213,6 +219,108 @@ export const handleServiceViewRequest = (
     })
     .then((newFields) => {
       setFields(newFields);
+    })
+    .catch((error) => console.error(error));
+};
+
+export const handleServiceTrendsRequest = (
+  http: HttpStart,
+  fixedInterval: string,
+  setItems: React.Dispatch<React.SetStateAction<ServiceTrends>>,
+  mode: TraceAnalyticsMode,
+  serviceFilter: any,
+  dataSourceMDSId?: string
+) => {
+  const parsedResult: ServiceTrends = {};
+
+  return handleDslRequest(
+    http,
+    [],
+    getServiceTrendsQuery(mode, serviceFilter),
+    mode,
+    dataSourceMDSId
+  )
+    .then((response) => {
+      response.aggregations.service_trends.buckets.forEach((serviceBucket) => {
+        const serviceName = serviceBucket.key;
+        parsedResult[serviceName] = {
+          latency_trend: {
+            x: [],
+            y: [],
+            type: 'scatter',
+            mode: 'lines+markers',
+            fill: 'tozeroy',
+            hovertemplate: '%{x}<br>Average latency: %{y}<extra></extra>',
+            hoverlabel: {
+              bgcolor: '#d7c2ff',
+            },
+            marker: {
+              color: '#987dcb',
+              size: 8,
+            },
+            line: {
+              color: '#987dcb',
+              size: 2,
+            },
+          },
+          throughput: {
+            x: [],
+            y: [],
+            marker: {
+              color: 'rgb(171, 211, 240)',
+            },
+            type: 'bar',
+            customdata: [],
+            hoverlabel: {
+              align: 'left',
+            },
+            hovertemplate: '%{customdata}<br>Throughput: %{y:,}<extra></extra>',
+          },
+          error_rate: {
+            x: [],
+            y: [],
+            marker: {
+              color: '#fad963',
+            },
+            type: 'bar',
+            customdata: [],
+            hoverlabel: {
+              align: 'left',
+            },
+            hovertemplate: '%{customdata}<br>Error rate: %{y}<extra></extra>',
+          },
+        };
+
+        serviceBucket.time_buckets.buckets.forEach(
+          (timeBucket: {
+            key: any;
+            average_latency?: { value: any };
+            trace_count?: { value: any };
+            error_rate?: { value: any };
+          }) => {
+            const timeKey = timeBucket.key;
+            const customTime = `${moment(timeKey).format(
+              TRACE_ANALYTICS_PLOTS_DATE_FORMAT
+            )} - ${moment(timeKey + fixedIntervalToMilli(fixedInterval)).format(
+              TRACE_ANALYTICS_PLOTS_DATE_FORMAT
+            )}`;
+
+            parsedResult[serviceName].latency_trend.x.push(timeKey);
+            parsedResult[serviceName].latency_trend.y.push(
+              timeBucket?.average_latency?.value ?? '0'
+            );
+
+            parsedResult[serviceName].throughput.x.push(timeKey);
+            parsedResult[serviceName].throughput.y.push(timeBucket?.trace_count?.value ?? '0');
+            parsedResult[serviceName].throughput.customdata.push(customTime);
+
+            parsedResult[serviceName].error_rate.x.push(timeKey);
+            parsedResult[serviceName].error_rate.y.push(timeBucket?.error_rate?.value ?? '0');
+            parsedResult[serviceName].error_rate.customdata.push(customTime);
+          }
+        );
+      });
+      setItems(parsedResult);
     })
     .catch((error) => console.error(error));
 };
