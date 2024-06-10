@@ -234,7 +234,7 @@ export function TraceView(props: TraceViewProps) {
       props.parentBreadcrumb,
       {
         text: 'Trace analytics',
-        href: '#/home',
+        href: '#/',
       },
       {
         text: 'Traces',
