@@ -156,7 +156,7 @@ export const Home = (props: HomeProps) => {
 
   useEffect(() => {
     if (mode === 'data_prepper') fetchAttributesFields();
-  }, []);
+  }, [mode]);
 
   const serviceBreadcrumbs = [
     {
