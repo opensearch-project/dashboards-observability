@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { truncate } from 'lodash';
 import React, { useMemo } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
@@ -199,7 +200,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 truncateText: true,
                 render: (item: any) =>
                   item ? (
-                    <EuiText size="s">{_.truncate(item.join(', '), { length: 50 })}</EuiText>
+                    <EuiText size="s">{truncate(item.join(', '), { length: 50 })}</EuiText>
                   ) : (
                     '-'
                   ),
