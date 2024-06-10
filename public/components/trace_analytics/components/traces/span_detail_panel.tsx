@@ -155,6 +155,8 @@ export function SpanDetailPanel(props: {
     const yTexts = yLabels.map((label) => label.substring(0, label.length - 36));
 
     return {
+      plot_bgcolor: 'rgba(0, 0, 0, 0)',
+      paper_bgcolor: 'rgba(0, 0, 0, 0)',
       height: 25 * plotTraces.length + 60,
       width: 800,
       margin: {

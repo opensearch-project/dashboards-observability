@@ -14,18 +14,16 @@ import {
   PanelTitle,
 } from '../helper_functions';
 
-export function ThroughputPlt(props: {
+export function ThroughputTrendPlt(props: {
+  onClick: (event: any) => void;
   items: { items: Plotly.Data[]; fixedInterval: string };
-  setStartTime: (startTime: string) => void;
-  setEndTime: (endTime: string) => void;
-  setIdSelected: (mode: string) => void;
-  idSelected: string;
-  toggleButtons: any[];
+  isPanel: boolean;
 }) {
   const layout = useMemo(
     () =>
       ({
-        height: 217,
+        plot_bgcolor: 'rgba(0, 0, 0, 0)',
+        paper_bgcolor: 'rgba(0, 0, 0, 0)',
         margin: {
           l: 50,
           r: 5,
@@ -45,9 +43,12 @@ export function ThroughputPlt(props: {
               undefined
             )}`,
             ax: 0,
-            ay: -160,
+            ay: -140,
             borderpad: 10,
             arrowwidth: 0.7,
+            font: {
+              color: '#899195',
+            },
           },
         ],
         xaxis: {
@@ -66,15 +67,42 @@ export function ThroughputPlt(props: {
             },
           },
           fixedrange: true,
-          gridcolor: '#d9d9d9',
+          gridcolor: 'rgba(217, 217, 217, 0.2)',
           showgrid: true,
           visible: true,
           color: '#899195',
         },
+        ...(!props.isPanel ? { height: 200 } : { height: 217 }),
+        ...(!props.isPanel && { width: 400 }),
       } as Partial<Plotly.Layout>),
     [props.items]
   );
+  return (
+    <>
+      {' '}
+      {props.items?.items?.length > 0 ? (
+        <Plt
+          data={props.items.items}
+          layout={layout}
+          onClickHandler={props.onClick}
+          height={props.isPanel ? '217' : '200'}
+        />
+      ) : (
+        <NoMatchMessage size="s" />
+      )}
+    </>
+  );
+}
 
+export function ThroughputPlt(props: {
+  title?: string;
+  items: { items: Plotly.Data[]; fixedInterval: string };
+  setStartTime: (startTime: string) => void;
+  setEndTime: (endTime: string) => void;
+  setIdSelected: (mode: string) => void;
+  idSelected: string;
+  toggleButtons: any[];
+}) {
   const onClick = (event) => {
     if (!event?.points) return;
     const point = event.points[0];
@@ -87,23 +115,19 @@ export function ThroughputPlt(props: {
 
   return (
     <>
-      <EuiPanel style={{ minWidth: 433, minHeight: 308 }}>
-      <EuiFlexGroup justifyContent='spaceBetween' gutterSize='xs'>  
-        <PanelTitle title="Traces over time" />
-        <EuiButtonGroup
+      <EuiPanel style={{ minWidth: 433, minHeight: 308, maxHeight: 560 }}>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+          <PanelTitle title={props.title ? props.title : 'Traces over time'} />
+          <EuiButtonGroup
             options={props.toggleButtons}
             idSelected={props.idSelected}
             onChange={(id: string) => props.setIdSelected(id as 'error_rate' | 'throughput')}
             buttonSize="s"
             color="text"
           />
-      </EuiFlexGroup>
+        </EuiFlexGroup>
         <EuiHorizontalRule margin="m" />
-        {props.items?.items?.length > 0 ? (
-          <Plt data={props.items.items} layout={layout} onClickHandler={onClick} />
-        ) : (
-          <NoMatchMessage size="s" />
-        )}
+        <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
       </EuiPanel>
     </>
   );

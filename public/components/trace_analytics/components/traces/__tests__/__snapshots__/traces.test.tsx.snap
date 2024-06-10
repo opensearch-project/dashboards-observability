@@ -3,6 +3,7 @@
 exports[`Traces component renders empty traces page 1`] = `
 <Traces
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -328,6 +329,7 @@ exports[`Traces component renders empty traces page 1`] = `
   </DataSourcePicker>
   <TracesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -530,8 +532,9 @@ exports[`Traces component renders empty traces page 1`] = `
     startTime="now-5m"
     traceIdColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="data_prepper"
@@ -1153,6 +1156,7 @@ exports[`Traces component renders empty traces page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="data_prepper"
         page="traces"
@@ -1352,7 +1356,115 @@ exports[`Traces component renders empty traces page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <EuiPanel>
+      <div
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <EuiAccordion
+          arrowDisplay="left"
+          buttonContent="Trace Groups"
+          data-test-subj="trace-groups-service-operation-accordian"
+          forceState="closed"
+          id="accordion1"
+          initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
+          onToggle={[Function]}
+          paddingSize="none"
+        >
+          <div
+            className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
+            onToggle={[Function]}
+          >
+            <div
+              className="euiAccordion__triggerWrapper"
+            >
+              <button
+                aria-controls="accordion1"
+                aria-expanded={false}
+                className="euiAccordion__button"
+                id="random_html_id"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiAccordion__iconWrapper"
+                >
+                  <EuiIcon
+                    className="euiAccordion__icon"
+                    size="m"
+                    type="arrowRight"
+                  >
+                    <EuiIconBeaker
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </EuiIconBeaker>
+                  </EuiIcon>
+                </span>
+                <span
+                  className="euiIEFlexWrapFix"
+                >
+                  Trace Groups
+                </span>
+              </button>
+            </div>
+            <div
+              aria-labelledby="random_html_id"
+              className="euiAccordion__childWrapper"
+              id="accordion1"
+              role="region"
+              tabIndex={-1}
+            >
+              <EuiResizeObserver
+                onResize={[Function]}
+              >
+                <div>
+                  <div
+                    className=""
+                  >
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                  </div>
+                </div>
+              </EuiResizeObserver>
+            </div>
+          </div>
+        </EuiAccordion>
+      </div>
+    </EuiPanel>
     <EuiSpacer
       size="m"
     >
@@ -1508,6 +1620,7 @@ exports[`Traces component renders empty traces page 1`] = `
 exports[`Traces component renders jaeger traces page 1`] = `
 <Traces
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -1834,6 +1947,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
   </DataSourcePicker>
   <TracesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -2036,8 +2150,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
     startTime="now-5m"
     traceIdColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="jaeger"
@@ -2661,6 +2776,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="jaeger"
         page="traces"
@@ -2861,7 +2977,116 @@ exports[`Traces component renders jaeger traces page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <EuiPanel>
+      <div
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <EuiAccordion
+          arrowDisplay="left"
+          buttonContent="Service and Operations"
+          data-test-subj="trace-groups-service-operation-accordian"
+          forceState="closed"
+          id="accordion1"
+          initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
+          onToggle={[Function]}
+          paddingSize="none"
+        >
+          <div
+            className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
+            onToggle={[Function]}
+          >
+            <div
+              className="euiAccordion__triggerWrapper"
+            >
+              <button
+                aria-controls="accordion1"
+                aria-expanded={false}
+                className="euiAccordion__button"
+                id="random_html_id"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiAccordion__iconWrapper"
+                >
+                  <EuiIcon
+                    className="euiAccordion__icon"
+                    size="m"
+                    type="arrowRight"
+                  >
+                    <EuiIconArrowRight
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiAccordion__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiAccordion__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                          fillRule="nonzero"
+                        />
+                      </svg>
+                    </EuiIconArrowRight>
+                  </EuiIcon>
+                </span>
+                <span
+                  className="euiIEFlexWrapFix"
+                >
+                  Service and Operations
+                </span>
+              </button>
+            </div>
+            <div
+              aria-labelledby="random_html_id"
+              className="euiAccordion__childWrapper"
+              id="accordion1"
+              role="region"
+              tabIndex={-1}
+            >
+              <EuiResizeObserver
+                onResize={[Function]}
+              >
+                <div>
+                  <div
+                    className=""
+                  >
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                  </div>
+                </div>
+              </EuiResizeObserver>
+            </div>
+          </div>
+        </EuiAccordion>
+      </div>
+    </EuiPanel>
     <EuiSpacer
       size="m"
     >
@@ -3018,6 +3243,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
 exports[`Traces component renders traces page 1`] = `
 <Traces
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -3343,6 +3569,7 @@ exports[`Traces component renders traces page 1`] = `
   </DataSourcePicker>
   <TracesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -3544,8 +3771,9 @@ exports[`Traces component renders traces page 1`] = `
     startTime="now-5m"
     traceIdColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="data_prepper"
@@ -4169,6 +4397,7 @@ exports[`Traces component renders traces page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="data_prepper"
         page="traces"
@@ -4369,7 +4598,116 @@ exports[`Traces component renders traces page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <EuiPanel>
+      <div
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <EuiAccordion
+          arrowDisplay="left"
+          buttonContent="Trace Groups"
+          data-test-subj="trace-groups-service-operation-accordian"
+          forceState="closed"
+          id="accordion1"
+          initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
+          onToggle={[Function]}
+          paddingSize="none"
+        >
+          <div
+            className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
+            onToggle={[Function]}
+          >
+            <div
+              className="euiAccordion__triggerWrapper"
+            >
+              <button
+                aria-controls="accordion1"
+                aria-expanded={false}
+                className="euiAccordion__button"
+                id="random_html_id"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiAccordion__iconWrapper"
+                >
+                  <EuiIcon
+                    className="euiAccordion__icon"
+                    size="m"
+                    type="arrowRight"
+                  >
+                    <EuiIconArrowRight
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiAccordion__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiAccordion__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                          fillRule="nonzero"
+                        />
+                      </svg>
+                    </EuiIconArrowRight>
+                  </EuiIcon>
+                </span>
+                <span
+                  className="euiIEFlexWrapFix"
+                >
+                  Trace Groups
+                </span>
+              </button>
+            </div>
+            <div
+              aria-labelledby="random_html_id"
+              className="euiAccordion__childWrapper"
+              id="accordion1"
+              role="region"
+              tabIndex={-1}
+            >
+              <EuiResizeObserver
+                onResize={[Function]}
+              >
+                <div>
+                  <div
+                    className=""
+                  >
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                  </div>
+                </div>
+              </EuiResizeObserver>
+            </div>
+          </div>
+        </EuiAccordion>
+      </div>
+    </EuiPanel>
     <EuiSpacer
       size="m"
     >
