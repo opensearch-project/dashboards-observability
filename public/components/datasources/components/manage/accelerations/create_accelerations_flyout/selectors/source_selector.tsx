@@ -23,6 +23,7 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CreateAccelerationForm,
+  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../../../../../framework/catalog_cache/cache_manager';
 import { useToast } from '../../../../../../common/toast';
@@ -30,25 +31,46 @@ import { hasError, validateDataTable, validateDatabase } from '../create/utils';
 import { SelectorLoadDatabases } from './selector_helpers/load_databases';
 import { SelectorLoadObjects } from './selector_helpers/load_objects';
 
-interface AccelerationDataSourceSelectorProps {
+export type BaseDataSourceForm = Pick<
+  CreateAccelerationForm,
+  'dataSource' | 'database' | 'dataTable'
+> & { formErrors: Partial<CreateAccelerationForm['formErrors']> };
+
+type DataSourceFormProps =
+  | {
+      formType: 'CreateAcceleration';
+      dataSourceFormData: CreateAccelerationForm;
+      setDataSourceFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
+    }
+  | {
+      formType: 'SetupIntegration';
+      dataSourceFormData: BaseDataSourceForm;
+      setDataSourceFormData: React.Dispatch<React.SetStateAction<BaseDataSourceForm>>;
+    };
+
+interface DataSourceSelectorProps {
   http: CoreStart['http'];
-  accelerationFormData: CreateAccelerationForm;
-  setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
+  dataSourceFormProps: DataSourceFormProps;
   selectedDatasource: string;
+  selectedDataSourceType: DatasourceType;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
+  hideHeader?: boolean;
+  hideDataSourceDescription?: boolean;
 }
 
-export const AccelerationDataSourceSelector = ({
+export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   http,
-  accelerationFormData,
-  setAccelerationFormData,
+  dataSourceFormProps: { dataSourceFormData, formType, setDataSourceFormData },
   selectedDatasource,
+  selectedDataSourceType,
   dataSourcesPreselected,
   tableFieldsLoading,
   dataSourceMDSId,
-}: AccelerationDataSourceSelectorProps) => {
+  hideHeader,
+  hideDataSourceDescription,
+}) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -62,23 +84,24 @@ export const AccelerationDataSourceSelector = ({
     dataTable: false,
   });
 
-  const dataSourceDescription = (
+  const dataSourceDescription = hideDataSourceDescription ? null : (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {accelerationFormData.dataSource}
-      </EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>{dataSourceFormData.dataSource}</EuiDescriptionListDescription>
     </EuiDescriptionList>
   );
 
   const loadDataSource = () => {
+    if (formType === 'SetupIntegration') {
+      return;
+    }
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(DATACONNECTIONS_BASE + `/dataSourceMDSId=${dataSourceMDSId}`)
+      .get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`)
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
-            connection.connector.toUpperCase() === 'S3GLUE' &&
+            ['S3GLUE', 'SECURITYLAKE'].includes(connection.connector.toUpperCase()) &&
             connection.name === selectedDatasource
         );
 
@@ -94,7 +117,7 @@ export const AccelerationDataSourceSelector = ({
   };
 
   const loadDatabases = () => {
-    const dsCache = CatalogCacheManager.getOrCreateDataSource(accelerationFormData.dataSource);
+    const dsCache = CatalogCacheManager.getOrCreateDataSource(dataSourceFormData.dataSource);
 
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
       const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
@@ -109,7 +132,7 @@ export const AccelerationDataSourceSelector = ({
     setSelectedDatabase([]);
     setTables([]);
     setSelectedTable([]);
-    setAccelerationFormData({ ...accelerationFormData, database: '', dataTable: '' });
+    setDataSourceFormData({ ...(dataSourceFormData as any), database: '', dataTable: '' });
   };
 
   const loadTables = () => {
@@ -117,8 +140,8 @@ export const AccelerationDataSourceSelector = ({
       let dbCache = {} as CachedDatabase;
       try {
         dbCache = CatalogCacheManager.getDatabase(
-          accelerationFormData.dataSource,
-          accelerationFormData.database
+          dataSourceFormData.dataSource,
+          dataSourceFormData.database
         );
         if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
           const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
@@ -135,7 +158,7 @@ export const AccelerationDataSourceSelector = ({
         console.error(error);
       }
       setSelectedTable([]);
-      setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
+      setDataSourceFormData({ ...(dataSourceFormData as any), dataTable: '' });
     }
   };
 
@@ -144,28 +167,32 @@ export const AccelerationDataSourceSelector = ({
   }, []);
 
   useEffect(() => {
-    if (accelerationFormData.dataSource !== '') {
+    if (dataSourceFormData.dataSource !== '') {
       loadDatabases();
     }
-  }, [accelerationFormData.dataSource]);
+  }, [dataSourceFormData.dataSource]);
 
   useEffect(() => {
-    if (accelerationFormData.database !== '') {
+    if (dataSourceFormData.database !== '') {
       loadTables();
     }
-  }, [accelerationFormData.database]);
+  }, [dataSourceFormData.database]);
 
   return (
     <>
-      <EuiText data-test-subj="datasource-selector-header">
-        <h3>Select data source</h3>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        Select the data source to accelerate data from. External data sources may take time to load.
-      </EuiText>
-      <EuiSpacer size="m" />
-
+      {!hideHeader && (
+        <>
+          <EuiText data-test-subj="datasource-selector-header">
+            <h3>Select data source</h3>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            Select the data source to accelerate data from. External data sources may take time to
+            load.
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {dataSourcesPreselected ? (
         <>
           <EuiFlexGroup>
@@ -174,7 +201,7 @@ export const AccelerationDataSourceSelector = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Database</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {accelerationFormData.database}
+                  {dataSourceFormData.database}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
@@ -182,7 +209,7 @@ export const AccelerationDataSourceSelector = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Table</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {accelerationFormData.dataTable}
+                  {dataSourceFormData.dataTable}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
@@ -195,8 +222,8 @@ export const AccelerationDataSourceSelector = ({
           <EuiFormRow
             label="Database"
             helpText="Select the database that contains the tables you'd like to use."
-            isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
-            error={accelerationFormData.formErrors.databaseError}
+            isInvalid={hasError(dataSourceFormData.formErrors, 'databaseError')}
+            error={dataSourceFormData.formErrors.databaseError}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
@@ -207,7 +234,7 @@ export const AccelerationDataSourceSelector = ({
                   selectedOptions={selectedDatabase}
                   onChange={(databaseOptions) => {
                     if (databaseOptions.length > 0) {
-                      setAccelerationFormData(
+                      setDataSourceFormData(
                         producer((accData) => {
                           accData.database = databaseOptions[0].label;
                           accData.formErrors.databaseError = validateDatabase(
@@ -219,7 +246,7 @@ export const AccelerationDataSourceSelector = ({
                     }
                   }}
                   isClearable={false}
-                  isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
+                  isInvalid={hasError(dataSourceFormData.formErrors, 'databaseError')}
                   isDisabled={
                     loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
                   }
@@ -227,11 +254,12 @@ export const AccelerationDataSourceSelector = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SelectorLoadDatabases
-                  dataSourceName={accelerationFormData.dataSource}
+                  dataSourceName={dataSourceFormData.dataSource}
                   loadDatabases={loadDatabases}
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -243,8 +271,8 @@ export const AccelerationDataSourceSelector = ({
                 ? 'Loading tables fields'
                 : 'Select the Spark table that has the data you would like to index.'
             }
-            isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
-            error={accelerationFormData.formErrors.dataTableError}
+            isInvalid={hasError(dataSourceFormData.formErrors, 'dataTableError')}
+            error={dataSourceFormData.formErrors.dataTableError}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
@@ -255,7 +283,7 @@ export const AccelerationDataSourceSelector = ({
                   selectedOptions={selectedTable}
                   onChange={(tableOptions) => {
                     if (tableOptions.length > 0) {
-                      setAccelerationFormData(
+                      setDataSourceFormData(
                         producer((accData) => {
                           accData.dataTable = tableOptions[0].label;
                           accData.formErrors.dataTableError = validateDataTable(
@@ -267,7 +295,7 @@ export const AccelerationDataSourceSelector = ({
                     }
                   }}
                   isClearable={false}
-                  isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
+                  isInvalid={hasError(dataSourceFormData.formErrors, 'dataTableError')}
                   isDisabled={
                     loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
                   }
@@ -275,12 +303,14 @@ export const AccelerationDataSourceSelector = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SelectorLoadObjects
-                  dataSourceName={accelerationFormData.dataSource}
-                  databaseName={accelerationFormData.database}
+                  dataSourceName={dataSourceFormData.dataSource}
+                  dataSourceType={selectedDataSourceType}
+                  databaseName={dataSourceFormData.database}
                   loadTables={loadTables}
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -16,7 +16,7 @@ Describe the integration resource log protocol you are interesting in [ [`access
 
 **What is the integration target protocol ?**
 
-Describe the target protocol you are interested to ingest [ for example [`logs.mapping`](https://github.com/opensearch-project/opensearch-catalog/blob/main/schema/observability/logs/logs.mapping) , [`http.mapping`](https://github.com/opensearch-project/opensearch-catalog/blob/main/schema/observability/logs/http.mapping) ]
+Describe the target protocol you are interested to ingest [ for example [`logs.mapping`](https://github.com/opensearch-project/opensearch-catalog/blob/c40d1e87199528d3853c0c3fa308524c76ac6c2c/schema/observability/logs/logs-1.0.0.mapping) , [`http.mapping`](https://github.com/opensearch-project/opensearch-catalog/blob/c40d1e87199528d3853c0c3fa308524c76ac6c2c/schema/observability/logs/http-1.0.0.mapping) ]
 
 **Which agents would you use to ship this data ?**
 

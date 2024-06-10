@@ -24,15 +24,18 @@ import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
+import { IntegrationConnectionType } from '../../../../common/types/integrations';
 
 export interface IntegrationSetupInputs {
   displayName: string;
-  connectionType: string;
+  connectionType: IntegrationConnectionType;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
   connectionTableName: string;
   enabledWorkflows: string[];
+  connectionDatabaseName?: string;
 }
 
 export interface IntegrationConfigProps {
@@ -99,7 +102,9 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
+  return `${config.connectionDataSource}.${config.connectionDatabaseName ?? 'default'}.${
+    config.connectionTableName
+  }`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -139,6 +144,14 @@ const addIntegration = async ({
   let sessionId: string | null = null;
 
   if (config.connectionType === 'index') {
+    let enabledWorkflows: string[] | undefined;
+    if (integration.workflows) {
+      enabledWorkflows = integration.workflows
+        .filter((w) =>
+          w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
+        )
+        .map((w) => w.name);
+    }
     const res = await addIntegrationRequest({
       addSample: false,
       templateName: integration.name,
@@ -147,6 +160,7 @@ const addIntegration = async ({
       name: config.displayName,
       indexPattern: config.connectionDataSource,
       skipRedirect: setIsInstalling ? true : false,
+      workflows: enabledWorkflows,
     });
     if (setIsInstalling) {
       setIsInstalling(false, res);
@@ -186,7 +200,9 @@ const addIntegration = async ({
       integration,
       setToast: setCalloutLikeToast,
       name: config.displayName,
-      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
+      indexPattern: `flint_${config.connectionDataSource}_${
+        config.connectionDatabaseName ?? 'default'
+      }_${config.connectionTableName}__*`,
       workflows: config.enabledWorkflows,
       skipRedirect: setIsInstalling ? true : false,
       dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
@@ -329,7 +345,7 @@ export function SetupIntegrationForm({
   unsetIntegration?: () => void;
   forceConnection?: {
     name: string;
-    type: string;
+    type: IntegrationConnectionType;
   };
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -367,67 +383,58 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
+  const IntegrationInputFormComponent =
+    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
+      ? SetupIntegrationInputsForSecurityLake
+      : SetupIntegrationFormInputs;
+
+  const content = (
+    <>
+      {showLoading ? (
+        <LoadingPage />
+      ) : (
+        <IntegrationInputFormComponent
+          config={integConfig}
+          updateConfig={updateConfig}
+          integration={template}
+          setupCallout={setupCallout}
+          lockConnectionType={forceConnection !== undefined}
+        />
+      )}
+    </>
+  );
+
+  const bottomBar = (
+    <SetupBottomBar
+      config={integConfig}
+      integration={template}
+      loading={showLoading}
+      setLoading={setShowLoading}
+      setSetupCallout={setSetupCallout}
+      unsetIntegration={unsetIntegration}
+      setIsInstalling={setIsInstalling}
+    />
+  );
+
   if (renderType === 'page') {
     return (
       <>
         <EuiPageContent>
-          <EuiPageContentBody>
-            {showLoading ? (
-              <LoadingPage />
-            ) : (
-              <SetupIntegrationFormInputs
-                config={integConfig}
-                updateConfig={updateConfig}
-                integration={template}
-                setupCallout={setupCallout}
-                lockConnectionType={forceConnection !== undefined}
-              />
-            )}
-          </EuiPageContentBody>
+          <EuiPageContentBody>{content}</EuiPageContentBody>
         </EuiPageContent>
-        <EuiBottomBar>
-          <SetupBottomBar
-            config={integConfig}
-            integration={template}
-            loading={showLoading}
-            setLoading={setShowLoading}
-            setSetupCallout={setSetupCallout}
-            unsetIntegration={unsetIntegration}
-            setIsInstalling={setIsInstalling}
-          />
-        </EuiBottomBar>
+        <EuiBottomBar>{bottomBar}</EuiBottomBar>
       </>
     );
   } else if (renderType === 'flyout') {
     return (
       <>
-        <EuiFlyoutBody>
-          {showLoading ? (
-            <LoadingPage />
-          ) : (
-            <SetupIntegrationFormInputs
-              config={integConfig}
-              updateConfig={updateConfig}
-              integration={template}
-              setupCallout={setupCallout}
-              lockConnectionType={forceConnection !== undefined}
-            />
-          )}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <SetupBottomBar
-            config={integConfig}
-            integration={template}
-            loading={showLoading}
-            setLoading={setShowLoading}
-            setSetupCallout={setSetupCallout}
-            unsetIntegration={unsetIntegration}
-            setIsInstalling={setIsInstalling}
-          />
-        </EuiFlyoutFooter>
+        <EuiFlyoutBody>{content}</EuiFlyoutBody>
+        <EuiFlyoutFooter>{bottomBar}</EuiFlyoutFooter>
       </>
     );
   }
+
+  return null;
 }
 
 export function SetupIntegrationPage({

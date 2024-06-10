@@ -5,20 +5,23 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiI18nNumber,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import round from 'lodash/round';
 import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
+import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
 import { FilterType } from '../common/filters/filters';
 import {
@@ -26,36 +29,89 @@ import {
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { ServiceTrendsPlots } from './service_trends_plots';
 
 interface ServicesTableProps {
   items: any[];
+  selectedItems: any[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
+  addServicesGroupFilter: () => void;
   loading: boolean;
-  nameColumnAction: (item: any) => any;
   traceColumnAction: any;
+  setCurrentSelectedService: (value: React.SetStateAction<string>) => void;
   addFilter: (filter: FilterType) => void;
   setRedirect: (redirect: boolean) => void;
   mode: TraceAnalyticsMode;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  isServiceTrendEnabled: boolean;
+  setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  serviceTrends: ServiceTrends;
 }
 
 export function ServicesTable(props: ServicesTableProps) {
   const {
     items,
+    selectedItems,
+    setSelectedItems,
+    addServicesGroupFilter,
     mode,
     loading,
-    nameColumnAction,
     traceColumnAction,
+    setCurrentSelectedService,
     addFilter,
     setRedirect,
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    isServiceTrendEnabled,
+    setIsServiceTrendEnabled,
+    serviceTrends,
   } = props;
+
+  const selectionValue = {
+    onSelectionChange: (selections: any[]) => setSelectedItems(selections),
+  };
+
+  const nameColumnAction = (serviceName: string) => {
+    addFilter({
+      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+      operator: 'is',
+      value: serviceName,
+      inverted: false,
+      disabled: false,
+    });
+  };
+
   const renderTitleBar = (totalItems?: number) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={10}>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
           <PanelTitle title="Services" totalItems={totalItems} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiToolTip position="top" content="Select services to filter">
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={addServicesGroupFilter}
+                  isDisabled={selectedItems.length < 1}
+                >
+                  Filter services
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            {mode === 'data_prepper' && (
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
+                >
+                  {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -80,15 +136,30 @@ export function ServicesTable(props: ServicesTableProps) {
           name: 'Average duration (ms)',
           align: 'right',
           sortable: true,
-          render: (item: any) => (item === 0 || item ? round(item, 2) : '-'),
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="average_latency"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         {
           field: 'error_rate',
           name: 'Error rate',
           align: 'right',
           sortable: true,
-          render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-',
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="error_rate"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         {
           field: 'throughput',
@@ -96,7 +167,15 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'right',
           sortable: true,
           truncateText: true,
-          render: (item: any) => (item === 0 || item ? <EuiI18nNumber value={item} /> : '-'),
+          render: (item: any, row: any) => (
+            <ServiceTrendsPlots
+              item={item}
+              row={row}
+              isServiceTrendEnabled={isServiceTrendEnabled}
+              fieldType="throughput"
+              serviceTrends={serviceTrends}
+            />
+          ),
         },
         ...(mode === 'data_prepper'
           ? [
@@ -128,6 +207,7 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             ]
           : []),
+
         {
           field: 'traces',
           name: 'Traces',
@@ -158,11 +238,29 @@ export function ServicesTable(props: ServicesTableProps) {
             </>
           ),
         },
+        {
+          field: 'actions',
+          name: 'Actions',
+          align: 'center',
+          render: (_item: any, row: any) => (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false} onClick={() => setCurrentSelectedService(row.name)}>
+                <EuiLink>
+                  <EuiIcon type="inspect" color="primary" />
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
       ] as Array<EuiTableFieldDataColumnType<any>>,
     [items]
   );
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
+  const titleBar = useMemo(() => renderTitleBar(items?.length), [
+    items,
+    selectedItems,
+    isServiceTrendEnabled,
+  ]);
 
   return (
     <>
@@ -191,6 +289,9 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             }}
             loading={loading}
+            selection={selectionValue}
+            isSelectable={true}
+            itemId="itemId"
           />
         ) : (
           <NoMatchMessage size="xl" />

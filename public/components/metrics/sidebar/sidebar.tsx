@@ -22,9 +22,9 @@ import {
   mergeMetrics,
   otelIndexSelector,
   removeSelectedMetric,
+  selectMetricByIdSelector,
   selectedMetricsIdsSelector,
   selectedMetricsSelector,
-  selectMetricByIdSelector,
   setDataSourceIcons,
   setSortedIds,
 } from '../redux/slices/metrics_slice';
@@ -40,6 +40,7 @@ interface SideBarMenuProps {
   selectedOTIndex: React.SetStateAction<Array<{}>>;
   setSelectedOTIndex: React.Dispatch<React.SetStateAction<unknown>>;
   additionalSelectedMetricId?: string;
+  dataSourceMDSId: string;
 }
 export const Sidebar = ({
   selectedDataSource,
@@ -47,6 +48,7 @@ export const Sidebar = ({
   selectedOTIndex,
   setSelectedOTIndex,
   additionalSelectedMetricId,
+  dataSourceMDSId,
 }: SideBarMenuProps) => {
   const dispatch = useDispatch();
   const [availableOTDocuments, setAvailableOTDocuments] = useState([]);
@@ -60,35 +62,46 @@ export const Sidebar = ({
   const otelIndices = useSelector(otelIndexSelector);
 
   useEffect(() => {
-    batch(() => {
-      dispatch(loadMetrics());
-    });
-  }, [dispatch, selectedDataSource]);
+    (async function () {
+      setSelectedDataSource([]);
+      setSelectedOTIndex([]);
+      await dispatch(clearSelectedMetrics());
+    })();
+  }, [dataSourceMDSId]);
 
   useEffect(() => {
     batch(() => {
-      dispatch(loadOTIndices());
+      dispatch(loadMetrics(dataSourceMDSId));
     });
-  }, [dispatch, selectedDataSource]);
+  }, [dispatch, selectedDataSource, dataSourceMDSId]);
+
+  useEffect(() => {
+    batch(() => {
+      dispatch(loadOTIndices(dataSourceMDSId));
+    });
+  }, [dispatch, selectedDataSource, dataSourceMDSId]);
 
   useEffect(() => {
     if (additionalMetric) {
       (async function () {
         await dispatch(clearSelectedMetrics());
-        await dispatch(addSelectedMetric(additionalMetric));
+        await dispatch(addSelectedMetric(additionalMetric, dataSourceMDSId));
       })();
     }
-  }, [additionalMetric?.id]);
+  }, [additionalMetric?.id, dataSourceMDSId]);
 
   const selectedMetricsList = useMemo(() => {
     return selectedMetricsIds.map((id) => selectedMetrics[id]).filter((m) => m); // filter away null entries
-  }, [selectedMetrics, selectedMetricsIds]);
+  }, [selectedMetrics, selectedMetricsIds, dataSourceMDSId]);
 
   useEffect(() => {
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
       const fetchOtelDocuments = async () => {
         try {
-          const documentNames = await fetchOpenTelemetryDocumentNames(selectedOTIndex[0]?.label)();
+          const documentNames = await fetchOpenTelemetryDocumentNames(
+            selectedOTIndex[0]?.label,
+            dataSourceMDSId
+          )();
           const availableOtelDocuments = documentNames?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
               return {
@@ -116,24 +129,30 @@ export const Sidebar = ({
       };
       fetchOtelDocuments();
     }
-  }, [dispatch, selectedDataSource, selectedOTIndex]);
+  }, [dispatch, selectedDataSource, selectedOTIndex, dataSourceMDSId]);
 
   const indexPicker = useMemo(() => {
     const isOpenTelemetry = selectedDataSource[0]?.label === 'OpenTelemetry' ? true : false;
     if (isOpenTelemetry) {
       return <IndexPicker otelIndices={otelIndices} setSelectedOTIndex={setSelectedOTIndex} />;
     }
-  }, [selectedDataSource]);
+  }, [selectedDataSource, dataSourceMDSId]);
 
   const availableMetrics = useMemo(() => {
     if (selectedDataSource[0]?.label === 'OpenTelemetry' && selectedOTIndex.length > 0)
       return promethuesMetrics;
     else if (selectedDataSource[0]?.label === 'Prometheus') return promethuesMetrics;
     else return [];
-  }, [promethuesMetrics, selectedDataSource, availableOTDocuments, selectedOTIndex]);
+  }, [
+    promethuesMetrics,
+    selectedDataSource,
+    availableOTDocuments,
+    selectedOTIndex,
+    dataSourceMDSId,
+  ]);
 
   const handleAddMetric = (metric: any) => {
-    dispatch(addSelectedMetric(metric));
+    dispatch(addSelectedMetric(metric, dataSourceMDSId));
   };
 
   const handleRemoveMetric = (metric: any) => {
@@ -158,6 +177,7 @@ export const Sidebar = ({
             headerName="Selected Metrics"
             handleClick={handleRemoveMetric}
             dataTestSubj="metricsListItems_selectedMetrics"
+            dataSourceMDSId={dataSourceMDSId}
           />
           <EuiSpacer size="s" />
           <MetricsAccordion
@@ -165,6 +185,7 @@ export const Sidebar = ({
             headerName="Available Metrics"
             handleClick={handleAddMetric}
             dataTestSubj="metricsListItems_availableMetrics"
+            dataSourceMDSId={dataSourceMDSId}
           />
         </section>
       </div>

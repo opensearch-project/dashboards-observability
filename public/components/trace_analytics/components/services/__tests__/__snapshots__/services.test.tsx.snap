@@ -3,6 +3,7 @@
 exports[`Services component renders empty services page 1`] = `
 <Services
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -329,6 +330,7 @@ exports[`Services component renders empty services page 1`] = `
   </DataSourcePicker>
   <ServicesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -532,8 +534,9 @@ exports[`Services component renders empty services page 1`] = `
     startTime="now-5m"
     traceColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="data_prepper"
@@ -1155,6 +1158,7 @@ exports[`Services component renders empty services page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="data_prepper"
         page="services"
@@ -1354,7 +1358,7 @@ exports[`Services component renders empty services page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
     <EuiSpacer
       size="m"
     >
@@ -1364,12 +1368,17 @@ exports[`Services component renders empty services page 1`] = `
     </EuiSpacer>
     <ServicesTable
       addFilter={[Function]}
+      addServicesGroupFilter={[Function]}
       dataPrepperIndicesExist={true}
+      isServiceTrendEnabled={false}
       items={Array []}
       loading={true}
       mode="data_prepper"
-      nameColumnAction={[Function]}
+      selectedItems={Array []}
+      serviceTrends={Object {}}
+      setIsServiceTrendEnabled={[Function]}
       setRedirect={[Function]}
+      setSelectedItems={[Function]}
       traceColumnAction={[Function]}
     >
       <EuiPanel>
@@ -1377,17 +1386,16 @@ exports[`Services component renders empty services page 1`] = `
           className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
         >
           <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
+            justifyContent="spaceBetween"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <EuiFlexItem
-                grow={10}
+                grow={false}
               >
                 <div
-                  className="euiFlexItem euiFlexItem--flexGrow10"
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <PanelTitle
                     title="Services"
@@ -1412,6 +1420,114 @@ exports[`Services component renders empty services page 1`] = `
                       </div>
                     </EuiText>
                   </PanelTitle>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiToolTip
+                            content="Select services to filter"
+                            delay="regular"
+                            position="top"
+                          >
+                            <span
+                              className="euiToolTipAnchor"
+                              onKeyUp={[Function]}
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <EuiButtonEmpty
+                                isDisabled={true}
+                                onBlur={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                size="xs"
+                              >
+                                <button
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                                  disabled={true}
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
+                                  type="button"
+                                >
+                                  <EuiButtonContent
+                                    className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    iconSize="s"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Filter services
+                                      </span>
+                                    </span>
+                                  </EuiButtonContent>
+                                </button>
+                              </EuiButtonEmpty>
+                            </span>
+                          </EuiToolTip>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiButtonEmpty
+                            onClick={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Show 24 hour trends
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
                 </div>
               </EuiFlexItem>
             </div>
@@ -2038,115 +2154,14 @@ exports[`Services component renders empty services page 1`] = `
           </div>
         </div>
       </EuiPanel>
-    </ServiceMap>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      <EuiSpacer
+        size="xl"
       >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Trace Groups"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Trace Groups
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
+        <div
+          className="euiSpacer euiSpacer--xl"
+        />
+      </EuiSpacer>
+    </ServiceMap>
   </ServicesContent>
 </Services>
 `;
@@ -2154,6 +2169,7 @@ exports[`Services component renders empty services page 1`] = `
 exports[`Services component renders jaeger services page 1`] = `
 <Services
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -2481,6 +2497,7 @@ exports[`Services component renders jaeger services page 1`] = `
   </DataSourcePicker>
   <ServicesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -2684,8 +2701,9 @@ exports[`Services component renders jaeger services page 1`] = `
     startTime="now-5m"
     traceColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="jaeger"
@@ -3309,6 +3327,7 @@ exports[`Services component renders jaeger services page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="jaeger"
         page="services"
@@ -3509,7 +3528,7 @@ exports[`Services component renders jaeger services page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
     <EuiSpacer
       size="m"
     >
@@ -3519,13 +3538,18 @@ exports[`Services component renders jaeger services page 1`] = `
     </EuiSpacer>
     <ServicesTable
       addFilter={[Function]}
+      addServicesGroupFilter={[Function]}
       dataPrepperIndicesExist={false}
+      isServiceTrendEnabled={false}
       items={Array []}
       jaegerIndicesExist={true}
       loading={true}
       mode="jaeger"
-      nameColumnAction={[Function]}
+      selectedItems={Array []}
+      serviceTrends={Object {}}
+      setIsServiceTrendEnabled={[Function]}
       setRedirect={[Function]}
+      setSelectedItems={[Function]}
       traceColumnAction={[Function]}
     >
       <EuiPanel>
@@ -3533,17 +3557,16 @@ exports[`Services component renders jaeger services page 1`] = `
           className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
         >
           <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
+            justifyContent="spaceBetween"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <EuiFlexItem
-                grow={10}
+                grow={false}
               >
                 <div
-                  className="euiFlexItem euiFlexItem--flexGrow10"
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <PanelTitle
                     title="Services"
@@ -3568,6 +3591,76 @@ exports[`Services component renders jaeger services page 1`] = `
                       </div>
                     </EuiText>
                   </PanelTitle>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiToolTip
+                            content="Select services to filter"
+                            delay="regular"
+                            position="top"
+                          >
+                            <span
+                              className="euiToolTipAnchor"
+                              onKeyUp={[Function]}
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <EuiButtonEmpty
+                                isDisabled={true}
+                                onBlur={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                size="xs"
+                              >
+                                <button
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                                  disabled={true}
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
+                                  type="button"
+                                >
+                                  <EuiButtonContent
+                                    className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    iconSize="s"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Filter services
+                                      </span>
+                                    </span>
+                                  </EuiButtonContent>
+                                </button>
+                              </EuiButtonEmpty>
+                            </span>
+                          </EuiToolTip>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
                 </div>
               </EuiFlexItem>
             </div>
@@ -3669,115 +3762,6 @@ exports[`Services component renders jaeger services page 1`] = `
       />
     </EuiSpacer>
     <div />
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-      >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Service and Operations"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconArrowRight
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                          fillRule="nonzero"
-                        />
-                      </svg>
-                    </EuiIconArrowRight>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Service and Operations
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
   </ServicesContent>
 </Services>
 `;
@@ -3785,6 +3769,7 @@ exports[`Services component renders jaeger services page 1`] = `
 exports[`Services component renders services page 1`] = `
 <Services
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   childBreadcrumbs={
     Array [
       Object {
@@ -4111,6 +4096,7 @@ exports[`Services component renders services page 1`] = `
   </DataSourcePicker>
   <ServicesContent
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     childBreadcrumbs={
       Array [
         Object {
@@ -4313,8 +4299,9 @@ exports[`Services component renders services page 1`] = `
     startTime="now-5m"
     traceColumnAction={[Function]}
   >
-    <SearchBar
+    <ForwardRef
       appConfigs={Array []}
+      attributesFilterFields={Array []}
       endTime="now"
       filters={Array []}
       mode="data_prepper"
@@ -4938,6 +4925,7 @@ exports[`Services component renders services page 1`] = `
       </EuiSpacer>
       <Filters
         appConfigs={Array []}
+        attributesFilterFields={Array []}
         filters={Array []}
         mode="data_prepper"
         page="services"
@@ -5138,7 +5126,7 @@ exports[`Services component renders services page 1`] = `
           </div>
         </EuiFlexGroup>
       </Filters>
-    </SearchBar>
+    </ForwardRef>
     <EuiSpacer
       size="m"
     >
@@ -5148,12 +5136,17 @@ exports[`Services component renders services page 1`] = `
     </EuiSpacer>
     <ServicesTable
       addFilter={[Function]}
+      addServicesGroupFilter={[Function]}
       dataPrepperIndicesExist={true}
+      isServiceTrendEnabled={false}
       items={Array []}
       loading={true}
       mode="data_prepper"
-      nameColumnAction={[Function]}
+      selectedItems={Array []}
+      serviceTrends={Object {}}
+      setIsServiceTrendEnabled={[Function]}
       setRedirect={[Function]}
+      setSelectedItems={[Function]}
       traceColumnAction={[Function]}
     >
       <EuiPanel>
@@ -5161,17 +5154,16 @@ exports[`Services component renders services page 1`] = `
           className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
         >
           <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
+            justifyContent="spaceBetween"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <EuiFlexItem
-                grow={10}
+                grow={false}
               >
                 <div
-                  className="euiFlexItem euiFlexItem--flexGrow10"
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <PanelTitle
                     title="Services"
@@ -5196,6 +5188,114 @@ exports[`Services component renders services page 1`] = `
                       </div>
                     </EuiText>
                   </PanelTitle>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiToolTip
+                            content="Select services to filter"
+                            delay="regular"
+                            position="top"
+                          >
+                            <span
+                              className="euiToolTipAnchor"
+                              onKeyUp={[Function]}
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <EuiButtonEmpty
+                                isDisabled={true}
+                                onBlur={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                size="xs"
+                              >
+                                <button
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                                  disabled={true}
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
+                                  type="button"
+                                >
+                                  <EuiButtonContent
+                                    className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    iconSize="s"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Filter services
+                                      </span>
+                                    </span>
+                                  </EuiButtonContent>
+                                </button>
+                              </EuiButtonEmpty>
+                            </span>
+                          </EuiToolTip>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiButtonEmpty
+                            onClick={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Show 24 hour trends
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
                 </div>
               </EuiFlexItem>
             </div>
@@ -5822,116 +5922,14 @@ exports[`Services component renders services page 1`] = `
           </div>
         </div>
       </EuiPanel>
-    </ServiceMap>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      <EuiSpacer
+        size="xl"
       >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Trace Groups"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconArrowRight
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                          fillRule="nonzero"
-                        />
-                      </svg>
-                    </EuiIconArrowRight>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Trace Groups
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
+        <div
+          className="euiSpacer euiSpacer--xl"
+        />
+      </EuiSpacer>
+    </ServiceMap>
   </ServicesContent>
 </Services>
 `;

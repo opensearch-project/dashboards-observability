@@ -19,11 +19,15 @@ export default class PPLService {
       query: string;
       format: string;
     },
+    dataSourceMDSId?: string,
     errorHandler?: (error: any) => void
   ) => {
     return this.http
       .post(`${PPL_BASE}${PPL_SEARCH}`, {
         body: JSON.stringify(params),
+        query: {
+          dataSourceMDSId,
+        },
       })
       .catch((error) => {
         console.error('fetch error: ', error.body);

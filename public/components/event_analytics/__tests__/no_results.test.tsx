@@ -13,13 +13,14 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../framework/redux/reducers';
 import thunk from 'redux-thunk';
+import { setRenderLogExplorerTablesFlyout } from '../../../plugin';
 
 describe('No result component', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders No result component', async () => {
     const store = createStore(rootReducer, applyMiddleware(thunk));
-
+    setRenderLogExplorerTablesFlyout(jest.fn());
     const wrapper = mount(
       <Provider store={store}>
         <NoResults tabId={initialTabId} />

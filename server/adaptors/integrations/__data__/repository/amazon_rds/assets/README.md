@@ -1,6 +1,6 @@
 # AWS RDS Integration Assets
 
-API: http://osd:5601/api/saved_objects/_import?overwrite=true
+API: http://opensearch-dashboards:5601/api/saved_objects/_import?overwrite=true
 
 - [Assets](aws_rds-1.0.0.ndjson)
 

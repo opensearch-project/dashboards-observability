@@ -54,7 +54,7 @@ Observability is collection of plugins and applications that let you visualize d
 [cypress-test-badge]: https://img.shields.io/badge/Cypress%20tests-in%20progress-yellow
 [cypress-test-link]: https://github.com/opensearch-project/opensearch-build/issues/1124
 [cypress-code-badge]: https://img.shields.io/badge/Cypress%20code-blue
-[cypress-code-link]: https://github.com/opensearch-project/dashboards-observability/blob/main/dashboards-observability/.cypress/CYPRESS_TESTS.md
+[cypress-code-link]: https://github.com/opensearch-project/dashboards-observability/blob/main/.cypress/CYPRESS_TESTS.md
 [opensearch-it-badge]: https://img.shields.io/badge/OpenSearch%20Plugin%20IT%20tests-in%20progress-yellow
 [opensearch-it-link]: https://github.com/opensearch-project/opensearch-build/issues/1124
 [opensearch-it-code-badge]: https://img.shields.io/badge/OpenSearch%20IT%20code-blue

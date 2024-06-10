@@ -42,16 +42,17 @@ export function SpanDetailPanel(props: {
     storedFilters ? JSON.parse(storedFilters) : []
   );
   const [DSL, setDSL] = useState<any>({});
-  let data: { gantt: any[]; table: any[]; ganttMaxX: number },
-    setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  let data: { gantt: any[]; table: any[]; ganttMaxX: number };
+  let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
+    gantt: [],
+    table: [],
+    ganttMaxX: 0,
+  });
   if (props.data && props.setData) {
     [data, setData] = [props.data, props.setData];
   } else {
-    [data, setData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
-      gantt: [],
-      table: [],
-      ganttMaxX: 0,
-    });
+    [data, setData] = [localData, localSetData];
   }
 
   const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
@@ -154,6 +155,8 @@ export function SpanDetailPanel(props: {
     const yTexts = yLabels.map((label) => label.substring(0, label.length - 36));
 
     return {
+      plot_bgcolor: 'rgba(0, 0, 0, 0)',
+      paper_bgcolor: 'rgba(0, 0, 0, 0)',
       height: 25 * plotTraces.length + 60,
       width: 800,
       margin: {
@@ -245,6 +248,7 @@ export function SpanDetailPanel(props: {
             setCurrentSpan(spanId);
           }
         }}
+        dataSourceMDSId={props.dataSourceMDSId}
       />
     ),
     [DSL, setCurrentSpan]
@@ -297,6 +301,7 @@ export function SpanDetailPanel(props: {
           closeFlyout={() => setCurrentSpan('')}
           addSpanFilter={addSpanFilter}
           mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId}
         />
       )}
     </>

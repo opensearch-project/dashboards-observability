@@ -28,16 +28,17 @@ import {
   DatasourceType,
 } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
+import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import { useToast } from '../../../common/toast';
 import { HomeProps } from '../../home';
 import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import S3Logo from '../../icons/s3-logo.svg';
+import SecurityLakeLogo from '../../icons/security-lake-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
-import { DataConnectionsDescription } from './manage_data_connections_description';
-import { getRenderCreateAccelerationFlyout } from '../../../../../public/plugin';
-import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
+import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
+import { DataConnectionsDescription } from './manage_data_connections_description';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -76,13 +77,17 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
       .then((res: DatasourceDetails[]) => {
-        const dataConnections = res.map((dataConnection: DatasourceDetails) => {
-          return {
-            name: dataConnection.name,
-            connectionType: dataConnection.connector,
-            dsStatus: dataConnection.status,
-          };
-        });
+        const dataConnections: DataConnection[] = res.map(
+          (dataSourceDetails: DatasourceDetails): DataConnection => {
+            const { name, status, connector } = dataSourceDetails;
+
+            return {
+              name,
+              connectionType: connector,
+              dsStatus: status,
+            };
+          }
+        );
         setData(dataConnections);
       })
       .catch((err) => {
@@ -134,7 +139,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       onClick: (datasource: DataConnection) => {
         if (datasource.connectionType === 'PROMETHEUS') {
           application!.navigateToApp(observabilityMetricsID);
-        } else if (datasource.connectionType === 'S3GLUE') {
+        } else if (['S3GLUE', 'SECURITYLAKE'].includes(datasource.connectionType)) {
           redirectToExplorerS3(datasource.name);
         }
       },
@@ -147,7 +152,10 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
       onClick: (datasource: DataConnection) => {
-        renderCreateAccelerationFlyout(datasource.name);
+        renderCreateAccelerationFlyout({
+          dataSource: datasource.name,
+          dataSourceType: datasource.connectionType,
+        });
       },
       'data-test-subj': 'action-accelerate',
     },
@@ -183,6 +191,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
 
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
+      case 'SECURITYLAKE':
+        return <EuiIcon type={SecurityLakeLogo} />;
       case 'S3GLUE':
         return <EuiIcon type={S3Logo} />;
       case 'PROMETHEUS':
@@ -213,8 +223,23 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
+      name: 'Type',
+      render: (connection: DataConnection) => {
+        switch (connection.connectionType) {
+          case 'PROMETHEUS':
+            return 'Prometheus';
+          case 'S3GLUE':
+            return 'Amazon S3 with AWS Glue Data Catalog';
+          case 'SECURITYLAKE':
+            return 'Amazon Security Lake';
+          default:
+            return '-';
+        }
+      },
+    },
+    {
       field: 'status',
-      name: 'Status',
+      name: 'Connection status',
       sortable: true,
       truncateText: true,
       render: (value, record: DataConnection) =>
@@ -237,11 +262,13 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     },
   };
 
-  const entries = data.map((dataconnection: DataConnection) => {
-    const name = dataconnection.name;
-    const connectionType = dataconnection.connectionType;
-    const dsStatus = dataconnection.dsStatus;
-    return { connectionType, name, dsStatus, data: { name, connectionType } };
+  const entries = data.map(({ name, connectionType, dsStatus }: DataConnection) => {
+    return {
+      connectionType,
+      name,
+      dsStatus,
+      data: { name, connectionType },
+    };
   });
 
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();

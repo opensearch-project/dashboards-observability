@@ -36,5 +36,5 @@ NOTE: Please select a paragraph before using these buttons
 
 ## Import Example Notebooks
 
-- Import sample notebooks from [example_notebooks folder](https://github.com/opensearch-project/dashboards-notebooks/tree/dev) based on your backend
+- Import sample notebooks from [example_notebooks folder](https://github.com/opensearch-project/dashboards-observability/tree/1944d0b7de350de01b31c894868ab05165ad25bc/public/components/notebooks/docs/example_notebooks) based on your backend
 - A notebook from one backend is incompatible to the other

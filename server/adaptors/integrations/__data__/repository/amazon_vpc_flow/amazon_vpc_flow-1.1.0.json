@@ -1,0 +1,114 @@
+{
+  "name": "amazon_vpc_flow",
+  "version": "1.1.0",
+  "displayName": "Amazon VPC",
+  "description": "Monitor IP traffic with VPC Flow Logs.",
+  "license": "Apache-2.0",
+  "type": "logs_vpc",
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_vpc_flow_1.1.0",
+  "workflows": [
+    {
+      "name": "queries",
+      "label": "Queries (recommended)",
+      "description": "Tables and pre-written queries for quickly getting insights on your data.",
+      "enabled_by_default": true
+    },
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false,
+      "applicable_data_sources": ["index"]
+    },
+    {
+      "name": "flint-live-dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false,
+      "applicable_data_sources": ["s3"]
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "AWS VPC Logo",
+      "path": "logo.svg"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS VPC Flow Log Dashboard",
+        "path": "dashboard1.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_vpc_flow",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "communication",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_vpc",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "create_table_vpc_schema",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-live-dashboards"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["queries"]
+    },
+    {
+      "name": "aws_vpc_flow",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "aws_vpc_flow_flint-live",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["flint-live-dashboards"]
+    },
+     {
+      "name": "aws_vpc_live_stream_mv_schema",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["flint-live-dashboards"]
+    }
+  ],
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

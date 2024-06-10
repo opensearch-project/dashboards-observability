@@ -18,9 +18,16 @@ export const ASSC_OBJ_TABLE_ACC_COLUMN_NAME = 'accelerations';
 
 export const ASSC_OBJ_TABLE_SEARCH_HINT = 'Search for objects';
 
+export const ASSC_OBJ_TABLE_FOR_S3_WITH_LAKE_FORMATION_SEARCH_HINT = 'Search for tables';
+
 export const ASSC_OBJ_PANEL_TITLE = 'Associated objects';
 
+export const ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION = 'Tables';
+
 export const ASSC_OBJ_PANEL_DESCRIPTION = 'Manage objects associated with this data sources.';
+
+export const ASSC_OBJ_PANEL_DESCRIPTION_FOR_S3_WITH_LAKE_FORMATION =
+  'Security Lake tables partially accelerated with skipping indexes.';
 
 export const ASSC_OBJ_NO_DATA_TITLE = 'You have no associated objects';
 

@@ -7,16 +7,16 @@
 import dateMath from '@elastic/datemath';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
-import isEmpty from 'lodash/isEmpty';
-import round from 'lodash/round';
+import { isEmpty, round } from 'lodash';
 import React from 'react';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
-  TRACE_ANALYTICS_DOCUMENTATION_LINK,
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
+  TRACE_ANALYTICS_DOCUMENTATION_LINK,
 } from '../../../../../common/constants/trace_analytics';
+import { GraphVisEdge, GraphVisNode } from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
 import { TraceAnalyticsMode } from '../../home';
 import { serviceMapColorPalette } from './color_palette';
@@ -128,13 +128,46 @@ export function getServiceMapScaleColor(
   return serviceMapColorPalette[idSelected][Math.min(99, Math.max(0, Math.floor(percent * 100)))];
 }
 
+function filterGraphBySelectedNode(
+  nodes: GraphVisNode[],
+  edges: GraphVisEdge[],
+  selectedNodeLabel: string
+): { graph: { nodes: GraphVisNode[]; edges: GraphVisEdge[] } } {
+  // Find the selected node's id
+  const selectedNode = nodes.find((node) => node.label === selectedNodeLabel);
+  if (!selectedNode) {
+    return { graph: { nodes, edges } };
+  }
+
+  const selectedNodeId = selectedNode.id;
+
+  // Filter edges to include only those that are connected to the selected node
+  const connectedEdges = edges.filter(
+    (edge) => edge.from === selectedNodeId || edge.to === selectedNodeId
+  );
+
+  // Get the set of connected node ids
+  const connectedNodeIds = new Set<number>();
+  connectedNodeIds.add(selectedNodeId);
+  connectedEdges.forEach((edge) => {
+    connectedNodeIds.add(edge.from);
+    connectedNodeIds.add(edge.to);
+  });
+
+  // Filter nodes to include only those that are connected
+  const connectedNodes = nodes.filter((node) => connectedNodeIds.has(node.id));
+
+  return { graph: { nodes: connectedNodes, edges: connectedEdges } };
+}
+
 // construct vis-js graph from ServiceObject
 export function getServiceMapGraph(
   map: ServiceObject,
   idSelected: 'latency' | 'error_rate' | 'throughput',
   ticks: number[],
   currService?: string,
-  relatedServices?: string[]
+  relatedServices?: string[],
+  filterByCurrService?: boolean
 ) {
   if (!relatedServices) relatedServices = Object.keys(map);
 
@@ -155,7 +188,6 @@ export function getServiceMapGraph(
         },
       };
     } else {
-      // service nodes that are not matched under traceGroup filter
       styleOptions = {
         borderWidth: 1.5,
         chosen: false,
@@ -169,22 +201,28 @@ export function getServiceMapGraph(
       };
     }
 
-    let hover = service;
-    hover += `\n\nAverage duration: ${
+    const averageLatency = `Average duration: ${
       map[service].latency! >= 0 ? map[service].latency + 'ms' : 'N/A'
     }`;
-    hover += `\nError rate: ${
+
+    const errorRate = `Error rate: ${
       map[service].error_rate! >= 0 ? map[service].error_rate + '%' : 'N/A'
     }`;
-    hover += `\nRequest rate: ${map[service].throughput! >= 0 ? map[service].throughput : 'N/A'}`;
-    if (map[service].throughputPerMinute != null)
-      hover += ` (${map[service].throughputPerMinute} per minute)`;
+
+    const throughput =
+      (map[service].throughput! >= 0 ? `Request rate: ${map[service].throughput}` : 'N/A') +
+      (map[service].throughputPerMinute ? ` (${map[service].throughputPerMinute} per minute)` : '');
+
+    const hover = `${service}\n\n ${averageLatency} \n ${errorRate} \n ${throughput}`;
 
     return {
       id: map[service].id,
       label: service,
       size: service === currService ? 30 : 15,
       title: hover,
+      average_latency: averageLatency,
+      error_rate: errorRate,
+      throughput,
       ...styleOptions,
     };
   });
@@ -204,6 +242,10 @@ export function getServiceMapGraph(
         });
       });
   });
+
+  if (filterByCurrService && currService) {
+    return filterGraphBySelectedNode(nodes, edges, currService);
+  }
   return { graph: { nodes, edges } };
 }
 
@@ -475,4 +517,55 @@ export const filtersToDsl = (
   }
 
   return DSL;
+};
+
+interface AttributeMapping {
+  properties: {
+    [key: string]: {
+      type?: string;
+      properties?: AttributeMapping['properties'];
+    };
+  };
+}
+
+interface JsonMapping {
+  [key: string]: {
+    mappings: {
+      properties: AttributeMapping['properties'];
+    };
+  };
+}
+
+export const extractAttributes = (
+  mapping: AttributeMapping['properties'],
+  prefix: string
+): string[] => {
+  let attributes: string[] = [];
+
+  for (const [key, value] of Object.entries(mapping)) {
+    if (value.properties) {
+      attributes = attributes.concat(extractAttributes(value.properties, `${prefix}.${key}`));
+    } else {
+      attributes.push(`${prefix}.${key}`);
+    }
+  }
+
+  return attributes;
+};
+
+export const getAttributes = (jsonMapping: JsonMapping): string[] => {
+  if (Object.keys(jsonMapping)[0] !== undefined) {
+    const spanMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.span?.properties?.attributes
+        ?.properties;
+    const resourceMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.resource?.properties
+        ?.attributes?.properties;
+
+    const spanAttributes = extractAttributes(spanMapping!, 'span.attributes');
+    const resourceAttributes = extractAttributes(resourceMapping!, 'resource.attributes');
+
+    return [...spanAttributes, ...resourceAttributes];
+  }
+  return [];
 };
