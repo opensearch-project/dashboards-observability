@@ -723,20 +723,6 @@ export const parseMetadataUserConfig = (
   }
 };
 
-export const constructOtelMetricsMetaData = () => {
-  const otelMetricSeries: any[] = [];
-  const otelMetricDimension: any[] = [];
-
-  otelMetricDimension.push({ name: 'xAxis', label: 'xAxis', customLabel: '' });
-  otelMetricSeries.push({ name: '', label: '', aggregation: 'count', customLabel: '' });
-
-  return {
-    series: otelMetricSeries,
-    dimensions: otelMetricDimension,
-    span: {},
-  };
-};
-
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {

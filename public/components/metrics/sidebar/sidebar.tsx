@@ -8,7 +8,7 @@ import './sidebar.scss';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { keyBy, sortBy } from 'lodash';
-import { default as React, default as React, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { OTEL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { OptionType } from '../../../../common/types/metrics';
