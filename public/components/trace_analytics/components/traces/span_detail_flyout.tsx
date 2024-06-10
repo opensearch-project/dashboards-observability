@@ -303,21 +303,24 @@ export function SpanDetailFlyout(props: {
         size="s"
       >
         <EuiFlyoutHeader hasBorder>
+          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiTitle>
                 <h2>Span detail</h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
-                View associated logs
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {mode === 'data_prepper' && (
+              <EuiFlexItem>
+                <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                  View associated logs
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             {props.serviceName && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  style={{ position: 'absolute', right: '38px', top: '8px', zIndex: 3 }}
+                  style={{ position: 'absolute', left: '0px', top: '8px', zIndex: 3 }}
                   color="primary"
                   onClick={() => props.setCurrentSpan && props.setCurrentSpan('')}
                   iconType="arrowLeft"

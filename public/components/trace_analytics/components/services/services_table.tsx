@@ -101,14 +101,16 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                size="xs"
-                onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
-              >
-                {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {mode === 'data_prepper' && (
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
+                >
+                  {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

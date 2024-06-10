@@ -162,29 +162,33 @@ export function ServiceView(props: ServiceViewProps) {
     {
       id: 0,
       items: [
-        {
-          name: 'View logs',
-          'data-test-subj': 'viewLogsButton',
-          onClick: () => {
-            coreRefs?.application!.navigateToApp(observabilityLogsID, {
-              path: `#/explorer`,
-              state: {
-                DEFAULT_DATA_SOURCE_NAME,
-                DEFAULT_DATA_SOURCE_TYPE,
-                queryToRun: `source = otel-* | where serviceName='${props.serviceName}'`,
-                startTimeRange: props.startTime,
-                endTimeRange: props.endTime,
+        ...(mode === 'data_prepper'
+          ? [
+              {
+                name: 'View logs',
+                'data-test-subj': 'viewLogsButton',
+                onClick: () => {
+                  coreRefs?.application!.navigateToApp(observabilityLogsID, {
+                    path: `#/explorer`,
+                    state: {
+                      DEFAULT_DATA_SOURCE_NAME,
+                      DEFAULT_DATA_SOURCE_TYPE,
+                      queryToRun: `source = otel-* | where serviceName='${props.serviceName}'`,
+                      startTimeRange: props.startTime,
+                      endTimeRange: props.endTime,
+                    },
+                  });
+                },
               },
-            });
-          },
-        },
+            ]
+          : []),
         {
           name: 'View traces',
           'data-test-subj': 'viewTracesButton',
           onClick: redirectToServiceTraces,
         },
         {
-          name: 'View in services page',
+          name: 'Expand view',
           'data-test-subj': 'viewServiceButton',
           onClick: () => {
             if (setCurrentSelectedService) setCurrentSelectedService('');
@@ -207,31 +211,25 @@ export function ServiceView(props: ServiceViewProps) {
     return (
       <>
         {_page === 'serviceFlyout' ? (
-          <EuiFlyoutHeader style={{ padding: 0 }}>
-            <EuiFlexGroup direction="column">
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiTitle size="l">
                   <h2 className="overview-content">{serviceName}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={actionsButton}
-                      isOpen={actionsMenuPopover}
-                      closePopover={() => setActionsMenuPopover(false)}
-                    >
-                      <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiPopover
+                  panelPaddingSize="none"
+                  button={actionsButton}
+                  isOpen={actionsMenuPopover}
+                  closePopover={() => setActionsMenuPopover(false)}
+                >
+                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
+                </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -484,25 +482,28 @@ export function ServiceView(props: ServiceViewProps) {
       )}
       <EuiSpacer size="xl" />
       {overview}
-      <EuiSpacer />
-      <ServiceMetrics
-        serviceName={props.serviceName}
-        mode={mode}
-        dataSourceMDSId={props.dataSourceMDSId}
-        setStartTime={props.setStartTime}
-        setEndTime={props.setEndTime}
-        page={props.page}
-      />
-      <EuiSpacer />
+
       {mode === 'data_prepper' ? (
-        <ServiceMap
-          serviceMap={serviceMap}
-          idSelected={serviceMapIdSelected}
-          setIdSelected={setServiceMapIdSelected}
-          currService={props.serviceName}
-          page="serviceView"
-          filterByCurrService={true}
-        />
+        <>
+          <EuiSpacer />
+          <ServiceMetrics
+            serviceName={props.serviceName}
+            mode={mode}
+            dataSourceMDSId={props.dataSourceMDSId}
+            setStartTime={props.setStartTime}
+            setEndTime={props.setEndTime}
+            page={props.page}
+          />
+          <EuiSpacer />
+          <ServiceMap
+            serviceMap={serviceMap}
+            idSelected={serviceMapIdSelected}
+            setIdSelected={setServiceMapIdSelected}
+            currService={props.serviceName}
+            page="serviceView"
+            filterByCurrService={true}
+          />
+        </>
       ) : (
         <div />
       )}
@@ -547,11 +548,10 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlyout
             ownFocus
             onClose={() => props.setCurrentSelectedService && props.setCurrentSelectedService('')}
+            paddingSize="l"
           >
-            <EuiFlyoutBody>
-              {title}
-              {pageToRender}
-            </EuiFlyoutBody>
+            {title}
+            <EuiFlyoutBody>{pageToRender}</EuiFlyoutBody>
           </EuiFlyout>
         )
       ) : (

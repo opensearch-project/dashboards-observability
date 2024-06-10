@@ -56,9 +56,10 @@ export const getFilterFields = (
 // filters will take effect
 export const getValidFilterFields = (
   mode: TraceAnalyticsMode,
-  page: 'dashboard' | 'traces' | 'services' | 'app'
+  page: 'dashboard' | 'traces' | 'services' | 'app',
+  attributesFilterFields: string[]
 ) => {
-  const fields = getFields(mode, page, []);
+  const fields = getFields(mode, page, attributesFilterFields);
   if (page !== 'services') return [...fields, 'Latency percentile within trace group'];
   return fields;
 };

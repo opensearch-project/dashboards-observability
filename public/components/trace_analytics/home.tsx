@@ -148,12 +148,15 @@ export const Home = (props: HomeProps) => {
     if (!sessionStorage.getItem('TraceAnalyticsMode')) {
       if (dataPrepperIndicesExist) {
         setMode('data_prepper');
-        fetchAttributesFields();
       } else if (jaegerIndicesExist) {
         setMode('jaeger');
       }
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+
+  useEffect(() => {
+    if (mode === 'data_prepper') fetchAttributesFields();
+  }, []);
 
   const serviceBreadcrumbs = [
     {
@@ -259,9 +262,6 @@ export const Home = (props: HomeProps) => {
         serviceName={currentSelectedService}
         setCurrentSelectedService={setCurrentSelectedService}
         dataSourceMDSId={dataSourceMDSId}
-        onClose={async () => {
-          setCurrentSelectedService('');
-        }}
         commonProps={commonProps}
       />
     );

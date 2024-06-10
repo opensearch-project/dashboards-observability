@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiHorizontalRule, EuiInMemoryTable, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiHorizontalRule, EuiInMemoryTable, EuiPanel, EuiText } from '@elastic/eui';
 import { truncate } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { GraphVisEdge, GraphVisNode } from '../../../../../../common/types/trace_analytics';
@@ -13,15 +13,10 @@ import { ServiceObject } from './service_map';
 
 interface ServiceDependenciesTableProps {
   serviceMap: ServiceObject;
-  setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
   graph: { nodes: GraphVisNode[]; edges: GraphVisEdge[] };
 }
 
-export const ServiceDependenciesTable = ({
-  serviceMap,
-  setCurrentSelectedService,
-  graph,
-}: ServiceDependenciesTableProps) => {
+export const ServiceDependenciesTable = ({ serviceMap, graph }: ServiceDependenciesTableProps) => {
   const [serviceDependencies, setServiceDependencies] = useState<
     Array<{
       id: number;
@@ -51,12 +46,9 @@ export const ServiceDependenciesTable = ({
         align: 'left',
         sortable: true,
         render: (item: any) => (
-          <EuiLink
-            data-test-subj="service-link"
-            onClick={() => setCurrentSelectedService && setCurrentSelectedService(item)}
-          >
+          <EuiText data-test-subj="service-dep-column">
             {item.length < 24 ? item : <div title={item}>{truncate(item, { length: 24 })}</div>}
-          </EuiLink>
+          </EuiText>
         ),
       },
       {

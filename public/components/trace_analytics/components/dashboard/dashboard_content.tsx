@@ -52,6 +52,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
     toasts,
     dataSourceMDSId,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -77,7 +78,7 @@ export function DashboardContent(props: DashboardProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, page);
+    const validFilters = getValidFilterFields(mode, page, attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
         ...filter,

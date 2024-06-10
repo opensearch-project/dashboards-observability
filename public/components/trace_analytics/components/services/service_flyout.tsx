@@ -13,7 +13,6 @@ interface ServiceFlyoutProps {
   serviceName: string;
   setCurrentSelectedService: React.Dispatch<React.SetStateAction<string>>;
   dataSourceMDSId: DataSourceOption[];
-  onClose: () => {};
   commonProps: TraceAnalyticsComponentDeps;
 }
 
@@ -21,7 +20,6 @@ export const ServiceFlyout = ({
   serviceName,
   setCurrentSelectedService,
   dataSourceMDSId,
-  onClose,
   commonProps,
 }: ServiceFlyoutProps) => {
   return (

@@ -92,7 +92,6 @@ export function ServiceMap({
   ];
 
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<ServiceNodeDetails | null>(null);
-  const graphContainerRef = React.useRef(null);
 
   const options = {
     layout: {
@@ -237,7 +236,7 @@ export function ServiceMap({
         {Object.keys(serviceMap).length > 0 ? (
           <EuiFlexGroup gutterSize="none" responsive={false}>
             <EuiFlexItem>
-              <div ref={graphContainerRef} style={{ position: 'relative' }}>
+              <div style={{ position: 'relative' }}>
                 {items?.graph && (
                   <Graph
                     graph={items.graph}
@@ -280,11 +279,7 @@ export function ServiceMap({
       </EuiPanel>
       <EuiSpacer size="xl" />
       {filterByCurrService && items?.graph && (
-        <ServiceDependenciesTable
-          serviceMap={serviceMap}
-          setCurrentSelectedService={setCurrentSelectedService}
-          graph={items?.graph}
-        />
+        <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
       )}
     </>
   );

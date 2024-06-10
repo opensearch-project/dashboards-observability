@@ -6,6 +6,7 @@
 import round from 'lodash/round';
 import moment from 'moment';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { uiSettingsService } from '../../../../common/utils';
 import {
   fixedIntervalToMilli,
   microToMilliSec,
@@ -84,7 +85,9 @@ export const handleDashboardRequest = async (
                       mode: 'lines',
                       hoverinfo: 'none',
                       line: {
-                        color: '#000000',
+                        color: uiSettingsService.get('theme:darkMode')
+                          ? 'rgb(255, 255, 255)'
+                          : 'rgb(0, 0, 0)',
                         width: 1,
                       },
                     },
@@ -413,7 +416,7 @@ export const handleDashboardThroughputPltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };
@@ -460,7 +463,7 @@ export const handleDashboardErrorRatePltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };

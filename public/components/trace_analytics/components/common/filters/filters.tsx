@@ -53,16 +53,16 @@ export function Filters(props: FiltersOwnProps) {
     props.setFilters(newFilters);
   };
 
-  const validFilterFields = useMemo(() => getValidFilterFields(props.mode, props.page), [
-    props.page,
-    props.mode,
-  ]);
+  const validFilterFields = useMemo(
+    () => getValidFilterFields(props.mode, props.page, props.attributesFilterFields),
+    [props.page, props.mode, props.attributesFilterFields]
+  );
   const filterFieldOptions = useMemo(
     () =>
       getFilterFields(props.mode, props.page, props.attributesFilterFields).map((field) => ({
         label: field,
       })),
-    [props.page, props.attributesFilterFields]
+    [props.page, props.mode, props.attributesFilterFields]
   );
 
   const globalPopoverPanels = [

@@ -61,7 +61,7 @@ export function ServicesContent(props: ServicesProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, 'services');
+    const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
     setFilters([
       ...filters.map((filter) => ({
@@ -162,7 +162,9 @@ export function ServicesContent(props: ServicesProps) {
   };
 
   const addServicesGroupFilter = () => {
-    const groupFilter = selectedItems.map((item) => 'serviceName: ' + item.name);
+    const groupFilter = selectedItems.map(
+      (row) => (mode === 'jaeger' ? 'process.serviceName: ' : 'serviceName: ') + row.name
+    );
     const filterQuery = groupFilter.join(' OR ');
     const newQuery = query ? `(${query}) AND (${filterQuery})` : `(${filterQuery})`;
     updateSearchQuery(newQuery);

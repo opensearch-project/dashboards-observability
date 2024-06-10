@@ -47,7 +47,7 @@ export function TracesContent(props: TracesProps) {
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, 'traces');
+    const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
         ...filter,

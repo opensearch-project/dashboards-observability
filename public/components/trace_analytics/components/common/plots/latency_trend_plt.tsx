@@ -45,6 +45,8 @@ export function LatencyPlt(props: { data: Plotly.Data[]; isPanel?: boolean }) {
   const layout = useMemo(
     () =>
       ({
+        plot_bgcolor: 'rgba(0, 0, 0, 0)',
+        paper_bgcolor: 'rgba(0, 0, 0, 0)',
         xaxis: {
           showgrid: false,
           type: 'date',
