@@ -45,7 +45,7 @@ const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
     case 'SECURITYLAKE':
       return 'Amazon Security Lake';
     case 'S3GLUE':
-      return 'Flint S3';
+      return 'S3 Glue';
     case 'PROMETHEUS':
       return null; // TODO Prometheus integrations not supported so no label available
     default:

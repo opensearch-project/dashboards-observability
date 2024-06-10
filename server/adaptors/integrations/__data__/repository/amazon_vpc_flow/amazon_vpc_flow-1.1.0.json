@@ -5,7 +5,7 @@
   "description": "Monitor IP traffic with VPC Flow Logs.",
   "license": "Apache-2.0",
   "type": "logs_vpc",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_vpc_flow_1.1.0",
   "workflows": [
@@ -23,8 +23,8 @@
     },
     {
       "name": "flint-live-dashboards",
-      "label": "Dashboards & Visualizations For Flint Integrations using live queries",
-      "description": "Dashboards and visualizations aligned with Flint S3 datasource ",
+      "label": "Dashboards & Visualizations For S3 Glue Integrations using live queries",
+      "description": "Dashboards and visualizations aligned with S3 Glue datasource ",
       "enabled_by_default": false
     }
   ],

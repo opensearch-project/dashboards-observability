@@ -5,7 +5,7 @@
   "description": "Analyze access logs for Elastic Load Balancing.",
   "license": "Apache-2.0",
   "type": "logs_elb",
-  "labels": ["Observability", "Logs", "AWS", "Flint S3", "Cloud"],
+  "labels": ["Observability", "Logs", "AWS", "S3 Glue", "Cloud"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_elb-1.0.0",
   "workflows": [
