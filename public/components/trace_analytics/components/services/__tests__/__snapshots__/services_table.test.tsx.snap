@@ -1933,9 +1933,12 @@ exports[`Services table component renders jaeger services table 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                         onClick={[Function]}
                                       >
-                                        <EuiLink>
+                                        <EuiLink
+                                          data-test-subj="service-flyout-action-btnundefined"
+                                        >
                                           <button
                                             className="euiLink euiLink--primary"
+                                            data-test-subj="service-flyout-action-btnundefined"
                                             disabled={false}
                                             type="button"
                                           >
@@ -4176,9 +4179,12 @@ exports[`Services table component renders services table 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                         onClick={[Function]}
                                       >
-                                        <EuiLink>
+                                        <EuiLink
+                                          data-test-subj="service-flyout-action-btnundefined"
+                                        >
                                           <button
                                             className="euiLink euiLink--primary"
+                                            data-test-subj="service-flyout-action-btnundefined"
                                             disabled={false}
                                             type="button"
                                           >

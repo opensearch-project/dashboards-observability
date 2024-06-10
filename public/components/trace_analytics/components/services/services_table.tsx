@@ -245,7 +245,7 @@ export function ServicesTable(props: ServicesTableProps) {
           render: (_item: any, row: any) => (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false} onClick={() => setCurrentSelectedService(row.name)}>
-                <EuiLink>
+                <EuiLink data-test-subj={'service-flyout-action-btn' + row.itemId}>
                   <EuiIcon type="inspect" color="primary" />
                 </EuiLink>
               </EuiFlexItem>
