@@ -60,7 +60,7 @@ export const mergeLayoutAndMetrics = (
 
   for (let i = 0; i < newVisualizationList.length; i++) {
     for (let j = 0; j < layout.length; j++) {
-      if (newVisualizationList[i].id == layout[j].i) {
+      if (newVisualizationList[i].id === layout[j].i) {
         newPanelVisualizations.push({
           ...newVisualizationList[i],
           x: layout[j].x,
