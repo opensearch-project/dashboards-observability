@@ -5,7 +5,7 @@
   "description": "Analyze access logs for Amazon CloudFront.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudfront",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_cloudfront-1.0.0",
   "statics": {

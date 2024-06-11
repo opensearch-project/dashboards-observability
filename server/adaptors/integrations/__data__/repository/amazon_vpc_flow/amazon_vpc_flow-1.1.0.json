@@ -5,7 +5,7 @@
   "description": "Monitor IP traffic with VPC Flow Logs.",
   "license": "Apache-2.0",
   "type": "logs_vpc",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_vpc_flow_1.1.0",
   "workflows": [

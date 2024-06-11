@@ -5,7 +5,7 @@
   "description": "Analyze HAProxy access logs.",
   "license": "Apache-2.0",
   "type": "logs",
-  "labels": ["Observability", "Logs", "Flint S3"],
+  "labels": ["Observability", "Logs", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/haproxy-1.0.0",
   "workflows": [
