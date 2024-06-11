@@ -43,6 +43,10 @@ const CreatedCodeBlock = ({ code }: { code: string }) => {
   );
 };
 
+const LoadingResults: React.FC = () => (
+  <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} body={<p>Loading results...</p>} />
+);
+
 const OpenSearchIndexNoResults = () => {
   return (
     <EuiFlexGroup justifyContent="center" direction="column">
@@ -225,10 +229,7 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
         <>
           {/* check to see if the rawQuery is empty or not */}
           {queryAssistLoading || eventsLoading ? (
-            <EuiEmptyPrompt
-              title={<EuiLoadingSpinner size="xl" />}
-              body={<p>Loading results...</p>}
-            />
+            <LoadingResults />
           ) : queryInfo?.rawQuery ? (
             <EuiFlexGroup justifyContent="center" direction="column">
               <EuiFlexItem grow={false}>
@@ -275,6 +276,8 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
         <>
           {explorerSearchMeta?.datasources[0]?.type === DATA_SOURCE_TYPES.S3Glue ? (
             renderS3Callouts()
+          ) : eventsLoading ? (
+            <LoadingResults />
           ) : (
             <OpenSearchIndexNoResults />
           )}
