@@ -27,7 +27,7 @@ the author in hindsight.
 If working on S3-based integrations, it's worth noting that queries have some values
 [substituted](https://github.com/opensearch-project/dashboards-observability/blob/4e1e0e585/public/components/integrations/components/setup_integration.tsx#L438) when installing. They are:
 
-- `{table_name}` is the fully qualified name of the Flint table, typically `datasource.database.object_name`.
+- `{table_name}` is the fully qualified name of the S3 Glue table, typically `datasource.database.object_name`.
   This is also substituted in any linked Saved Queries when using S3-based integrations.
 - `{s3_bucket_location}` to locate data.
 - `{s3_checkpoint_location}` to store intermediate results, which is required by Spark.

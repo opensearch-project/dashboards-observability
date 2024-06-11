@@ -15,7 +15,7 @@ Flow logs can help you with a number of tasks, such as:
 Flow log data is collected outside of the path of your network traffic, and therefore does not affect network throughput or latency. You can create or delete flow logs without any risk of impact to network performance.
 
 - See additional AWS Logs Info details [Here](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html).
-- Flint S3 VPC integration [Readme](Flint-Integration.md)
+- S3 Glue VPC integration [Readme](Flint-Integration.md)
 
 ## What is AWS VPC FLow Logs Integration ?
 
