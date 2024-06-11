@@ -5,7 +5,7 @@
   "description": "Analyze CloudTrail events.",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudtrail",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/aws_cloudtrail-1.1.0",
   "workflows": [
@@ -17,14 +17,14 @@
     },
     {
       "name": "dashboards-flint",
-      "label": "Dashboards & Visualizations & sample queries adapted to Flint",
-      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3",
+      "label": "Dashboards & Visualizations & sample queries adapted to S3 Glue",
+      "description": "Dashboards and visualizations adapted to S3 Glue datasource that enable you to easily visualize data residing on S3",
       "enabled_by_default": false
     },
     {
       "name": "dashboards-flint-records",
-      "label": "Dashboards & Visualizations & sample queries adapted to Flint (Multi-Records Protocol)",
-      "description": "Dashboards and visualizations adapted to Flint S3 datasource that enable you to easily visualize data residing on S3 (Multi-Records Protocol)",
+      "label": "Dashboards & Visualizations & sample queries adapted to S3 Glue (Multi-Records Protocol)",
+      "description": "Dashboards and visualizations adapted to S3 Glue datasource that enable you to easily visualize data residing on S3 (Multi-Records Protocol)",
       "enabled_by_default": true
     }
   ],

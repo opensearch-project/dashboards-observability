@@ -5,7 +5,7 @@
   "description": "Insights on applications using the standard Apache access log format.",
   "license": "Apache-2.0",
   "type": "logs_apache",
-  "labels": ["Observability", "Logs", "Flint S3"],
+  "labels": ["Observability", "Logs", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/apache-1.0.0",
   "workflows": [

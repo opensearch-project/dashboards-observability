@@ -5,7 +5,7 @@
   "description": "Analyze AWS WAF web ACL traffic.",
   "license": "Apache-2.0",
   "type": "logs_waf",
-  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/aws_waf-1.0.0",
   "workflows": [
