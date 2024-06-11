@@ -32,9 +32,10 @@ import { getRenderLogExplorerTablesFlyout } from '../../../plugin';
 export interface NoResultsProps {
   tabId: string;
   dataSourceConnectionType: DatasourceType;
+  isEventsLoading: boolean;
 }
 
-export const NoResults = ({ tabId, dataSourceConnectionType }: NoResultsProps) => {
+export const NoResults = ({ tabId, dataSourceConnectionType, isEventsLoading }: NoResultsProps) => {
   // get the queries isLoaded, if it exists AND is true = show no res
   const queryInfo = useSelector(selectQueries)[tabId];
   const summaryData = useSelector(selectQueryAssistantSummarization)[tabId];
@@ -223,7 +224,7 @@ export const NoResults = ({ tabId, dataSourceConnectionType }: NoResultsProps) =
       {coreRefs.queryAssistEnabled ? (
         <>
           {/* check to see if the rawQuery is empty or not */}
-          {queryAssistLoading ? (
+          {queryAssistLoading || isEventsLoading ? (
             <EuiEmptyPrompt
               title={<EuiLoadingSpinner size="xl" />}
               body={<p>Loading results...</p>}

@@ -73,6 +73,7 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
+import { DatasourceType } from '../../../../common/types/data_connections';
 import {
   IExplorerProps,
   IField,
@@ -88,6 +89,10 @@ import {
 } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
+import {
+  getRenderCreateAccelerationFlyout,
+  getRenderLogExplorerTablesFlyout,
+} from '../../../plugin';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
@@ -112,8 +117,8 @@ import {
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -123,11 +128,12 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
+import { AccelerateCallout } from './accelerate_callout';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -137,12 +143,6 @@ import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { getTimeRangeFromCountDistribution, HitsCounter, Timechart } from './timechart';
 import { ExplorerVisualizations } from './visualizations';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
-import {
-  getRenderCreateAccelerationFlyout,
-  getRenderLogExplorerTablesFlyout,
-} from '../../../plugin';
-import { AccelerateCallout } from './accelerate_callout';
-import { DatasourceType } from '../../../../common/types/data_connections';
 
 export const Explorer = ({
   pplService,
@@ -188,6 +188,7 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
+  const [isEventsLoading, setIsEventsLoading] = useState(false);
 
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
@@ -394,7 +395,7 @@ export const Explorer = ({
     setSummaryStatus?: boolean
   ) => {
     const curQuery: IQuery = queryRef.current!;
-    new PPLDataFetcher(
+    await new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },
       {
@@ -727,7 +728,11 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults tabId={tabId} dataSourceConnectionType={dataSourceConnectionType} />
+          <NoResults
+            tabId={tabId}
+            dataSourceConnectionType={dataSourceConnectionType}
+            isEventsLoading={isEventsLoading}
+          />
         )}
       </div>
     );
@@ -742,6 +747,7 @@ export const Explorer = ({
     isLiveTailOnRef.current,
     isQueryRunning,
     isS3Connection,
+    isEventsLoading,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -824,6 +830,7 @@ export const Explorer = ({
   };
 
   const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
+    setIsEventsLoading(true);
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (
@@ -844,6 +851,7 @@ export const Explorer = ({
       await updateQueryInStore(searchedQuery);
     }
     await fetchData(undefined, undefined, setSummaryStatus);
+    setIsEventsLoading(false);
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
