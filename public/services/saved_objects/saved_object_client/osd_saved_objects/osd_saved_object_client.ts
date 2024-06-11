@@ -74,6 +74,7 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     applicationId = '',
     userConfigs = '',
     subType = '',
+    metricType = '',
     unitsOfMeasure = '',
     selectedLabels,
     objectId = '',
@@ -116,6 +117,10 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
 
     if (!isEmpty(subType)) {
       objRequest.object.subType = subType;
+    }
+
+    if (!isEmpty(metricType)) {
+      objRequest.object.metricType = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {

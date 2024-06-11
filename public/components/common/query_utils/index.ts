@@ -4,23 +4,27 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
-import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { Moment } from 'moment-timezone';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
   SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
 } from '../../../../common/constants/explorer';
+import { SPAN_RESOLUTION_REGEX } from '../../../../common/constants/metrics';
 import {
+  OTEL_DATE_FORMAT,
+  OTEL_METRIC_SUBTYPE,
   PPL_DATE_FORMAT,
+  PPL_DESCRIBE_INDEX_REGEX,
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
-  PPL_DESCRIBE_INDEX_REGEX,
+  PROMQL_METRIC_SUBTYPE,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
+import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -62,15 +66,24 @@ export const convertDateTime = (
   datetime: string,
   isStart = true,
   formatted = true,
-  isMetrics: boolean = false
+  metricType: string = ''
 ) => {
-  let returnTime: undefined | Moment;
+  let returnTime: Moment = '';
+
   if (isStart) {
     returnTime = dateMath.parse(datetime);
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-  if (isMetrics) {
+
+  if (metricType === OTEL_METRIC_SUBTYPE) {
+    const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
+    const milliseconds = returnTime!.millisecond();
+    const formattedMilliseconds = String(milliseconds).padEnd(6, '0');
+    return `${formattedDate}.${formattedMilliseconds}Z`;
+  }
+
+  if (metricType === PROMQL_METRIC_SUBTYPE) {
     const myDate = new Date(returnTime._d); // Your timezone!
     const epochTime = myDate.getTime() / 1000.0;
     return Math.round(epochTime);
@@ -101,8 +114,8 @@ export const updateCatalogVisualizationQuery = ({
   resolution: string;
 }) => {
   const attributesGroupString = attributesGroupBy.join(',');
-  const startEpochTime = convertDateTime(start, true, false, true);
-  const endEpochTime = convertDateTime(end, false, false, true);
+  const startEpochTime = convertDateTime(start, true, false, PROMQL_METRIC_SUBTYPE);
+  const endEpochTime = convertDateTime(end, false, false, PROMQL_METRIC_SUBTYPE);
   const promQuery =
     attributesGroupBy.length === 0
       ? `${aggregation} (${catalogTableName})`
@@ -184,13 +197,14 @@ export const updatePromQLQueryFilters = (
   const { connection, metric, aggregation, attributesGroupBy } = parsePromQLIntoKeywords(
     promQLQuery
   );
+
   const promQLPart = buildPromQLFromMetricQuery({
     metric,
     attributesGroupBy: attributesGroupBy.split(','),
     aggregation,
   });
-  const start = convertDateTime(startTime, true, false, true);
-  const end = convertDateTime(endTime, false, false, true);
+  const start = convertDateTime(startTime, true, false, PROMQL_METRIC_SUBTYPE);
+  const end = convertDateTime(endTime, false, false, PROMQL_METRIC_SUBTYPE);
   return `source = ${connection}.query_range('${promQLPart}', ${start}, ${end}, '1h')`;
 };
 
@@ -214,19 +228,25 @@ export const getDescribeQueryIndexFromRawQuery = (query: string): string | undef
   return undefined;
 };
 
+function extractSpanAndResolution(query: string) {
+  if (!query) return;
+
+  const match = query.match(SPAN_RESOLUTION_REGEX);
+  return match ? { span: parseInt(match[1], 10), resolution: match[2] } : null;
+}
+
 export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
   // convert to moment
   const start = convertDateTime(startTime, true);
   const end = convertDateTime(endTime, false);
-
-  const resolution = findMinInterval(start, end);
+  const spanResolution = extractSpanAndResolution(metaData?.query);
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...metaData.queryMetaData,
     start,
     end,
-    span: '1',
-    resolution,
+    span: spanResolution?.span || 1,
+    resolution: spanResolution?.resolution || 'h',
   });
 
   return visualizationQuery;
@@ -255,7 +275,6 @@ export const preprocessQuery = ({
   whereClause?: string;
 }) => {
   let finalQuery = '';
-
   if (isEmpty(rawQuery)) return finalQuery;
 
   // convert to moment

@@ -21,3 +21,9 @@ export const PPL_METRICS = [
 
 export const VIS_TYPE_LINE = 'Time Series';
 export const TESTING_PANEL = 'Mock Testing Panels for Metrics';
+
+export const OTEL_METRICS_NAMES = [
+  '[Otel Metric] ss4o_metrics-otel-dp.duration',
+  '[Otel Metric] ss4o_metrics-otel-dp.http.client.duration',
+  '[Otel Metric] ss4o_metrics-otel-dp.rpc.client.duration',
+];

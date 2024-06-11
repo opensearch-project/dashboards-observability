@@ -66,7 +66,7 @@ export function SavedQueryTable({
       sortable: true,
       truncateText: true,
       render: (item: any) => {
-        return item.subType === PROMQL_METRIC_SUBTYPE ? (
+        return item.metricType === PROMQL_METRIC_SUBTYPE ? (
           <EuiLink
             href={`${METRIC_EXPLORER_BASE_PATH}${item.objectId}`}
             data-test-subj="eventHome__savedQueryTableName"
@@ -108,6 +108,7 @@ export function SavedQueryTable({
       timestamp: savedObject.selected_timestamp?.name,
       fields: savedObject.selected_fields?.tokens || [],
       subType: savedObject.subType,
+      metricType: savedObject?.metricType || 'customMetric',
     };
     return {
       id: h.objectId,

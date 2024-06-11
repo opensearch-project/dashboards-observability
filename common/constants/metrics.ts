@@ -14,6 +14,7 @@ export const PPL_DATASOURCES_REQUEST =
 // redux
 
 export const OBSERVABILITY_CUSTOM_METRIC = 'CUSTOM_METRICS';
+export const OPEN_TELEMETRY = 'OpenTelemetry';
 export const REDUX_SLICE_METRICS = 'metrics';
 
 export const resolutionOptions = [
@@ -33,3 +34,21 @@ export const AGGREGATION_OPTIONS = [
   { value: 'min', text: 'min()' },
   { value: 'max', text: 'max()' },
 ];
+
+export const DATASOURCE_OPTIONS = [
+  {
+    label: 'Prometheus',
+    'data-test-subj': 'prometheusOption',
+  },
+  {
+    label: 'OpenTelemetry',
+    'data-test-subj': 'openTelemetryOption',
+  },
+];
+export const DATA_PREPPER_INDEX_NAME = 'ss4o_metrics-*-*';
+export const METRICS_ANALYTICS_DATA_PREPPER_INDICES_ROUTE =
+  '/api/observability/metrics_analytics/data_prepper_indices';
+
+// Regex pattens
+export const INDEX_DOCUMENT_NAME_PATTERN = /\[Otel Metric\]\s(\S+?-\S+?)\.(\S+)/;
+export const SPAN_RESOLUTION_REGEX = /'(\d+)([smhdwMy])'/;

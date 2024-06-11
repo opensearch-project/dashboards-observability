@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
@@ -85,33 +85,31 @@ export const PanelGrid = (props: PanelGridProps) => {
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   // Reset Size of Visualizations when layout is changed
-  const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
+  const layoutChanged = (currLayouts: Layout[]) => {
     window.dispatchEvent(new Event('resize'));
     setPostEditLayout(currLayouts);
   };
 
   const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map(
-      (panelVisualization: VisualizationType, index) => (
-        <VisualizationContainer
-          key={panelVisualization.id}
-          http={http}
-          editMode={editMode}
-          visualizationId={panelVisualization.id}
-          savedVisualizationId={panelVisualization.savedVisualizationId}
-          pplService={pplService}
-          fromTime={startTime}
-          toTime={endTime}
-          onRefresh={onRefresh}
-          onEditClick={onEditClick}
-          cloneVisualization={cloneVisualization}
-          pplFilterValue={pplFilterValue}
-          showFlyout={showFlyout}
-          removeVisualization={removeVisualization}
-          contextMenuId="visualization"
-        />
-      )
-    );
+    const gridDataComps = panelVisualizations.map((panelVisualization: VisualizationType) => (
+      <VisualizationContainer
+        key={panelVisualization.id}
+        http={http}
+        editMode={editMode}
+        visualizationId={panelVisualization.id}
+        savedVisualizationId={panelVisualization.savedVisualizationId}
+        pplService={pplService}
+        fromTime={startTime}
+        toTime={endTime}
+        onRefresh={onRefresh}
+        onEditClick={onEditClick}
+        cloneVisualization={cloneVisualization}
+        pplFilterValue={pplFilterValue}
+        showFlyout={showFlyout}
+        removeVisualization={removeVisualization}
+        contextMenuId="visualization"
+      />
+    ));
     setGridData(gridDataComps);
   };
 
