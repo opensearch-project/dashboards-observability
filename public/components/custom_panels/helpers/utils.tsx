@@ -170,13 +170,14 @@ export const getQueryResponse = async (
   endTime: string,
   filterQuery = '',
   timestampField = 'timestamp',
-  metricVisualization = false
+  metricVisualization = false,
+  dataSourceMDSId?: string
 ) => {
   const finalQuery = metricVisualization
     ? query
     : queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
 
-  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' });
+  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' }, dataSourceMDSId);
 
   if (res === undefined) throw new Error('Please check the validity of PPL Filter');
 
@@ -198,6 +199,7 @@ export const renderSavedVisualization = async ({
   setIsLoading,
   setIsError,
   visualization,
+  dataSourceMDSId,
 }: {
   pplService: PPLService;
   startTime: string;
@@ -212,6 +214,7 @@ export const renderSavedVisualization = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   visualization: SavedVisualizationType;
+  dataSourceMDSId?: string;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -244,7 +247,9 @@ export const renderSavedVisualization = async ({
       startTime,
       endTime,
       filterQuery,
-      visualization.timeField
+      visualization.timeField,
+      false,
+      dataSourceMDSId
     );
     setVisualizationData(queryData);
   } catch (error) {
@@ -330,6 +335,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading,
   setIsError,
   visualization,
+  dataSourceMDSId,
 }: {
   pplService: PPLService;
   catalogSource: string;
@@ -346,6 +352,7 @@ export const renderCatalogVisualization = async ({
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   queryMetaData?: MetricType;
   visualization: SavedVisualizationType;
+  dataSourceMDSId?: string;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -373,7 +380,8 @@ export const renderCatalogVisualization = async ({
       endTime,
       filterQuery,
       visualizationTimeField,
-      true
+      true,
+      dataSourceMDSId
     );
     setVisualizationData(queryData);
 
@@ -432,7 +440,8 @@ export const fetchAggregatedBinCount = async (
   documentName: string,
   selectedOtelIndex: string,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  dataSourceMDSId: string
 ) => {
   const http = getOSDHttp();
   try {
@@ -444,6 +453,7 @@ export const fetchAggregatedBinCount = async (
         endTime,
         documentName,
         index: selectedOtelIndex,
+        dataSourceMDSId,
       }),
     });
     return response;
@@ -459,11 +469,17 @@ export const fetchAggregatedBinCount = async (
   }
 };
 
-export const fetchSampleOTDocument = async (selectedOtelIndex: string, documentName: string) => {
+export const fetchSampleOTDocument = async (
+  selectedOtelIndex: string,
+  documentName: string,
+  dataSourceMDSId: string
+) => {
   const http = getOSDHttp();
   try {
     const response = await http.get(
-      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/${documentName}`
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/${documentName}/${
+        dataSourceMDSId ?? ''
+      }`
     );
     return response;
   } catch (error) {
@@ -495,6 +511,7 @@ export const renderOpenTelemetryVisualization = async ({
   setIsError,
   visualization,
   setToast,
+  dataSourceMDSId,
 }: {
   startTime: string;
   endTime: string;
@@ -511,6 +528,7 @@ export const renderOpenTelemetryVisualization = async ({
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
+  dataSourceMDSId?: string;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -527,7 +545,7 @@ export const renderOpenTelemetryVisualization = async ({
       setToast('Document name is undefined', 'danger', undefined, 'right');
   }
 
-  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName);
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName, dataSourceMDSId);
   const source = fetchSampleDocument.hits[0]._source;
 
   setVisualizationType(visualizationType);
@@ -545,7 +563,8 @@ export const renderOpenTelemetryVisualization = async ({
         documentName,
         index,
         setIsError,
-        setIsLoading
+        setIsLoading,
+        dataSourceMDSId
       );
 
       return {

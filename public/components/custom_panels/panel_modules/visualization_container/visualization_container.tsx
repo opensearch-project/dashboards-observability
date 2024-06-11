@@ -24,7 +24,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -41,7 +41,7 @@ import {
   fetchVisualizationById,
   renderCatalogVisualization,
   renderOpenTelemetryVisualization,
-  renderSavedVisualization
+  renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 
@@ -85,6 +85,7 @@ interface Props {
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
   actionMenuType?: string;
+  dataSourceMDSId?: string;
 }
 
 export const VisualizationContainer = ({
@@ -106,6 +107,7 @@ export const VisualizationContainer = ({
   catalogVisualization,
   inlineEditor,
   actionMenuType,
+  dataSourceMDSId,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -263,6 +265,7 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError,
         setToast,
+        dataSourceMDSId,
       });
     else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
       renderCatalogVisualization({
@@ -281,6 +284,7 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError,
         queryMetaData,
+        dataSourceMDSId,
       });
     else
       await renderSavedVisualization({
@@ -299,6 +303,7 @@ export const VisualizationContainer = ({
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
+        dataSourceMDSId,
       });
   };
 
