@@ -12,7 +12,11 @@ import {
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
-import { OBSERVABILITY_BASE, PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import {
+  OBSERVABILITY_BASE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../../common/constants/shared';
 import { MetricType } from '../../../../../common/types/metrics';
 import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';

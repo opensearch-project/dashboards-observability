@@ -41,7 +41,7 @@ import {
   fetchVisualizationById,
   renderCatalogVisualization,
   renderOpenTelemetryVisualization,
-  renderSavedVisualization
+  renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 
