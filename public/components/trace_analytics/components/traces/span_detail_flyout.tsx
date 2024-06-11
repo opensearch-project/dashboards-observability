@@ -285,7 +285,7 @@ export function SpanDetailFlyout(props: {
       state: {
         DEFAULT_DATA_SOURCE_NAME,
         DEFAULT_DATA_SOURCE_TYPE,
-        queryToRun: `source = otel-* | where ${spanField}='${spanId}'`,
+        queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
         startTimeRange: props.startTime,
         endTimeRange: props.endTime,
       },
