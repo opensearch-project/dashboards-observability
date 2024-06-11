@@ -180,15 +180,11 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
-  const {
-    isEventsLoading: _isPatternLoading,
-    getPatterns,
-    setDefaultPatternsField,
-  } = useFetchPatterns({
+  const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
     requestParams,
   });
-  const [isEventsLoading, setIsEventsLoading] = useState(false);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
@@ -731,7 +727,7 @@ export const Explorer = ({
           <NoResults
             tabId={tabId}
             dataSourceConnectionType={dataSourceConnectionType}
-            isEventsLoading={isEventsLoading}
+            eventsLoading={eventsLoading}
           />
         )}
       </div>
@@ -747,7 +743,7 @@ export const Explorer = ({
     isLiveTailOnRef.current,
     isQueryRunning,
     isS3Connection,
-    isEventsLoading,
+    eventsLoading,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -830,7 +826,7 @@ export const Explorer = ({
   };
 
   const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
-    setIsEventsLoading(true);
+    setEventsLoading(true);
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (
@@ -851,7 +847,7 @@ export const Explorer = ({
       await updateQueryInStore(searchedQuery);
     }
     await fetchData(undefined, undefined, setSummaryStatus);
-    setIsEventsLoading(false);
+    setEventsLoading(false);
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
