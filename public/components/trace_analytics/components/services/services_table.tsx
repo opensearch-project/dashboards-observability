@@ -127,7 +127,7 @@ export function ServicesTable(props: ServicesTableProps) {
           sortable: true,
           render: (item: any) => (
             <EuiLink data-test-subj="service-link" onClick={() => nameColumnAction(item)}>
-              {item.length < 24 ? item : <div title={item}>{_.truncate(item, { length: 24 })}</div>}
+              {item.length < 24 ? item : <div title={item}>{truncate(item, { length: 24 })}</div>}
             </EuiLink>
           ),
         },
@@ -245,7 +245,7 @@ export function ServicesTable(props: ServicesTableProps) {
           render: (_item: any, row: any) => (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false} onClick={() => setCurrentSelectedService(row.name)}>
-                <EuiLink>
+                <EuiLink data-test-subj={'service-flyout-action-btn' + row.itemId}>
                   <EuiIcon type="inspect" color="primary" />
                 </EuiLink>
               </EuiFlexItem>
