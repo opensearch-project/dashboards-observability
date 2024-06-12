@@ -111,8 +111,8 @@ import {
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  selectCountDistribution,
   render as updateCountDistribution,
+  selectCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -122,8 +122,8 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
@@ -173,14 +173,11 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
-  const {
-    isEventsLoading: _isPatternLoading,
-    getPatterns,
-    setDefaultPatternsField,
-  } = useFetchPatterns({
+  const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
     requestParams,
   });
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
@@ -365,7 +362,7 @@ export const Explorer = ({
     setSummaryStatus?: boolean
   ) => {
     const curQuery: IQuery = queryRef.current!;
-    new PPLDataFetcher(
+    await new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },
       {
@@ -672,7 +669,7 @@ export const Explorer = ({
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
                           showTimeBasedComponents
-                            ? _.sum(countDistribution.data?.['count()']) ||
+                            ? sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length
                         }
@@ -693,7 +690,7 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults tabId={tabId} />
+          <NoResults tabId={tabId} eventsLoading={eventsLoading} />
         )}
       </div>
     );
@@ -707,6 +704,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
+    eventsLoading,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -793,6 +791,7 @@ export const Explorer = ({
   };
 
   const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
+    setEventsLoading(true);
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (
@@ -813,6 +812,7 @@ export const Explorer = ({
       await updateQueryInStore(searchedQuery);
     }
     await fetchData(undefined, undefined, setSummaryStatus);
+    setEventsLoading(false);
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
