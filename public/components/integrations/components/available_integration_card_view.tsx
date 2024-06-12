@@ -12,7 +12,6 @@ import {
   EuiFieldSearch,
   EuiButtonGroup,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,

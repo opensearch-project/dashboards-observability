@@ -21,7 +21,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import _, { isEmpty, isEqual, reduce } from 'lodash';
+import { createBrowserHistory } from 'history';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import reduce from 'lodash/reduce';
+import sum from 'lodash/sum';
 import React, {
   ReactElement,
   useCallback,
@@ -32,7 +36,6 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { createBrowserHistory } from 'history';
 import { LogExplorerRouterContext } from '..';
 import {
   DEFAULT_DATA_SOURCE_TYPE,
@@ -62,6 +65,7 @@ import {
 } from '../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
+  DATACONNECTIONS_BASE,
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_DESCRIBE_INDEX_REGEX,
@@ -108,8 +112,8 @@ import {
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  render as updateCountDistribution,
   selectCountDistribution,
+  render as updateCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -119,22 +123,26 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  change as updateVizConfig,
   selectVisualizationConfig,
+  change as updateVizConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
-import { HitsCounter } from './hits_counter/hits_counter';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { NoResults } from './no_results';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
-import { TimechartHeader } from './timechart_header';
+import { getTimeRangeFromCountDistribution, HitsCounter, Timechart } from './timechart';
 import { ExplorerVisualizations } from './visualizations';
-import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import {
+  getRenderCreateAccelerationFlyout,
+  getRenderLogExplorerTablesFlyout,
+} from '../../../plugin';
+import { AccelerateCallout } from './accelerate_callout';
+import { DatasourceType } from '../../../../common/types/data_connections';
 
 export const Explorer = ({
   pplService,
@@ -206,6 +214,18 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const [dataSourceConnectionType, setDataSourceConnectionType] = useState<DatasourceType>(
+    'PROMETHEUS'
+  );
+  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
+  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
+  const onCreateAcceleration = () =>
+    renderCreateAccelerationFlyout({
+      dataSource: dataSourceName,
+      dataSourceType: dataSourceConnectionType,
+    });
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -248,6 +268,16 @@ export const Explorer = ({
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
 
+  const updateDataSourceConnectionInfo = () => {
+    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${dataSourceName}`).then((data: any) => {
+      setDataSourceConnectionType(data.connector);
+    });
+  };
+
+  useEffect(() => {
+    updateDataSourceConnectionInfo();
+  }, [dataSourceName]);
+
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
 
@@ -276,6 +306,8 @@ export const Explorer = ({
       datasourceName,
       datasourceType,
       queryToRun,
+      startTimeRange,
+      endTimeRange,
     }: any = historyFromRedirection.location.state;
     batch(() => {
       if (datasourceName && datasourceType) {
@@ -303,6 +335,18 @@ export const Explorer = ({
           })
         );
         setTempQuery(queryToRun);
+      }
+      if (startTimeRange && endTimeRange) {
+        dispatch(
+          changeData({
+            tabId,
+            data: {
+              [SELECTED_DATE_RANGE]: [startTimeRange, endTimeRange],
+            },
+          })
+        );
+        setStartTime(startTimeRange);
+        setEndTime(endTimeRange);
       }
     });
   }, []);
@@ -527,12 +571,25 @@ export const Explorer = ({
     handleQuerySearch();
   };
 
+  /**
+   * If query assist is enabled, the time range is fixed to
+   * QUERY_ASSIST_START_TIME and QUERY_ASSIST_END_TIME and not useful. Return
+   * the time range based on aggregation buckets instead.
+   *
+   * @returns startTime and endTime
+   */
+  const getTimeChartRange = (): { startTime?: string; endTime?: string } => {
+    if (!coreRefs.queryAssistEnabled) return { startTime, endTime };
+    const { startTime: start, endTime: end } = getTimeRangeFromCountDistribution(countDistribution);
+    return { startTime: start ?? startTime, endTime: end ?? endTime };
+  };
+
   const totalHits: number = useMemo(() => {
     if (isLiveTailOn && countDistribution?.data) {
       const hits = reduce(
         countDistribution.data['count()'],
-        (sum, n) => {
-          return sum + n;
+        (total, n) => {
+          return total + n;
         },
         liveHits
       );
@@ -552,19 +609,20 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
+            {isS3Connection && (
+              <EuiFlexItem>
+                <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
+              </EuiFlexItem>
+            )}
             {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                     {countDistribution?.data && !isLiveTailOnRef.current && (
                       <EuiPanel>
-                        <HitsCounter
-                          hits={_.sum(countDistribution.data?.['count()'])}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                        <TimechartHeader
-                          options={timeIntervalOptions}
+                        <Timechart
+                          countDistribution={countDistribution}
+                          timeIntervalOptions={timeIntervalOptions}
                           onChangeInterval={(selectedIntrv) => {
                             const intervalOptionsIndex = timeIntervalOptions.findIndex(
                               (item) => item.value === selectedIntrv
@@ -580,20 +638,10 @@ export const Explorer = ({
                             selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
                             getPatterns(intrv, getErrorHandler('Error fetching patterns'));
                           }}
-                          stateInterval={
-                            countDistribution.selectedInterval || selectedIntervalRef.current?.value
-                          }
-                          startTime={startTime}
-                          endTime={endTime}
-                        />
-                        <EuiSpacer size="s" />
-                        <CountDistribution
-                          countDistribution={countDistribution}
                           selectedInterval={
                             countDistribution.selectedInterval || selectedIntervalRef.current?.value
                           }
-                          startTime={startTime}
-                          endTime={endTime}
+                          {...getTimeChartRange()}
                         />
                       </EuiPanel>
                     )}
@@ -658,7 +706,7 @@ export const Explorer = ({
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
                           showTimeBasedComponents
-                            ? _.sum(countDistribution.data?.['count()']) ||
+                            ? sum(countDistribution.data?.['count()']) ||
                               explorerData.datarows.length
                             : explorerData.datarows.length
                         }
@@ -679,7 +727,7 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults tabId={tabId} />
+          <NoResults tabId={tabId} dataSourceConnectionType={dataSourceConnectionType} />
         )}
       </div>
     );
@@ -693,6 +741,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
+    isS3Connection,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -738,11 +787,7 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization
-        currentDataSource={
-          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
-        }
-      />
+      <DirectQueryVisualization onCreateAcceleration={onCreateAcceleration} />
     );
   }, [
     query,
@@ -751,7 +796,7 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    explorerSearchMeta.datasources,
+    onCreateAcceleration,
   ]);
 
   const contentTabs = [
@@ -1065,8 +1110,25 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
+                {isS3Connection && (
+                  <>
+                    <EuiLink
+                      style={{ paddingLeft: 130 }}
+                      onClick={() => {
+                        renderTablesFlyout(dataSourceName, dataSourceConnectionType);
+                      }}
+                    >
+                      View databases and tables
+                    </EuiLink>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {explorerSearchMeta.isPolling ? (
-                  <DirectQueryRunning tabId={tabId} />
+                  <DirectQueryRunning
+                    tabId={tabId}
+                    isS3Connection={isS3Connection}
+                    onCreateAcceleration={onCreateAcceleration}
+                  />
                 ) : (
                   <EuiTabbedContent
                     className="mainContentTabs"

@@ -14,7 +14,7 @@ import {
   createAccelerationEmptyDataMock,
   mockDatasourcesQuery,
 } from '../../../../../../../../../test/accelerations';
-import { AccelerationDataSourceSelector } from '../source_selector';
+import { DataSourceSelector } from '../source_selector';
 
 const coreStartMock = coreMock.createStart();
 
@@ -29,11 +29,14 @@ describe('Source selector components', () => {
     client.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
 
     const wrapper = mount(
-      <AccelerationDataSourceSelector
+      <DataSourceSelector
         http={client}
         selectedDatasource={selectedDatasource}
-        accelerationFormData={accelerationFormData}
-        setAccelerationFormData={setAccelerationFormData}
+        dataSourceFormProps={{
+          formType: 'CreateAcceleration',
+          dataSourceFormData: accelerationFormData,
+          setDataSourceFormData: setAccelerationFormData,
+        }}
         dataSourcesPreselected={false}
         tableFieldsLoading={false}
       />
@@ -62,11 +65,14 @@ describe('Source selector components', () => {
     client.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
     client.post = jest.fn().mockResolvedValue([]);
     const wrapper = mount(
-      <AccelerationDataSourceSelector
+      <DataSourceSelector
         selectedDatasource={selectedDatasource}
         http={client}
-        accelerationFormData={accelerationFormData}
-        setAccelerationFormData={setAccelerationFormData}
+        dataSourceFormProps={{
+          formType: 'CreateAcceleration',
+          dataSourceFormData: accelerationFormData,
+          setDataSourceFormData: setAccelerationFormData,
+        }}
         dataSourcesPreselected={true}
         tableFieldsLoading={false}
       />

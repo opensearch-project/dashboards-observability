@@ -268,7 +268,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                     </th>
                     <th
                       class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_status_1"
+                      data-test-subj="tableHeaderCell_Type_1"
                       role="columnheader"
                       scope="col"
                     >
@@ -277,9 +277,26 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       >
                         <span
                           class="euiTableCellContent__text"
-                          title="Status"
+                          title="Type"
                         >
-                          Status
+                          Type
+                        </span>
+                      </span>
+                    </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_status_2"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Connection status"
+                        >
+                          Connection status
                         </span>
                       </span>
                     </th>
@@ -307,7 +324,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                   >
                     <td
                       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="3"
+                      colspan="4"
                     >
                       <div
                         class="euiTableCellContent euiTableCellContent--alignCenter"

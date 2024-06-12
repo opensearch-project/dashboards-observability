@@ -13,7 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useCallback, useState } from 'react';
 import { batch, useDispatch } from 'react-redux';
 import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';

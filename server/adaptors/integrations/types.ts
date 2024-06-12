@@ -67,6 +67,7 @@ interface IntegrationWorkflow {
   label: string;
   description: string;
   enabled_by_default: boolean;
+  applicable_data_sources?: string[];
 }
 
 type ParsedIntegrationAsset =

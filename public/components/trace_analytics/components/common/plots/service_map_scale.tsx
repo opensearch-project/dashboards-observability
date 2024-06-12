@@ -4,9 +4,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import _ from 'lodash';
+import merge from 'lodash/merge';
 import React, { useEffect, useState } from 'react';
 import { BarOrientation } from '../../../../../../common/constants/shared';
+import { uiSettingsService } from '../../../../../../common/utils';
 import { Plt } from '../../../../visualizations/plotly/plot';
 import unmatchedNode from '../../../images/unmatched_node.png';
 import { getServiceMapScaleColor } from '../helper_functions';
@@ -67,7 +68,7 @@ export function ServiceMapScale(props: {
       },
     ] as Plotly.Data;
 
-    const layout = _.merge(
+    const layout = merge(
       {
         plot_bgcolor: 'rgba(0, 0, 0, 0)',
         paper_bgcolor: 'rgba(0, 0, 0, 0)',
@@ -88,6 +89,7 @@ export function ServiceMapScale(props: {
           showticklabels: true,
           tickvals: props.ticks,
           ticktexts: props.ticks,
+          color: uiSettingsService.get('theme:darkMode') ? '255,255,255' : '0,0,0',
         },
         margin: {
           l: 0,

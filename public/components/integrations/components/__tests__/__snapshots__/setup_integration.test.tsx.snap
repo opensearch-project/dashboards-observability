@@ -131,7 +131,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 hasChildLabel={true}
                                 hasEmptyLabelSpace={false}
                                 isInvalid={false}
-                                label="Display Name"
+                                label="Integration display Name"
                                 labelType="label"
                               >
                                 <div
@@ -154,7 +154,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                         className="euiFormLabel euiFormRow__label"
                                         htmlFor="random_html_id"
                                       >
-                                        Display Name
+                                        Integration display Name
                                       </label>
                                     </EuiFormLabel>
                                   </div>

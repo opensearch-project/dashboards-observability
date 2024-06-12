@@ -27,7 +27,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import moment from 'moment';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -267,7 +267,7 @@ export function NoteTable({
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink href={`#/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
+        <EuiLink href={`#/${record.id}`}>{truncate(value, { length: 100 })}</EuiLink>
       ),
     },
     {

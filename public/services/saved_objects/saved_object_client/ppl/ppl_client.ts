@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { has, isArray, isEmpty } from 'lodash';
+import has from 'lodash/has';
+import isArray from 'lodash/isArray';
+import isEmpty from 'lodash/isEmpty';
 import { HttpStart } from '../../../../../../../src/core/public';
 import {
   EVENT_ANALYTICS,

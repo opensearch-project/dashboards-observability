@@ -11,9 +11,11 @@ import {
   useLoadTablesToCache,
 } from '../../../../../../../../framework/catalog_cache/cache_loader';
 import { useToast } from '../../../../../../../common/toast';
+import { DatasourceType } from '../../../../../../../../../common/types/data_connections';
 
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;
+  dataSourceType: DatasourceType;
   databaseName: string;
   loadTables: () => void;
   loadingComboBoxes: {
@@ -29,15 +31,18 @@ interface SelectorLoadDatabasesProps {
     }>
   >;
   tableFieldsLoading: boolean;
+  dataSourceMDSId?: string;
 }
 
 export const SelectorLoadObjects = ({
   dataSourceName,
+  dataSourceType,
   databaseName,
   loadTables,
   loadingComboBoxes,
   setLoadingComboBoxes,
   tableFieldsLoading,
+  dataSourceMDSId,
 }: SelectorLoadDatabasesProps) => {
   const { setToast } = useToast();
   const [isLoading, setIsLoading] = useState({
@@ -65,8 +70,8 @@ export const SelectorLoadObjects = ({
       tableStatus: true,
       accelerationsStatus: true,
     });
-    startLoadingTables({ dataSourceName, databaseName });
-    startLoadingAccelerations({ dataSourceName });
+    startLoadingTables({ dataSourceName, databaseName, dataSourceMDSId, dataSourceType });
+    startLoadingAccelerations({ dataSourceName, dataSourceMDSId });
   };
 
   useEffect(() => {

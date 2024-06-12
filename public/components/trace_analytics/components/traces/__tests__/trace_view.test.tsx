@@ -7,21 +7,22 @@ import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { TraceView } from '..';
-import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
+import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('Trace view component', () => {
   configure({ adapter: new Adapter() });
 
   it('renders trace view', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const wrapper = shallow(
       <TraceView
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         traceId="test"
         mode="data_prepper"
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
     expect(wrapper).toMatchSnapshot();

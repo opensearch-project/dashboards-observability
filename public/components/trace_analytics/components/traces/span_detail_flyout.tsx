@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiCopy,
@@ -17,12 +18,20 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { SpanField } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
@@ -56,7 +65,7 @@ const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_
 const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) => {
   const fieldKey = getSpanFieldKey(mode, field);
   if (fieldKey === undefined) return undefined;
-  return _.get(span, fieldKey);
+  return get(span, fieldKey);
 };
 
 export function SpanDetailFlyout(props: {
@@ -67,6 +76,11 @@ export function SpanDetailFlyout(props: {
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  serviceName?: string;
+  setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
+  startTime?: string;
+  endTime?: string;
+  setCurrentSpan?: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
@@ -86,13 +100,13 @@ export function SpanDetailFlyout(props: {
         description={description}
         key={`list-item-${title}`}
         addSpanFilter={
-          fieldKey ? () => props.addSpanFilter(fieldKey, _.get(span, fieldKey)) : undefined
+          fieldKey ? () => props.addSpanFilter(fieldKey, get(span, fieldKey)) : undefined
         }
       />
     );
   };
 
-  const isEmpty = (value) => {
+  const _isEmpty = (value) => {
     return (
       value == null ||
       (value.hasOwnProperty('length') && value.length === 0) ||
@@ -101,7 +115,7 @@ export function SpanDetailFlyout(props: {
   };
 
   const renderContent = () => {
-    if (!span || _.isEmpty(span)) return '-';
+    if (!span || isEmpty(span)) return '-';
     const overviewList = [
       getListItem(
         getSpanFieldKey(mode, 'SPAN_ID'),
@@ -158,8 +172,8 @@ export function SpanDetailFlyout(props: {
         'Duration',
         `${
           mode === 'data_prepper'
-            ? _.round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
-            : _.round(microToMilliSec(Math.max(0, span.duration)), 2)
+            ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
+            : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
       ),
       getListItem(
@@ -167,7 +181,7 @@ export function SpanDetailFlyout(props: {
         'Start time',
         mode === 'data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
@@ -176,7 +190,7 @@ export function SpanDetailFlyout(props: {
         'End time',
         mode === 'data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
@@ -216,20 +230,20 @@ export function SpanDetailFlyout(props: {
     const attributesList = Object.keys(span)
       .filter((key) => !ignoredKeys.has(key))
       .sort((keyA, keyB) => {
-        const isANull = isEmpty(span[keyA]);
-        const isBNull = isEmpty(span[keyB]);
+        const isANull = _isEmpty(span[keyA]);
+        const isBNull = _isEmpty(span[keyB]);
         if ((isANull && isBNull) || (!isANull && !isBNull)) return keyA < keyB ? -1 : 1;
         if (isANull) return 1;
         return -1;
       })
       .map((key) => {
-        if (isEmpty(span[key])) return getListItem(key, key, '-');
+        if (_isEmpty(span[key])) return getListItem(key, key, '-');
         let value = span[key];
         if (typeof value === 'object') value = JSON.stringify(value);
         return getListItem(key, key, value);
       });
 
-    const eventsComponent = _.isEmpty(span.events) ? null : (
+    const eventsComponent = isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
           <span className="panel-title">Event</span>
@@ -264,13 +278,60 @@ export function SpanDetailFlyout(props: {
     );
   };
 
+  const redirectToExplorer = () => {
+    const spanId = getSpanValue(span, mode, 'SPAN_ID');
+    const spanField = getSpanFieldKey(mode, 'SPAN_ID');
+    coreRefs?.application!.navigateToApp(observabilityLogsID, {
+      path: `#/explorer`,
+      state: {
+        DEFAULT_DATA_SOURCE_NAME,
+        DEFAULT_DATA_SOURCE_TYPE,
+        queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
+        startTimeRange: props.startTime,
+        endTimeRange: props.endTime,
+      },
+    });
+  };
+
   return (
     <>
-      <EuiFlyout data-test-subj="spanDetailFlyout" onClose={props.closeFlyout} size="s">
+      <EuiFlyout
+        data-test-subj="spanDetailFlyout"
+        onClose={() => {
+          props.closeFlyout();
+        }}
+        size="s"
+      >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle>
-            <h2>Span detail</h2>
-          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>Span detail</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {mode === 'data_prepper' && (
+              <EuiFlexItem>
+                <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                  View associated logs
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {props.serviceName && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  style={{ position: 'absolute', left: '0px', top: '8px', zIndex: 3 }}
+                  color="primary"
+                  onClick={() => props.setCurrentSpan && props.setCurrentSpan('')}
+                  iconType="arrowLeft"
+                  iconSide="left"
+                  size="xs"
+                >
+                  Back
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{renderContent()}</EuiFlyoutBody>
       </EuiFlyout>

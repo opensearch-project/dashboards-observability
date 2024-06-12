@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { IDefaultTimestampState, IQuery } from '../../../../common/types/explorer';
 import { IDataFetcher } from '../fetch_interface';
 import { DataFetcherBase } from '../fetcher_base';

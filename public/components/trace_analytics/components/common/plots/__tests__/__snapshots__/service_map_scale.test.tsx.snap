@@ -85,6 +85,7 @@ exports[`Service map scale component renders service map scale plot 1`] = `
             "zeroline": false,
           },
           "yaxis": Object {
+            "color": "0,0,0",
             "fixedrange": true,
             "range": Array [
               0,
@@ -205,6 +206,7 @@ exports[`Service map scale component renders service map scale plot 1`] = `
               "zeroline": false,
             },
             "yaxis": Object {
+              "color": "0,0,0",
               "fixedrange": true,
               "range": Array [
                 0,

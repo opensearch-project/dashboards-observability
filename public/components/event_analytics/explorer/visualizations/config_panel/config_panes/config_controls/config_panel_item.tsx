@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { uniqueId, isEmpty } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
+import isEmpty from 'lodash/isEmpty';
 import { EuiTitle, EuiComboBox, EuiSpacer } from '@elastic/eui';
 
 export const PanelItem = ({

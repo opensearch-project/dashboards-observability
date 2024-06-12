@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiFlyout,
 } from '@elastic/eui';
-import _ from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
 import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
 import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
 import { coreRefs } from '../../../../../framework/core_refs';
@@ -27,8 +27,10 @@ import { AvailableIntegrationsTable } from '../../../../integrations/components/
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { DatasourceType } from '../../../../../../common/types/data_connections';
+import { isS3Connection } from '../../../utils/helpers';
 
 interface IntegrationInstanceTableEntry {
+  id: string;
   name: string;
   locator: {
     name: string;
@@ -40,8 +42,10 @@ interface IntegrationInstanceTableEntry {
 
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
+    case 'SECURITYLAKE':
+      return 'Amazon Security Lake';
     case 'S3GLUE':
-      return 'Flint S3';
+      return 'S3 Glue';
     case 'PROMETHEUS':
       return null; // TODO Prometheus integrations not supported so no label available
     default:
@@ -79,6 +83,7 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
+    id: instance.id,
     name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
@@ -123,17 +128,19 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
   );
 };
 
-export const InstallIntegrationFlyout = ({
-  closeFlyout,
-  datasourceType,
-  datasourceName,
-  refreshInstances,
-}: {
-  closeFlyout: () => void;
+export interface InstallIntegrationFlyoutProps {
   datasourceType: DatasourceType;
   datasourceName: string;
-  refreshInstances: () => void;
-}) => {
+  closeFlyout: () => void;
+  refreshInstances?: () => void;
+}
+
+export const InstallIntegrationFlyout = ({
+  datasourceType,
+  datasourceName,
+  closeFlyout,
+  refreshInstances,
+}: InstallIntegrationFlyoutProps) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
   } as AvailableIntegrationsList);
@@ -149,9 +156,12 @@ export const InstallIntegrationFlyout = ({
     });
   }, []);
 
-  const s3FilteredIntegrations = {
+  const integrationLabelToCheck =
+    datasourceType === 'SECURITYLAKE' ? 'Security Lake' : labelFromDataSourceType(datasourceType);
+
+  const integrationsFilteredByLabel = {
     hits: availableIntegrations.hits.filter((config) =>
-      config.labels?.includes(labelFromDataSourceType(datasourceType) ?? '')
+      config.labels?.includes(integrationLabelToCheck ?? '')
     ),
   };
 
@@ -167,7 +177,7 @@ export const InstallIntegrationFlyout = ({
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
-          data={s3FilteredIntegrations}
+          data={integrationsFilteredByLabel}
           isCardView={true}
           setInstallingIntegration={setInstallingIntegration}
         />
@@ -177,10 +187,10 @@ export const InstallIntegrationFlyout = ({
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
           forceConnection={
-            datasourceType === 'S3GLUE'
+            isS3Connection(datasourceType)
               ? {
                   name: datasourceName,
-                  type: 's3',
+                  type: datasourceType.toLowerCase() === 'securitylake' ? 'securityLake' : 's3',
                 }
               : undefined
           }
@@ -188,7 +198,7 @@ export const InstallIntegrationFlyout = ({
             setIsInstalling(installing);
             if (success) {
               closeFlyout();
-              refreshInstances();
+              refreshInstances?.();
             }
           }}
         />
@@ -211,7 +221,7 @@ export const InstalledIntegrationsTable = ({
   const [query, setQuery] = useState('');
   const filteredIntegrations = integrations
     .map(instanceToTableEntry)
-    .filter((i) => i.name.match(new RegExp(_.escapeRegExp(query), 'i')));
+    .filter((i) => i.name.match(new RegExp(escapeRegExp(query), 'i')));
 
   const [showAvailableFlyout, setShowAvailableFlyout] = useState(false);
   const toggleFlyout = () => setShowAvailableFlyout((prev) => !prev);

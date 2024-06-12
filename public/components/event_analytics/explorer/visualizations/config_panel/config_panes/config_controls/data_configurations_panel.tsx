@@ -20,7 +20,9 @@ import {
   EuiFlexGroup,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { filter, isEmpty, isEqual } from 'lodash';
+import filter from 'lodash/filter';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 import {
   AGGREGATIONS,
   AGGREGATION_OPTIONS,

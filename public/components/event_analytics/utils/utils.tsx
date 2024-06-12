@@ -5,7 +5,7 @@
 
 /* eslint-disable no-bitwise */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import moment from 'moment';
 import React, { MutableRefObject } from 'react';
 import { EuiDataGridSorting, EuiText } from '@elastic/eui';

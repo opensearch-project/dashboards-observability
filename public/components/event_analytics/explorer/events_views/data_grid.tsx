@@ -29,7 +29,7 @@ import PPLService from '../../../../services/requests/ppl';
 import { useFetchEvents } from '../../hooks';
 import { redoQuery } from '../../utils/utils';
 import { FlyoutButton } from './docViewRow';
-import { HitsCounter } from '../hits_counter/hits_counter';
+import { HitsCounter } from '../timechart/hits_counter';
 
 export interface DataGridProps {
   http: HttpSetup;

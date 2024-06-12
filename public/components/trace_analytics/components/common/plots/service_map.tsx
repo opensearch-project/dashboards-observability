@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
 import Graph from 'react-graph-vis';
+import { ServiceNodeDetails } from '../../../../../../common/types/trace_analytics';
 import { FilterType } from '../filters/filters';
 import {
   calculateTicks,
@@ -23,10 +24,13 @@ import {
   NoMatchMessage,
   PanelTitle,
 } from '../helper_functions';
+import { ServiceDependenciesTable } from './service_dependencies_table';
+import { ServiceMapNodeDetails } from './service_map_node_details';
 import { ServiceMapScale } from './service_map_scale';
 
 export interface ServiceObject {
   [key: string]: {
+    average_latency: any;
     serviceName: string;
     id: number;
     traceGroups: Array<{ traceGroup: string; targetResource: string[] }>;
@@ -47,6 +51,8 @@ export function ServiceMap({
   addFilter,
   currService,
   page,
+  setCurrentSelectedService,
+  filterByCurrService,
 }: {
   serviceMap: ServiceObject;
   idSelected: 'latency' | 'error_rate' | 'throughput';
@@ -62,6 +68,8 @@ export function ServiceMap({
     | 'serviceView'
     | 'detailFlyout'
     | 'traceView';
+  setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
+  filterByCurrService?: boolean;
 }) {
   const [invalid, setInvalid] = useState(false);
   const [network, setNetwork] = useState(null);
@@ -82,6 +90,8 @@ export function ServiceMap({
       label: 'Request Rate',
     },
   ];
+
+  const [selectedNodeDetails, setSelectedNodeDetails] = useState<ServiceNodeDetails | null>(null);
 
   const options = {
     layout: {
@@ -122,25 +132,38 @@ export function ServiceMap({
     autoResize: true,
   };
 
+  const addServiceFilter = (selectedServiceName: string) => {
+    if (!addFilter) return;
+    addFilter({
+      field: 'serviceName',
+      operator: 'is',
+      value: selectedServiceName,
+      inverted: false,
+      disabled: false,
+    });
+    if (!['appCreate', 'detailFlyout'].includes(page)) {
+      window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+    }
+  };
+
   const events = {
-    select: (event: any) => {
-      const { nodes, edges } = event;
+    select: (event) => {
+      const { nodes } = event;
       if (!addFilter || !nodes) return;
-      const serviceName = items?.graph.nodes.find((node: any) => node.id === nodes[0])?.label;
-      if (serviceName) {
-        addFilter({
-          field: 'serviceName',
-          operator: 'is',
-          value: serviceName,
-          inverted: false,
-          disabled: false,
-        });
-        if (!['appCreate', 'detailFlyout'].includes(page)) {
-          window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
-        }
+      const selectedNode = items?.graph.nodes.find((node) => node.id === nodes[0]);
+      if (selectedNode) {
+        const details = {
+          label: selectedNode.label,
+          average_latency: selectedNode.average_latency,
+          error_rate: selectedNode.error_rate,
+          throughput: selectedNode.throughput,
+        };
+
+        // Update the state to display node details
+        setSelectedNodeDetails(details);
       }
     },
-    hoverNode: (event: any) => {},
+    hoverNode: (_event) => {},
   };
 
   const onFocus = (service: string, networkInstance?: any) => {
@@ -170,9 +193,11 @@ export function ServiceMap({
         idSelected,
         calculatedTicks,
         currService,
-        serviceMap[currService!]?.relatedServices
+        serviceMap[currService!]?.relatedServices,
+        filterByCurrService
       )
     );
+    setSelectedNodeDetails(null);
   }, [serviceMap, idSelected]);
 
   return (
@@ -211,17 +236,36 @@ export function ServiceMap({
         {Object.keys(serviceMap).length > 0 ? (
           <EuiFlexGroup gutterSize="none" responsive={false}>
             <EuiFlexItem>
-              {items?.graph && (
-                <Graph
-                  graph={items.graph}
-                  options={options}
-                  events={events}
-                  getNetwork={(networkInstance: any) => {
-                    setNetwork(networkInstance);
-                    if (currService) onFocus(currService, networkInstance);
-                  }}
-                />
-              )}
+              <div style={{ position: 'relative' }}>
+                {items?.graph && (
+                  <Graph
+                    graph={items.graph}
+                    options={options}
+                    events={events}
+                    getNetwork={(networkInstance: any) => {
+                      setNetwork(networkInstance);
+                      if (currService) onFocus(currService, networkInstance);
+                    }}
+                  />
+                )}
+                {selectedNodeDetails && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      right: 20,
+                      zIndex: 1000,
+                    }}
+                  >
+                    <ServiceMapNodeDetails
+                      selectedNodeDetails={selectedNodeDetails}
+                      setSelectedNodeDetails={setSelectedNodeDetails}
+                      addServiceFilter={addServiceFilter}
+                      setCurrentSelectedService={setCurrentSelectedService}
+                    />
+                  </div>
+                )}
+              </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
@@ -233,6 +277,10 @@ export function ServiceMap({
           </div>
         )}
       </EuiPanel>
+      <EuiSpacer size="xl" />
+      {filterByCurrService && items?.graph && (
+        <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
+      )}
     </>
   );
 }

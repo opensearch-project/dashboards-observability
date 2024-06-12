@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import round from 'lodash/round';
 import moment from 'moment';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { uiSettingsService } from '../../../../common/utils';
 import {
   fixedIntervalToMilli,
   microToMilliSec,
@@ -49,7 +50,7 @@ export const handleDashboardRequest = async (
       response.aggregations.trace_group.buckets.forEach((traceGroup) => {
         map[traceGroup.key] = Object.values(
           traceGroup.latency_variance_nanos.values
-        ).map((nano: number) => _.round(nanoToMilliSec(Math.max(0, nano)), 2));
+        ).map((nano: number) => round(nanoToMilliSec(Math.max(0, nano)), 2));
       });
       return map;
     })
@@ -84,7 +85,9 @@ export const handleDashboardRequest = async (
                       mode: 'lines',
                       hoverinfo: 'none',
                       line: {
-                        color: '#000000',
+                        color: uiSettingsService.get('theme:darkMode')
+                          ? 'rgb(255, 255, 255)'
+                          : 'rgb(0, 0, 0)',
                         width: 1,
                       },
                     },
@@ -94,6 +97,7 @@ export const handleDashboardRequest = async (
                       ...values,
                       type: 'scatter',
                       mode: 'lines+markers',
+                      fill: 'tozeroy',
                       hovertemplate: '%{x}<br>Average latency: %{y}<extra></extra>',
                       hoverlabel: {
                         bgcolor: '#d7c2ff',
@@ -255,7 +259,7 @@ export const handleJaegerDashboardRequest = async (
           response.aggregations.trace_group.buckets.forEach((traceGroup) => {
             map[traceGroup.key_as_string] = Object.values(
               traceGroup.latency_variance_micros.values
-            ).map((nano: number) => _.round(microToMilliSec(Math.max(0, nano)), 2));
+            ).map((nano: number) => round(microToMilliSec(Math.max(0, nano)), 2));
           });
           return map;
         })
@@ -412,7 +416,7 @@ export const handleDashboardThroughputPltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };
@@ -446,7 +450,7 @@ export const handleDashboardErrorRatePltRequest = (
           ? [
               {
                 x: buckets.map((bucket) => bucket.key),
-                y: buckets.map((bucket) => _.round(bucket.error_rate?.value || 0, 2)),
+                y: buckets.map((bucket) => round(bucket.error_rate?.value || 0, 2)),
                 marker: {
                   color: '#fad963',
                 },
@@ -459,7 +463,7 @@ export const handleDashboardErrorRatePltRequest = (
               },
             ]
           : [];
-      setItems({ items: newItems, fixedInterval: fixedInterval });
+      setItems({ items: newItems, fixedInterval });
     })
     .catch((error) => console.error(error));
 };

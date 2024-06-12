@@ -24,7 +24,7 @@ export const DataSourcePicker = ({
   return (
     <div className="metrics-data-source-picker">
       <EuiTitle size="xxxs">
-        <h5>Data source</h5>
+        <h5>Metrics source</h5>
       </EuiTitle>
       <EuiComboBox
         placeholder="Select a data source"

@@ -12,37 +12,36 @@ import {
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { max } from 'lodash';
-import semver from 'semver';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { MetricsExportPanel } from './metrics_export_panel';
+import max from 'lodash/max';
+import React, { useEffect } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { useSelector } from 'react-redux';
+import semver from 'semver';
+import { MountPoint } from '../../../../../../src/core/public';
+import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
+import { SavedVisualization } from '../../../../common/types/explorer';
+import { MetricType } from '../../../../common/types/metrics';
+import { coreRefs } from '../../../framework/core_refs';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
-import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
+import { updateCatalogVisualizationQuery } from '../../common/query_utils';
 import {
   addMultipleVizToPanels,
   isUuid,
   selectPanelList,
 } from '../../custom_panels/redux/panel_slice';
-import { MetricType } from '../../../../common/types/metrics';
+import { visualizationFromOtelMetric, visualizationFromPrometheusMetric } from '../helpers/utils';
 import {
   dateSpanFilterSelector,
   selectedMetricsIdsSelector,
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
-import { coreRefs } from '../../../framework/core_refs';
-import { SavedVisualization } from '../../../../common/types/explorer';
-import { visualizationFromPrometheusMetric, visualizationFromOtelMetric } from '../helpers/utils';
-import { updateCatalogVisualizationQuery } from '../../common/query_utils';
-import {
-  OTEL_METRIC_SUBTYPE,
-  PROMQL_METRIC_SUBTYPE,
-  PPL_METRIC_SUBTYPE,
-} from '../../../../common/constants/shared';
-import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
-import { MountPoint } from '../../../../../../src/core/public';
+import { MetricsExportPanel } from './metrics_export_panel';
 
 const Savebutton = ({
   setIsPanelOpen,

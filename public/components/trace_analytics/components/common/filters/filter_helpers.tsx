@@ -10,27 +10,56 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import _ from 'lodash';
+import get from 'lodash/get';
 import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
 
-const getFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') =>
-  (mode === 'data_prepper' ? {
-    dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-    traces: ['traceId', 'traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-    services: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-    app: ['traceId', 'traceGroup', 'serviceName'],
-  }[page] : {
-    dashboard: ['process.serviceName', 'error', 'latency'],
-    traces: ['traceID', 'operationName', 'process.serviceName', 'error', 'latency'],
-    services: ['process.serviceName', 'error', 'latency'],
-    app: ['traceID', 'process.serviceName'],
-  }[page]);
+const getFields = (
+  mode: TraceAnalyticsMode,
+  page: 'dashboard' | 'traces' | 'services' | 'app',
+  attributesFilterFields: string[]
+) =>
+  mode === 'data_prepper'
+    ? {
+        dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
+        traces: [
+          'traceId',
+          'traceGroup',
+          'serviceName',
+          'error',
+          'status.message',
+          'latency',
+          ...attributesFilterFields,
+        ],
+        services: [
+          'traceGroup',
+          'serviceName',
+          'error',
+          'status.message',
+          'latency',
+          ...attributesFilterFields,
+        ],
+        app: ['traceId', 'traceGroup', 'serviceName'],
+      }[page]
+    : {
+        dashboard: ['process.serviceName', 'error', 'latency'],
+        traces: ['traceID', 'operationName', 'process.serviceName', 'error', 'latency'],
+        services: ['process.serviceName', 'error', 'latency'],
+        app: ['traceID', 'process.serviceName'],
+      }[page];
 // filters will take effect and can be manually added
-export const getFilterFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') => getFields(mode, page);
+export const getFilterFields = (
+  mode: TraceAnalyticsMode,
+  page: 'dashboard' | 'traces' | 'services' | 'app',
+  attributesFilterFields: string[]
+) => getFields(mode, page, attributesFilterFields);
 // filters will take effect
-export const getValidFilterFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') => {
-  const fields = getFields(mode, page);
+export const getValidFilterFields = (
+  mode: TraceAnalyticsMode,
+  page: 'dashboard' | 'traces' | 'services' | 'app',
+  attributesFilterFields: string[]
+) => {
+  const fields = getFields(mode, page, attributesFilterFields);
   if (page !== 'services') return [...fields, 'Latency percentile within trace group'];
   return fields;
 };
@@ -64,7 +93,7 @@ const getType = (field: string): string | null => {
     endTime: 'date_nanos',
     startTime: 'date_nanos',
   };
-  const type = _.get(typeMapping, field, 'keyword');
+  const type = get(typeMapping, field, 'keyword');
   return typeof type === 'string' ? type : null;
 };
 
@@ -113,7 +142,7 @@ export const getOperatorOptions = (field: string) => {
   };
   const operators = [
     ...operatorMapping.default_first,
-    ..._.get(operatorMapping, type),
+    ...get(operatorMapping, type),
     ...operatorMapping.default_last,
   ];
   return operators;
