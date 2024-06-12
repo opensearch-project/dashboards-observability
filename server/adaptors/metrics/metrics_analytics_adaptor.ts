@@ -42,7 +42,7 @@ export class MetricsAnalyticsAdaptor {
           must: [
             {
               term: {
-                'name.keyword': {
+                name: {
                   value: documentName,
                 },
               },
@@ -107,7 +107,7 @@ export class MetricsAnalyticsAdaptor {
           must: [
             {
               term: {
-                'name.keyword': {
+                name: {
                   value: documentName,
                 },
               },
@@ -141,7 +141,7 @@ export class MetricsAnalyticsAdaptor {
       aggs: {
         distinct_names: {
           terms: {
-            field: 'name.keyword',
+            field: 'name',
             size: 500,
           },
         },
