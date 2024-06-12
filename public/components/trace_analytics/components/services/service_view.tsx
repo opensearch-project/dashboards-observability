@@ -173,7 +173,7 @@ export function ServiceView(props: ServiceViewProps) {
                     state: {
                       DEFAULT_DATA_SOURCE_NAME,
                       DEFAULT_DATA_SOURCE_TYPE,
-                      queryToRun: `source = otel-* | where serviceName='${props.serviceName}'`,
+                      queryToRun: `source = ss4o_logs-* | where serviceName='${props.serviceName}'`,
                       startTimeRange: props.startTime,
                       endTimeRange: props.endTime,
                     },
