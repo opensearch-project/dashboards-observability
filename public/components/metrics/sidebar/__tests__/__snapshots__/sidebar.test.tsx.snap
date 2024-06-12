@@ -162,7 +162,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   <h5
                     className="euiTitle euiTitle--xxxsmall"
                   >
-                    Data source
+                    Metrics source
                   </h5>
                 </EuiTitle>
                 <EuiComboBox
