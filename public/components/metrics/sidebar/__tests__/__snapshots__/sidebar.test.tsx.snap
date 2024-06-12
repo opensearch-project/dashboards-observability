@@ -184,7 +184,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                       },
                     ]
                   }
-                  placeholder="Select a data source"
+                  placeholder="Select a metric source"
                   selectedOptions={Array []}
                   singleSelection={
                     Object {
@@ -216,7 +216,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                       onFocus={[Function]}
                       onOpenListClick={[Function]}
                       onRemoveOption={[Function]}
-                      placeholder="Select a data source"
+                      placeholder="Select a metric source"
                       rootId={[Function]}
                       searchValue=""
                       selectedOptions={Array []}
@@ -259,7 +259,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                               <p
                                 className="euiComboBoxPlaceholder"
                               >
-                                Select a data source
+                                Select a metric source
                               </p>
                               <AutosizeInput
                                 aria-controls=""
