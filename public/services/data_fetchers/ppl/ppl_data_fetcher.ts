@@ -3,15 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
-import { IDefaultTimestampState, IQuery } from '../../../../common/types/explorer';
-import { IDataFetcher } from '../fetch_interface';
-import { DataFetcherBase } from '../fetcher_base';
-import {
-  buildRawQuery,
-  composeFinalQuery,
-  getIndexPatternFromRawQuery,
-} from '../../../../common/utils';
+import isEmpty from 'lodash/isEmpty';
 import {
   FILTERED_PATTERN,
   PATTERNS_REGEX,
@@ -23,10 +15,18 @@ import {
   TAB_CHART_ID,
 } from '../../../../common/constants/explorer';
 import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
+import { IDefaultTimestampState, IQuery } from '../../../../common/types/explorer';
+import {
+  buildRawQuery,
+  composeFinalQuery,
+  getIndexPatternFromRawQuery,
+} from '../../../../common/utils';
 import {
   composeFinalQueryWithoutTimestamp,
   getDescribeQueryIndexFromRawQuery,
 } from '../../../components/common/query_utils';
+import { DataFetcherBase } from '../fetcher_base';
+import { IDataFetcher } from '../fetch_interface';
 
 export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   protected queryIndex: string;
@@ -132,10 +132,15 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     }
 
     // get query data
+    let getDataPromise: Promise<void>;
     if (isLiveTailOn) {
-      getLiveTail(finalQuery, getErrorHandler('Error fetching events'));
+      getDataPromise = getLiveTail(finalQuery, getErrorHandler('Error fetching events'));
     } else {
-      getEvents(finalQuery, getErrorHandler('Error fetching events'), setSummaryStatus);
+      getDataPromise = getEvents(
+        finalQuery,
+        getErrorHandler('Error fetching events'),
+        setSummaryStatus
+      );
     }
     // still need all fields when query contains stats
     if (finalQuery.match(PPL_STATS_REGEX)) getAvailableFields(`search source=${this.queryIndex}`);
@@ -157,6 +162,8 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
         })
       );
     }
+    // block search call until data retrieval and processing finishes
+    await getDataPromise;
   }
 
   async setLogPattern(query: IQuery, index: string, _finalQuery: string) {

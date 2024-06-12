@@ -193,7 +193,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     );
   };
 
-  const getEvents = (
+  const getEvents = async (
     query: string = '',
     errorHandler?: (error: any) => void,
     setSummaryStatus?: boolean
@@ -201,7 +201,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     if (isEmpty(query)) return;
     const cur = queriesRef.current;
     const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
-    fetchEvents(
+    await fetchEvents(
       { query: searchQuery },
       'jdbc',
       async (res: any) => {
