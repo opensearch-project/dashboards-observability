@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { TraceAnalyticsMode } from '../../home';
@@ -187,7 +187,19 @@ export function SpanDetailPanel(props: {
 
   const [currentSpan, setCurrentSpan] = useState('');
 
+  const spanContainerRef = useRef<HTMLDivElement | null>(null);
+  const prevScrollPositionRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (spanContainerRef.current) {
+      setTimeout(() => {
+        spanContainerRef.current.scrollTop = prevScrollPositionRef.current || 0;
+      }, 0);
+    }
+  }, [currentSpan]);
+
   const onClick = (event: any) => {
+    const currentScrollPosition = spanContainerRef.current?.scrollTop || 0;
     if (!event?.points) return;
     const point = event.points[0];
     if (fromApp) {
@@ -195,6 +207,7 @@ export function SpanDetailPanel(props: {
     } else {
       setCurrentSpan(point.data.spanId);
     }
+    prevScrollPositionRef.current = currentScrollPosition;
   };
 
   const renderFilters = useMemo(() => {
@@ -279,7 +292,7 @@ export function SpanDetailPanel(props: {
           </>
         )}
         <EuiHorizontalRule margin="m" />
-        <div style={{ overflowY: 'auto', maxHeight: 500 }}>
+        <div style={{ overflowY: 'auto', maxHeight: 500 }} ref={spanContainerRef}>
           {toggleIdSelected === 'timeline' ? (
             <Plt
               data={data.gantt}
