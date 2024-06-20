@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { batch as Batch } from 'react-redux';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import {

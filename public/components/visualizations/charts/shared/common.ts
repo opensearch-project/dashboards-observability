@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, forEach, mapKeys } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import forEach from 'lodash/forEach';
+import mapKeys from 'lodash/mapKeys';
 import { CUSTOM_LABEL } from '../../../../../common/constants/explorer';
 import {
   ConfigList,

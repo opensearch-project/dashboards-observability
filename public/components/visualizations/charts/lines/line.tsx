@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, last } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import last from 'lodash/last';
+import forEach from 'lodash/forEach';
 import React, { useMemo } from 'react';
-import _ from 'lodash';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
   DEFAULT_CHART_STYLES,
@@ -58,7 +59,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
       } = {},
     },
     vis: { name },
-  }: IVisualizationContainerProps = visualizations;
+  }: IVisualizationContainerProps = visualizations as IVisualizationContainerProps;
 
   const tooltipMode =
     tooltipOptions.tooltipMode !== undefined ? tooltipOptions.tooltipMode : 'show';
@@ -99,7 +100,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
 
   const preprocessMetricsJsonData = (json): any => {
     const data: any[] = [];
-    _.forEach(json, (row) => {
+    forEach(json, (row) => {
       const record: any = {};
       record['@labels'] = JSON.parse(row['@labels']);
       record['@timestamp'] = JSON.parse(row['@timestamp']);

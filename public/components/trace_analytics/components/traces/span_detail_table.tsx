@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiDataGrid, EuiDataGridColumn, EuiLink, EuiText } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
@@ -219,18 +219,18 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         case 'spanID':
           return <EuiLink onClick={() => props.openFlyout(value)}>{value}</EuiLink>;
         case 'durationInNanos':
-          return `${_.round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
+          return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
         case 'duration':
-          return `${_.round(microToMilliSec(Math.max(0, value)), 2)} ms`;
+          return `${round(microToMilliSec(Math.max(0, value)), 2)} ms`;
         case 'startTime':
           return mode === 'jaeger'
-            ? moment(_.round(microToMilliSec(Math.max(0, value)), 2)).format(
+            ? moment(round(microToMilliSec(Math.max(0, value)), 2)).format(
                 TRACE_ANALYTICS_DATE_FORMAT
               )
             : moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
         case 'jaegerEndTime':
           return moment(
-            _.round(
+            round(
               microToMilliSec(
                 Math.max(0, items[adjustedRowIndex].startTime + items[adjustedRowIndex].duration)
               ),

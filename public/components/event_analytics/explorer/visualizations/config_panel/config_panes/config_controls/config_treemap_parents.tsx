@@ -4,7 +4,7 @@
  */
 
 import { EuiButtonIcon, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { Fragment } from 'react';
 import { ParentUnitType, TreemapParentsProps } from '../../../../../../../../common/types/explorer';
 

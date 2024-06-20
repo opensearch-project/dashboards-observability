@@ -4,7 +4,9 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import _, { forEach } from 'lodash';
+import forEach from 'lodash/forEach';
+import reject from 'lodash/reject';
+import omit from 'lodash/omit';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
@@ -129,7 +131,7 @@ export const PanelGridSO = (props: PanelGridProps) => {
 
   // remove visualization from panel in edit mode
   const removeVisualization = (visualizationId: string) => {
-    const newVisualizationList = _.reject(panelVisualizations, {
+    const newVisualizationList = reject(panelVisualizations, {
       id: visualizationId,
     });
     mergeLayoutAndVisualizations(postEditLayout, newVisualizationList, setPanelVisualizations);
@@ -174,7 +176,7 @@ export const PanelGridSO = (props: PanelGridProps) => {
   useEffect(() => {
     if (editActionType === 'save') {
       const visualizationParams = postEditLayout.map((layout) =>
-        _.omit(layout, ['static', 'moved'])
+        omit(layout, ['static', 'moved'])
       );
       saveVisualizationLayouts(panelId, visualizationParams);
       if (updateAvailabilityVizId) {

@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { take, merge, isEmpty } from 'lodash';
+import take from 'lodash/take';
+import merge from 'lodash/merge';
 import { Plt } from '../../plotly/plot';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 

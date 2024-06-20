@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { IntegrationHeader } from './integration_header';
 import { AddedIntegrationsTable } from './added_integration_table';

@@ -14,7 +14,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
+import truncate from 'lodash/truncate';
 import React, { useState } from 'react';
 import { basePathLink } from '../../../../common/utils/shared';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
@@ -64,7 +64,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
               data-test-subj={`${record.name}IntegrationLink`}
               onClick={() => setInstallingIntegration(record.name)}
             >
-              {_.truncate(record.displayName || record.name, { length: 100 })}
+              {truncate(record.displayName || record.name, { length: 100 })}
             </EuiLink>
           );
         } else {
@@ -73,7 +73,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
               data-test-subj={`${record.name}IntegrationLink`}
               href={basePathLink(`/app/integrations#/available/${record.name}`)}
             >
-              {_.truncate(record.displayName || record.name, { length: 100 })}
+              {truncate(record.displayName || record.name, { length: 100 })}
             </EuiLink>
           );
         }
@@ -86,7 +86,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       truncateText: true,
       render: (_value, record) => (
         <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
-          {_.truncate(record.description, { length: 100 })}
+          {truncate(record.description, { length: 100 })}
         </EuiText>
       ),
     },

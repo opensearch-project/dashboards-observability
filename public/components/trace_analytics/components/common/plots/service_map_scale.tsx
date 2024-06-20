@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import _ from 'lodash';
+import merge from 'lodash/merge';
 import React, { useEffect, useState } from 'react';
 import { BarOrientation } from '../../../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../../../common/utils';
@@ -68,7 +68,7 @@ export function ServiceMapScale(props: {
       },
     ] as Plotly.Data;
 
-    const layout = _.merge(
+    const layout = merge(
       {
         plot_bgcolor: 'rgba(0, 0, 0, 0)',
         paper_bgcolor: 'rgba(0, 0, 0, 0)',

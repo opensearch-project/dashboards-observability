@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { find } from 'lodash';
+import find from 'lodash/find';
 import {
   DEFAULT_GAUGE_CHART_PARAMETERS,
   GROUPBY,

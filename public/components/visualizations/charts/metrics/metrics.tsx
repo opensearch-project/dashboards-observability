@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { find, isEmpty, uniqBy } from 'lodash';
+import find from 'lodash/find';
+import isEmpty from 'lodash/isEmpty';
+import uniqBy from 'lodash/uniqBy';
 import Plotly from 'plotly.js-dist';
 import React, { useMemo } from 'react';
 import { COLOR_BLACK, COLOR_WHITE } from '../../../../../common/constants/colors';

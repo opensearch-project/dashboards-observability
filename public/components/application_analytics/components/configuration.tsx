@@ -24,7 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ApplicationRequestType, ApplicationType } from 'common/types/application_analytics';
-import { last } from 'lodash';
 import React, { useState } from 'react';
 
 interface ConfigProps {

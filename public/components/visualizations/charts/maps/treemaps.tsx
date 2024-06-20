@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, isEqual, uniq } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
 import React, { useMemo } from 'react';
 
 import {

@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
   AGGREGATIONS,

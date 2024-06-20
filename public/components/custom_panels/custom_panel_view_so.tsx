@@ -27,7 +27,7 @@ import {
   ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import { last } from 'lodash';
+import last from 'lodash/last';
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

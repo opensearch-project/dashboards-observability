@@ -55,6 +55,7 @@
     "lint-staged": "^13.1.0"
   },
   "resolutions": {
+    "@types/react": "^16.14.23",
     "react-syntax-highlighter": "^15.4.3",
     "prismjs": "^1.22.0",
     "trim": "^1.0.0",

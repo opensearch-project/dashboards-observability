@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import _ from 'lodash';
+import uniqueId from 'lodash/uniqueId';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,7 +37,7 @@ export function DocViewer(props: IDocViewerProps) {
   const getTabList = () => {
     return [
       {
-        id: _.uniqueId('doc_viewer_tab_'),
+        id: uniqueId('doc_viewer_tab_'),
         name: 'Table',
         component: (tabProps: any) => (
           <DocViewTable
@@ -50,13 +50,13 @@ export function DocViewer(props: IDocViewerProps) {
         otherProps: {},
       },
       {
-        id: _.uniqueId('doc_viewer_tab_'),
+        id: uniqueId('doc_viewer_tab_'),
         name: 'JSON',
         component: (tabProps: any) => <JsonCodeBlock {...tabProps} />,
         otherProps: {},
       },
       {
-        id: _.uniqueId('doc_viewer_tab_'),
+        id: uniqueId('doc_viewer_tab_'),
         name: (
           <>
             <span>Traces</span>

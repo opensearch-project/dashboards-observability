@@ -4,7 +4,6 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
 import { LatencyPlt, LinePlt } from '../common/plots/latency_trend_plt';
 

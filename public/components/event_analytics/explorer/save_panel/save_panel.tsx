@@ -13,7 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useEffect } from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useDispatch, useSelector } from 'react-redux';
 import SavedObjects from '../../../../services/saved_objects/event_analytics/saved_objects';
 import {

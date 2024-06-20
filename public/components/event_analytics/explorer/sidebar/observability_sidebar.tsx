@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import _, { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
 import { selectQueryResult } from '../../redux/slices/query_result_slice';
 import { selectFields } from '../../redux/slices/field_slice';

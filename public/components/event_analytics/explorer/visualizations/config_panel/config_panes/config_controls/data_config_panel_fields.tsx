@@ -15,7 +15,9 @@ import {
   EuiFormRow,
   EuiFormLabel,
 } from '@elastic/eui';
-import { isArray, isEmpty, lowerCase } from 'lodash';
+import isArray from 'lodash/isArray';
+import isEmpty from 'lodash/isEmpty';
+import lowerCase from 'lodash/lowerCase';
 import {
   AGGREGATIONS,
   CUSTOM_LABEL,

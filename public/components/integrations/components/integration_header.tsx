@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
 import {
   OPENSEARCH_CATALOG_URL,

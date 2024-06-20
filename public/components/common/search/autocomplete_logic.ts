@@ -4,7 +4,7 @@
  */
 
 import DSLService from 'public/services/requests/dsl';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { getDataValueQuery } from './queries/data_queries';
 import {
   statsCommands,

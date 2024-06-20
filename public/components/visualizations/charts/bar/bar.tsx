@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { last } from 'lodash';
+import last from 'lodash/last';
 import {
   AGGREGATIONS,
   BREAKDOWNS,

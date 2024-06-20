@@ -13,7 +13,7 @@ import {
   EuiModalHeaderTitle,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import _ from 'lodash';
+import differenceBy from 'lodash/differenceBy';
 import React, { useState } from 'react';
 import {
   CreateAccelerationForm,
@@ -88,7 +88,7 @@ export const DeleteFieldsModal = ({
           onClick={() => {
             setAccelerationFormData({
               ...accelerationFormData,
-              skippingIndexQueryData: _.differenceBy(
+              skippingIndexQueryData: differenceBy(
                 accelerationFormData.skippingIndexQueryData,
                 selectedFields,
                 'id'

@@ -14,7 +14,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import producer from 'immer';
-import _ from 'lodash';
+import filter from 'lodash/filter';
 import React, { useState } from 'react';
 import { ACCELERATION_AGGREGRATION_FUNCTIONS } from '../../../../../../../../../common/constants/data_sources';
 import {
@@ -51,7 +51,7 @@ export const ColumnExpression = ({
 
   const onDeleteColumnExpression = () => {
     const newColumnExpresionValue = [
-      ..._.filter(columnExpressionValues, (o) => o.id !== currentColumnExpressionValue.id),
+      ...filter(columnExpressionValues, (o) => o.id !== currentColumnExpressionValue.id),
     ];
     setAccelerationFormData(
       producer((accData) => {

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { forEach } from 'lodash';
 import {
   addVizToPanels,
   fetchPanel,

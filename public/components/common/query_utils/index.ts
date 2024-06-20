@@ -4,8 +4,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
+import isEmpty from 'lodash/isEmpty';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,

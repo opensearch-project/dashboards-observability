@@ -32,7 +32,7 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -364,7 +364,7 @@ export const VisaulizationFlyoutSO = ({
           <EuiFlexItem>
             {previewLoading ? (
               <EuiLoadingChart size="xl" mono className="visualization-loading-chart-preview" />
-            ) : !_.isEmpty(isPreviewError) ? (
+            ) : !isEmpty(isPreviewError) ? (
               <div className="visualization-error-div">
                 <EuiIcon type="alert" color="danger" size="s" />
                 <EuiSpacer size="s" />

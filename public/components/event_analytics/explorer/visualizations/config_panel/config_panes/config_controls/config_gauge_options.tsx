@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useCallback, Fragment } from 'react';
-import { indexOf } from 'lodash';
+import indexOf from 'lodash/indexOf';
 import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { PanelItem } from './config_panel_item';
 import { NUMERICAL_FIELDS } from '../../../../../../../../common/constants/shared';

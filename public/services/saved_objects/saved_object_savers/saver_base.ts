@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { CoreStart } from '../../../../../../src/core/public';
 import { ISavedObjectSaver } from './saver_interface';
 

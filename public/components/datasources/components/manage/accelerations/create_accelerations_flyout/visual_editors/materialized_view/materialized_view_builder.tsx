@@ -12,7 +12,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import producer from 'immer';
-import { map } from 'lodash';
+import map from 'lodash/map';
 import React, { useEffect, useState } from 'react';
 import {
   AggregationFunctionType,

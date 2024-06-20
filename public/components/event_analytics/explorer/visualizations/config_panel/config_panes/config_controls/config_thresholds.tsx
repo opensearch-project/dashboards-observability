@@ -18,7 +18,7 @@ import {
   htmlIdGenerator,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 export interface ThresholdUnitType {
   thid: string;

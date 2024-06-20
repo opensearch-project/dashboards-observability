@@ -18,7 +18,8 @@ import {
   EuiText,
   PropertySort,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
@@ -68,7 +69,7 @@ export function TracesTable(props: TracesTableProps) {
                   {item.length < 24 ? (
                     item
                   ) : (
-                    <div title={item}>{_.truncate(item, { length: 24 })}</div>
+                    <div title={item}>{truncate(item, { length: 24 })}</div>
                   )}
                 </EuiLink>
               </EuiFlexItem>
@@ -101,7 +102,7 @@ export function TracesTable(props: TracesTableProps) {
                 {item.length < 36 ? (
                   item
                 ) : (
-                  <div title={item}>{_.truncate(item, { length: 36 })}</div>
+                  <div title={item}>{truncate(item, { length: 36 })}</div>
                 )}
               </EuiText>
             ) : (
@@ -126,7 +127,7 @@ export function TracesTable(props: TracesTableProps) {
           align: 'right',
           sortable: true,
           render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}th`}</EuiText> : '-',
+            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}th`}</EuiText> : '-',
         },
         {
           field: 'error_count',
@@ -168,7 +169,7 @@ export function TracesTable(props: TracesTableProps) {
                     {item.length < 24 ? (
                       item
                     ) : (
-                      <div title={item}>{_.truncate(item, { length: 24 })}</div>
+                      <div title={item}>{truncate(item, { length: 24 })}</div>
                     )}
                   </EuiLink>
                 </EuiFlexItem>

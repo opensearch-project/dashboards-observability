@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { PPL_DOCUMENTATION_URL } from '../../../../common/constants/shared';
-import _ from 'lodash';
+import find from 'lodash/find';
 import React, { useState } from 'react';
 import { FlyoutContainers } from '../flyout_containers';
 import { Group1, Group2, Group3 } from './ppl_docs/groups';
@@ -33,7 +33,7 @@ type Props = {
 export const PPLReferenceFlyout = ({ module, closeFlyout }: Props) => {
   const allOptionsStatic = [{ label: 'Overview', value: overview }, Group1, Group2, Group3];
   const defaultOption =
-    module === 'explorer' ? [allOptionsStatic[0]] : [_.find(Group1.options, ['label', 'where'])];
+    module === 'explorer' ? [allOptionsStatic[0]] : [find(Group1.options, ['label', 'where'])];
   const [selectedOptions, setSelected] = useState(defaultOption);
   const [flyoutContent, setFlyoutContent] = useState(
     <EuiMarkdownFormat>{defaultOption[0].value}</EuiMarkdownFormat>

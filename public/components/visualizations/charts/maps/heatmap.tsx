@@ -4,7 +4,9 @@
  */
 import React, { useMemo } from 'react';
 import { colorPalette } from '@elastic/eui';
-import { forEach, isEmpty, map } from 'lodash';
+import forEach from 'lodash/forEach';
+import isEmpty from 'lodash/isEmpty';
+import map from 'lodash/map';
 import Plotly from 'plotly.js-dist';
 import {
   HEATMAP_PALETTE_COLOR,

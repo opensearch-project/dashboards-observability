@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { forIn } from 'lodash';
-
 export const getPlotlySharedConfigs = () => {
   return {
     layout: {

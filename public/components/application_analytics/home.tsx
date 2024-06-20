@@ -12,7 +12,7 @@ import SavedObjects from 'public/services/saved_objects/event_analytics/saved_ob
 import TimestampUtils from 'public/services/timestamp/timestamp';
 import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { isEmpty, last } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useDispatch } from 'react-redux';
 import { AppTable } from './components/app_table';
 import { Application } from './components/application';

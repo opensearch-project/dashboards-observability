@@ -5,7 +5,10 @@
 
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import { createSlice } from '@reduxjs/toolkit';
-import { keyBy, mergeWith, pick, sortBy } from 'lodash';
+import keyBy from 'lodash/keyBy';
+import mergeWith from 'lodash/mergeWith';
+import pick from 'lodash/pick';
+import sortBy from 'lodash/sortBy';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
   PPL_DATASOURCES_REQUEST,

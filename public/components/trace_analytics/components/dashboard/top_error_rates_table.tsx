@@ -19,7 +19,8 @@ import {
   PropertySort,
 } from '@elastic/eui';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import _ from 'lodash';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { FilterType } from '../common/filters/filters';
 import { NoMatchMessage, PanelTitle } from '../common/helper_functions';
@@ -91,7 +92,7 @@ export function ErrorRatesTable(props: {
               {item.length < 48 ? (
                 decodeURI(item)
               ) : (
-                <div title={item}>{_.truncate(decodeURI(item), { length: 48 })}</div>
+                <div title={item}>{truncate(decodeURI(item), { length: 48 })}</div>
               )}
             </EuiLink>
           ) : (
@@ -126,7 +127,7 @@ export function ErrorRatesTable(props: {
         align: 'right',
         sortable: true,
         dataType: 'number',
-        render: (item) => (item === 0 || item ? _.round(item, 2) : '-'),
+        render: (item) => (item === 0 || item ? round(item, 2) : '-'),
       },
       {
         field: 'dashboard_error_rate',
@@ -156,7 +157,7 @@ export function ErrorRatesTable(props: {
         align: 'right',
         sortable: false,
         render: (item) =>
-          item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}%`}</EuiText> : '-',
+          item === 0 || item ? <EuiText size="s">{`${round(item, 2)}%`}</EuiText> : '-',
       },
       {
         field: 'dashboard_traces',

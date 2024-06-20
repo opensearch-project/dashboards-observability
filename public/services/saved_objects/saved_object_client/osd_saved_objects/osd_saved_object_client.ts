@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,
