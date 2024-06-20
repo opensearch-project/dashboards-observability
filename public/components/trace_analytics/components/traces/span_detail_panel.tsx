@@ -79,8 +79,8 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  const refresh = _.debounce(() => {
-    if (_.isEmpty(props.colorMap)) return;
+  const refresh = debounce(() => {
+    if (isEmpty(props.colorMap)) return;
     const refreshDSL = spanFiltersToDSL();
     setDSL(refreshDSL);
     handleSpansGanttRequest(
