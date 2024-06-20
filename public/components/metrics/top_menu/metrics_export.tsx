@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
+import { I18nProvider } from '@osd/i18n/react';
 import max from 'lodash/max';
 import React, { useEffect } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
