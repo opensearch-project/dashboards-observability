@@ -233,37 +233,33 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
     table: [],
     ganttMaxX: 0,
   };
+  const isJaeger = mode === 'jaeger';
+
   if (hits.length === 0) return data;
 
-  const minStartTime =
-    mode === 'jaeger'
-      ? microToMilliSec(hits[hits.length - 1].sort[0])
-      : nanoToMilliSec(hits[hits.length - 1].sort[0]);
+  const minStartTime = isJaeger
+    ? microToMilliSec(hits[hits.length - 1].sort[0])
+    : nanoToMilliSec(hits[hits.length - 1].sort[0]);
   let maxEndTime = 0;
 
   hits.forEach((hit: any) => {
-    const startTime =
-      mode === 'jaeger'
-        ? microToMilliSec(hit.sort[0]) - minStartTime
-        : nanoToMilliSec(hit.sort[0]) - minStartTime;
-    const duration =
-      mode === 'jaeger'
-        ? round(microToMilliSec(hit._source.duration), 2)
-        : round(nanoToMilliSec(hit._source.durationInNanos), 2);
-    const serviceName =
-      mode === 'jaeger'
-        ? get(hit, ['_source', 'process']).serviceName
-        : get(hit, ['_source', 'serviceName']);
-    const name =
-      mode === 'jaeger' ? get(hit, '_source.operationName') : get(hit, '_source.name');
-    const error =
-      mode === 'jaeger'
-        ? hit._source.tag?.['error'] === true
-          ? ' \u26a0 Error'
-          : ''
-        : hit._source['status.code'] === 2
+    const startTime = isJaeger
+      ? microToMilliSec(hit.sort[0]) - minStartTime
+      : nanoToMilliSec(hit.sort[0]) - minStartTime;
+    const duration = isJaeger
+      ? round(microToMilliSec(hit._source.duration), 2)
+      : round(nanoToMilliSec(hit._source.durationInNanos), 2);
+    const serviceName = isJaeger
+      ? get(hit, ['_source', 'process']).serviceName
+      : get(hit, ['_source', 'serviceName']);
+    const name = isJaeger ? get(hit, '_source.operationName') : get(hit, '_source.name');
+    const error = isJaeger
+      ? hit._source.tag?.['error'] === true
         ? ' \u26a0 Error'
-        : '';
+        : ''
+      : hit._source['status.code'] === 2
+      ? ' \u26a0 Error'
+      : '';
     const uniqueLabel = `${serviceName} <br>${name} ` + uuid();
     maxEndTime = Math.max(maxEndTime, startTime + duration);
 
@@ -288,7 +284,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         orientation: BarOrientation.horizontal,
         hoverinfo: 'none',
         showlegend: false,
-        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
+        spanId: isJaeger ? hit._source.spanID : hit._source.spanId,
       },
       {
         x: [duration],
@@ -303,7 +299,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         type: 'bar',
         orientation: BarOrientation.horizontal,
         hovertemplate: '%{x}<extra></extra>',
-        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
+        spanId: isJaeger ? hit._source.spanID : hit._source.spanId,
       }
     );
   });

@@ -64,6 +64,8 @@ export function DashboardContent(props: DashboardProps) {
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
   const { setToast } = useToast();
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
 
   useEffect(() => {
     if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
@@ -91,8 +93,7 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
+      ((isDataPrepper && dataPrepperIndicesExist) || (isJaeger && jaegerIndicesExist))
     )
       refresh();
   }, [
@@ -140,7 +141,7 @@ export function DashboardContent(props: DashboardProps) {
       appConfigs
     );
     const fixedInterval = minFixedInterval(startTime, endTime);
-    if (mode === 'jaeger') {
+    if (isJaeger) {
       handleJaegerDashboardRequest(
         http,
         DSL,
@@ -175,7 +176,7 @@ export function DashboardContent(props: DashboardProps) {
         dataSourceMDSId[0].id,
         setPercentileMap
       ).finally(() => setLoading(false));
-    } else if (mode === 'data_prepper') {
+    } else if (isDataPrepper) {
       handleDashboardRequest(
         http,
         DSL,
@@ -276,10 +277,9 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
-      (mode === 'jaeger' && jaegerIndicesExist) ? (
+      {(isDataPrepper && dataPrepperIndicesExist) || (isJaeger && jaegerIndicesExist) ? (
         <div>
-          {mode === 'data_prepper' ? (
+          {isDataPrepper ? (
             <>
               <DashboardTable
                 items={tableItems}

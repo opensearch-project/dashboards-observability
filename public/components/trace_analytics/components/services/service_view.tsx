@@ -70,6 +70,8 @@ export function ServiceView(props: ServiceViewProps) {
   >('latency');
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
 
   const refresh = () => {
     const DSL = filtersToDsl(
@@ -87,7 +89,7 @@ export function ServiceView(props: ServiceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     );
-    if (mode === 'data_prepper') {
+    if (isDataPrepper) {
       handleServiceMapRequest(
         props.http,
         DSL,
@@ -132,7 +134,7 @@ export function ServiceView(props: ServiceViewProps) {
   const redirectToServiceTraces = () => {
     if (setCurrentSelectedService) setCurrentSelectedService('');
     setRedirect(true);
-    const filterField = mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
+    const filterField = isDataPrepper ? 'serviceName' : 'process.serviceName';
     props.addFilter({
       field: filterField,
       operator: 'is',
@@ -162,7 +164,7 @@ export function ServiceView(props: ServiceViewProps) {
     {
       id: 0,
       items: [
-        ...(mode === 'data_prepper'
+        ...(isDataPrepper
           ? [
               {
                 name: 'View logs',
@@ -272,7 +274,7 @@ export function ServiceView(props: ServiceViewProps) {
                     {props.serviceName || '-'}
                   </EuiText>
                 </EuiFlexItem>
-                {mode === 'data_prepper' ? (
+                {isDataPrepper ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Number of connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -284,7 +286,7 @@ export function ServiceView(props: ServiceViewProps) {
                 ) : (
                   <EuiFlexItem />
                 )}
-                {mode === 'data_prepper' ? (
+                {isDataPrepper ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -397,13 +399,13 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    if (mode === 'data_prepper') {
+    if (isDataPrepper) {
       spanDSL.query.bool.must.push({
         term: {
           serviceName: props.serviceName,
         },
       });
-    } else if (mode === 'jaeger') {
+    } else if (isJaeger) {
       spanDSL.query.bool.must.push({
         term: {
           'process.serviceName': props.serviceName,
@@ -483,7 +485,7 @@ export function ServiceView(props: ServiceViewProps) {
       <EuiSpacer size="xl" />
       {overview}
 
-      {mode === 'data_prepper' ? (
+      {isDataPrepper ? (
         <>
           <EuiSpacer />
           <ServiceMetrics

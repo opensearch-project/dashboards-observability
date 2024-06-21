@@ -18,6 +18,7 @@ export const getServicesQuery = (
   serviceName: string | undefined,
   DSL?: any
 ) => {
+  const isJaeger = mode === 'jaeger';
   const query = {
     size: 0,
     query: {
@@ -31,20 +32,20 @@ export const getServicesQuery = (
     aggs: {
       service: {
         terms: {
-          field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+          field: isJaeger ? 'process.serviceName' : 'serviceName',
           size: 10000,
         },
         aggs: {
           trace_count: {
             cardinality: {
-              field: mode === 'jaeger' ? 'traceID' : 'traceId',
+              field: isJaeger ? 'traceID' : 'traceId',
             },
           },
         },
       },
     },
   };
-  if (mode === 'jaeger') {
+  if (isJaeger) {
     if (serviceName) {
       query.query.bool.must.push({
         term: {

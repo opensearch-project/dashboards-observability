@@ -43,6 +43,8 @@ export function TracesContent(props: TracesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
 
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
   useEffect(() => {
@@ -60,8 +62,7 @@ export function TracesContent(props: TracesProps) {
   useEffect(() => {
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
+      ((isDataPrepper && dataPrepperIndicesExist) || (isJaeger && jaegerIndicesExist))
     )
       refresh();
   }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
@@ -138,7 +139,7 @@ export function TracesContent(props: TracesProps) {
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
-          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
+          buttonContent={isDataPrepper ? 'Trace Groups' : 'Service and Operations'}
           forceState={trigger}
           onToggle={onToggle}
           data-test-subj="trace-groups-service-operation-accordian"

@@ -42,6 +42,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     }>,
   });
   const { mode } = props;
+  const isJaeger = mode === 'jaeger';
   const [items, setItems] = useState<any>([]);
   const [total, setTotal] = useState(0);
 
@@ -67,7 +68,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   }, [total]);
 
   const columns: EuiDataGridColumn[] = [
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'spanID',
@@ -80,7 +81,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Span ID',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'references',
@@ -93,7 +94,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Parent span ID',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'traceID',
@@ -106,7 +107,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Trace ID',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? []
       : [
           {
@@ -114,7 +115,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Trace group',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'process',
@@ -127,7 +128,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Service',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'operationName',
@@ -140,7 +141,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'Operation',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'duration',
@@ -157,7 +158,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       id: 'startTime',
       display: 'Start time',
     },
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'jaegerEndTime',
@@ -170,7 +171,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             display: 'End time',
           },
         ]),
-    ...(mode === 'jaeger'
+    ...(isJaeger
       ? [
           {
             id: 'tag',
@@ -223,7 +224,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         case 'duration':
           return `${round(microToMilliSec(Math.max(0, value)), 2)} ms`;
         case 'startTime':
-          return mode === 'jaeger'
+          return isJaeger
             ? moment(round(microToMilliSec(Math.max(0, value)), 2)).format(
                 TRACE_ANALYTICS_DATE_FORMAT
               )
@@ -281,8 +282,8 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={total}
         renderCellValue={renderCellValue}
-        sorting={mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort }}
-        toolbarVisibility={mode === 'jaeger' ? false : true}
+        sorting={isJaeger ? undefined : { columns: tableParams.sortingColumns, onSort }}
+        toolbarVisibility={isJaeger ? false : true}
         pagination={{
           pageIndex: tableParams.page,
           pageSize: tableParams.size,

@@ -58,6 +58,8 @@ export function ServicesContent(props: ServicesProps) {
   const [isServiceTrendEnabled, setIsServiceTrendEnabled] = useState(false);
   const [serviceTrends, setServiceTrends] = useState<ServiceTrends>({});
   const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
 
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
@@ -83,8 +85,7 @@ export function ServicesContent(props: ServicesProps) {
     setFilteredService(newFilteredService);
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
+      ((isDataPrepper && dataPrepperIndicesExist) || (isJaeger && jaegerIndicesExist))
     )
       refresh(newFilteredService);
   }, [
@@ -163,7 +164,7 @@ export function ServicesContent(props: ServicesProps) {
 
   const addServicesGroupFilter = () => {
     const groupFilter = selectedItems.map(
-      (row) => (mode === 'jaeger' ? 'process.serviceName: ' : 'serviceName: ') + row.name
+      (row) => (isJaeger ? 'process.serviceName: ' : 'serviceName: ') + row.name
     );
     const filterQuery = groupFilter.join(' OR ');
     const newQuery = query ? `(${query}) AND (${filterQuery})` : `(${filterQuery})`;
@@ -207,7 +208,7 @@ export function ServicesContent(props: ServicesProps) {
         serviceTrends={serviceTrends}
       />
       <EuiSpacer size="m" />
-      {mode === 'data_prepper' && dataPrepperIndicesExist ? (
+      {isDataPrepper && dataPrepperIndicesExist ? (
         <ServiceMap
           addFilter={addFilter}
           serviceMap={serviceMap}
