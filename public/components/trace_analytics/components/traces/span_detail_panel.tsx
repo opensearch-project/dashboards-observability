@@ -13,8 +13,9 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import _ from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import debounce from 'lodash/debounce';
+import isEmpty from 'lodash/isEmpty';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { TraceAnalyticsMode } from '../../home';
@@ -78,8 +79,8 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  const refresh = _.debounce(() => {
-    if (_.isEmpty(props.colorMap)) return;
+  const refresh = debounce(() => {
+    if (isEmpty(props.colorMap)) return;
     const refreshDSL = spanFiltersToDSL();
     setDSL(refreshDSL);
     handleSpansGanttRequest(
@@ -185,15 +186,18 @@ export function SpanDetailPanel(props: {
 
   const [currentSpan, setCurrentSpan] = useState('');
 
-  const onClick = (event: any) => {
-    if (!event?.points) return;
-    const point = event.points[0];
-    if (fromApp) {
-      props.openSpanFlyout(point.data.spanId);
-    } else {
-      setCurrentSpan(point.data.spanId);
-    }
-  };
+  const onClick = useCallback(
+    (event: any) => {
+      if (!event?.points) return;
+      const point = event.points[0];
+      if (fromApp) {
+        props.openSpanFlyout(point.data.spanId);
+      } else {
+        setCurrentSpan(point.data.spanId);
+      }
+    },
+    [props.openSpanFlyout, setCurrentSpan, fromApp]
+  );
 
   const renderFilters = useMemo(() => {
     return spanFilters.map(({ field, value }) => (
@@ -210,15 +214,15 @@ export function SpanDetailPanel(props: {
     ));
   }, [spanFilters]);
 
-  const onHover = () => {
+  const onHover = useCallback(() => {
     const dragLayer = document.getElementsByClassName('nsewdrag')?.[0];
     dragLayer.style.cursor = 'pointer';
-  };
+  }, []);
 
-  const onUnhover = () => {
+  const onUnhover = useCallback(() => {
     const dragLayer = document.getElementsByClassName('nsewdrag')?.[0];
     dragLayer.style.cursor = '';
-  };
+  }, []);
 
   const toggleOptions = [
     {
@@ -252,6 +256,19 @@ export function SpanDetailPanel(props: {
     [DSL, setCurrentSpan]
   );
 
+  const ganttChart = useMemo(
+    () => (
+      <Plt
+        data={data.gantt}
+        layout={layout}
+        onClickHandler={onClick}
+        onHoverHandler={onHover}
+        onUnhoverHandler={onUnhover}
+      />
+    ),
+    [data.gantt, layout, onClick, onHover, onUnhover]
+  );
+
   return (
     <>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
@@ -278,17 +295,7 @@ export function SpanDetailPanel(props: {
         )}
         <EuiHorizontalRule margin="m" />
         <div style={{ overflowY: 'auto', maxHeight: 500 }}>
-          {toggleIdSelected === 'timeline' ? (
-            <Plt
-              data={data.gantt}
-              layout={layout}
-              onClickHandler={onClick}
-              onHoverHandler={onHover}
-              onUnhoverHandler={onUnhover}
-            />
-          ) : (
-            spanDetailTable
-          )}
+          {toggleIdSelected === 'timeline' ? ganttChart : spanDetailTable}
         </div>
       </EuiPanel>
       {!!currentSpan && (
