@@ -108,6 +108,7 @@ import {
   SetupDependencies,
 } from './types';
 import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
+import { registerAllPluginNavGroups } from './plugin_nav';
 
 interface PublicConfig {
   query_assist: {
@@ -345,6 +346,8 @@ export class ObservabilityPlugin
       order: observabilityIntegrationsPluginOrder,
       mount: appMountWithStartPage('integrations'),
     });
+
+    registerAllPluginNavGroups(core);
 
     core.application.register({
       id: observabilityDataConnectionsID,
