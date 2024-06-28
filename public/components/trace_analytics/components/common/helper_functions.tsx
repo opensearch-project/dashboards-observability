@@ -371,6 +371,8 @@ export const filtersToDsl = (
   page?: string,
   appConfigs: FilterType[] = []
 ) => {
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
   const DSL: any = {
     query: {
       bool: {
@@ -429,15 +431,15 @@ export const filtersToDsl = (
       let filterQuery = {};
       let field = filter.field;
       if (field === 'latency') {
-        if (mode === 'data_prepper') {
+        if (isDataPrepper) {
           field = 'traceGroupFields.durationInNanos';
-        } else if (mode === 'jaeger') {
+        } else if (isJaeger) {
           field = 'duration';
         }
       } else if (field === 'error') {
-        if (mode === 'data_prepper') {
+        if (isDataPrepper) {
           field = 'traceGroupFields.statusCode';
-        } else if (mode === 'jaeger') {
+        } else if (isJaeger) {
           field = 'tag.error';
         }
       }

@@ -36,6 +36,7 @@ export function SpanDetailPanel(props: {
   setData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
 }) {
   const { mode } = props;
+  const isJaeger = mode === 'jaeger';
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const fromApp = props.page === 'app';
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
@@ -96,40 +97,39 @@ export function SpanDetailPanel(props: {
   }, 150);
 
   const spanFiltersToDSL = () => {
-    const spanDSL: any =
-      mode === 'jaeger'
-        ? {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      traceID: props.traceId,
-                    },
+    const spanDSL: any = isJaeger
+      ? {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    traceID: props.traceId,
                   },
-                ],
-                filter: [],
-                should: [],
-                must_not: [],
-              },
+                },
+              ],
+              filter: [],
+              should: [],
+              must_not: [],
             },
-          }
-        : {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      traceId: props.traceId,
-                    },
+          },
+        }
+      : {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    traceId: props.traceId,
                   },
-                ],
-                filter: [],
-                should: [],
-                must_not: [],
-              },
+                },
+              ],
+              filter: [],
+              should: [],
+              must_not: [],
             },
-          };
+          },
+        };
     spanFilters.map(({ field, value }) => {
       if (value != null) {
         spanDSL.query.bool.must.push({
@@ -241,7 +241,7 @@ export function SpanDetailPanel(props: {
     () => (
       <SpanDetailTable
         http={props.http}
-        hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
+        hiddenColumns={isJaeger ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
         DSL={DSL}
         mode={mode}
         openFlyout={(spanId: string) => {

@@ -83,6 +83,7 @@ export function SpanDetailFlyout(props: {
   setCurrentSpan?: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { mode } = props;
+  const isDataPrepper = mode === 'data_prepper';
   const [span, setSpan] = useState<any>({});
 
   useEffect(() => {
@@ -141,16 +142,14 @@ export function SpanDetailFlyout(props: {
         getSpanValue(span, mode, 'PARENT_SPAN_ID') ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
-              <EuiCopy
-                textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
-              >
+              <EuiCopy textToCopy={isDataPrepper ? span.parentSpanId : span.references[0].spanID}>
                 {(copy) => (
                   <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
                 )}
               </EuiCopy>
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="parentSpanId">
-              {mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+              {isDataPrepper ? span.parentSpanId : span.references[0].spanID}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -171,7 +170,7 @@ export function SpanDetailFlyout(props: {
         getSpanFieldKey(mode, 'DURATION'),
         'Duration',
         `${
-          mode === 'data_prepper'
+          isDataPrepper
             ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
             : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
@@ -179,7 +178,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'START_TIME'),
         'Start time',
-        mode === 'data_prepper'
+        isDataPrepper
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -188,7 +187,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'END_TIME'),
         'End time',
-        mode === 'data_prepper'
+        isDataPrepper
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -197,7 +196,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'ERRORS'),
         'Errors',
-        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag?.error) ? (
+        (isDataPrepper ? span['status.code'] === 2 : span.tag?.error) ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
@@ -310,7 +309,7 @@ export function SpanDetailFlyout(props: {
                 <h2>Span detail</h2>
               </EuiTitle>
             </EuiFlexItem>
-            {mode === 'data_prepper' && (
+            {isDataPrepper && (
               <EuiFlexItem>
                 <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
                   View associated logs

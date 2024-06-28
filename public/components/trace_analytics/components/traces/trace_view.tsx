@@ -48,6 +48,7 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
 
 export function TraceView(props: TraceViewProps) {
   const { mode } = props;
+  const isDataPrepper = mode === 'data_prepper';
   const page = 'traceView';
   const renderTitle = (traceId: string) => {
     return (
@@ -95,7 +96,7 @@ export function TraceView(props: TraceViewProps) {
                   </EuiFlexGroup>
                 )}
               </EuiFlexItem>
-              {mode === 'data_prepper' ? (
+              {isDataPrepper ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Trace group name</EuiText>
                   <EuiText size="s" className="overview-content">
@@ -300,7 +301,7 @@ export function TraceView(props: TraceViewProps) {
             ) : null}
           </EuiPanel>
           <EuiSpacer />
-          {mode === 'data_prepper' ? (
+          {isDataPrepper ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}

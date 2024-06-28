@@ -67,6 +67,8 @@ export function ServicesTable(props: ServicesTableProps) {
     setIsServiceTrendEnabled,
     serviceTrends,
   } = props;
+  const isDataPrepper = mode === 'data_prepper';
+  const isJaeger = mode === 'jaeger';
 
   const selectionValue = {
     onSelectionChange: (selections: any[]) => setSelectedItems(selections),
@@ -74,7 +76,7 @@ export function ServicesTable(props: ServicesTableProps) {
 
   const nameColumnAction = (serviceName: string) => {
     addFilter({
-      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+      field: isJaeger ? 'process.serviceName' : 'serviceName',
       operator: 'is',
       value: serviceName,
       inverted: false,
@@ -101,7 +103,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
-            {mode === 'data_prepper' && (
+            {isDataPrepper && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   size="xs"
@@ -177,7 +179,7 @@ export function ServicesTable(props: ServicesTableProps) {
             />
           ),
         },
-        ...(mode === 'data_prepper'
+        ...(isDataPrepper
           ? [
               {
                 field: 'number_of_connected_services',
@@ -190,7 +192,7 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             ]
           : []),
-        ...(mode === 'data_prepper'
+        ...(isDataPrepper
           ? [
               {
                 field: 'connected_services',
@@ -221,7 +223,7 @@ export function ServicesTable(props: ServicesTableProps) {
                   onClick={() => {
                     setRedirect(true);
                     addFilter({
-                      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+                      field: isJaeger ? 'process.serviceName' : 'serviceName',
                       operator: 'is',
                       value: row.name,
                       inverted: false,
@@ -268,10 +270,7 @@ export function ServicesTable(props: ServicesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!(
-          (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && jaegerIndicesExist)
-        ) ? (
+        {!((isDataPrepper && dataPrepperIndicesExist) || (isJaeger && jaegerIndicesExist)) ? (
           <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 ? (
           <EuiInMemoryTable
