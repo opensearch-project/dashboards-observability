@@ -83,6 +83,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
           name: { type: 'string' },
           version: { type: 'string' },
           extension: { type: 'string' },
+          override: { type: 'boolean', nullable: true },
           type: { type: 'string' },
           data: { type: 'string', nullable: true },
           workflows: {
