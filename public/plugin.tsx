@@ -54,6 +54,9 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedTitle,
+  observabilityGettingStartedPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -289,6 +292,14 @@ export class ObservabilityPlugin
         coreStart.savedObjects
       );
     };
+
+    core.application.register({
+      id: observabilityGettingStartedID,
+      title: observabilityGettingStartedTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityGettingStartedPluginOrder,
+      mount: appMountWithStartPage('gettingStarted'),
+    });
 
     core.application.register({
       id: observabilityApplicationsID,

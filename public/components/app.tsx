@@ -21,6 +21,7 @@ import { Home as IntegrationsHome } from './integrations/home';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
+import { Home as GettingStartedHome } from './getting_started/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -51,6 +52,7 @@ const pages = {
   dashboards: CustomPanelsHome,
   integrations: IntegrationsHome,
   dataconnections: DataConnectionsHome,
+  gettingstarted: GettingStartedHome,
 };
 
 export const App = ({
@@ -68,7 +70,7 @@ export const App = ({
   dataSourceEnabled,
   savedObjectsMDSClient,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
+  const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
