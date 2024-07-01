@@ -52,7 +52,7 @@ const pages = {
   dashboards: CustomPanelsHome,
   integrations: IntegrationsHome,
   dataconnections: DataConnectionsHome,
-  gettingstarted: GettingStartedHome,
+  gettingStarted: GettingStartedHome,
 };
 
 export const App = ({

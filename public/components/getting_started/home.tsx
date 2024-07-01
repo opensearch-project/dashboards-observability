@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 
@@ -18,7 +18,9 @@ export const Home = (_props: HomeProps) => {
   return (
     <div>
       <HashRouter>
-        <Switch />
+        <Switch>
+          <Route exact path={'/'} render={() => <p>Hellowworld</p>} />
+        </Switch>
       </HashRouter>
     </div>
   );
