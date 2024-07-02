@@ -6,20 +6,43 @@
 import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  ChromeStart,
+  HttpStart,
+  NotificationsStart,
+} from '../../../../../src/core/public';
+import { NewGettingStarted } from './components/getting_started';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
-interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
-  parentBreadcrumbs: ChromeBreadcrumb[];
+export interface HomeProps extends RouteComponentProps {
+  pplService: any;
+  parentBreadcrumb: ChromeBreadcrumb;
+  http: HttpStart;
+  chrome: ChromeStart;
+  notifications: NotificationsStart;
 }
 
-export const Home = (_props: HomeProps) => {
+export const Home = (props: HomeProps) => {
+  const { http, chrome, pplService, notifications } = props;
+
+  const commonProps = {
+    http,
+    chrome,
+    pplService,
+    notifications,
+  };
+
   return (
     <div>
       <HashRouter>
         <Switch>
-          <Route exact path={'/'} render={() => <p>Hellowworld</p>} />
+          <Route
+            exact
+            path={['/']}
+            render={(_routerProps) => <NewGettingStarted {...commonProps} />}
+          />
         </Switch>
       </HashRouter>
     </div>
