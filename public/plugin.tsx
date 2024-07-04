@@ -50,6 +50,7 @@ import {
   observabilityPanelsID,
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
+  observabilityPanelsTitleForNav,
   observabilityPluginOrder,
   observabilityTracesID,
   observabilityTracesPluginOrder,
@@ -323,6 +324,18 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('traces'),
     });
 
+    // NEEDS CORRECTION OR REFACTOR //ADAM
+    // The new-added applications need to be wrapped by a feature flag check.
+    // if (core.chrome.navGroup.getNavGroupEnabled()) {
+    //   core.application.register({
+    //     id: "observability-traces-nav",
+    //     title: observabilityTracesTitle,
+    //     order: observabilityTracesPluginOrder,
+    //     category: DEFAULT_APP_CATEGORIES.investigate,
+    //     mount: appMountWithStartPage('traces'),
+    //   });
+    // }
+
     core.application.register({
       id: observabilityNotebookID,
       title: observabilityNotebookTitle,
@@ -331,13 +344,23 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('notebooks'),
     });
 
-    core.application.register({
-      id: observabilityPanelsID,
-      title: observabilityPanelsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('dashboards'),
-    });
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityPanelsID,
+        title: observabilityPanelsTitleForNav,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityPanelsPluginOrder,
+        mount: appMountWithStartPage('dashboards'),
+      });
+    } else {
+      core.application.register({
+        id: observabilityPanelsID,
+        title: observabilityPanelsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityPanelsPluginOrder,
+        mount: appMountWithStartPage('dashboards'),
+      });
+    }
 
     core.application.register({
       id: observabilityIntegrationsID,
