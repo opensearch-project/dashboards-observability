@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedQuery, SavedVisualization } from '../../../../common/types/explorer';
-import { SAVED_QUERY, SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
+import { SAVED_NOTEBOOK, SAVED_QUERY, SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
+import { SavedNotebook, SavedQuery, SavedVisualization } from '../../../../common/types/explorer';
 
 export interface SavedObjectsCreateResponse {
   objectId: string;
@@ -27,7 +27,11 @@ export interface ObservabilitySavedQuery extends ObservabilitySavedObjectBase {
   [SAVED_QUERY]: SavedQuery;
 }
 
-export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery;
+export interface ObservabilitySavedNotebook extends ObservabilitySavedObjectBase {
+  [SAVED_NOTEBOOK]: SavedNotebook;
+}
+
+export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery | ObservabilitySavedNotebook;
 
 export interface SavedObjectsGetParams {
   objectId: string;

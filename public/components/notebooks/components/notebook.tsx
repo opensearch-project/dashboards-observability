@@ -273,8 +273,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       modalLayout: getCustomModal(
         (newName: string) => {
           this.props.renameNotebook(newName, this.props.openedNoteId).then((res) => {
+            console.log(res)
             this.setState({ isModalVisible: false });
-            window.location.assign(`#/${res.message.objectId}`);
+            window.location.assign(`#/${res.id}`);
             setTimeout(() => {
               this.loadNotebook();
             }, 300);
@@ -363,9 +364,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       paragraphInput: newParaContent,
       inputType: inpType,
     };
-
+    console.log(addParaObj)
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/paragraph/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
@@ -448,7 +449,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       noteId: this.props.openedNoteId,
     };
     this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/paragraph/clearall/`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
@@ -569,12 +570,41 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
   };
 
-  loadNotebook = () => {
-    this.showParagraphRunning('queue');
+  loadNotebook = async () => {
+    // this.showParagraphRunning('queue');
+    // await OSDSavedNotebookClient.getInstance().get({
+    //   "objectId": this.props.openedNoteId,
+    // }).then(async response => {
+    //   const savedNotebooks = {
+    //     ...response.observabilityObjectList[0].savedNotebook,
+    //     id: response.observabilityObjectList[0].objectId
+    //   }
+    //   console.log(savedNotebooks)
+    //   this.setBreadcrumbs(savedNotebooks.path);
+    //     let index = 0;
+    //     for (index = 0; index < savedNotebooks.paragraphs.length; ++index) {
+    //       // if the paragraph is a query, load the query output
+    //       if (savedNotebooks.paragraphs[index].output[0]?.outputType === 'QUERY') {
+    //         await this.loadQueryResultsFromInput(savedNotebooks.paragraphs[index]);
+    //       }
+    //     }
+    //     this.setState(savedNotebooks, this.parseAllParagraphs);
+    //   })
+    //   .catch((err) => {
+    //     this.props.setToast(
+    //       'Error fetching notebooks, please make sure you have the correct permission.',
+    //       'danger'
+    //     );
+    //     console.error(err);
+    //   });
+    // console.log(this.props.openedNoteId)
+    // let s = await OSDSavedNotebookClient.getInstance().get({objectId: `observability-notebook:${this.props.openedNoteId}`})
+    
     this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/note/` + this.props.openedNoteId)
+      .get(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/` + this.props.openedNoteId)
       .then(async (res) => {
-        this.setBreadcrumbs(res.path);
+        console.log(res,'from notebooks')
+        this.setBreadcrumbs(res.name);
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output

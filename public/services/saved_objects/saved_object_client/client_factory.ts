@@ -4,14 +4,16 @@
  */
 
 import {
+  NOTEBOOK_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../../../common/types/observability_saved_object_attributes';
 import { ISavedObjectsClient } from './client_interface';
 import { OSDSavedObjectClient } from './osd_saved_objects/osd_saved_object_client';
-import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
 import { OSDSavedSearchClient } from './osd_saved_objects/saved_searches';
+import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
 import { PPLSavedQueryClient, PPLSavedVisualizationClient } from './ppl';
+import { PPLSavedNotebookClient } from './ppl/saved_notebook';
 
 interface GetSavedObjectsClientOptions {
   objectId: string;
@@ -28,6 +30,8 @@ export const getSavedObjectsClient = (
       return OSDSavedVisualizationClient.getInstance();
     case SEARCH_SAVED_OBJECT:
       return OSDSavedSearchClient.getInstance();
+    case NOTEBOOK_SAVED_OBJECT:
+      return OSDSavedVisualizationClient.getInstance();
 
     default:
       break;
@@ -36,6 +40,8 @@ export const getSavedObjectsClient = (
   switch (options.objectType) {
     case 'savedVisualization':
       return PPLSavedVisualizationClient.getInstance();
+    case 'savedNotebook':
+      return PPLSavedNotebookClient.getInstance();
 
     default:
       return PPLSavedQueryClient.getInstance();

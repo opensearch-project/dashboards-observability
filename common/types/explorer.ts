@@ -183,6 +183,14 @@ export interface SavedVisualization extends SavedObjectAttributes {
   metricType?: typeof PROMQL_METRIC_SUBTYPE | typeof OTEL_METRIC_SUBTYPE; // exists if sub type is metric
 }
 
+export interface SavedNotebook extends SavedObjectAttributes {
+  name: string;
+  dateCreated: string;
+  dateModified: string;
+  backend: string;
+  paragraphs: [];
+}
+
 export interface ExplorerDataType {
   jsonData: object[];
   jsonDataAll: object[];

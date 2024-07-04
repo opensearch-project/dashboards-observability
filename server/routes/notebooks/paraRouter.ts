@@ -12,6 +12,7 @@ import {
 } from '../../../../../src/core/server';
 import { NOTEBOOKS_API_PREFIX, wreckOptions } from '../../../common/constants/notebooks';
 import { BACKEND } from '../../adaptors/notebooks';
+import { clearParagraphs, createParagraphs, deleteParagraphs } from '../../adaptors/notebooks/saved_object_paragraphs';
 import {
   DefaultNotebooks,
   DefaultParagraph,
@@ -276,4 +277,99 @@ export function registerParaRoute(router: IRouter) {
       }
     }
   );
+
+  router.post(
+    {
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`,
+      validate: {
+        body: schema.object({
+          noteId: schema.string(),
+          paragraphIndex: schema.number(),
+          paragraphInput: schema.string(),
+          inputType: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        console.log(request.body)
+        const saveResponse = await createParagraphs(request.body, context.core.savedObjects.client)
+        return response.ok({
+          body: saveResponse,
+        });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+  router.put(
+    {
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`,
+      validate: {
+        body: schema.object({
+          noteId: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        const clearParaResponse = await clearParagraphs(request.body, context.core.savedObjects.client)
+        return response.ok({
+          body: clearParaResponse,
+        });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+  router.delete(
+    {
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`,
+      validate: {
+        query: schema.object({
+          noteId: schema.string(),
+          paragraphId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+      const params = {
+        noteId: request.query.noteId,
+        paragraphId: request.query.paragraphId,
+      };
+      try {
+        const deleteResponse = await deleteParagraphs(params, context.core.savedObjects.client)
+        return response.ok({
+          body: deleteResponse,
+        });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+  
 }

@@ -9,15 +9,15 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
-import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import {
   NOTEBOOKS_API_PREFIX,
-  NOTEBOOKS_DOCUMENTATION_URL,
+  NOTEBOOKS_DOCUMENTATION_URL
 } from '../../../../common/constants/notebooks';
-import { Notebook } from './notebook';
+import PPLService from '../../../services/requests/ppl';
 import { NoteTable } from './note_table';
+import { Notebook } from './notebook';
 
 /*
  * "Main" component renders the whole Notebooks as a single page application
@@ -80,17 +80,37 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Fetches path and id for all stored notebooks
-  fetchNotebooks = () => {
+  fetchNotebooks = async () => {
+
+    // await OSDSavedNotebookClient.getInstance().getBulk({
+    //   "type": "observability-notebook",
+    // }).then(response => {
+    //   // Extract savedNotebook and add objectId to each
+    //   console.log(response)
+    //   const savedNotebooks = response.observabilityObjectList.map(item => {
+    //       return {
+    //           ...item.savedNotebook,
+    //           id: item.objectId
+    //       };
+    //   });
+  
+    //   // Set the extracted objects to the state
+    //   this.setState({data: savedNotebooks });
+    // });
+    
     return this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/`)
-      .then((res) => this.setState(res))
+      .get(`${NOTEBOOKS_API_PREFIX}/savedNotebooks`)
+      .then((res) => {this.setState(res)
+      console.log(this.state.data)}
+    
+    )
       .catch((err) => {
         console.error('Issue in fetching the notebooks', err.body.message);
       });
   };
 
   // Creates a new notebook
-  createNotebook = (newNoteName: string) => {
+  createNotebook = async (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       window.location.assign('#/');
@@ -99,12 +119,36 @@ export class Main extends React.Component<MainProps, MainState> {
     const newNoteObject = {
       name: newNoteName,
     };
-
+    // let noteObject : DefaultNotebooks = {
+    //   dateCreated: new Date().toISOString(),
+    //   name: newNoteObject.name,
+    //   dateModified: new Date().toISOString(),
+    //   backend: 'Default',
+    //   paragraphs: [],
+    // };
+    // try{
+    //   const savedObject = await OSDSavedNotebookClient.getInstance().create(noteObject);
+    //   this.setToast(`Notebook "${newNoteName}" successfully created!`);
+    //   console.log(savedObject)
+    //   window.location.assign(`#/${savedObject.object.id}`);
+    // }
+    // catch (err){
+    //     this.setToast(
+    //       'Please ask your administrator to enable Notebooks for you.',
+    //       'danger',
+    //       <EuiLink href={NOTEBOOKS_DOCUMENTATION_URL} target="_blank">
+    //         Documentation
+    //       </EuiLink>
+    //     );
+    //     console.error(err);
+    // }
+    // this.createSavedNotebook(newNoteObject)
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebooks`, {
         body: JSON.stringify(newNoteObject),
       })
       .then(async (res) => {
+        console.log(res, 'created here')
         this.setToast(`Notebook "${newNoteName}" successfully created!`);
         window.location.assign(`#/${res}`);
       })
@@ -121,7 +165,7 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Renames an existing notebook
-  renameNotebook = (editedNoteName: string, editedNoteID: string): Promise<any> => {
+  renameNotebook = async (editedNoteName: string, editedNoteID: string): Promise<any> => {
     if (editedNoteName.length >= 50 || editedNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       return;
@@ -130,13 +174,37 @@ export class Main extends React.Component<MainProps, MainState> {
       name: editedNoteName,
       noteId: editedNoteID,
     };
-
+    // console.log(renameNoteObject)
+    // let noteObject  = {
+    //   name: editedNoteName,
+    //   dateModified: new Date().toISOString(),
+    //   objectId: editedNoteID
+    // };
+    // await OSDSavedNotebookClient.getInstance().update(noteObject)
+    // .then(async response => {
+    //   this.setState((prevState) => {
+    //     const newData = [...prevState.data];
+    //     const renamedNotebook = newData.find((notebook) => notebook.id === editedNoteID);
+    //     if (renamedNotebook) renamedNotebook.path = editedNoteName;
+    //     return { data: newData };
+    //   });
+    //   this.setToast(`Notebook successfully renamed into "${editedNoteName}"`);
+    //   return response;
+    // })
+    // .catch((err) => {
+    //   this.setToast(
+    //     'Error renaming notebook, please make sure you have the correct permission.',
+    //     'danger'
+    //   );
+    //   console.error(err.body.message);
+    // });
     return this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/note/rename`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/rename`, {
         body: JSON.stringify(renameNoteObject),
       })
       .then((res) => {
         this.setState((prevState) => {
+          console.log(res,prevState)
           const newData = [...prevState.data];
           const renamedNotebook = newData.find((notebook) => notebook.id === editedNoteID);
           if (renamedNotebook) renamedNotebook.path = editedNoteName;
@@ -155,7 +223,7 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Clones an existing notebook, return new notebook's id
-  cloneNotebook = (clonedNoteName: string, clonedNoteID: string): Promise<string> => {
+  cloneNotebook = async (clonedNoteName: string, clonedNoteID: string): Promise<string> => {
     if (clonedNoteName.length >= 50 || clonedNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       return Promise.reject();
@@ -164,25 +232,73 @@ export class Main extends React.Component<MainProps, MainState> {
       name: clonedNoteName,
       noteId: clonedNoteID,
     };
+    // let savedNotebooks: DefaultNotebooks;
+    // await OSDSavedNotebookClient.getInstance().get({
+    //   "objectId": clonedNoteID,
+    // }).then(async response => {
+    //   console.log(response, 'from get')
+    //   savedNotebooks = {
+    //     dateCreated: response.observabilityObjectList[0].savedNotebook.dateCreated,
+    //     name: response.observabilityObjectList[0].savedNotebook.name,
+    //     dateModified: response.observabilityObjectList[0].savedNotebook.dateModified,
+    //     paragraphs: response.observabilityObjectList[0].savedNotebook.paragraphs,
+    //     backend: response.observabilityObjectList[0].savedNotebook.backend,
+    //   }
+    //   console.log(savedNotebooks,'clone')
+    // })
+
+    // let cloneNotebook: DefaultNotebooks = {
+    //   ...savedNotebooks,
+    //   dateCreated: new Date().toISOString(),
+    //   dateModified: new Date().toISOString(),
+    //   name: clonedNoteName
+
+    // };
+    //   console.log(cloneNotebook)
+    //   await OSDSavedNotebookClient.getInstance().create(cloneNotebook)
+    //   .then(async response => {
+    //     console.log('from res',response)
+    //     this.setState((prevState) => ({
+    //       data: [
+    //         ...prevState.data,
+    //         {
+    //           path: clonedNoteName,
+    //           id: response.objectId,
+    //           dateCreated: response.object.attributes.savedNotebook.dateCreated,
+    //           dateModified: response.object.attributes.savedNotebook.dateModified,
+    //         },
+    //       ],
+    //     }));
+    //     this.setToast(`Notebook "${clonedNoteName}" successfully created!`);
+    //     return response.object.id;
+    //   })
+    //   .catch((err) => {
+    //     this.setToast(
+    //       'Error cloning notebook, please make sure you have the correct permission.',
+    //       'danger'
+    //     );
+    //     console.error(err.body.message);
+    //   });
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note/clone`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/clone`, {
         body: JSON.stringify(cloneNoteObject),
       })
       .then((res) => {
+        console.log(res,'from clone')
         this.setState((prevState) => ({
           data: [
             ...prevState.data,
             {
               path: clonedNoteName,
-              id: res.body.id,
-              dateCreated: res.body.dateCreated,
-              dateModified: res.body.dateModified,
+              id: res.id,
+              dateCreated: res.attributes.dateCreated,
+              dateModified: res.attributes.dateModified,
             },
           ],
         }));
         this.setToast(`Notebook "${clonedNoteName}" successfully created!`);
-        return res.body.id;
+        return res.id;
       })
       .catch((err) => {
         this.setToast(
@@ -194,25 +310,74 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Deletes existing notebooks
-  deleteNotebook = (notebookList: string[], toastMessage?: string) => {
-    return this.props.http
-      .delete(`${NOTEBOOKS_API_PREFIX}/note/${notebookList.join(',')}`)
-      .then((res) => {
-        this.setState((prevState) => ({
-          data: prevState.data.filter((notebook) => !notebookList.includes(notebook.id)),
-        }));
-        const message =
-          toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
-        this.setToast(message);
-        return res;
-      })
-      .catch((err) => {
-        this.setToast(
-          'Error deleting notebook, please make sure you have the correct permission.',
-          'danger'
-        );
-        console.error(err.body.message);
-      });
+  deleteNotebook = async (notebookList: string[], toastMessage?: string) => {
+      const deleteNotebook = (id: string) => {
+        return this.props.http
+          .delete(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${id}`)
+          .then((res) => {
+            this.setState((prevState) => ({
+              data: prevState.data.filter((notebook) => notebook.id !== id),
+            }));
+            return res;
+          });
+      };
+    
+      const promises = notebookList.map((id) =>
+        deleteNotebook(id).catch((err) => {
+          this.setToast(
+            'Error deleting notebook, please make sure you have the correct permission.',
+            'danger'
+          );
+          console.error(err.body.message);
+        })
+      );
+    
+      Promise.all(promises)
+        .then(() => {
+          const message =
+            toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
+          this.setToast(message);
+        })
+        .catch((err) => {
+          console.error('Error in deleting multiple notebooks', err);
+        });
+    // console.log(notebookList, toastMessage)
+    // await OSDSavedNotebookClient.getInstance().deleteBulk({objectIdList: notebookList})
+    // .then(async response => {
+    //   this.setState((prevState) => ({
+    //     data: prevState.data.filter((notebook) => !notebookList.includes(notebook.id)),
+    //   }));
+    //   const message =
+    //     toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
+    //   this.setToast(message);
+    //   return response;
+    // })
+    // .catch((err) => {
+    //   this.setToast(
+    //     'Error deleting notebook, please make sure you have the correct permission.',
+    //     'danger'
+    //   );
+    //   console.error(err.body.message);
+    // })
+
+    // return this.props.http
+    //   .delete(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${notebookList.join(',')}`)
+    //   .then((res) => {
+    //     this.setState((prevState) => ({
+    //       data: prevState.data.filter((notebook) => !notebookList.includes(notebook.id)),
+    //     }));
+    //     const message =
+    //       toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
+    //     this.setToast(message);
+    //     return res;
+    //   })
+    //   .catch((err) => {
+    //     this.setToast(
+    //       'Error deleting notebook, please make sure you have the correct permission.',
+    //       'danger'
+    //     );
+    //     console.error(err.body.message);
+    //   });
   };
 
   addSampleNotebooks = async () => {
@@ -269,11 +434,13 @@ export class Main extends React.Component<MainProps, MainState> {
           },
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));
+
       await this.props.http
-        .post(`${NOTEBOOKS_API_PREFIX}/note/addSampleNotebooks`, {
+        .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebooks/addSampleNotebooks`, {
           body: JSON.stringify({ visIds }),
         })
         .then((res) => {
+          console.log(res)
           const newData = res.body.map((notebook: any) => ({
             path: notebook.name,
             id: notebook.id,

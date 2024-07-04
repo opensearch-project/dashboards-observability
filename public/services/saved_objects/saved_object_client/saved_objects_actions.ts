@@ -4,13 +4,15 @@
  */
 
 import {
+  NOTEBOOK_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../../../common/types/observability_saved_object_attributes';
 import { ISavedObjectRequestParams } from '../event_analytics/saved_objects';
 import { OSDSavedObjectClient } from './osd_saved_objects/osd_saved_object_client';
-import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
+import { OSDSavedNotebookClient } from './osd_saved_objects/saved_notebooks';
 import { OSDSavedSearchClient } from './osd_saved_objects/saved_searches';
+import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
 import { ObservabilitySavedObjectsType } from './osd_saved_objects/types';
 import { PPLSavedQueryClient } from './ppl';
 import {
@@ -35,6 +37,8 @@ export class SavedObjectsActions {
         return OSDSavedVisualizationClient.getInstance().get(params);
       case SEARCH_SAVED_OBJECT:
         return OSDSavedSearchClient.getInstance().get(params);
+      case NOTEBOOK_SAVED_OBJECT:
+          return OSDSavedNotebookClient.getInstance().get(params);
 
       default:
         // for non-osd objects it does not matter which client implementation
@@ -75,6 +79,20 @@ export class SavedObjectsActions {
       };
     }
 
+    if (params.objectType?.includes('savedNotebook')) {
+      const osdNotebookObjects = await OSDSavedNotebookClient.getInstance().getBulk();
+      if (objects.totalHits && osdNotebookObjects.totalHits) {
+        objects.totalHits += osdNotebookObjects.totalHits;
+      }
+      objects = {
+        ...objects,
+        observabilityObjectList: [
+          ...objects.observabilityObjectList,
+          ...osdNotebookObjects.observabilityObjectList,
+        ],
+      };
+    }
+
     if (params.sortOrder === 'asc') {
       objects.observabilityObjectList.sort((a, b) => a.lastUpdatedTimeMs - b.lastUpdatedTimeMs);
     } else {
@@ -90,6 +108,8 @@ export class SavedObjectsActions {
         return OSDSavedVisualizationClient.getInstance().delete(params);
       case SEARCH_SAVED_OBJECT:
         return OSDSavedSearchClient.getInstance().delete(params);
+      case NOTEBOOK_SAVED_OBJECT:
+        return OSDSavedNotebookClient.getInstance().delete(params);
 
       default:
         return PPLSavedQueryClient.getInstance().delete(params);
@@ -129,6 +149,16 @@ export class SavedObjectsActions {
     if (idMap[SEARCH_SAVED_OBJECT]?.length) {
       const searchDeleteResponses = await OSDSavedSearchClient.getInstance().deleteBulk({
         objectIdList: idMap[SEARCH_SAVED_OBJECT],
+      });
+      responses.deleteResponseList = {
+        ...responses.deleteResponseList,
+        ...searchDeleteResponses.deleteResponseList,
+      };
+    }
+
+    if (idMap[NOTEBOOK_SAVED_OBJECT]?.length) {
+      const searchDeleteResponses = await OSDSavedNotebookClient.getInstance().deleteBulk({
+        objectIdList: idMap[NOTEBOOK_SAVED_OBJECT],
       });
       responses.deleteResponseList = {
         ...responses.deleteResponseList,

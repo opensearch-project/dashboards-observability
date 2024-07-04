@@ -44,6 +44,7 @@ export const HAS_SAVED_TIMESTAMP = 'hasSavedTimestamp';
 export const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
 export const SAVED_QUERY = 'savedQuery';
 export const SAVED_VISUALIZATION = 'savedVisualization';
+export const SAVED_NOTEBOOK = 'savedNotebook';
 export const SAVED_OBJECT_ID = 'savedObjectId';
 export const SAVED_OBJECT_TYPE = 'objectType';
 export const TAB_CREATED_TYPE = 'tabCreatedType';

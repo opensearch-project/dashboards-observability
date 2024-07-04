@@ -1210,22 +1210,22 @@ export const getSampleNotebooks = (visIds: string[]) => {
   const dateString = new Date().toISOString();
   return [
     {
-      notebook: getDemoNotebook(dateString, visIds[2]),
+      savedNotebook: getDemoNotebook(dateString, visIds[2]),
       dateModified: dateString,
       dateCreated: dateString,
     },
     {
-      notebook: getSQLNotebook(dateString),
+      savedNotebook: getSQLNotebook(dateString),
       dateModified: dateString,
       dateCreated: dateString,
     },
     {
-      notebook: getPPLNotebook(dateString),
+      savedNotebook: getPPLNotebook(dateString),
       dateModified: dateString,
       dateCreated: dateString,
     },
     {
-      notebook: getRootCauseNotebook(dateString, visIds),
+      savedNotebook: getRootCauseNotebook(dateString, visIds),
       dateModified: dateString,
       dateCreated: dateString,
     },
