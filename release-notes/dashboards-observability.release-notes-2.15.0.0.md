@@ -36,6 +36,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.15.0
 * [Bug fix] Add conditional rendering for data connection page's tabs ([#1756](https://github.com/opensearch-project/dashboards-observability/pull/1756))
 * removed update button from explorer ([#1755](https://github.com/opensearch-project/dashboards-observability/pull/1755))
 * (query assist) remove caching agent id ([#1734](https://github.com/opensearch-project/dashboards-observability/pull/1734))
+* added placeholder change for metrics picker ([#1906](https://github.com/opensearch-project/dashboards-observability/pull/1906))
 
 ### Maintenance
 * Remove mocha from dependencies ([#1890](https://github.com/opensearch-project/dashboards-observability/pull/1890))
