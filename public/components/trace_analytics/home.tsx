@@ -6,7 +6,7 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Redirect } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -44,6 +44,7 @@ export interface TraceAnalyticsCoreDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
   savedObjectsMDSClient: SavedObjectsStart;
+  defaultRoute?: string;
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
@@ -119,6 +120,7 @@ export const Home = (props: HomeProps) => {
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
+  const { defaultRoute = '/services' } = props;
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -326,7 +328,7 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path={['/services', '/']}
+          path={['/services']}
           render={(_routerProps) => (
             <TraceSideBar>
               <Services
@@ -362,6 +364,12 @@ export const Home = (props: HomeProps) => {
               }}
               dataSourceMDSId={dataSourceMDSId}
             />
+          )}
+        />
+        <Route
+          path="/"
+          render={() => (
+            <Redirect to={defaultRoute} />
           )}
         />
       </HashRouter>

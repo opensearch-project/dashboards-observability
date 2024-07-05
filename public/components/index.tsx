@@ -23,7 +23,8 @@ export const Observability = (
   startPage: string,
   dataSourcePluggables,
   dataSourceManagement: DataSourceManagementPluginSetup,
-  savedObjectsMDSClient: CoreStart['savedObjects']
+  savedObjectsMDSClient: CoreStart['savedObjects'],
+  defaultRoute?: string,
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
@@ -42,6 +43,7 @@ export const Observability = (
       setActionMenu={setHeaderActionMenu}
       dataSourceEnabled={!!dataSource}
       savedObjectsMDSClient={savedObjectsMDSClient}
+      defaultRoute={defaultRoute}
     />,
     AppMountParametersProp.element
   );
