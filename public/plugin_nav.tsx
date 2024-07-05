@@ -124,4 +124,15 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
     },
   ]);
+
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+    {
+      id: 'observability-traces-nav',
+      category: DEFAULT_APP_CATEGORIES.investigate,
+    },
+    {
+      id: 'observability-services-nav',
+      category: DEFAULT_APP_CATEGORIES.investigate,
+    },
+  ]);
 }
