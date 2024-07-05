@@ -271,7 +271,9 @@ export class ObservabilityPlugin
       // prometheus: openSearchLocalDataSourcePluggable
     };
 
-    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (params: AppMountParameters) => {
+    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
+      params: AppMountParameters
+    ) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
@@ -291,7 +293,7 @@ export class ObservabilityPlugin
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
         coreStart.savedObjects,
-        defaultRoute,
+        defaultRoute
       );
     };
 
@@ -327,11 +329,9 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('traces'),
     });
 
-    // NEEDS CORRECTION OR REFACTOR //ADAM
-    // The new-added applications need to be wrapped by a feature flag check.
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
-        id: "observability-traces-nav",
+        id: 'observability-traces-nav',
         title: observabilityTracesTitle,
         order: observabilityTracesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -339,7 +339,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: "observability-services-nav",
+        id: 'observability-services-nav',
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,

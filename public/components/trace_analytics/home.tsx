@@ -163,7 +163,7 @@ export const Home = (props: HomeProps) => {
   const serviceBreadcrumbs = [
     {
       text: 'Trace analytics',
-      href: '#/',
+      href: '#/services',
     },
     {
       text: 'Services',
@@ -174,7 +174,7 @@ export const Home = (props: HomeProps) => {
   const traceBreadcrumbs = [
     {
       text: 'Trace analytics',
-      href: '#/',
+      href: '#/services',
     },
     {
       text: 'Traces',
@@ -366,12 +366,7 @@ export const Home = (props: HomeProps) => {
             />
           )}
         />
-        <Route
-          path="/"
-          render={() => (
-            <Redirect to={defaultRoute} />
-          )}
-        />
+        <Route path="/" render={() => <Redirect to={defaultRoute} />} />
       </HashRouter>
       {flyout}
       {spanFlyoutComponent}
