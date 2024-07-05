@@ -6,10 +6,14 @@
 import { EuiPanel, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { GettingStartedDescription } from './getting_started_description';
-import s3Svg from '../icons/s3-logo.svg';
-import prometheusSvg from '../icons/prometheus-logo.svg';
+import logs from '../icons/logs.svg';
 import { GettingStartedType } from '../../../../common/types/getting_started';
-import { AmazonS3URL, PrometheusURL } from '../../../../common/constants/getting_started';
+import {
+  LogsURL,
+  MetricsURL,
+  TracesURL,
+  ProfilingURL,
+} from '../../../../common/constants/getting_started';
 
 export interface GettingStartedCard {
   name: GettingStartedType;
@@ -19,42 +23,137 @@ export interface GettingStartedCard {
   onClick: () => void;
 }
 
-export function GettingStartedCardView() {
-  const Datasources: GettingStartedCard[] = [
+interface GettingStartedCardViewProps {
+  category: 'byType' | 'byTechnology' | 'byLanguage';
+  size?: 'small' | 'large';
+}
+
+export function GettingStartedCardView({ category, size = 'large' }: GettingStartedCardViewProps) {
+  const byType: GettingStartedCard[] = [
     {
-      name: 'S3GLUE',
-      displayName: 'Amazon S3',
-      description: 'Connect to Amazon S3 via AWS Glue Data Catalog',
-      displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${AmazonS3URL}`),
+      name: 'Logs',
+      displayName: 'Logs',
+      description: 'The Logs',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#tutorial/${LogsURL}`),
     },
     {
-      name: 'PROMETHEUS',
-      displayName: 'Prometheus',
-      description: 'Connect to Prometheus',
-      displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${PrometheusURL}`),
+      name: 'Metrics',
+      displayName: 'Metrics',
+      description: 'The Metrics',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${MetricsURL}`),
+    },
+    {
+      name: 'Traces',
+      displayName: 'Traces',
+      description: 'The Traces',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${TracesURL}`),
+    },
+    {
+      name: 'Profiling',
+      displayName: 'Profiling',
+      description: 'The Profiling',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${ProfilingURL}`),
     },
   ];
 
-  const renderRows = (datasources: GettingStartedCard[]) => {
+  const byTechnology: GettingStartedCard[] = [
+    {
+      name: 'Logs',
+      displayName: 'OpenTelemtry',
+      description: '..',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#tutorial/${LogsURL}`),
+    },
+    {
+      name: 'Metrics',
+      displayName: 'Kubernetes',
+      description: '...',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${MetricsURL}`),
+    },
+    {
+      name: 'Metrics',
+      displayName: 'AWS',
+      description: '...',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${MetricsURL}`),
+    },
+  ];
+
+  const byLanguage: GettingStartedCard[] = [
+    {
+      name: 'Logs',
+      displayName: 'Java',
+      description: '',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#tutorial/${LogsURL}`),
+    },
+    {
+      name: 'Metrics',
+      displayName: 'Python',
+      description: '',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${MetricsURL}`),
+    },
+    {
+      name: 'Metrics',
+      displayName: 'GoLang',
+      description: '',
+      displayIcon: <EuiIcon type={logs} size="xl" />,
+      onClick: () => (window.location.hash = `#/tutorial/${MetricsURL}`),
+    },
+  ];
+
+  const getCardsByCategory = () => {
+    switch (category) {
+      case 'byTechnology':
+        return byTechnology;
+      case 'byLanguage':
+        return byLanguage;
+      case 'byType':
+      default:
+        return byType;
+    }
+  };
+
+  const getTitleByCategory = () => {
+    switch (category) {
+      case 'byTechnology':
+        return 'By Technology';
+      case 'byLanguage':
+        return 'By Language';
+      case 'byType':
+      default:
+        return 'By Type';
+    }
+  };
+
+  const renderRows = (gettingStarted: GettingStartedCard[]) => {
     return (
       <>
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
-          {datasources.map((i) => {
-            return (
-              <EuiFlexItem key={i.name} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
-                <EuiCard
-                  icon={i.displayIcon}
-                  title={i.displayName}
-                  description={i.description}
-                  data-test-subj={`datasource_card_${i.name.toLowerCase()}`}
-                  titleElement="span"
-                  onClick={i.onClick}
-                />
-              </EuiFlexItem>
-            );
-          })}
+          {gettingStarted.map((i) => (
+            <EuiFlexItem
+              key={i.name}
+              style={{
+                minWidth: size === 'small' ? '8rem' : '14rem',
+                maxWidth: size === 'small' ? '8rem' : '14rem',
+              }}
+            >
+              <EuiCard
+                icon={i.displayIcon}
+                title={i.displayName}
+                description={i.description}
+                data-test-subj={`datasource_card_${i.name.toLowerCase()}`}
+                titleElement="span"
+                onClick={i.onClick}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
         <EuiSpacer />
       </>
@@ -63,8 +162,8 @@ export function GettingStartedCardView() {
 
   return (
     <EuiPanel>
-      <GettingStartedDescription />
-      {renderRows(Datasources)}
+      <GettingStartedDescription title={getTitleByCategory()} />
+      {renderRows(getCardsByCategory())}
     </EuiPanel>
   );
 }

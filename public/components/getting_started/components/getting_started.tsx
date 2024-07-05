@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
 import { GettingStartedConnectionsHeader } from './getting_started_header';
@@ -25,7 +25,11 @@ export const NewGettingStarted = (props: HomeProps) => {
     <EuiPage>
       <EuiPageBody component="div">
         <GettingStartedConnectionsHeader />
-        <GettingStartedCardView />
+        <GettingStartedCardView category="byType" />
+        <EuiSpacer size="l" />
+        <GettingStartedCardView category="byTechnology" />
+        <EuiSpacer size="l" />
+        <GettingStartedCardView category="byLanguage" size="small" />
       </EuiPageBody>
     </EuiPage>
   );

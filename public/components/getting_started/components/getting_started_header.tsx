@@ -26,7 +26,7 @@ export const GettingStartedConnectionsHeader = () => {
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Please select your data source.{' '}
+        More info.{' '}
         <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
