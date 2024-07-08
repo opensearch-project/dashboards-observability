@@ -22,6 +22,7 @@ import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
+import { Home as OverviewHome } from './overview/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -53,6 +54,7 @@ const pages = {
   integrations: IntegrationsHome,
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
+  overview: OverviewHome,
 };
 
 export const App = ({

@@ -13,7 +13,7 @@ import {
   NotificationsStart,
 } from '../../../../../src/core/public';
 import { NewGettingStarted } from './components/getting_started';
-import AccordionFilterPage from './components/accordionFilterPage';
+import { AccordionFilterPage } from './components/accordionFilterPage';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 

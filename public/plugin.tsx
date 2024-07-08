@@ -57,6 +57,9 @@ import {
   observabilityGettingStartedID,
   observabilityGettingStartedTitle,
   observabilityGettingStartedPluginOrder,
+  observabilityOverviewID,
+  observabilityOverviewTitle,
+  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -292,6 +295,13 @@ export class ObservabilityPlugin
         coreStart.savedObjects
       );
     };
+    core.application.register({
+      id: observabilityOverviewID,
+      title: observabilityOverviewTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityOverviewPluginOrder,
+      mount: appMountWithStartPage('overview'),
+    });
 
     core.application.register({
       id: observabilityGettingStartedID,
