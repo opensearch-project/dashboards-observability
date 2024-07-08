@@ -283,7 +283,7 @@ export function registerNoteRoute(router: IRouter) {
       let notebooksData : SavedObjectsFindResponse<NotebooksSavedObjectAttributes>
       try {
         notebooksData = await opensearchNotebooksClient.find({'type': NOTEBOOK_SAVED_OBJECT })
-        // console.log(notebooksData)
+        console.log(notebooksData)
         let books = fetchNotebooks(notebooksData.saved_objects)
         return response.ok({
           body: {
@@ -318,6 +318,7 @@ export function registerNoteRoute(router: IRouter) {
       let notebooksData 
       try {
         let newNotebookObject = createNotebook(request.body)
+        console.log('created', newNotebookObject)
         notebooksData = await opensearchNotebooksClient.create(NOTEBOOK_SAVED_OBJECT, newNotebookObject)
         // console.log(notebooksData)
         return response.ok({
@@ -348,6 +349,7 @@ export function registerNoteRoute(router: IRouter) {
       const opensearchNotebooksClient: SavedObjectsClientContract = context.core.savedObjects.client 
       try {
         const notebookinfo = await opensearchNotebooksClient.get(NOTEBOOK_SAVED_OBJECT,request.params.noteId)
+        console.log(notebookinfo)
         return response.ok({
           body: notebookinfo.attributes.savedNotebook,
         });
@@ -379,7 +381,7 @@ export function registerNoteRoute(router: IRouter) {
       try {
         let getNotebook = await opensearchNotebooksClient.get(NOTEBOOK_SAVED_OBJECT,request.body.noteId)
         // console.log(getNotebook)
-        let createCloneNotebook = cloneNotebook(getNotebook.attributes.object, request.body.name)
+        let createCloneNotebook = cloneNotebook(getNotebook.attributes.savedNotebook, request.body.name)
         let createdNotebook = await opensearchNotebooksClient.create(NOTEBOOK_SAVED_OBJECT, createCloneNotebook)
         console.log(createdNotebook,'clone here')
         return response.ok({

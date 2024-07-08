@@ -14,8 +14,9 @@ export function fetchNotebooks(
 ) {
   const notebooks: any[] = [];
 //   console.log(savedObjectNotebooks)
-  savedObjectNotebooks.forEach(
-    (savedObject: { type: string; attributes: { savedNotebook: any } }) => {
+  savedObjectNotebooks.map(
+    (savedObject) => {
+        console.log(savedObject)
       if (savedObject.type === 'observability-notebook' && savedObject.attributes.savedNotebook) {
         notebooks.push({
           dateCreated: savedObject.attributes.savedNotebook.dateCreated,
@@ -41,7 +42,7 @@ export function createNotebook(notebookName: { name: string }) {
   };
 
   return {
-    object: noteObject,
+    savedNotebook: noteObject,
   };
 }
 
@@ -56,7 +57,7 @@ export function cloneNotebook(fetchedNotebook: DefaultNotebooks, name: string) {
   };
 
   return {
-    object: noteObject,
+    savedNotebook: noteObject,
   };
 }
 
@@ -68,7 +69,7 @@ export function renameNotebook(noteBookObj: { name: string; noteId: string }) {
   };
 
   return {
-    object: noteObject,
+    savedNotebook: noteObject,
   };
 }
 
