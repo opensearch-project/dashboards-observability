@@ -183,7 +183,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   deleteParagraphButton = (para: ParaType, index: number) => {
     if (index !== -1) {
       return this.props.http
-        .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
+        .delete(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
           query: {
             noteId: this.props.openedNoteId,
             paragraphId: para.uniqueId,
@@ -275,7 +275,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         (newName: string) => {
           this.props.renameNotebook(newName, this.props.openedNoteId).then((res) => {
             this.setState({ isModalVisible: false });
-            window.location.assign(`#/${res.message.objectId}`);
+            window.location.assign(`#/${res.id}`);
             setTimeout(() => {
               this.loadNotebook();
             }, 300);
@@ -342,7 +342,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // Function for delete Visualization from notebook
   deleteVizualization = (uniqueId: string) => {
     this.props.http
-      .delete(`${NOTEBOOKS_API_PREFIX}/paragraph/` + this.props.openedNoteId + '/' + uniqueId)
+      .delete(
+        `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/` +
+          this.props.openedNoteId +
+          '/' +
+          uniqueId
+      )
       .then((res) => {
         this.setState({ paragraphs: res.paragraphs });
         this.parseAllParagraphs();
@@ -366,7 +371,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/paragraph/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
@@ -418,7 +423,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/set_paragraphs/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs/`, {
         body: JSON.stringify(moveParaObj),
       })
       .then((_res) => this.setState({ paragraphs, parsedPara }))
@@ -449,7 +454,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       noteId: this.props.openedNoteId,
     };
     this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/paragraph/clearall/`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
@@ -485,7 +490,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run/`, {
         body: JSON.stringify(paraUpdateObject),
       })
       .then(async (res) => {
@@ -570,12 +575,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
   };
 
-  loadNotebook = () => {
+  loadNotebook = async () => {
     this.showParagraphRunning('queue');
     this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/note/` + this.props.openedNoteId)
+      .get(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/` + this.props.openedNoteId)
       .then(async (res) => {
-        this.setBreadcrumbs(res.path);
+        this.setBreadcrumbs(res.name);
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
