@@ -88,6 +88,10 @@ exports[`Trace Config component renders empty trace config 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -993,6 +997,10 @@ exports[`Trace Config component renders with one trace selected 1`] = `
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
+      },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],

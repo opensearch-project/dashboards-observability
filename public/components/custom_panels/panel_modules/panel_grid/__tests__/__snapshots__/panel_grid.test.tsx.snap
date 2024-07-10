@@ -246,6 +246,10 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],

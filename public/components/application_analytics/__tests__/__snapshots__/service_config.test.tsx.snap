@@ -89,6 +89,10 @@ exports[`Service Config component renders empty service config 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -1281,6 +1285,10 @@ exports[`Service Config component renders with one service selected 1`] = `
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
+      },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],

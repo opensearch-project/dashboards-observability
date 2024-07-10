@@ -102,6 +102,10 @@ exports[`Dashboard component renders dashboard 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -440,6 +444,10 @@ exports[`Dashboard component renders dashboard 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1259,6 +1267,10 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -1596,6 +1608,10 @@ exports[`Dashboard component renders empty dashboard 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2415,6 +2431,10 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -2754,6 +2774,10 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],

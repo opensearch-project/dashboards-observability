@@ -102,6 +102,10 @@ exports[`Traces component renders empty traces page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -427,6 +431,10 @@ exports[`Traces component renders empty traces page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1719,6 +1727,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -2045,6 +2057,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3342,6 +3358,10 @@ exports[`Traces component renders traces page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -3667,6 +3687,10 @@ exports[`Traces component renders traces page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
