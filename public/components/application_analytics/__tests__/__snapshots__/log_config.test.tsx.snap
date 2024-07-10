@@ -92,10 +92,8 @@ exports[`Log Config component renders empty log config 1`] = `
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
         "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -723,10 +721,8 @@ exports[`Log Config component renders with query 1`] = `
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
         "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],

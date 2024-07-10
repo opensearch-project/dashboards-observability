@@ -102,10 +102,8 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
-          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
-          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -272,10 +270,8 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
             "registerRight": [MockFunction],
           },
           "navGroup": Object {
-            "getCurrentNavGroup$": [MockFunction],
             "getNavGroupEnabled": [MockFunction],
             "getNavGroupsMap$": [MockFunction],
-            "setCurrentNavGroup": [MockFunction],
           },
           "navLinks": Object {
             "enableForcedAppSwitcherNavigation": [MockFunction],

@@ -105,30 +105,8 @@ exports[`Traces component renders empty traces page 1`] = `
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction] {
-          "calls": Array [
-            Array [],
-            Array [],
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -459,30 +437,8 @@ exports[`Traces component renders empty traces page 1`] = `
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
-          "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction] {
-            "calls": Array [
-              Array [],
-              Array [],
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
-          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1778,30 +1734,8 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction] {
-          "calls": Array [
-            Array [],
-            Array [],
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2133,30 +2067,8 @@ exports[`Traces component renders jaeger traces page 1`] = `
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
-          "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction] {
-            "calls": Array [
-              Array [],
-              Array [],
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
-          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3457,30 +3369,8 @@ exports[`Traces component renders traces page 1`] = `
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction] {
-          "calls": Array [
-            Array [],
-            Array [],
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3811,30 +3701,8 @@ exports[`Traces component renders traces page 1`] = `
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
-          "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction] {
-            "calls": Array [
-              Array [],
-              Array [],
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
-          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
