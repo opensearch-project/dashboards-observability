@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -88,12 +88,12 @@ export function FilterEditPopover(props: {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             data-test-subj="filter-popover-cancel-button"
             onClick={props.closePopover}
           >
             Cancel
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSmallButton

@@ -5,6 +5,7 @@
 
 import {
   EuiSmallButton,
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -392,7 +393,7 @@ const MetricsExportPopOver = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
+            <EuiButton
               size="s"
               fill
               onClick={() => {
@@ -401,7 +402,7 @@ const MetricsExportPopOver = () => {
               data-test-subj="metrics__SaveConfirm"
             >
               Save
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>

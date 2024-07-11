@@ -8,7 +8,7 @@ import {
   EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiPopover,
   EuiSwitch,
   EuiIcon,
@@ -85,7 +85,7 @@ export const GridHeader = ({
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: GRID_HEADER_COLUMN_MAX_WIDTH }}>
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           iconSize="s"
           color="text"
           aria-label="Next"
@@ -93,7 +93,7 @@ export const GridHeader = ({
           onClick={() => setIsFullScreenHandler(true)}
         >
           Full screen
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       </EuiFlexItem>
       {isFullScreen && (
         <EuiIcon
@@ -118,7 +118,7 @@ export const DensityPopover = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconSize="s"
       color="text"
       aria-label="Next"
@@ -126,7 +126,7 @@ export const DensityPopover = ({
       onClick={onButtonClick}
     >
       Density
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
   );
 
   return (
@@ -161,7 +161,7 @@ export const ColumnVisiblityPopover = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconSize="s"
       color="text"
       aria-label="Next"
@@ -169,7 +169,7 @@ export const ColumnVisiblityPopover = ({
       onClick={onButtonClick}
     >
       Columns
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
   );
 
   return (

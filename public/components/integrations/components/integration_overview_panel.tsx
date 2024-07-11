@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiSmallButton,
+  EuiButton,
   EuiFlexGroup,
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -37,7 +37,7 @@ export function IntegrationOverview(props: any) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiSmallButton
+              <EuiButton
                 size="m"
                 onClick={() => {
                   props.setUpSample();
@@ -47,10 +47,10 @@ export function IntegrationOverview(props: any) {
                 data-click-metric-element="integrations.create_from_try_it"
               >
                 Try It
-              </EuiSmallButton>
+              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiSmallButton
+              <EuiButton
                 size="m"
                 onClick={() => {
                   props.showFlyout(config.name);
@@ -61,7 +61,7 @@ export function IntegrationOverview(props: any) {
                 data-click-metric-element="integrations.set_up"
               >
                 Set Up
-              </EuiSmallButton>
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageContentHeaderSection>

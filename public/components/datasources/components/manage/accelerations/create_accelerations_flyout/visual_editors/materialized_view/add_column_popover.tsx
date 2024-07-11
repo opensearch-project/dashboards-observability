@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiSmallButton,
+  EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
