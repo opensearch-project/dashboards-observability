@@ -17,7 +17,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
   EuiSpacer,
   EuiText,
@@ -124,7 +124,7 @@ export const Configuration = (props: ConfigProps) => {
                   </EuiText>
                   <EuiSpacer size="m" />
                   {visWithAvailability.length > 0 ? (
-                    <EuiSelect
+                    <EuiCompressedSelect
                       options={visWithAvailability}
                       value={availabilityVisId}
                       onChange={onAvailabilityVisChange}

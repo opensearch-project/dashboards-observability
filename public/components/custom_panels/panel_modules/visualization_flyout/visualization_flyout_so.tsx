@@ -24,7 +24,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
   EuiSpacer,
   EuiText,
@@ -273,7 +273,7 @@ export const VisaulizationFlyoutSO = ({
         <>
           <EuiSpacer size="s" />
           <EuiCompressedFormRow label="Visualization name">
-            <EuiSelect
+            <EuiCompressedSelect
               hasNoInitialSelection
               onChange={(e) => onChangeSelection(e)}
               options={visualizationOptions}

@@ -7,7 +7,7 @@ import {
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import React from 'react';
@@ -37,7 +37,7 @@ export const TopMenu = () => {
                 onChange={(e) => dispatch(setDateSpan({ span: e.target.value }))}
                 data-test-subj="metrics__spanValue"
                 append={
-                  <EuiSelect
+                  <EuiCompressedSelect
                     className="resolutionSelectOption"
                     options={resolutionOptions}
                     value={dateSpanFilter.resolution}

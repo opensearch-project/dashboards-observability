@@ -10,7 +10,7 @@ import {
   EuiCompressedFieldText,
   EuiForm,
   EuiCompressedFormRow,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -252,7 +252,7 @@ export function IntegrationConnectionInputs({
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
       >
-        <EuiSelect
+        <EuiCompressedSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 'securityLake') {
               return (

@@ -7,7 +7,7 @@ import {
   EuiCompressedFormRow,
   EuiLink,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
@@ -131,7 +131,7 @@ export const IndexTypeSelector = ({
           </EuiText>
         }
       >
-        <EuiSuperSelect
+        <EuiCompressedSuperSelect
           options={superSelectOptions}
           valueOfSelected={value}
           onChange={onChangeSupeSelect}

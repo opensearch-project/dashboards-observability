@@ -12,7 +12,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiTextArea,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -158,7 +158,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiSpacer size="m" />
 
           <EuiCompressedFormRow label="Authentication method">
-            <EuiSelect
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}
