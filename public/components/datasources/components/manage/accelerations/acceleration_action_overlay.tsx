@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiOverlayMask, EuiConfirmModal, EuiCompressedFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiOverlayMask, EuiConfirmModal, EuiCompressedFormRow, EuiCompressedFieldText } from '@elastic/eui';
 import { CachedAcceleration } from '../../../../../../common/types/data_connections';
 import {
   ACC_DELETE_MSG,
@@ -80,7 +80,7 @@ export const AccelerationActionOverlay: React.FC<AccelerationActionOverlayProps>
         <p>{description}</p>
         {actionType === 'vacuum' && (
           <EuiCompressedFormRow label={`To confirm, type ${displayIndexName}`}>
-            <EuiFieldText
+            <EuiCompressedFieldText
               name="confirmationInput"
               value={confirmationInput}
               onChange={(e) => setConfirmationInput(e.target.value)}

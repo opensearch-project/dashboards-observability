@@ -14,7 +14,7 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButton,
 } from '@elastic/eui';
 
@@ -77,7 +77,7 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
         <EuiModalBody>
           <EuiForm>
             <EuiCompressedFormRow label={labelTxt} helpText={helpText}>
-              <EuiFieldText
+              <EuiCompressedFieldText
                 data-test-subj="customModalFieldText"
                 name="input"
                 value={value}

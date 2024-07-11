@@ -8,8 +8,8 @@ import {
   EuiSmallButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiPanel,
@@ -380,7 +380,7 @@ export const DataConfigPanelItem = ({
                 <>
                   {getCommonDimensionsField(selectedObj, name)}
                   <EuiCompressedFormRow label="Custom label">
-                    <EuiFieldText
+                    <EuiCompressedFieldText
                       placeholder="Custom label"
                       value={selectedObj[CUSTOM_LABEL]}
                       onChange={(e) => updateList(e.target.value, CUSTOM_LABEL)}
@@ -458,7 +458,7 @@ export const DataConfigPanelItem = ({
 
   const getNumberField = (type: string) => (
     <>
-      <EuiFieldNumber
+      <EuiCompressedFieldNumber
         id={htmlIdGenerator('input-number')()}
         fullWidth
         placeholder="auto"
@@ -482,7 +482,7 @@ export const DataConfigPanelItem = ({
             <EuiPanel color="subdued" style={{ padding: '0px' }}>
               <EuiSpacer size="s" />
               <EuiCompressedFormRow label="Interval">
-                <EuiFieldNumber
+                <EuiCompressedFieldNumber
                   placeholder="Placeholder text"
                   value={configList.span?.interval ?? 1}
                   min={1}

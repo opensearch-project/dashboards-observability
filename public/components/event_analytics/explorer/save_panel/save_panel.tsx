@@ -9,7 +9,7 @@ import {
   EuiComboBox,
   EuiCompressedFormRow,
   EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
@@ -103,7 +103,7 @@ export const SavePanel = ({
         <h3>Name</h3>
       </EuiTitle>
       <EuiCompressedFormRow helpText="Name for your savings">
-        <EuiFieldText
+        <EuiCompressedFieldText
           key={'save-panel-id'}
           value={savePanelName}
           isInvalid={isEmpty(savePanelName)}

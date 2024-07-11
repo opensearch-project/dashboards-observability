@@ -5,7 +5,7 @@
 
 import {
   EuiButtonGroup,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -222,7 +222,7 @@ export function ServiceMap({
             <EuiText>Focus on</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
               placeholder="Service name"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

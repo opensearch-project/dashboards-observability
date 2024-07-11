@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, EuiCompressedFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiText, EuiCompressedFormRow, EuiCompressedFieldText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 
@@ -52,7 +52,7 @@ export const NameRow = (props: ConfigureNameProps) => {
             and concise.
           </p>
         </EuiText>
-        <EuiFieldText
+        <EuiCompressedFieldText
           data-test-subj="name"
           placeholder="Title"
           value={name}

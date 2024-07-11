@@ -6,7 +6,7 @@
 import React, { useEffect } from 'react';
 import {
   EuiComboBox,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiCompressedFormRow,
   EuiFlexItem,
@@ -84,7 +84,7 @@ export const MetricsExportPanel = ({
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiCompressedFormRow label={'Metric Name #' + (index + 1)}>
-                      <EuiFieldText
+                      <EuiCompressedFieldText
                         key={`metric-name-input-id-${index}`}
                         value={metaData.name}
                         onChange={(e) => onNameChange(index, e.target.value)}

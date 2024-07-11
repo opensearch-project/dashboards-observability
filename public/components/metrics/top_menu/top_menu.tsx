@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
@@ -29,7 +29,7 @@ export const TopMenu = () => {
         <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
           <EuiFlexItem grow={false}>
             <div className="resolutionSelect">
-              <EuiFieldText
+              <EuiCompressedFieldText
                 className="resolutionSelectText"
                 prepend="Span Interval"
                 value={dateSpanFilter.span}

@@ -9,7 +9,7 @@ import {
   EuiConfirmModal,
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiForm,
   EuiCompressedFormRow,
   EuiModal,
@@ -154,7 +154,7 @@ export const DeleteNotebookModal = ({
           <EuiSpacer />
           <EuiForm>
             <EuiCompressedFormRow label={'To confirm deletion, enter "delete" in the text field'}>
-              <EuiFieldText
+              <EuiCompressedFieldText
                 data-test-subj="delete-notebook-modal-input"
                 name="input"
                 placeholder="delete"

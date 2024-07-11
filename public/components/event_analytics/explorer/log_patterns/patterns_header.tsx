@@ -8,7 +8,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSmallButtonIcon,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -79,7 +79,7 @@ export const PatternsHeader = ({
               </EuiText>
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={patternRegexInput}
               onChange={(e) => setPatternRegexInput(e.target.value)}
             />

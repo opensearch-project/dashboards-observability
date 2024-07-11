@@ -7,7 +7,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiExpression,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -109,7 +109,7 @@ export const GroupByTumbleExpression = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCompressedFormRow label="Tumble Window">
-              <EuiFieldNumber
+              <EuiCompressedFieldNumber
                 value={groupbyValues.tumbleWindow}
                 onChange={onChangeTumbleWindow}
                 min={1}

@@ -10,7 +10,7 @@ import {
   EuiSmallButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -251,7 +251,7 @@ export const SurroundingFlyout = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="cnt-picker">
           <EuiCompressedFormRow>
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               value={value}
               onChange={(e) => onChange(e)}
               aria-label={typeOfDocs === 'new' ? 'fetch newer events' : 'fetch older events'}

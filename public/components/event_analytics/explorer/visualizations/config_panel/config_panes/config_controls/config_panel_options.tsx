@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFieldText, EuiForm, EuiCompressedFormRow, EuiTextArea, EuiAccordion } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiForm, EuiCompressedFormRow, EuiTextArea, EuiAccordion } from '@elastic/eui';
 import { VIS_CHART_TYPES } from '../../../../../../../../common/constants/shared';
 import { DEFAULT_GAUGE_CHART_PARAMETERS } from '../../../../../../../../common/constants/explorer';
 import { ConfigPanelOptionGauge } from './config_panel_option_gauge';
@@ -44,7 +44,7 @@ export const ConfigPanelOptions = ({ visualizations, handleConfigChange, vizStat
     >
       <EuiForm component="form">
         <EuiCompressedFormRow fullWidth label="Title" helpText={`${helpText}`}>
-          <EuiFieldText
+          <EuiCompressedFieldText
             name="title"
             onChange={handleTextChange}
             onBlur={() => handleConfigChange(panelOptionsValues)}

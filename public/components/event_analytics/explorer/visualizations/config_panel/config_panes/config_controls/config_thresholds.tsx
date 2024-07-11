@@ -8,13 +8,13 @@ import {
   EuiButton,
   EuiAccordion,
   EuiCompressedFormRow,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiColorPicker,
   EuiSpacer,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   htmlIdGenerator,
   EuiToolTip,
 } from '@elastic/eui';
@@ -124,7 +124,7 @@ export const ConfigThresholds = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
                     <EuiCompressedFormRow helpText="name">
-                      <EuiFieldText
+                      <EuiCompressedFieldText
                         onChange={handleThresholdChange(thr.thid, 'name')}
                         value={thr.name || ''}
                         arial-label="Input threshold name"
@@ -135,7 +135,7 @@ export const ConfigThresholds = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
                     <EuiCompressedFormRow helpText="value">
-                      <EuiFieldNumber
+                      <EuiCompressedFieldNumber
                         fullWidth
                         placeholder="threshold value"
                         value={thr.value || 0}

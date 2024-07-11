@@ -5,7 +5,7 @@
 
 import {
   EuiComboBox,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFormControlLayoutDelimited,
   EuiCompressedFormRow,
   EuiSpacer,
@@ -158,7 +158,7 @@ export const getValueComponent = (
     <>
       <EuiSpacer size="s" />
       <EuiCompressedFormRow label={'Value'}>
-        <EuiFieldText
+        <EuiCompressedFieldText
           placeholder="Enter a value"
           value={value}
           onChange={(e) => setValue(e.target.value)}

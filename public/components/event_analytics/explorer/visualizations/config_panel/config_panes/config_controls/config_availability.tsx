@@ -8,13 +8,13 @@ import {
   EuiButton,
   EuiAccordion,
   EuiCompressedFormRow,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiColorPicker,
   EuiSpacer,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSelect,
   htmlIdGenerator,
   EuiText,
@@ -146,7 +146,7 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
                     </EuiFlexItem>
                     <EuiFlexItem grow={5}>
                       <EuiCompressedFormRow helpText="name">
-                        <EuiFieldText
+                        <EuiCompressedFieldText
                           onChange={handleAvailabilityChange(thr.thid, 'name')}
                           value={thr.name || ''}
                           arial-label="Input availability name"
@@ -167,7 +167,7 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
                     </EuiCompressedFormRow>
                     <EuiFlexItem grow={5}>
                       <EuiCompressedFormRow helpText="value">
-                        <EuiFieldNumber
+                        <EuiCompressedFieldNumber
                           fullWidth
                           placeholder="availability value"
                           value={thr.value || 0}

@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -100,7 +100,7 @@ export const DefineIndexOptions = ({
           </EuiText>
         }
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           placeholder="Enter index name"
           value={accelerationFormData.accelerationIndexName}
           onChange={onChangeIndexName}
