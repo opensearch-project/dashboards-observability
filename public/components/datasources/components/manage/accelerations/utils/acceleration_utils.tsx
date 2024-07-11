@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiHealth } from '@elastic/eui';
+import { EuiSmallButton, EuiHealth } from '@elastic/eui';
 import React from 'react';
 import { DATA_SOURCE_TYPES } from '../../../../../../../common/constants/data_sources';
 import {
@@ -107,7 +107,7 @@ export const CreateAccelerationFlyoutButton = ({
 }) => {
   return (
     <>
-      <EuiButton
+      <EuiSmallButton
         onClick={() =>
           renderCreateAccelerationFlyout({
             dataSource: dataSourceName,
@@ -118,7 +118,7 @@ export const CreateAccelerationFlyoutButton = ({
         fill
       >
         Create acceleration
-      </EuiButton>
+      </EuiSmallButton>
     </>
   );
 };

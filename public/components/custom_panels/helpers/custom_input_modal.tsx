@@ -15,7 +15,7 @@ import {
   EuiOverlayMask,
   EuiFormRow,
   EuiFieldText,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 
 /*
@@ -90,17 +90,17 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeModal}>{btn1txt}</EuiButtonEmpty>
           {optionalArgs === undefined ? (
-            <EuiButton data-test-subj="runModalButton" onClick={() => runModal(value)} fill>
+            <EuiSmallButton data-test-subj="runModalButton" onClick={() => runModal(value)} fill>
               {btn2txt}
-            </EuiButton>
+            </EuiSmallButton>
           ) : (
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="runModalButton"
               onClick={() => runModal(value, ...optionalArgs)}
               fill
             >
               {btn2txt}
-            </EuiButton>
+            </EuiSmallButton>
           )}
         </EuiModalFooter>
       </EuiModal>

@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
@@ -262,14 +262,14 @@ export const TreemapConfigPanelItem = ({
       <EuiSpacer size="s" />
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="visualizeEditorRenderButton"
           iconType="play"
           onClick={() => updateChart()}
           size="s"
         >
           Update chart
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </div>
   );

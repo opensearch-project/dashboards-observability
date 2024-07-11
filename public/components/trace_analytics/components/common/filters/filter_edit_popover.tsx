@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -96,7 +96,7 @@ export function FilterEditPopover(props: {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             fill
             disabled={
               selectedFieldOptions.length === 0 ||
@@ -120,7 +120,7 @@ export function FilterEditPopover(props: {
             }}
           >
             Save
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

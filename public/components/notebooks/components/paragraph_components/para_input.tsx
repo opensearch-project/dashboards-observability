@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiComboBox,
@@ -149,7 +149,7 @@ export const ParaInput = (props: {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="para-input-visualization-browse-button"
               onClick={() => {
                 setSelectableOptions([
@@ -161,7 +161,7 @@ export const ParaInput = (props: {
               }}
             >
               Browse
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={2} />
           <EuiFlexItem grow={9}>
@@ -220,13 +220,13 @@ export const ParaInput = (props: {
 
               <EuiModalFooter>
                 <EuiButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiButtonEmpty>
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="para-input-select-button"
                   onClick={() => onSelect()}
                   fill
                 >
                   Select
-                </EuiButton>
+                </EuiSmallButton>
               </EuiModalFooter>
             </EuiModal>
           </EuiOverlayMask>

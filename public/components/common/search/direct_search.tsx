@@ -8,6 +8,7 @@ import './search.scss';
 import '@algolia/autocomplete-theme-classic';
 import {
   EuiBadge,
+  EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -144,7 +145,7 @@ export const DirectSearch = (props: any) => {
   }
 
   const Savebutton = (
-    <EuiButton
+    <EuiSmallButton
       iconSide="right"
       onClick={() => {
         setIsSavePanelOpen((staleState) => {
@@ -155,7 +156,7 @@ export const DirectSearch = (props: any) => {
       iconType="arrowDown"
     >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const handleQueryLanguageChange = (lang: QUERY_LANGUAGE) => {
@@ -188,7 +189,7 @@ export const DirectSearch = (props: any) => {
   ];
 
   const languagePopOverButton = (
-    <EuiButton
+    <EuiSmallButton
       iconType="arrowDown"
       iconSide="right"
       onClick={onLanguagePopoverClick}
@@ -196,7 +197,7 @@ export const DirectSearch = (props: any) => {
       isDisabled={explorerSearchMetadata.isPolling}
     >
       {queryLang}
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const stopPollingWithStatus = (status: DirectQueryLoadingStatus | undefined) => {
@@ -409,7 +410,7 @@ export const DirectSearch = (props: any) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-          <EuiButton
+          <EuiSmallButton
             color="success"
             onClick={() => {
               onQuerySearch(queryLang);
@@ -418,7 +419,7 @@ export const DirectSearch = (props: any) => {
             isDisabled={explorerSearchMetadata.isPolling}
           >
             Search
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
 
         {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (

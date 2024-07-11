@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
@@ -146,9 +146,9 @@ export const VisaulizationFlyoutSO = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill>
+          <EuiSmallButton onClick={closeModal} fill>
             Close
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );
@@ -311,14 +311,14 @@ export const VisaulizationFlyoutSO = ({
     <EuiFlyoutFooter>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="closeFlyoutButton" onClick={closeFlyout}>
+          <EuiSmallButton data-test-subj="closeFlyoutButton" onClick={closeFlyout}>
             Cancel
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="addFlyoutButton" onClick={addVisualization} fill>
+          <EuiSmallButton data-test-subj="addFlyoutButton" onClick={addVisualization} fill>
             Add
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
@@ -373,9 +373,9 @@ export const VisaulizationFlyoutSO = ({
                 </EuiText>
                 {isPreviewError.hasOwnProperty('errorDetails') &&
                 isPreviewError.errorDetails !== '' ? (
-                  <EuiButton color="danger" onClick={() => showModal('errorModal')} size="s">
+                  <EuiSmallButton color="danger" onClick={() => showModal('errorModal')} size="s">
                     See error details
-                  </EuiButton>
+                  </EuiSmallButton>
                 ) : (
                   <></>
                 )}

@@ -5,7 +5,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,7 +67,7 @@ export const Configuration = (props: ConfigProps) => {
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <EuiButton
+                    <EuiSmallButton
                       fill
                       data-test-subj="editApplicationButton"
                       onClick={() => {
@@ -75,7 +75,7 @@ export const Configuration = (props: ConfigProps) => {
                       }}
                     >
                       Edit
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>

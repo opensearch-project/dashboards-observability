@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -84,7 +84,7 @@ export const PPLReferenceFlyout = ({ module, closeFlyout }: Props) => {
     <EuiFlyoutFooter>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={closeFlyout}>Close</EuiButton>
+          <EuiSmallButton onClick={closeFlyout}>Close</EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

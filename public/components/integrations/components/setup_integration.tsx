@@ -5,7 +5,7 @@
 
 import {
   EuiBottomBar,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -289,7 +289,7 @@ export function SetupBottomBar({
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           fill
           iconType="arrowRight"
           iconSide="right"
@@ -321,7 +321,7 @@ export function SetupBottomBar({
           data-test-subj="create-instance-button"
         >
           Add Integration
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

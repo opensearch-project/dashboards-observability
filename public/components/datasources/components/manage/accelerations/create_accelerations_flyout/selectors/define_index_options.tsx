@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,9 +51,9 @@ export const DefineIndexOptions = ({
         </EuiFlexGroup>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={() => setModalComponent(<></>)} fill>
+        <EuiSmallButton onClick={() => setModalComponent(<></>)} fill>
           Close
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

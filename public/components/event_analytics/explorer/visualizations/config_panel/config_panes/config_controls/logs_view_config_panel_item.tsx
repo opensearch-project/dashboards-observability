@@ -8,6 +8,7 @@ import {
   EuiTitle,
   EuiComboBox,
   EuiSpacer,
+  EuiSmallButton,
   EuiButton,
   EuiFlexItem,
   EuiFormRow,
@@ -203,7 +204,7 @@ export const LogsViewConfigPanelItem = ({
         <EuiSpacer size="s" />
         {
           <EuiFlexItem grow>
-            <EuiButton
+            <EuiSmallButton
               fullWidth
               iconType="plusInCircleFilled"
               color="primary"
@@ -211,7 +212,7 @@ export const LogsViewConfigPanelItem = ({
               disabled={queriedFields.length !== 0}
             >
               Add
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         }
       </Fragment>

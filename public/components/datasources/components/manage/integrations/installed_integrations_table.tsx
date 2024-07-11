@@ -5,6 +5,7 @@
 
 import {
   EuiButton,
+  EuiSmallButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -99,9 +100,9 @@ const AddIntegrationButton = ({
   toggleFlyout: () => void;
 }) => {
   return (
-    <EuiButton fill={fill} onClick={toggleFlyout}>
+    <EuiSmallButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
