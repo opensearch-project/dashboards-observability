@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -78,7 +78,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             value={dataSource}
             isInvalid={isDataSourceValid === false}
             append={
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="validateIndex"
                 onClick={async () => {
                   const validationResult = await doExistingDataSourceValidation(
@@ -95,7 +95,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 disabled={dataSource.length === 0}
               >
                 Validate
-              </EuiButton>
+              </EuiSmallButton>
             }
           />
         </EuiFormRow>
@@ -130,12 +130,12 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       <EuiFlyoutFooter>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButton onClick={() => onClose()} color="danger">
+            <EuiSmallButton onClick={() => onClose()} color="danger">
               Cancel
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => {
                 onCreate(name, dataSource);
                 onClose();
@@ -152,7 +152,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               data-click-metric-element="integrations.create_from_setup"
             >
               Add Integration
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

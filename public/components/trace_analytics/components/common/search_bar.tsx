@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -90,14 +90,14 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
           {renderDatePicker(props.startTime, props.setStartTime, props.endTime, props.setEndTime)}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="superDatePickerApplyTimeButton"
             data-click-metric-element="trace_analytics.refresh_button"
             iconType="refresh"
             onClick={() => props.refresh()}
           >
             Refresh
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 

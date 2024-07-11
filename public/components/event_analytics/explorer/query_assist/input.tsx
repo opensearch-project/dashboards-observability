@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
@@ -386,7 +386,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       {props.children}
       <EuiSpacer size="m" />
       {props.lastFocusedInput === 'query_area' ? (
-        <EuiButton
+        <EuiSmallButton
           fill
           isLoading={loading}
           onClick={props.runChanges}
@@ -394,7 +394,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
           style={{ height: 44 }}
         >
           Run
-        </EuiButton>
+        </EuiSmallButton>
       ) : (
         <EuiSplitButton
           disabled={loading}

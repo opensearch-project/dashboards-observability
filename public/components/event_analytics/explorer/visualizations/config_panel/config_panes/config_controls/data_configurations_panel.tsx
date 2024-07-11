@@ -5,7 +5,7 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFieldNumber,
@@ -581,7 +581,7 @@ export const DataConfigPanelItem = ({
         )}
         <div className="logExplorerVisConfig__content">
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="visualizeEditorRenderButton"
               iconType="play"
               onClick={() => updateChart()}
@@ -589,7 +589,7 @@ export const DataConfigPanelItem = ({
               isDisabled={isEmpty(configList[AGGREGATIONS])}
             >
               Update chart
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </div>
       </div>

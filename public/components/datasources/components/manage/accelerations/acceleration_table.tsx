@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -143,7 +143,7 @@ export const AccelerationTable = ({
 
   const RefreshButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         onClick={handleRefresh}
         isLoading={
           isRefreshing ||
@@ -151,7 +151,7 @@ export const AccelerationTable = ({
         }
       >
         Refresh
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 

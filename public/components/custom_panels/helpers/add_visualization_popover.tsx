@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiSmallButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
   CREATE_TAB_PARAM,
@@ -67,7 +67,7 @@ export const AddVisualizationPopover = ({
   };
 
   const addVisualizationButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="addVisualizationButton"
       iconType="arrowDown"
       iconSide="right"
@@ -75,7 +75,7 @@ export const AddVisualizationPopover = ({
       onClick={onPopoverClick}
     >
       Add visualization
-    </EuiButton>
+    </EuiSmallButton>
   );
   return (
     <EuiPopover

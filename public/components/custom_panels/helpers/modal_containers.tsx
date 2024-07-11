@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import {
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiForm,

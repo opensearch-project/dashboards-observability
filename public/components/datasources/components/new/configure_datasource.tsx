@@ -9,7 +9,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiButton,
+  EuiSmallButton,
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
@@ -206,17 +206,17 @@ export function Configure(props: ConfigureDatasourceProps) {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => (page === 'review' ? setPage('configure') : {})}
               color="ghost"
               size="s"
               iconType="arrowLeft"
             >
               Previous
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
               size="s"
               iconType="arrowRight"
@@ -225,7 +225,7 @@ export function Configure(props: ConfigureDatasourceProps) {
               {page === 'configure'
                 ? `Review Configuration`
                 : `Connect to ${DatasourceTypeToDisplayName[type]}`}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>

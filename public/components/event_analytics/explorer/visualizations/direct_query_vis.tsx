@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCallOut, EuiPage, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiPage, EuiSmallButton } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
@@ -26,12 +26,12 @@ export const DirectQueryVisualization = ({
               index."
             />
           </p>
-          <EuiButton iconType={'bolt'} onClick={onCreateAcceleration} color="warning">
+          <EuiSmallButton iconType={'bolt'} onClick={onCreateAcceleration} color="warning">
             <FormattedMessage
               id="observability.directQueryVisualization.CreateAcceleration"
               defaultMessage="Create acceleration"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiCallOut>
       </EuiPage>
     </I18nProvider>

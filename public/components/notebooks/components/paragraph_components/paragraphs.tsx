@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonIcon,
   EuiComboBoxOptionOption,
   EuiContextMenu,
@@ -615,13 +615,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj={`runRefreshBtn-${index}`}
                     onClick={() => onRunPara()}
                     fill
                   >
                     {isOutputAvailable ? 'Refresh' : 'Run'}
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
                 {isOutputAvailable && renderOutputTimestampMessage()}
               </EuiFlexGroup>

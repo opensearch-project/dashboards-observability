@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
 import { AuthMethod } from '../../../../../common/constants/data_connections';
@@ -53,7 +53,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={goBack}>Edit</EuiButton>
+            <EuiSmallButton onClick={goBack}>Edit</EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />

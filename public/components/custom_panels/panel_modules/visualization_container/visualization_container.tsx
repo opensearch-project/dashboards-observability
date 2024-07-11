@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
@@ -145,9 +145,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -169,9 +169,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -320,14 +320,14 @@ export const VisualizationContainer = ({
               <p>{isError.errorMessage}</p>
             </EuiText>
             {isError.hasOwnProperty('errorDetails') && isError.errorDetails !== '' ? (
-              <EuiButton
+              <EuiSmallButton
                 className="viz-error-btn"
                 color="danger"
                 onClick={() => showModal('errorModal')}
                 size="s"
               >
                 See error details
-              </EuiButton>
+              </EuiSmallButton>
             ) : (
               <></>
             )}

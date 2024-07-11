@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,7 +49,7 @@ const Savebutton = ({
   setIsPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   return (
-    <EuiButton
+    <EuiSmallButton
       iconSide="right"
       onClick={() => {
         setIsPanelOpen((staleState) => !staleState);
@@ -58,7 +58,7 @@ const Savebutton = ({
       iconType="arrowDown"
     >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
@@ -392,7 +392,7 @@ const MetricsExportPopOver = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               size="s"
               fill
               onClick={() => {
@@ -401,7 +401,7 @@ const MetricsExportPopOver = () => {
               data-test-subj="metrics__SaveConfirm"
             >
               Save
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>

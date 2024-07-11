@@ -6,7 +6,7 @@
 import './docView.scss';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
@@ -215,14 +215,14 @@ export const SurroundingFlyout = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             onClick={openDetailsFlyout}
             className="header-button"
             iconType="sortRight"
             iconSide="right"
           >
             View event details
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutHeader>

@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import {
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiForm,
@@ -167,7 +167,7 @@ export const DeleteNotebookModal = ({
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="delete-notebook-modal-delete-button"
             onClick={() => onConfirm()}
             color="danger"
@@ -175,7 +175,7 @@ export const DeleteNotebookModal = ({
             disabled={value !== 'delete'}
           >
             Delete
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>
