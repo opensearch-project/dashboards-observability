@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiFilePicker,
+  EuiCompressedFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -117,7 +117,7 @@ export const IntegrationUploadPicker = ({
         isInvalid={checkCompleted && isInvalid}
         error={['Must be an ndjson bundle of integration templates']}
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           id="integrationBundlePicker"
           initialPromptText="Select or drag and drop integration bundles"
           onChange={handleFileChange}
