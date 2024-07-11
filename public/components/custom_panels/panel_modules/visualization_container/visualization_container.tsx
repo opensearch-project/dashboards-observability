@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -379,7 +379,7 @@ export const VisualizationContainer = ({
               ) : (
                 <EuiPopover
                   button={
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="actionMenuButton"
                       iconType="boxesHorizontal"
                       onClick={onActionsMenuClick}

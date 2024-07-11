@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -84,13 +84,13 @@ export function TraceView(props: TraceViewProps) {
                     <EuiFlexItem grow={false}>
                       <EuiCopy textToCopy={fields.trace_id}>
                         {(copy) => (
-                          <EuiButtonIcon
+                          <EuiSmallButtonIcon
                             aria-label="Copy trace id"
                             iconType="copyClipboard"
                             onClick={copy}
                           >
                             Click to copy
-                          </EuiButtonIcon>
+                          </EuiSmallButtonIcon>
                         )}
                       </EuiCopy>
                     </EuiFlexItem>

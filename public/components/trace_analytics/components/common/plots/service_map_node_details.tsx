@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -37,7 +37,7 @@ export const ServiceMapNodeDetails = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             aria-label="Close node details"
             iconType="cross"
             color="text"

@@ -6,7 +6,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
   EuiDatePicker,
@@ -306,7 +306,7 @@ export const VisaulizationFlyout = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="refreshPreview"
                 iconType="refresh"
                 onClick={onRefreshPreview}

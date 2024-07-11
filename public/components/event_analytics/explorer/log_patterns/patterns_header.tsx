@@ -7,7 +7,7 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -54,7 +54,7 @@ export const PatternsHeader = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               iconType="gear"
               onClick={() => setIsPatternConfigPopoverOpen(!isPatternConfigPopoverOpen)}
             />

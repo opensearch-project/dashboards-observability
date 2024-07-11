@@ -4,7 +4,7 @@
  */
 import React, { Fragment } from 'react';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -66,7 +66,7 @@ export const DataConfigPanelFields = ({
 
   const tooltipIcon = <EuiIcon type="iInCircle" color="text" size="m" />;
   const crossIcon = (index: number, configName: string) => (
-    <EuiButtonIcon
+    <EuiSmallButtonIcon
       color="subdued"
       iconType="cross"
       aria-label="clear-field"
@@ -150,7 +150,7 @@ export const DataConfigPanelFields = ({
           {!hideClickToAddButton(sectionName) && (
             <EuiPanel className="panelItem_button" data-test-subj="viz-config-section" grow>
               <EuiText size="s">{addButtonText}</EuiText>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 iconType="plusInCircle"
                 aria-label="add-field"
                 iconSize="s"

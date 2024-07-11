@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 import { LatencyPlt, LinePlt } from '../common/plots/latency_trend_plt';
 
@@ -29,7 +29,7 @@ export function LatencyTrendCell({
           ownFocus
           anchorPosition="downCenter"
           button={
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               aria-label="Open popover"
               onClick={() => setIsPopoverOpen(true)}
               iconType="magnifyWithPlus"
@@ -45,7 +45,7 @@ export function LatencyTrendCell({
               <EuiText size="s">{traceGroupName}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="Close popover"
                 iconType="cross"
                 color="text"
