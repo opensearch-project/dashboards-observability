@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiCompressedFieldText, EuiForm, EuiCompressedFormRow, EuiTextArea, EuiAccordion } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiForm, EuiCompressedFormRow, EuiCompressedTextArea, EuiAccordion } from '@elastic/eui';
 import { VIS_CHART_TYPES } from '../../../../../../../../common/constants/shared';
 import { DEFAULT_GAUGE_CHART_PARAMETERS } from '../../../../../../../../common/constants/explorer';
 import { ConfigPanelOptionGauge } from './config_panel_option_gauge';
@@ -53,7 +53,7 @@ export const ConfigPanelOptions = ({ visualizations, handleConfigChange, vizStat
           />
         </EuiCompressedFormRow>
         <EuiCompressedFormRow label="Description">
-          <EuiTextArea
+          <EuiCompressedTextArea
             name="description"
             aria-label="Use aria labels when no actual label is in use"
             placeholder={'Description'}
