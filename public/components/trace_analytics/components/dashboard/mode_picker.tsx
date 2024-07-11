@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiSmallButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TraceAnalyticsMode } from '../../home';
 
@@ -33,7 +33,7 @@ export function DataSourcePicker(props: {
   const createTrigger = () => {
     const { label, title, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         flush="left"
         color="text"
         iconSide="right"
@@ -43,7 +43,7 @@ export function DataSourcePicker(props: {
         {...rest}
       >
         {label}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 

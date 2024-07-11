@@ -7,7 +7,7 @@ import './docView.scss';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFieldNumber,
@@ -238,14 +238,14 @@ export const SurroundingFlyout = ({
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFormRow>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               isLoading={typeOfDocs === 'new' ? loadingNewEvents : loadingOldEvents}
               iconSide="left"
               onClick={() => loadButton(typeOfDocs)}
               iconType={iconType}
             >
               Load
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="cnt-picker">

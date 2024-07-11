@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiCodeBlock,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -219,7 +219,7 @@ export const ParaInput = (props: {
               </EuiModalBody>
 
               <EuiModalFooter>
-                <EuiButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiButtonEmpty>
+                <EuiSmallButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiSmallButtonEmpty>
                 <EuiSmallButton
                   data-test-subj="para-input-select-button"
                   onClick={() => onSelect()}

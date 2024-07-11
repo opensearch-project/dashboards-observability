@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiButtonEmpty, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSmallButtonEmpty, EuiLink, EuiSpacer } from '@elastic/eui';
 
 interface AccelerateCalloutProps {
   onCreateAcceleration: () => void;
@@ -22,7 +22,7 @@ export const AccelerateCallout = ({ onCreateAcceleration }: AccelerateCalloutPro
             Security Lake tables include acceleration with skipping index, but the query performance
             can be further improved with other types of accelerations.
           </span>
-          <EuiButtonEmpty onClick={onCreateAcceleration}>Create acceleration</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={onCreateAcceleration}>Create acceleration</EuiSmallButtonEmpty>
           <span>&nbsp;or&nbsp;</span>
           <EuiLink
             href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"

@@ -6,7 +6,7 @@
 import {
   EuiBottomBar,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -268,7 +268,7 @@ export function SetupBottomBar({
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           color="text"
           iconType="cross"
           onClick={() => {
@@ -286,7 +286,7 @@ export function SetupBottomBar({
           disabled={loading}
         >
           Discard
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSmallButton

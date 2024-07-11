@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiForm,
   EuiModal,
   EuiModalBody,
@@ -88,7 +88,7 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>{btn1txt}</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={closeModal}>{btn1txt}</EuiSmallButtonEmpty>
           {optionalArgs === undefined ? (
             <EuiSmallButton data-test-subj="runModalButton" onClick={() => runModal(value)} fill>
               {btn2txt}

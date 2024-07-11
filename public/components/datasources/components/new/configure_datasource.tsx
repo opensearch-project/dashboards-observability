@@ -13,7 +13,7 @@ import {
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigureS3Datasource } from './configure_s3_datasource';
@@ -194,7 +194,7 @@ export function Configure(props: ConfigureDatasourceProps) {
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               onClick={() => {
                 window.location.hash = '#/new';
               }}
@@ -203,7 +203,7 @@ export function Configure(props: ConfigureDatasourceProps) {
               iconType="cross"
             >
               Cancel
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSmallButton
