@@ -10,7 +10,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -42,7 +42,7 @@ export function FilterEditPopover(props: {
       <button style={{ width: 0, height: 0, position: 'fixed', marginLeft: -1000, bottom: 0 }} />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={6}>
-          <EuiFormRow label={'Field'}>
+          <EuiCompressedFormRow label={'Field'}>
             <EuiComboBox
               placeholder="Select a field first"
               isClearable={false}
@@ -55,10 +55,10 @@ export function FilterEditPopover(props: {
               }}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={5}>
-          <EuiFormRow label={'Operator'}>
+          <EuiCompressedFormRow label={'Operator'}>
             <EuiComboBox
               placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
               isClearable={false}
@@ -75,7 +75,7 @@ export function FilterEditPopover(props: {
               }}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       {selectedOperatorOptions.length > 0 &&

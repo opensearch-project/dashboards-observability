@@ -8,7 +8,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -208,7 +208,7 @@ export const TreemapConfigPanelItem = ({
       </EuiTitle>
       <div className="first-division">
         <EuiPanel color="subdued">
-          <EuiFormRow label="Child Field">
+          <EuiCompressedFormRow label="Child Field">
             <EuiComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(GROUPBY)}
@@ -222,7 +222,7 @@ export const TreemapConfigPanelItem = ({
                 updateList(GROUPBY, CHILDFIELD, val.length > 0 ? val[0].label : '')
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
 
           <EuiSpacer size="s" />
           <EuiTitle size="xxxs">
@@ -242,7 +242,7 @@ export const TreemapConfigPanelItem = ({
       </EuiTitle>
       <div className="first-division">
         <EuiPanel color="subdued">
-          <EuiFormRow label="Value Field">
+          <EuiCompressedFormRow label="Value Field">
             <EuiComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(AGGREGATIONS)}
@@ -256,7 +256,7 @@ export const TreemapConfigPanelItem = ({
                 updateList(AGGREGATIONS, VALUEFIELD, val.length > 0 ? val[0].label : '')
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiPanel>
       </div>
       <EuiSpacer size="s" />

@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiSpacer,
   EuiSuperSelect,
@@ -120,7 +120,7 @@ export const IndexTypeSelector = ({
         <h3>Acceleration setting</h3>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Acceleration type"
         helpText="Select the type of acceleration according to your use case."
         labelAppend={
@@ -138,7 +138,7 @@ export const IndexTypeSelector = ({
           itemLayoutAlign="top"
           hasDividers
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 };

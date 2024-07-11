@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiAccordion, EuiFieldNumber, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiFieldNumber, EuiCompressedFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import producer from 'immer';
 import React, { ChangeEvent, useState } from 'react';
 import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
@@ -56,7 +56,7 @@ export const IndexAdvancedSettings = ({
           setAccelerationFormData={setAccelerationFormData}
         />
       )}
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Number of primary shards"
         helpText="Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created."
         isInvalid={hasError(accelerationFormData.formErrors, 'primaryShardsError')}
@@ -80,9 +80,9 @@ export const IndexAdvancedSettings = ({
           }}
           isInvalid={hasError(accelerationFormData.formErrors, 'primaryShardsError')}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       <EuiSpacer size="l" />
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Number of replicas"
         helpText="Specify the number of replicas each primary shard should have."
         isInvalid={hasError(accelerationFormData.formErrors, 'replicaShardsError')}
@@ -106,7 +106,7 @@ export const IndexAdvancedSettings = ({
           }}
           isInvalid={hasError(accelerationFormData.formErrors, 'replicaShardsError')}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiAccordion>
   );
 };

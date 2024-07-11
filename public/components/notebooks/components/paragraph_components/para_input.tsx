@@ -11,7 +11,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHighlight,
   EuiLink,
   EuiModal,
@@ -134,7 +134,7 @@ export const ParaInput = (props: {
       <>
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
           <EuiFlexItem grow={6}>
-            <EuiFormRow label="Title" fullWidth>
+            <EuiCompressedFormRow label="Title" fullWidth>
               <EuiComboBox
                 placeholder="Find visualization"
                 singleSelection={{ asPlainText: true }}
@@ -146,7 +146,7 @@ export const ParaInput = (props: {
                   props.setIsOutputStale(true);
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSmallButton
@@ -165,7 +165,7 @@ export const ParaInput = (props: {
           </EuiFlexItem>
           <EuiFlexItem grow={2} />
           <EuiFlexItem grow={9}>
-            <EuiFormRow label="Date range" fullWidth>
+            <EuiCompressedFormRow label="Date range" fullWidth>
               <EuiSuperDatePicker
                 start={props.startTime}
                 end={props.endTime}
@@ -177,7 +177,7 @@ export const ParaInput = (props: {
                   props.setIsOutputStale(true);
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>

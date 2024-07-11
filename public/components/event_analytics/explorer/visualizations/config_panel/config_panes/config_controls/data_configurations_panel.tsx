@@ -11,7 +11,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -356,7 +356,7 @@ export const DataConfigPanelItem = ({
             <EuiPanel color="subdued" style={{ padding: '0px' }}>
               {/* Aggregation input for Series */}
               {isAggregations && (
-                <EuiFormRow label="Aggregation">
+                <EuiCompressedFormRow label="Aggregation">
                   <EuiComboBox
                     aria-label="aggregation input"
                     placeholder="Select a aggregation"
@@ -373,20 +373,20 @@ export const DataConfigPanelItem = ({
                     }
                     onChange={(e) => updateList(e.length > 0 ? e[0].label : '', 'aggregation')}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               )}
               {/* Show input fields for Series when aggregation is not empty  */}
               {isAggregations && selectedObj.aggregation !== '' && (
                 <>
                   {getCommonDimensionsField(selectedObj, name)}
-                  <EuiFormRow label="Custom label">
+                  <EuiCompressedFormRow label="Custom label">
                     <EuiFieldText
                       placeholder="Custom label"
                       value={selectedObj[CUSTOM_LABEL]}
                       onChange={(e) => updateList(e.target.value, CUSTOM_LABEL)}
                       aria-label="input label"
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </>
               )}
               {/* Show input fields for dimensions */}
@@ -427,7 +427,7 @@ export const DataConfigPanelItem = ({
   const getCommonDimensionsField = (selectedObj: ConfigListEntry, name: string) => {
     return (
       <>
-        <EuiFormRow label="Field">
+        <EuiCompressedFormRow label="Field">
           <EuiComboBox
             aria-label="input field"
             placeholder="Select a field"
@@ -450,7 +450,7 @@ export const DataConfigPanelItem = ({
                 : updateList(e.length > 0 ? e[0].label : '', 'label')
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {isTimeStampSelected && DateHistogram}
       </>
     );
@@ -481,7 +481,7 @@ export const DataConfigPanelItem = ({
           <div className="first-division">
             <EuiPanel color="subdued" style={{ padding: '0px' }}>
               <EuiSpacer size="s" />
-              <EuiFormRow label="Interval">
+              <EuiCompressedFormRow label="Interval">
                 <EuiFieldNumber
                   placeholder="Placeholder text"
                   value={configList.span?.interval ?? 1}
@@ -501,8 +501,8 @@ export const DataConfigPanelItem = ({
                   aria-label="interval field"
                   data-test-subj="valueFieldNumber"
                 />
-              </EuiFormRow>
-              <EuiFormRow label="Unit">
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow label="Unit">
                 <EuiComboBox
                   aria-label="date unit"
                   placeholder="Select fields"
@@ -516,7 +516,7 @@ export const DataConfigPanelItem = ({
                   selectedOptions={configList.span?.unit ? [...configList.span?.unit] : []}
                   onChange={(e) => handleTimeStampFieldsChange(e, 'unit')}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiPanel>
           </div>
         </div>

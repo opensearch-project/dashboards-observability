@@ -11,7 +11,7 @@ import {
   EuiSmallButtonEmpty,
   EuiFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -153,7 +153,7 @@ export const DeleteNotebookModal = ({
           <EuiText>The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiFormRow label={'To confirm deletion, enter "delete" in the text field'}>
+            <EuiCompressedFormRow label={'To confirm deletion, enter "delete" in the text field'}>
               <EuiFieldText
                 data-test-subj="delete-notebook-modal-input"
                 name="input"
@@ -161,7 +161,7 @@ export const DeleteNotebookModal = ({
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 

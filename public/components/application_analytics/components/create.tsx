@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
@@ -199,20 +199,20 @@ export const CreateApp = (props: CreateAppProps) => {
             </EuiPageContentHeader>
             <EuiHorizontalRule />
             <EuiForm component="form">
-              <EuiFormRow label="Name" data-test-subj="nameFormRow">
+              <EuiCompressedFormRow label="Name" data-test-subj="nameFormRow">
                 <EuiFieldText
                   name="name"
                   value={name}
                   onChange={(e) => setNameWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
-              <EuiFormRow label="Description" data-test-subj="descriptionFormRow">
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow label="Description" data-test-subj="descriptionFormRow">
                 <EuiFieldText
                   name="description"
                   value={description}
                   onChange={(e) => setDescriptionWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiForm>
           </EuiPageContent>
           <EuiSpacer />
