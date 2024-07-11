@@ -8,7 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
-  EuiRadioGroup,
+  EuiCompressedRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -80,7 +80,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiRadioGroup
+          <EuiCompressedRadioGroup
             options={accessLevelOptions}
             idSelected={selectedAccessLevel}
             onChange={(id) => {
