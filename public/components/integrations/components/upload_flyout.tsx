@@ -13,7 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
@@ -112,7 +112,7 @@ export const IntegrationUploadPicker = ({
 
   return (
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Select file"
         isInvalid={checkCompleted && isInvalid}
         error={['Must be an ndjson bundle of integration templates']}
@@ -124,7 +124,7 @@ export const IntegrationUploadPicker = ({
           isInvalid={checkCompleted && isInvalid}
           onBlur={() => setBlurred(true)}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   );
 };

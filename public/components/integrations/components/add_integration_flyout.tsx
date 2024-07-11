@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiText,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -54,7 +54,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const formContent = () => {
     return (
       <div>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Index name or wildcard pattern"
           helpText="Input an index name or wildcard pattern that your integration will query."
           isInvalid={isDataSourceValid === false}
@@ -98,15 +98,15 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               </EuiSmallButton>
             }
           />
-        </EuiFormRow>
-        <EuiFormRow label="Name" helpText="This will be used to label the newly added integration.">
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow label="Name" helpText="This will be used to label the newly added integration.">
           <EuiFieldText
             data-test-subj="new-instance-name"
             name="first"
             onChange={(e) => onNameChange(e)}
             value={name}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   };

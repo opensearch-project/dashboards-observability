@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiForm, EuiCompressedFormRow } from '@elastic/eui';
 import { ConfigPanelOptions } from './config_controls';
 
 export const VizDataPanel = ({ visualizations, onConfigChange, vizState = {}, tabProps }: any) => {
@@ -20,7 +20,7 @@ export const VizDataPanel = ({ visualizations, onConfigChange, vizState = {}, ta
   const dynamicContent = tabProps.sections.map((section) => {
     const Editor = section.editor;
     return (
-      <EuiFormRow key={section.id} fullWidth>
+      <EuiCompressedFormRow key={section.id} fullWidth>
         <Editor
           visualizations={visualizations}
           schemas={section.schemas}
@@ -30,20 +30,20 @@ export const VizDataPanel = ({ visualizations, onConfigChange, vizState = {}, ta
           sectionId={section.id}
           props={section.props || {}}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   });
 
   return (
     <div className="visEditorSidebar__config">
       <EuiForm className="visEditorSidebar__form">
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <ConfigPanelOptions
             vizState={vizState?.panelOptions}
             visualizations={visualizations}
             handleConfigChange={handleConfigEditing('panelOptions')}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {dynamicContent}
       </EuiForm>
     </div>

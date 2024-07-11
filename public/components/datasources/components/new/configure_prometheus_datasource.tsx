@@ -9,7 +9,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiTextArea,
   EuiSelect,
@@ -113,7 +113,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             currentError={error}
             setErrorForForm={setError}
           />
-          <EuiFormRow label="Description - Optional">
+          <EuiCompressedFormRow label="Description - Optional">
             <EuiTextArea
               data-test-subj="data-source-description"
               placeholder="Placeholder"
@@ -125,7 +125,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
                 setDetails(e.target.value);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
           <EuiText>
@@ -133,7 +133,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Prometheus URI">
+          <EuiCompressedFormRow label="Prometheus URI">
             <>
               <EuiText size="xs">
                 <p>Enter the Prometheus URI endpoint.</p>
@@ -150,7 +150,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
                 }}
               />
             </>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
           <EuiText>
@@ -158,7 +158,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Authentication method">
+          <EuiCompressedFormRow label="Authentication method">
             <EuiSelect
               id="selectAuthMethod"
               options={authOptions}
@@ -167,7 +167,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
                 setAuthMethodForRequest(e.target.value as AuthMethod);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
 
           <AuthDetails
             currentUsername={currentUsername}

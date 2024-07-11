@@ -16,7 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiLoadingChart,
   EuiModal,
@@ -210,7 +210,7 @@ export const VisaulizationFlyoutSO = ({
       content="Picker is disabled. Please edit date/time from panel"
       display="block"
     >
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Panel Time Range"
         fullWidth
         isInvalid={startDate > endDate}
@@ -243,7 +243,7 @@ export const VisaulizationFlyoutSO = ({
             />
           }
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiToolTip>
   );
 
@@ -272,14 +272,14 @@ export const VisaulizationFlyoutSO = ({
       <EuiFlyoutBody>
         <>
           <EuiSpacer size="s" />
-          <EuiFormRow label="Visualization name">
+          <EuiCompressedFormRow label="Visualization name">
             <EuiSelect
               hasNoInitialSelection
               onChange={(e) => onChangeSelection(e)}
               options={visualizationOptions}
               value={selectValue}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="l" />
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>

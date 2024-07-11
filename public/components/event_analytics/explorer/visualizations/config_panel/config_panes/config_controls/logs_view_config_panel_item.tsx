@@ -11,7 +11,7 @@ import {
   EuiSmallButton,
   EuiButton,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
@@ -173,7 +173,7 @@ export const LogsViewConfigPanelItem = ({
   const getLogsViewUI = () => {
     const list = configList[GROUPBY] ? configList[GROUPBY] : [];
     const listUI = list.map((field, index) => (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Field"
         labelAppend={
           <EuiText size="xs">
@@ -196,7 +196,7 @@ export const LogsViewConfigPanelItem = ({
             updateLogsViewConfig(e.length > 0 ? e[0].label : '', field as ConfigListEntry)
           }
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ));
     return (
       <Fragment key="logsViewUI">

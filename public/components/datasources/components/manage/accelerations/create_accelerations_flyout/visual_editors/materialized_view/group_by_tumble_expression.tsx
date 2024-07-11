@@ -10,7 +10,7 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopover,
   EuiSelect,
 } from '@elastic/eui';
@@ -93,7 +93,7 @@ export const GroupByTumbleExpression = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Time Field">
+            <EuiCompressedFormRow label="Time Field">
               <EuiComboBox
                 style={{ minWidth: '200px' }}
                 placeholder="Select one or more options"
@@ -105,25 +105,25 @@ export const GroupByTumbleExpression = ({
                 onChange={onChangeTimeField}
                 isClearable={false}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Tumble Window">
+            <EuiCompressedFormRow label="Tumble Window">
               <EuiFieldNumber
                 value={groupbyValues.tumbleWindow}
                 onChange={onChangeTumbleWindow}
                 min={1}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Tumble Interval">
+            <EuiCompressedFormRow label="Tumble Interval">
               <EuiSelect
                 value={groupbyValues.tumbleInterval}
                 onChange={onChangeTumbleInterval}
                 options={ACCELERATION_TIME_INTERVAL}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>

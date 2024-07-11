@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiTextArea, EuiAccordion } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiCompressedFormRow, EuiTextArea, EuiAccordion } from '@elastic/eui';
 import { VIS_CHART_TYPES } from '../../../../../../../../common/constants/shared';
 import { DEFAULT_GAUGE_CHART_PARAMETERS } from '../../../../../../../../common/constants/explorer';
 import { ConfigPanelOptionGauge } from './config_panel_option_gauge';
@@ -43,7 +43,7 @@ export const ConfigPanelOptions = ({ visualizations, handleConfigChange, vizStat
       paddingSize="s"
     >
       <EuiForm component="form">
-        <EuiFormRow fullWidth label="Title" helpText={`${helpText}`}>
+        <EuiCompressedFormRow fullWidth label="Title" helpText={`${helpText}`}>
           <EuiFieldText
             name="title"
             onChange={handleTextChange}
@@ -51,8 +51,8 @@ export const ConfigPanelOptions = ({ visualizations, handleConfigChange, vizStat
             value={panelOptionsValues.title}
             placeholder={'Title'}
           />
-        </EuiFormRow>
-        <EuiFormRow label="Description">
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow label="Description">
           <EuiTextArea
             name="description"
             aria-label="Use aria labels when no actual label is in use"
@@ -61,7 +61,7 @@ export const ConfigPanelOptions = ({ visualizations, handleConfigChange, vizStat
             onChange={handleTextChange}
             onBlur={() => handleConfigChange(panelOptionsValues)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {visualizations?.vis?.name?.toLowerCase() === VIS_CHART_TYPES.Gauge && (
           <ConfigPanelOptionGauge
             onChange={handleTextChange}

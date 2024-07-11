@@ -11,7 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,

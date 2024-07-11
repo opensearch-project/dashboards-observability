@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiCompressedFormRow,
   EuiFormRow,
   EuiSpacer,
   EuiText,
@@ -237,7 +238,7 @@ export const SurroundingFlyout = ({
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiSmallButtonEmpty
               isLoading={typeOfDocs === 'new' ? loadingNewEvents : loadingOldEvents}
               iconSide="left"
@@ -246,10 +247,10 @@ export const SurroundingFlyout = ({
             >
               Load
             </EuiSmallButtonEmpty>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="cnt-picker">
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiFieldNumber
               value={value}
               onChange={(e) => onChange(e)}
@@ -258,10 +259,10 @@ export const SurroundingFlyout = ({
               max={10000}
               onKeyDown={(e) => handleKeyDown(e, typeOfDocs)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="center">
+          <EuiFormRow display="centerCompressed">
             <EuiText>{typeOfDocs === 'new' ? 'newer' : 'older'} events</EuiText>
           </EuiFormRow>
         </EuiFlexItem>

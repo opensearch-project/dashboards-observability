@@ -7,7 +7,7 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
@@ -43,7 +43,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
         <EuiText size="xs">
           Select one or more OpenSearch roles that can query this data connection.
         </EuiText>
-        <EuiFormRow
+        <EuiCompressedFormRow
           isInvalid={selectedRoles.length === 0}
           error={
             selectedRoles.length === 0
@@ -60,7 +60,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
             data-test-subj="query-permissions-combo-box"
             isInvalid={selectedRoles.length === 0}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   };

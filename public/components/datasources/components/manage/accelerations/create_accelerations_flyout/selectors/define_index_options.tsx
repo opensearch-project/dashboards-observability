@@ -8,7 +8,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIconTip,
   EuiLink,
   EuiMarkdownFormat,
@@ -89,7 +89,7 @@ export const DefineIndexOptions = ({
 
   return (
     <>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Index name"
         helpText='Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.'
         isInvalid={hasError(accelerationFormData.formErrors, 'indexNameError')}
@@ -117,7 +117,7 @@ export const DefineIndexOptions = ({
             );
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {modalComponent}
     </>
   );

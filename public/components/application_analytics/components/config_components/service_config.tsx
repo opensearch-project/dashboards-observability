@@ -9,7 +9,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiComboBox,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
@@ -167,7 +167,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
         }}
         paddingSize="l"
       >
-        <EuiFormRow label="Services & entities">
+        <EuiCompressedFormRow label="Services & entities">
           <EuiComboBox
             aria-label="Select services and entities"
             placeholder="Select services and entities"
@@ -177,7 +177,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
             isClearable={false}
             data-test-subj="servicesEntitiesComboBox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
         <ServiceMap
           serviceMap={serviceMap}

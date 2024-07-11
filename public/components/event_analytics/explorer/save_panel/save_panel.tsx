@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import {
   EuiTitle,
   EuiComboBox,
+  EuiCompressedFormRow,
   EuiFormRow,
   EuiFieldText,
   EuiSwitch,
@@ -78,7 +79,7 @@ export const SavePanel = ({
           <EuiTitle size="xxs">
             <h3>{'Custom operational dashboards/application'}</h3>
           </EuiTitle>
-          <EuiFormRow helpText="Search existing dashboards or applications by name">
+          <EuiCompressedFormRow helpText="Search existing dashboards or applications by name">
             <EuiComboBox
               placeholder="Select dashboards/applications"
               onChange={(daOptions) => {
@@ -95,13 +96,13 @@ export const SavePanel = ({
               singleSelection={{ asPlainText: true }}
               data-test-subj="eventExplorer__querySaveComboBox"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       )}
       <EuiTitle size="xxs">
         <h3>Name</h3>
       </EuiTitle>
-      <EuiFormRow helpText="Name for your savings">
+      <EuiCompressedFormRow helpText="Name for your savings">
         <EuiFieldText
           key={'save-panel-id'}
           value={savePanelName}
@@ -111,7 +112,7 @@ export const SavePanel = ({
           }}
           data-test-subj="eventExplorer__querySaveName"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {showOptionList && (
         <>
           <EuiFormRow display="columnCompressedSwitch">

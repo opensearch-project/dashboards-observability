@@ -7,7 +7,7 @@ import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiAccordion,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldNumber,
   EuiColorPicker,
   EuiSpacer,
@@ -133,28 +133,28 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
           vizState.level.map((thr: AvailabilityUnitType) => {
             return (
               <>
-                <EuiFormRow fullWidth label="">
+                <EuiCompressedFormRow fullWidth label="">
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem grow={3}>
-                      <EuiFormRow helpText="color">
+                      <EuiCompressedFormRow helpText="color">
                         <EuiColorPicker
                           fullWidth
                           onChange={handleAvailabilityChange(thr.thid, 'color')}
                           color={thr.color}
                         />
-                      </EuiFormRow>
+                      </EuiCompressedFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem grow={5}>
-                      <EuiFormRow helpText="name">
+                      <EuiCompressedFormRow helpText="name">
                         <EuiFieldText
                           onChange={handleAvailabilityChange(thr.thid, 'name')}
                           value={thr.name || ''}
                           arial-label="Input availability name"
                           data-test-subj="nameFieldText"
                         />
-                      </EuiFormRow>
+                      </EuiCompressedFormRow>
                     </EuiFlexItem>
-                    <EuiFormRow helpText="expression">
+                    <EuiCompressedFormRow helpText="expression">
                       <EuiFlexItem grow={4}>
                         <EuiSelect
                           options={expressionOptions}
@@ -164,9 +164,9 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
                           data-test-subj="expressionSelect"
                         />
                       </EuiFlexItem>
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                     <EuiFlexItem grow={5}>
-                      <EuiFormRow helpText="value">
+                      <EuiCompressedFormRow helpText="value">
                         <EuiFieldNumber
                           fullWidth
                           placeholder="availability value"
@@ -175,15 +175,15 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
                           aria-label="Input availability value"
                           data-test-subj="valueFieldNumber"
                         />
-                      </EuiFormRow>
+                      </EuiCompressedFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem grow={1}>
-                      <EuiFormRow>
+                      <EuiCompressedFormRow>
                         <EuiIcon type="trash" onClick={handleAvailabilityDelete(thr.thid)} />
-                      </EuiFormRow>
+                      </EuiCompressedFormRow>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </>
             );
           })}

@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
 } from '@elastic/eui';
 import isArray from 'lodash/isArray';
@@ -88,7 +88,7 @@ export const DataConfigPanelFields = ({
   );
 
   return (
-    <EuiFormRow>
+    <EuiCompressedFormRow>
       <>
         <div style={{ display: 'flex' }}>
           <EuiFormLabel className="panel_title">{sectionName}</EuiFormLabel>
@@ -162,6 +162,6 @@ export const DataConfigPanelFields = ({
           )}
         </div>
       </>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

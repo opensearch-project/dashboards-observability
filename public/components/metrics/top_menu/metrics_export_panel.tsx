@@ -8,7 +8,7 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexItem,
   EuiForm,
 } from '@elastic/eui';
@@ -53,7 +53,7 @@ export const MetricsExportPanel = ({
 
   return (
     <div style={{ minWidth: '15vw' }}>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Custom operational dashboards/application"
         helpText="Search existing dashboards or applications by name"
       >
@@ -74,7 +74,7 @@ export const MetricsExportPanel = ({
           isClearable={true}
           data-test-subj="eventExplorer__querySaveComboBox"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
 
       {metricsToExport.length > 0 && (
         <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
@@ -83,14 +83,14 @@ export const MetricsExportPanel = ({
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label={'Metric Name #' + (index + 1)}>
+                    <EuiCompressedFormRow label={'Metric Name #' + (index + 1)}>
                       <EuiFieldText
                         key={`metric-name-input-id-${index}`}
                         value={metaData.name}
                         onChange={(e) => onNameChange(index, e.target.value)}
                         data-test-subj="metrics__querySaveName"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiForm>

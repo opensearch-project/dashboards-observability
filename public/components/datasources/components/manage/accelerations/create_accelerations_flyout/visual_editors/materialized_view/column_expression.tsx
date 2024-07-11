@@ -10,7 +10,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopover,
 } from '@elastic/eui';
 import producer from 'immer';
@@ -93,7 +93,7 @@ export const ColumnExpression = ({
             <>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Aggregate function">
+                  <EuiCompressedFormRow label="Aggregate function">
                     <EuiComboBox
                       singleSelection={{ asPlainText: true }}
                       options={ACCELERATION_AGGREGRATION_FUNCTIONS}
@@ -113,11 +113,11 @@ export const ColumnExpression = ({
                       }
                       isClearable={false}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
                 {currentColumnExpressionValue.functionName !== 'window.start' && (
                   <EuiFlexItem grow={false}>
-                    <EuiFormRow label="Aggregation field">
+                    <EuiCompressedFormRow label="Aggregation field">
                       <EuiComboBox
                         singleSelection={{ asPlainText: true }}
                         options={[
@@ -145,7 +145,7 @@ export const ColumnExpression = ({
                         }
                         isClearable={false}
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -173,7 +173,7 @@ export const ColumnExpression = ({
               panelPaddingSize="s"
               anchorPosition="downLeft"
             >
-              <EuiFormRow label="Column alias">
+              <EuiCompressedFormRow label="Column alias">
                 <EuiFieldText
                   name="aliasField"
                   value={currentColumnExpressionValue.fieldAlias}
@@ -184,7 +184,7 @@ export const ColumnExpression = ({
                     )
                   }
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiPopover>
           </EuiFlexItem>
         )}
