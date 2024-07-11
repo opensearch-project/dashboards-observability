@@ -13,7 +13,6 @@ import {
   NotificationsStart,
 } from '../../../../../src/core/public';
 import { NewGettingStarted } from './components/getting_started';
-import { AccordionFilterPage } from './components/accordionFilterPage';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -44,7 +43,6 @@ export const Home = (props: HomeProps) => {
             path={['/']}
             render={(_routerProps) => <NewGettingStarted {...commonProps} />}
           />
-          <Route path="/accordion-filter" render={(_routerProps) => <AccordionFilterPage />} />
         </Switch>
       </HashRouter>
     </div>

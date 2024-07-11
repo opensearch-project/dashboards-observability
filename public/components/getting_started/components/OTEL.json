@@ -1,0 +1,22 @@
+{
+  "tutorial": {
+    "title": "Basic Configuration Steps",
+    "steps": [
+      {
+        "step": "Initialize Configuration",
+        "description": "Set up your environment variables.",
+        "code": "export API_KEY='your-api-key-here'"
+      },
+      {
+        "step": "Install Dependencies",
+        "description": "Run the following command to install necessary libraries.",
+        "code": "npm install axios"
+      },
+      {
+        "step": "Execute the Script",
+        "description": "Run the script to see the output.",
+        "code": "node script.js"
+      }
+    ]
+  }
+}
