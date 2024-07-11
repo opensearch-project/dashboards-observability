@@ -10,7 +10,7 @@ import {
   EuiText,
   EuiLink,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTextArea,
   EuiSelect,
   EuiCallOut,
@@ -134,7 +134,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 engine to connect to AWS Glue Data Catalog.
               </p>
             </EuiText>
-            <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
+            <EuiCompressedFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
         </EuiCompressedFormRow>
 
@@ -143,7 +143,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiText size="xs">
               <p>This should be the IAM role ARN</p>
             </EuiText>
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="role-ARN"
               placeholder="Role ARN"
               value={arn}
@@ -172,7 +172,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 Catalog. This OpenSearch instance is used for writing index data back.
               </p>
             </EuiText>
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="index-URI"
               placeholder="Index store URI"
               value={store}

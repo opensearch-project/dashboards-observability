@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -71,7 +71,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             </EuiText>
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="data-source-name"
             name="first"
             onChange={(e) => onDatasourceChange(e)}
@@ -100,7 +100,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           />
         </EuiCompressedFormRow>
         <EuiCompressedFormRow label="Name" helpText="This will be used to label the newly added integration.">
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="new-instance-name"
             name="first"
             onChange={(e) => onNameChange(e)}

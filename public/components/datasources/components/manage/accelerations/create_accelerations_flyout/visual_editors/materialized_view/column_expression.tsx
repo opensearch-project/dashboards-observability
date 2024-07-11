@@ -7,7 +7,7 @@ import {
   EuiSmallButtonIcon,
   EuiComboBox,
   EuiExpression,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -174,7 +174,7 @@ export const ColumnExpression = ({
               anchorPosition="downLeft"
             >
               <EuiCompressedFormRow label="Column alias">
-                <EuiFieldText
+                <EuiCompressedFieldText
                   name="aliasField"
                   value={currentColumnExpressionValue.fieldAlias}
                   onChange={(e) =>

@@ -9,7 +9,7 @@ import {
   EuiSmallButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -388,7 +388,7 @@ export const CustomPanelTable = ({
             <EuiHorizontalRule margin="m" />
             {customPanels.length > 0 ? (
               <>
-                <EuiFieldSearch
+                <EuiCompressedFieldSearch
                   fullWidth
                   data-test-subj="operationalPanelSearchBar"
                   placeholder="Search Observability Dashboard name"

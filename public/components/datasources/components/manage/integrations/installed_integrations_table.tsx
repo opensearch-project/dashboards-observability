@@ -4,9 +4,8 @@
  */
 
 import {
-  EuiButton,
   EuiSmallButton,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -235,7 +234,7 @@ export const InstalledIntegrationsTable = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             fullWidth
             placeholder="Search..."
             onChange={(queryEvent) => {

@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -72,7 +72,7 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
       <EuiFlexGroup gutterSize="s">
         {!props.datepickerOnly && (
           <EuiFlexItem>
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
               fullWidth
               isClearable={false}
               placeholder="Trace ID, trace group name, service name"

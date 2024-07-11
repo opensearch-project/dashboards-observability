@@ -6,7 +6,7 @@
 import {
   EuiSmallButton,
   EuiComboBoxOptionOption,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -337,7 +337,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         <EuiFlexItem>
           <EuiInputPopover
             input={
-              <EuiFieldText
+              <EuiCompressedFieldText
                 inputRef={inputRef}
                 placeholder="Ask me a question"
                 disabled={loading}

@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiLink,
   EuiSelect,
@@ -183,7 +183,7 @@ export const IndexSettingOptions = ({
           isInvalid={hasError(accelerationFormData.formErrors, 'refreshIntervalError')}
           error={accelerationFormData.formErrors.refreshIntervalError}
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             placeholder="Refresh increments"
             value={refreshWindow}
             onChange={onChangeRefreshWindow}
@@ -236,7 +236,7 @@ export const IndexSettingOptions = ({
             </EuiText>
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             placeholder="s3://checkpoint/location"
             value={checkpoint}
             onChange={onChangeCheckpoint}
@@ -262,7 +262,7 @@ export const IndexSettingOptions = ({
           isInvalid={hasError(accelerationFormData.formErrors, 'watermarkDelayError')}
           error={accelerationFormData.formErrors.watermarkDelayError}
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             placeholder="Watermark delay interval"
             value={delayWindow}
             onChange={onChangeDelayWindow}
