@@ -11,7 +11,7 @@ import {
   EuiLink,
   EuiCompressedFormRow,
   EuiCompressedFieldText,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
@@ -108,7 +108,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           setErrorForForm={setError}
         />
         <EuiCompressedFormRow label="Description - Optional">
-          <EuiTextArea
+          <EuiCompressedTextArea
             placeholder="Describe data source"
             value={details}
             onBlur={(e) => {

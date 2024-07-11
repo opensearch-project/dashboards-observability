@@ -25,7 +25,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { Input, Prompt } from '@nteract/presentational-components';
 import React, { useState } from 'react';
@@ -72,7 +72,7 @@ export const ParaInput = (props: {
       <div style={{ width: '100%' }}>
         {/* If the para is selected show the editor else display the code in the paragraph */}
         {para.isSelected ? (
-          <EuiTextArea
+          <EuiCompressedTextArea
             data-test-subj={`editorArea-${index}`}
             placeholder={inputPlaceholderString}
             id="editorArea"

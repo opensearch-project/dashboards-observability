@@ -11,7 +11,7 @@ import {
   EuiLink,
   EuiCompressedFormRow,
   EuiCompressedFieldText,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiCompressedSelect,
   EuiForm,
 } from '@elastic/eui';
@@ -113,7 +113,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             setErrorForForm={setError}
           />
           <EuiCompressedFormRow label="Description - Optional">
-            <EuiTextArea
+            <EuiCompressedTextArea
               data-test-subj="data-source-description"
               placeholder="Placeholder"
               value={details}
