@@ -5,7 +5,7 @@
 
 import React, { useState, ReactChildren, ReactChild } from 'react';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
@@ -134,7 +134,7 @@ export const DensityPopover = ({
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         {ROW_DENSITIES.map((i: RowConfigType, index: number) => (
           <EuiFlexItem key={index} grow={false}>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               onClick={() => selectDensityHandler(i)}
               display={selectedDensity.icon === i.icon ? 'fill' : 'base'}
               iconType={i.icon}

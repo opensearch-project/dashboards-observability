@@ -2,10 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
- 
+
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiSmallButtonIcon } from '@elastic/eui';
 
 export interface Props {
   onClick: () => void;
@@ -18,7 +18,7 @@ export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
   });
   return (
     <EuiToolTip content={label}>
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         aria-expanded={!isCollapsed}
         aria-label={label}
         data-test-subj="collapseBtn"

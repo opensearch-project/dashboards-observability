@@ -6,7 +6,7 @@
 import {
   EuiBasicTable,
   EuiSmallButton,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
@@ -122,7 +122,7 @@ export const SkippingIndexBuilder = ({
       readOnly: isSkippingtableLoading,
       render: (item: SkippingIndexRowType) => {
         return (
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => {
               setAccelerationFormData({
                 ...accelerationFormData,
