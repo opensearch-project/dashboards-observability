@@ -12,7 +12,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiTextArea,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -191,7 +191,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>
             </EuiText>
-            <EuiSelect
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}

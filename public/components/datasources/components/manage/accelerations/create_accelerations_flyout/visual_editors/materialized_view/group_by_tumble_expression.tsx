@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiPopover,
-  EuiSelect,
+  EuiCompressedSelect,
 } from '@elastic/eui';
 import producer from 'immer';
 import React, { useState } from 'react';
@@ -118,7 +118,7 @@ export const GroupByTumbleExpression = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCompressedFormRow label="Tumble Interval">
-              <EuiSelect
+              <EuiCompressedSelect
                 value={groupbyValues.tumbleInterval}
                 onChange={onChangeTumbleInterval}
                 options={ACCELERATION_TIME_INTERVAL}

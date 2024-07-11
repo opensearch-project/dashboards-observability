@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFieldText,
-  EuiSelect,
+  EuiCompressedSelect,
   htmlIdGenerator,
   EuiText,
 } from '@elastic/eui';
@@ -156,7 +156,7 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
                     </EuiFlexItem>
                     <EuiCompressedFormRow helpText="expression">
                       <EuiFlexItem grow={4}>
-                        <EuiSelect
+                        <EuiCompressedSelect
                           options={expressionOptions}
                           value={thr.expression || ''}
                           onChange={handleAvailabilityChange(thr.thid, 'expression')}
