@@ -9,7 +9,7 @@ import {
   EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -373,7 +373,7 @@ export const Search = (props: any) => {
                 </EuiFlexItem>
                 {coreRefs.queryAssistEnabled && (
                   <EuiFlexItem>
-                    <EuiComboBox
+                    <EuiCompressedComboBox
                       placeholder="Select an index"
                       isClearable={false}
                       prepend={<EuiText>Index</EuiText>}

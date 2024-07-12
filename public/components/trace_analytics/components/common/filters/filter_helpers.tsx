@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiFormControlLayoutDelimited,
   EuiCompressedFormRow,
@@ -220,7 +220,7 @@ export const getValueComponent = (
       <>
         <EuiSpacer size="s" />
         <EuiCompressedFormRow label={'Value'}>
-          <EuiComboBox
+          <EuiCompressedComboBox
             placeholder="Select a value"
             options={[
               {

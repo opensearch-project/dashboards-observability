@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiCompressedFormRow,
@@ -118,7 +118,7 @@ export const MetricsExportPanel = ({
 
         <EuiFlexItem style={{ maxWidth: '400px' }}>
           <EuiCompressedFormRow label="Dashboards and applications - optional">
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder="Select dashboards/applications"
               onChange={(newOptions) => {
                 setSelectedPanelOptions(newOptions);

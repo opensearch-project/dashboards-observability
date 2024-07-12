@@ -8,7 +8,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFormRow,
   EuiOverlayMask,
   EuiSpacer,
@@ -168,7 +168,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
         paddingSize="l"
       >
         <EuiCompressedFormRow label="Services & entities">
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-label="Select services and entities"
             placeholder="Select services and entities"
             options={services}

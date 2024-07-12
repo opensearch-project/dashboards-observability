@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -227,7 +227,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a database"
                   singleSelection={{ asPlainText: true }}
                   options={databases}
@@ -276,7 +276,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a table"
                   singleSelection={{ asPlainText: true }}
                   options={tables}

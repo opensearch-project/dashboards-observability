@@ -6,7 +6,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiSmallButton,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
@@ -357,7 +357,7 @@ export const DataConfigPanelItem = ({
               {/* Aggregation input for Series */}
               {isAggregations && (
                 <EuiCompressedFormRow label="Aggregation">
-                  <EuiComboBox
+                  <EuiCompressedComboBox
                     aria-label="aggregation input"
                     placeholder="Select a aggregation"
                     singleSelection={{ asPlainText: true }}
@@ -428,7 +428,7 @@ export const DataConfigPanelItem = ({
     return (
       <>
         <EuiCompressedFormRow label="Field">
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-label="input field"
             placeholder="Select a field"
             singleSelection={{ asPlainText: true }}
@@ -503,7 +503,7 @@ export const DataConfigPanelItem = ({
                 />
               </EuiCompressedFormRow>
               <EuiCompressedFormRow label="Unit">
-                <EuiComboBox
+                <EuiCompressedComboBox
                   aria-label="date unit"
                   placeholder="Select fields"
                   singleSelection

@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButtonIcon,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiExpression,
   EuiCompressedFieldText,
   EuiFlexGroup,
@@ -94,7 +94,7 @@ export const ColumnExpression = ({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiCompressedFormRow label="Aggregate function">
-                    <EuiComboBox
+                    <EuiCompressedComboBox
                       singleSelection={{ asPlainText: true }}
                       options={ACCELERATION_AGGREGRATION_FUNCTIONS}
                       selectedOptions={[
@@ -118,7 +118,7 @@ export const ColumnExpression = ({
                 {currentColumnExpressionValue.functionName !== 'window.start' && (
                   <EuiFlexItem grow={false}>
                     <EuiCompressedFormRow label="Aggregation field">
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         singleSelection={{ asPlainText: true }}
                         options={[
                           {

@@ -7,7 +7,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiCodeBlock,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
@@ -135,7 +135,7 @@ export const ParaInput = (props: {
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
           <EuiFlexItem grow={6}>
             <EuiCompressedFormRow label="Title" fullWidth>
-              <EuiComboBox
+              <EuiCompressedComboBox
                 placeholder="Find visualization"
                 singleSelection={{ asPlainText: true }}
                 options={props.visOptions}

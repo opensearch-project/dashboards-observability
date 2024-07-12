@@ -6,7 +6,7 @@
 import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,7 +43,7 @@ export function FilterEditPopover(props: {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={6}>
           <EuiCompressedFormRow label={'Field'}>
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder="Select a field first"
               isClearable={false}
               options={props.filterFieldOptions}
@@ -59,7 +59,7 @@ export function FilterEditPopover(props: {
         </EuiFlexItem>
         <EuiFlexItem grow={5}>
           <EuiCompressedFormRow label={'Operator'}>
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
               isClearable={false}
               isDisabled={selectedFieldOptions.length === 0}

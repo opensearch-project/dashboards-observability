@@ -6,7 +6,7 @@
 import {
   EuiCallOut,
   EuiCheckableCard,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiForm,
   EuiCompressedFormRow,
@@ -278,7 +278,7 @@ export function IntegrationConnectionInputs({
         />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow label={connectionType.title} helpText={connectionType.help}>
-        <EuiComboBox
+        <EuiCompressedComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
           onChange={(selected) => {
