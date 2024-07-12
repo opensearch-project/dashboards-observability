@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
 import { ADD_BUTTON_TEXT, AGGREGATIONS } from '../../../../../../../../common/constants/explorer';
@@ -105,7 +105,7 @@ export const ConfigColorTheme = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={4}>
                     <EuiCompressedFormRow helpText="Field">
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select a field"
                         options={getUpdatedOptions()}

@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -143,7 +143,7 @@ export const TreemapConfigPanelItem = ({
           title={`Parent ${index + 1}`}
           closeMenu={() => isHandlePanelClickBack(selectedAxis)}
         />
-        <EuiComboBox
+        <EuiCompressedComboBox
           id={htmlIdGenerator('axis-select-')}
           placeholder="Select a field"
           options={options}
@@ -209,7 +209,7 @@ export const TreemapConfigPanelItem = ({
       <div className="first-division">
         <EuiPanel color="subdued">
           <EuiCompressedFormRow label="Child Field">
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(GROUPBY)}
               selectedOptions={
@@ -243,7 +243,7 @@ export const TreemapConfigPanelItem = ({
       <div className="first-division">
         <EuiPanel color="subdued">
           <EuiCompressedFormRow label="Value Field">
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(AGGREGATIONS)}
               selectedOptions={

@@ -9,7 +9,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFormRow,
   EuiOverlayMask,
   EuiSpacer,
@@ -250,7 +250,7 @@ export const TraceConfig = (props: TraceConfigProps) => {
           label="Trace Groups"
           helpText="Select one or multiple trace groups, or type a custom one"
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-label="Select trace groups"
             placeholder="Select or add trace groups"
             options={traceOptions}

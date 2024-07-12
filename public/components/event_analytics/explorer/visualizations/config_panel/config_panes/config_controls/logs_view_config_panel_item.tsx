@@ -6,7 +6,7 @@
 import React, { useEffect, useState, useContext, Fragment } from 'react';
 import {
   EuiTitle,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiSpacer,
   EuiSmallButton,
   EuiButton,
@@ -185,7 +185,7 @@ export const LogsViewConfigPanelItem = ({
           </EuiText>
         }
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           aria-label="logsViewField"
           placeholder="Select a field"
           singleSelection={{ asPlainText: true }}

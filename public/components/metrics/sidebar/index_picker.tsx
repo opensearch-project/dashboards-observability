@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiTitle } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiTitle } from '@elastic/eui';
 import React, { useState } from 'react';
 
 export const IndexPicker = (props: { otelIndices: unknown; setSelectedOTIndex: unknown }) => {
@@ -23,7 +23,7 @@ export const IndexPicker = (props: { otelIndices: unknown; setSelectedOTIndex: u
       <EuiTitle size="xxxs">
         <h5>Otel Index</h5>
       </EuiTitle>
-      <EuiComboBox
+      <EuiCompressedComboBox
         placeholder="Select an index"
         singleSelection={{ asPlainText: true }}
         options={otelIndex}

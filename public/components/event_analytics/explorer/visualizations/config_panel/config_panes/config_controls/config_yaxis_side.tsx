@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
 import {
@@ -98,7 +98,7 @@ export const ConfigYAxisSide = ({
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={4}>
                     <EuiCompressedFormRow helpText="Field">
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select a field"
                         options={getUpdatedOptions()}
@@ -111,7 +111,7 @@ export const ConfigYAxisSide = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={3}>
                     <EuiCompressedFormRow helpText="Position">
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select position"
                         options={SERIES_POSITION_OPTIONS}

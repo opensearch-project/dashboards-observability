@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import {
   EuiTitle,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFormRow,
   EuiFormRow,
   EuiCompressedFieldText,
@@ -80,7 +80,7 @@ export const SavePanel = ({
             <h3>{'Custom operational dashboards/application'}</h3>
           </EuiTitle>
           <EuiCompressedFormRow helpText="Search existing dashboards or applications by name">
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder="Select dashboards/applications"
               onChange={(daOptions) => {
                 handleOptionChange(daOptions);

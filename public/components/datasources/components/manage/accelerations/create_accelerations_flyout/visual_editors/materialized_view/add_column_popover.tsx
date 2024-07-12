@@ -6,7 +6,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiCompressedFieldText,
   EuiFlexGroup,
@@ -116,7 +116,7 @@ export const AddColumnPopOver = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCompressedFormRow label="Function">
-              <EuiComboBox
+              <EuiCompressedComboBox
                 singleSelection={{ asPlainText: true }}
                 options={ACCELERATION_AGGREGRATION_FUNCTIONS}
                 selectedOptions={selectedFunction}
@@ -128,7 +128,7 @@ export const AddColumnPopOver = ({
           {selectedFunction[0].label !== 'window.start' && (
             <EuiFlexItem>
               <EuiCompressedFormRow label="Aggregation field">
-                <EuiComboBox
+                <EuiCompressedComboBox
                   singleSelection={{ asPlainText: true }}
                   options={[
                     { label: '*', disabled: selectedFunction[0].label !== 'count' },

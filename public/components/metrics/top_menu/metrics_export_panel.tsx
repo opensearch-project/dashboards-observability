@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiCompressedFormRow,
@@ -57,7 +57,7 @@ export const MetricsExportPanel = ({
         label="Custom operational dashboards/application"
         helpText="Search existing dashboards or applications by name"
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           placeholder="Select dashboards/applications"
           onChange={(newOptions) => {
             setSelectedPanelOptions(newOptions);

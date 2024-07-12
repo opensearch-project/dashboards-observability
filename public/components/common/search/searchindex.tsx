@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import React, { useState, useEffect, memo } from 'react';
 
 
@@ -50,7 +50,7 @@ export function SearchIndex(options: Fetch) {
   };
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       placeholder="Select one or more index"
       options={indicesFromBackend}
       selectedOptions={selectedOptions}
