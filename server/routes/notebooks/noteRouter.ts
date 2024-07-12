@@ -275,7 +275,7 @@ export function registerNoteRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebooks`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook`,
       validate: {},
     },
     async (
@@ -308,7 +308,7 @@ export function registerNoteRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/note/savedNotebooks`,
+      path: `${NOTEBOOKS_API_PREFIX}/note/savedNotebook`,
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -485,7 +485,7 @@ export function registerNoteRoute(router: IRouter) {
   );
   router.post(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/note/savedNotebooks/addSampleNotebooks`,
+      path: `${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`,
       validate: {
         body: schema.object({
           visIds: schema.arrayOf(schema.string()),
@@ -506,6 +506,47 @@ export function registerNoteRoute(router: IRouter) {
         );
         return response.ok({
           body: sampleNotebooks,
+        });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `${NOTEBOOKS_API_PREFIX}/note/migrate`,
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          noteId: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+      try {
+        const getNotebook = await BACKEND.fetchNote(
+          opensearchNotebooksClient,
+          request.body.noteId,
+          wreckOptions
+        );
+        const createCloneNotebook = cloneNotebook(getNotebook, request.body.name);
+        const createdNotebook = await context.core.savedObjects.client.create(
+          NOTEBOOK_SAVED_OBJECT,
+          createCloneNotebook
+        );
+        return response.ok({
+          body: createdNotebook,
         });
       } catch (error) {
         return response.custom({

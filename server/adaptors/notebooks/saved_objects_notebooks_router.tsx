@@ -44,7 +44,7 @@ export function cloneNotebook(fetchedNotebook: DefaultNotebooks, name: string) {
     dateCreated: new Date().toISOString(),
     name,
     dateModified: new Date().toISOString(),
-    backend: fetchedNotebook.backend,
+    backend: 'kibana_1.0',
     paragraphs: fetchedNotebook.paragraphs,
     path: name,
   };

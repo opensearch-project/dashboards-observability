@@ -16,6 +16,7 @@ import {
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
 import PPLService from '../../../services/requests/ppl';
+import { isValidUUID } from './helpers/notebooks_parser';
 import { NoteTable } from './note_table';
 import { Notebook } from './notebook';
 
@@ -82,7 +83,7 @@ export class Main extends React.Component<MainProps, MainState> {
   // Fetches path and id for all stored notebooks
   fetchNotebooks = () => {
     return Promise.all([
-      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebooks/`),
+      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`),
       this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
     ])
       .then(([savedNotebooksResponse, secondResponse]) => {
@@ -108,7 +109,7 @@ export class Main extends React.Component<MainProps, MainState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebooks`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook`, {
         body: JSON.stringify(newNoteObject),
       })
       .then(async (res) => {
@@ -139,7 +140,7 @@ export class Main extends React.Component<MainProps, MainState> {
     };
 
     return this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/note/savedNotebooks/rename`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/rename`, {
         body: JSON.stringify(renameNoteObject),
       })
       .then((res) => {
@@ -203,14 +204,16 @@ export class Main extends React.Component<MainProps, MainState> {
   // Deletes existing notebooks
   deleteNotebook = async (notebookList: string[], toastMessage?: string) => {
     const deleteNotebook = (id: string) => {
-      return this.props.http
-        .delete(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${id}`)
-        .then((res) => {
-          this.setState((prevState) => ({
-            data: prevState.data.filter((notebook) => notebook.id !== id),
-          }));
-          return res;
-        });
+      const isValid = isValidUUID(id);
+      const route = isValid
+        ? `${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${id}`
+        : `${NOTEBOOKS_API_PREFIX}/note/${id}`;
+      return this.props.http.delete(route).then((res) => {
+        this.setState((prevState) => ({
+          data: prevState.data.filter((notebook) => notebook.id !== id),
+        }));
+        return res;
+      });
     };
 
     const promises = notebookList.map((id) =>
@@ -233,7 +236,42 @@ export class Main extends React.Component<MainProps, MainState> {
         console.error('Error in deleting multiple notebooks', err);
       });
   };
-
+  migrateNotebook = async (migrateNoteName: string, migrateNoteID: string): Promise<string> => {
+    if (migrateNoteName.length >= 50 || migrateNoteName.length === 0) {
+      this.setToast('Invalid notebook name', 'danger');
+      return Promise.reject();
+    }
+    const migrateNoteObject = {
+      name: migrateNoteName,
+      noteId: migrateNoteID,
+    };
+    return this.props.http
+      .post(`${NOTEBOOKS_API_PREFIX}/note/migrate`, {
+        body: JSON.stringify(migrateNoteObject),
+      })
+      .then((res) => {
+        this.setState((prevState) => ({
+          data: [
+            ...prevState.data,
+            {
+              path: migrateNoteName,
+              id: res.id,
+              dateCreated: res.attributes.dateCreated,
+              dateModified: res.attributes.dateModified,
+            },
+          ],
+        }));
+        this.setToast(`Notebook "${migrateNoteName}" successfully created!`);
+        return res.id;
+      })
+      .catch((err) => {
+        this.setToast(
+          'Error migrating notebook, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
   addSampleNotebooks = async () => {
     try {
       this.setState({ loading: true });
@@ -289,7 +327,7 @@ export class Main extends React.Component<MainProps, MainState> {
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));
       await this.props.http
-        .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebooks/addSampleNotebooks`, {
+        .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`, {
           body: JSON.stringify({ visIds }),
         })
         .then((res) => {
@@ -362,6 +400,7 @@ export class Main extends React.Component<MainProps, MainState> {
                   setToast={this.setToast}
                   location={props.location}
                   history={props.history}
+                  migrateNotebook={this.migrateNotebook}
                 />
               )}
             />
