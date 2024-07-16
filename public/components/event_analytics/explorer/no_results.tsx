@@ -265,8 +265,8 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
               title={<h2>Get started</h2>}
               body={
                 <p>
-                  Run a query to view results, or use the Natural Language Query Generator to
-                  automatically generate complex queries using simple conversational prompts.
+                  Enter your natural language question to automatically generate summaries and
+                  complex queries using simple conversational prompts
                 </p>
               }
             />
