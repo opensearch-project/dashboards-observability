@@ -102,6 +102,12 @@ exports[`Services component renders empty services page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -428,6 +434,12 @@ exports[`Services component renders empty services page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2268,6 +2280,12 @@ exports[`Services component renders jaeger services page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -2595,6 +2613,12 @@ exports[`Services component renders jaeger services page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3868,6 +3892,12 @@ exports[`Services component renders services page 1`] = `
         "registerLeft": [MockFunction],
         "registerRight": [MockFunction],
       },
+      "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
+      },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
         "get": [MockFunction],
@@ -4194,6 +4224,12 @@ exports[`Services component renders services page 1`] = `
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
