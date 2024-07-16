@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 import awsLogo from '../icons/logs.svg';
+import otelLogo from '../icons/otel.svg';
 
 interface TechnologyProps {
   isOpen: boolean;
@@ -24,17 +25,17 @@ const Technology: React.FC<TechnologyProps> = ({
 }) => {
   const techCatalog = {
     Catalog: [
-      { name: 'AWS: VPC', image: awsLogo },
-      { name: 'AWS: Cloudtrail', image: awsLogo },
-      { name: 'AWS: Cloudfont', image: awsLogo },
-      { name: 'AWS: Waf', image: awsLogo },
-      { name: 'AWS: Rdf', image: awsLogo },
-      { name: 'AWS: S3 access', image: awsLogo },
-      { name: 'K8s', image: awsLogo },
-      { name: 'Nginx', image: awsLogo },
-      { name: 'OTEL', image: awsLogo },
-      { name: 'HA-Proxy', image: awsLogo },
-      { name: 'Apache', image: awsLogo },
+      // { name: 'AWS: VPC', image: awsLogo },
+      // { name: 'AWS: Cloudtrail', image: awsLogo },
+      // { name: 'AWS: Cloudfont', image: awsLogo },
+      // { name: 'AWS: Waf', image: awsLogo },
+      // { name: 'AWS: Rdf', image: awsLogo },
+      // { name: 'AWS: S3 access', image: awsLogo },
+      // { name: 'K8s', image: awsLogo },
+      // { name: 'Nginx', image: awsLogo },
+      { name: 'OTEL', image: otelLogo },
+      // { name: 'HA-Proxy', image: awsLogo },
+      // { name: 'Apache', image: awsLogo },
     ],
     Custom: [
       { name: 'Python Client', image: awsLogo },
@@ -57,14 +58,14 @@ const Technology: React.FC<TechnologyProps> = ({
   const renderCards = (techList) => (
     <EuiFlexGroup wrap>
       {techList.map((tech) => (
-        <EuiFlexItem key={tech.name}>
+        <EuiFlexItem key={tech.name} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
           <EuiCard
             layout="vertical"
             icon={<img src={tech.image} alt={tech.name} style={{ width: 100, height: 100 }} />}
             title={tech.name}
             onClick={() => {
               onSelectTechnology(tech.name);
-              onToggle(false); // Collapse Technology section
+              onToggle(false);
             }}
           />
         </EuiFlexItem>

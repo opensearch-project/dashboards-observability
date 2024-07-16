@@ -4,60 +4,255 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiAccordion, EuiPanel, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiLink,
+  EuiComboBox,
+  EuiTabbedContent,
+  EuiButton,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
+import otelJson from './OTEL.json';
 
 export const DataShipment: React.FC<DataShipmentProps> = ({
   isOpen,
   onToggle,
   selectedTechnology,
+  onMoveToQueryData,
 }) => {
-  const [tutorial, setTutorial] = useState<any>(null);
+  const [gettingStarted, setGettingStarted] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [_htmlResponse, setHtmlResponse] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState('');
+  const [labelsOptions, setLabelsOptions] = useState([]);
+  const [selectedTabId, setSelectedTabId] = useState('workflow_tab');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selectedTechnology === 'OTEL') {
-      const url = './OTEL.json';
-      console.log('Attempting to fetch URL:', url);
-      fetch(url)
-        .then((response) => {
-          console.log('Response received');
-          // Check if the response is JSON
-          if (response.headers.get('Content-Type')?.includes('application/json')) {
-            return response.json(); // Parse JSON data
-          } else {
-            // Handle non-JSON response
-            return response.text().then((text) => {
-              setHtmlResponse(text);
-              throw new Error(`Unexpected response type: ${response.headers.get('Content-Type')}`);
-            });
-          }
-        })
-        .then((data) => {
-          console.log('Parsed data successfully:', data);
-          setTutorial(data.tutorial); // Store the tutorial part of the JSON
-        })
-        .catch((err) => {
-          // Renamed 'error' to 'err'
-          console.error('Error during fetch or processing:', err);
-          setError('Failed to fetch or process tutorial data');
-        });
+    if (selectedTechnology === 'OTEL' && otelJson && otelJson['getting-started']) {
+      setGettingStarted(otelJson['getting-started']);
+      const labels = otelJson['getting-started'].workflows[0].steps.map((step: any) => ({
+        label: step.label || step.name,
+        value: step.name.replace(/\s/g, '-'),
+      }));
+      setLabelsOptions(labels);
+      setError(null);
+    } else {
+      setGettingStarted(null);
+      setError('Selected technology not supported or data not found');
     }
   }, [selectedTechnology]);
 
-  const renderSteps = (steps: any[]) => {
-    return steps.map((step, index) => (
-      <div key={index}>
+  if (!gettingStarted) {
+    return (
+      <EuiText color="danger">
+        <p>Data Shipment: Select a Technology first.</p>
+      </EuiText>
+    );
+  }
+
+  const onLabelChange = (selectedOptions: any[]) => {
+    if (selectedOptions.length === 0) {
+      setSelectedLabel('');
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    } else {
+      const selectedValue = selectedOptions[0].value;
+      setSelectedLabel(selectedValue);
+      const element = document.getElementById(selectedValue);
+      if (element) {
+        const headerOffset = 100;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+      }
+    }
+  };
+
+  const renderSteps = (steps: any[]) =>
+    steps.map((step, index) => (
+      <div key={index} id={step.name.replace(/\s/g, '-')}>
         <EuiTitle size="s">
-          <h3>{step.step}</h3>
+          <h3>{step.name}</h3>
         </EuiTitle>
+        {step.label && (
+          <EuiText color="secondary">
+            <p>{step.label}</p>
+          </EuiText>
+        )}
         <EuiText>{step.description}</EuiText>
-        <EuiText>
-          <pre>{step.code}</pre>
-        </EuiText>
+        {step['input-params'] && step['input-params'].length > 0 && (
+          <div>
+            <EuiTitle size="xs">
+              <h4>Input Parameters:</h4>
+            </EuiTitle>
+            {step['input-params'].map((param, idx) => (
+              <EuiText key={idx}>
+                <strong>{param.name}:</strong> {param.description} ({param.type})
+              </EuiText>
+            ))}
+          </div>
+        )}
+        {step.info &&
+          step.info.map((link, linkIndex) => (
+            <EuiLink key={linkIndex} href={link} target="_blank">
+              More Info
+            </EuiLink>
+          ))}
+        {step.content && (
+          <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
+            {step.content}
+          </EuiCodeBlock>
+        )}
         <EuiSpacer size="m" />
       </div>
     ));
+
+  const renderSchema = (schemas: any[]) =>
+    schemas.map((schema, idx) => (
+      <div key={idx}>
+        <EuiTitle size="s">
+          <h3>{schema.type} Schema</h3>
+        </EuiTitle>
+        <EuiText>
+          {schema.description}
+          <br />
+          <strong>Alias:</strong> {schema.alias}
+          <br />
+          <strong>Index Pattern Name:</strong> {schema['index-pattern-name']}
+          <br />
+          {schema.info.map((infoLink: string, linkIdx: number) => (
+            <EuiLink key={linkIdx} href={infoLink} target="_blank">
+              More Info
+            </EuiLink>
+          ))}
+        </EuiText>
+        <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
+          {schema.content}
+        </EuiCodeBlock>
+        <EuiLink href={schema['index-template']} target="_blank">
+          Index Template
+        </EuiLink>
+        <EuiSpacer size="m" />
+      </div>
+    ));
+
+  const renderIndexPatterns = (indexPatterns: any) => (
+    <>
+      <EuiTitle size="m">
+        <h2>Index Patterns</h2>
+      </EuiTitle>
+      <EuiText>
+        {indexPatterns.description}
+        <br />
+        {indexPatterns.info.map((infoLink: string, linkIdx: number) => (
+          <EuiLink key={linkIdx} href={infoLink} target="_blank">
+            More Info
+          </EuiLink>
+        ))}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiTitle size="s">
+        <h3>Index Patterns</h3>
+      </EuiTitle>
+      <EuiListGroup>
+        {indexPatterns['index-patterns'].map((pattern: string, idx: number) => (
+          <EuiListGroupItem key={idx} label={pattern} />
+        ))}
+      </EuiListGroup>
+      <EuiButton
+        onClick={() => {
+          setSaveMessage('Pattern created successfully');
+          setTimeout(() => setSaveMessage(null), 3000);
+        }}
+      >
+        Create Pattern
+      </EuiButton>
+      {saveMessage && (
+        <EuiText color="secondary">
+          <p>{saveMessage}</p>
+        </EuiText>
+      )}
+      <EuiSpacer size="m" />
+      <EuiButton onClick={onMoveToQueryData}>Move to Query Data</EuiButton>
+    </>
+  );
+
+  const tabs = [
+    {
+      id: 'workflow_tab',
+      name: 'Workflow',
+      content: (
+        <div>
+          <EuiComboBox
+            placeholder="Search and select a label..."
+            singleSelection={{ asPlainText: true }}
+            options={labelsOptions}
+            selectedOptions={selectedLabel ? [{ label: selectedLabel }] : []}
+            onChange={onLabelChange}
+            style={{ marginBottom: '20px' }}
+          />
+          <EuiTitle size="m">
+            <h2>Getting Started Workflow</h2>
+          </EuiTitle>
+          {renderSteps(gettingStarted.workflows[0].steps)}
+          <EuiButton
+            onClick={() => {
+              setSelectedTabId('schema_tab');
+              window.scrollTo(0, 0);
+            }}
+          >
+            Go to Schema
+          </EuiButton>
+        </div>
+      ),
+    },
+    {
+      id: 'schema_tab',
+      name: 'Schema',
+      content: (
+        <div>
+          <EuiTitle size="m">
+            <h2>Schema</h2>
+          </EuiTitle>
+          {renderSchema(gettingStarted.schema)}
+          <EuiButton
+            onClick={() => {
+              setSelectedTabId('index_patterns_tab');
+              window.scrollTo(0, 0);
+            }}
+          >
+            Go to Index Patterns
+          </EuiButton>
+        </div>
+      ),
+    },
+    {
+      id: 'index_patterns_tab',
+      name: 'Index Patterns',
+      content: (
+        <div>
+          <EuiTitle size="m">
+            <h2>Index Patterns</h2>
+          </EuiTitle>
+          {renderIndexPatterns(gettingStarted['index-patterns'])}
+        </div>
+      ),
+    },
+  ];
+
+  const onTabClick = (tab) => {
+    setSelectedTabId(tab.id);
   };
 
   const renderContent = () => {
@@ -70,14 +265,13 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
       );
     }
 
-    if (selectedTechnology === 'OTEL' && tutorial) {
+    if (selectedTechnology === 'OTEL' && gettingStarted) {
       return (
-        <div>
-          <EuiTitle size="m">
-            <h2>{tutorial.title}</h2>
-          </EuiTitle>
-          {renderSteps(tutorial.steps)}
-        </div>
+        <EuiTabbedContent
+          tabs={tabs}
+          selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+          onTabClick={onTabClick}
+        />
       );
     }
 
@@ -97,7 +291,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={onToggle}
     >
-      <EuiPanel>{renderContent()}</EuiPanel>
+      <EuiPanel style={{ maxWidth: '1000px' }}>{renderContent()}</EuiPanel>
     </EuiAccordion>
   );
 };

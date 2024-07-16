@@ -31,8 +31,6 @@ export const GettingStartedConnectionsHeader = () => {
           Learn more
         </EuiLink>
       </EuiText>
-      <EuiSpacer size="l" />
-      <EuiSpacer size="s" />
     </div>
   );
 };

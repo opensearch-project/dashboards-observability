@@ -51,7 +51,7 @@ const HomeContent = () => (
             layout="vertical"
             title="uncover insights with raw data exploration"
             description={'with discover'}
-            onClick={() => changeUrl('observability-logs#/')}
+            onClick={() => changeUrl('management/')}
           />
         </EuiFlexItem>
         <EuiFlexItem>

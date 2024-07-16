@@ -38,7 +38,7 @@ export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 1500;
 
 export const observabilityOverviewID = 'observability-overview';
-export const observabilityOverviewTitle = 'Overview';
+export const observabilityOverviewTitle = 'Observability overview';
 export const observabilityOverviewPluginOrder = 5088;
 
 export const observabilityGettingStartedID = 'observability-gettingStarted';

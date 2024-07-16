@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 
 export const PickYourSource = ({ onSelectSource, selectedSource, isOpen, onToggle }) => (
   <EuiAccordion
@@ -14,8 +14,8 @@ export const PickYourSource = ({ onSelectSource, selectedSource, isOpen, onToggl
     forceState={isOpen ? 'open' : 'closed'}
     onToggle={onToggle}
   >
-    <EuiPanel>
-      <EuiFlexGroup gutterSize="l">
+    <EuiPanel style={{ maxWidth: '550px' }}>
+      <EuiFlexGroup gutterSize="l" style={{ minWidth: '30rem', maxWidth: '30rem' }}>
         <EuiFlexItem>
           <EuiCard
             layout="vertical"
@@ -41,41 +41,6 @@ export const PickYourSource = ({ onSelectSource, selectedSource, isOpen, onToggl
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
-  </EuiAccordion>
-);
-
-export const DataShipment = () => (
-  <EuiAccordion
-    id="dataShipment"
-    buttonContent="Data Shipment"
-    paddingSize="m"
-    initialIsOpen={false}
-  >
-    <EuiPanel>
-      <EuiText>
-        <p>Content for Data Shipment goes here.</p>
-      </EuiText>
-    </EuiPanel>
-  </EuiAccordion>
-);
-
-export const QueryData = () => (
-  <EuiAccordion id="queryData" buttonContent="Query Data" paddingSize="m" initialIsOpen={false}>
-    <EuiPanel>
-      <EuiText>
-        <p>Content for Query Data goes here.</p>
-      </EuiText>
-    </EuiPanel>
-  </EuiAccordion>
-);
-
-export const AnalyzeData = () => (
-  <EuiAccordion id="analyzeData" buttonContent="Analyze Data" paddingSize="m" initialIsOpen={false}>
-    <EuiPanel>
-      <EuiText>
-        <p>Content for Analyze Data goes here.</p>
-      </EuiText>
     </EuiPanel>
   </EuiAccordion>
 );
