@@ -9,8 +9,11 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import {
+  DataSourceManagementPluginSetup
+} from '../../../../../../src/plugins/data_source_management/public';
 import {
   NOTEBOOKS_API_PREFIX,
   NOTEBOOKS_DOCUMENTATION_URL,
@@ -19,7 +22,6 @@ import PPLService from '../../../services/requests/ppl';
 import { isValidUUID } from './helpers/notebooks_parser';
 import { NoteTable } from './note_table';
 import { Notebook } from './notebook';
-
 /*
  * "Main" component renders the whole Notebooks as a single page application
  *
@@ -38,6 +40,10 @@ type MainProps = RouteComponentProps & {
   notifications: CoreStart['notifications'];
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: SavedObjectsStart;
 };
 
 interface MainState {
@@ -401,6 +407,11 @@ export class Main extends React.Component<MainProps, MainState> {
                   location={props.location}
                   history={props.history}
                   migrateNotebook={this.migrateNotebook}
+                  dataSourceManagement={this.props.dataSourceManagement}
+                  setActionMenu={this.props.setActionMenu}
+                  notifications={this.props.notifications}
+                  dataSourceEnabled={this.props.dataSourceEnabled}
+                  savedObjectsMDSClient={this.props.savedObjectsMDSClient}
                 />
               )}
             />

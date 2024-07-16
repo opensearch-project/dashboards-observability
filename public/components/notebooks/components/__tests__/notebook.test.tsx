@@ -64,7 +64,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -75,30 +75,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
-      />
-    );
-    await waitFor(() => {
-      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
-    });
-    expect(utils.container.firstChild).toMatchSnapshot();
-  });
-
-  it('test reporting action button', async () => {
-    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
-    const utils = render(
-      <Notebook
-        pplService={pplService}
-        openedNoteId="mock-id"
-        DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClient}
-        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
-        setBreadcrumbs={setBreadcrumbs}
-        renameNotebook={renameNotebook}
-        cloneNotebook={cloneNotebook}
-        deleteNotebook={deleteNotebook}
-        setToast={setToast}
-        location={location}
-        history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -106,19 +83,6 @@ describe('<Notebook /> spec', () => {
     });
     expect(utils.container.firstChild).toMatchSnapshot();
 
-    act(() => {
-      fireEvent.click(utils.getByText('Reporting actions'));
-    });
-
-    expect(utils.queryByTestId('download-notebook-pdf')).toBeInTheDocument();
-
-    act(() => {
-      fireEvent.click(utils.getByText('Reporting actions'));
-    });
-
-    await waitFor(() => {
-      expect(utils.queryByTestId('download-notebook-pdf')).toBeNull();
-    });
   });
 
   it('Adds a code block', async () => {
@@ -133,7 +97,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -144,6 +108,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -171,7 +136,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -182,6 +147,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -217,7 +183,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -228,6 +194,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -260,7 +227,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -271,6 +238,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -327,7 +295,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -338,6 +306,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -411,7 +380,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -422,6 +391,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -470,7 +440,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -481,6 +451,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -524,7 +495,7 @@ describe('<Notebook /> spec', () => {
     const utils = render(
       <Notebook
         pplService={pplService}
-        openedNoteId="mock-id"
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
         DashboardContainerByValueRenderer={jest.fn()}
         http={httpClient}
         parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
@@ -535,6 +506,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceEnabled={false}
       />
     );
     await waitFor(() => {
@@ -605,6 +577,7 @@ describe('<Notebook /> spec', () => {
         setToast={setToast}
         location={location}
         history={history}
+        dataSourceManagement={{ ui: { DataSourceSelector: <></> } }}
       />
     );
 

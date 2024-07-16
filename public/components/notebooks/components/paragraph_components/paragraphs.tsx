@@ -24,11 +24,12 @@ import {
 import filter from 'lodash/filter';
 import moment from 'moment';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
+import { CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
   DashboardStart,
 } from '../../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { ViewMode } from '../../../../../../../src/plugins/embeddable/public';
 import { NOTEBOOKS_API_PREFIX } from '../../../../../common/constants/notebooks';
 import {
@@ -77,7 +78,7 @@ interface ParagraphProps {
   paraCount: number;
   paragraphSelector: (index: number) => void;
   textValueEditor: (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
-  handleKeyPress: (evt: React.KeyboardEvent<Element>, para: ParaType, index: number) => void;
+  handleKeyPress: (evt: React.KeyboardEvent<Element>, para: ParaType, index: number, dataSourceMDSID: string) => void;
   addPara: (index: number, newParaContent: string, inputType: string) => void;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   deleteVizualization: (uniqueId: string) => void;
@@ -85,11 +86,17 @@ interface ParagraphProps {
   selectedViewId: string;
   setSelectedViewId: (viewId: string, scrollToIndex?: number) => void;
   deletePara: (para: ParaType, index: number) => void;
-  runPara: (para: ParaType, index: number, vizObjectInput?: string, paraType?: string) => void;
+  runPara: (para: ParaType, index: number, vizObjectInput?: string, paraType?: string, dataSourceMDSId?: string) => void;
   clonePara: (para: ParaType, index: number) => void;
   movePara: (index: number, targetIndex: number) => void;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  notifications: CoreStart['notifications'];
+  dataSourceEnabled: boolean;
+  savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (dataSourceMDSId: string | undefined) => void
 }
 
 export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
@@ -104,6 +111,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     showQueryParagraphError,
     queryParagraphErrorMessage,
     http,
+    dataSourceEnabled,
+    dataSourceManagement,
+    setActionMenu,
+    notifications,
+    savedObjectsMDSClient,
+    handleSelectedDataSourceChange
   } = props;
 
   const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([
@@ -115,6 +128,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const [selectedVisOption, setSelectedVisOption] = useState<EuiComboBoxOptionOption[]>([]);
   const [visInput, setVisInput] = useState(undefined);
   const [visType, setVisType] = useState('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState('');
 
   // output is available if it's not cleared and vis paragraph has a selected visualization
   const isOutputAvailable =
@@ -131,7 +145,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     let opt1: EuiComboBoxOptionOption[] = [];
     let opt2: EuiComboBoxOptionOption[] = [];
     await http
-      .get(`${NOTEBOOKS_API_PREFIX}/visualizations`)
+      .get(`${NOTEBOOKS_API_PREFIX}/visualizations/${dataSourceMDSId ?? ''}`)
       .then((res) => {
         opt1 = res.savedVisualizations.map((vizObject) => ({
           label: vizObject.label,
@@ -175,7 +189,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
       fetchVisualizations();
     }
-  }, []);
+  }, [dataSourceMDSId]);
 
   const createDashboardVizObject = (objectId: string) => {
     const vizUniqueId = htmlIdGenerator()();
@@ -235,7 +249,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       newVisObjectInput = JSON.stringify(inputTemp);
     }
     setRunParaError(false);
-    return props.runPara(para, index, newVisObjectInput, visType);
+    return props.runPara(para, index, newVisObjectInput, visType, dataSourceMDSId);
   };
 
   const setStartTime = (time: string) => {
@@ -511,11 +525,28 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const paraClass = `notebooks-paragraph notebooks-paragraph-${
     uiSettingsService.get('theme:darkMode') ? 'dark' : 'light'
   }`;
-
+  let DataSourceSelector;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    setDataSourceMDSId(dataConnectionId)
+    handleSelectedDataSourceChange(dataConnectionId)
+  }
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  } 
   return (
     <>
       <EuiPanel>
         {renderParaHeader(!para.isVizualisation ? 'Code block' : 'Visualization', index)}
+        {dataSourceEnabled && (<DataSourceSelector
+          savedObjectsClient={savedObjectsMDSClient.client}
+          notifications={notifications} 
+          onSelectedDataSource={onSelectedDataSource}
+          disabled={false} 
+          fullWidth={false}
+          removePrepend={true}
+        />)}
+        <EuiSpacer size="s" />
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div key={index} className={paraClass} onClick={() => paragraphSelector(index)}>
           {para.isInputExpanded && (
@@ -542,6 +573,11 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   selectedVisOption={selectedVisOption}
                   setSelectedVisOption={setSelectedVisOption}
                   setVisType={setVisType}
+                  dataSourceManagement={dataSourceManagement}
+                  setActionMenu={setActionMenu}
+                  notifications={notifications}
+                  dataSourceEnabled={dataSourceEnabled}
+                  savedObjectsMDSClient={savedObjectsMDSClient}
                 />
               </EuiFormRow>
               {runParaError && (

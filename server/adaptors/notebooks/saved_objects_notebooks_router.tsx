@@ -80,6 +80,7 @@ export async function addSampleNotes(
         dateModified: createdNotebooks.attributes.savedNotebook.dateModified,
         name: createdNotebooks.attributes.savedNotebook.name,
         id: createdNotebooks.id,
+        path: createdNotebooks.attributes.savedNotebook.name,
       });
     }
 

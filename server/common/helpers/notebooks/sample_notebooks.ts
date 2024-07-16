@@ -11,9 +11,10 @@ const getDemoNotebook = (dateString: string, visId: string) => {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   return {
     name: 'OpenSearch Notebooks Quick Start Guide',
+    path: 'OpenSearch Notebooks Quick Start Guide',
     dateCreated: dateString,
     dateModified: dateString,
-    backend: 'Default',
+    backend: 'kibana_1.0',
     paragraphs: [
       {
         output: [
@@ -189,9 +190,10 @@ const getRootCauseNotebook = (dateString: string, visIds: string[]) => {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   return {
     name: '[Logs] Sample Root Cause Event Analysis',
+    path: '[Logs] Sample Root Cause Event Analysis',
     dateCreated: dateString,
     dateModified: dateString,
-    backend: 'Default',
+    backend: 'kibana_1.0',
     paragraphs: [
       {
         output: [
@@ -704,9 +706,10 @@ Wait, what's meant by an evaluation. Can we really perform an evaluation?`,
 const getSQLNotebook = (dateString: string) => {
   return {
     name: '[Flights] OpenSearch SQL Quick Start Guide',
+    path: '[Flights] OpenSearch SQL Quick Start Guide',
     dateCreated: dateString,
     dateModified: dateString,
-    backend: 'Default',
+    backend: 'kibana_1.0',
     paragraphs: [
       {
         output: [
@@ -963,9 +966,10 @@ SELECT abs(-1.234), abs(-1 * abs(-5)), dayofmonth(DATE '2021-07-07');`,
 const getPPLNotebook = (dateString: string) => {
   return {
     name: '[Logs] OpenSearch Piped Processing Language (PPL) Quick Start Guide',
+    path: '[Logs] OpenSearch Piped Processing Language (PPL) Quick Start Guide',
     dateCreated: dateString,
     dateModified: dateString,
-    backend: 'Default',
+    backend: 'kibana_1.0',
     paragraphs: [
       {
         output: [

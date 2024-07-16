@@ -28,8 +28,9 @@ import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
@@ -75,6 +76,11 @@ interface NotebookProps {
   location: RouteComponentProps['location'];
   history: RouteComponentProps['history'];
   migrateNotebook: (newNoteName: string, noteId: string) => Promise<string>;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  notifications: CoreStart['notifications'];
+  dataSourceEnabled: boolean;
+  savedObjectsMDSClient: SavedObjectsStart;
 }
 
 interface NotebookState {
@@ -96,6 +102,7 @@ interface NotebookState {
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
   savedObjectNotebook: boolean;
+  dataSourceMDSId: string | undefined;
 }
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
@@ -119,6 +126,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
       savedObjectNotebook: true,
+      dataSourceMDSId: ''
     };
   }
 
@@ -633,12 +641,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       });
   };
 
+  handleSelectedDataSourceChange = (id : string| undefined) => {
+    this.setState({dataSourceMDSId: id})
+  };
+
   loadQueryResultsFromInput = async (paragraph: any) => {
     const queryType =
       paragraph.input.inputText.substring(0, 4) === '%sql' ? 'sqlquery' : 'pplquery';
+    const query = {
+      dataSourceMDSId: this.state.dataSourceMDSId
+    }
     await this.props.http
       .post(`/api/sql/${queryType}`, {
         body: JSON.stringify(paragraph.output[0].result),
+        query
       })
       .then((response) => {
         paragraph.output[0].result = response.data.resp;
@@ -1031,6 +1047,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       movePara={this.movePara}
                       showQueryParagraphError={this.state.showQueryParagraphError}
                       queryParagraphErrorMessage={this.state.queryParagraphErrorMessage}
+                      dataSourceManagement={this.props.dataSourceManagement}
+                      setActionMenu={this.props.setActionMenu}
+                      notifications={this.props.notifications}
+                      dataSourceEnabled={this.props.dataSourceEnabled}
+                      savedObjectsMDSClient={this.props.savedObjectsMDSClient}
+                      handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
                     />
                   </div>
                 ))}

@@ -47,9 +47,9 @@ export function setupRoutes({
   // notebooks routes
   registerParaRoute(router);
   registerNoteRoute(router);
-  registerVizRoute(router);
+  registerVizRoute(router, dataSourceEnabled);
   const queryService = new QueryService(client);
-  registerSqlRoute(router, queryService);
+  registerSqlRoute(router, queryService, dataSourceEnabled);
 
   registerMetricsRoute(router, dataSourceEnabled);
   registerIntegrationsRoute(router);
