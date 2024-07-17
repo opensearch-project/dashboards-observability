@@ -18,7 +18,7 @@ interface QueryDataProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
   selectedTechnology: string;
-  onMoveToAnalyzeData: () => void; // New prop for moving to Analyze Data
+  onMoveToAnalyzeData: () => void;
 }
 
 export const QueryData: React.FC<QueryDataProps> = ({
@@ -77,7 +77,7 @@ export const QueryData: React.FC<QueryDataProps> = ({
       <EuiPanel>
         {!selectedTechnology ? (
           <EuiText color="danger">
-            <p>Please select a technology first to query data.</p>
+            <p>Please select a collection method first to query data.</p>
           </EuiText>
         ) : (
           <>

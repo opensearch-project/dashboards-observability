@@ -44,17 +44,9 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
       setError(null);
     } else {
       setGettingStarted(null);
-      setError('Selected technology not supported or data not found');
+      setError('Selected collection method not supported or data not found');
     }
   }, [selectedTechnology]);
-
-  if (!gettingStarted) {
-    return (
-      <EuiText color="danger">
-        <p>Data Shipment: Select a Technology first.</p>
-      </EuiText>
-    );
-  }
 
   const onLabelChange = (selectedOptions: any[]) => {
     if (selectedOptions.length === 0) {
@@ -149,9 +141,6 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
 
   const renderIndexPatterns = (indexPatterns: any) => (
     <>
-      <EuiTitle size="m">
-        <h2>Index Patterns</h2>
-      </EuiTitle>
       <EuiText>
         {indexPatterns.description}
         <br />
@@ -205,7 +194,9 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Getting Started Workflow</h2>
           </EuiTitle>
-          {renderSteps(gettingStarted.workflows[0].steps)}
+          {gettingStarted && gettingStarted.workflows
+            ? renderSteps(gettingStarted.workflows[0].steps)
+            : null}
           <EuiButton
             onClick={() => {
               setSelectedTabId('schema_tab');
@@ -225,7 +216,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Schema</h2>
           </EuiTitle>
-          {renderSchema(gettingStarted.schema)}
+          {gettingStarted && gettingStarted.schema ? renderSchema(gettingStarted.schema) : null}
           <EuiButton
             onClick={() => {
               setSelectedTabId('index_patterns_tab');
@@ -245,7 +236,9 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Index Patterns</h2>
           </EuiTitle>
-          {renderIndexPatterns(gettingStarted['index-patterns'])}
+          {gettingStarted && gettingStarted['index-patterns']
+            ? renderIndexPatterns(gettingStarted['index-patterns'])
+            : null}
         </div>
       ),
     },
@@ -256,6 +249,14 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
   };
 
   const renderContent = () => {
+    if (!selectedTechnology) {
+      return (
+        <EuiText color="danger">
+          <p>Please select a collection method first to see steps.</p>
+        </EuiText>
+      );
+    }
+
     if (error) {
       return (
         <EuiText color="danger">
@@ -265,7 +266,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
       );
     }
 
-    if (selectedTechnology === 'OTEL' && gettingStarted) {
+    if (gettingStarted) {
       return (
         <EuiTabbedContent
           tabs={tabs}
@@ -278,15 +279,15 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
     return (
       <EuiText>
         <h3>Select a Technology</h3>
-        <p>Please select a technology to view data shipment information.</p>
+        <p>Please select a collection method to view data shipment information.</p>
       </EuiText>
     );
   };
 
   return (
     <EuiAccordion
-      id="data-shipment"
-      buttonContent={selectedTechnology ? `Data Shipment: ${selectedTechnology}` : 'Data Shipment'}
+      id="steps"
+      buttonContent={selectedTechnology ? `Steps: ${selectedTechnology}` : 'Steps'}
       paddingSize="m"
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={onToggle}

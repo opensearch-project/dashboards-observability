@@ -3,16 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiLink,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { OPENSEARCH_S3_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
 
 export const GettingStartedConnectionsHeader = () => {
   return (
@@ -24,13 +16,6 @@ export const GettingStartedConnectionsHeader = () => {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        More info.{' '}
-        <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
-          Learn more
-        </EuiLink>
-      </EuiText>
     </div>
   );
 };
