@@ -74,7 +74,7 @@ export function QueryArea({
     <EuiPanel paddingSize="none">
       <EuiAccordion
         id="ppl-query-accordion"
-        buttonContent="PPL Query"
+        buttonContent="Query Assist"
         initialIsOpen
         className="ppl-query-accordion"
         // this paddingSize is for accordion children
