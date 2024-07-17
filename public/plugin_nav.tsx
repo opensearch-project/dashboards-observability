@@ -27,7 +27,6 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
     {
       id: observabilityLogsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
-      showInAllNavGroup: true,
     },
   ]);
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
