@@ -70,7 +70,7 @@ export const App = ({
   savedObjectsMDSClient,
   defaultRoute,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
+  const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
