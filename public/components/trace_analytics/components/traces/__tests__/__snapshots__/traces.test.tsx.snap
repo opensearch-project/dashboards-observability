@@ -97,11 +97,9 @@ exports[`Traces component renders empty traces page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -431,11 +429,9 @@ exports[`Traces component renders empty traces page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -1730,11 +1726,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -2065,11 +2059,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -3369,11 +3361,9 @@ exports[`Traces component renders traces page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -3703,11 +3693,9 @@ exports[`Traces component renders traces page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {

@@ -94,11 +94,9 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -264,11 +262,9 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "navControls": Object {
             "getCenter$": [MockFunction],
             "getLeft$": [MockFunction],
-            "getLeftBottom$": [MockFunction],
             "getRight$": [MockFunction],
             "registerCenter": [MockFunction],
             "registerLeft": [MockFunction],
-            "registerLeftBottom": [MockFunction],
             "registerRight": [MockFunction],
           },
           "navGroup": Object {

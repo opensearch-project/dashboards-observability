@@ -97,11 +97,9 @@ exports[`Services component renders empty services page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -432,11 +430,9 @@ exports[`Services component renders empty services page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -2279,11 +2275,9 @@ exports[`Services component renders jaeger services page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -2615,11 +2609,9 @@ exports[`Services component renders jaeger services page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -3895,11 +3887,9 @@ exports[`Services component renders services page 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -4230,11 +4220,9 @@ exports[`Services component renders services page 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
-          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
-          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {

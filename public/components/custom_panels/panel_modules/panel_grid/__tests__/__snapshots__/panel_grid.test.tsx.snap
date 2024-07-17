@@ -241,11 +241,9 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
