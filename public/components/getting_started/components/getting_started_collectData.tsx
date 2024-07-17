@@ -3,31 +3,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiAccordion,
   EuiPanel,
-  EuiTitle,
   EuiText,
   EuiSpacer,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiTabbedContent,
+  EuiComboBox,
+  EuiButton,
   EuiCodeBlock,
   EuiLink,
-  EuiComboBox,
-  EuiTabbedContent,
-  EuiButton,
   EuiListGroup,
   EuiListGroupItem,
+  EuiTitle,
 } from '@elastic/eui';
 import otelJson from './OTEL.json';
 
-export const DataShipment: React.FC<DataShipmentProps> = ({
+interface CollectAndShipDataProps {
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
+  selectedTechnology: string;
+  onMoveToQueryData: () => void;
+  onSelectSource: (source: string) => void;
+}
+
+export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   isOpen,
   onToggle,
   selectedTechnology,
   onMoveToQueryData,
+  onSelectSource,
 }) => {
+  const [collectionMethod, setCollectionMethod] = useState('');
+  const [specificMethod, setSpecificMethod] = useState('');
   const [gettingStarted, setGettingStarted] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState('');
   const [labelsOptions, setLabelsOptions] = useState([]);
   const [selectedTabId, setSelectedTabId] = useState('workflow_tab');
@@ -36,17 +50,64 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
   useEffect(() => {
     if (selectedTechnology === 'OTEL' && otelJson && otelJson['getting-started']) {
       setGettingStarted(otelJson['getting-started']);
-      const labels = otelJson['getting-started'].workflows[0].steps.map((step: any) => ({
-        label: step.label || step.name,
-        value: step.name.replace(/\s/g, '-'),
-      }));
+      const labels =
+        otelJson['getting-started']?.workflows?.[0]?.steps?.map((step: any) => ({
+          label: step.label || step.name,
+          value: step.name.replace(/\s/g, '-'),
+        })) || [];
       setLabelsOptions(labels);
-      setError(null);
     } else {
       setGettingStarted(null);
-      setError('Selected collection method not supported or data not found');
     }
   }, [selectedTechnology]);
+
+  const handleCollectionMethodChange = (value) => {
+    setCollectionMethod(value);
+    setSpecificMethod('');
+    setGettingStarted(null);
+  };
+
+  const handleSpecificMethodChange = (e) => {
+    const selectedMethod = e.target.value;
+    setSpecificMethod(selectedMethod);
+    onSelectSource(selectedMethod);
+  };
+
+  const renderSpecificMethodDropdown = () => {
+    if (!collectionMethod) return null;
+
+    let options = [];
+    if (collectionMethod === 'Structured') {
+      options = [
+        { value: 'OTEL', text: 'Open Telemetry' },
+        { value: 'Nginx', text: 'Nginx' },
+        { value: 'vpc-flow', text: 'VPC Flow' },
+      ];
+    } else if (collectionMethod === 'Unstructured') {
+      options = [
+        { value: 'golang', text: 'Golang' },
+        { value: 'python', text: 'Python' },
+        { value: 'java', text: 'Java' },
+      ];
+    } else if (collectionMethod === 'Upload File') {
+      options = [
+        { value: 'Data Prepper', text: 'Data Prepper' },
+        { value: 'Flint Data', text: 'Flint Data' },
+      ];
+    }
+
+    return (
+      <>
+        <EuiText>Select one of the following</EuiText>
+        <EuiSpacer size="s" />
+        <EuiSelect
+          options={[{ value: '', text: 'Select an option' }, ...options]}
+          value={specificMethod}
+          onChange={handleSpecificMethodChange}
+        />
+      </>
+    );
+  };
 
   const onLabelChange = (selectedOptions: any[]) => {
     if (selectedOptions.length === 0) {
@@ -142,9 +203,9 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
   const renderIndexPatterns = (indexPatterns: any) => (
     <>
       <EuiText>
-        {indexPatterns.description}
+        {indexPatterns?.description}
         <br />
-        {indexPatterns.info.map((infoLink: string, linkIdx: number) => (
+        {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
           <EuiLink key={linkIdx} href={infoLink} target="_blank">
             More Info
           </EuiLink>
@@ -155,7 +216,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
         <h3>Index Patterns</h3>
       </EuiTitle>
       <EuiListGroup>
-        {indexPatterns['index-patterns'].map((pattern: string, idx: number) => (
+        {indexPatterns?.['index-patterns']?.map((pattern: string, idx: number) => (
           <EuiListGroupItem key={idx} label={pattern} />
         ))}
       </EuiListGroup>
@@ -173,7 +234,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
         </EuiText>
       )}
       <EuiSpacer size="m" />
-      <EuiButton onClick={onMoveToQueryData}>Move to Query Data</EuiButton>
+      <EuiButton onClick={onMoveToQueryData}>Move to Query and Analyze Data</EuiButton>
     </>
   );
 
@@ -194,9 +255,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Getting Started Workflow</h2>
           </EuiTitle>
-          {gettingStarted && gettingStarted.workflows
-            ? renderSteps(gettingStarted.workflows[0].steps)
-            : null}
+          {renderSteps(gettingStarted?.workflows?.[0]?.steps || [])}
           <EuiButton
             onClick={() => {
               setSelectedTabId('schema_tab');
@@ -216,7 +275,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Schema</h2>
           </EuiTitle>
-          {gettingStarted && gettingStarted.schema ? renderSchema(gettingStarted.schema) : null}
+          {renderSchema(gettingStarted?.schema || [])}
           <EuiButton
             onClick={() => {
               setSelectedTabId('index_patterns_tab');
@@ -236,9 +295,7 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
           <EuiTitle size="m">
             <h2>Index Patterns</h2>
           </EuiTitle>
-          {gettingStarted && gettingStarted['index-patterns']
-            ? renderIndexPatterns(gettingStarted['index-patterns'])
-            : null}
+          {renderIndexPatterns(gettingStarted?.['index-patterns'] || {})}
         </div>
       ),
     },
@@ -249,50 +306,70 @@ export const DataShipment: React.FC<DataShipmentProps> = ({
   };
 
   const renderContent = () => {
-    if (!selectedTechnology) {
+    if (!gettingStarted) {
       return (
-        <EuiText color="danger">
-          <p>Please select a collection method first to see steps.</p>
+        <EuiText>
+          <h3>Select a collection method first</h3>
+          <p>Please select a collection method to view data shipment information.</p>
         </EuiText>
-      );
-    }
-
-    if (error) {
-      return (
-        <EuiText color="danger">
-          <h3>Error</h3>
-          <p>{error}</p>
-        </EuiText>
-      );
-    }
-
-    if (gettingStarted) {
-      return (
-        <EuiTabbedContent
-          tabs={tabs}
-          selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
-          onTabClick={onTabClick}
-        />
       );
     }
 
     return (
-      <EuiText>
-        <h3>Select a Technology</h3>
-        <p>Please select a collection method to view data shipment information.</p>
-      </EuiText>
+      <EuiTabbedContent
+        tabs={tabs}
+        selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+        onTabClick={onTabClick}
+      />
     );
   };
 
   return (
     <EuiAccordion
-      id="steps"
-      buttonContent={selectedTechnology ? `Steps: ${selectedTechnology}` : 'Steps'}
+      id="collect-and-ship-data"
+      buttonContent="Collect & Ship Data"
       paddingSize="m"
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={onToggle}
     >
-      <EuiPanel style={{ maxWidth: '1000px' }}>{renderContent()}</EuiPanel>
+      <EuiPanel>
+        <EuiText>
+          <h2>Collect Your Data</h2>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiText>Select a collection method</EuiText>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="l" style={{ maxWidth: '30rem' }}>
+          <EuiFlexItem>
+            <EuiCard
+              layout="vertical"
+              title="Structured"
+              description="Structured data collection methods"
+              onClick={() => handleCollectionMethodChange('Structured')}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              layout="vertical"
+              title="Unstructured"
+              description="Unstructured data collection methods"
+              onClick={() => handleCollectionMethodChange('Unstructured')}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              layout="vertical"
+              title="Upload File"
+              description="Upload a data file"
+              onClick={() => handleCollectionMethodChange('Upload File')}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {renderSpecificMethodDropdown()}
+        <EuiSpacer size="l" />
+        {selectedTechnology && gettingStarted && renderContent()}
+      </EuiPanel>
     </EuiAccordion>
   );
 };

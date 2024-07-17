@@ -7,18 +7,14 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
 import { GettingStartedConnectionsHeader } from './getting_started_header';
-import { PickYourSource } from './getting_started_sections';
-import { DataShipment } from './getting_started_dataShipment';
-import { QueryData } from './getting_started_queryData';
-import { AnalyzeData } from './getting_started_analyzeData';
+import { CollectAndShipData } from './getting_started_collectData';
+import { QueryAndAnalyze } from './getting_started_queryAndAnalyze';
 
 export const NewGettingStarted = (props: HomeProps) => {
   const { chrome } = props;
   const [selectedSource, setSelectedSource] = useState('');
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
-  const [isDataShipmentOpen, setIsDataShipmentOpen] = useState(false);
   const [isQueryDataOpen, setIsQueryDataOpen] = useState(false);
-  const [isAnalyzeDataOpen, setIsAnalyzeDataOpen] = useState(false);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -31,39 +27,22 @@ export const NewGettingStarted = (props: HomeProps) => {
 
   const handleSelectSource = (source: string) => {
     setSelectedSource(source);
-    setIsPickYourSourceOpen(false);
-    setIsDataShipmentOpen(true);
   };
 
   const togglePickYourSource = (isOpen: boolean) => {
     setIsPickYourSourceOpen(isOpen);
     if (isOpen) {
-      setIsDataShipmentOpen(false);
       setIsQueryDataOpen(false);
-      setIsAnalyzeDataOpen(false);
     }
-  };
-
-  const toggleDataShipment = (isOpen: boolean) => {
-    setIsDataShipmentOpen(isOpen);
   };
 
   const toggleQueryData = (isOpen: boolean) => {
     setIsQueryDataOpen(isOpen);
   };
 
-  const toggleAnalyzeData = (isOpen: boolean) => {
-    setIsAnalyzeDataOpen(isOpen);
-  };
-
   const setQueryDataOpen = () => {
-    setIsDataShipmentOpen(false);
+    setIsPickYourSourceOpen(false);
     setIsQueryDataOpen(true);
-  };
-
-  const setAnalyzeDataOpen = () => {
-    setIsQueryDataOpen(false);
-    setIsAnalyzeDataOpen(true);
   };
 
   return (
@@ -71,30 +50,17 @@ export const NewGettingStarted = (props: HomeProps) => {
       <EuiPageBody component="div">
         <GettingStartedConnectionsHeader />
         <EuiSpacer size="l" />
-        <PickYourSource
-          onSelectSource={handleSelectSource}
-          selectedSource={selectedSource}
+        <CollectAndShipData
           isOpen={isPickYourSourceOpen}
           onToggle={togglePickYourSource}
-        />
-        <EuiSpacer size="l" />
-        <DataShipment
-          isOpen={isDataShipmentOpen}
-          onToggle={toggleDataShipment}
           selectedTechnology={selectedSource}
           onMoveToQueryData={setQueryDataOpen}
+          onSelectSource={handleSelectSource}
         />
         <EuiSpacer size="l" />
-        <QueryData
+        <QueryAndAnalyze
           isOpen={isQueryDataOpen}
           onToggle={toggleQueryData}
-          selectedTechnology={selectedSource}
-          onMoveToAnalyzeData={setAnalyzeDataOpen}
-        />
-        <EuiSpacer size="l" />
-        <AnalyzeData
-          isOpen={isAnalyzeDataOpen}
-          onToggle={toggleAnalyzeData}
           selectedTechnology={selectedSource}
         />
       </EuiPageBody>
