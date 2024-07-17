@@ -50,7 +50,6 @@ import {
   observabilityPanelsID,
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
-  observabilityPanelsTitleForNav,
   observabilityPluginOrder,
   observabilityServicesPluginOrder,
   observabilityServicesTitle,
@@ -321,14 +320,6 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('metrics'),
     });
 
-    core.application.register({
-      id: observabilityTracesID,
-      title: observabilityTracesTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityTracesPluginOrder,
-      mount: appMountWithStartPage('traces'),
-    });
-
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
         id: 'observability-traces-nav',
@@ -345,6 +336,14 @@ export class ObservabilityPlugin
         category: DEFAULT_APP_CATEGORIES.investigate,
         mount: appMountWithStartPage('traces', '/services'),
       });
+    } else {
+      core.application.register({
+        id: observabilityTracesID,
+        title: observabilityTracesTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityTracesPluginOrder,
+        mount: appMountWithStartPage('traces'),
+      });
     }
 
     core.application.register({
@@ -355,23 +354,13 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('notebooks'),
     });
 
-    if (core.chrome.navGroup.getNavGroupEnabled()) {
-      core.application.register({
-        id: observabilityPanelsID,
-        title: observabilityPanelsTitleForNav,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityPanelsPluginOrder,
-        mount: appMountWithStartPage('dashboards'),
-      });
-    } else {
-      core.application.register({
-        id: observabilityPanelsID,
-        title: observabilityPanelsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityPanelsPluginOrder,
-        mount: appMountWithStartPage('dashboards'),
-      });
-    }
+    core.application.register({
+      id: observabilityPanelsID,
+      title: observabilityPanelsTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityPanelsPluginOrder,
+      mount: appMountWithStartPage('dashboards'),
+    });
 
     core.application.register({
       id: observabilityIntegrationsID,

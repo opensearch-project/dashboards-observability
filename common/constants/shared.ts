@@ -63,7 +63,6 @@ export const observabilityNotebookPluginOrder = 5094;
 
 export const observabilityPanelsID = 'observability-dashboards';
 export const observabilityPanelsTitle = 'Dashboards';
-export const observabilityPanelsTitleForNav = 'Observability-Dashboards';
 export const observabilityPanelsPluginOrder = 5095;
 
 export const observabilityIntegrationsID = 'integrations';
