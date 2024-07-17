@@ -237,4 +237,43 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
       }
     }
   );
+
+  router.get(
+    {
+      path: `${DATACONNECTIONS_BASE}/{name}/dataSourceMDSId={dataSourceMDSId?}`,
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const dataSourceMDSId = request.params.dataSourceMDSId;
+      try {
+        let dataConnectionsresponse;
+        if (dataSourceEnabled && dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          dataConnectionsresponse = await client.callAPI('ppl.getDataConnectionById', {
+            dataconnection: request.params.name,
+          });
+        } else {
+          dataConnectionsresponse = await context.observability_plugin.observabilityClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.getDataConnectionById', {
+              dataconnection: request.params.name,
+            });
+        }
+        return response.ok({
+          body: dataConnectionsresponse,
+        });
+      } catch (error: any) {
+        console.error('Issue in fetching data connection:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
 }
