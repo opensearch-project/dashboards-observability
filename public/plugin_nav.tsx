@@ -52,6 +52,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
     {
       id: observabilityMetricsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
+      showInAllNavGroup: true,
     },
   ]);
 
@@ -59,6 +60,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
     {
       id: observabilityTracesID,
       category: DEFAULT_APP_CATEGORIES.investigate,
+      showInAllNavGroup: true,
     },
   ]);
 
