@@ -97,14 +97,18 @@ exports[`Dashboard component renders dashboard 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
         "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -440,14 +444,18 @@ exports[`Dashboard component renders dashboard 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1262,14 +1270,18 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
         "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1604,14 +1616,18 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2426,14 +2442,18 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
         "getNavGroupEnabled": [MockFunction],
         "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2770,14 +2790,18 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
