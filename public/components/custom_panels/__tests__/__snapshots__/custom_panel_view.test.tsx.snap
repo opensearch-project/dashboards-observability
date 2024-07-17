@@ -1233,8 +1233,10 @@ exports[`Panels View Component renders panel view container with visualizations 
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3028,8 +3030,10 @@ exports[`Panels View Component renders panel view container with visualizations 
                           "registerRight": [MockFunction],
                         },
                         "navGroup": Object {
+                          "getCurrentNavGroup$": [MockFunction],
                           "getNavGroupEnabled": [MockFunction],
                           "getNavGroupsMap$": [MockFunction],
+                          "setCurrentNavGroup": [MockFunction],
                         },
                         "navLinks": Object {
                           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3480,8 +3484,10 @@ exports[`Panels View Component renders panel view container without visualizatio
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
           "getNavGroupEnabled": [MockFunction],
           "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5159,8 +5165,10 @@ exports[`Panels View Component renders panel view container without visualizatio
                           "registerRight": [MockFunction],
                         },
                         "navGroup": Object {
+                          "getCurrentNavGroup$": [MockFunction],
                           "getNavGroupEnabled": [MockFunction],
                           "getNavGroupsMap$": [MockFunction],
+                          "setCurrentNavGroup": [MockFunction],
                         },
                         "navLinks": Object {
                           "enableForcedAppSwitcherNavigation": [MockFunction],
