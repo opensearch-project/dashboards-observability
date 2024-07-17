@@ -314,6 +314,14 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
+        id: observabilityApplicationsID,
+        title: observabilityApplicationsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityApplicationsPluginOrder,
+        mount: appMountWithStartPage('applications'),
+      });
+
+      core.application.register({
         id: 'observability-services-nav',
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
@@ -342,13 +350,6 @@ export class ObservabilityPlugin
         category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: observabilityLogsPluginOrder,
         mount: appMountWithStartPage('logs'),
-      });
-      core.application.register({
-        id: observabilityApplicationsID,
-        title: observabilityApplicationsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityApplicationsPluginOrder,
-        mount: appMountWithStartPage('applications'),
       });
     }
 
