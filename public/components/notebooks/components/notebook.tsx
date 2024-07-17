@@ -28,7 +28,12 @@ import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
@@ -126,7 +131,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
       savedObjectNotebook: true,
-      dataSourceMDSId: ''
+      dataSourceMDSId: '',
     };
   }
 
@@ -641,20 +646,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       });
   };
 
-  handleSelectedDataSourceChange = (id : string| undefined) => {
-    this.setState({dataSourceMDSId: id})
+  handleSelectedDataSourceChange = (id: string | undefined) => {
+    this.setState({ dataSourceMDSId: id });
   };
 
   loadQueryResultsFromInput = async (paragraph: any) => {
     const queryType =
       paragraph.input.inputText.substring(0, 4) === '%sql' ? 'sqlquery' : 'pplquery';
     const query = {
-      dataSourceMDSId: this.state.dataSourceMDSId
-    }
+      dataSourceMDSId: this.state.dataSourceMDSId,
+    };
     await this.props.http
       .post(`/api/sql/${queryType}`, {
         body: JSON.stringify(paragraph.output[0].result),
-        query
+        query,
       })
       .then((response) => {
         paragraph.output[0].result = response.data.resp;

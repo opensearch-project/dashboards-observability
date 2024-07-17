@@ -82,7 +82,6 @@ describe('<Notebook /> spec', () => {
       expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
     });
     expect(utils.container.firstChild).toMatchSnapshot();
-
   });
 
   it('Adds a code block', async () => {

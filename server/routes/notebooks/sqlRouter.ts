@@ -11,15 +11,19 @@ import {
 } from '../../../../../src/core/server';
 import { QueryService } from '../../services/queryService';
 
-export function registerSqlRoute(server: IRouter, service: QueryService, _dataSourceEnabled: boolean) {
+export function registerSqlRoute(
+  server: IRouter,
+  service: QueryService,
+  _dataSourceEnabled: boolean
+) {
   server.post(
     {
       path: '/api/sql/sqlquery',
       validate: {
         body: schema.any(),
         query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' }))
-        })
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (
@@ -40,8 +44,8 @@ export function registerSqlRoute(server: IRouter, service: QueryService, _dataSo
       validate: {
         body: schema.any(),
         query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' }))
-        })
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (

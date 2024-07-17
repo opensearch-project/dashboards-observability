@@ -13,7 +13,12 @@ export class QueryService {
     this.client = client;
   }
 
-  describeQueryInternal = async (request: any, format: string, responseFormat: string, context: any) => {
+  describeQueryInternal = async (
+    request: any,
+    format: string,
+    responseFormat: string,
+    context: any
+  ) => {
     try {
       const queryRequest = {
         query: request.body,
@@ -21,10 +26,10 @@ export class QueryService {
       const params = {
         body: JSON.stringify(queryRequest),
       };
-  
+
       let client = this.client;
       let queryResponse;
-  
+
       const { dataSourceMDSId } = request.query;
       if (dataSourceMDSId) {
         client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
@@ -41,7 +46,7 @@ export class QueryService {
     } catch (err) {
       this.logger.info('error describeQueryInternal');
       this.logger.info(err);
-  
+
       return {
         data: {
           ok: false,
@@ -51,7 +56,7 @@ export class QueryService {
       };
     }
   };
-  
+
   describeSQLQuery = async (context: any, request: any) => {
     return this.describeQueryInternal(request, 'ppl.sqlQuery', 'json', context);
   };

@@ -9,11 +9,14 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../src/core/public';
-import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import {
-  DataSourceManagementPluginSetup
-} from '../../../../../../src/plugins/data_source_management/public';
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
+import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import {
   NOTEBOOKS_API_PREFIX,
   NOTEBOOKS_DOCUMENTATION_URL,

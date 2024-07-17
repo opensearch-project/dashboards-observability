@@ -35,24 +35,22 @@ export function registerVizRoute(router: IRouter, dataSourceEnabled: boolean) {
       };
       try {
         let opensearchClientResponse;
-        let vizResponse;
         if (dataSourceEnabled && request.params.dataSourceMDSId) {
           const client = await context.dataSource.opensearch.legacy.getClient(
             request.params.dataSourceMDSId
           );
           opensearchClientResponse = await client.callAPI('search', params);
-        }
-        else{
+        } else {
           opensearchClientResponse = await context.core.opensearch.legacy.client.callAsCurrentUser(
             'search',
             params
           );
         }
         const savedVisualizations = opensearchClientResponse.hits.hits;
-          vizResponse = savedVisualizations.map((vizDocument) => ({
-            label: vizDocument._source.visualization.title,
-            key: vizDocument._id.split(':').pop(),
-          }));
+        const vizResponse = savedVisualizations.map((vizDocument) => ({
+          label: vizDocument._source.visualization.title,
+          key: vizDocument._id.split(':').pop(),
+        }));
         return response.ok({
           body: { savedVisualizations: vizResponse },
         });
