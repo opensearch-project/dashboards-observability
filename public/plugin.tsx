@@ -297,22 +297,6 @@ export class ObservabilityPlugin
     };
 
     core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
-
-    core.application.register({
-      id: observabilityLogsID,
-      title: observabilityLogsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityLogsPluginOrder,
-      mount: appMountWithStartPage('logs'),
-    });
-
-    core.application.register({
       id: observabilityMetricsID,
       title: observabilityMetricsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
@@ -344,6 +328,28 @@ export class ObservabilityPlugin
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
       });
+      // depreciated in new Nav Groups.
+      core.application.register({
+        id: observabilityPanelsID,
+        title: observabilityPanelsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityPanelsPluginOrder,
+        mount: appMountWithStartPage('dashboards'),
+      });
+      core.application.register({
+        id: observabilityLogsID,
+        title: observabilityLogsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityLogsPluginOrder,
+        mount: appMountWithStartPage('logs'),
+      });
+      core.application.register({
+        id: observabilityApplicationsID,
+        title: observabilityApplicationsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityApplicationsPluginOrder,
+        mount: appMountWithStartPage('applications'),
+      });
     }
 
     core.application.register({
@@ -352,14 +358,6 @@ export class ObservabilityPlugin
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityNotebookPluginOrder,
       mount: appMountWithStartPage('notebooks'),
-    });
-
-    core.application.register({
-      id: observabilityPanelsID,
-      title: observabilityPanelsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('dashboards'),
     });
 
     core.application.register({
