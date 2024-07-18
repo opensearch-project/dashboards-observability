@@ -336,7 +336,7 @@ export class ObservabilityPlugin
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
       });
-      // depreciated in new Nav Groups.
+      // deprecated in new Nav Groups.
       core.application.register({
         id: observabilityPanelsID,
         title: observabilityPanelsTitle,
