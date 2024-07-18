@@ -78,11 +78,13 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: 'observability-traces-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
+      order: 300,
     },
     {
       id: 'observability-services-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
+      order: 100,
     },
   ]);
 }
