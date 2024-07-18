@@ -17,7 +17,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
     {
       id: observabilityApplicationsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
-      order: 100,
+      order: 400,
     },
   ]);
 
@@ -26,7 +26,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityMetricsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 200,
+      order: 100,
     },
   ]);
 
@@ -79,13 +79,13 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: 'observability-traces-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 300,
+      order: 200,
     },
     {
       id: 'observability-services-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 100,
+      order: 300,
     },
   ]);
 }
