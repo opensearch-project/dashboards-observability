@@ -25,6 +25,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityMetricsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
+      order: 200,
     },
   ]);
 
