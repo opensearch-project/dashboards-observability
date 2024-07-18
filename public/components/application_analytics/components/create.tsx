@@ -37,11 +37,8 @@ import {
   OptionType,
 } from '../../../../common/types/application_analytics';
 import { fetchAppById } from '../helpers/utils';
-import {
-  observabilityApplicationsID,
-  observabilityID,
-  observabilityTitle,
-} from '../../../../common/constants/shared';
+import { observabilityApplicationsID } from '../../../../common/constants/shared';
+import { coreRefs } from '../../../framework/core_refs';
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -91,17 +88,32 @@ export const CreateApp = (props: CreateAppProps) => {
   });
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Applications',
-        href: '#/',
-      },
-      {
-        text: editMode ? 'Edit' : 'Create',
-        href: `#/${editMode ? 'edit' : 'create'}`,
-      },
-    ]);
+    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
+    if (isNavGroupEnabled) {
+      chrome.setBreadcrumbs([
+        ...parentBreadcrumbs,
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+        {
+          text: editMode ? 'Edit' : 'Create',
+          href: `#/${editMode ? 'edit' : 'create'}`,
+        },
+      ]);
+    } else {
+      chrome.setBreadcrumbs([
+        ...parentBreadcrumbs,
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+        {
+          text: editMode ? 'Edit' : 'Create',
+          href: `#/${editMode ? 'edit' : 'create'}`,
+        },
+      ]);
+    }
   }, []);
 
   useEffect(() => {

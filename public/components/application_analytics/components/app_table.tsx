@@ -37,13 +37,9 @@ import moment from 'moment';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AppAnalyticsComponentDeps } from '../home';
 import { getCustomModal } from '../../custom_panels/helpers/modal_containers';
-import {
-  observabilityID,
-  observabilityTitle,
-  pageStyles,
-  UI_DATE_FORMAT,
-} from '../../../../common/constants/shared';
+import { pageStyles, UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ApplicationType, AvailabilityType } from '../../../../common/types/application_analytics';
+import { coreRefs } from '../../../framework/core_refs';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -74,13 +70,23 @@ export function AppTable(props: AppTableProps) {
   const createButtonText = 'Create application';
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Applications',
-        href: '#/',
-      },
-    ]);
+    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
+    if (isNavGroupEnabled) {
+      chrome.setBreadcrumbs([
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+      ]);
+    } else {
+      chrome.setBreadcrumbs([
+        ...parentBreadcrumbs,
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+      ]);
+    }
     clear();
     fetchApplications();
   }, []);

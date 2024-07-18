@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
+  observabilityApplicationsID,
   observabilityIntegrationsID,
   observabilityMetricsID,
   observabilityNotebookID,
@@ -12,6 +13,14 @@ import { AppPluginStartDependencies } from './types';
 import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
 
 export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDependencies>) {
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityApplicationsID,
+      category: DEFAULT_APP_CATEGORIES.investigate,
+      order: 100,
+    },
+  ]);
+
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityMetricsID,

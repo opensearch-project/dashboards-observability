@@ -100,22 +100,40 @@ export function ServiceView(props: ServiceViewProps) {
   };
 
   useEffect(() => {
+    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
     if (page !== 'serviceFlyout')
-      props.chrome.setBreadcrumbs([
-        props.parentBreadcrumb,
-        {
-          text: 'Trace analytics',
-          href: '#/',
-        },
-        {
-          text: 'Services',
-          href: '#/services',
-        },
-        {
-          text: props.serviceName,
-          href: `#/services/${encodeURIComponent(props.serviceName)}`,
-        },
-      ]);
+      if (isNavGroupEnabled) {
+        props.chrome.setBreadcrumbs([
+          {
+            text: 'Trace analytics',
+            href: '#/',
+          },
+          {
+            text: 'Services',
+            href: '#/services',
+          },
+          {
+            text: props.serviceName,
+            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+          },
+        ]);
+      } else {
+        props.chrome.setBreadcrumbs([
+          props.parentBreadcrumb,
+          {
+            text: 'Trace analytics',
+            href: '#/',
+          },
+          {
+            text: 'Services',
+            href: '#/services',
+          },
+          {
+            text: props.serviceName,
+            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+          },
+        ]);
+      }
   }, [props.serviceName]);
 
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();

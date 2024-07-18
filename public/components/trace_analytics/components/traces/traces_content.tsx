@@ -14,6 +14,7 @@ import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
 import { TracesProps } from './traces';
 import { TracesTable } from './traces_table';
+import { coreRefs } from '../../../../framework/core_refs';
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -25,7 +26,6 @@ export function TracesContent(props: TracesProps) {
     appConfigs,
     startTime,
     endTime,
-    parentBreadcrumb,
     childBreadcrumbs,
     traceIdColumnAction,
     setQuery,
@@ -43,10 +43,14 @@ export function TracesContent(props: TracesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
-
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    chrome.setBreadcrumbs([
+      ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
+      ...childBreadcrumbs,
+    ]);
     const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({

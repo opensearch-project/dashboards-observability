@@ -104,7 +104,17 @@ exports[`Services component renders empty services page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -437,7 +447,17 @@ exports[`Services component renders empty services page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },
@@ -2282,7 +2302,17 @@ exports[`Services component renders jaeger services page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -2616,7 +2646,17 @@ exports[`Services component renders jaeger services page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },
@@ -3894,7 +3934,17 @@ exports[`Services component renders services page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -4227,7 +4277,17 @@ exports[`Services component renders services page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },

@@ -121,6 +121,8 @@ export const Home = (props: HomeProps) => {
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
   const { defaultRoute = '/services' } = props;
+  const { chrome } = props;
+  const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -295,8 +297,19 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path="/traces"
-          render={(_routerProps) => (
-            <TraceSideBar>
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                <Traces
+                  page="traces"
+                  childBreadcrumbs={traceBreadcrumbs}
+                  traceIdColumnAction={traceIdColumnAction}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
               <Traces
                 page="traces"
                 childBreadcrumbs={traceBreadcrumbs}
@@ -305,8 +318,8 @@ export const Home = (props: HomeProps) => {
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
-            </TraceSideBar>
-          )}
+            )
+          }
         />
         <Route
           path="/traces/:id+"
@@ -329,8 +342,20 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path={['/services']}
-          render={(_routerProps) => (
-            <TraceSideBar>
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  traceColumnAction={traceColumnAction}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
               <Services
                 page="services"
                 childBreadcrumbs={serviceBreadcrumbs}
@@ -340,8 +365,8 @@ export const Home = (props: HomeProps) => {
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
-            </TraceSideBar>
-          )}
+            )
+          }
         />
         <Route
           path="/services/:id+"
