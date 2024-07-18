@@ -1225,9 +1225,11 @@ exports[`Panels View Component renders panel view container with visualizations 
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -3020,9 +3022,11 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "navControls": Object {
                           "getCenter$": [MockFunction],
                           "getLeft$": [MockFunction],
+                          "getLeftBottom$": [MockFunction],
                           "getRight$": [MockFunction],
                           "registerCenter": [MockFunction],
                           "registerLeft": [MockFunction],
+                          "registerLeftBottom": [MockFunction],
                           "registerRight": [MockFunction],
                         },
                         "navGroup": Object {
@@ -3472,9 +3476,11 @@ exports[`Panels View Component renders panel view container without visualizatio
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
         },
         "navGroup": Object {
@@ -5151,9 +5157,11 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "navControls": Object {
                           "getCenter$": [MockFunction],
                           "getLeft$": [MockFunction],
+                          "getLeftBottom$": [MockFunction],
                           "getRight$": [MockFunction],
                           "registerCenter": [MockFunction],
                           "registerLeft": [MockFunction],
+                          "registerLeftBottom": [MockFunction],
                           "registerRight": [MockFunction],
                         },
                         "navGroup": Object {
