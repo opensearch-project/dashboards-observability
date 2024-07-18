@@ -9,11 +9,11 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiSmallButton,
+  EuiButton,
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
-  EuiSmallButtonEmpty,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigureS3Datasource } from './configure_s3_datasource';
@@ -194,7 +194,7 @@ export function Configure(props: ConfigureDatasourceProps) {
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiSmallButtonEmpty
+            <EuiButtonEmpty
               onClick={() => {
                 window.location.hash = '#/new';
               }}
@@ -203,20 +203,20 @@ export function Configure(props: ConfigureDatasourceProps) {
               iconType="cross"
             >
               Cancel
-            </EuiSmallButtonEmpty>
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
+            <EuiButton
               onClick={() => (page === 'review' ? setPage('configure') : {})}
               color="ghost"
               size="s"
               iconType="arrowLeft"
             >
               Previous
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
+            <EuiButton
               onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
               size="s"
               iconType="arrowRight"
@@ -225,7 +225,7 @@ export function Configure(props: ConfigureDatasourceProps) {
               {page === 'configure'
                 ? `Review Configuration`
                 : `Connect to ${DatasourceTypeToDisplayName[type]}`}
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
