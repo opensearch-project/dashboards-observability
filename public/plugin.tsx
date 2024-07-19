@@ -108,11 +108,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-<<<<<<< HEAD
-=======
-import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 import { registerAllPluginNavGroups } from './plugin_nav';
->>>>>>> 09090a6d ([Navigation] Register all plugins to NavGroups (#1926))
 
 interface PublicConfig {
   query_assist: {
