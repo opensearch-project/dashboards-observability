@@ -423,7 +423,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
                       fill={selectedWorkflow === 'Connect To a Collector'}
                       onClick={() => handleWorkflowChange('Connect To a Collector')}
                     >
-                      Connect to a Collector
+                      Configure Existing Collector
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
