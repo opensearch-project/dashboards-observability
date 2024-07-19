@@ -43,6 +43,7 @@ import {
   getSampleNotebooksModal,
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 interface NoteTableProps {
   loading: boolean;
@@ -79,13 +80,15 @@ export function NoteTable({
   const history = useHistory();
 
   useEffect(() => {
-    setBreadcrumbs([
-      parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/',
-      },
-    ]);
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
+        {
+          text: 'Notebooks',
+          href: '#/',
+        },
+      ]
+    );
     fetchNotebooks();
   }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
 

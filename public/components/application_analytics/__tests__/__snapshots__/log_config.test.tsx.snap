@@ -84,9 +84,11 @@ exports[`Log Config component renders empty log config 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {
@@ -713,9 +715,11 @@ exports[`Log Config component renders with query 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
       },
       "navGroup": Object {

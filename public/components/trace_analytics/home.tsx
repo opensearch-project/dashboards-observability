@@ -6,7 +6,7 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Redirect } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -44,6 +44,7 @@ export interface TraceAnalyticsCoreDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
   savedObjectsMDSClient: SavedObjectsStart;
+  defaultRoute?: string;
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
@@ -119,6 +120,9 @@ export const Home = (props: HomeProps) => {
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
+  const { defaultRoute = '/services' } = props;
+  const { chrome } = props;
+  const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -161,7 +165,7 @@ export const Home = (props: HomeProps) => {
   const serviceBreadcrumbs = [
     {
       text: 'Trace analytics',
-      href: '#/',
+      href: '#/services',
     },
     {
       text: 'Services',
@@ -172,7 +176,7 @@ export const Home = (props: HomeProps) => {
   const traceBreadcrumbs = [
     {
       text: 'Trace analytics',
-      href: '#/',
+      href: '#/services',
     },
     {
       text: 'Traces',
@@ -293,8 +297,19 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path="/traces"
-          render={(_routerProps) => (
-            <TraceSideBar>
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                <Traces
+                  page="traces"
+                  childBreadcrumbs={traceBreadcrumbs}
+                  traceIdColumnAction={traceIdColumnAction}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
               <Traces
                 page="traces"
                 childBreadcrumbs={traceBreadcrumbs}
@@ -303,8 +318,8 @@ export const Home = (props: HomeProps) => {
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
-            </TraceSideBar>
-          )}
+            )
+          }
         />
         <Route
           path="/traces/:id+"
@@ -326,9 +341,21 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path={['/services', '/']}
-          render={(_routerProps) => (
-            <TraceSideBar>
+          path={['/services']}
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  traceColumnAction={traceColumnAction}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
               <Services
                 page="services"
                 childBreadcrumbs={serviceBreadcrumbs}
@@ -338,8 +365,8 @@ export const Home = (props: HomeProps) => {
                 dataSourceMDSId={dataSourceMDSId}
                 {...commonProps}
               />
-            </TraceSideBar>
-          )}
+            )
+          }
         />
         <Route
           path="/services/:id+"
@@ -364,6 +391,7 @@ export const Home = (props: HomeProps) => {
             />
           )}
         />
+        <Route path="/" render={() => <Redirect to={defaultRoute} />} />
       </HashRouter>
       {flyout}
       {spanFlyoutComponent}
