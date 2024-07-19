@@ -38,7 +38,7 @@ import {
 } from '../../../../common/types/application_analytics';
 import { fetchAppById } from '../helpers/utils';
 import { observabilityApplicationsID } from '../../../../common/constants/shared';
-import { coreRefs } from '../../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -53,7 +53,6 @@ interface CreateAppProps extends AppAnalyticsComponentDeps {
 export const CreateApp = (props: CreateAppProps) => {
   const {
     parentBreadcrumbs,
-    chrome,
     http,
     query,
     name,
@@ -88,9 +87,9 @@ export const CreateApp = (props: CreateAppProps) => {
   });
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      chrome.setBreadcrumbs([
+    setNavBreadCrumbs(
+      [...parentBreadcrumbs],
+      [
         ...parentBreadcrumbs,
         {
           text: 'Applications',
@@ -100,20 +99,8 @@ export const CreateApp = (props: CreateAppProps) => {
           text: editMode ? 'Edit' : 'Create',
           href: `#/${editMode ? 'edit' : 'create'}`,
         },
-      ]);
-    } else {
-      chrome.setBreadcrumbs([
-        ...parentBreadcrumbs,
-        {
-          text: 'Applications',
-          href: '#/',
-        },
-        {
-          text: editMode ? 'Edit' : 'Create',
-          href: `#/${editMode ? 'edit' : 'create'}`,
-        },
-      ]);
-    }
+      ]
+    );
   }, []);
 
   useEffect(() => {

@@ -63,7 +63,7 @@ import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
-import { coreRefs } from '../../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -214,9 +214,9 @@ export function Application(props: AppDetailProps) {
   }, [appId]);
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      chrome.setBreadcrumbs([
+    setNavBreadCrumbs(
+      [...parentBreadcrumbs],
+      [
         {
           text: 'Applications',
           href: '#/',
@@ -225,20 +225,8 @@ export function Application(props: AppDetailProps) {
           text: application.name,
           href: `#/${appId}`,
         },
-      ]);
-    } else {
-      chrome.setBreadcrumbs([
-        ...parentBreadcrumbs,
-        {
-          text: 'Applications',
-          href: '#/',
-        },
-        {
-          text: application.name,
-          href: `#/${appId}`,
-        },
-      ]);
-    }
+      ]
+    );
 
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
     setEndTimeForApp(sessionStorage.getItem(`${application.name}EndTime`) || 'now');

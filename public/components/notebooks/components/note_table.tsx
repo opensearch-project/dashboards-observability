@@ -43,7 +43,7 @@ import {
   getSampleNotebooksModal,
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
-import { coreRefs } from '../../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 interface NoteTableProps {
   loading: boolean;
@@ -80,23 +80,15 @@ export function NoteTable({
   const history = useHistory();
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      setBreadcrumbs([
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
         {
           text: 'Notebooks',
           href: '#/',
         },
-      ]);
-    } else {
-      setBreadcrumbs([
-        parentBreadcrumb,
-        {
-          text: 'Notebooks',
-          href: '#/',
-        },
-      ]);
-    }
+      ]
+    );
     fetchNotebooks();
   }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
 

@@ -37,7 +37,7 @@ import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_fun
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
-import { coreRefs } from '../../../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -231,10 +231,9 @@ export function TraceView(props: TraceViewProps) {
   }, [serviceMap, ganttData]);
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      props.chrome.setBreadcrumbs([
-        props.parentBreadcrumb,
+    setNavBreadCrumbs(
+      [props.parentBreadcrumb],
+      [
         {
           text: 'Trace analytics',
           href: '#/',
@@ -247,24 +246,8 @@ export function TraceView(props: TraceViewProps) {
           text: props.traceId,
           href: `#/traces/${encodeURIComponent(props.traceId)}`,
         },
-      ]);
-    } else {
-      props.chrome.setBreadcrumbs([
-        props.parentBreadcrumb,
-        {
-          text: 'Trace analytics',
-          href: '#/',
-        },
-        {
-          text: 'Traces',
-          href: '#/traces',
-        },
-        {
-          text: props.traceId,
-          href: `#/traces/${encodeURIComponent(props.traceId)}`,
-        },
-      ]);
-    }
+      ]
+    );
     refresh();
   }, [props.mode]);
   return (

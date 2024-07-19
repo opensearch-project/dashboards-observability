@@ -27,7 +27,7 @@ import { setSelectedDataSourceMDSId } from './redux/slices/metrics_slice';
 import { Sidebar } from './sidebar/sidebar';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricsGrid } from './view/metrics_grid';
-import { coreRefs } from '../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 
 interface MetricsProps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -58,23 +58,15 @@ export const Home = ({
   const [reloadSidebar, setReloadSidebar] = useState<boolean>(false);
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      chrome.setBreadcrumbs([
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
         {
           text: 'Metrics',
           href: `#/`,
         },
-      ]);
-    } else {
-      chrome.setBreadcrumbs([
-        parentBreadcrumb,
-        {
-          text: 'Metrics',
-          href: `#/`,
-        },
-      ]);
-    }
+      ]
+    );
   }, [chrome, parentBreadcrumb, dataSourceMDSId]);
 
   useEffect(() => {

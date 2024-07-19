@@ -39,7 +39,7 @@ import { AppAnalyticsComponentDeps } from '../home';
 import { getCustomModal } from '../../custom_panels/helpers/modal_containers';
 import { pageStyles, UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ApplicationType, AvailabilityType } from '../../../../common/types/application_analytics';
-import { coreRefs } from '../../../framework/core_refs';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -53,7 +53,6 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
 
 export function AppTable(props: AppTableProps) {
   const {
-    chrome,
     applications,
     parentBreadcrumbs,
     fetchApplications,
@@ -70,23 +69,15 @@ export function AppTable(props: AppTableProps) {
   const createButtonText = 'Create application';
 
   useEffect(() => {
-    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-    if (isNavGroupEnabled) {
-      chrome.setBreadcrumbs([
+    setNavBreadCrumbs(
+      [...parentBreadcrumbs],
+      [
         {
           text: 'Applications',
           href: '#/',
         },
-      ]);
-    } else {
-      chrome.setBreadcrumbs([
-        ...parentBreadcrumbs,
-        {
-          text: 'Applications',
-          href: '#/',
-        },
-      ]);
-    }
+      ]
+    );
     clear();
     fetchApplications();
   }, []);
