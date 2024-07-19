@@ -1,0 +1,249 @@
+{
+  "name": "golang-client",
+  "version": "1.0.0",
+  "displayName": "golang client",
+  "description": "golang applicative logs",
+  "license": "Apache-2.0",
+  "type": "logs",
+  "labels": [
+    "Observability",
+    "Logs",
+    "golang"
+  ],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/golang_client/info",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "golang Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "golang Client Tutorial Dashboard",
+        "path": "dashboard.png",
+        "labels": ["dashboard","tutorial"],
+        "savedObject-id": "golang-getting-started-tutorial-1.0.0"
+      }
+    ]
+  },
+  "components": [],
+  "assets": [
+    {
+      "name": "tutorial",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    }
+  ],
+  "getting-started": {
+    "ingestion": [
+      "Go-client"
+    ],
+    "structured": "false",
+    "technology": "Go",
+    "protocol": [],
+    "live-sample": "true",
+    "workflows": [
+      {
+        "name": "Quick Start",
+        "description": "This is a golang-client fluent-bit based docker quick starting instructions tutorial with a live example",
+        "steps": [
+          {
+            "name": "Create docker-network",
+            "label": "Environment setting",
+            "phase": "docker",
+            "type": "console-cmd",
+            "content": "docker network create opensearch-net",
+            "description": "Before running any docker-compose files, create the opensearch-net network"
+          },
+          {
+            "name": "Setup docker .env file",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "input-params": [
+              {
+                "name": "OPENSEARCH_HOST",
+                "description": "Opensearch host",
+                "type": "host-name"
+              },
+              {
+                "name": "OPENSEARCH_DASHBOARD_HOST",
+                "description": "Opensearch Dashboard host",
+                "type": "host-name"
+              }
+            ],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/.env",
+            "description": "Setup docker-compose env variables "
+          },
+          {
+            "name": "Setup fluent-bit folder",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/fluent-bit/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/fluent-bit/parsers.conf"
+            ],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/golang_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/golang_client/getting-started/fluent-bit/parsers.conf\n",
+            "description": "Setup docker-compose fluent-bit's service configuration "
+          },
+          {
+            "name": "Setup golang app folder",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/Dockerfile",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/go.mod",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/main.go"
+            ],
+            "content": "wget https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/Dockerfile \\\n https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/go.mod \\\n https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/golang-app/main.go \n",
+            "description": "Setup docker-compose golan-app service configuration "
+          },
+          {
+            "name": "Run docker-compose",
+            "label": "live container",
+            "type": "file-url",
+            "phase": "docker",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/docker-compose.yml"],
+            "description": "Run docker-compose for the gloang-client live example and see the generated index",
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/golang_client/getting-started/docker-compose.yml && docker-compose up --build \n"
+          }
+        ]
+      },
+      {
+        "name": "Go-client Setup",
+        "description": "This is a Go-based getting started instructions tutorial",
+        "steps": [
+          {
+            "name": "Initialize Go Project",
+            "type": "code",
+            "phase": "setup",
+            "label": "Project Initialization",
+            "description": "Initialize a new Go project using go mod init.",
+            "content": "go mod init <mymodulename>"
+          },
+          {
+            "name": "Add OpenSearch Go Client",
+            "type": "code",
+            "phase": "setup",
+            "label": "Client Installation",
+            "description": "Add the OpenSearch Go client to your project using go get.",
+            "content": "go get github.com/opensearch-project/opensearch-go"
+          },
+          {
+            "name": "Create Connection to OpenSearch",
+            "type": "code",
+            "phase": "setup",
+            "label": "Connection Establishment",
+            "description": "Establish a connection to your OpenSearch cluster.",
+            "input-params": [
+              {
+                "name": "opensearch_host",
+                "description": "Hostname or IP address of your OpenSearch server",
+                "type": "host-name",
+                "default": "localhost"
+              },
+              {
+                "name": "opensearch_port",
+                "description": "Port of your OpenSearch server (default is 9200)",
+                "type": "port",
+                "default": 9200
+              }
+            ],
+            "content": "client, err := opensearch.NewClient(opensearch.Config{\n    Transport: &http.Transport{\n        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},\n    },\n    Addresses: []string{\"https://localhost:9200\"},\n    Username:  \"admin\",\n    Password:  \"admin\",\n})"
+          },
+          {
+            "name": "Indexing Logs",
+            "type": "code",
+            "phase": "logging",
+            "label": "Log Indexing",
+            "description": "Start indexing logs into OpenSearch.",
+            "input-params": [
+              {
+                "name": "index_name",
+                "description": "Desired index name in OpenSearch",
+                "type": "index-name"
+              },
+              {
+                "name": "timestamp",
+                "description": "Timestamp of the log entry",
+                "type": "timestamp"
+              },
+              {
+                "name": "level",
+                "description": "Log level (e.g., info, error)",
+                "type": "log-level"
+              },
+              {
+                "name": "message",
+                "description": "Log message",
+                "type": "log-message"
+              },
+              {
+                "name": "source",
+                "description": "Source of the log entry",
+                "type": "source"
+              },
+              {
+                "name": "module",
+                "description": "Module of the log entry",
+                "type": "module"
+              },
+              {
+                "name": "function",
+                "description": "Function of the log entry",
+                "type": "function"
+              },
+              {
+                "name": "user_id",
+                "description": "User ID associated with the log entry",
+                "type": "user-id"
+              }
+            ],
+            "content": "logEntry := LogEntry{\n    Timestamp: \"2024-02-05T12:05:00\",\n    Level:     \"info\",\n    Message:   \"Processing user request.\",\n    Source:    \"your_golang_project\",\n    Module:    \"request_handler\",\n    Function:  \"process_request\",\n    UserID:    \"user_123\",\n}\n\nerr = LogToOpenSearch(client, logEntry)"
+          }
+        ]
+      }
+    ]
+  },
+  "schema": [
+    {
+      "type": "logs",
+      "info": [
+        "https://opensearch.org/docs/latest/im-plugin/index-templates"
+      ],
+      "content": "PUT _index_template/application_logs_template",
+      "description": "Setup applicative logs index template in the dev console",
+      "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/schemas/applicative-logs-1.0.0.mapping.json",
+      "index-pattern-name": "applicative_logs-*"
+    }
+  ],
+  "index-patterns": {
+    "type": [
+      "logs"
+    ],
+    "info": [
+      "https://opensearch.org/docs/latest/dashboards/management/index-patterns/"
+    ],
+    "description": "Import index patterns `.ndjson` file to the saved objects",
+    "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/assets/tutorial-1.0.0.ndjson",
+    "index-patterns-name": [
+      "applicative_logs-*"
+    ]
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}
