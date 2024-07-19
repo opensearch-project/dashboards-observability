@@ -104,8 +104,8 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "docker-compose",
-        "description": "This is a docker-composed based getting started live example ",
+        "name": "QuickStart",
+        "description": "This is a docker-composed based getting started with a predefined openTelemetry Demo sample application ",
         "types": ["logs","traces","metrics"],
         "info": "https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/otel-services/info/GettingStarted.md",
         "steps": [
@@ -148,10 +148,27 @@
             "description": "Setup docker-compose env variables "
           },
           {
+            "name": "Run docker-compose",
+            "label": "live container",
+            "type": "console-cmd",
+            "phase": "docker",
+            "info": ["https://github.com/opensearch-project/opentelemetry-demo/blob/main/docker-compose.yml"],
+            "description": "Run docker-compose for the otel live example and see the generated indices",
+            "content": "docker-compose up -d --scale opensearch-node1=0 --scale opensearch-node2=0 --scale  opensearch-dashboards=0"
+          }
+        ]
+      },
+      {
+        "name": "Connect To a Collector",
+        "description": "This is a workflow for connecting into an existing Otel Collector",
+        "types": ["logs","traces","metrics"],
+        "info": "https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/otel-services/info/GettingStarted.md",
+        "steps": [
+          {
             "name": "Configure Data-Prepper Logs exporter",
             "label": "Logs Exporter",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "pipeline",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml"],
             "description": "Configure Data-prepper logs pipeline and export into opensearch index ",
             "content": "otel-logs-pipeline:\n  workers: 5\n  delay: 10\n  source:\n    otel_logs_source:\n      ssl: false\n  buffer:\n    bounded_blocking:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: otel-events-%{yyyy.MM.dd}\n        bulk_size: 4\n"
@@ -160,7 +177,7 @@
             "name": "Configure Data-Prepper Traces exporter",
             "label": "Traces Exporter",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "pipeline",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml"],
             "description": "Configure Data-prepper Traces pipeline and export into opensearch index ",
             "content": "entry-pipeline:\n  delay: \"100\"\n  source:\n    otel_trace_source:\n      ssl: false\n  sink:\n    - pipeline:\n        name: \"raw-pipeline\"\n    - pipeline:\n        name: \"service-map-pipeline\"\nraw-pipeline:\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - otel_trace_raw:\n  sink:\n    - opensearch:\n        hosts: [ \"https://opensearch-node1:9200\" ]\n        insecure: true        \n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        index_type: trace-analytics-raw"
@@ -169,7 +186,7 @@
             "name": "Configure Data-Prepper Metrics exporter",
             "label": "Metrics Exporter",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "pipeline",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml"],
             "description": "Configure Data-prepper Metrics pipeline and export into opensearch index ",
             "content": "otel-metrics-pipeline:\n  workers: 8\n  delay: 3000\n  source:\n    otel_metrics_source:\n      health_check_service: true\n      ssl: false\n  buffer:\n    bounded_blocking:\n      buffer_size: 1024 # max number of records the buffer accepts\n      batch_size: 1024 # max number of records the buffer drains after each read\n  processor:\n    - otel_metrics:\n        calculate_histogram_buckets: true\n        calculate_exponential_histogram_buckets: true\n        exponential_histogram_max_allowed_scale: 10\n        flatten_attributes: false\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: ss4o_metrics-otel-%{yyyy.MM.dd}\n        bulk_size: 4\n        template_type: index-template"
@@ -178,7 +195,7 @@
             "name": "Configure Data-Prepper Services exporter",
             "label": "Services Exporter",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "pipeline",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml"],
             "description": "Configure Data-prepper Services Processor to build the service network map pipeline and export into opensearch index ",
             "content": "service-map-pipeline:\n  delay: \"100\"\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - service_map_stateful:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        insecure: true\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        index_type: trace-analytics-service-map"
@@ -187,7 +204,7 @@
             "name": "Configure Data-Prepper inside Otel Collector",
             "label": "OTEL Collector Logs services",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "Collector",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/otelcollector/otelcol-config.yml"],
             "description": "Configure Data-prepper Pipelines within the Otel Processor logs pipeline ",
             "content": "  otlp/logs:\n    endpoint: \"data-prepper:21892\"\n    tls:\n      insecure: true\n      insecure_skip_verify: true \n  service:\n  pipelines:\n    logs:\n      receivers: [otlp]\n      processors: [batch]\n      exporters: [otlp/logs, debug]"
@@ -196,7 +213,7 @@
             "name": "Configure Data-Prepper inside Otel Collector",
             "label": "OTEL Collector Traces services",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "Collector",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/otelcollector/otelcol-config.yml"],
             "description": "Configure Data-prepper Pipelines within the Otel Processor Traces pipeline ",
             "content": "  otlp/traces:\n    endpoint: \"data-prepper:21890\"\n    tls:\n      insecure: true\n      insecure_skip_verify: true \n  service:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [batch]\n      exporters: [otlp, debug, spanmetrics, otlp/traces]"
@@ -205,19 +222,10 @@
             "name": "Configure Data-Prepper inside Otel Collector",
             "label": "OTEL Collector Metrics services",
             "type": "console-cmd",
-            "phase": "docker",
+            "phase": "Collector",
             "info": ["https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/otelcollector/otelcol-config.yml"],
             "description": "Configure Data-prepper Pipelines within the Otel Processor Metrics pipeline ",
             "content": "  otlp/metrics:\n    endpoint: \"data-prepper:21891\"\n    tls:\n      insecure: true\n      insecure_skip_verify: true \n  service:\n  pipelines:\n    metrics:\n      receivers: [otlp, spanmetrics]\n      processors: [filter/ottl, transform, batch]\n      exporters: [otlphttp/prometheus, otlp/metrics, debug]"
-          },
-          {
-            "name": "Run docker-compose",
-            "label": "live container",
-            "type": "console-cmd",
-            "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opentelemetry-demo/blob/main/docker-compose.yml"],
-            "description": "Run docker-compose for the otel live example and see the generated indices",
-            "content": "docker-compose up -d --scale opensearch-node1=0 --scale opensearch-node2=0 --scale  opensearch-dashboards=0"
           }
         ]
       }
@@ -264,8 +272,8 @@
       "type": ["logs","services","traces","metrics"],
       "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/otel-services/assets/otel-index-patterns-1.0.0.ndjson",
-      "index-patterns": ["otel-v1-apm-span*","ss4o_metrics*","otel-events-*","otel-v1-apm-service-map"]
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/otel-services/assets/otel-index-patterns-1.0.0.ndjson",
+      "index-patterns-name": ["otel-v1-apm-span*","ss4o_metrics*","otel-events-*","otel-v1-apm-service-map"]
 
     }
   },

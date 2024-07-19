@@ -51,7 +51,7 @@ const HomeContent = () => (
             layout="vertical"
             title="uncover insights with raw data exploration"
             description={'with discover'}
-            onClick={() => changeUrl('management/')}
+            onClick={() => changeUrl('data-explorer/discover#/')}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -75,15 +75,15 @@ const HomeContent = () => (
             layout="vertical"
             title="proactively identify risks with customizable alert triggers"
             description={'with alerts'}
-            onClick={() => changeUrl('alerts#/')}
+            onClick={() => changeUrl('alerting#/')}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
             layout="vertical"
-            title="See more ways to get started"
-            description={''}
-            onClick={() => changeUrl('learn-more#/')}
+            title="...to be added...."
+            description={'with anomly detection'}
+            onClick={() => changeUrl('anomaly-detection-dashboards#')}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
