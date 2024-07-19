@@ -248,7 +248,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         async () => {
           this.setState({ isModalVisible: false });
           await this.props.http
-            .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
+            .delete(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
               query: {
                 noteId: this.props.openedNoteId,
               },
