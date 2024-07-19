@@ -28,7 +28,6 @@ import { useDispatch } from 'react-redux';
 import { last } from 'lodash';
 import { VisualizationType } from 'common/types/custom_panels';
 import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
-import { DashboardContent } from '../../../components/trace_analytics/components/dashboard/dashboard_content';
 import { ServicesContent } from '../../trace_analytics/components/services/services_content';
 import {
   filtersToDsl,
@@ -43,7 +42,6 @@ import {
   TAB_LOG_ID,
   TAB_LOG_TITLE,
   TAB_OVERVIEW_ID,
-  TAB_OVERVIEW_TITLE,
   TAB_PANEL_ID,
   TAB_PANEL_TITLE,
   TAB_SERVICE_ID,
@@ -66,7 +64,7 @@ import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
-import { observabilityApplicationsID } from '../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -111,7 +109,6 @@ export function Application(props: AppDetailProps) {
     updateApp,
     setAppConfigs,
     setToasts,
-    toasts,
     setFilters,
     callback,
     queryManager,
@@ -218,17 +215,20 @@ export function Application(props: AppDetailProps) {
   }, [appId]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Applications',
-        href: '#/',
-      },
-      {
-        text: application.name,
-        href: `#/${appId}`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [...parentBreadcrumbs],
+      [
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+        {
+          text: application.name,
+          href: `#/${appId}`,
+        },
+      ]
+    );
+
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
     setEndTimeForApp(sessionStorage.getItem(`${application.name}EndTime`) || 'now');
   }, [appId, application.name]);
