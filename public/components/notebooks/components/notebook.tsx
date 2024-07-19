@@ -42,6 +42,7 @@ import {
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
 import { Paragraphs } from './paragraph_components/paragraphs';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 const panelStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
@@ -617,17 +618,19 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   setBreadcrumbs(path: string) {
-    this.props.setBreadcrumbs([
-      this.props.parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/',
-      },
-      {
-        text: path,
-        href: `#/${this.props.openedNoteId}`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [this.props.parentBreadcrumb],
+      [
+        {
+          text: 'Notebooks',
+          href: '#/',
+        },
+        {
+          text: path,
+          href: `#/${this.props.openedNoteId}`,
+        },
+      ]
+    );
   }
 
   checkIfReportingPluginIsInstalled() {

@@ -20,6 +20,7 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
+import { coreRefs } from '../../../../framework/core_refs';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -60,7 +61,8 @@ export function ServicesContent(props: ServicesProps) {
   const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
+    chrome.setBreadcrumbs([...(isNavGroupEnabled ? [] : [parentBreadcrumb]), ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
     setFilters([
