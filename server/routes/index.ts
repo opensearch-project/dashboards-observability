@@ -37,7 +37,7 @@ export function setupRoutes({
   PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
-  registerDslRoute({ router, facet: new DSLFacet(client) });
+  registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
   registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
   registerAppAnalyticsRouter(router);
 
