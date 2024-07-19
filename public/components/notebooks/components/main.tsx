@@ -239,7 +239,7 @@ export class Main extends React.Component<MainProps, MainState> {
       })
     );
 
-    Promise.all(promises)
+    Promise.allSettled(promises)
       .then(() => {
         const message =
           toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
