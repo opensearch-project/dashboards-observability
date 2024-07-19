@@ -4,13 +4,13 @@
  */
 
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
-import { optionsType } from '../../../common/types/notebooks';
+import { OptionsType } from '../../../common/types/notebooks';
 
 export interface NotebookAdaptor {
   backend: string;
 
   // Gets all the notebooks available
-  viewNotes: (client: ILegacyScopedClusterClient, wreckOptions: optionsType) => Promise<any[]>;
+  viewNotes: (client: ILegacyScopedClusterClient, wreckOptions: OptionsType) => Promise<any[]>;
 
   /* Fetches a notebook by id
    * Param: noteId -> Id of notebook to be fetched
@@ -18,7 +18,7 @@ export interface NotebookAdaptor {
   fetchNote: (
     client: ILegacyScopedClusterClient,
     noteId: string,
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Adds a notebook to storage
@@ -27,7 +27,7 @@ export interface NotebookAdaptor {
   addNote: (
     client: ILegacyScopedClusterClient,
     params: { name: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Renames a notebook
@@ -37,7 +37,7 @@ export interface NotebookAdaptor {
   renameNote: (
     client: ILegacyScopedClusterClient,
     params: { name: string; noteId: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Clone a notebook
@@ -47,7 +47,7 @@ export interface NotebookAdaptor {
   cloneNote: (
     client: ILegacyScopedClusterClient,
     params: { name: string; noteId: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Delete a notebook
@@ -56,7 +56,7 @@ export interface NotebookAdaptor {
   deleteNote: (
     client: ILegacyScopedClusterClient,
     noteId: string,
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Export a notebook
@@ -65,7 +65,7 @@ export interface NotebookAdaptor {
   exportNote: (
     client: ILegacyScopedClusterClient,
     noteId: string,
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* Import a notebook
@@ -74,7 +74,7 @@ export interface NotebookAdaptor {
   importNote: (
     client: ILegacyScopedClusterClient,
     noteObj: any,
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* --> Updates a Paragraph with input content
@@ -87,7 +87,7 @@ export interface NotebookAdaptor {
   updateRunFetchParagraph: (
     client: ILegacyScopedClusterClient,
     request: any,
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* --> Updates a Paragraph with input content
@@ -99,7 +99,7 @@ export interface NotebookAdaptor {
   updateFetchParagraph: (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphId: string; paragraphInput: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* --> Adds a Paragraph with input content
@@ -110,7 +110,7 @@ export interface NotebookAdaptor {
   addFetchNewParagraph: (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphIndex: number; paragraphInput: string; inputType: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<any>;
 
   /* --> Deletes a Paragraph with id
@@ -121,7 +121,7 @@ export interface NotebookAdaptor {
   deleteFetchParagraphs: (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphId: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<{ paragraphs: any }>;
 
   /* --> Clears output for all the paragraphs
@@ -131,6 +131,6 @@ export interface NotebookAdaptor {
   clearAllFetchParagraphs: (
     client: ILegacyScopedClusterClient,
     params: { noteId: string },
-    wreckOptions: optionsType
+    wreckOptions: OptionsType
   ) => Promise<{ paragraphs: any }>;
 }

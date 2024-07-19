@@ -54,6 +54,8 @@ interface MainState {
   openedNotebook: NotebookType | undefined;
   toasts: Toast[];
   loading: boolean;
+  defaultMDSId: string;
+  defaultMDSLabel: string;
 }
 
 export interface NotebookType {
@@ -71,6 +73,8 @@ export class Main extends React.Component<MainProps, MainState> {
       openedNotebook: undefined,
       toasts: [],
       loading: false,
+      defaultMDSId: '',
+      defaultMDSLabel: '',
     };
   }
 

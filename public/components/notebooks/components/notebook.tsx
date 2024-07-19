@@ -44,6 +44,11 @@ import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_lo
 import { defaultParagraphParser } from './helpers/default_parser';
 import { DeleteNotebookModal, getCustomModal, getDeleteModal } from './helpers/modal_containers';
 import { isValidUUID } from './helpers/notebooks_parser';
+import {
+  contextMenuCreateReportDefinition,
+  contextMenuViewReports,
+  generateInContextReport,
+} from './helpers/reporting_context_menu_helper';
 import { Paragraphs } from './paragraph_components/paragraphs';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 const panelStyles: CSS.Properties = {
@@ -107,7 +112,8 @@ interface NotebookState {
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
   savedObjectNotebook: boolean;
-  dataSourceMDSId: string | undefined;
+  dataSourceMDSId: string | undefined | null;
+  dataSourceMDSLabel: string | undefined | null;
 }
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
@@ -131,7 +137,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
       savedObjectNotebook: true,
-      dataSourceMDSId: '',
+      dataSourceMDSId: null,
+      dataSourceMDSLabel: null,
     };
   }
 
@@ -524,6 +531,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
       paragraphType: paraType || '',
+      dataSourceMDSId: this.state.dataSourceMDSId,
+      dataSourceMDSLabel: this.state.dataSourceMDSLabel,
     };
     const isValid = isValidUUID(this.props.openedNoteId);
     const route = isValid
@@ -535,7 +544,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       })
       .then(async (res) => {
         if (res.output[0]?.outputType === 'QUERY') {
-          await this.loadQueryResultsFromInput(res);
+          await this.loadQueryResultsFromInput(res, this.state.dataSourceMDSId);
           const checkErrorJSON = JSON.parse(res.output[0].result);
           if (this.checkQueryOutputError(checkErrorJSON)) {
             return;
@@ -632,7 +641,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
           if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
-            await this.loadQueryResultsFromInput(res.paragraphs[index]);
+            await this.loadQueryResultsFromInput(
+              res.paragraphs[index],
+              res.paragraphs[index].dataSourceMDSId
+            );
           }
         }
         this.setState(res, this.parseAllParagraphs);
@@ -646,15 +658,15 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       });
   };
 
-  handleSelectedDataSourceChange = (id: string | undefined) => {
-    this.setState({ dataSourceMDSId: id });
+  handleSelectedDataSourceChange = (id: string | undefined, label: string | undefined) => {
+    this.setState({ dataSourceMDSId: id, dataSourceMDSLabel: label });
   };
 
-  loadQueryResultsFromInput = async (paragraph: any) => {
+  loadQueryResultsFromInput = async (paragraph: any, dataSourceMDSId?: any) => {
     const queryType =
       paragraph.input.inputText.substring(0, 4) === '%sql' ? 'sqlquery' : 'pplquery';
     const query = {
-      dataSourceMDSId: this.state.dataSourceMDSId,
+      dataSourceMDSId,
     };
     await this.props.http
       .post(`/api/sql/${queryType}`, {
@@ -909,6 +921,73 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       },
     ];
 
+    const reportingActionPanels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: 'Reporting',
+        items: [
+          {
+            name: 'Download PDF',
+            icon: <EuiIcon type="download" data-test-subj="download-notebook-pdf" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              generateInContextReport('pdf', this.props, this.toggleReportingLoadingModal);
+            },
+          },
+          {
+            name: 'Download PNG',
+            icon: <EuiIcon type="download" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              generateInContextReport('png', this.props, this.toggleReportingLoadingModal);
+            },
+          },
+          {
+            name: 'Create report definition',
+            icon: <EuiIcon type="calendar" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              contextMenuCreateReportDefinition(window.location.href);
+            },
+          },
+          {
+            name: 'View reports',
+            icon: <EuiIcon type="document" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              contextMenuViewReports();
+            },
+          },
+        ],
+      },
+    ];
+
+    const showReportingContextMenu = this.state.isReportingPluginInstalled ? (
+      <div>
+        <EuiPopover
+          panelPaddingSize="none"
+          button={
+            <EuiButton
+              id="reportingActionsButton"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() =>
+                this.setState({
+                  isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
+                })
+              }
+            >
+              Reporting actions
+            </EuiButton>
+          }
+          isOpen={this.state.isReportingActionsPopoverOpen}
+          closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
+        >
+          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} />
+        </EuiPopover>
+      </div>
+    ) : null;
+
     const showLoadingModal = this.state.isReportingLoadingModalOpen ? (
       <GenerateReportLoadingModal setShowLoading={this.toggleReportingLoadingModal} />
     ) : null;
@@ -934,6 +1013,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               )}
               <EuiFlexItem grow={false} />
               <EuiFlexItem grow={false} />
+              <EuiFlexItem grow={false}>{showReportingContextMenu}</EuiFlexItem>
               {this.state.savedObjectNotebook && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
@@ -990,7 +1070,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       data-test-subj="migrate-notebook"
                       onClick={() => this.showMigrateModal()}
                     >
-                      Migrate this notebook
+                      Upgrade Notebook
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -1010,7 +1090,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             </EuiTitle>
             {!this.state.savedObjectNotebook && (
               <EuiCallOut color="primary" iconType='iInCircle"'>
-                Migrate this notebook to take full advantage of the latest features
+                Upgrade this notebook to take full advantage of the latest features
               </EuiCallOut>
             )}
             <EuiSpacer size="m" />
@@ -1058,6 +1138,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       dataSourceEnabled={this.props.dataSourceEnabled}
                       savedObjectsMDSClient={this.props.savedObjectsMDSClient}
                       handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
+                      paradataSourceMDSId={this.state.parsedPara[index].dataSourceMDSId}
+                      dataSourceMDSLabel={this.state.parsedPara[index].dataSourceMDSLabel}
                     />
                   </div>
                 ))}

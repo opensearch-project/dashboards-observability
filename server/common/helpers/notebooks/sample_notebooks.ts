@@ -287,7 +287,7 @@ Let's take a look at the source data by the selected fields (search and fields).
   response, bytes | head 20
 
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.008 ms',
           },
         ],
@@ -326,7 +326,7 @@ Check for any error log with response code 404 or 503 (filter).`,
             result: `
   source=opensearch_dashboards_sample_data_logs | fields host, clientip, response, bytes | where response='503' or response='404' | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.007 ms',
           },
         ],
@@ -364,7 +364,7 @@ We see too many events. Let's quickly check which host has the issue (dedup).`,
   source=opensearch_dashboards_sample_data_logs | fields host, clientip, response,
    bytes | where response='503' or response='404' | dedup host | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.010 ms',
           },
         ],
@@ -404,7 +404,7 @@ We get too few events. Let's dedup in consecutive mode (dedup).`,
    bytes | where response='503' or response='404' |
     dedup host consecutive=true | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.007 ms',
           },
         ],
@@ -445,7 +445,7 @@ How many IP addresses for each response (stats).`,
    bytes | where response='503' or response='404' | 
    stats count() as ip_count by response | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.008 ms',
           },
         ],
@@ -487,7 +487,7 @@ To dive deep, let's group by host and response, count, and sum (stats).`,
    stats count() as ip_count, sum(bytes) 
    as sum_bytes by host, response | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.007 ms',
           },
         ],
@@ -532,7 +532,7 @@ We don't see a meaningful response. Let's change to resp_code (rename).`,
      rename response as resp_code | head 20
 
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.009 ms',
           },
         ],
@@ -580,7 +580,7 @@ The data looks better now. Let's sort by \`DESC count\` and \`ASC sum_bytes\` (s
    rename response as resp_code | 
    sort - ip_count, + sum_bytes | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -628,7 +628,7 @@ Let's check if we can perform aggregations after stats (eval).`,
     sort - ip_count, + sum_bytes | 
     eval per_ip_bytes=sum_bytes/ip_count  | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -678,7 +678,7 @@ Wait, what's meant by an evaluation. Can we really perform an evaluation?`,
    eval per_ip_bytes=sum_bytes/ip_count, 
     double_per_ip_bytes = 2 * per_ip_bytes | head 20
 `,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.010 ms',
           },
         ],
@@ -772,7 +772,7 @@ To use SQL, add a code paragraph, type %sql on the first line, and then add SQL 
         output: [
           {
             result: 'Select * from opensearch_dashboards_sample_data_flights limit 20;',
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.007 ms',
           },
         ],
@@ -807,7 +807,7 @@ You can specify fields in the \`SELECT\` clause and use the \`WHERE\` clause to 
         output: [
           {
             result: `SELECT FlightNum,OriginCountry,OriginCityName,DestCountry,DestCityName,DistanceMiles FROM opensearch_dashboards_sample_data_flights WHERE DistanceMiles > 5000 AND DestCountry LIKE 'A%' LIMIT 20;`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -841,7 +841,7 @@ OpenSearch SQL also supports subqueries:`,
         output: [
           {
             result: `SELECT opensearch_dashboards_sample_data_flights.FlightNum,opensearch_dashboards_sample_data_flights.OriginCountry,opensearch_dashboards_sample_data_flights.OriginCityName,opensearch_dashboards_sample_data_flights.DestCountry,opensearch_dashboards_sample_data_flights.DestCityName,opensearch_dashboards_sample_data_flights.DistanceMiles FROM opensearch_dashboards_sample_data_flights WHERE FlightNum IN (SELECT FlightNum FROM opensearch_dashboards_sample_data_flights WHERE DistanceMiles > 5000 AND DestCountry = 'AU') LIMIT 20;`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.009 ms',
           },
         ],
@@ -877,7 +877,7 @@ OpenSearch SQL supports inner joins, cross joins, and left outer joins. The foll
           {
             result: `
 SELECT a.FlightNum,a.OriginCountry,a.OriginCityName,a.DestCountry,a.DestCityName,a.DistanceMiles FROM opensearch_dashboards_sample_data_flights a JOIN opensearch_dashboards_sample_data_flights b on a.OriginCountry = b.DestCountry LIMIT 20`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -912,7 +912,7 @@ For aggregations, use the \`GROUP BY\` clause. The following query finds the cou
         output: [
           {
             result: `SELECT OriginCountry,COUNT(1) FROM opensearch_dashboards_sample_data_flights GROUP BY OriginCountry HAVING COUNT(1) > 500 LIMIT 20;`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -946,7 +946,7 @@ OpenSearch SQL supports expressions.`,
         output: [
           {
             result: `SELECT abs(-1.234), abs(-1 * abs(-5)), dayofmonth(DATE '2021-07-07');`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.005 ms',
           },
         ],
@@ -1066,7 +1066,7 @@ To use PPL, add a code paragraph, type \`%ppl\` on the first line, and add your 
           {
             result: `
 source=opensearch_dashboards_sample_data_logs | head 20`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.026 ms',
           },
         ],
@@ -1102,7 +1102,7 @@ To specify fields to include and filter results, use the \`field\` and \`where\`
           {
             result: `
 source=opensearch_dashboards_sample_data_logs | fields host, clientip, response, bytes | where response='503' or response='404'`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.006 ms',
           },
         ],
@@ -1137,7 +1137,7 @@ To see most common hosts from the previous result, use the \`top\` command.`,
           {
             result: `
 source=opensearch_dashboards_sample_data_logs | where response='503' or response='404' | top host`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.008 ms',
           },
         ],
@@ -1172,7 +1172,7 @@ To perform aggregations on search results, use the \`stats\` command.`,
           {
             result: `
 source=opensearch_dashboards_sample_data_logs | where response='503' or response='404' | stats count(1) by host`,
-            outputType: 'QUERY',
+            // outputType: 'QUERY',
             execution_time: '0.011 ms',
           },
         ],

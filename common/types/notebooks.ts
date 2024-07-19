@@ -4,8 +4,6 @@
  */
 
 import { RefObject } from 'react';
-import { DashboardStart } from "../../../../src/plugins/dashboard/public";
-import { NavigationPublicPluginStart } from "../../../../src/plugins/navigation/public";
 
 export interface NotebooksPluginSetup {
   getGreeting: () => string;
@@ -13,7 +11,7 @@ export interface NotebooksPluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NotebooksPluginStart {}
 
-export interface optionsType {
+export interface OptionsType {
   baseUrl: string;
   payload?: any;
   headers?: any;
@@ -27,7 +25,7 @@ export interface optionsType {
   ciphers?: string; // The TLS ciphers to support
 }
 
-export type ParaType = {
+export interface ParaType {
   uniqueId: string;
   isRunning: boolean;
   inQueue: boolean;
@@ -41,7 +39,7 @@ export type ParaType = {
   inp: string;
   lang: string;
   editorLanguage: string;
-  typeOut: Array<string>;
+  typeOut: string[];
   out: any[];
   isInputExpanded: boolean;
   isOutputStale: boolean;
@@ -50,4 +48,6 @@ export type ParaType = {
   visStartTime?: string;
   visEndTime?: string;
   visSavedObjId?: string;
-};
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
+}

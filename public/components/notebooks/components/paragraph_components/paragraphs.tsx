@@ -107,7 +107,12 @@ interface ParagraphProps {
   notifications: CoreStart['notifications'];
   dataSourceEnabled: boolean;
   savedObjectsMDSClient: SavedObjectsStart;
-  handleSelectedDataSourceChange: (dataSourceMDSId: string | undefined) => void;
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void;
+  paradataSourceMDSId: string;
+  dataSourceMDSLabel: string;
 }
 
 export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
@@ -124,10 +129,11 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     http,
     dataSourceEnabled,
     dataSourceManagement,
-    setActionMenu,
     notifications,
     savedObjectsMDSClient,
     handleSelectedDataSourceChange,
+    paradataSourceMDSId,
+    dataSourceMDSLabel,
   } = props;
 
   const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([
@@ -539,8 +545,9 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   let DataSourceSelector;
   const onSelectedDataSource = (e) => {
     const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
     setDataSourceMDSId(dataConnectionId);
-    handleSelectedDataSourceChange(dataConnectionId);
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
   };
   if (dataSourceEnabled) {
     DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
@@ -549,7 +556,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     <>
       <EuiPanel>
         {renderParaHeader(!para.isVizualisation ? 'Code block' : 'Visualization', index)}
-        {dataSourceEnabled && (
+        {dataSourceEnabled && !para.isVizualisation && (
           <DataSourceSelector
             savedObjectsClient={savedObjectsMDSClient.client}
             notifications={notifications}
@@ -557,6 +564,11 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             disabled={false}
             fullWidth={false}
             removePrepend={true}
+            defaultOption={
+              paradataSourceMDSId !== undefined && [
+                { id: paradataSourceMDSId, label: dataSourceMDSLabel },
+              ]
+            }
           />
         )}
         <EuiSpacer size="s" />
@@ -587,7 +599,6 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   setSelectedVisOption={setSelectedVisOption}
                   setVisType={setVisType}
                   dataSourceManagement={dataSourceManagement}
-                  setActionMenu={setActionMenu}
                   notifications={notifications}
                   dataSourceEnabled={dataSourceEnabled}
                   savedObjectsMDSClient={savedObjectsMDSClient}

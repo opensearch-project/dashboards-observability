@@ -135,7 +135,14 @@ export async function deleteParagraphs(
 }
 
 export async function updateRunFetchParagraph(
-  params: { noteId: string; paragraphId: string; paragraphInput: string; paragraphType: string },
+  params: {
+    noteId: string;
+    paragraphId: string;
+    paragraphInput: string;
+    paragraphType: string;
+    dataSourceMDSId: string | undefined;
+    dataSourceMDSLabel: string | undefined;
+  },
   opensearchNotebooksClient: SavedObjectsClientContract
 ) {
   try {
@@ -144,7 +151,9 @@ export async function updateRunFetchParagraph(
       notebookinfo.attributes.savedNotebook.paragraphs,
       params.paragraphId,
       params.paragraphInput,
-      params.paragraphType
+      params.paragraphType,
+      params.dataSourceMDSId,
+      params.dataSourceMDSLabel
     );
     const updatedOutputParagraphs = await runParagraph(updatedInputParagraphs, params.paragraphId);
 
@@ -240,13 +249,17 @@ export function updateParagraphs(
   paragraphs: DefaultParagraph[],
   paragraphId: string,
   paragraphInput: string,
-  paragraphType?: string
+  paragraphType?: string,
+  dataSourceMDSId?: string,
+  dataSourceMDSLabel?: string
 ) {
   try {
     const updatedParagraphs: DefaultParagraph[] = [];
     paragraphs.map((paragraph: DefaultParagraph) => {
       const updatedParagraph = { ...paragraph };
       if (paragraph.id === paragraphId) {
+        updatedParagraph.dataSourceMDSId = dataSourceMDSId;
+        updatedParagraph.dataSourceMDSLabel = dataSourceMDSLabel;
         updatedParagraph.dateModified = new Date().toISOString();
         updatedParagraph.input.inputText = paragraphInput;
         if (paragraphType.length > 0) {

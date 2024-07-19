@@ -47,9 +47,6 @@ export function registerParaRoute(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      // const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-      //   request
-      // );
       try {
         const runResponse = await BACKEND.updateRunFetchParagraph(
           context.observability_plugin.observabilityClient,
@@ -387,6 +384,8 @@ export function registerParaRoute(router: IRouter) {
           paragraphId: schema.string(),
           paragraphInput: schema.string(),
           paragraphType: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+          dataSourceMDSLabel: schema.string(),
         }),
       },
     },
