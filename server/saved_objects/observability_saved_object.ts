@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsType } from '../../../../src/core/server';
+import { NOTEBOOKS_API_PREFIX } from '../../common/constants/notebooks';
 import { observabilityLogsID } from '../../common/constants/shared';
 import {
   NOTEBOOK_SAVED_OBJECT,
@@ -93,8 +94,7 @@ export const notebookSavedObject: SavedObjectsType = {
       return obj.attributes.title;
     },
     getInAppUrl(obj) {
-      const editPath = `#/explorer/${NOTEBOOK_SAVED_OBJECT}:${obj.id}`;
-      const editUrl = `/app/${observabilityLogsID}${editPath}`;
+      const editUrl = `/app/${NOTEBOOKS_API_PREFIX}#/${obj.id}?view=view_both`;
       return {
         path: editUrl,
         uiCapabilitiesPath: 'observability.show',

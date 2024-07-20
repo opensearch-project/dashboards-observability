@@ -114,6 +114,7 @@ interface NotebookState {
   savedObjectNotebook: boolean;
   dataSourceMDSId: string | undefined | null;
   dataSourceMDSLabel: string | undefined | null;
+  dataSourceMDSEnabled: boolean;
 }
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
@@ -139,6 +140,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       savedObjectNotebook: true,
       dataSourceMDSId: null,
       dataSourceMDSLabel: null,
+      dataSourceMDSEnabled: false,
     };
   }
 
@@ -531,8 +533,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
       paragraphType: paraType || '',
-      dataSourceMDSId: this.state.dataSourceMDSId,
-      dataSourceMDSLabel: this.state.dataSourceMDSLabel,
+      dataSourceMDSId: this.state.dataSourceMDSId || '',
+      dataSourceMDSLabel: this.state.dataSourceMDSLabel || '',
     };
     const isValid = isValidUUID(this.props.openedNoteId);
     const route = isValid
@@ -629,6 +631,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     const isValid = isValidUUID(this.props.openedNoteId);
     this.setState({
       savedObjectNotebook: isValid,
+      dataSourceMDSEnabled: isValid && this.props.dataSourceEnabled,
     });
     const route = isValid
       ? `${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${this.props.openedNoteId}`
@@ -640,11 +643,32 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
-          if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
+          if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            this.props.dataSourceEnabled &&
+            res.paragraphs[index].dataSourceMDSId
+          ) {
             await this.loadQueryResultsFromInput(
               res.paragraphs[index],
               res.paragraphs[index].dataSourceMDSId
             );
+          } else if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            !this.props.dataSourceEnabled &&
+            res.paragraphs[index].dataSourceMDSId
+          ) {
+            res.paragraphs[index].output[0] = [];
+            this.props.setToast(
+              `Data source ${res.paragraphs[index].dataSourceMDSLabel} is not available. Please configure your dataSources`,
+              'danger'
+            );
+          } else if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            !this.state.savedObjectNotebook
+          ) {
+            await this.loadQueryResultsFromInput(res.paragraphs[index]);
+          } else if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
+            await this.loadQueryResultsFromInput(res.paragraphs[index], '');
           }
         }
         this.setState(res, this.parseAllParagraphs);
@@ -671,7 +695,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     await this.props.http
       .post(`/api/sql/${queryType}`, {
         body: JSON.stringify(paragraph.output[0].result),
-        query,
+        ...(this.props.dataSourceEnabled && { query }),
       })
       .then((response) => {
         paragraph.output[0].result = response.data.resp;
@@ -1135,7 +1159,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       dataSourceManagement={this.props.dataSourceManagement}
                       setActionMenu={this.props.setActionMenu}
                       notifications={this.props.notifications}
-                      dataSourceEnabled={this.props.dataSourceEnabled}
+                      dataSourceEnabled={this.state.dataSourceMDSEnabled}
                       savedObjectsMDSClient={this.props.savedObjectsMDSClient}
                       handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
                       paradataSourceMDSId={this.state.parsedPara[index].dataSourceMDSId}
