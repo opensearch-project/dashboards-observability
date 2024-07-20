@@ -22,7 +22,13 @@ import {
   EuiListGroupItem,
   EuiTitle,
 } from '@elastic/eui';
-import otelJson from './OTEL.json';
+
+// Import JSON files directly
+import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
+import csvFileJson from '../getting_started_artifacts/csv_file/csv_file-1.0.0.json';
+import golangClientJson from '../getting_started_artifacts/golang_client/golang_client-1.0.0.json';
+import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
+// import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -46,13 +52,27 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [selectedTabId, setSelectedTabId] = useState('workflow_tab');
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [selectedWorkflow, setSelectedWorkflow] = useState('');
+  const [firstWorkflow, setFirstWorkflow] = useState<string>('');
+  const [secondWorkflow, setSecondWorkflow] = useState<string>('');
+
+  const technologyJsonMap: Record<string, any> = {
+    OTEL: otelJson,
+    CSV: csvFileJson,
+    Golang: golangClientJson,
+    Python: pythonJson,
+    // Nginx: nginxJson,
+  };
 
   useEffect(() => {
-    if (selectedWorkflow && otelJson && otelJson['getting-started']) {
-      const workflowData = otelJson['getting-started']?.workflows.find(
-        (workflow) => workflow.name === selectedWorkflow
-      );
-      if (specificMethod === 'OTEL') {
+    if (specificMethod) {
+      const json = technologyJsonMap[specificMethod];
+      if (json && json['getting-started']) {
+        const workflows = json['getting-started'].workflows;
+        if (workflows && workflows.length >= 2) {
+          setFirstWorkflow(workflows[0].name);
+          setSecondWorkflow(workflows[1].name);
+        }
+        const workflowData = workflows.find((workflow: any) => workflow.name === selectedWorkflow);
         setGettingStarted(workflowData || null);
         const labels =
           workflowData?.steps?.map((step: any) => ({
@@ -66,35 +86,27 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     } else {
       setGettingStarted(null);
     }
-  }, [selectedWorkflow, specificMethod]);
+  }, [specificMethod, selectedWorkflow]);
 
-  const handleCollectionMethodChange = (value) => {
+  const handleCollectionMethodChange = (value: string) => {
     setCollectionMethod(value);
     setSpecificMethod('');
     setSelectedWorkflow('');
     setGettingStarted(null);
   };
 
-  const handleSpecificMethodChange = (change) => {
-    const selectedMethod = change.target.value;
+  const handleSpecificMethodChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedMethod = event.target.value;
     setSpecificMethod(selectedMethod);
     onSelectSource(selectedMethod);
     setSelectedLabel('');
+    setSelectedWorkflow('');
     setGettingStarted(null);
   };
 
-  const handleWorkflowChange = (workflow) => {
+  const handleWorkflowChange = (workflow: string) => {
     setSelectedWorkflow(workflow);
     setSelectedTabId('workflow_tab');
-    const selectedWorkflowDataOTEL = otelJson['getting-started']?.workflows.find(
-      (wf) => wf.name === workflow
-    );
-    if (specificMethod === 'OTEL') {
-      setGettingStarted(selectedWorkflowDataOTEL || null);
-    } else {
-      setGettingStarted(null);
-    }
-    setSelectedLabel('');
   };
 
   const renderSpecificMethodDropdown = () => {
@@ -104,15 +116,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     if (collectionMethod === 'Configure collectors') {
       options = [
         { value: 'OTEL', text: 'Open Telemetry (structured)' },
-        { value: 'Nginx', text: 'Nginx (structured)' },
         { value: 'vpc-flow', text: 'VPC Flow (structured)' },
+        { value: 'Nginx', text: 'Nginx (structured)' },
         { value: 'Java', text: 'Java (unstructured)' },
         { value: 'Python', text: 'Python (unstructured)' },
-        { value: 'golang', text: 'Golang (unstructured)' },
+        { value: 'Golang', text: 'Golang (unstructured)' },
       ];
     } else if (collectionMethod === 'Upload a file CSV or JSON') {
       options = [
-        { value: 'Fluent Bit', text: 'Fluent Bit' },
+        { value: 'CSV', text: 'Fluent Bit' },
         { value: 'Data Prepper', text: 'Data Prepper' },
       ];
     }
@@ -166,7 +178,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         {workflow.types && <p>Types: {workflow.types.join(', ')}</p>}
       </EuiText>
       <EuiSpacer size="m" />
-      {workflow.steps.map((step, index) => (
+      {workflow.steps.map((step: any, index: number) => (
         <div key={index} id={step.name.replace(/\s/g, '-')}>
           <EuiTitle size="s">
             <h3>{step.name}</h3>
@@ -182,7 +194,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
               <EuiTitle size="xs">
                 <h4>Input Parameters:</h4>
               </EuiTitle>
-              {step['input-params'].map((param, idx) => (
+              {step['input-params'].map((param: any, idx: number) => (
                 <EuiText key={idx}>
                   <strong>{param.name}:</strong> {param.description} ({param.type})
                 </EuiText>
@@ -190,7 +202,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             </div>
           )}
           {step.info &&
-            step.info.map((link, linkIndex) => (
+            step.info.map((link: string, linkIndex: number) => (
               <EuiLink key={linkIndex} href={link} target="_blank">
                 More Info
               </EuiLink>
@@ -307,7 +319,11 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           <EuiTitle size="m">
             <h2>Schema</h2>
           </EuiTitle>
-          {renderSchema(otelJson?.['getting-started']?.schema || [])}
+          {renderSchema(
+            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+              technologyJsonMap[specificMethod]?.schema ||
+              []
+          )}
           <EuiButton
             onClick={() => {
               setSelectedTabId('index_patterns_tab');
@@ -327,13 +343,17 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           <EuiTitle size="m">
             <h2>Index Patterns</h2>
           </EuiTitle>
-          {renderIndex(otelJson?.['getting-started']?.['index-patterns'] || {})}
+          {renderIndex(
+            technologyJsonMap[specificMethod]?.['getting-started']?.['index-patterns'] ||
+              technologyJsonMap[specificMethod]?.['index-patterns'] ||
+              {}
+          )}
         </div>
       ),
     },
   ];
 
-  const onTabClick = (tab) => {
+  const onTabClick = (tab: any) => {
     setSelectedTabId(tab.id);
   };
 
@@ -412,18 +432,18 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
                 <EuiFlexGroup gutterSize="s" style={{ maxWidth: '20rem' }}>
                   <EuiFlexItem>
                     <EuiButton
-                      fill={selectedWorkflow === 'QuickStart'}
-                      onClick={() => handleWorkflowChange('QuickStart')}
+                      fill={selectedWorkflow === firstWorkflow}
+                      onClick={() => handleWorkflowChange(firstWorkflow)}
                     >
                       QuickStart
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiButton
-                      fill={selectedWorkflow === 'Connect To a Collector'}
-                      onClick={() => handleWorkflowChange('Connect To a Collector')}
+                      fill={selectedWorkflow === secondWorkflow}
+                      onClick={() => handleWorkflowChange(secondWorkflow)}
                     >
-                      Configure Existing Collector
+                      Connect To a Collector
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>

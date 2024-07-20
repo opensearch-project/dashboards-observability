@@ -28,23 +28,33 @@
     "gallery": [
       {
         "annotation": "Services Step",
-        "path": "observability-services-step.png"
+        "path": "observability-services-step.png",
+        "tags": ["dashboard","services"],
+        "savedObject-id": "otel-services-dashboard-1_0_0_ID"
       },
       {
         "annotation": "Ingestion Rate Step",
-        "path": "rate-ingestion-step.png"
+        "path": "rate-ingestion-step.png",
+        "tags": ["dashboard","ingestion"],
+        "savedObject-id": "data-ingestion-rate-dashboard-1_0_0_ID"
       },
       {
         "annotation": "Single service monitoring",
-        "path": "single-service-step.png"
+        "path": "single-service-step.png",
+        "tags": ["dashboard","services"],
+        "savedObject-id": "single-service-correlated-dashboard-1_0_0_ID"
       },
       {
         "annotation": "Network Metrics Monitoring",
-        "path": "apm-network-metrics-step.png"
+        "path": "apm-network-metrics-step.png",
+        "tags": ["dashboard","metrics"],
+        "savedObject-id": "apm-network-metrics-dashboard-1_0_0_ID"
       },
       {
         "annotation": "System Metrics Monitoring",
-        "path": "apm-system-metrics-step.png"
+        "path": "apm-system-metrics-step.png",
+        "tags": ["dashboard","metrics"],
+        "savedObject-id": "apm-system-metrics-dashboard-1_0_0_ID"
       }
     ]
   },

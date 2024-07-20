@@ -16,6 +16,7 @@ import {
   EuiCard,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 interface QueryAndAnalyzeProps {
   isOpen: boolean;
@@ -23,12 +24,29 @@ interface QueryAndAnalyzeProps {
   selectedTechnology: string;
 }
 
+const technologyPaths: Record<string, string> = {
+  // CHANGE TO GET THE CREATED TAG
+  OTEL: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
+  CSV: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
+  Golang: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
+  Python: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
+};
+
 export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   isOpen,
   onToggle,
   selectedTechnology,
 }) => {
   const [searchValue, setSearchValue] = useState<string>('');
+
+  const redirectToExplorer = (path: string) => {
+    coreRefs?.application!.navigateToApp('dashboards', {
+      path: `#/${path}`,
+    });
+  };
+
+  // Remove view
+  const currentPath = technologyPaths[selectedTechnology];
 
   return (
     <EuiAccordion
@@ -75,20 +93,20 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
           <EuiFlexItem style={{ maxWidth: '300px' }}>
             <EuiCard
               icon={<div />}
-              title="Create New Dashboard"
-              description="Create a new dashboard to visualize your data"
+              title={selectedTechnology}
+              description={`Explore the ${selectedTechnology} dashboard`}
               onClick={() => {
-                /* Handle card click */
+                redirectToExplorer(currentPath);
               }}
             />
           </EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: '300px' }}>
             <EuiCard
               icon={<div />}
-              title={selectedTechnology}
-              description={`Explore the ${selectedTechnology} dashboard`}
+              title="Create New Dashboard"
+              description="Create a new dashboard to visualize your data"
               onClick={() => {
-                /* Handle card click */
+                redirectToExplorer('dashboards');
               }}
             />
           </EuiFlexItem>
