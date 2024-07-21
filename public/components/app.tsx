@@ -37,6 +37,7 @@ interface ObservabilityAppDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
   savedObjectsMDSClient: CoreStart['savedObjects'];
+  defaultRoute?: string;
 }
 
 // for cypress to test redux store
@@ -71,6 +72,7 @@ export const App = ({
   setActionMenu,
   dataSourceEnabled,
   savedObjectsMDSClient,
+  defaultRoute,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
@@ -106,6 +108,7 @@ export const App = ({
             dataSourceEnabled={dataSourceEnabled}
             setActionMenu={setActionMenu}
             savedObjectsMDSClient={savedObjectsMDSClient}
+            defaultRoute={defaultRoute}
           />
         </MetricsListener>
       </I18nProvider>

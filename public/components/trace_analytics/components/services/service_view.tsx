@@ -50,6 +50,7 @@ import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
 import { ServiceMetrics } from './service_metrics';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -101,21 +102,23 @@ export function ServiceView(props: ServiceViewProps) {
 
   useEffect(() => {
     if (page !== 'serviceFlyout')
-      props.chrome.setBreadcrumbs([
-        props.parentBreadcrumb,
-        {
-          text: 'Trace analytics',
-          href: '#/',
-        },
-        {
-          text: 'Services',
-          href: '#/services',
-        },
-        {
-          text: props.serviceName,
-          href: `#/services/${encodeURIComponent(props.serviceName)}`,
-        },
-      ]);
+      setNavBreadCrumbs(
+        [props.parentBreadcrumb],
+        [
+          {
+            text: 'Trace analytics',
+            href: '#/',
+          },
+          {
+            text: 'Services',
+            href: '#/services',
+          },
+          {
+            text: props.serviceName,
+            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+          },
+        ]
+      );
   }, [props.serviceName]);
 
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
