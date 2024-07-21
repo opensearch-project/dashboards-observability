@@ -4,7 +4,6 @@
  */
 import {
   observabilityApplicationsID,
-  observabilityIntegrationsID,
   observabilityMetricsID,
   observabilityNotebookID,
 } from '../common/constants/shared';
@@ -33,44 +32,22 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
       order: 400,
     },
   ]);
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
     {
       id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
       order: 400,
     },
   ]);
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
     {
       id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
       order: 400,
-    },
-  ]);
-
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-    {
-      id: observabilityIntegrationsID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-      order: 500,
-    },
-  ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
-    {
-      id: observabilityIntegrationsID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-      order: 500,
-    },
-  ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
-    {
-      id: observabilityIntegrationsID,
-      category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-      order: 500,
     },
   ]);
 
