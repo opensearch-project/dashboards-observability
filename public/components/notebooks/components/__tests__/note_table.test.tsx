@@ -70,7 +70,6 @@ describe('<NoteTable /> spec', () => {
     fireEvent.click(utils.getByText('Cancel'));
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
     fireEvent.click(utils.getByText('Actions'));
-    fireEvent.click(utils.getByText('Rename'));
   });
 
   it('create notebook modal', async () => {
@@ -121,70 +120,6 @@ describe('<NoteTable /> spec', () => {
     });
     fireEvent.click(getAllByText('Create')[0]);
     expect(props.createNotebook).toHaveBeenCalledTimes(1);
-  });
-
-  it('renames a notebook', () => {
-    const notebooks = [
-      {
-        path: 'path-1',
-        id: 'id-1',
-        dateCreated: 'date-created',
-        dateModified: 'date-modified',
-      },
-    ];
-    const { getByText, getByLabelText, getAllByText, getByTestId } = renderNoteTable({ notebooks });
-
-    // Select a notebook
-    fireEvent.click(getByLabelText('Select this row'));
-
-    // Open Actions dropdown and click Rename
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getByText('Rename'));
-
-    // Ensure the modal is open (you may need to adjust based on your modal implementation)
-    expect(getAllByText('Rename notebook')).toHaveLength(1);
-
-    // Mock user input and submit
-    fireEvent.input(getByTestId('custom-input-modal-input'), {
-      target: { value: 'test-notebook-newname' },
-    });
-    fireEvent.click(getByTestId('custom-input-modal-confirm-button'));
-
-    // Assert that the renameNotebook function is called
-    expect(props.renameNotebook).toHaveBeenCalledTimes(1);
-    expect(props.renameNotebook).toHaveBeenCalledWith('test-notebook-newname', 'id-1');
-  });
-
-  it('clones a notebook', () => {
-    const notebooks = [
-      {
-        path: 'path-1',
-        id: 'id-1',
-        dateCreated: 'date-created',
-        dateModified: 'date-modified',
-      },
-    ];
-    const { getByText, getByLabelText, getAllByText, getByTestId } = renderNoteTable({ notebooks });
-
-    // Select a notebook
-    fireEvent.click(getByLabelText('Select this row'));
-
-    // Open Actions dropdown and click Duplicate
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getByText('Duplicate'));
-
-    // Ensure the modal is open (you may need to adjust based on your modal implementation)
-    expect(getAllByText('Duplicate notebook')).toHaveLength(1);
-
-    // Mock user input and submit
-    fireEvent.input(getByTestId('custom-input-modal-input'), {
-      target: { value: 'new-copy' },
-    });
-    fireEvent.click(getByTestId('custom-input-modal-confirm-button'));
-
-    // Assert that the cloneNotebook function is called
-    expect(props.cloneNotebook).toHaveBeenCalledTimes(1);
-    expect(props.cloneNotebook).toHaveBeenCalledWith('new-copy', 'id-1');
   });
 
   it('deletes a notebook', () => {
@@ -244,14 +179,14 @@ describe('<NoteTable /> spec', () => {
     fireEvent.click(getByText('Actions'));
 
     // Ensure the action panel is open
-    expect(queryByTestId('renameNotebookBtn')).toBeInTheDocument();
+    expect(queryByTestId('deleteNotebookBtn')).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(getByText('Actions'));
     });
 
     // Ensure the action panel is closed
-    expect(queryByTestId('renameNotebookBtn')).not.toBeInTheDocument();
+    expect(queryByTestId('deleteNotebookBtn')).not.toBeInTheDocument();
   });
 
   it('closes the delete modal', () => {
