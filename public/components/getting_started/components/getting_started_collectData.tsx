@@ -23,12 +23,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-// Import JSON files directly
 import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
 import csvFileJson from '../getting_started_artifacts/csv_file/csv_file-1.0.0.json';
 import golangClientJson from '../getting_started_artifacts/golang_client/golang_client-1.0.0.json';
 import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
 // import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
+
+import { IntegrationCards } from './getting_started_integrationCards';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -420,7 +421,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         <EuiSpacer size="m" />
         {collectionMethod === 'Use a sample dataset' ? (
           <>
-            <EuiText>Add all integration cards here.</EuiText>
+            <IntegrationCards />
           </>
         ) : (
           <>
