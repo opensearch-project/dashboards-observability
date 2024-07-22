@@ -30,7 +30,7 @@ import pythonJson from '../getting_started_artifacts/python_client/python_client
 import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
-import { uploadAssets } from './utils';
+import { fetchDashboardIds, uploadAssets } from './utils';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -272,7 +272,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         </EuiListGroup>
         <EuiButton
           onClick={async () => {
-            await uploadAssets();
+            await uploadAssets(specificMethod);
           }}
         >
           Create Pattern

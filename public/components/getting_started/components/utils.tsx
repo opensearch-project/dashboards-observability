@@ -6,23 +6,26 @@
 import { coreRefs } from '../../../framework/core_refs';
 import { uploadBundle } from '../../integrations/components/upload_flyout';
 
-export const uploadAssets = async () => {
+const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'indexPatterns') => {
+  const assetFilterParam = assetFilter ? `/${assetFilter}/` : '';
   const http = coreRefs.http;
-  let responeData = {};
+  const responeData = await http!
+    .get(`/api/observability/gettingStarted/${assetFilterParam}${tutorialId}`)
+    .then((res: any) => {
+      return res;
+    })
+    .catch((_error) => {
+      console.error('failed to fetch file');
+    });
+  return responeData;
+};
 
+export const uploadAssets = async (tutorialId: string) => {
   try {
-    await http!
-      .get('/api/observability/gettingstarted')
-      .then((res: any) => {
-        responeData = res;
-        console.log(responeData);
-      })
-      .catch((error) => {
-        console.error('failed to fetch file');
-      });
+    const responeData = await fetchAssets(tutorialId);
 
     const blob = new Blob([responeData.data], { type: 'application/x-ndjson' });
-    const file = new File([blob], 'your-ndjson-file.ndjson');
+    const file = new File([blob], 'ndjson-file.ndjson');
 
     const error = await uploadBundle(file);
     if (error) {
@@ -30,7 +33,24 @@ export const uploadAssets = async () => {
     } else {
       console.log('Bundle uploaded successfully');
     }
-    // const result = await responeData.json();
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+export const fetchDashboardIds = async (tutorialId: string) => {
+  try {
+    const responeData = await fetchAssets(tutorialId, 'dashboards');
+    return responeData;
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+export const fetchIndexPatternIds = async (tutorialId: string) => {
+  try {
+    const responeData = await fetchAssets(tutorialId, 'indexPatterns');
+    return responeData;
   } catch (err) {
     console.error(err.message);
   }

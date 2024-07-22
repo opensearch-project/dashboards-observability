@@ -3,20 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
+  EuiButton,
+  EuiCard,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
   EuiHorizontalRule,
-  EuiButton,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import { coreRefs } from '../../../../public/framework/core_refs';
+import { fetchDashboardIds, fetchIndexPatternIds } from './utils';
+import { useEffect } from 'react';
 
 interface QueryAndAnalyzeProps {
   isOpen: boolean;
@@ -38,16 +41,39 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   selectedTechnology,
   indexPatterns,
 }) => {
-  const redirectToExplorer = (path: string) => {
+  const [searchValue, setSearchValue] = useState<string>('');
+
+  const [patternsContent, setPatternsContent] = useState([]);
+
+  // Remove view
+  const currentPath = technologyPaths[selectedTechnology];
+
+  const fetchIndexPatternContent = async () =>{
+    const content = await fetchIndexPatternIds(currentPath);
+    setPatternsContent(content);
+  }
+
+  useEffect(() => {
+    fetchIndexPatternContent();
+  }, [])
+
+  const redirectToDashboards = (path: string) => {
     coreRefs?.application!.navigateToApp('dashboards', {
       path: `#/${path}`,
     });
   };
 
-  const handleIndexPatternClick = (pattern: string) => {
-    console.log(`Redirect to explorer with pattern: ${pattern}`);
-    redirectToExplorer(`dashboards#/view/${pattern}`);
+  const handleIndexPatternClick = (patternId: string) => {
+    // console.log(`Redirect to explorer with pattern: ${pattern}`);
+    redirectToDiscover(patternId);
   };
+  const redirectToDiscover = (indexPatternId: string) => {
+    coreRefs?.application!.navigateToApp('data-explorer', {
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${indexPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+    });
+  };
+
+
 
   return (
     <EuiAccordion
@@ -68,9 +94,9 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup wrap>
-          {indexPatterns.map((pattern) => (
-            <EuiFlexItem key={pattern} style={{ maxWidth: '200px' }}>
-              <EuiButton onClick={() => handleIndexPatternClick(pattern)}>{pattern}</EuiButton>
+          {patternsContent.map((pattern) => (
+            <EuiFlexItem key={pattern.id} style={{ maxWidth: '200px' }}>
+              <EuiButton onClick={() => handleIndexPatternClick(pattern.id)}>{pattern.title}</EuiButton>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -97,7 +123,8 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               title={selectedTechnology}
               description={`Explore the ${selectedTechnology} dashboard`}
               onClick={() => {
-                redirectToExplorer(technologyPaths[selectedTechnology]);
+                const dashboards = await fetchDashboardIds(technologyPaths[selectedTechnology])
+                redirectToDashboards(dashboards[0].id);
               }}
             />
           </EuiFlexItem>
@@ -107,7 +134,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               title="Create New Dashboard"
               description="Create a new dashboard to visualize your data"
               onClick={() => {
-                redirectToExplorer('dashboards');
+                redirectToDashboards('dashboards');
               }}
             />
           </EuiFlexItem>
