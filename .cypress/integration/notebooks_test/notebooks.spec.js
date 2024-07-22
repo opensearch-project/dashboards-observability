@@ -99,10 +99,10 @@ describe('Testing notebooks table', () => {
     cy.get('.euiFormControlLayoutClearButton').click();
     cy.get('input.euiFieldSearch')
       .focus()
-      .type(TEST_NOTEBOOK + ' (copy) (rename)');
+      .type(TEST_NOTEBOOK);
 
     cy.get('a.euiLink')
-      .contains(TEST_NOTEBOOK + ' (copy) (rename)')
+      .contains(TEST_NOTEBOOK)
       .should('exist');
   });
 
