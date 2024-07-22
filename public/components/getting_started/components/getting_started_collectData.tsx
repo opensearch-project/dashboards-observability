@@ -27,7 +27,7 @@ import csvFileJson from '../getting_started_artifacts/csv_file/csv_file-1.0.0.js
 import golangClientJson from '../getting_started_artifacts/golang_client/golang_client-1.0.0.json';
 import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
 import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
-// import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
+import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
 import { uploadAssets } from './utils';
@@ -36,7 +36,7 @@ interface CollectAndShipDataProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
   selectedTechnology: string;
-  onMoveToQueryData: () => void;
+  onMoveToQueryData: (indexPatterns: string[]) => void;
   onSelectSource: (source: string) => void;
 }
 
@@ -56,13 +56,14 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [selectedWorkflow, setSelectedWorkflow] = useState('');
   const [firstWorkflow, setFirstWorkflow] = useState<string>('');
   const [secondWorkflow, setSecondWorkflow] = useState<string>('');
+  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
 
   const technologyJsonMap: Record<string, any> = {
     OTEL: otelJson,
     CSV: csvFileJson,
     Golang: golangClientJson,
     Python: pythonJson,
-    // Nginx: nginxJson,
+    Nginx: nginxJson,
   };
 
   useEffect(() => {
@@ -249,44 +250,46 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </div>
     ));
 
-  const renderIndex = (indexPatterns: any) => (
-    <>
-      <EuiText>
-        {indexPatterns?.description}
-        <br />
-        {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
-          <EuiLink key={linkIdx} href={infoLink} target="_blank">
-            More Info
-          </EuiLink>
-        ))}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>Index Patterns</h3>
-      </EuiTitle>
-      <EuiListGroup>
-        {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
-          <EuiListGroupItem key={idx} label={pattern} />
-        ))}
-      </EuiListGroup>
-      <EuiButton
-        onClick={async () => {
-          // setSaveMessage('Pattern created successfully');
-          // setTimeout(() => setSaveMessage(null), 3000);
-          await uploadAssets();
-        }}
-      >
-        Create Pattern
-      </EuiButton>
-      {saveMessage && (
-        <EuiText color="secondary">
-          <p>{saveMessage}</p>
+    const renderIndex = (indexPatterns: any) => (
+      <>
+        <EuiText>
+          {indexPatterns?.description}
+          <br />
+          {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
+            <EuiLink key={linkIdx} href={infoLink} target="_blank">
+              More Info
+            </EuiLink>
+          ))}
         </EuiText>
-      )}
-      <EuiSpacer size="m" />
-      <EuiButton onClick={onMoveToQueryData}>Move to Query and Analyze Data</EuiButton>
-    </>
-  );
+        <EuiSpacer size="m" />
+        <EuiTitle size="s">
+          <h3>Index Patterns</h3>
+        </EuiTitle>
+        <EuiListGroup>
+          {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
+            <EuiListGroupItem key={idx} label={pattern} />
+          ))}
+        </EuiListGroup>
+        <EuiButton
+          onClick={async () => {
+            await uploadAssets();
+          }}
+        >
+          Create Pattern
+        </EuiButton>
+        {saveMessage && (
+          <EuiText color="secondary">
+            <p>{saveMessage}</p>
+          </EuiText>
+        )}
+        <EuiSpacer size="m" />
+        <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
+          Move to Query and Analyze Data
+        </EuiButton>
+      </>
+    );
+    
+    
 
   const tabs = [
     {

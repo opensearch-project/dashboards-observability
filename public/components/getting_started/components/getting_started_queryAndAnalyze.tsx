@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiPanel,
   EuiTitle,
   EuiText,
   EuiSpacer,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
   EuiHorizontalRule,
+  EuiButton,
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
 
@@ -22,10 +22,10 @@ interface QueryAndAnalyzeProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
   selectedTechnology: string;
+  indexPatterns: string[];
 }
 
 const technologyPaths: Record<string, string> = {
-  // CHANGE TO GET THE CREATED TAG
   OTEL: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
   CSV: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
   Golang: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
@@ -36,17 +36,18 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   isOpen,
   onToggle,
   selectedTechnology,
+  indexPatterns,
 }) => {
-  const [searchValue, setSearchValue] = useState<string>('');
-
   const redirectToExplorer = (path: string) => {
     coreRefs?.application!.navigateToApp('dashboards', {
       path: `#/${path}`,
     });
   };
 
-  // Remove view
-  const currentPath = technologyPaths[selectedTechnology];
+  const handleIndexPatternClick = (pattern: string) => {
+    console.log(`Redirect to explorer with pattern: ${pattern}`);
+    redirectToExplorer(`dashboards#/view/${pattern}`);
+  };
 
   return (
     <EuiAccordion
@@ -65,14 +66,14 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             <strong>Explore your data</strong>
           </p>
         </EuiText>
-        <EuiFieldSearch
-          placeholder="Search..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          isClearable
-          aria-label="Use aria labels when no actual label is in use"
-        />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup wrap>
+          {indexPatterns.map((pattern) => (
+            <EuiFlexItem key={pattern} style={{ maxWidth: '200px' }}>
+              <EuiButton onClick={() => handleIndexPatternClick(pattern)}>{pattern}</EuiButton>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
         <EuiHorizontalRule />
         <EuiTitle size="m">
           <h2>Analyze Data</h2>
@@ -96,7 +97,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               title={selectedTechnology}
               description={`Explore the ${selectedTechnology} dashboard`}
               onClick={() => {
-                redirectToExplorer(currentPath);
+                redirectToExplorer(technologyPaths[selectedTechnology]);
               }}
             />
           </EuiFlexItem>

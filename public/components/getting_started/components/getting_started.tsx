@@ -1,8 +1,3 @@
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
@@ -15,6 +10,7 @@ export const NewGettingStarted = (props: HomeProps) => {
   const [selectedSource, setSelectedSource] = useState('');
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
   const [isQueryDataOpen, setIsQueryDataOpen] = useState(false);
+  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -40,9 +36,10 @@ export const NewGettingStarted = (props: HomeProps) => {
     setIsQueryDataOpen(isOpen);
   };
 
-  const setQueryDataOpen = () => {
+  const setQueryDataOpen = (patterns: string[]) => {
     setIsPickYourSourceOpen(false);
     setIsQueryDataOpen(true);
+    setIndexPatterns(patterns);
   };
 
   return (
@@ -62,6 +59,7 @@ export const NewGettingStarted = (props: HomeProps) => {
           isOpen={isQueryDataOpen}
           onToggle={toggleQueryData}
           selectedTechnology={selectedSource}
+          indexPatterns={indexPatterns}
         />
       </EuiPageBody>
     </EuiPage>

@@ -223,14 +223,14 @@
         "info": ["https://opensearch.org/docs/latest/im-plugin/index-templates","https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md"],
         "content": "PUT _component_template/http",
         "description": "Setup simple schema http component template in the dev console",
-        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/http-1.0.0.mapping.json",
+        "index-template": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/http-1.0.0.mapping.json"]
       },
       {
         "type": "communication",
         "info": ["https://opensearch.org/docs/latest/im-plugin/index-templates","https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md"],
         "content": "PUT _component_template/communication",
         "description": "Setup simple schema communication component template in the dev console",
-        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/communication-1.0.0.mapping.json",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/communication-1.0.0.mapping.json"
       },
       {
         "type": "logs",
