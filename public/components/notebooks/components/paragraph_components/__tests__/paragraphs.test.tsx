@@ -59,6 +59,7 @@ describe('<Paragraphs /> spec', () => {
         movePara={movePara}
         showQueryParagraphError={false}
         queryParagraphErrorMessage="error-message"
+        dataSourceEnabled={false}
       />
     );
     expect(utils.container.firstChild).toMatchSnapshot();

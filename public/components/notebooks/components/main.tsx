@@ -9,16 +9,22 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
-import PPLService from '../../../services/requests/ppl';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import {
   NOTEBOOKS_API_PREFIX,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
-import { Notebook } from './notebook';
+import PPLService from '../../../services/requests/ppl';
+import { isValidUUID } from './helpers/notebooks_parser';
 import { NoteTable } from './note_table';
-
+import { Notebook } from './notebook';
 /*
  * "Main" component renders the whole Notebooks as a single page application
  *
@@ -37,6 +43,10 @@ type MainProps = RouteComponentProps & {
   notifications: CoreStart['notifications'];
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: SavedObjectsStart;
 };
 
 interface MainState {
@@ -44,6 +54,8 @@ interface MainState {
   openedNotebook: NotebookType | undefined;
   toasts: Toast[];
   loading: boolean;
+  defaultMDSId: string;
+  defaultMDSLabel: string;
 }
 
 export interface NotebookType {
@@ -61,6 +73,8 @@ export class Main extends React.Component<MainProps, MainState> {
       openedNotebook: undefined,
       toasts: [],
       loading: false,
+      defaultMDSId: '',
+      defaultMDSLabel: '',
     };
   }
 
@@ -81,16 +95,23 @@ export class Main extends React.Component<MainProps, MainState> {
 
   // Fetches path and id for all stored notebooks
   fetchNotebooks = () => {
-    return this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/`)
-      .then((res) => this.setState(res))
+    return Promise.all([
+      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`),
+      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
+    ])
+      .then(([savedNotebooksResponse, secondResponse]) => {
+        const combinedData = {
+          data: [...savedNotebooksResponse.data, ...secondResponse.data],
+        };
+        this.setState(combinedData);
+      })
       .catch((err) => {
         console.error('Issue in fetching the notebooks', err.body.message);
       });
   };
 
   // Creates a new notebook
-  createNotebook = (newNoteName: string) => {
+  createNotebook = async (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       window.location.assign('#/');
@@ -101,7 +122,7 @@ export class Main extends React.Component<MainProps, MainState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook`, {
         body: JSON.stringify(newNoteObject),
       })
       .then(async (res) => {
@@ -121,7 +142,7 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Renames an existing notebook
-  renameNotebook = (editedNoteName: string, editedNoteID: string): Promise<any> => {
+  renameNotebook = async (editedNoteName: string, editedNoteID: string): Promise<any> => {
     if (editedNoteName.length >= 50 || editedNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       return;
@@ -132,7 +153,7 @@ export class Main extends React.Component<MainProps, MainState> {
     };
 
     return this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/note/rename`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/rename`, {
         body: JSON.stringify(renameNoteObject),
       })
       .then((res) => {
@@ -155,7 +176,7 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Clones an existing notebook, return new notebook's id
-  cloneNotebook = (clonedNoteName: string, clonedNoteID: string): Promise<string> => {
+  cloneNotebook = async (clonedNoteName: string, clonedNoteID: string): Promise<string> => {
     if (clonedNoteName.length >= 50 || clonedNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       return Promise.reject();
@@ -166,7 +187,7 @@ export class Main extends React.Component<MainProps, MainState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note/clone`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/clone`, {
         body: JSON.stringify(cloneNoteObject),
       })
       .then((res) => {
@@ -175,14 +196,14 @@ export class Main extends React.Component<MainProps, MainState> {
             ...prevState.data,
             {
               path: clonedNoteName,
-              id: res.body.id,
-              dateCreated: res.body.dateCreated,
-              dateModified: res.body.dateModified,
+              id: res.id,
+              dateCreated: res.attributes.dateCreated,
+              dateModified: res.attributes.dateModified,
             },
           ],
         }));
         this.setToast(`Notebook "${clonedNoteName}" successfully created!`);
-        return res.body.id;
+        return res.id;
       })
       .catch((err) => {
         this.setToast(
@@ -194,27 +215,76 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Deletes existing notebooks
-  deleteNotebook = (notebookList: string[], toastMessage?: string) => {
-    return this.props.http
-      .delete(`${NOTEBOOKS_API_PREFIX}/note/${notebookList.join(',')}`)
-      .then((res) => {
+  deleteNotebook = async (notebookList: string[], toastMessage?: string) => {
+    const deleteNotebook = (id: string) => {
+      const isValid = isValidUUID(id);
+      const route = isValid
+        ? `${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${id}`
+        : `${NOTEBOOKS_API_PREFIX}/note/${id}`;
+      return this.props.http.delete(route).then((res) => {
         this.setState((prevState) => ({
-          data: prevState.data.filter((notebook) => !notebookList.includes(notebook.id)),
+          data: prevState.data.filter((notebook) => notebook.id !== id),
         }));
-        const message =
-          toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
-        this.setToast(message);
         return res;
-      })
-      .catch((err) => {
+      });
+    };
+
+    const promises = notebookList.map((id) =>
+      deleteNotebook(id).catch((err) => {
         this.setToast(
           'Error deleting notebook, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
+      })
+    );
+
+    Promise.allSettled(promises)
+      .then(() => {
+        const message =
+          toastMessage || `Notebook${notebookList.length > 1 ? 's' : ''} successfully deleted!`;
+        this.setToast(message);
+      })
+      .catch((err) => {
+        console.error('Error in deleting multiple notebooks', err);
       });
   };
-
+  migrateNotebook = async (migrateNoteName: string, migrateNoteID: string): Promise<string> => {
+    if (migrateNoteName.length >= 50 || migrateNoteName.length === 0) {
+      this.setToast('Invalid notebook name', 'danger');
+      return Promise.reject();
+    }
+    const migrateNoteObject = {
+      name: migrateNoteName,
+      noteId: migrateNoteID,
+    };
+    return this.props.http
+      .post(`${NOTEBOOKS_API_PREFIX}/note/migrate`, {
+        body: JSON.stringify(migrateNoteObject),
+      })
+      .then((res) => {
+        this.setState((prevState) => ({
+          data: [
+            ...prevState.data,
+            {
+              path: migrateNoteName,
+              id: res.id,
+              dateCreated: res.attributes.dateCreated,
+              dateModified: res.attributes.dateModified,
+            },
+          ],
+        }));
+        this.setToast(`Notebook "${migrateNoteName}" successfully created!`);
+        return res.id;
+      })
+      .catch((err) => {
+        this.setToast(
+          'Error migrating notebook, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
   addSampleNotebooks = async () => {
     try {
       this.setState({ loading: true });
@@ -270,7 +340,7 @@ export class Main extends React.Component<MainProps, MainState> {
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));
       await this.props.http
-        .post(`${NOTEBOOKS_API_PREFIX}/note/addSampleNotebooks`, {
+        .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`, {
           body: JSON.stringify({ visIds }),
         })
         .then((res) => {
@@ -310,7 +380,7 @@ export class Main extends React.Component<MainProps, MainState> {
             <Route
               exact
               path={['/create', '/']}
-              render={(props) => (
+              render={(_props) => (
                 <NoteTable
                   loading={this.state.loading}
                   fetchNotebooks={this.fetchNotebooks}
@@ -343,6 +413,12 @@ export class Main extends React.Component<MainProps, MainState> {
                   setToast={this.setToast}
                   location={props.location}
                   history={props.history}
+                  migrateNotebook={this.migrateNotebook}
+                  dataSourceManagement={this.props.dataSourceManagement}
+                  setActionMenu={this.props.setActionMenu}
+                  notifications={this.props.notifications}
+                  dataSourceEnabled={this.props.dataSourceEnabled}
+                  savedObjectsMDSClient={this.props.savedObjectsMDSClient}
                 />
               )}
             />
