@@ -312,6 +312,14 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('applications'),
     });
 
+    core.application.register({
+      id: observabilityIntegrationsID,
+      title: observabilityIntegrationsTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityIntegrationsPluginOrder,
+      mount: appMountWithStartPage('integrations'),
+    });
+
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
         id: 'observability-traces-nav',
@@ -350,13 +358,6 @@ export class ObservabilityPlugin
         category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: observabilityLogsPluginOrder,
         mount: appMountWithStartPage('logs'),
-      });
-      core.application.register({
-        id: observabilityIntegrationsID,
-        title: observabilityIntegrationsTitle,
-        category: DEFAULT_APP_CATEGORIES.management,
-        order: observabilityIntegrationsPluginOrder,
-        mount: appMountWithStartPage('integrations'),
       });
     }
 

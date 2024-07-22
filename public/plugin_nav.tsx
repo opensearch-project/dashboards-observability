@@ -2,8 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   observabilityApplicationsID,
+  observabilityIntegrationsID,
   observabilityMetricsID,
   observabilityNotebookID,
 } from '../common/constants/shared';
@@ -17,6 +19,14 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityApplicationsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       order: 400,
+    },
+  ]);
+
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityIntegrationsID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 500,
     },
   ]);
 
