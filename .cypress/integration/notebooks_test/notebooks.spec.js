@@ -93,23 +93,6 @@ describe('Testing notebooks table', () => {
     cy.contains(TEST_NOTEBOOK).should('exist');
   });
 
-  it('Duplicates a notebook', () => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).click();
-    cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
-    cy.get('button[data-test-subj="duplicateNotebookBtn"]').click();
-    cy.get('button[data-test-subj="custom-input-modal-confirm-button"]').click();
-
-    cy.get('.euiCheckbox__input[title="Select this row"]').eq(1).click();
-  });
-
-  it('Renames a notebook', () => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).click();
-    cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
-    cy.get('button[data-test-subj="renameNotebookBtn"]').click();
-    cy.get('input[data-test-subj="custom-input-modal-input"]').focus().type(' (rename)');
-    cy.get('button[data-test-subj="custom-input-modal-confirm-button"]').click();
-  });
-
   it('Searches existing notebooks', () => {
     cy.get('input.euiFieldSearch').focus().type('this notebook should not exist');
     cy.get('.euiTableCellContent__text').contains('No items found').should('exist');

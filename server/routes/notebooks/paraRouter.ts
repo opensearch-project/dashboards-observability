@@ -385,7 +385,7 @@ export function registerParaRoute(router: IRouter) {
           paragraphInput: schema.string(),
           paragraphType: schema.string(),
           dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
-          dataSourceMDSLabel: schema.string(),
+          dataSourceMDSLabel: schema.maybe(schema.string({ defaultValue: '' })),
         }),
       },
     },
@@ -459,6 +459,8 @@ export function registerParaRoute(router: IRouter) {
               dateCreated: schema.string(),
               dateModified: schema.string(),
               id: schema.string(),
+              dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+              dataSourceMDSLabel: schema.maybe(schema.string({ defaultValue: '' })),
             })
           ),
         }),
