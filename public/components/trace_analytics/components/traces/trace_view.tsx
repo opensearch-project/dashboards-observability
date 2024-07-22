@@ -26,6 +26,8 @@ import {
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -37,7 +39,6 @@ import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_fun
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
-import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -260,6 +261,7 @@ export function TraceView(props: TraceViewProps) {
             componentConfig={{
               activeOption: props.dataSourceMDSId,
               fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
             }}
           />
         )}

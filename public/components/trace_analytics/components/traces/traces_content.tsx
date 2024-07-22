@@ -7,6 +7,8 @@
 import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
@@ -14,7 +16,6 @@ import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
 import { TracesProps } from './traces';
 import { TracesTable } from './traces_table';
-import { coreRefs } from '../../../../framework/core_refs';
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -120,6 +121,7 @@ export function TracesContent(props: TracesProps) {
           componentConfig={{
             activeOption: dataSourceMDSId,
             fullWidth: true,
+            dataSourceFilter: dataSourceFilterFn,
           }}
         />
       )}
