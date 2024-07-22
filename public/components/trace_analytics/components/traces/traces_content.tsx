@@ -6,11 +6,8 @@
 
 import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import semver from 'semver';
-import { SavedObject } from '../../../../../../../src/core/public';
-import { DataSourceAttributes } from '../../../../../../../src/plugins/data_source/common/data_sources';
 import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
-import * as pluginManifest from '../../../../../opensearch_dashboards.json';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -49,17 +46,6 @@ export function TracesContent(props: TracesProps) {
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
-
-  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
-    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
-    return (
-      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
-      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
-        installedPlugins.includes(plugin)
-      )
-    );
-  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([

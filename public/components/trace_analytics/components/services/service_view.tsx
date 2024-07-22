@@ -27,9 +27,6 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
-import semver from 'semver';
-import { SavedObject } from '../../../../../../../src/core/public';
-import { DataSourceAttributes } from '../../../../../../../src/plugins/data_source/common/data_sources';
 import {
   DataSourceManagementPluginSetup,
   DataSourceViewConfig,
@@ -41,7 +38,7 @@ import {
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import * as pluginManifest from '../../../../../opensearch_dashboards.json';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
@@ -126,17 +123,6 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.serviceName]);
 
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
-
-  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
-    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
-    return (
-      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
-      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
-        installedPlugins.includes(plugin)
-      )
-    );
-  };
 
   const redirectToServicePage = (service: string) => {
     window.location.href = `#/services/${service}`;

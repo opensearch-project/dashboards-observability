@@ -20,16 +20,14 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
-import semver from 'semver';
-import { MountPoint, SavedObject } from '../../../../../../../src/core/public';
-import { DataSourceAttributes } from '../../../../../../../src/plugins/data_source/common/data_sources/types';
+import { MountPoint } from '../../../../../../../src/core/public';
 import {
   DataSourceManagementPluginSetup,
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import * as pluginManifest from '../../../../../opensearch_dashboards.json';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -65,17 +63,6 @@ export function TraceView(props: TraceViewProps) {
     );
   };
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
-
-  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
-    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
-    return (
-      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
-      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
-        installedPlugins.includes(plugin)
-      )
-    );
-  };
 
   const renderOverview = (fields: any) => {
     return (

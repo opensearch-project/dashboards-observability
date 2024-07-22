@@ -8,15 +8,12 @@ import debounce from 'lodash/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { HashRouter, Route, RouteComponentProps, StaticContext } from 'react-router-dom';
-import semver from 'semver';
 import {
   ChromeBreadcrumb,
   MountPoint,
   NotificationsStart,
-  SavedObject,
   SavedObjectsStart,
 } from '../../../../../src/core/public';
-import { DataSourceAttributes } from '../../../../../src/plugins/data_source/common/data_sources';
 import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
@@ -24,7 +21,7 @@ import {
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { OptionType } from '../../../common/types/metrics';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
-import * as pluginManifest from '../../../opensearch_dashboards.json';
+import { dataSourceFilterFn } from '../../../common/utils/shared';
 import PPLService from '../../services/requests/ppl';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import './index.scss';
@@ -85,16 +82,6 @@ export const Home = ({
     debounce(() => {
       dispatch(setSelectedDataSourceMDSId(id));
     }, 300);
-  };
-  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
-    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
-    return (
-      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
-      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
-        installedPlugins.includes(plugin)
-      )
-    );
   };
 
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceSelectableConfig>();
