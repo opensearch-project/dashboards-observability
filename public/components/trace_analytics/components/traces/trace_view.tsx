@@ -20,12 +20,16 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
-import { MountPoint } from '../../../../../../../src/core/public';
+import semver from 'semver';
+import { MountPoint, SavedObject } from '../../../../../../../src/core/public';
+import { DataSourceAttributes } from '../../../../../../../src/plugins/data_source/common/data_sources/types';
 import {
   DataSourceManagementPluginSetup,
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
+import * as pluginManifest from '../../../../../opensearch_dashboards.json';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -37,7 +41,6 @@ import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_fun
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
-import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -62,6 +65,11 @@ export function TraceView(props: TraceViewProps) {
     );
   };
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
+  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
+    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
+    return semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions);
+  };
 
   const renderOverview = (fields: any) => {
     return (
@@ -260,6 +268,7 @@ export function TraceView(props: TraceViewProps) {
             componentConfig={{
               activeOption: props.dataSourceMDSId,
               fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
             }}
           />
         )}

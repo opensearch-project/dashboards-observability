@@ -6,7 +6,12 @@
 
 import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import semver from 'semver';
+import { SavedObject } from '../../../../../../../src/core/public';
+import { DataSourceAttributes } from '../../../../../../../src/plugins/data_source/common/data_sources';
 import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
+import * as pluginManifest from '../../../../../opensearch_dashboards.json';
+import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
@@ -14,7 +19,6 @@ import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
 import { TracesProps } from './traces';
 import { TracesTable } from './traces_table';
-import { coreRefs } from '../../../../framework/core_refs';
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -45,7 +49,10 @@ export function TracesContent(props: TracesProps) {
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
-
+  const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
+    const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
+    return semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions);
+  };
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
@@ -120,6 +127,7 @@ export function TracesContent(props: TracesProps) {
           componentConfig={{
             activeOption: dataSourceMDSId,
             fullWidth: true,
+            dataSourceFilter: dataSourceFilterFn,
           }}
         />
       )}

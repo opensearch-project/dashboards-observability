@@ -27,5 +27,6 @@
   ],
   "configPath": [
     "observability"
-  ]
+  ],
+  "supportedOSDataSourceVersions": ">=2.9.0"
 }
