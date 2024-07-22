@@ -16,6 +16,7 @@ import {
   codeBlockNotebook,
   codePlaceholderText,
   emptyNotebook,
+  migrateBlockNotebook,
   notebookPutResponse,
   runCodeBlockResponse,
   sampleNotebook1,
@@ -583,5 +584,109 @@ describe('<Notebook /> spec', () => {
     await waitFor(() => {
       expect(utils.container.firstChild).toMatchSnapshot();
     });
+  });
+
+  it('Renders a old notebook and migrates it', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
+    httpClient.put = jest.fn(() =>
+      Promise.resolve((clearOutputNotebook as unknown) as HttpResponse)
+    );
+    httpClient.delete = jest.fn(() =>
+      Promise.resolve(({ paragraphs: [] } as unknown) as HttpResponse)
+    );
+    const migrateNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
+    httpClient.get = jest.fn(() =>
+      Promise.resolve((migrateBlockNotebook as unknown) as HttpResponse)
+    );
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+        dataSourceEnabled={false}
+        migrateNotebook={migrateNotebookMock}
+      />
+    );
+    await waitFor(() => {
+      expect(
+        utils.getByText('Upgrade this notebook to take full advantage of the latest features')
+      ).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Upgrade Notebook'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('custom-input-modal-confirm-button'));
+    });
+
+    expect(migrateNotebookMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('Checks old notebook delete action', async () => {
+    const renameNotebookMock = jest.fn(() =>
+      Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
+    );
+    const cloneNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
+    httpClient.get = jest.fn(() => Promise.resolve((codeBlockNotebook as unknown) as HttpResponse));
+
+    httpClient.put = jest.fn(() => {
+      return Promise.resolve((notebookPutResponse as unknown) as HttpResponse);
+    });
+
+    httpClient.post = jest.fn(() => {
+      return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+    });
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebookMock}
+        cloneNotebook={cloneNotebookMock}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+        dataSourceEnabled={false}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Delete this notebook'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('delete-notebook-modal-input')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.input(utils.getByTestId('delete-notebook-modal-input'), {
+        target: { value: 'delete' },
+      });
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('delete-notebook-modal-delete-button'));
+    });
+
+    expect(deleteNotebook).toHaveBeenCalledTimes(1);
   });
 });
