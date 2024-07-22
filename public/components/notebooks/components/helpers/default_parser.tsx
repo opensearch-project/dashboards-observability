@@ -9,14 +9,14 @@ import { ParaType } from '../../../../../common/types/notebooks';
 // Param: Default Backend Paragraph
 const parseOutput = (paraObject: any) => {
   try {
-    let outputType = [];
-    let result = [];
+    const outputType = [];
+    const result = [];
     paraObject.output.map((output: { outputType: string; result: string }) => {
       outputType.push(output.outputType);
       result.push(output.result);
     });
     return {
-      outputType: outputType,
+      outputType,
       outputData: result,
     };
   } catch (error) {
@@ -46,7 +46,7 @@ const parseInputType = (paraObject: any) => {
 const parseVisualization = (paraObject: any) => {
   try {
     if (paraObject.input.inputType.includes('VISUALIZATION')) {
-      let vizContent = paraObject.input.inputText;
+      const vizContent = paraObject.input.inputText;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
       let visStartTime = startDate.toISOString();
@@ -79,14 +79,14 @@ const parseVisualization = (paraObject: any) => {
 // Placeholder for default parser
 // Param: Default Backend Paragraph
 export const defaultParagraphParser = (defaultBackendParagraphs: any) => {
-  let parsedPara: Array<ParaType> = [];
+  const parsedPara: ParaType[] = [];
   try {
     defaultBackendParagraphs.map((paraObject: any, index: number) => {
       const codeLanguage = parseInputType(paraObject);
       const vizParams = parseVisualization(paraObject);
       const message = parseOutput(paraObject);
 
-      let tempPara: ParaType = {
+      const tempPara: ParaType = {
         uniqueId: paraObject.id,
         isRunning: false,
         inQueue: false,
@@ -109,6 +109,8 @@ export const defaultParagraphParser = (defaultBackendParagraphs: any) => {
         visStartTime: vizParams.visStartTime,
         visEndTime: vizParams.visEndTime,
         visSavedObjId: vizParams.visSavedObjId,
+        dataSourceMDSId: paraObject.dataSourceMDSId,
+        dataSourceMDSLabel: paraObject.dataSourceMDSLabel,
       };
       parsedPara.push(tempPara);
     });

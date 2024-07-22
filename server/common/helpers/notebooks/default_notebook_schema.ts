@@ -21,6 +21,8 @@ export interface DefaultParagraph {
   dateModified: string;
   input: DefaultInput;
   output: DefaultOutput[];
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
 }
 export interface DefaultNotebooks {
   name: string;
