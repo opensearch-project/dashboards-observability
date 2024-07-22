@@ -697,7 +697,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               className="euiSuperUpdateButton"
                               color="primary"
                               data-test-subj="superDatePickerApplyTimeButton"
-                              fill={true}
                               iconType="refresh"
                               isDisabled={false}
                               isLoading={false}
@@ -717,7 +716,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 data-test-subj="superDatePickerApplyTimeButton"
                                 disabled={false}
                                 element="button"
-                                fill={true}
                                 iconType="refresh"
                                 isDisabled={false}
                                 isLoading={false}
@@ -732,7 +730,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 type="button"
                               >
                                 <button
-                                  className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                  className="euiButton euiButton--primary euiSuperUpdateButton"
                                   data-test-subj="superDatePickerApplyTimeButton"
                                   disabled={false}
                                   onBlur={[Function]}
