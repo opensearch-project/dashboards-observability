@@ -106,7 +106,27 @@ exports[`Traces component renders empty traces page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -440,7 +460,27 @@ exports[`Traces component renders empty traces page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },
@@ -1739,7 +1779,27 @@ exports[`Traces component renders jaeger traces page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -2074,7 +2134,27 @@ exports[`Traces component renders jaeger traces page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },
@@ -3378,7 +3458,27 @@ exports[`Traces component renders traces page 1`] = `
       },
       "navGroup": Object {
         "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupEnabled": [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "getNavGroupsMap$": [MockFunction],
         "setCurrentNavGroup": [MockFunction],
       },
@@ -3712,7 +3812,27 @@ exports[`Traces component renders traces page 1`] = `
         },
         "navGroup": Object {
           "getCurrentNavGroup$": [MockFunction],
-          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupEnabled": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getNavGroupsMap$": [MockFunction],
           "setCurrentNavGroup": [MockFunction],
         },
