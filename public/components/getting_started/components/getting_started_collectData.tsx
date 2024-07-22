@@ -3,33 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
+  EuiButton,
   EuiCard,
+  EuiCodeBlock,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
-  EuiTabbedContent,
-  EuiComboBox,
-  EuiButton,
-  EuiCodeBlock,
   EuiLink,
   EuiListGroup,
   EuiListGroupItem,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 
-import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
 import csvFileJson from '../getting_started_artifacts/csv_file/csv_file-1.0.0.json';
 import golangClientJson from '../getting_started_artifacts/golang_client/golang_client-1.0.0.json';
+import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
 import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
 // import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
+import { uploadAssets } from './utils';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -269,9 +270,10 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         ))}
       </EuiListGroup>
       <EuiButton
-        onClick={() => {
-          setSaveMessage('Pattern created successfully');
-          setTimeout(() => setSaveMessage(null), 3000);
+        onClick={async () => {
+          // setSaveMessage('Pattern created successfully');
+          // setTimeout(() => setSaveMessage(null), 3000);
+          await uploadAssets();
         }}
       >
         Create Pattern
