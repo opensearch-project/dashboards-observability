@@ -282,7 +282,7 @@
       "type": ["logs","services","traces","metrics"],
       "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/otel-services/assets/otel-index-patterns-1.0.0.ndjson",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/otel-services/assets/getting-started-demo-1.0.0.ndjson",
       "index-patterns-name": ["otel-v1-apm-span*","ss4o_metrics*","otel-events-*","otel-v1-apm-service-map"]
 
     }
