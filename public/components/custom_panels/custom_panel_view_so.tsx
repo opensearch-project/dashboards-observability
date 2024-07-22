@@ -21,7 +21,7 @@ import {
   EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiSuperDatePicker,
+  EuiCompressedSuperDatePicker,
   EuiTitle,
   OnTimeChangeProps,
   ShortDate,
@@ -634,7 +634,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={panel.timeRange.from}
                   end={panel.timeRange.to}

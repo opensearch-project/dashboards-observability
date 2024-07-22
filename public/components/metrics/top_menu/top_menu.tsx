@@ -8,7 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedSelect,
-  EuiSuperDatePicker,
+  EuiCompressedSuperDatePicker,
 } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,8 +53,7 @@ export const TopMenu = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
-                <EuiSuperDatePicker
-                  compressed={true}
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={dateSpanFilter.start}
                   end={dateSpanFilter.end}
