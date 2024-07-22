@@ -39,6 +39,7 @@ import {
 } from '../../../../../common/constants/shared';
 import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -554,6 +555,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     setDataSourceMDSId(dataConnectionId);
     handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
   };
+
   if (dataSourceEnabled) {
     DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
   }
@@ -574,6 +576,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                 { id: paradataSourceMDSId, label: dataSourceMDSLabel },
               ]
             }
+            dataSourceFilter={dataSourceFilterFn}
           />
         )}
         <EuiSpacer size="s" />
