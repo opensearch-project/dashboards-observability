@@ -278,11 +278,6 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       >
         Create Pattern
       </EuiButton>
-      {saveMessage && (
-        <EuiText color="secondary">
-          <p>{saveMessage}</p>
-        </EuiText>
-      )}
       <EuiSpacer size="m" />
       <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
         Move to Query and Analyze Data
