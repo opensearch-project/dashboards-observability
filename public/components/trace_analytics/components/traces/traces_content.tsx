@@ -49,10 +49,18 @@ export function TracesContent(props: TracesProps) {
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
   const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
     const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    return semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions);
+    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
+    return (
+      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
+      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
+        installedPlugins.includes(plugin)
+      )
+    );
   };
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),

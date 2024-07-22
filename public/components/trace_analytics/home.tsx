@@ -264,7 +264,13 @@ export const Home = (props: HomeProps) => {
 
   const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
     const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
-    return semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions);
+    const installedPlugins = dataSource?.attributes?.installedPlugins || [];
+    return (
+      semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
+      pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
+        installedPlugins.includes(plugin)
+      )
+    );
   };
 
   let flyout;
