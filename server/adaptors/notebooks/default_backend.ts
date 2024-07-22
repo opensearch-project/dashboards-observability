@@ -6,7 +6,7 @@
 import now from 'performance-now';
 import { v4 as uuid } from 'uuid';
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
-import { optionsType } from '../../../common/types/notebooks';
+import { OptionsType } from '../../../common/types/notebooks';
 import {
   DefaultNotebooks,
   DefaultOutput,
@@ -86,7 +86,7 @@ export class DefaultBackend implements NotebookAdaptor {
   };
 
   // gets first `FETCH_SIZE` notebooks available
-  viewNotes = async function (client: ILegacyScopedClusterClient, _wreckOptions: optionsType) {
+  viewNotes = async function (client: ILegacyScopedClusterClient, _wreckOptions: OptionsType) {
     try {
       const response = await client.callAsCurrentUser('observability.getObject', {
         objectType: 'notebook',
@@ -110,7 +110,7 @@ export class DefaultBackend implements NotebookAdaptor {
   fetchNote = async function (
     client: ILegacyScopedClusterClient,
     noteId: string,
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const noteObject = await this.getNote(client, noteId);
@@ -131,7 +131,7 @@ export class DefaultBackend implements NotebookAdaptor {
   addNote = async function (
     client: ILegacyScopedClusterClient,
     params: { name: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const newNotebook = this.createNewNotebook(params.name);
@@ -152,7 +152,7 @@ export class DefaultBackend implements NotebookAdaptor {
   addSampleNotes = async function (
     client: ILegacyScopedClusterClient,
     visIds: string[],
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const notebooks = getSampleNotebooks(visIds);
@@ -181,7 +181,7 @@ export class DefaultBackend implements NotebookAdaptor {
   renameNote = async function (
     client: ILegacyScopedClusterClient,
     params: { name: string; noteId: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const updateNotebook = {
@@ -202,7 +202,7 @@ export class DefaultBackend implements NotebookAdaptor {
   cloneNote = async function (
     client: ILegacyScopedClusterClient,
     params: { name: string; noteId: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const noteObject = await this.getNote(client, params.noteId);
@@ -225,7 +225,7 @@ export class DefaultBackend implements NotebookAdaptor {
   deleteNote = async function (
     client: ILegacyScopedClusterClient,
     noteList: string,
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const response = await client.callAsCurrentUser('observability.deleteObjectByIdList', {
@@ -243,7 +243,7 @@ export class DefaultBackend implements NotebookAdaptor {
   exportNote = async function (
     client: ILegacyScopedClusterClient,
     noteId: string,
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, noteId);
@@ -259,7 +259,7 @@ export class DefaultBackend implements NotebookAdaptor {
   importNote = async function (
     client: ILegacyScopedClusterClient,
     noteObj: any,
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const newNoteObject = { ...noteObj };
@@ -352,7 +352,7 @@ export class DefaultBackend implements NotebookAdaptor {
   runParagraph = async function (
     paragraphs: DefaultParagraph[],
     paragraphId: string,
-    client: ILegacyScopedClusterClient
+    _client: ILegacyScopedClusterClient
   ) {
     try {
       const updatedParagraphs = [];
@@ -431,7 +431,7 @@ export class DefaultBackend implements NotebookAdaptor {
   updateRunFetchParagraph = async function (
     client: ILegacyScopedClusterClient,
     request: any,
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const scopedClient = client.asScoped(request);
@@ -452,11 +452,7 @@ export class DefaultBackend implements NotebookAdaptor {
         paragraphs: updatedOutputParagraphs,
         dateModified: new Date().toISOString(),
       };
-      const opensearchClientResponse = await this.updateNote(
-        scopedClient,
-        params.noteId,
-        updateNotebook
-      );
+      await this.updateNote(scopedClient, params.noteId, updateNotebook);
       let resultParagraph = {};
       let index = 0;
 
@@ -481,7 +477,7 @@ export class DefaultBackend implements NotebookAdaptor {
   updateFetchParagraph = async function (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphId: string; paragraphInput: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, params.noteId);
@@ -495,7 +491,7 @@ export class DefaultBackend implements NotebookAdaptor {
         paragraphs: updatedInputParagraphs,
         dateModified: new Date().toISOString(),
       };
-      const opensearchClientResponse = await this.updateNote(client, params.noteId, updateNotebook);
+      await this.updateNote(client, params.noteId, updateNotebook);
 
       let resultParagraph = {};
       updatedInputParagraphs.map((paragraph: DefaultParagraph) => {
@@ -518,7 +514,7 @@ export class DefaultBackend implements NotebookAdaptor {
   addFetchNewParagraph = async function (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphIndex: number; paragraphInput: string; inputType: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, params.noteId);
@@ -529,7 +525,7 @@ export class DefaultBackend implements NotebookAdaptor {
         paragraphs,
         dateModified: new Date().toISOString(),
       };
-      const opensearchClientResponse = await this.updateNote(client, params.noteId, updateNotebook);
+      await this.updateNote(client, params.noteId, updateNotebook);
 
       return newParagraph;
     } catch (error) {
@@ -546,26 +542,24 @@ export class DefaultBackend implements NotebookAdaptor {
   deleteFetchParagraphs = async function (
     client: ILegacyScopedClusterClient,
     params: { noteId: string; paragraphId: string | undefined },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, params.noteId);
       const updatedparagraphs: DefaultParagraph[] = [];
       if (params.paragraphId !== undefined) {
-        opensearchClientGetResponse.notebook.paragraphs.map(
-          (paragraph: DefaultParagraph, index: number) => {
-            if (paragraph.id !== params.paragraphId) {
-              updatedparagraphs.push(paragraph);
-            }
+        opensearchClientGetResponse.notebook.paragraphs.map((paragraph: DefaultParagraph) => {
+          if (paragraph.id !== params.paragraphId) {
+            updatedparagraphs.push(paragraph);
           }
-        );
+        });
       }
 
       const updateNotebook = {
         paragraphs: updatedparagraphs,
         dateModified: new Date().toISOString(),
       };
-      const opensearchClientResponse = await this.updateNote(client, params.noteId, updateNotebook);
+      await this.updateNote(client, params.noteId, updateNotebook);
 
       return { paragraphs: updatedparagraphs };
     } catch (error) {
@@ -582,24 +576,22 @@ export class DefaultBackend implements NotebookAdaptor {
   clearAllFetchParagraphs = async function (
     client: ILegacyScopedClusterClient,
     params: { noteId: string },
-    _wreckOptions: optionsType
+    _wreckOptions: OptionsType
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, params.noteId);
       const updatedparagraphs: DefaultParagraph[] = [];
-      opensearchClientGetResponse.notebook.paragraphs.map(
-        (paragraph: DefaultParagraph, index: number) => {
-          const updatedParagraph = { ...paragraph };
-          updatedParagraph.output = [];
-          updatedparagraphs.push(updatedParagraph);
-        }
-      );
+      opensearchClientGetResponse.notebook.paragraphs.map((paragraph: DefaultParagraph) => {
+        const updatedParagraph = { ...paragraph };
+        updatedParagraph.output = [];
+        updatedparagraphs.push(updatedParagraph);
+      });
 
       const updateNotebook = {
         paragraphs: updatedparagraphs,
         dateModified: new Date().toISOString(),
       };
-      const opensearchClientResponse = await this.updateNote(client, params.noteId, updateNotebook);
+      await this.updateNote(client, params.noteId, updateNotebook);
 
       return { paragraphs: updatedparagraphs };
     } catch (error) {

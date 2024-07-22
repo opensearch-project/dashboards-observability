@@ -4,8 +4,8 @@
  */
 
 import 'core-js/stable';
-import 'regenerator-runtime/runtime';
 import _ from 'lodash';
+import 'regenerator-runtime/runtime';
 
 export class QueryService {
   private client: any;
@@ -13,7 +13,12 @@ export class QueryService {
     this.client = client;
   }
 
-  describeQueryInternal = async (request: any, format: string, responseFormat: string) => {
+  describeQueryInternal = async (
+    request: any,
+    format: string,
+    responseFormat: string,
+    context: any
+  ) => {
     try {
       const queryRequest = {
         query: request.body,
@@ -21,7 +26,17 @@ export class QueryService {
       const params = {
         body: JSON.stringify(queryRequest),
       };
-      const queryResponse = await this.client.asScoped(request).callAsCurrentUser(format, params);
+
+      let client = this.client;
+      let queryResponse;
+
+      const { dataSourceMDSId } = request.query;
+      if (dataSourceMDSId) {
+        client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+        queryResponse = await client.callAPI(format, params);
+      } else {
+        queryResponse = await this.client.asScoped(request).callAsCurrentUser(format, params);
+      }
       return {
         data: {
           ok: true,
@@ -29,22 +44,24 @@ export class QueryService {
         },
       };
     } catch (err) {
-      console.error(err);
+      this.logger.info('error describeQueryInternal');
+      this.logger.info(err);
+
       return {
         data: {
           ok: false,
-          resp: err.response,
+          resp: err.message,
           body: err.body,
         },
       };
     }
   };
 
-  describeSQLQuery = async (request: any) => {
-    return this.describeQueryInternal(request, 'ppl.sqlQuery', 'json');
+  describeSQLQuery = async (context: any, request: any) => {
+    return this.describeQueryInternal(request, 'ppl.sqlQuery', 'json', context);
   };
 
-  describePPLQuery = async (request: any) => {
-    return this.describeQueryInternal(request, 'ppl.pplQuery', 'json');
+  describePPLQuery = async (context: any, request: any) => {
+    return this.describeQueryInternal(request, 'ppl.pplQuery', 'json', context);
   };
 }
