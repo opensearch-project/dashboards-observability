@@ -20,6 +20,8 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { OptionType } from '../../../common/types/metrics';
+import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../common/utils/shared';
 import PPLService from '../../services/requests/ppl';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import './index.scss';
@@ -27,7 +29,6 @@ import { setSelectedDataSourceMDSId } from './redux/slices/metrics_slice';
 import { Sidebar } from './sidebar/sidebar';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricsGrid } from './view/metrics_grid';
-import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 
 interface MetricsProps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -82,6 +83,7 @@ export const Home = ({
       dispatch(setSelectedDataSourceMDSId(id));
     }, 300);
   };
+
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceSelectableConfig>();
   const dataSourceMenuComponent = useMemo(() => {
     return (
@@ -94,6 +96,7 @@ export const Home = ({
           fullWidth: true,
           // activeOption: dataSourceMDSId,
           onSelectedDataSources: onSelectedDataSource,
+          dataSourceFilter: dataSourceFilterFn,
         }}
       />
     );

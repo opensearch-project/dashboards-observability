@@ -37,6 +37,8 @@ import {
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
@@ -50,7 +52,6 @@ import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
 import { ServiceMetrics } from './service_metrics';
-import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -260,6 +261,7 @@ export function ServiceView(props: ServiceViewProps) {
             componentConfig={{
               activeOption: props.dataSourceMDSId,
               fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
             }}
           />
         )}
