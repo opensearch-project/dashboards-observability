@@ -4,15 +4,31 @@
  */
 import {
   observabilityApplicationsID,
+  observabilityGettingStartedID,
   observabilityIntegrationsID,
   observabilityMetricsID,
   observabilityNotebookID,
+  observabilityOverviewID,
 } from '../common/constants/shared';
 import { CoreSetup } from '../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
 
 export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDependencies>) {
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityOverviewID,
+      order: 10,
+    },
+  ]);
+
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityGettingStartedID,
+      order: 20,
+    },
+  ]);
+
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityApplicationsID,

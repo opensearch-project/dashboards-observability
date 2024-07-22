@@ -28,9 +28,10 @@ import golangClientJson from '../getting_started_artifacts/golang_client/golang_
 import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
 import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
 import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
+import javaJson from '../getting_started_artifacts/java_client/java_client-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
-import { fetchDashboardIds, uploadAssets } from './utils';
+import { uploadAssets } from './utils';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -52,18 +53,18 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [selectedLabel, setSelectedLabel] = useState('');
   const [labelsOptions, setLabelsOptions] = useState([]);
   const [selectedTabId, setSelectedTabId] = useState('workflow_tab');
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [selectedWorkflow, setSelectedWorkflow] = useState('');
   const [firstWorkflow, setFirstWorkflow] = useState<string>('');
   const [secondWorkflow, setSecondWorkflow] = useState<string>('');
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
 
   const technologyJsonMap: Record<string, any> = {
-    OTEL: otelJson,
-    CSV: csvFileJson,
-    Golang: golangClientJson,
-    Python: pythonJson,
-    Nginx: nginxJson,
+    otel: otelJson,
+    csv: csvFileJson,
+    golang: golangClientJson,
+    python: pythonJson,
+    nginx: nginxJson,
+    java: javaJson,
+    // 'data-prepper': dataPrepperJson,
   };
 
   useEffect(() => {
@@ -118,17 +119,16 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     let options = [];
     if (collectionMethod === 'Configure collectors') {
       options = [
-        { value: 'OTEL', text: 'Open Telemetry (structured)' },
-        { value: 'vpc-flow', text: 'VPC Flow (structured)' },
-        { value: 'Nginx', text: 'Nginx (structured)' },
-        { value: 'Java', text: 'Java (unstructured)' },
-        { value: 'Python', text: 'Python (unstructured)' },
-        { value: 'Golang', text: 'Golang (unstructured)' },
+        { value: 'otel', text: 'Open Telemetry (structured)' },
+        { value: 'nginx', text: 'Nginx (structured)' },
+        { value: 'java', text: 'Java (unstructured)' },
+        { value: 'python', text: 'Python (unstructured)' },
+        { value: 'golang', text: 'Golang (unstructured)' },
       ];
     } else if (collectionMethod === 'Upload a file CSV or JSON') {
       options = [
-        { value: 'CSV', text: 'Fluent Bit' },
-        { value: 'Data Prepper', text: 'Data Prepper' },
+        { value: 'csv', text: 'Fluent Bit' },
+        // { value: 'data-prepper', text: 'Data Prepper' },
       ];
     }
 
@@ -250,46 +250,45 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </div>
     ));
 
-    const renderIndex = (indexPatterns: any) => (
-      <>
-        <EuiText>
-          {indexPatterns?.description}
-          <br />
-          {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
-            <EuiLink key={linkIdx} href={infoLink} target="_blank">
-              More Info
-            </EuiLink>
-          ))}
+  const renderIndex = (indexPatterns: any) => (
+    <>
+      <EuiText>
+        {indexPatterns?.description}
+        <br />
+        {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
+          <EuiLink key={linkIdx} href={infoLink} target="_blank">
+            More Info
+          </EuiLink>
+        ))}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiTitle size="s">
+        <h3>Index Patterns</h3>
+      </EuiTitle>
+      <EuiListGroup>
+        {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
+          <EuiListGroupItem key={idx} label={pattern} />
+        ))}
+      </EuiListGroup>
+      <EuiButton
+        onClick={async () => {
+          console.log(specificMethod);
+          await uploadAssets(specificMethod);
+        }}
+      >
+        Create Pattern
+      </EuiButton>
+      {saveMessage && (
+        <EuiText color="secondary">
+          <p>{saveMessage}</p>
         </EuiText>
-        <EuiSpacer size="m" />
-        <EuiTitle size="s">
-          <h3>Index Patterns</h3>
-        </EuiTitle>
-        <EuiListGroup>
-          {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
-            <EuiListGroupItem key={idx} label={pattern} />
-          ))}
-        </EuiListGroup>
-        <EuiButton
-          onClick={async () => {
-            await uploadAssets(specificMethod);
-          }}
-        >
-          Create Pattern
-        </EuiButton>
-        {saveMessage && (
-          <EuiText color="secondary">
-            <p>{saveMessage}</p>
-          </EuiText>
-        )}
-        <EuiSpacer size="m" />
-        <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
-          Move to Query and Analyze Data
-        </EuiButton>
-      </>
-    );
-    
-    
+      )}
+      <EuiSpacer size="m" />
+      <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
+        Move to Query and Analyze Data
+      </EuiButton>
+    </>
+  );
 
   const tabs = [
     {

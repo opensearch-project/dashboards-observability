@@ -5,15 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import {
-  EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { coreRefs } from '../../../public/framework/core_refs';
@@ -21,7 +13,7 @@ import { coreRefs } from '../../../public/framework/core_refs';
 const alertsPluginID = 'alerting';
 const anomalyPluginID = 'anomalyDetection';
 
-// Plugin URLS
+// Plugin URLs
 const gettingStartedURL = 'observability-gettingStarted';
 const discoverURL = 'data-explorer';
 const metricsURL = 'observability-metrics';
@@ -82,82 +74,80 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
-const HomeContent = ({
-  alertsPluginExists,
-  anomalyPluginExists,
-}: {
-  alertsPluginExists: boolean;
-  anomalyPluginExists: boolean;
-}) => (
+const cardTitleStyle = {
+  textAlign: 'left',
+};
+
+const cardDescriptionStyle = {
+  textAlign: 'left',
+  marginTop: 'auto',
+};
+
+const cardStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  height: '200px',
+};
+
+const HomeContent = ({ alertsPluginExists, anomalyPluginExists }) => (
   <div>
     <EuiAccordion id="home-accordion" buttonContent="Home" paddingSize="m" initialIsOpen={true}>
       <EuiText>
         <h2>Observability overview</h2>
-        <p>Get Started</p>
+        <p>Get started</p>
       </EuiText>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <EuiCard
-            layout="vertical"
-            title="get started collecting and analyzing data"
-            description={'getting started guide'}
-            onClick={() => navigateToApp(gettingStartedURL, '/')}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            layout="vertical"
-            title="uncover insights with raw data exploration"
-            description={'with discover'}
-            onClick={() => navigateToApp(discoverURL, '/')}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            layout="vertical"
-            title="transform logs into actionable visualizations with metrics extraction"
-            description={'with metrics'}
-            onClick={() => navigateToApp(metricsURL, '/')}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            layout="vertical"
-            title="unveil performance bottlenecks with event flow visualization"
-            description={'with traces'}
-            onClick={() => navigateToApp(tracesURL, '/')}
-          />
-        </EuiFlexItem>
-        {alertsPluginExists && (
-          <EuiFlexItem>
-            <EuiCard
-              layout="vertical"
-              title="proactively identify risks with customizable alert triggers"
-              description={'with alerts'}
-              onClick={() => navigateToApp(alertsURL, '/')}
-            />
-          </EuiFlexItem>
-        )}
-        {anomalyPluginExists && (
-          <EuiFlexItem>
-            <EuiCard
-              layout="vertical"
-              title="...to be added...."
-              description={'with anomaly detection'}
-              onClick={() => navigateToApp(anomalyDetectionURL, '/')}
-            />
-          </EuiFlexItem>
-        )}
+        {[
+          {
+            id: gettingStartedURL,
+            title: 'Get started collecting and analyzing data.',
+            description: 'getting started guide',
+          },
+          {
+            id: discoverURL,
+            title: 'Uncover insights with raw data exploration.',
+            description: 'with Discover',
+          },
+          {
+            id: metricsURL,
+            title: 'Transform logs into actionable visualizations with metrics extraction.',
+            description: 'with Metrics',
+          },
+          {
+            id: tracesURL,
+            title: 'Unveil performance bottlenecks with event flow visualization.',
+            description: 'with Traces',
+          },
+          {
+            id: alertsURL,
+            title: 'Proactively identify risks with customizable alert triggers.',
+            description: 'with Alerts',
+            exists: alertsPluginExists,
+          },
+          {
+            id: anomalyDetectionURL,
+            title: 'Unveil anomalies with real-time data monitoring.',
+            description: 'with Anomaly Detectors',
+            exists: anomalyPluginExists,
+          },
+        ]
+          .filter((card) => card.exists !== false)
+          .map((card) => (
+            <EuiFlexItem key={card.id} style={{ maxWidth: '300px' }}>
+              <EuiCard
+                layout="vertical"
+                title={<div style={cardTitleStyle}>{card.title}</div>}
+                description={<div style={cardDescriptionStyle}>{card.description}</div>}
+                onClick={() => navigateToApp(card.id, '/')}
+                style={cardStyle}
+              />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGroup>
     </EuiAccordion>
     <EuiSpacer size="l" />
-    <EuiPanel style={{ minHeight: '400px' }}>
-      <EuiText>
-        <h3>Embedded Dashboard</h3>
-        <p>This section will hold the embedded dashboard.</p>
-      </EuiText>
-    </EuiPanel>
   </div>
 );
 

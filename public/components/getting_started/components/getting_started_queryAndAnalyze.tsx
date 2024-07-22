@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
   EuiCard,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,10 +16,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { fetchDashboardIds, fetchIndexPatternIds } from './utils';
-import { useEffect } from 'react';
 
 interface QueryAndAnalyzeProps {
   isOpen: boolean;
@@ -28,34 +26,31 @@ interface QueryAndAnalyzeProps {
   indexPatterns: string[];
 }
 
-const technologyPaths: Record<string, string> = {
-  OTEL: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
-  CSV: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
-  Golang: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
-  Python: 'view/c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
-};
-
 export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   isOpen,
   onToggle,
   selectedTechnology,
-  indexPatterns,
 }) => {
-  const [searchValue, setSearchValue] = useState<string>('');
-
   const [patternsContent, setPatternsContent] = useState([]);
+  const [dashboardsContent, setDashboardsContent] = useState([]);
 
-  // Remove view
-  const currentPath = technologyPaths[selectedTechnology];
+  const fetchIndexPatternContent = async () => {
+    try {
+      const content = await fetchIndexPatternIds(selectedTechnology);
+      setPatternsContent(content.data.length !== 0 ? content.data : []);
+    } catch (error) {
+      console.error('Error fetching index patterns:', error);
+      setPatternsContent([]);
+    }
 
-  const fetchIndexPatternContent = async () =>{
-    const content = await fetchIndexPatternIds(currentPath);
-    setPatternsContent(content);
-  }
-
-  useEffect(() => {
-    fetchIndexPatternContent();
-  }, [])
+    try {
+      const content = await fetchDashboardIds(selectedTechnology);
+      setDashboardsContent(content.data.length !== 0 ? content.data : []);
+    } catch (error) {
+      console.error('Error fetching index patterns:', error);
+      setDashboardsContent([]);
+    }
+  };
 
   const redirectToDashboards = (path: string) => {
     coreRefs?.application!.navigateToApp('dashboards', {
@@ -63,17 +58,17 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
     });
   };
 
+  useEffect(() => {
+    if (selectedTechnology !== '') {
+      fetchIndexPatternContent();
+    }
+  }, [selectedTechnology]);
+
   const handleIndexPatternClick = (patternId: string) => {
-    // console.log(`Redirect to explorer with pattern: ${pattern}`);
-    redirectToDiscover(patternId);
-  };
-  const redirectToDiscover = (indexPatternId: string) => {
     coreRefs?.application!.navigateToApp('data-explorer', {
-      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${indexPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${patternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
     });
   };
-
-
 
   return (
     <EuiAccordion
@@ -94,11 +89,14 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup wrap>
-          {patternsContent.map((pattern) => (
-            <EuiFlexItem key={pattern.id} style={{ maxWidth: '200px' }}>
-              <EuiButton onClick={() => handleIndexPatternClick(pattern.id)}>{pattern.title}</EuiButton>
-            </EuiFlexItem>
-          ))}
+          {patternsContent.length !== 0 &&
+            patternsContent.map((pattern) => (
+              <EuiFlexItem key={pattern.id} style={{ maxWidth: '200px' }}>
+                <EuiButton onClick={() => handleIndexPatternClick(pattern.id)}>
+                  {pattern.title}
+                </EuiButton>
+              </EuiFlexItem>
+            ))}
         </EuiFlexGroup>
         <EuiHorizontalRule />
         <EuiTitle size="m">
@@ -109,25 +107,23 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             <strong>Visualize your data</strong>
           </p>
         </EuiText>
-        <EuiText>
-          <p>
-            Visualize your data with these recommended out-of-the-box dashboards for your data, or
-            create a new dashboard from scratch.
-          </p>
-        </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup wrap>
-          <EuiFlexItem style={{ maxWidth: '300px' }}>
-            <EuiCard
-              icon={<div />}
-              title={selectedTechnology}
-              description={`Explore the ${selectedTechnology} dashboard`}
-              onClick={() => {
-                const dashboards = await fetchDashboardIds(technologyPaths[selectedTechnology])
-                redirectToDashboards(dashboards[0].id);
-              }}
-            />
-          </EuiFlexItem>
+          {dashboardsContent.length !== 0 &&
+            dashboardsContent.map((dashboard) => (
+              <EuiFlexItem style={{ maxWidth: '300px' }}>
+                <EuiCard
+                  icon={<div />}
+                  title={selectedTechnology}
+                  description={`Explore the ${selectedTechnology} dashboard`}
+                  onClick={() => {
+                    // const theID = fetchDashboardIds(selectedTechnology);
+                    redirectToDashboards(`/view/${dashboard.id}`);
+                  }}
+                />
+              </EuiFlexItem>
+            ))}
+
           <EuiFlexItem style={{ maxWidth: '300px' }}>
             <EuiCard
               icon={<div />}

@@ -223,7 +223,7 @@
         "info": ["https://opensearch.org/docs/latest/im-plugin/index-templates","https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md"],
         "content": "PUT _component_template/http",
         "description": "Setup simple schema http component template in the dev console",
-        "index-template": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/http-1.0.0.mapping.json"]
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/schema/http-1.0.0.mapping.json"
       },
       {
         "type": "communication",
@@ -245,7 +245,7 @@
       "type": ["logs"],
       "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/assets/nginx-index-patterns-1.0.0.ndjson",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/assets/getting-started-tutorial-1.0.0.ndjson",
       "index-patterns-name": ["ss4o_logs-*-*"]
     }
   },

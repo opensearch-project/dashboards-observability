@@ -7,7 +7,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { uploadBundle } from '../../integrations/components/upload_flyout';
 
 const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'indexPatterns') => {
-  const assetFilterParam = assetFilter ? `/${assetFilter}/` : '';
+  const assetFilterParam = assetFilter ? `${assetFilter}/` : '';
   const http = coreRefs.http;
   const responeData = await http!
     .get(`/api/observability/gettingStarted/${assetFilterParam}${tutorialId}`)

@@ -301,21 +301,6 @@ export class ObservabilityPlugin
         defaultRoute
       );
     };
-    core.application.register({
-      id: observabilityOverviewID,
-      title: observabilityOverviewTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      order: observabilityOverviewPluginOrder,
-      mount: appMountWithStartPage('overview'),
-    });
-
-    core.application.register({
-      id: observabilityGettingStartedID,
-      title: observabilityGettingStartedTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      order: observabilityGettingStartedPluginOrder,
-      mount: appMountWithStartPage('gettingStarted'),
-    });
 
     core.application.register({
       id: observabilityMetricsID,
@@ -334,6 +319,22 @@ export class ObservabilityPlugin
     });
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityOverviewID,
+        title: observabilityOverviewTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityOverviewPluginOrder,
+        mount: appMountWithStartPage('overview'),
+      });
+
+      core.application.register({
+        id: observabilityGettingStartedID,
+        title: observabilityGettingStartedTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityGettingStartedPluginOrder,
+        mount: appMountWithStartPage('gettingStarted'),
+      });
+
       core.application.register({
         id: 'observability-traces-nav',
         title: observabilityTracesTitle,
