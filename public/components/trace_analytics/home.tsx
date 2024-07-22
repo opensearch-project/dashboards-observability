@@ -6,7 +6,7 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps, Redirect } from 'react-router-dom';
+import { HashRouter, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -21,6 +21,7 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
+import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
 import { getAttributes } from './components/common/helper_functions';
@@ -283,6 +284,7 @@ export const Home = (props: HomeProps) => {
             fullWidth: true,
             activeOption: dataSourceMDSId,
             onSelectedDataSources: onSelectedDataSource,
+            dataSourceFilter: dataSourceFilterFn,
           }}
         />
       )}
