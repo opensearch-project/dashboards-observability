@@ -8,9 +8,11 @@ import { SavedQuery, SavedVisualization } from './explorer';
 
 export const VISUALIZATION_SAVED_OBJECT = 'observability-visualization';
 export const SEARCH_SAVED_OBJECT = 'observability-search';
+export const NOTEBOOK_SAVED_OBJECT = 'observability-notebook';
 export const OBSERVABILTY_SAVED_OBJECTS = [
   VISUALIZATION_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
+  NOTEBOOK_SAVED_OBJECT,
 ] as const;
 export const SAVED_OBJECT_VERSION = 1;
 
