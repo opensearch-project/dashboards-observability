@@ -32,9 +32,6 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityDataConnectionsID,
-  observabilityDataConnectionsPluginOrder,
-  observabilityDataConnectionsTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -382,23 +379,6 @@ export class ObservabilityPlugin
     });
 
     registerAllPluginNavGroups(core);
-
-    core.application.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDataConnectionsPluginOrder,
-      mount: appMountWithStartPage('dataconnections'),
-    });
-
-    setupDeps.managementOverview?.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      order: 9070,
-      description: i18n.translate('observability.dataconnectionsDescription', {
-        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
-      }),
-    });
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
