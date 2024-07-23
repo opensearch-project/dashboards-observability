@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    volumes:
+      - ./data:/fluent-bit/data
+    command: ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/data/fluent-bit.conf"]
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-data:
+
+networks:
+  opensearch-net:
+    driver: bridge

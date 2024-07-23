@@ -15,6 +15,7 @@ import { registerDataConnectionsRoute } from './data_connections/data_connection
 import { registerDatasourcesRoute } from './datasources/datasources_router';
 import { registerDslRoute } from './dsl';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
+import { registerGettingStartedRoutes } from './getting_started/getting_started_router';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
 import { registerNoteRoute } from './notebooks/noteRouter';
@@ -56,4 +57,5 @@ export function setupRoutes({
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
   registerQueryAssistRoutes(router);
+  registerGettingStartedRoutes(router);
 }

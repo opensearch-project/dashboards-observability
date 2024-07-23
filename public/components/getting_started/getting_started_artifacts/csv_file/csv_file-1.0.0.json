@@ -1,0 +1,166 @@
+{
+  "name": "csv",
+  "version": "1.0.0",
+  "displayName": "csv-file",
+  "description": "Upload a CSV file",
+  "license": "Apache-2.0",
+  "type": "logs",
+  "labels": ["Logs", "Unstructured"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/csv_file/info",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "CSV Logo",
+      "path": "logo.svg"
+    },
+    "gallery": [
+      {
+        "annotation": "Fluent-Bit getting started tutorial",
+        "path": "fluent-bit-getting-started-dashboard.png",
+        "tags":["dashboard","tutorial"],
+        "savedObject-id": "csv-getting-started-tutorial-1.0.0"
+      },
+      {
+        "annotation": "Data-Prepper Logo",
+        "path": "data-pepper.png"
+      },
+      {
+        "annotation": "Fluent-Bit Logo",
+        "path": "fluentbit.png"
+      }
+    ]
+  },
+  "components": [],
+  "getting-started": {
+    "info": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/info/Getting-Started.md",
+    "ingestion": ["fluent-bit","data-prepper"],
+    "structured": "true",
+    "technology": "csv",
+    "protocol": [],
+    "live-sample": "true",
+    "workflows": [
+      {
+        "name": "QuickStart",
+        "description": "This is a docker-composed based getting started live example with CSV file upload",
+        "steps": [
+          {
+            "name": "Create docker-network",
+            "label": "Environment setting",
+            "phase": "docker",
+            "type": "console-cmd",
+            "content": "docker network create opensearch-net",
+            "description": "Before running any docker-compose files, create the opensearch-net network"
+          },
+          {
+            "name": "Setup docker .env file",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "input-params": [
+              {
+                "name": "OPENSEARCH_HOST",
+                "description": "Opensearch host",
+                "type": "host-name"
+              },
+              {
+                "name": "OPENSEARCH_DASHBOARD_HOST",
+                "description": "Opensearch Dashboard host",
+                "type": "host-name"
+              }
+            ],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/.env",
+            "description": "Setup docker-compose env variables "
+          },
+          {
+            "name": "Setup fluent-bit folder",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/data/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/data/parsers.conf"
+            ],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/csv_file/getting-started/fluent-bit/data/fluent-bit.conf \\\n     https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf\n",
+            "description": "Setup docker-compose fluent-bit's service configuration "
+          },
+          {
+            "name": "Run docker-compose",
+            "label": "live container",
+            "type": "file-url",
+            "phase": "docker",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit.yml"],
+            "description": "Run docker-compose for the nginx live example and see the generated index",
+            "content": "wget -O fluent-bit.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit.yml && docker-compose -f fluent-bit.yml up -d\n"
+          }
+        ]
+      },
+      {
+        "name": "Fluent-bit file upload",
+        "description": "This is a fluent-bit based CSV file upload getting started instructions tutorial",
+        "steps": [
+          {
+            "name": "Fluent-Bit Parser",
+            "type": "console-cmd",
+            "phase": "ingestion",
+            "label": "Log Parsing",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"],
+            "description": "Setup Fluent-Bit parser config file parsing csv file",
+            "content": "[PARSER]\n    Name        csv\n    Format      regex\n    Regex       ^(?<timestamp>[^,]+),(?<log_level>[^,]+),(?<message>[^,]+),(?<application>[^,]+),(?<host>[^,]+)$\n    Time_Key    timestamp\n    Time_Format %Y-%m-%d %H:%M:%S\n"
+          },
+          {
+            "name": "Fluent-Bit Setup",
+            "type": "console-cmd",
+            "phase": "ingestion",
+            "label": "Agent Set-Up",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf"],
+            "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
+            "input-params": [
+              {
+                "name": "opensearch-node1",
+                "description": "Opensearch host",
+                "type": "host-name"
+              },
+              {
+                "name": "ss4o_logs-nginx-prod",
+                "description": "logs sink index name",
+                "type": "index-name"
+              }
+            ],
+            "content": "[SERVICE]\n    Flush        1\n    Log_Level    info\n    Parsers_File parsers.conf\n\n[INPUT]\n    Name         tail\n    Path         /fluent-bit/data/*.csv\n    Parser       csv\n    Tag          csv\n\n[INPUT]\n    Name         dummy\n    Dummy        {\"timestamp\":\"2024-07-16 12:09:00\", \"log_level\":\"INFO\", \"message\":\"Dummy log message\", \"application\":\"App2\", \"host\":\"host2\"}\n    Tag          dummy\n\n[OUTPUT]\n    Name         opensearch\n    Host         opensearch-node1\n    Match        *\n    Port         9200\n    Type         _doc\n    Index        logs-index\n    tls             On\n    tls.verify      Off\n    Suppress_Type_Name On\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#"
+          }
+        ]
+      }
+    ],
+    "schema": [
+      {
+        "type": "csv-logs",
+        "info": ["https://opensearch.org/docs/latest/im-plugin/index-templates"],
+        "content": "PUT _index_template/csv_logs_template",
+        "description": "Setup sample csv based schema logs index template in the dev console",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/schema/csv-logs-1.0.0.mapping.json",
+        "index-pattern-name": "logs-*"
+      }
+    ],
+    "index-patterns": {
+      "type": ["logs"],
+      "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
+      "description": "Import index patterns `.ndjson` file to the saved objects",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/assets/fluent-bit-csv-upload-1.0.0.ndjson",
+      "index-patterns-name": ["logs-*"]
+    }
+  },
+  "assets": [
+    { "name": "fluent-bit-csv-upload", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["dashboards"] }
+  ],
+  "sampleData": {
+    "path": "logs.csv"
+  }
+}
