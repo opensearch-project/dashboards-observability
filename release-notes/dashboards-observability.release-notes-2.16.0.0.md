@@ -2,6 +2,11 @@
 
 Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 
+### Bugfixes
+
+* fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
+
+
 ### Features
 * replace dashboards with the getting started dashboards ([#1963](https://github.com/opensearch-project/dashboards-observability/pull/1963))
 * Observability Overview and GettingStarted ([#1957](https://github.com/opensearch-project/dashboards-observability/pull/1957))
@@ -21,7 +26,3 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 
 ### Maintenance
 * updated java version from 11 to 21 ([#1940](https://github.com/opensearch-project/dashboards-observability/pull/1940))
-
-### UNKNOWN (Needs Manual Categorization)
-* fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
-* Increment version to 3.0.0.0 ([#1361](https://github.com/opensearch-project/dashboards-observability/pull/1361))
