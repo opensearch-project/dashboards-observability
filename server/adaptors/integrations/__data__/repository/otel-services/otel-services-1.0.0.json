@@ -70,35 +70,7 @@
   ],
   "assets": [
       {
-        "name": "otel_services_dashboard",
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
-      },
-      {
-        "name": "otel_single_service_dashboard",
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
-      },
-      {
-        "name": "otel_ingestion_rate_dashboard",
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
-      },
-      {
-        "name": "otel_amp_network_metrics_dashboard",
-        "version": "1.0.0",
-        "extension": "ndjson",
-        "type": "savedObjectBundle",
-        "workflows": ["dashboards"]
-      },
-      {
-        "name": "otel_apm_network_services",
+        "name": "otel-index-patterns",
         "version": "1.0.0",
         "extension": "ndjson",
         "type": "savedObjectBundle",
