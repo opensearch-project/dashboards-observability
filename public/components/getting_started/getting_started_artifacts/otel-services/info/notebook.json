@@ -1,0 +1,832 @@
+GET _cat/indices/otel*
+
+# This is a SimpleSchema for Observability based mapping setup integration
+# The OTEL schema defines the four signale which compose the root elements of the OTEL protocol. :
+
+# (Traces) Setup ss4o_traces_template
+# (Logs) Setup ss4o_logs_template
+# (Metrics) Setup ss4o_metrics_template
+# (Services) Setup ss4o_services_template
+
+# ------------------------------------------------------------------------------------------------------------------------------------
+#
+# The workflow includes the following steps
+#  - create a new `ss4o_traces_template` index template
+#  - create a new `ss4o_logs_template` index template
+#  - create a new `ss4o_metrics_template` index template
+#  - create a new `ss4o_services_template` index template
+
+
+# For Additional Information visit : https://github.com/opensearch-project/opensearch-catalog/integrations/observability/otel-schema-setup/info
+# ------------------------------------------------------------------------------------------------------------------------------------
+
+# Create the ss4o_traces_template index template
+# >> ADD the "data_stream":{} line to apply for data-streams
+PUT  _index_template/ss4o_traces_template
+{
+  "index_patterns": [
+    "ss4o_traces-*-*"
+  ],
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "traces",
+        "component": "trace",
+        "correlations": [
+          {
+            "field": "serviceName",
+            "foreign-schema": "services",
+            "foreign-field": "spanId"
+          }
+        ]
+      },
+      "dynamic_templates": [
+        {
+          "events_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "events.attributes.*"
+          }
+        },
+        {
+          "links_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "links.attributes.*"
+          }
+        },
+        {
+          "instrumentation_scope_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "instrumentationScope.attributes.*"
+          }
+        }
+      ],
+      "_source": {
+        "enabled": true
+      },
+      "properties": {
+        "traceId": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "spanId": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "traceState": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "parentSpanId": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "name": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "kind": {
+          "ignore_above": 128,
+          "type": "keyword"
+        },
+        "startTime": {
+          "type": "date_nanos"
+        },
+        "endTime": {
+          "type": "date_nanos"
+        },
+        "droppedAttributesCount": {
+          "type": "long"
+        },
+        "droppedEventsCount": {
+          "type": "long"
+        },
+        "droppedLinksCount": {
+          "type": "long"
+        },
+        "status": {
+          "properties": {
+            "code": {
+              "type": "long"
+            },
+            "message": {
+              "ignore_above": 128,
+              "type": "keyword"
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "serviceName": {
+              "type": "keyword"
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "namespace": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 56,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "events": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "@timestamp": {
+              "type": "date_nanos"
+            },
+            "observedTimestamp": {
+              "type": "date_nanos"
+            }
+          }
+        },
+        "links": {
+          "type": "nested",
+          "properties": {
+            "traceId": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "spanId": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "traceState": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "instrumentationScope": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "droppedAttributesCount": {
+              "type": "integer"
+            },
+            "schemaUrl": {
+              "type": "keyword"
+            }
+          }
+        },
+        "schemaUrl": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases" : {
+        "otel-v1-apm-span" : {}
+    }
+  },
+  "composed_of": [],
+  "version": 1,
+  "_meta": {
+    "description": "Observability Traces Mapping Template",
+    "catalog": "observability",
+    "type": "traces",
+    "correlations": [
+      {
+        "field": "serviceName",
+        "foreign-schema": "services",
+        "foreign-field": "serviceName"
+      }
+    ]
+  }
+}
+
+# Create the ss4o_logs_template index template
+# >> add the "data_stream":{} line to apply for  data-streams
+PUT  _index_template/ss4o_logs_template
+{
+  "index_patterns": ["ss4o_logs-*-*"],
+  "priority": 900,
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "log",
+        "correlations": [
+          {
+            "field": "spanId",
+            "foreign-schema": "traces",
+            "foreign-field": "spanId"
+          },
+          {
+            "field": "traceId",
+            "foreign-schema": "traces",
+            "foreign-field": "traceId"
+          }
+        ]
+      },
+      "_source": {
+        "enabled": true
+      },
+      "dynamic_templates": [
+        {
+          "instrumentation_scope_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "instrumentationScope.attributes.*"
+          }
+        }
+      ],
+      "properties": {
+        "severity": {
+          "properties": {
+            "number": {
+              "type": "long"
+            },
+            "text": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "namespace": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 56,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "body": {
+          "type": "text"
+        },
+        "@message": {
+          "type": "alias",
+          "path": "body"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "observedTimestamp": {
+          "type": "date"
+        },
+        "observerTime": {
+          "type": "alias",
+          "path": "observedTimestamp"
+        },
+        "traceId": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "spanId": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "schemaUrl": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "instrumentationScope": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 128
+                }
+              }
+            },
+            "version": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "dropped_attributes_count": {
+              "type": "integer"
+            },
+            "schemaUrl": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "domain": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "source": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "category": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "kind": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "result": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "exception": {
+              "properties": {
+                "message": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "stacktrace": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "mapping": {
+          "total_fields": {
+            "limit": 10000
+          }
+        },
+        "refresh_interval": "5s"
+      }
+    },
+    "aliases" : {
+        "otel-events" : {}
+    }
+  },
+  "composed_of": [],
+  "version": 1
+}
+
+# Create the ss4o_metrics_template index template
+# >> add the "data_stream":{} line to apply for data-streams
+PUT  _index_template/ss4o_metrics_template
+{
+  "index_patterns": [
+    "ss4o_metrics-*-*"
+  ],
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "metrics",
+        "component": "metrics",
+        "correlations" : [
+          {
+            "field": "spanId",
+            "foreign-schema" : "traces",
+            "foreign-field" : "spanId"
+          },
+          {
+            "field": "traceId",
+            "foreign-schema" : "traces",
+            "foreign-field" : "traceId"
+          }
+        ]
+      },
+      "_source": {
+        "enabled": true
+      },
+      "dynamic_templates": [
+        {
+          "exemplar_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "exemplar.attributes.*"
+          }
+        },
+        {
+          "instrumentation_scope_attributes_map": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "path_match": "instrumentationScope.attributes.*"
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+            "type": "keyword",
+            "ignore_above": 256
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "namespace": {
+                  "ignore_above": 128,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 56,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "unit": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "kind": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "aggregationTemporality": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "monotonic": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "date"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "observedTimestamp": {
+          "type": "date_nanos"
+        },
+        "value@int": {
+          "type": "integer"
+        },
+        "value@double": {
+          "type": "double"
+        },
+        "buckets": {
+          "type" : "nested",
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "sum": {
+              "type": "double"
+            },
+            "max": {
+              "type": "float"
+            },
+            "min": {
+              "type": "float"
+            }
+          }
+        },
+        "bucketCount": {
+          "type": "long"
+        },
+        "bucketCountsList": {
+          "type": "long"
+        },
+        "explicitBoundsList": {
+          "type": "float"
+        },
+        "explicitBoundsCount": {
+          "type": "float"
+        },
+        "quantiles": {
+          "properties": {
+            "quantile": {
+              "type": "double"
+            },
+            "value": {
+              "type": "double"
+            }
+          }
+        },
+        "quantileValuesCount": {
+          "type": "long"
+        },
+        "positiveBuckets": {
+          "type" : "nested",
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "max": {
+              "type": "float"
+            },
+            "min": {
+              "type": "float"
+            }
+          }
+        },
+        "negativeBuckets": {
+          "type" : "nested",
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "max": {
+              "type": "float"
+            },
+            "min": {
+              "type": "float"
+            }
+          }
+        },
+        "negativeOffset": {
+          "type": "integer"
+        },
+        "positiveOffset": {
+          "type": "integer"
+        },
+        "zeroCount": {
+          "type": "long"
+        },
+        "scale": {
+          "type": "long"
+        },
+        "max": {
+          "type": "float"
+        },
+        "min": {
+          "type": "float"
+        },
+        "sum": {
+          "type": "float"
+        },
+        "count": {
+          "type": "long"
+        },
+        "exemplar": {
+          "properties": {
+            "time": {
+              "type": "date"
+            },
+            "traceId": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "spanId": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "instrumentationScope": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "version": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "droppedAttributesCount": {
+              "type": "integer"
+            },
+            "schemaUrl": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "schemaUrl": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "aliases" : {
+        "otel-metrics" : {}
+    },
+    "settings": {
+      "index": {
+        "mapping": {
+          "total_fields": {
+            "limit": 10000
+          }
+        },
+        "refresh_interval": "5s"
+      }
+    }
+  },
+  "composed_of": [],
+  "version": 1,
+  "_meta": {
+    "description": "Observability Metrics Mapping Template",
+    "catalog": "observability",
+    "type": "metrics",
+    "correlations" : [
+      {
+        "field": "spanId",
+        "foreign-schema" : "traces",
+        "foreign-field" : "spanId"
+      },
+      {
+        "field": "traceId",
+        "foreign-schema" : "traces",
+        "foreign-field" : "traceId"
+      }
+    ]
+  }
+}
+
+# Create the ss4o_services_template index template
+# >> add the "data_stream":{} line to apply for data-streams
+PUT  _index_template/ss4o_services_template
+{
+  "index_patterns": [
+    "ss4o_services-*-*"
+  ],
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "traces",
+        "component": "services",
+        "correlations": [
+          {
+            "field": "traceGroupName",
+            "foreign-schema": "traceGroups",
+            "foreign-field": "traceGroup"
+          }
+        ]
+      },
+      "_source": {
+        "enabled": true
+      },
+      "properties": {
+        "destination": {
+          "properties": {
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "resource": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "hashId": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "serviceName": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "kind": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "target": {
+          "properties": {
+            "domain": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "resource": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "traceGroupName": {
+          "type": "keyword",
+          "ignore_above": 1024
+        }
+      }
+    },
+     "aliases" : {
+        "open otel-v1-apm-service-map" : {}
+    },
+   "settings": {
+      "index": {
+        "mapping": {
+          "total_fields": {
+            "limit": 10000
+          }
+        },
+        "refresh_interval": "5s"
+      }
+    }
+  },
+  "composed_of": [],
+  "version": 1,
+  "_meta": {
+    "description": "Simple Schema For Observability Service",
+    "catalog": "observability",
+    "type": "services",
+    "correlations": [
+      {
+        "field": "traceGroupName",
+        "foreign-schema": "traceGroups",
+        "foreign-field": "traceGroup"
+      }
+    ]
+  }
+}

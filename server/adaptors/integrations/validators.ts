@@ -107,7 +107,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     },
   },
   required: ['name', 'version', 'license', 'type', 'components', 'assets'],
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 const instanceSchema: JSONSchemaType<IntegrationInstance> = {

@@ -1,0 +1,360 @@
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:33:54.885Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:33:59.873Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:34:04.874Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:34:09.877Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:34:14.878Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:34:19.879Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:34:24.883Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:34:29.884Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:34:34.722Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:34:39.717Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:34:41.023Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:34:46.020Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:35:09.482Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:35:14.235Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:35:15.049Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:35:15.960Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:35:20.955Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:35:25.955Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:35:30.959Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:35:35.959Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:35:40.961Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:35:45.963Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:35:50.967Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:35:55.968Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:36:00.969Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:36:05.970Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:36:10.974Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:36:15.976Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:36:20.978Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:36:25.980Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:36:30.983Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:36:35.984Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:36:40.987Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:36:45.990Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:36:50.991Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:36:55.992Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:37:00.994Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:37:05.995Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:37:10.998Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:37:16.002Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:37:21.009Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:37:26.011Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:37:31.017Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:37:36.018Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:37:41.019Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:37:46.020Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:37:51.022Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:37:56.024Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:38:01.037Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:38:06.038Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:38:11.039Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:38:16.040Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:38:21.045Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:38:26.045Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:38:31.052Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:38:36.056Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:38:41.059Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:38:46.061Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:38:51.066Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:38:56.067Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:39:01.070Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:39:06.071Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:39:11.072Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:39:16.074Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:39:21.078Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:39:26.080Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:39:31.082Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:39:36.084Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:39:41.088Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:39:46.090Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:39:51.090Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:39:56.096Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:40:01.097Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:40:06.100Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:40:11.103Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:40:16.107Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:40:21.111Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:40:26.113Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:40:31.113Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:40:36.116Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:40:41.118Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:40:46.122Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:40:51.123Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:40:56.123Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:41:01.127Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:41:06.130Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:41:11.134Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:41:16.139Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:41:21.140Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:41:26.143Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:41:31.146Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:41:36.146Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:41:41.150Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:41:46.152Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:41:51.154Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:41:56.156Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:42:01.157Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:42:06.159Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:42:11.161Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:42:16.163Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:42:21.165Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:42:26.168Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:42:31.170Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:42:36.173Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:42:41.174Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:42:46.176Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:42:51.177Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:42:56.181Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:43:01.182Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:43:06.184Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:43:11.186Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:43:16.189Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:43:21.190Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:43:26.191Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:43:31.196Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:43:36.200Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:43:41.201Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:43:46.204Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:43:51.206Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:43:56.207Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:44:01.209Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:44:06.210Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:44:11.213Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:44:16.215Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:44:21.217Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:44:26.217Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:44:31.222Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:44:36.224Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:44:41.226Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:44:46.226Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:44:51.229Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:44:56.231Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:45:01.233Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:45:06.235Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:45:11.236Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:45:16.238Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:45:21.239Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:45:26.244Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:45:31.248Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:45:36.250Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:45:41.253Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:45:46.256Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:45:51.260Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:45:56.262Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:46:01.263Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:46:06.264Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:46:11.266Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:46:16.270Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:46:21.273Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:46:26.275Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:46:31.281Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:46:36.282Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:46:41.284Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:46:46.286Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:46:51.290Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:46:56.291Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:47:01.293Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:47:06.294Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:47:11.296Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:47:16.296Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:47:21.299Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:47:26.301Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:47:31.303Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:47:36.303Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:47:41.305Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:47:46.307Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:47:51.311Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:47:56.312Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:48:01.317Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:48:06.319Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:48:11.321Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:48:16.322Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:48:21.324Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:48:26.326Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:48:31.331Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:48:36.331Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:48:41.332Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:48:46.333Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:48:51.336Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:48:56.337Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:49:01.339Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:49:06.342Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:49:11.344Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:49:16.346Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:49:21.348Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:49:26.349Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:49:31.349Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:49:36.352Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:49:41.354Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:49:46.357Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:49:51.362Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:49:56.363Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:50:01.365Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:50:06.366Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:50:11.370Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:50:16.375Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:50:21.376Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:50:26.377Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:50:31.380Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:50:36.383Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:50:41.384Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:50:46.386Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:50:51.388Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:50:56.393Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:51:01.396Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:51:06.398Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:51:11.400Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:51:16.403Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:51:21.405Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:51:26.410Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:51:31.412Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:51:36.414Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:51:41.420Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:51:46.422Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:51:51.426Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:51:56.427Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:52:01.430Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:52:06.431Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:11.434Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:16.435Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:21.437Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:52:26.441Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:52:31.443Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:36.446Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:41.453Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:52:46.456Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:52:51.457Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:52:56.459Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:53:01.460Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:53:06.462Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:53:11.464Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:53:16.466Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:53:21.467Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:53:26.477Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:53:31.478Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:53:36.481Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:53:41.483Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:53:46.484Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:53:51.489Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:53:56.490Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:54:01.492Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:54:06.494Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:54:11.495Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:54:16.496Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:54:21.497Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:54:26.499Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:54:31.500Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:54:36.509Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:54:41.510Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:54:46.511Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:54:51.514Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:54:56.517Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:55:01.519Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:55:06.522Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:55:11.526Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:55:16.528Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:55:21.528Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:55:26.533Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:55:31.538Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:55:36.538Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:55:41.544Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:55:46.546Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:55:51.547Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:55:56.548Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:56:01.553Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:56:06.554Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:56:11.559Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:56:16.560Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:56:21.562Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:56:26.562Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:56:31.568Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:56:36.569Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:56:41.572Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:56:46.573Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:56:51.580Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:56:56.578Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:57:01.579Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:57:06.580Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:57:11.581Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:57:16.583Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:57:21.586Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:57:26.587Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:57:31.589Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:57:36.590Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:57:41.591Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:57:46.592Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:57:51.593Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:57:56.594Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:58:01.597Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:58:06.600Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:58:11.601Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:58:16.604Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:58:21.605Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:58:26.607Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:58:31.609Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:58:36.611Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:58:41.612Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:58:46.613Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:58:51.614Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:58:56.615Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T04:59:01.619Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:59:06.620Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:59:11.622Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T04:59:16.626Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T04:59:21.629Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:59:26.633Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T04:59:31.634Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:59:36.636Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T04:59:41.638Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T04:59:46.639Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:59:51.641Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T04:59:56.643Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:00:01.648Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T05:00:06.652Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:00:11.655Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:00:16.660Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T05:00:21.665Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:00:26.666Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:00:31.669Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:00:36.671Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:00:41.672Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:00:46.674Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T05:00:51.676Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T05:00:56.676Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:01:01.680Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:01:06.680Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T05:01:11.681Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:01:16.684Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T05:01:21.685Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:01:26.688Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:01:31.690Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:01:36.696Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:01:41.697Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T05:01:46.701Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:01:51.705Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T05:01:56.708Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:02:01.712Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:06.713Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:02:11.722Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:02:16.723Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:21.729Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T05:02:26.730Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:31.732Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:36.733Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:02:41.738Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:46.741Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:02:51.747Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Connection timeout.","timestamp":"2024-07-22T05:02:56.750Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:03:01.752Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:03:06.755Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:03:11.756Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"User logged in.","timestamp":"2024-07-22T05:03:16.758Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Application started successfully.","timestamp":"2024-07-22T05:03:21.759Z"}
+{"level":"info","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:03:26.760Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:03:31.763Z"}
+{"level":"warning","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:03:36.764Z"}
+{"level":"error","module":"main","function":"start_app","source":"your_java_project","message":"Error accessing database.","timestamp":"2024-07-22T05:03:41.766Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"File not found.","timestamp":"2024-07-22T05:03:46.767Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"Data saved successfully.","timestamp":"2024-07-22T05:03:51.768Z"}
+{"level":"debug","module":"main","function":"start_app","source":"your_java_project","message":"User logged out.","timestamp":"2024-07-22T05:03:56.770Z"}

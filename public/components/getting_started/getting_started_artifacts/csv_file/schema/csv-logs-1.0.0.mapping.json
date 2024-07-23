@@ -1,0 +1,29 @@
+{
+  "index_patterns": ["logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "log_level": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text"
+        },
+        "application": {
+          "type": "keyword"
+        },
+        "host": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

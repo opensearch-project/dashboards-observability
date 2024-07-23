@@ -1,0 +1,1172 @@
+[
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "Counts the total number of given recommendations",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "recommendations",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "app_recommendations_counter",
+      "startTime": "2024-01-28T02:11:16.172176876Z",
+      "attributes": {
+        "instrumentationScope.name": "recommendationservice",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.recommendation@type": "catalog"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 750
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "idle",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 104012.75
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "user",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 966.33
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "system",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 402.61
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "irq",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 0
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 2,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "idle",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 103649.86
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 2,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "user",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 1410.36
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 2,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "system",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 366.29
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 2,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "irq",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 0
+  },
+  {
+      "kind": "SUM",
+      "flags": 0,
+      "description": "System CPU time",
+      "serviceName": "recommendationservice",
+      "schemaUrl": "",
+      "isMonotonic": true,
+      "unit": "seconds",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "name": "system.cpu.time",
+      "startTime": "2024-01-28T02:12:04.086412026Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 3,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "idle",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "value": 103931.09
+  },
+  {
+    "kind": "HISTOGRAM",
+    "buckets": [
+      {
+        "min": -3.4028234663852886e+38,
+        "max": 2,
+        "count": 1
+      },
+      {
+        "min": 2,
+        "max": 4,
+        "count": 1
+      },
+      {
+        "min": 4,
+        "max": 6,
+        "count": 0
+      },
+      {
+        "min": 6,
+        "max": 8,
+        "count": 0
+      },
+      {
+        "min": 8,
+        "max": 10,
+        "count": 0
+      },
+      {
+        "min": 10,
+        "max": 50,
+        "count": 0
+      },
+      {
+        "min": 50,
+        "max": 100,
+        "count": 0
+      },
+      {
+        "min": 100,
+        "max": 200,
+        "count": 0
+      },
+      {
+        "min": 200,
+        "max": 400,
+        "count": 0
+      },
+      {
+        "min": 400,
+        "max": 800,
+        "count": 0
+      },
+      {
+        "min": 800,
+        "max": 1000,
+        "count": 0
+      },
+      {
+        "min": 1000,
+        "max": 1400,
+        "count": 0
+      },
+      {
+        "min": 1400,
+        "max": 2000,
+        "count": 0
+      },
+      {
+        "min": 2000,
+        "max": 5000,
+        "count": 0
+      },
+      {
+        "min": 5000,
+        "max": 10000,
+        "count": 0
+      },
+      {
+        "min": 10000,
+        "max": 15000,
+        "count": 0
+      },
+      {
+        "min": 15000,
+        "max": 3.4028234663852886e+38,
+        "count": 0
+      }
+    ],
+    "count": 2,
+    "bucketCountsList": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "flags": 0,
+    "description": "",
+    "sum": 3.4693509999999996,
+    "serviceName": "featureflagservice",
+    "schemaUrl": "",
+    "unit": "ms",
+    "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+    "exemplars": [],
+    "bucketCounts": 17,
+    "name": "duration",
+    "startTime": "2024-01-28T02:29:17.769670320Z",
+    "explicitBoundsCount": 16,
+    "attributes": {
+      "metric.attributes.status@code": "STATUS_CODE_UNSET",
+      "resource.attributes.telemetry@sdk@language": "erlang",
+      "metric.attributes.service@name": "featureflagservice",
+      "resource.attributes.process@runtime@description": "Erlang/OTP 23 erts-11.2.2.13",
+      "resource.attributes.telemetry@sdk@version": "1.3.0",
+      "resource.attributes.service@instance@id": "featureflagservice@2c596dfa1268",
+      "resource.attributes.service@name": "featureflagservice",
+      "resource.attributes.process@executable@name": "featureflagservice",
+      "metric.attributes.span@name": "featureflagservice.repo.query:featureflags",
+      "instrumentationScope.name": "spanmetricsconnector",
+      "resource.attributes.process@runtime@version": "11.2.2.13",
+      "resource.attributes.telemetry@sdk@name": "opentelemetry",
+      "resource.attributes.process@runtime@name": "BEAM",
+      "metric.attributes.span@kind": "SPAN_KIND_CLIENT"
+    },
+    "time": "2024-01-28T02:30:09.168168773Z",
+    "explicitBounds": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      50,
+      100,
+      200,
+      400,
+      800,
+      1000,
+      1400,
+      2000,
+      5000,
+      10000,
+      15000
+    ]
+  },
+  {
+      "kind": "HISTOGRAM",
+      "buckets": [
+        {
+          "min": -3.4028234663852886e+38,
+          "max": 2,
+          "count": 1
+        },
+        {
+          "min": 2,
+          "max": 4,
+          "count": 1
+        },
+        {
+          "min": 4,
+          "max": 6,
+          "count": 0
+        },
+        {
+          "min": 6,
+          "max": 8,
+          "count": 0
+        },
+        {
+          "min": 8,
+          "max": 10,
+          "count": 0
+        },
+        {
+          "min": 10,
+          "max": 50,
+          "count": 0
+        },
+        {
+          "min": 50,
+          "max": 100,
+          "count": 0
+        },
+        {
+          "min": 100,
+          "max": 200,
+          "count": 0
+        },
+        {
+          "min": 200,
+          "max": 400,
+          "count": 0
+        },
+        {
+          "min": 400,
+          "max": 800,
+          "count": 0
+        },
+        {
+          "min": 800,
+          "max": 1000,
+          "count": 0
+        },
+        {
+          "min": 1000,
+          "max": 1400,
+          "count": 0
+        },
+        {
+          "min": 1400,
+          "max": 2000,
+          "count": 0
+        },
+        {
+          "min": 2000,
+          "max": 5000,
+          "count": 0
+        },
+        {
+          "min": 5000,
+          "max": 10000,
+          "count": 0
+        },
+        {
+          "min": 10000,
+          "max": 15000,
+          "count": 0
+        },
+        {
+          "min": 15000,
+          "max": 3.4028234663852886e+38,
+          "count": 0
+        }
+      ],
+      "count": 2,
+      "bucketCountsList": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "flags": 0,
+      "description": "",
+      "sum": 5.175447,
+      "serviceName": "featureflagservice",
+      "schemaUrl": "",
+      "unit": "ms",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "bucketCounts": 17,
+      "name": "duration",
+      "startTime": "2024-01-28T02:29:17.769670320Z",
+      "explicitBoundsCount": 16,
+      "attributes": {
+        "metric.attributes.status@code": "STATUS_CODE_UNSET",
+        "resource.attributes.telemetry@sdk@language": "erlang",
+        "metric.attributes.service@name": "featureflagservice",
+        "resource.attributes.process@runtime@description": "Erlang/OTP 23 erts-11.2.2.13",
+        "resource.attributes.telemetry@sdk@version": "1.3.0",
+        "resource.attributes.service@instance@id": "featureflagservice@2c596dfa1268",
+        "resource.attributes.service@name": "featureflagservice",
+        "resource.attributes.process@executable@name": "featureflagservice",
+        "metric.attributes.span@name": "/",
+        "instrumentationScope.name": "spanmetricsconnector",
+        "resource.attributes.process@runtime@version": "11.2.2.13",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.process@runtime@name": "BEAM",
+        "metric.attributes.span@kind": "SPAN_KIND_SERVER"
+      },
+      "time": "2024-01-28T02:30:09.168168773Z",
+      "explicitBounds": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        50,
+        100,
+        200,
+        400,
+        800,
+        1000,
+        1400,
+        2000,
+        5000,
+        10000,
+        15000
+      ]
+  },
+  {
+      "kind": "HISTOGRAM",
+      "buckets": [
+        {
+          "min": -3.4028234663852886e+38,
+          "max": 2,
+          "count": 0
+        },
+        {
+          "min": 2,
+          "max": 4,
+          "count": 0
+        },
+        {
+          "min": 4,
+          "max": 6,
+          "count": 0
+        },
+        {
+          "min": 6,
+          "max": 8,
+          "count": 0
+        },
+        {
+          "min": 8,
+          "max": 10,
+          "count": 0
+        },
+        {
+          "min": 10,
+          "max": 50,
+          "count": 0
+        },
+        {
+          "min": 50,
+          "max": 100,
+          "count": 0
+        },
+        {
+          "min": 100,
+          "max": 200,
+          "count": 0
+        },
+        {
+          "min": 200,
+          "max": 400,
+          "count": 0
+        },
+        {
+          "min": 400,
+          "max": 800,
+          "count": 0
+        },
+        {
+          "min": 800,
+          "max": 1000,
+          "count": 0
+        },
+        {
+          "min": 1000,
+          "max": 1400,
+          "count": 0
+        },
+        {
+          "min": 1400,
+          "max": 2000,
+          "count": 0
+        },
+        {
+          "min": 2000,
+          "max": 5000,
+          "count": 0
+        },
+        {
+          "min": 5000,
+          "max": 10000,
+          "count": 0
+        },
+        {
+          "min": 10000,
+          "max": 15000,
+          "count": 0
+        },
+        {
+          "min": 15000,
+          "max": 3.4028234663852886e+38,
+          "count": 8
+        }
+      ],
+      "count": 8,
+      "bucketCountsList": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "flags": 0,
+      "description": "",
+      "sum": 480243.614412,
+      "serviceName": "loadgenerator",
+      "schemaUrl": "",
+      "unit": "ms",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "bucketCounts": 17,
+      "name": "duration",
+      "startTime": "2024-01-28T02:29:14.338013543Z",
+      "explicitBoundsCount": 16,
+      "attributes": {
+        "metric.attributes.status@code": "STATUS_CODE_ERROR",
+        "instrumentationScope.name": "spanmetricsconnector",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.service@name": "loadgenerator",
+        "metric.attributes.span@kind": "SPAN_KIND_CLIENT",
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.service@name": "loadgenerator",
+        "metric.attributes.span@name": "GET"
+      },
+      "time": "2024-01-28T02:30:09.168178406Z",
+      "explicitBounds": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        50,
+        100,
+        200,
+        400,
+        800,
+        1000,
+        1400,
+        2000,
+        5000,
+        10000,
+        15000
+      ]
+  },
+  {
+      "kind": "HISTOGRAM",
+      "buckets": [
+        {
+          "min": -3.4028234663852886e+38,
+          "max": 2,
+          "count": 0
+        },
+        {
+          "min": 2,
+          "max": 4,
+          "count": 0
+        },
+        {
+          "min": 4,
+          "max": 6,
+          "count": 0
+        },
+        {
+          "min": 6,
+          "max": 8,
+          "count": 0
+        },
+        {
+          "min": 8,
+          "max": 10,
+          "count": 0
+        },
+        {
+          "min": 10,
+          "max": 50,
+          "count": 0
+        },
+        {
+          "min": 50,
+          "max": 100,
+          "count": 0
+        },
+        {
+          "min": 100,
+          "max": 200,
+          "count": 0
+        },
+        {
+          "min": 200,
+          "max": 400,
+          "count": 0
+        },
+        {
+          "min": 400,
+          "max": 800,
+          "count": 0
+        },
+        {
+          "min": 800,
+          "max": 1000,
+          "count": 0
+        },
+        {
+          "min": 1000,
+          "max": 1400,
+          "count": 0
+        },
+        {
+          "min": 1400,
+          "max": 2000,
+          "count": 0
+        },
+        {
+          "min": 2000,
+          "max": 5000,
+          "count": 0
+        },
+        {
+          "min": 5000,
+          "max": 10000,
+          "count": 0
+        },
+        {
+          "min": 10000,
+          "max": 15000,
+          "count": 0
+        },
+        {
+          "min": 15000,
+          "max": 3.4028234663852886e+38,
+          "count": 1
+        }
+      ],
+      "count": 1,
+      "bucketCountsList": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "flags": 0,
+      "description": "",
+      "sum": 60062.225229,
+      "serviceName": "loadgenerator",
+      "schemaUrl": "",
+      "unit": "ms",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "bucketCounts": 17,
+      "name": "duration",
+      "startTime": "2024-01-28T02:29:14.338013543Z",
+      "explicitBoundsCount": 16,
+      "attributes": {
+        "metric.attributes.status@code": "STATUS_CODE_ERROR",
+        "instrumentationScope.name": "spanmetricsconnector",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.service@name": "loadgenerator",
+        "metric.attributes.span@kind": "SPAN_KIND_CLIENT",
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.service@name": "loadgenerator",
+        "metric.attributes.span@name": "POST"
+      },
+      "time": "2024-01-28T02:30:09.168178406Z",
+      "explicitBounds": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        50,
+        100,
+        200,
+        400,
+        800,
+        1000,
+        1400,
+        2000,
+        5000,
+        10000,
+        15000
+      ]
+  },
+  {
+      "kind": "HISTOGRAM",
+      "buckets": [
+        {
+          "min": -3.4028234663852886e+38,
+          "max": 2,
+          "count": 3
+        },
+        {
+          "min": 2,
+          "max": 4,
+          "count": 1
+        },
+        {
+          "min": 4,
+          "max": 6,
+          "count": 0
+        },
+        {
+          "min": 6,
+          "max": 8,
+          "count": 0
+        },
+        {
+          "min": 8,
+          "max": 10,
+          "count": 0
+        },
+        {
+          "min": 10,
+          "max": 50,
+          "count": 0
+        },
+        {
+          "min": 50,
+          "max": 100,
+          "count": 0
+        },
+        {
+          "min": 100,
+          "max": 200,
+          "count": 0
+        },
+        {
+          "min": 200,
+          "max": 400,
+          "count": 0
+        },
+        {
+          "min": 400,
+          "max": 800,
+          "count": 0
+        },
+        {
+          "min": 800,
+          "max": 1000,
+          "count": 0
+        },
+        {
+          "min": 1000,
+          "max": 1400,
+          "count": 0
+        },
+        {
+          "min": 1400,
+          "max": 2000,
+          "count": 0
+        },
+        {
+          "min": 2000,
+          "max": 5000,
+          "count": 0
+        },
+        {
+          "min": 5000,
+          "max": 10000,
+          "count": 0
+        },
+        {
+          "min": 10000,
+          "max": 15000,
+          "count": 0
+        },
+        {
+          "min": 15000,
+          "max": 3.4028234663852886e+38,
+          "count": 0
+        }
+      ],
+      "count": 4,
+      "bucketCountsList": [
+        3,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "flags": 0,
+      "description": "",
+      "sum": 5.129096,
+      "serviceName": "featureflagservice",
+      "schemaUrl": "",
+      "unit": "ms",
+      "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+      "exemplars": [],
+      "bucketCounts": 17,
+      "name": "duration",
+      "startTime": "2024-01-28T02:29:17.769670320Z",
+      "explicitBoundsCount": 16,
+      "attributes": {
+        "metric.attributes.status@code": "STATUS_CODE_UNSET",
+        "resource.attributes.telemetry@sdk@language": "erlang",
+        "metric.attributes.service@name": "featureflagservice",
+        "resource.attributes.process@runtime@description": "Erlang/OTP 23 erts-11.2.2.13",
+        "resource.attributes.telemetry@sdk@version": "1.3.0",
+        "resource.attributes.service@instance@id": "featureflagservice@2c596dfa1268",
+        "resource.attributes.service@name": "featureflagservice",
+        "resource.attributes.process@executable@name": "featureflagservice",
+        "metric.attributes.span@name": "featureflagservice.repo.query:featureflags",
+        "instrumentationScope.name": "spanmetricsconnector",
+        "resource.attributes.process@runtime@version": "11.2.2.13",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.process@runtime@name": "BEAM",
+        "metric.attributes.span@kind": "SPAN_KIND_CLIENT"
+      },
+      "time": "2024-01-28T02:31:09.170233125Z",
+      "explicitBounds": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        50,
+        100,
+        200,
+        400,
+        800,
+        1000,
+        1400,
+        2000,
+        5000,
+        10000,
+        15000
+      ]
+    },
+  {
+      "unit": "1",
+      "exemplars": [],
+      "kind": "GAUGE",
+      "name": "system.cpu.utilization",
+      "flags": 0,
+      "description": "System CPU utilization",
+      "startTime": "1970-01-01T00:00:00Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "idle",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "serviceName": "recommendationservice",
+      "value": 0.919,
+      "schemaUrl": ""
+  },
+  {
+      "unit": "1",
+      "exemplars": [],
+      "kind": "GAUGE",
+      "name": "system.cpu.utilization",
+      "flags": 0,
+      "description": "System CPU utilization",
+      "startTime": "1970-01-01T00:00:00Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "user",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "serviceName": "recommendationservice",
+      "value": 0.064,
+      "schemaUrl": ""
+  },
+  {
+      "unit": "1",
+      "exemplars": [],
+      "kind": "GAUGE",
+      "name": "system.cpu.utilization",
+      "flags": 0,
+      "description": "System CPU utilization",
+      "startTime": "1970-01-01T00:00:00Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "system",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "serviceName": "recommendationservice",
+      "value": 0.013999999999999999,
+      "schemaUrl": ""
+  },
+  {
+      "unit": "1",
+      "exemplars": [],
+      "kind": "GAUGE",
+      "name": "system.cpu.utilization",
+      "flags": 0,
+      "description": "System CPU utilization",
+      "startTime": "1970-01-01T00:00:00Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 1,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "irq",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "serviceName": "recommendationservice",
+      "value": 0,
+      "schemaUrl": ""
+  },
+  {
+      "unit": "1",
+      "exemplars": [],
+      "kind": "GAUGE",
+      "name": "system.cpu.utilization",
+      "flags": 0,
+      "description": "System CPU utilization",
+      "startTime": "1970-01-01T00:00:00Z",
+      "attributes": {
+        "instrumentationScope.name": "opentelemetry.instrumentation.system_metrics",
+        "resource.attributes.telemetry@sdk@name": "opentelemetry",
+        "resource.attributes.telemetry@sdk@language": "python",
+        "metric.attributes.cpu": 2,
+        "resource.attributes.service@namespace": "opentelemetry-demo",
+        "resource.attributes.telemetry@sdk@version": "1.19.0",
+        "resource.attributes.telemetry@auto@version": "0.40b0",
+        "resource.attributes.service@name": "recommendationservice",
+        "metric.attributes.state": "idle",
+        "instrumentationScope.version": "0.40b0"
+      },
+      "time": "2024-01-28T02:31:06.752193881Z",
+      "serviceName": "recommendationservice",
+      "value": 0.948,
+      "schemaUrl": ""
+    }
+  ]

@@ -1,0 +1,36 @@
+{
+  "index_patterns": ["applicative_logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1
+    },
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text"
+        },
+        "source": {
+          "type": "keyword"
+        },
+        "module": {
+          "type": "keyword"
+        },
+        "function": {
+          "type": "keyword"
+        },
+        "error_code": {
+          "type": "keyword"
+        },
+        "user_id": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

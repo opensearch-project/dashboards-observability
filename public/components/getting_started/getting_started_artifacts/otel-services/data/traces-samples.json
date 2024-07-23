@@ -1,0 +1,557 @@
+[
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "http.client_ip": "127.0.0.1",
+      "http.flavor": "1.1",
+      "http.method": "GET",
+      "http.route": "/",
+      "http.scheme": "http",
+      "http.status_code": 200,
+      "http.target": "/",
+      "http.user_agent": "curl/7.64.0",
+      "net.host.name": "localhost",
+      "net.host.port": 8081,
+      "net.peer.port": 45056,
+      "net.sock.host.addr": "127.0.0.1",
+      "net.sock.peer.addr": "127.0.0.1",
+      "net.transport": "IP.TCP",
+      "phoenix.action": "index",
+      "phoenix.plug": "Elixir.FeatureflagserviceWeb.PageController"
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:08:42.592837143Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_phoenix",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Server",
+    "name": "/",
+    "parentSpanId": "",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "5458679f73ad2351",
+    "startTime": "2024-01-31T23:08:42.555358301Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "ed7e4fb8ae2bd90822f40e16ca04de58",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "db.instance": "ffs",
+      "db.name": "ffs",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
+      "db.type": "sql",
+      "db.url": "ecto://ffs_postgres",
+      "decode_time_microseconds": 216,
+      "idle_time_microseconds": 1384015,
+      "query_time_microseconds": 4931,
+      "queue_time_microseconds": 4225,
+      "source": "featureflags",
+      "total_time_microseconds": 9374
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:08:42.572211207Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_ecto",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Client",
+    "name": "featureflagservice.repo.query:featureflags",
+    "parentSpanId": "5458679f73ad2351",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "0d2c542a4153fda1",
+    "startTime": "2024-01-31T23:08:42.559125683Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "ed7e4fb8ae2bd90822f40e16ca04de58",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "http.client_ip": "127.0.0.1",
+      "http.flavor": "1.1",
+      "http.method": "GET",
+      "http.route": "/",
+      "http.scheme": "http",
+      "http.status_code": 200,
+      "http.target": "/",
+      "http.user_agent": "curl/7.64.0",
+      "net.host.name": "localhost",
+      "net.host.port": 8081,
+      "net.peer.port": 47170,
+      "net.sock.host.addr": "127.0.0.1",
+      "net.sock.peer.addr": "127.0.0.1",
+      "net.transport": "IP.TCP",
+      "phoenix.action": "index",
+      "phoenix.plug": "Elixir.FeatureflagserviceWeb.PageController"
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:09:14.879497489Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_phoenix",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Server",
+    "name": "/",
+    "parentSpanId": "",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "de7d247f2891e0c2",
+    "startTime": "2024-01-31T23:09:14.806656036Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "e3335d43c7790064a14318ef59602e56",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "db.instance": "ffs",
+      "db.name": "ffs",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
+      "db.type": "sql",
+      "db.url": "ecto://ffs_postgres",
+      "decode_time_microseconds": 24,
+      "idle_time_microseconds": 1378373,
+      "query_time_microseconds": 3812,
+      "queue_time_microseconds": 252,
+      "source": "featureflags",
+      "total_time_microseconds": 4089
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:09:14.856665852Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_ecto",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Client",
+    "name": "featureflagservice.repo.query:featureflags",
+    "parentSpanId": "de7d247f2891e0c2",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "7b195452e8c11293",
+    "startTime": "2024-01-31T23:09:14.810723879Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "e3335d43c7790064a14318ef59602e56",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "http.client_ip": "127.0.0.1",
+      "http.flavor": "1.1",
+      "http.method": "GET",
+      "http.route": "/",
+      "http.scheme": "http",
+      "http.status_code": 200,
+      "http.target": "/",
+      "http.user_agent": "curl/7.64.0",
+      "net.host.name": "localhost",
+      "net.host.port": 8081,
+      "net.peer.port": 55518,
+      "net.sock.host.addr": "127.0.0.1",
+      "net.sock.peer.addr": "127.0.0.1",
+      "net.transport": "IP.TCP",
+      "phoenix.action": "index",
+      "phoenix.plug": "Elixir.FeatureflagserviceWeb.PageController"
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:09:47.974710645Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_phoenix",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Server",
+    "name": "/",
+    "parentSpanId": "",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "b54e5c502926040f",
+    "startTime": "2024-01-31T23:09:47.657715533Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "c83bcad65ffebc62cbfe1dd89408c448",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "db.instance": "ffs",
+      "db.name": "ffs",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
+      "db.type": "sql",
+      "db.url": "ecto://ffs_postgres",
+      "decode_time_microseconds": 11,
+      "idle_time_microseconds": 1910850,
+      "query_time_microseconds": 306695,
+      "queue_time_microseconds": 980,
+      "source": "featureflags",
+      "total_time_microseconds": 307687
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:09:47.97249447Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_ecto",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Client",
+    "name": "featureflagservice.repo.query:featureflags",
+    "parentSpanId": "b54e5c502926040f",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "ba32e6b78c23694a",
+    "startTime": "2024-01-31T23:09:47.663066074Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "c83bcad65ffebc62cbfe1dd89408c448",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "http.client_ip": "127.0.0.1",
+      "http.flavor": "1.1",
+      "http.method": "GET",
+      "http.route": "/",
+      "http.scheme": "http",
+      "http.status_code": 200,
+      "http.target": "/",
+      "http.user_agent": "curl/7.64.0",
+      "net.host.name": "localhost",
+      "net.host.port": 8081,
+      "net.peer.port": 53716,
+      "net.sock.host.addr": "127.0.0.1",
+      "net.sock.peer.addr": "127.0.0.1",
+      "net.transport": "IP.TCP",
+      "phoenix.action": "index",
+      "phoenix.plug": "Elixir.FeatureflagserviceWeb.PageController"
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:10:20.683718383Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_phoenix",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Server",
+    "name": "/",
+    "parentSpanId": "",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "3d5613bcb20e92b9",
+    "startTime": "2024-01-31T23:10:20.400975769Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "5de190e5140f26e48f0e5fb7c69435d6",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "db.instance": "ffs",
+      "db.name": "ffs",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
+      "db.type": "sql",
+      "db.url": "ecto://ffs_postgres",
+      "decode_time_microseconds": 104,
+      "idle_time_microseconds": 1875458,
+      "query_time_microseconds": 139608,
+      "queue_time_microseconds": 20079,
+      "source": "featureflags",
+      "total_time_microseconds": 159791
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:10:20.617379683Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_ecto",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Client",
+    "name": "featureflagservice.repo.query:featureflags",
+    "parentSpanId": "3d5613bcb20e92b9",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "3d2ea0b1d570b22d",
+    "startTime": "2024-01-31T23:10:20.448581859Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "5de190e5140f26e48f0e5fb7c69435d6",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "http.client_ip": "127.0.0.1",
+      "http.flavor": "1.1",
+      "http.method": "GET",
+      "http.route": "/",
+      "http.scheme": "http",
+      "http.status_code": 200,
+      "http.target": "/",
+      "http.user_agent": "curl/7.64.0",
+      "net.host.name": "localhost",
+      "net.host.port": 8081,
+      "net.peer.port": 55986,
+      "net.sock.host.addr": "127.0.0.1",
+      "net.sock.peer.addr": "127.0.0.1",
+      "net.transport": "IP.TCP",
+      "phoenix.action": "index",
+      "phoenix.plug": "Elixir.FeatureflagserviceWeb.PageController"
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:10:50.896350778Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_phoenix",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Server",
+    "name": "/",
+    "parentSpanId": "",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "50c401b99b5b108d",
+    "startTime": "2024-01-31T23:10:50.882433825Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "2a27ab91b401cc9ac504481d8ce79aba",
+    "traceState": ""
+  },
+  {
+    "attributes": {
+      "data_stream": {
+        "dataset": "traces",
+        "namespace": "namespace",
+        "type": "span"
+      },
+      "db.instance": "ffs",
+      "db.name": "ffs",
+      "db.statement": "SELECT f0.\"id\", f0.\"description\", f0.\"enabled\", f0.\"name\", f0.\"inserted_at\", f0.\"updated_at\" FROM \"featureflags\" AS f0",
+      "db.type": "sql",
+      "db.url": "ecto://ffs_postgres",
+      "decode_time_microseconds": 10,
+      "idle_time_microseconds": 1070109,
+      "query_time_microseconds": 8842,
+      "queue_time_microseconds": 644,
+      "source": "featureflags",
+      "total_time_microseconds": 9498
+    },
+    "droppedAttributesCount": 0,
+    "droppedEventsCount": 0,
+    "droppedLinksCount": 0,
+    "endTime": "2024-01-31T23:10:50.893919077Z",
+    "instrumentationScope": {
+      "droppedAttributesCount": 0,
+      "name": "opentelemetry_ecto",
+      "schemaUrl": "",
+      "version": "1.1.1"
+    },
+    "kind": "Client",
+    "name": "featureflagservice.repo.query:featureflags",
+    "parentSpanId": "50c401b99b5b108d",
+    "resource": {
+      "process.executable.name": "featureflagservice",
+      "process.runtime.description": "Erlang/OTP 23 erts-11.2.2.13",
+      "process.runtime.name": "BEAM",
+      "process.runtime.version": "11.2.2.13",
+      "service.instance.id": "featureflagservice@bcf966452cef",
+      "service.name": "featureflagservice",
+      "telemetry.sdk.language": "erlang",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.3.0"
+    },
+    "spanId": "a3b98a60588d4902",
+    "startTime": "2024-01-31T23:10:50.883145301Z",
+    "status": {
+      "code": "Unset",
+      "message": ""
+    },
+    "@timestamp": "0001-01-01T00:00:00Z",
+    "traceId": "2a27ab91b401cc9ac504481d8ce79aba",
+    "traceState": ""
+  }
+]

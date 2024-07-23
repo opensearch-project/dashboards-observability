@@ -1,0 +1,10 @@
+2024-07-16 12:00:00,INFO,Application started successfully,App1,host1
+2024-07-16 12:01:00,DEBUG,User logged in,App1,host1
+2024-07-16 12:01:05,ERROR,Failed to load resource,App1,host1
+2024-07-16 12:02:00,WARN,Deprecated API used,App1,host1
+2024-07-16 12:03:00,INFO,Background job executed,App1,host1
+2024-07-16 12:04:00,DEBUG,Cache cleared,App1,host1
+2024-07-16 12:05:00,INFO,User logged out,App1,host1
+2024-07-16 12:06:00,ERROR,Database connection failed,App1,host1
+2024-07-16 12:07:00,INFO,Application shutdown initiated,App1,host1
+2024-07-16 12:08:00,INFO,Application shutdown completed,App1,host1
