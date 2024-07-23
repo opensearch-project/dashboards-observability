@@ -303,7 +303,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -734,7 +734,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -2151,7 +2151,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="m"
+                                            panelPaddingSize="s"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
@@ -2334,7 +2334,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             className="euiSuperUpdateButton"
                                             color="primary"
                                             data-test-subj="superDatePickerApplyTimeButton"
-                                            fill={true}
                                             iconType="refresh"
                                             isDisabled={false}
                                             isLoading={false}
@@ -2354,7 +2353,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               data-test-subj="superDatePickerApplyTimeButton"
                                               disabled={false}
                                               element="button"
-                                              fill={true}
                                               iconType="refresh"
                                               isDisabled={false}
                                               isLoading={false}
@@ -2369,7 +2367,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}
@@ -4400,7 +4398,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="m"
+                                            panelPaddingSize="s"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
@@ -4581,7 +4579,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             className="euiSuperUpdateButton"
                                             color="primary"
                                             data-test-subj="superDatePickerApplyTimeButton"
-                                            fill={true}
                                             iconType="refresh"
                                             isDisabled={false}
                                             isLoading={false}
@@ -4601,7 +4598,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               data-test-subj="superDatePickerApplyTimeButton"
                                               disabled={false}
                                               element="button"
-                                              fill={true}
                                               iconType="refresh"
                                               isDisabled={false}
                                               isLoading={false}
@@ -4616,7 +4612,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}

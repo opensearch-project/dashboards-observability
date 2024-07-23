@@ -9,9 +9,9 @@ import path from 'path';
 export const assetMapper = (tutorialId: string) => {
   switch (tutorialId) {
     case 'otel':
-      return 'otel-getting-started-demo-1.0.0.ndjson';
+      return 'otel-index-patterns-1.0.0.ndjson';
     case 'nginx':
-      return 'nginx-getting-started-tutorial-1.0.0.ndjson';
+      return 'nginx-1.0.0.ndjson';
     case 'java':
       return 'java-tutorial-1.0.0.ndjson';
     case 'python':
