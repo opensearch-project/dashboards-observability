@@ -5,6 +5,7 @@
 
 import { coreRefs } from '../../../framework/core_refs';
 import { uploadBundle } from '../../integrations/components/upload_flyout';
+import { useToast } from '../../../../public/components/common/toast';
 
 const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'indexPatterns') => {
   const assetFilterParam = assetFilter ? `${assetFilter}/` : '';
@@ -20,7 +21,8 @@ const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'ind
   return responeData;
 };
 
-export const uploadAssets = async (tutorialId: string) => {
+export const UploadAssets = async (tutorialId: string) => {
+  const { setToast } = useToast();
   try {
     const responeData = await fetchAssets(tutorialId);
 
@@ -31,10 +33,11 @@ export const uploadAssets = async (tutorialId: string) => {
     if (error) {
       console.error(error.message);
     } else {
-      console.log('Bundle uploaded successfully');
+      setToast('Created saved object assets successfully', 'success');
     }
   } catch (err) {
     console.error(err.message);
+    setToast('Failed to create saved object assets', 'danger');
   }
 };
 
