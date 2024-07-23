@@ -159,6 +159,9 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
         sample-notebook-1
       </h1>
       <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
         class="euiSpacer euiSpacer--m"
       />
       <div
@@ -386,7 +389,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
         >
           <button
             class="euiButton euiButton--primary"
-            data-test-subj="upgrade-notebook"
+            data-test-subj="upgrade-notebook-callout"
             type="button"
           >
             <span
@@ -428,17 +431,49 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
         data-test-subj="notebookTitle"
       />
       <div
-        class="euiCallOut euiCallOut--primary"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          class="euiText euiText--small"
+          class="euiFlexItem"
         >
           <div
-            class="euiTextColor euiTextColor--default"
+            class="euiCallOut euiCallOut--primary"
           >
-            Upgrade this notebook to take full advantage of the latest features
+            <div
+              class="euiText euiText--small"
+            >
+              <div
+                class="euiTextColor euiTextColor--default"
+              >
+                Upgrade this notebook to take full advantage of the latest features
+                <div
+                  class="euiSpacer euiSpacer--s"
+                />
+                <button
+                  class="euiButton euiButton--primary"
+                  data-test-subj="upgrade-notebook"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      class="euiButton__text"
+                    >
+                      Upgrade Notebook
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
       </div>
       <div
         class="euiSpacer euiSpacer--m"
