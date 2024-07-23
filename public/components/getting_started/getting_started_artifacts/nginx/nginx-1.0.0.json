@@ -245,7 +245,7 @@
       "type": ["logs"],
       "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/assets/getting-started-tutorial-1.0.0.ndjson",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/nginx/assets/nginx-1.0.0.ndjson",
       "index-patterns-name": ["ss4o_logs-*-*"]
     }
   },
