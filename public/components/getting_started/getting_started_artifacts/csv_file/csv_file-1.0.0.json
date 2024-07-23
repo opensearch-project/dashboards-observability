@@ -48,42 +48,6 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Fluent-bit file upload",
-        "description": "This is a fluent-bit based CSV file upload getting started instructions tutorial",
-        "steps": [
-          {
-            "name": "Fluent-Bit Parser",
-            "type": "console-cmd",
-            "phase": "ingestion",
-            "label": "Log Parsing",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"],
-            "description": "Setup Fluent-Bit parser config file parsing csv file",
-            "content": "[PARSER]\n    Name        csv\n    Format      regex\n    Regex       ^(?<timestamp>[^,]+),(?<log_level>[^,]+),(?<message>[^,]+),(?<application>[^,]+),(?<host>[^,]+)$\n    Time_Key    timestamp\n    Time_Format %Y-%m-%d %H:%M:%S\n"
-          },
-          {
-            "name": "Fluent-Bit Setup",
-            "type": "console-cmd",
-            "phase": "ingestion",
-            "label": "Agent Set-Up",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf"],
-            "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
-            "input-params": [
-              {
-                "name": "opensearch-node1",
-                "description": "Opensearch host",
-                "type": "host-name"
-              },
-              {
-                "name": "ss4o_logs-nginx-prod",
-                "description": "logs sink index name",
-                "type": "index-name"
-              }
-            ],
-            "content": "[SERVICE]\n    Flush        1\n    Log_Level    info\n    Parsers_File parsers.conf\n\n[INPUT]\n    Name         tail\n    Path         /fluent-bit/data/*.csv\n    Parser       csv\n    Tag          csv\n\n[INPUT]\n    Name         dummy\n    Dummy        {\"timestamp\":\"2024-07-16 12:09:00\", \"log_level\":\"INFO\", \"message\":\"Dummy log message\", \"application\":\"App2\", \"host\":\"host2\"}\n    Tag          dummy\n\n[OUTPUT]\n    Name         opensearch\n    Host         opensearch-node1\n    Match        *\n    Port         9200\n    Type         _doc\n    Index        logs-index\n    tls             On\n    tls.verify      Off\n    Suppress_Type_Name On\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#"
-          }
-        ]
-      },
-      {
         "name": "QuickStart",
         "description": "This is a docker-composed based getting started live example with CSV file upload",
         "steps": [
@@ -135,6 +99,42 @@
             "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit.yml"],
             "description": "Run docker-compose for the nginx live example and see the generated index",
             "content": "wget -O fluent-bit.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit.yml && docker-compose -f fluent-bit.yml up -d\n"
+          }
+        ]
+      },
+      {
+        "name": "Fluent-bit file upload",
+        "description": "This is a fluent-bit based CSV file upload getting started instructions tutorial",
+        "steps": [
+          {
+            "name": "Fluent-Bit Parser",
+            "type": "console-cmd",
+            "phase": "ingestion",
+            "label": "Log Parsing",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"],
+            "description": "Setup Fluent-Bit parser config file parsing csv file",
+            "content": "[PARSER]\n    Name        csv\n    Format      regex\n    Regex       ^(?<timestamp>[^,]+),(?<log_level>[^,]+),(?<message>[^,]+),(?<application>[^,]+),(?<host>[^,]+)$\n    Time_Key    timestamp\n    Time_Format %Y-%m-%d %H:%M:%S\n"
+          },
+          {
+            "name": "Fluent-Bit Setup",
+            "type": "console-cmd",
+            "phase": "ingestion",
+            "label": "Agent Set-Up",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf"],
+            "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
+            "input-params": [
+              {
+                "name": "opensearch-node1",
+                "description": "Opensearch host",
+                "type": "host-name"
+              },
+              {
+                "name": "ss4o_logs-nginx-prod",
+                "description": "logs sink index name",
+                "type": "index-name"
+              }
+            ],
+            "content": "[SERVICE]\n    Flush        1\n    Log_Level    info\n    Parsers_File parsers.conf\n\n[INPUT]\n    Name         tail\n    Path         /fluent-bit/data/*.csv\n    Parser       csv\n    Tag          csv\n\n[INPUT]\n    Name         dummy\n    Dummy        {\"timestamp\":\"2024-07-16 12:09:00\", \"log_level\":\"INFO\", \"message\":\"Dummy log message\", \"application\":\"App2\", \"host\":\"host2\"}\n    Tag          dummy\n\n[OUTPUT]\n    Name         opensearch\n    Host         opensearch-node1\n    Match        *\n    Port         9200\n    Type         _doc\n    Index        logs-index\n    tls             On\n    tls.verify      Off\n    Suppress_Type_Name On\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#"
           }
         ]
       }

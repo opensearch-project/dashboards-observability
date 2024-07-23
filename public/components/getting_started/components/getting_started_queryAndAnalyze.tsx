@@ -73,14 +73,14 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   return (
     <EuiAccordion
       id="query-and-analyze"
-      buttonContent={`Query & Analyze Data: ${selectedTechnology}`}
+      buttonContent={`Query and analyze data: ${selectedTechnology}`}
       paddingSize="m"
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={onToggle}
     >
       <EuiPanel>
         <EuiTitle size="m">
-          <h2>Query Data</h2>
+          <h3>Query data</h3>
         </EuiTitle>
         <EuiText>
           <p>
@@ -100,7 +100,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
         </EuiFlexGroup>
         <EuiHorizontalRule />
         <EuiTitle size="m">
-          <h2>Analyze Data</h2>
+          <h3>Analyze data</h3>
         </EuiTitle>
         <EuiText>
           <p>
@@ -114,10 +114,9 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               <EuiFlexItem style={{ maxWidth: '300px' }}>
                 <EuiCard
                   icon={<div />}
-                  title={selectedTechnology}
-                  description={`Explore the ${selectedTechnology} dashboard`}
+                  title={dashboard.title}
+                  description={`Explore the ${dashboard.title} dashboard`}
                   onClick={() => {
-                    // const theID = fetchDashboardIds(selectedTechnology);
                     redirectToDashboards(`/view/${dashboard.id}`);
                   }}
                 />

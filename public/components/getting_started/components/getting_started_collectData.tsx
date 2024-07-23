@@ -6,20 +6,20 @@
 import {
   EuiAccordion,
   EuiButton,
-  EuiCard,
+  EuiCheckableCard,
   EuiCodeBlock,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
-  EuiSelect,
+  EuiSelectable,
   EuiSpacer,
-  EuiTabbedContent,
+  EuiSteps,
   EuiText,
   EuiTitle,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
@@ -39,6 +39,7 @@ interface CollectAndShipDataProps {
   selectedTechnology: string;
   onMoveToQueryData: (indexPatterns: string[]) => void;
   onSelectSource: (source: string) => void;
+  onCardSelectionChange: (isSampleDataset: boolean) => void;
 }
 
 export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
@@ -46,17 +47,16 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   onToggle,
   onMoveToQueryData,
   onSelectSource,
+  onCardSelectionChange,
 }) => {
   const [collectionMethod, setCollectionMethod] = useState('');
   const [specificMethod, setSpecificMethod] = useState('');
-  const [gettingStarted, setGettingStarted] = useState<any>(null);
-  const [selectedLabel, setSelectedLabel] = useState('');
-  const [labelsOptions, setLabelsOptions] = useState([]);
-  const [selectedTabId, setSelectedTabId] = useState('workflow_tab');
-  const [selectedWorkflow, setSelectedWorkflow] = useState('');
-  const [firstWorkflow, setFirstWorkflow] = useState<string>('');
-  const [secondWorkflow, setSecondWorkflow] = useState<string>('');
+  const [_gettingStarted, setGettingStarted] = useState<any>(null);
+  const [selectedTabId, setSelectedTabId] = useState('workflow_0');
+  const [_selectedWorkflow, setSelectedWorkflow] = useState('');
+  const [workflows, setWorkflows] = useState<any[]>([]);
   const [selectedCard, setSelectedCard] = useState('');
+  const [collectorOptions, setCollectorOptions] = useState([]);
 
   const technologyJsonMap: Record<string, any> = {
     otel: otelJson,
@@ -65,128 +65,102 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     python: pythonJson,
     nginx: nginxJson,
     java: javaJson,
-    // 'data-prepper': dataPrepperJson,
   };
 
   useEffect(() => {
     if (specificMethod) {
       const json = technologyJsonMap[specificMethod];
       if (json && json['getting-started']) {
-        const workflows = json['getting-started'].workflows;
-        if (workflows && workflows.length >= 2) {
-          setFirstWorkflow(workflows[0].name);
-          setSecondWorkflow(workflows[1].name);
+        const fetchedWorkflows = json['getting-started'].workflows || [];
+        setWorkflows(fetchedWorkflows);
+        if (fetchedWorkflows.length > 0) {
+          setSelectedWorkflow(fetchedWorkflows[0].name);
+          setSelectedTabId(`workflow_0`);
+          setGettingStarted(fetchedWorkflows[0]);
         }
-        const workflowData = workflows.find((workflow: any) => workflow.name === selectedWorkflow);
-        setGettingStarted(workflowData || null);
-        const labels =
-          workflowData?.steps?.map((step: any) => ({
-            label: step.label || step.name,
-            value: step.name.replace(/\s/g, '-'),
-          })) || [];
-        setLabelsOptions(labels);
       } else {
         setGettingStarted(null);
+        setWorkflows([]);
       }
     } else {
       setGettingStarted(null);
+      setWorkflows([]);
     }
-  }, [specificMethod, selectedWorkflow]);
+  }, [specificMethod]);
 
   const handleCollectionMethodChange = (value: string) => {
     setCollectionMethod(value);
     setSpecificMethod('');
     setSelectedWorkflow('');
     setGettingStarted(null);
+    setWorkflows([]);
+    onCardSelectionChange(value === 'Use a sample dataset');
+
+    if (value === 'Configure collectors') {
+      setCollectorOptions([
+        { label: 'Open Telemetry (structured)', value: 'otel' },
+        { label: 'Nginx (structured)', value: 'nginx' },
+        { label: 'Java (unstructured)', value: 'java' },
+        { label: 'Python (unstructured)', value: 'python' },
+        { label: 'Golang (unstructured)', value: 'golang' },
+      ]);
+    } else if (value === 'Upload a file CSV or JSON') {
+      setCollectorOptions([{ label: 'Fluent Bit', value: 'csv' }]);
+    }
   };
 
-  const handleSpecificMethodChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedMethod = event.target.value;
-    setSpecificMethod(selectedMethod);
-    onSelectSource(selectedMethod);
-    setSelectedLabel('');
+  const handleSpecificMethodChange = (selectedOption: any) => {
+    if (!selectedOption) {
+      return;
+    }
+    const updatedOptions = collectorOptions.map((option) =>
+      option.value === selectedOption.value
+        ? { ...option, checked: 'on' }
+        : { ...option, checked: undefined }
+    );
+    setCollectorOptions(updatedOptions);
+    setSpecificMethod(selectedOption.value);
+    onSelectSource(selectedOption.value);
     setSelectedWorkflow('');
     setGettingStarted(null);
+    setWorkflows([]);
   };
 
-  const handleWorkflowChange = (workflow: string) => {
-    setSelectedWorkflow(workflow);
-    setSelectedTabId('workflow_tab');
+  const onTabClick = (tab: any) => {
+    const workflowIndex = parseInt(tab.id.split('_')[1], 10);
+    setSelectedTabId(tab.id);
+    setSelectedWorkflow(workflows[workflowIndex].name);
+    setGettingStarted(workflows[workflowIndex]);
   };
 
   const renderSpecificMethodDropdown = () => {
     if (!collectionMethod) return null;
 
-    let options = [];
-    if (collectionMethod === 'Configure collectors') {
-      options = [
-        { value: 'otel', text: 'Open Telemetry (structured)' },
-        { value: 'nginx', text: 'Nginx (structured)' },
-        { value: 'java', text: 'Java (unstructured)' },
-        { value: 'python', text: 'Python (unstructured)' },
-        { value: 'golang', text: 'Golang (unstructured)' },
-      ];
-    } else if (collectionMethod === 'Upload a file CSV or JSON') {
-      options = [
-        { value: 'csv', text: 'Fluent Bit' },
-        // { value: 'data-prepper', text: 'Data Prepper' },
-      ];
-    }
-
     return (
       <>
-        <EuiText>Select one of the following</EuiText>
+        <EuiText>
+          <strong>Select a collector</strong>
+        </EuiText>
         <EuiSpacer size="s" />
-        <EuiSelect
-          options={[{ value: '', text: 'Select an option' }, ...options]}
-          value={specificMethod}
-          onChange={handleSpecificMethodChange}
-        />
+        <EuiSelectable
+          options={collectorOptions}
+          singleSelection
+          onChange={(newOptions) =>
+            handleSpecificMethodChange(newOptions.find((option) => option.checked))
+          }
+          listProps={{ bordered: true }}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </>
     );
   };
 
-  const onLabelChange = (selectedOptions: any[]) => {
-    if (selectedOptions.length === 0) {
-      setSelectedLabel('');
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    } else {
-      const selectedValue = selectedOptions[0].value;
-      setSelectedLabel(selectedValue);
-      const element = document.getElementById(selectedValue);
-      if (element) {
-        const headerOffset = 100;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
-      }
-    }
-  };
-
-  const renderSteps = (workflow: any) => (
-    <div>
-      <EuiText>
-        <h2>{workflow.name} Workflow</h2>
-        <p>{workflow.description}</p>
-        {workflow.info && (
-          <EuiLink href={workflow.info} target="_blank">
-            More Info
-          </EuiLink>
-        )}
-        {workflow.types && <p>Types: {workflow.types.join(', ')}</p>}
-      </EuiText>
-      <EuiSpacer size="m" />
-      {workflow.steps.map((step: any, index: number) => (
-        <div key={index} id={step.name.replace(/\s/g, '-')}>
-          <EuiTitle size="s">
-            <h3>{step.name}</h3>
-          </EuiTitle>
+  const renderSteps = (workflow: any) => {
+    const steps = workflow.steps.map((step: any) => ({
+      title: step.name,
+      children: (
+        <div>
           {step.label && (
             <EuiText color="secondary">
               <p>{step.label}</p>
@@ -218,9 +192,29 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           )}
           <EuiSpacer size="m" />
         </div>
-      ))}
-    </div>
-  );
+      ),
+    }));
+
+    steps.push({
+      title: 'Schema',
+      children: renderSchema(
+        technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+          technologyJsonMap[specificMethod]?.schema ||
+          []
+      ),
+    });
+
+    steps.push({
+      title: 'Index Patterns',
+      children: renderIndex(
+        technologyJsonMap[specificMethod]?.['getting-started']?.['index-patterns'] ||
+          technologyJsonMap[specificMethod]?.['index-patterns'] ||
+          {}
+      ),
+    });
+
+    return <EuiSteps steps={steps} />;
+  };
 
   const renderSchema = (schemas: any[]) =>
     schemas.map((schema, idx) => (
@@ -273,174 +267,94 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          console.log(specificMethod);
           await uploadAssets(specificMethod);
         }}
+        fill
       >
-        Create Pattern
+        Create assets
       </EuiButton>
       <EuiSpacer size="m" />
       <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
-        Move to Query and Analyze Data
+        Move to query and analyze data
       </EuiButton>
     </>
   );
 
-  const tabs = [
-    {
-      id: 'workflow_tab',
-      name: 'Workflow',
-      content: (
-        <div>
-          <EuiComboBox
-            placeholder="Search and select a label..."
-            singleSelection={{ asPlainText: true }}
-            options={labelsOptions}
-            selectedOptions={selectedLabel ? [{ label: selectedLabel }] : []}
-            onChange={onLabelChange}
-            style={{ marginBottom: '20px' }}
-          />
-          {gettingStarted && renderSteps(gettingStarted)}
-          <EuiButton
-            onClick={() => {
-              setSelectedTabId('schema_tab');
-              window.scrollTo(0, 0);
-            }}
-          >
-            Go to Schema
-          </EuiButton>
-        </div>
-      ),
-    },
-    {
-      id: 'schema_tab',
-      name: 'Schema',
-      content: (
-        <div>
-          <EuiTitle size="m">
-            <h2>Schema</h2>
-          </EuiTitle>
-          {renderSchema(
-            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
-              technologyJsonMap[specificMethod]?.schema ||
-              []
-          )}
-          <EuiButton
-            onClick={() => {
-              setSelectedTabId('index_patterns_tab');
-              window.scrollTo(0, 0);
-            }}
-          >
-            Go to Index Patterns
-          </EuiButton>
-        </div>
-      ),
-    },
-    {
-      id: 'index_patterns_tab',
-      name: 'Index Patterns',
-      content: (
-        <div>
-          <EuiTitle size="m">
-            <h2>Index Patterns</h2>
-          </EuiTitle>
-          {renderIndex(
-            technologyJsonMap[specificMethod]?.['getting-started']?.['index-patterns'] ||
-              technologyJsonMap[specificMethod]?.['index-patterns'] ||
-              {}
-          )}
-        </div>
-      ),
-    },
-  ];
-
-  const onTabClick = (tab: any) => {
-    setSelectedTabId(tab.id);
-  };
-
-  const renderContent = () => {
-    if (!gettingStarted) {
-      return (
-        <EuiText>
-          <h3>No workflow available</h3>
-          <p>There is no workflow available for the selected method.</p>
-        </EuiText>
-      );
-    }
-
-    return (
-      <EuiTabbedContent
-        tabs={tabs}
-        selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
-        onTabClick={onTabClick}
-      />
-    );
-  };
+  const tabs = workflows.map((workflow, index) => ({
+    id: `workflow_${index}`,
+    name: workflow.name,
+    content: (
+      <div>
+        <EuiSpacer size="l" />
+        {renderSteps(workflow)}
+      </div>
+    ),
+  }));
 
   return (
     <EuiAccordion
       id="collect-and-ship-data"
-      buttonContent="Collect & Ship Data"
+      buttonContent="Collect and ship data"
       paddingSize="m"
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={onToggle}
     >
       <EuiPanel>
         <EuiText>
-          <h2>Collect Your Data</h2>
+          <h3>Collect your data</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiText>Select a collection method</EuiText>
+        <EuiText>
+          <strong>Select a collection method</strong>
+        </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiCard
-              layout="vertical"
-              title="Configure collectors"
-              description="Configure agents and ingestion pipeline"
-              selectable={{
-                onClick: () => {
-                  handleCollectionMethodChange('Configure collectors');
-                  setSelectedCard('Configure collectors');
-                },
-                isSelected: selectedCard === 'Configure collectors',
+            <EuiCheckableCard
+              id="configure_collectors"
+              label="Configure collectors"
+              checkableType="radio"
+              checked={selectedCard === 'Configure collectors'}
+              onChange={() => {
+                handleCollectionMethodChange('Configure collectors');
+                setSelectedCard('Configure collectors');
               }}
-            />
+            >
+              Configure agents and ingestion pipeline
+            </EuiCheckableCard>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              layout="vertical"
-              title="Upload a file CSV or JSON"
-              description="..."
-              selectable={{
-                onClick: () => {
-                  handleCollectionMethodChange('Upload a file CSV or JSON');
-                  setSelectedCard('Upload a file CSV or JSON');
-                },
-                isSelected: selectedCard === 'Upload a file CSV or JSON',
+            <EuiCheckableCard
+              id="upload_file"
+              label="Upload a file CSV"
+              checkableType="radio"
+              checked={selectedCard === 'Upload a file CSV or JSON'}
+              onChange={() => {
+                handleCollectionMethodChange('Upload a file CSV or JSON');
+                setSelectedCard('Upload a file CSV or JSON');
               }}
-            />
+            >
+              Upload your data
+            </EuiCheckableCard>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              layout="vertical"
-              title="Use a sample dataset"
-              description="Explore with a log dataset"
-              selectable={{
-                onClick: () => {
-                  handleCollectionMethodChange('Use a sample dataset');
-                  setSelectedCard('Use a sample dataset');
-                },
-                isSelected: selectedCard === 'Use a sample dataset',
+            <EuiCheckableCard
+              id="use_sample_dataset"
+              label="Use a sample dataset"
+              checkableType="radio"
+              checked={selectedCard === 'Use a sample dataset'}
+              onChange={() => {
+                handleCollectionMethodChange('Use a sample dataset');
+                setSelectedCard('Use a sample dataset');
               }}
-            />
+            >
+              Explore with a log dataset
+            </EuiCheckableCard>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {collectionMethod === 'Use a sample dataset' ? (
-          <>
-            <IntegrationCards />
-          </>
+          <IntegrationCards />
         ) : (
           <>
             {renderSpecificMethodDropdown()}
@@ -448,28 +362,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             {specificMethod && (
               <>
                 <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" style={{ maxWidth: '20rem' }}>
-                  <EuiFlexItem>
-                    <EuiButton
-                      fill={selectedWorkflow === firstWorkflow}
-                      onClick={() => handleWorkflowChange(firstWorkflow)}
-                    >
-                      QuickStart
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton
-                      fill={selectedWorkflow === secondWorkflow}
-                      onClick={() => handleWorkflowChange(secondWorkflow)}
-                    >
-                      Connect To a Collector
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                {tabs.length > 0 && (
+                  <EuiTabbedContent
+                    tabs={tabs}
+                    selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+                    onTabClick={onTabClick}
+                  />
+                )}
               </>
             )}
-            <EuiSpacer size="l" />
-            {selectedWorkflow && renderContent()}
           </>
         )}
       </EuiPanel>

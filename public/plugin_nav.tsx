@@ -18,6 +18,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityOverviewID,
+      category: undefined,
       order: 10,
     },
   ]);
@@ -25,6 +26,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityGettingStartedID,
+      category: undefined,
       order: 20,
     },
   ]);

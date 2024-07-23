@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
@@ -11,6 +16,7 @@ export const NewGettingStarted = (props: HomeProps) => {
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
   const [isQueryDataOpen, setIsQueryDataOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
+  const [isSampleDataset, setIsSampleDataset] = useState(false); // New state
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -42,6 +48,10 @@ export const NewGettingStarted = (props: HomeProps) => {
     setIndexPatterns(patterns);
   };
 
+  const handleCardSelectionChange = (isSample: boolean) => {
+    setIsSampleDataset(isSample);
+  };
+
   return (
     <EuiPage>
       <EuiPageBody component="div">
@@ -53,14 +63,17 @@ export const NewGettingStarted = (props: HomeProps) => {
           selectedTechnology={selectedSource}
           onMoveToQueryData={setQueryDataOpen}
           onSelectSource={handleSelectSource}
+          onCardSelectionChange={handleCardSelectionChange}
         />
         <EuiSpacer size="l" />
-        <QueryAndAnalyze
-          isOpen={isQueryDataOpen}
-          onToggle={toggleQueryData}
-          selectedTechnology={selectedSource}
-          indexPatterns={indexPatterns}
-        />
+        {!isSampleDataset && (
+          <QueryAndAnalyze
+            isOpen={isQueryDataOpen}
+            onToggle={toggleQueryData}
+            selectedTechnology={selectedSource}
+            indexPatterns={indexPatterns}
+          />
+        )}
       </EuiPageBody>
     </EuiPage>
   );
