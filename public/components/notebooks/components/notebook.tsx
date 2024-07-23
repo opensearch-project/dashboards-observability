@@ -39,6 +39,7 @@ import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/d
 import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 import PPLService from '../../../services/requests/ppl';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
 import { defaultParagraphParser } from './helpers/default_parser';
@@ -50,7 +51,6 @@ import {
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
 import { Paragraphs } from './paragraph_components/paragraphs';
-import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 const panelStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
@@ -339,7 +339,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({ isModalVisible: true });
   };
 
-  showMigrateModal = () => {
+  showUpgradeModal = () => {
     this.setState({
       modalLayout: getCustomModal(
         (newName: string) => {
@@ -353,10 +353,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         },
         () => this.setState({ isModalVisible: false }),
         'Name',
-        'Migrate notebook',
+        'Upgrade notebook',
         'Cancel',
-        'Migrate',
-        this.state.path + ' (migrated)',
+        'Upgrade',
+        this.state.path + ' (upgraded)',
         CREATE_NOTE_MESSAGE
       ),
     });
@@ -1091,8 +1091,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      data-test-subj="migrate-notebook"
-                      onClick={() => this.showMigrateModal()}
+                      data-test-subj="upgrade-notebook"
+                      onClick={() => this.showUpgradeModal()}
                     >
                       Upgrade Notebook
                     </EuiButton>
