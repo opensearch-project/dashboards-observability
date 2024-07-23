@@ -2,11 +2,6 @@
 
 Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 
-### Bugfixes
-
-* fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
-
-
 ### Features
 * replace dashboards with the getting started dashboards ([#1963](https://github.com/opensearch-project/dashboards-observability/pull/1963))
 * Observability Overview and GettingStarted ([#1957](https://github.com/opensearch-project/dashboards-observability/pull/1957))
@@ -21,6 +16,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 * Add toast message for getting started / Fix Nav Bug for Traces ([#1977](https://github.com/opensearch-project/dashboards-observability/pull/1977))
 * Unregister observability datasource from old and new nav group ([#1972](https://github.com/opensearch-project/dashboards-observability/pull/1972))
 * UX copy changes for Notebooks with MDS ([#1971](https://github.com/opensearch-project/dashboards-observability/pull/1971))
+* fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
 * Trace analytics scroll bar reset ([#1917](https://github.com/opensearch-project/dashboards-observability/pull/1917))
 * #1466 - create observability dashboard after invalid name ([#1730](https://github.com/opensearch-project/dashboards-observability/pull/1730))
 
