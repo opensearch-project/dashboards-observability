@@ -1,0 +1,20 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+csv-pipeline:
+  source:
+    file:
+      path: "/full/path/to/ingest.csv"
+      record_type: "event"
+  processor:
+    - csv:
+        column_names: ["col1", "col2", "col3"]
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        username: "admin"
+        password: "my_%New%_passW0rd!@#"
+        insecure: true
+        index_type: custom
+        index: logs-index
+        bulk_size: 4

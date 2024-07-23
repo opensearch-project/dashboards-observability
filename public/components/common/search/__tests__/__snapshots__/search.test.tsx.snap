@@ -571,7 +571,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                           hasArrow={true}
                                           isOpen={false}
                                           ownFocus={true}
-                                          panelPaddingSize="m"
+                                          panelPaddingSize="s"
                                         >
                                           <div
                                             className="euiPopover euiPopover--anchorDownLeft"
