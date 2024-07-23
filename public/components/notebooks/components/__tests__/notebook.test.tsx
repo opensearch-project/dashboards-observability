@@ -623,7 +623,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Upgrade Notebook'));
+      fireEvent.click(utils.getByTestId('upgrade-notebook'));
     });
 
     act(() => {

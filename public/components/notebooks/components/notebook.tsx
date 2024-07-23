@@ -1091,7 +1091,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      data-test-subj="upgrade-notebook"
+                      data-test-subj="upgrade-notebook-callout"
                       onClick={() => this.showUpgradeModal()}
                     >
                       Upgrade Notebook
@@ -1112,10 +1112,23 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             <EuiTitle size="l" data-test-subj="notebookTitle">
               <h1>{this.state.path}</h1>
             </EuiTitle>
+            <EuiSpacer />
             {!this.state.savedObjectNotebook && (
-              <EuiCallOut color="primary" iconType='iInCircle"'>
-                Upgrade this notebook to take full advantage of the latest features
-              </EuiCallOut>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut color="primary" iconType='iInCircle"'>
+                    Upgrade this notebook to take full advantage of the latest features
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      data-test-subj="upgrade-notebook"
+                      onClick={() => this.showUpgradeModal()}
+                    >
+                      Upgrade Notebook
+                    </EuiButton>
+                  </EuiCallOut>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} />
+              </EuiFlexGroup>
             )}
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems={'flexStart'} gutterSize={'l'}>
