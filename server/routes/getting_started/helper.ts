@@ -10,12 +10,10 @@ export const assetMapper = (tutorialId: string) => {
   switch (tutorialId) {
     case 'otel':
       return 'otel-getting-started-demo-1.0.0.ndjson';
-    case 'vpc-flow':
-      return 'dummy.ndjson';
     case 'nginx':
       return 'nginx-getting-started-tutorial-1.0.0.ndjson';
     case 'java':
-      return 'dummy.ndjson';
+      return 'java-tutorial-1.0.0.ndjson';
     case 'python':
       return 'python-tutorial-1.0.0.ndjson';
     case 'golang':

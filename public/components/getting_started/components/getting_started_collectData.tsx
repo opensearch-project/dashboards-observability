@@ -56,6 +56,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [selectedWorkflow, setSelectedWorkflow] = useState('');
   const [firstWorkflow, setFirstWorkflow] = useState<string>('');
   const [secondWorkflow, setSecondWorkflow] = useState<string>('');
+  const [selectedCard, setSelectedCard] = useState('');
 
   const technologyJsonMap: Record<string, any> = {
     otel: otelJson,
@@ -391,13 +392,19 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         <EuiSpacer size="m" />
         <EuiText>Select a collection method</EuiText>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="l" style={{ maxWidth: '30rem' }}>
+        <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCard
               layout="vertical"
               title="Configure collectors"
               description="Configure agents and ingestion pipeline"
-              onClick={() => handleCollectionMethodChange('Configure collectors')}
+              selectable={{
+                onClick: () => {
+                  handleCollectionMethodChange('Configure collectors');
+                  setSelectedCard('Configure collectors');
+                },
+                isSelected: selectedCard === 'Configure collectors',
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -405,7 +412,13 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
               layout="vertical"
               title="Upload a file CSV or JSON"
               description="..."
-              onClick={() => handleCollectionMethodChange('Upload a file CSV or JSON')}
+              selectable={{
+                onClick: () => {
+                  handleCollectionMethodChange('Upload a file CSV or JSON');
+                  setSelectedCard('Upload a file CSV or JSON');
+                },
+                isSelected: selectedCard === 'Upload a file CSV or JSON',
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -413,7 +426,13 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
               layout="vertical"
               title="Use a sample dataset"
               description="Explore with a log dataset"
-              onClick={() => handleCollectionMethodChange('Use a sample dataset')}
+              selectable={{
+                onClick: () => {
+                  handleCollectionMethodChange('Use a sample dataset');
+                  setSelectedCard('Use a sample dataset');
+                },
+                isSelected: selectedCard === 'Use a sample dataset',
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
