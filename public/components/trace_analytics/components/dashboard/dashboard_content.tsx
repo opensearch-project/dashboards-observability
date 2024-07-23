@@ -31,6 +31,7 @@ import { ThroughputPlt } from '../common/plots/throughput_plt';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -64,6 +65,7 @@ export function DashboardContent(props: DashboardProps) {
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
   const { setToast } = useToast();
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
@@ -77,7 +79,12 @@ export function DashboardContent(props: DashboardProps) {
   }, [showTimeoutToast]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    if (isNavGroupEnabled) {
+      chrome.setBreadcrumbs([...childBreadcrumbs]);
+    } else {
+      chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    }
+
     const validFilters = getValidFilterFields(mode, page, attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({

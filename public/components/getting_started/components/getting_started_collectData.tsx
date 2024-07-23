@@ -31,7 +31,7 @@ import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 import javaJson from '../getting_started_artifacts/java_client/java_client-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
-import { uploadAssets } from './utils';
+import { UploadAssets } from './utils';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -267,7 +267,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          await uploadAssets(specificMethod);
+          await UploadAssets(specificMethod);
         }}
         fill
       >
