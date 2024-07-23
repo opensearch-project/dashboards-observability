@@ -570,7 +570,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             onSelectedDataSource={onSelectedDataSource}
             disabled={false}
             fullWidth={false}
-            removePrepend={true}
+            removePrepend={false}
             defaultOption={
               paradataSourceMDSId !== undefined && [
                 { id: paradataSourceMDSId, label: dataSourceMDSLabel },

@@ -386,7 +386,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
         >
           <button
             class="euiButton euiButton--primary"
-            data-test-subj="migrate-notebook"
+            data-test-subj="upgrade-notebook"
             type="button"
           >
             <span
