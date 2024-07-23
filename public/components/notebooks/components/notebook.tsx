@@ -7,6 +7,7 @@ import {
   EuiButton,
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
+  EuiCallOut,
   EuiCard,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -27,15 +28,23 @@ import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 import PPLService from '../../../services/requests/ppl';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
 import { defaultParagraphParser } from './helpers/default_parser';
 import { DeleteNotebookModal, getCustomModal, getDeleteModal } from './helpers/modal_containers';
+import { isValidUUID } from './helpers/notebooks_parser';
 import {
   contextMenuCreateReportDefinition,
   contextMenuViewReports,
@@ -76,6 +85,12 @@ interface NotebookProps {
   setToast: (title: string, color?: string, text?: string) => void;
   location: RouteComponentProps['location'];
   history: RouteComponentProps['history'];
+  migrateNotebook: (newNoteName: string, noteId: string) => Promise<string>;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  notifications: CoreStart['notifications'];
+  dataSourceEnabled: boolean;
+  savedObjectsMDSClient: SavedObjectsStart;
 }
 
 interface NotebookState {
@@ -96,6 +111,10 @@ interface NotebookState {
   modalLayout: React.ReactNode;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
+  savedObjectNotebook: boolean;
+  dataSourceMDSId: string | undefined | null;
+  dataSourceMDSLabel: string | undefined | null;
+  dataSourceMDSEnabled: boolean;
 }
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
@@ -118,6 +137,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       modalLayout: <EuiOverlayMask />,
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
+      savedObjectNotebook: true,
+      dataSourceMDSId: null,
+      dataSourceMDSLabel: null,
+      dataSourceMDSEnabled: false,
     };
   }
 
@@ -182,7 +205,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   deleteParagraphButton = (para: ParaType, index: number) => {
     if (index !== -1) {
       return this.props.http
-        .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
+        .delete(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
           query: {
             noteId: this.props.openedNoteId,
             paragraphId: para.uniqueId,
@@ -227,7 +250,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         async () => {
           this.setState({ isModalVisible: false });
           await this.props.http
-            .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
+            .delete(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
               query: {
                 noteId: this.props.openedNoteId,
               },
@@ -274,7 +297,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         (newName: string) => {
           this.props.renameNotebook(newName, this.props.openedNoteId).then((res) => {
             this.setState({ isModalVisible: false });
-            window.location.assign(`#/${res.message.objectId}`);
+            window.location.assign(`#/${res.id}`);
             setTimeout(() => {
               this.loadNotebook();
             }, 300);
@@ -316,6 +339,30 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({ isModalVisible: true });
   };
 
+  showUpgradeModal = () => {
+    this.setState({
+      modalLayout: getCustomModal(
+        (newName: string) => {
+          this.props.migrateNotebook(newName, this.props.openedNoteId).then((id: string) => {
+            window.location.assign(`#/${id}`);
+            setTimeout(() => {
+              this.loadNotebook();
+            }, 300);
+          });
+          this.setState({ isModalVisible: false });
+        },
+        () => this.setState({ isModalVisible: false }),
+        'Name',
+        'Upgrade notebook',
+        'Cancel',
+        'Upgrade',
+        this.state.path + ' (upgraded)',
+        CREATE_NOTE_MESSAGE
+      ),
+    });
+    this.setState({ isModalVisible: true });
+  };
+
   showDeleteNotebookModal = () => {
     this.setState({
       modalLayout: (
@@ -341,7 +388,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // Function for delete Visualization from notebook
   deleteVizualization = (uniqueId: string) => {
     this.props.http
-      .delete(`${NOTEBOOKS_API_PREFIX}/paragraph/` + this.props.openedNoteId + '/' + uniqueId)
+      .delete(
+        `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/` +
+          this.props.openedNoteId +
+          '/' +
+          uniqueId
+      )
       .then((res) => {
         this.setState({ paragraphs: res.paragraphs });
         this.parseAllParagraphs();
@@ -365,7 +417,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/paragraph/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
@@ -417,7 +469,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/set_paragraphs/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs/`, {
         body: JSON.stringify(moveParaObj),
       })
       .then((_res) => this.setState({ paragraphs, parsedPara }))
@@ -448,7 +500,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       noteId: this.props.openedNoteId,
     };
     this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/paragraph/clearall/`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
@@ -481,15 +533,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
       paragraphType: paraType || '',
+      dataSourceMDSId: this.state.dataSourceMDSId || '',
+      dataSourceMDSLabel: this.state.dataSourceMDSLabel || '',
     };
-
+    const isValid = isValidUUID(this.props.openedNoteId);
+    const route = isValid
+      ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run/`
+      : `${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`;
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`, {
+      .post(route, {
         body: JSON.stringify(paraUpdateObject),
       })
       .then(async (res) => {
         if (res.output[0]?.outputType === 'QUERY') {
-          await this.loadQueryResultsFromInput(res);
+          await this.loadQueryResultsFromInput(res, this.state.dataSourceMDSId);
           const checkErrorJSON = JSON.parse(res.output[0].result);
           if (this.checkQueryOutputError(checkErrorJSON)) {
             return;
@@ -569,17 +626,49 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
   };
 
-  loadNotebook = () => {
+  loadNotebook = async () => {
     this.showParagraphRunning('queue');
+    const isValid = isValidUUID(this.props.openedNoteId);
+    this.setState({
+      savedObjectNotebook: isValid,
+      dataSourceMDSEnabled: isValid && this.props.dataSourceEnabled,
+    });
+    const route = isValid
+      ? `${NOTEBOOKS_API_PREFIX}/note/savedNotebook/${this.props.openedNoteId}`
+      : `${NOTEBOOKS_API_PREFIX}/note/${this.props.openedNoteId}`;
     this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/note/` + this.props.openedNoteId)
+      .get(route)
       .then(async (res) => {
         this.setBreadcrumbs(res.path);
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
-          if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
+          if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            this.props.dataSourceEnabled &&
+            res.paragraphs[index].dataSourceMDSId
+          ) {
+            await this.loadQueryResultsFromInput(
+              res.paragraphs[index],
+              res.paragraphs[index].dataSourceMDSId
+            );
+          } else if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            !this.props.dataSourceEnabled &&
+            res.paragraphs[index].dataSourceMDSId
+          ) {
+            res.paragraphs[index].output[0] = [];
+            this.props.setToast(
+              `Data source ${res.paragraphs[index].dataSourceMDSLabel} is not available. Please configure your dataSources`,
+              'danger'
+            );
+          } else if (
+            res.paragraphs[index].output[0]?.outputType === 'QUERY' &&
+            !this.state.savedObjectNotebook
+          ) {
             await this.loadQueryResultsFromInput(res.paragraphs[index]);
+          } else if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
+            await this.loadQueryResultsFromInput(res.paragraphs[index], '');
           }
         }
         this.setState(res, this.parseAllParagraphs);
@@ -593,12 +682,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       });
   };
 
-  loadQueryResultsFromInput = async (paragraph: any) => {
+  handleSelectedDataSourceChange = (id: string | undefined, label: string | undefined) => {
+    this.setState({ dataSourceMDSId: id, dataSourceMDSLabel: label });
+  };
+
+  loadQueryResultsFromInput = async (paragraph: any, dataSourceMDSId?: any) => {
     const queryType =
       paragraph.input.inputText.substring(0, 4) === '%sql' ? 'sqlquery' : 'pplquery';
+    const query = {
+      dataSourceMDSId,
+    };
     await this.props.http
       .post(`/api/sql/${queryType}`, {
         body: JSON.stringify(paragraph.output[0].result),
+        ...(this.props.dataSourceEnabled && { query }),
       })
       .then((response) => {
         paragraph.output[0].result = response.data.resp;
@@ -617,17 +714,19 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   setBreadcrumbs(path: string) {
-    this.props.setBreadcrumbs([
-      this.props.parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/',
-      },
-      {
-        text: path,
-        href: `#/${this.props.openedNoteId}`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [this.props.parentBreadcrumb],
+      [
+        {
+          text: 'Notebooks',
+          href: '#/',
+        },
+        {
+          text: path,
+          href: `#/${this.props.openedNoteId}`,
+        },
+      ]
+    );
   }
 
   checkIfReportingPluginIsInstalled() {
@@ -938,58 +1037,86 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               )}
               <EuiFlexItem grow={false} />
               <EuiFlexItem grow={false} />
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="none"
-                  button={
-                    <EuiButton
-                      data-test-subj="notebook-paragraph-actions-button"
-                      iconType="arrowDown"
-                      iconSide="right"
-                      onClick={() =>
-                        this.setState({
-                          isParaActionsPopoverOpen: !this.state.isParaActionsPopoverOpen,
-                        })
-                      }
-                    >
-                      Paragraph actions
-                    </EuiButton>
-                  }
-                  isOpen={this.state.isParaActionsPopoverOpen}
-                  closePopover={() => this.setState({ isParaActionsPopoverOpen: false })}
-                >
-                  <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} />
-                </EuiPopover>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>{showReportingContextMenu}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="none"
-                  button={
+              {this.state.savedObjectNotebook && (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    panelPaddingSize="none"
+                    button={
+                      <EuiButton
+                        data-test-subj="notebook-paragraph-actions-button"
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() =>
+                          this.setState({
+                            isParaActionsPopoverOpen: !this.state.isParaActionsPopoverOpen,
+                          })
+                        }
+                      >
+                        Paragraph actions
+                      </EuiButton>
+                    }
+                    isOpen={this.state.isParaActionsPopoverOpen}
+                    closePopover={() => this.setState({ isParaActionsPopoverOpen: false })}
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
+              {this.state.savedObjectNotebook ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    panelPaddingSize="none"
+                    button={
+                      <EuiButton
+                        data-test-subj="notebook-notebook-actions-button"
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() =>
+                          this.setState({
+                            isNoteActionsPopoverOpen: !this.state.isNoteActionsPopoverOpen,
+                          })
+                        }
+                      >
+                        Notebook actions
+                      </EuiButton>
+                    }
+                    isOpen={this.state.isNoteActionsPopoverOpen}
+                    closePopover={() => this.setState({ isNoteActionsPopoverOpen: false })}
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={noteActionsPanels} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : (
+                <>
+                  <EuiFlexItem grow={false}>
                     <EuiButton
-                      data-test-subj="notebook-notebook-actions-button"
-                      iconType="arrowDown"
-                      iconSide="right"
-                      onClick={() =>
-                        this.setState({
-                          isNoteActionsPopoverOpen: !this.state.isNoteActionsPopoverOpen,
-                        })
-                      }
+                      data-test-subj="upgrade-notebook"
+                      onClick={() => this.showUpgradeModal()}
                     >
-                      Notebook actions
+                      Upgrade Notebook
                     </EuiButton>
-                  }
-                  isOpen={this.state.isNoteActionsPopoverOpen}
-                  closePopover={() => this.setState({ isNoteActionsPopoverOpen: false })}
-                >
-                  <EuiContextMenu initialPanelId={0} panels={noteActionsPanels} />
-                </EuiPopover>
-              </EuiFlexItem>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="delete-notebook"
+                      onClick={() => this.showDeleteNotebookModal()}
+                    >
+                      Delete this notebook
+                    </EuiButton>
+                  </EuiFlexItem>
+                </>
+              )}
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiTitle size="l" data-test-subj="notebookTitle">
               <h1>{this.state.path}</h1>
             </EuiTitle>
+            {!this.state.savedObjectNotebook && (
+              <EuiCallOut color="primary" iconType='iInCircle"'>
+                Upgrade this notebook to take full advantage of the latest features
+              </EuiCallOut>
+            )}
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems={'flexStart'} gutterSize={'l'}>
               <EuiFlexItem grow={false}>
@@ -1029,10 +1156,18 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       movePara={this.movePara}
                       showQueryParagraphError={this.state.showQueryParagraphError}
                       queryParagraphErrorMessage={this.state.queryParagraphErrorMessage}
+                      dataSourceManagement={this.props.dataSourceManagement}
+                      setActionMenu={this.props.setActionMenu}
+                      notifications={this.props.notifications}
+                      dataSourceEnabled={this.state.dataSourceMDSEnabled}
+                      savedObjectsMDSClient={this.props.savedObjectsMDSClient}
+                      handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
+                      paradataSourceMDSId={this.state.parsedPara[index].dataSourceMDSId}
+                      dataSourceMDSLabel={this.state.parsedPara[index].dataSourceMDSLabel}
                     />
                   </div>
                 ))}
-                {this.state.selectedViewId !== 'output_only' && (
+                {this.state.selectedViewId !== 'output_only' && this.state.savedObjectNotebook && (
                   <>
                     <EuiSpacer />
                     <EuiPopover
@@ -1068,41 +1203,43 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     </EuiText>
                   </EuiText>
                   <EuiSpacer size="xl" />
-                  <EuiFlexGroup justifyContent="spaceEvenly">
-                    <EuiFlexItem grow={2} />
-                    <EuiFlexItem grow={3}>
-                      <EuiCard
-                        icon={<EuiIcon size="xxl" type="editorCodeBlock" />}
-                        title="Code block"
-                        description="Write contents directly using markdown, SQL or PPL."
-                        footer={
-                          <EuiButton
-                            data-test-subj="emptyNotebookAddCodeBlockBtn"
-                            onClick={() => this.addPara(0, '', 'CODE')}
-                            style={{ marginBottom: 17 }}
-                          >
-                            Add code block
-                          </EuiButton>
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={3}>
-                      <EuiCard
-                        icon={<EuiIcon size="xxl" type="visArea" />}
-                        title="Visualization"
-                        description="Import OpenSearch Dashboards or Observability visualizations to the notes."
-                        footer={
-                          <EuiButton
-                            onClick={() => this.addPara(0, '', 'VISUALIZATION')}
-                            style={{ marginBottom: 17 }}
-                          >
-                            Add visualization
-                          </EuiButton>
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={2} />
-                  </EuiFlexGroup>
+                  {this.state.savedObjectNotebook && (
+                    <EuiFlexGroup justifyContent="spaceEvenly">
+                      <EuiFlexItem grow={2} />
+                      <EuiFlexItem grow={3}>
+                        <EuiCard
+                          icon={<EuiIcon size="xxl" type="editorCodeBlock" />}
+                          title="Code block"
+                          description="Write contents directly using markdown, SQL or PPL."
+                          footer={
+                            <EuiButton
+                              data-test-subj="emptyNotebookAddCodeBlockBtn"
+                              onClick={() => this.addPara(0, '', 'CODE')}
+                              style={{ marginBottom: 17 }}
+                            >
+                              Add code block
+                            </EuiButton>
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={3}>
+                        <EuiCard
+                          icon={<EuiIcon size="xxl" type="visArea" />}
+                          title="Visualization"
+                          description="Import OpenSearch Dashboards or Observability visualizations to the notes."
+                          footer={
+                            <EuiButton
+                              onClick={() => this.addPara(0, '', 'VISUALIZATION')}
+                              style={{ marginBottom: 17 }}
+                            >
+                              Add visualization
+                            </EuiButton>
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={2} />
+                    </EuiFlexGroup>
+                  )}
                   <EuiSpacer size="xxl" />
                 </EuiPanel>
               </div>

@@ -43,6 +43,7 @@ import {
   getSampleNotebooksModal,
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 
 interface NoteTableProps {
   loading: boolean;
@@ -64,8 +65,6 @@ export function NoteTable({
   addSampleNotebooks,
   notebooks,
   createNotebook,
-  renameNotebook,
-  cloneNotebook,
   deleteNotebook,
   parentBreadcrumb,
   setBreadcrumbs,
@@ -79,13 +78,15 @@ export function NoteTable({
   const history = useHistory();
 
   useEffect(() => {
-    setBreadcrumbs([
-      parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/',
-      },
-    ]);
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
+        {
+          text: 'Notebooks',
+          href: '#/',
+        },
+      ]
+    );
     fetchNotebooks();
   }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
 
@@ -105,16 +106,6 @@ export function NoteTable({
 
   const onCreate = async (newNoteName: string) => {
     createNotebook(newNoteName);
-    closeModal();
-  };
-
-  const onRename = async (newNoteName: string) => {
-    renameNotebook(newNoteName, selectedNotebooks[0].id);
-    closeModal();
-  };
-
-  const onClone = async (newName: string) => {
-    cloneNotebook(newName, selectedNotebooks[0].id);
     closeModal();
   };
 
@@ -142,38 +133,6 @@ export function NoteTable({
         'Cancel',
         'Create',
         undefined,
-        CREATE_NOTE_MESSAGE
-      )
-    );
-    showModal();
-  };
-
-  const renameNote = () => {
-    setModalLayout(
-      getCustomModal(
-        onRename,
-        closeModal,
-        'Name',
-        'Rename notebook',
-        'Cancel',
-        'Rename',
-        selectedNotebooks[0].path,
-        CREATE_NOTE_MESSAGE
-      )
-    );
-    showModal();
-  };
-
-  const cloneNote = () => {
-    setModalLayout(
-      getCustomModal(
-        onClone,
-        closeModal,
-        'Name',
-        'Duplicate notebook',
-        'Cancel',
-        'Duplicate',
-        selectedNotebooks[0].path + ' (copy)',
         CREATE_NOTE_MESSAGE
       )
     );
@@ -215,28 +174,6 @@ export function NoteTable({
   );
 
   const popoverItems: ReactElement[] = [
-    <EuiContextMenuItem
-      key="rename"
-      disabled={notebooks.length === 0 || selectedNotebooks.length !== 1}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        renameNote();
-      }}
-      data-test-subj="renameNotebookBtn"
-    >
-      Rename
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="duplicate"
-      disabled={notebooks.length === 0 || selectedNotebooks.length !== 1}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        cloneNote();
-      }}
-      data-test-subj="duplicateNotebookBtn"
-    >
-      Duplicate
-    </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="delete"
       disabled={notebooks.length === 0 || selectedNotebooks.length === 0}

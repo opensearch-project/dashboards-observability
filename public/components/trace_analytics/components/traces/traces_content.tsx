@@ -7,6 +7,8 @@
 import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
@@ -25,7 +27,6 @@ export function TracesContent(props: TracesProps) {
     appConfigs,
     startTime,
     endTime,
-    parentBreadcrumb,
     childBreadcrumbs,
     traceIdColumnAction,
     setQuery,
@@ -43,10 +44,14 @@ export function TracesContent(props: TracesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
-
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    chrome.setBreadcrumbs([
+      ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
+      ...childBreadcrumbs,
+    ]);
     const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
@@ -116,6 +121,7 @@ export function TracesContent(props: TracesProps) {
           componentConfig={{
             activeOption: dataSourceMDSId,
             fullWidth: true,
+            dataSourceFilter: dataSourceFilterFn,
           }}
         />
       )}

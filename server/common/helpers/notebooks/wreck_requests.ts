@@ -4,12 +4,12 @@
  */
 
 import Wreck from '@hapi/wreck';
-import { optionsType } from '../../../../common/types/notebooks';
+import { OptionsType } from '../../../../common/types/notebooks';
 
 export const requestor = async function (
   requestType: string,
   url: string,
-  wreckOptions: optionsType
+  wreckOptions: OptionsType
 ) {
   const promise = Wreck.request(requestType, url, wreckOptions);
   const res = await promise;

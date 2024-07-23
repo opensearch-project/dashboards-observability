@@ -32,9 +32,6 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityDataConnectionsID,
-  observabilityDataConnectionsPluginOrder,
-  observabilityDataConnectionsTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -51,9 +48,17 @@ import {
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesPluginOrder,
+  observabilityServicesTitle,
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedTitle,
+  observabilityGettingStartedPluginOrder,
+  observabilityOverviewID,
+  observabilityOverviewTitle,
+  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -106,6 +111,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { registerAllPluginNavGroups } from './plugin_nav';
 
 interface PublicConfig {
   query_assist: {
@@ -257,7 +263,9 @@ export class ObservabilityPlugin
       // prometheus: openSearchLocalDataSourcePluggable
     };
 
-    const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
+    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
+      params: AppMountParameters
+    ) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
@@ -276,25 +284,10 @@ export class ObservabilityPlugin
         startPage,
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
-        coreStart.savedObjects
+        coreStart.savedObjects,
+        defaultRoute
       );
     };
-
-    core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
-
-    core.application.register({
-      id: observabilityLogsID,
-      title: observabilityLogsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityLogsPluginOrder,
-      mount: appMountWithStartPage('logs'),
-    });
 
     core.application.register({
       id: observabilityMetricsID,
@@ -305,27 +298,11 @@ export class ObservabilityPlugin
     });
 
     core.application.register({
-      id: observabilityTracesID,
-      title: observabilityTracesTitle,
+      id: observabilityApplicationsID,
+      title: observabilityApplicationsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityTracesPluginOrder,
-      mount: appMountWithStartPage('traces'),
-    });
-
-    core.application.register({
-      id: observabilityNotebookID,
-      title: observabilityNotebookTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityNotebookPluginOrder,
-      mount: appMountWithStartPage('notebooks'),
-    });
-
-    core.application.register({
-      id: observabilityPanelsID,
-      title: observabilityPanelsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('dashboards'),
+      order: observabilityApplicationsPluginOrder,
+      mount: appMountWithStartPage('applications'),
     });
 
     core.application.register({
@@ -336,22 +313,72 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityOverviewID,
+        title: observabilityOverviewTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityOverviewPluginOrder,
+        mount: appMountWithStartPage('overview'),
+      });
+
+      core.application.register({
+        id: observabilityGettingStartedID,
+        title: observabilityGettingStartedTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityGettingStartedPluginOrder,
+        mount: appMountWithStartPage('gettingStarted'),
+      });
+
+      core.application.register({
+        id: 'observability-traces-nav',
+        title: observabilityTracesTitle,
+        order: observabilityTracesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/traces'),
+      });
+
+      core.application.register({
+        id: 'observability-services-nav',
+        title: observabilityServicesTitle,
+        order: observabilityServicesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/services'),
+      });
+    } else {
+      core.application.register({
+        id: observabilityTracesID,
+        title: observabilityTracesTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityTracesPluginOrder,
+        mount: appMountWithStartPage('traces'),
+      });
+      // deprecated in new Nav Groups.
+      core.application.register({
+        id: observabilityPanelsID,
+        title: observabilityPanelsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityPanelsPluginOrder,
+        mount: appMountWithStartPage('dashboards'),
+      });
+      core.application.register({
+        id: observabilityLogsID,
+        title: observabilityLogsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityLogsPluginOrder,
+        mount: appMountWithStartPage('logs'),
+      });
+    }
+
     core.application.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDataConnectionsPluginOrder,
-      mount: appMountWithStartPage('dataconnections'),
+      id: observabilityNotebookID,
+      title: observabilityNotebookTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityNotebookPluginOrder,
+      mount: appMountWithStartPage('notebooks'),
     });
 
-    setupDeps.managementOverview?.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      order: 9070,
-      description: i18n.translate('observability.dataconnectionsDescription', {
-        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
-      }),
-    });
+    registerAllPluginNavGroups(core);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,

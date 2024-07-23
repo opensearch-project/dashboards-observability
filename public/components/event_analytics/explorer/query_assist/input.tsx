@@ -128,6 +128,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const selectedIndex = props.selectedIndex[0]?.label || '';
 
   useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
+
+  useEffect(() => {
     if (
       props.nlqInput.trim().length === 0 ||
       (summaryData.responseForSummaryStatus !== 'success' &&
@@ -321,17 +325,21 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            className="euiFieldText"
+            style={{ padding: 8 }}
+            size="original"
+            type={chatLogo}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiInputPopover
             input={
               <EuiFieldText
                 inputRef={inputRef}
-                placeholder={
-                  selectedIndex
-                    ? `Ask a natural language question about ${selectedIndex} to generate a query`
-                    : 'Select a data source or index to ask a question.'
-                }
+                placeholder="Ask me a question"
                 disabled={loading}
                 value={props.nlqInput}
                 onChange={(e) => {
@@ -342,7 +350,6 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
                   // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
                   if (e.key === 'Enter') runAndSummarize();
                 }}
-                prepend={<EuiIcon type={chatLogo} />}
                 fullWidth
                 onFocus={() => {
                   props.setNeedsUpdate(false);
@@ -359,8 +366,9 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
             }}
           >
             <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-              {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question) => (
+              {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question, i) => (
                 <EuiListGroupItem
+                  key={i}
                   onClick={() => {
                     props.setNlqInput(question);
                     inputRef.current?.focus();

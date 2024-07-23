@@ -37,6 +37,8 @@ import {
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
@@ -101,21 +103,23 @@ export function ServiceView(props: ServiceViewProps) {
 
   useEffect(() => {
     if (page !== 'serviceFlyout')
-      props.chrome.setBreadcrumbs([
-        props.parentBreadcrumb,
-        {
-          text: 'Trace analytics',
-          href: '#/',
-        },
-        {
-          text: 'Services',
-          href: '#/services',
-        },
-        {
-          text: props.serviceName,
-          href: `#/services/${encodeURIComponent(props.serviceName)}`,
-        },
-      ]);
+      setNavBreadCrumbs(
+        [props.parentBreadcrumb],
+        [
+          {
+            text: 'Trace analytics',
+            href: '#/',
+          },
+          {
+            text: 'Services',
+            href: '#/services',
+          },
+          {
+            text: props.serviceName,
+            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+          },
+        ]
+      );
   }, [props.serviceName]);
 
   const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
@@ -257,6 +261,7 @@ export function ServiceView(props: ServiceViewProps) {
             componentConfig={{
               activeOption: props.dataSourceMDSId,
               fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
             }}
           />
         )}

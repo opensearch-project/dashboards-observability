@@ -21,6 +21,8 @@ import { Home as IntegrationsHome } from './integrations/home';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
+import { Home as GettingStartedHome } from './getting_started/home';
+import { Home as OverviewHome } from './overview/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -35,6 +37,7 @@ interface ObservabilityAppDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
   savedObjectsMDSClient: CoreStart['savedObjects'];
+  defaultRoute?: string;
 }
 
 // for cypress to test redux store
@@ -51,6 +54,8 @@ const pages = {
   dashboards: CustomPanelsHome,
   integrations: IntegrationsHome,
   dataconnections: DataConnectionsHome,
+  gettingStarted: GettingStartedHome,
+  overview: OverviewHome,
 };
 
 export const App = ({
@@ -67,8 +72,9 @@ export const App = ({
   setActionMenu,
   dataSourceEnabled,
   savedObjectsMDSClient,
+  defaultRoute,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
+  const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
@@ -102,6 +108,7 @@ export const App = ({
             dataSourceEnabled={dataSourceEnabled}
             setActionMenu={setActionMenu}
             savedObjectsMDSClient={savedObjectsMDSClient}
+            defaultRoute={defaultRoute}
           />
         </MetricsListener>
       </I18nProvider>

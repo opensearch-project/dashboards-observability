@@ -20,6 +20,8 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { OptionType } from '../../../common/types/metrics';
+import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../common/utils/shared';
 import PPLService from '../../services/requests/ppl';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import './index.scss';
@@ -57,13 +59,15 @@ export const Home = ({
   const [reloadSidebar, setReloadSidebar] = useState<boolean>(false);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      parentBreadcrumb,
-      {
-        text: 'Metrics',
-        href: `#/`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
+        {
+          text: 'Metrics',
+          href: `#/`,
+        },
+      ]
+    );
   }, [chrome, parentBreadcrumb, dataSourceMDSId]);
 
   useEffect(() => {
@@ -79,6 +83,7 @@ export const Home = ({
       dispatch(setSelectedDataSourceMDSId(id));
     }, 300);
   };
+
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceSelectableConfig>();
   const dataSourceMenuComponent = useMemo(() => {
     return (
@@ -91,6 +96,7 @@ export const Home = ({
           fullWidth: true,
           // activeOption: dataSourceMDSId,
           onSelectedDataSources: onSelectedDataSource,
+          dataSourceFilter: dataSourceFilterFn,
         }}
       />
     );

@@ -26,6 +26,8 @@ import {
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -230,21 +232,23 @@ export function TraceView(props: TraceViewProps) {
   }, [serviceMap, ganttData]);
 
   useEffect(() => {
-    props.chrome.setBreadcrumbs([
-      props.parentBreadcrumb,
-      {
-        text: 'Trace analytics',
-        href: '#/',
-      },
-      {
-        text: 'Traces',
-        href: '#/traces',
-      },
-      {
-        text: props.traceId,
-        href: `#/traces/${encodeURIComponent(props.traceId)}`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [props.parentBreadcrumb],
+      [
+        {
+          text: 'Trace analytics',
+          href: '#/',
+        },
+        {
+          text: 'Traces',
+          href: '#/traces',
+        },
+        {
+          text: props.traceId,
+          href: `#/traces/${encodeURIComponent(props.traceId)}`,
+        },
+      ]
+    );
     refresh();
   }, [props.mode]);
   return (
@@ -257,6 +261,7 @@ export function TraceView(props: TraceViewProps) {
             componentConfig={{
               activeOption: props.dataSourceMDSId,
               fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
             }}
           />
         )}
