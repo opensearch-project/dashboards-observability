@@ -56,6 +56,12 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedTitle,
+  observabilityGettingStartedPluginOrder,
+  observabilityOverviewID,
+  observabilityOverviewTitle,
+  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -311,6 +317,22 @@ export class ObservabilityPlugin
     });
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityOverviewID,
+        title: observabilityOverviewTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityOverviewPluginOrder,
+        mount: appMountWithStartPage('overview'),
+      });
+
+      core.application.register({
+        id: observabilityGettingStartedID,
+        title: observabilityGettingStartedTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityGettingStartedPluginOrder,
+        mount: appMountWithStartPage('gettingStarted'),
+      });
+
       core.application.register({
         id: 'observability-traces-nav',
         title: observabilityTracesTitle,
