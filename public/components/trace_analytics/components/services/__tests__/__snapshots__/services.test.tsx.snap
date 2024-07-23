@@ -934,7 +934,7 @@ exports[`Services component renders empty services page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
@@ -3137,7 +3137,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
@@ -4771,7 +4771,7 @@ exports[`Services component renders services page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
