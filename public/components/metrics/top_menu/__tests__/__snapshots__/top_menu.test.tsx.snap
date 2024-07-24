@@ -516,7 +516,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               hasArrow={true}
                               isOpen={false}
                               ownFocus={true}
-                              panelPaddingSize="s"
+                              panelPaddingSize="m"
                             >
                               <div
                                 className="euiPopover euiPopover--anchorDownLeft"
