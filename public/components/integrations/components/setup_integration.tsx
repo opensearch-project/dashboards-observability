@@ -18,14 +18,16 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { Color } from '../../../../common/constants/integrations';
+import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { IntegrationConnectionType } from '../../../../common/types/integrations';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
-import { IntegrationConnectionType } from '../../../../common/types/integrations';
 
 export interface IntegrationSetupInputs {
   displayName: string;
@@ -44,6 +46,10 @@ export interface IntegrationConfigProps {
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
   lockConnectionType?: boolean;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -338,6 +344,10 @@ export function SetupIntegrationForm({
   renderType = 'page',
   unsetIntegration,
   forceConnection,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
   setIsInstalling,
 }: {
   integration: string;
@@ -347,6 +357,10 @@ export function SetupIntegrationForm({
     name: string;
     type: IntegrationConnectionType;
   };
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
   const [integConfig, setConfig] = useState({
@@ -387,7 +401,6 @@ export function SetupIntegrationForm({
     forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
       ? SetupIntegrationInputsForSecurityLake
       : SetupIntegrationFormInputs;
-
   const content = (
     <>
       {showLoading ? (
@@ -399,6 +412,10 @@ export function SetupIntegrationForm({
           integration={template}
           setupCallout={setupCallout}
           lockConnectionType={forceConnection !== undefined}
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
         />
       )}
     </>
@@ -440,9 +457,17 @@ export function SetupIntegrationForm({
 export function SetupIntegrationPage({
   integration,
   unsetIntegration,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
 }: {
   integration: string;
   unsetIntegration?: () => void;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
 }) {
   return (
     <EuiPage>
@@ -451,6 +476,10 @@ export function SetupIntegrationPage({
           integration={integration}
           unsetIntegration={unsetIntegration}
           renderType="page"
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
         />
       </EuiPageBody>
     </EuiPage>
