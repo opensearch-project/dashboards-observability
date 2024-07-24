@@ -2153,7 +2153,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="s"
+                                            panelPaddingSize="m"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
@@ -4404,7 +4404,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="s"
+                                            panelPaddingSize="m"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
