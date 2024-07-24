@@ -507,6 +507,11 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
   }
   updateConfig={[Function]}
 >
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -1081,6 +1086,11 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
   lockConnectionType={true}
   updateConfig={[Function]}
 >
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
