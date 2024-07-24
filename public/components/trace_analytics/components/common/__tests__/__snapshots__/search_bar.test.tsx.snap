@@ -220,7 +220,7 @@ exports[`Search bar components renders date picker 1`] = `
                   hasArrow={true}
                   isOpen={false}
                   ownFocus={true}
-                  panelPaddingSize="s"
+                  panelPaddingSize="m"
                 >
                   <div
                     className="euiPopover euiPopover--anchorDownLeft"
@@ -729,7 +729,7 @@ exports[`Search bar components renders search bar 1`] = `
                             hasArrow={true}
                             isOpen={false}
                             ownFocus={true}
-                            panelPaddingSize="s"
+                            panelPaddingSize="m"
                           >
                             <div
                               className="euiPopover euiPopover--anchorDownLeft"
