@@ -15,11 +15,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
-import { coreRefs } from '../../../framework/core_refs';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 import { IntegrationConnectionType } from '../../../../common/types/integrations';
+import { coreRefs } from '../../../framework/core_refs';
+import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
@@ -190,15 +192,27 @@ export function IntegrationConnectionInputs({
   config,
   updateConfig,
   integration,
+  dataSourceEnabled,
+  dataSourceManagement,
+  notifications,
+  savedObjectsMDSClient,
   lockConnectionType,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
   lockConnectionType?: boolean;
 }) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
+  let DataSourceSelector;
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
     [] as Array<{ label: string }>
   );
@@ -217,6 +231,23 @@ export function IntegrationConnectionInputs({
 
   return (
     <>
+      {dataSourceEnabled && (
+        <>
+          <EuiFormRow
+            label="Data Source"
+            helpText="Select the type of remote data source to query from."
+          >
+            <DataSourceSelector
+              savedObjectsClient={savedObjectsMDSClient.client}
+              notifications={notifications}
+              disabled={false}
+              fullWidth={false}
+              removePrepend={true}
+            />
+          </EuiFormRow>
+          <EuiSpacer />
+        </>
+      )}
       <EuiFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
@@ -398,7 +429,17 @@ export function IntegrationWorkflowsInputs({
 }
 
 export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
-  const { config, updateConfig, integration, setupCallout, lockConnectionType } = props;
+  const {
+    config,
+    updateConfig,
+    integration,
+    setupCallout,
+    lockConnectionType,
+    dataSourceEnabled,
+    dataSourceManagement,
+    notifications,
+    savedObjectsMDSClient,
+  } = props;
 
   return (
     <EuiForm>
@@ -431,6 +472,10 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
         updateConfig={updateConfig}
         integration={integration}
         lockConnectionType={lockConnectionType}
+        dataSourceManagement={dataSourceManagement}
+        notifications={notifications}
+        dataSourceEnabled={dataSourceEnabled}
+        savedObjectsMDSClient={savedObjectsMDSClient}
       />
       {config.connectionType === 's3' ? (
         <>
