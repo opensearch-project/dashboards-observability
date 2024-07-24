@@ -3,30 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties, useEffect } from 'react';
 import {
-  EuiSpacer,
-  EuiPanel,
-  EuiInMemoryTable,
-  EuiTitle,
-  EuiLink,
+  EuiButton,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
-  EuiButton,
-  EuiIcon,
-  EuiText,
   EuiFlyout,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
-import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
-import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
-import { coreRefs } from '../../../../../framework/core_refs';
-import { basePathLink } from '../../../../../../common/utils/shared';
-import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
-import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { DatasourceType } from '../../../../../../common/types/data_connections';
+import { basePathLink } from '../../../../../../common/utils/shared';
+import { coreRefs } from '../../../../../framework/core_refs';
+import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
+import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
+import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
 
 interface IntegrationInstanceTableEntry {
   name: string;
