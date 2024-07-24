@@ -11,6 +11,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 * added changes for moving notebooks to .kibana ([#1937](https://github.com/opensearch-project/dashboards-observability/pull/1937))
 * Register all plugins to NavGroups ([#1926](https://github.com/opensearch-project/dashboards-observability/pull/1926))
 * Remove duplicate description for create s3 datasource flow ([#1915](https://github.com/opensearch-project/dashboards-observability/pull/1915))
+* Multi-data Source Support for Integrations ([#1992](https://github.com/opensearch-project/dashboards-observability/pull/1992))
 
 ### Bug Fixes
 * Add toast message for getting started / Fix Nav Bug for Traces ([#1977](https://github.com/opensearch-project/dashboards-observability/pull/1977))
