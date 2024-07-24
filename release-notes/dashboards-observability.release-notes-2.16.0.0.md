@@ -22,3 +22,5 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 
 ### Maintenance
 * updated java version from 11 to 21 ([#1940](https://github.com/opensearch-project/dashboards-observability/pull/1940))
+* [Bug] Fix CVEs for ag-grid, ws and braces packages ([#1987](https://github.com/opensearch-project/dashboards-observability/pull/1987))
+* [Bug] CVE fix for ag ([#1989](https://github.com/opensearch-project/dashboards-observability/pull/1989))
