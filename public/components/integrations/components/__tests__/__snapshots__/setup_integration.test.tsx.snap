@@ -249,11 +249,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               lockConnectionType={false}
                               updateConfig={[Function]}
                             >
-                              <EuiSpacer>
-                                <div
-                                  className="euiSpacer euiSpacer--l"
-                                />
-                              </EuiSpacer>
                               <EuiFormRow
                                 describedByIds={Array []}
                                 display="row"
