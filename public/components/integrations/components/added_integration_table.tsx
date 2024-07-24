@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { useToast } from '../../../../public/components/common/toast';
 import {
   AddedIntegrationType,
   AddedIntegrationsTableProps,
 } from './added_integration_overview_page';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const { http } = props;
+  const { http, dataSourceEnabled } = props;
 
   const { setToast } = useToast();
 
@@ -85,6 +85,18 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       ),
     },
   ] as Array<EuiTableFieldDataColumnType<AddedIntegrationType>>;
+
+  if (dataSourceEnabled) {
+    tableColumns.splice(1, 0, {
+      field: 'dataSourceName',
+      name: 'Data Source Name',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>- -</EuiText>
+      ),
+    });
+  }
 
   async function deleteAddedIntegration(integrationInstance: string, name: string) {
     http
