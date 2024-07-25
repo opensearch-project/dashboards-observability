@@ -11,7 +11,6 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 * added changes for moving notebooks to .kibana ([#1937](https://github.com/opensearch-project/dashboards-observability/pull/1937))
 * Register all plugins to NavGroups ([#1926](https://github.com/opensearch-project/dashboards-observability/pull/1926))
 * Remove duplicate description for create s3 datasource flow ([#1915](https://github.com/opensearch-project/dashboards-observability/pull/1915))
-* Multi-data Source Support for Integrations ([#1992](https://github.com/opensearch-project/dashboards-observability/pull/1992))
 
 ### Bug Fixes
 * Add toast message for getting started / Fix Nav Bug for Traces ([#1977](https://github.com/opensearch-project/dashboards-observability/pull/1977))
@@ -20,6 +19,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 * fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
 * Trace analytics scroll bar reset ([#1917](https://github.com/opensearch-project/dashboards-observability/pull/1917))
 * #1466 - create observability dashboard after invalid name ([#1730](https://github.com/opensearch-project/dashboards-observability/pull/1730))
+* fix redirection url in saved objects management page for notebooks([#1998](https://github.com/opensearch-project/dashboards-observability/pull/1998))
 
 ### Maintenance
 * updated java version from 11 to 21 ([#1940](https://github.com/opensearch-project/dashboards-observability/pull/1940))
