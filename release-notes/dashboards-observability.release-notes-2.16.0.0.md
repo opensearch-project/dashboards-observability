@@ -19,6 +19,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.16.0
 * fix minor issues in query assist UI ([#1939](https://github.com/opensearch-project/dashboards-observability/pull/1939))
 * Trace analytics scroll bar reset ([#1917](https://github.com/opensearch-project/dashboards-observability/pull/1917))
 * #1466 - create observability dashboard after invalid name ([#1730](https://github.com/opensearch-project/dashboards-observability/pull/1730))
+* fix redirection url in saved objects management page for notebooks([#1998](https://github.com/opensearch-project/dashboards-observability/pull/1998))
 
 ### Maintenance
 * updated java version from 11 to 21 ([#1940](https://github.com/opensearch-project/dashboards-observability/pull/1940))
