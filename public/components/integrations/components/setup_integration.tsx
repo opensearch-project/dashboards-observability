@@ -18,12 +18,15 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { Color } from '../../../../common/constants/integrations';
+import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
 
 export interface IntegrationSetupInputs {
   displayName: string;
@@ -41,6 +44,10 @@ export interface IntegrationConfigProps {
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
   lockConnectionType?: boolean;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -331,6 +338,10 @@ export function SetupIntegrationForm({
   renderType = 'page',
   unsetIntegration,
   forceConnection,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
   setIsInstalling,
 }: {
   integration: string;
@@ -340,6 +351,10 @@ export function SetupIntegrationForm({
     name: string;
     type: string;
   };
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
   const [integConfig, setConfig] = useState({
@@ -376,35 +391,49 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
+  const IntegrationInputFormComponent =
+    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
+      ? SetupIntegrationInputsForSecurityLake
+      : SetupIntegrationFormInputs;
+  const content = (
+    <>
+      {showLoading ? (
+        <LoadingPage />
+      ) : (
+        <IntegrationInputFormComponent
+          config={integConfig}
+          updateConfig={updateConfig}
+          integration={template}
+          setupCallout={setupCallout}
+          lockConnectionType={forceConnection !== undefined}
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
+        />
+      )}
+    </>
+  );
+
+  const bottomBar = (
+    <SetupBottomBar
+      config={integConfig}
+      integration={template}
+      loading={showLoading}
+      setLoading={setShowLoading}
+      setSetupCallout={setSetupCallout}
+      unsetIntegration={unsetIntegration}
+      setIsInstalling={setIsInstalling}
+    />
+  );
+
   if (renderType === 'page') {
     return (
       <>
         <EuiPageContent>
-          <EuiPageContentBody>
-            {showLoading ? (
-              <LoadingPage />
-            ) : (
-              <SetupIntegrationFormInputs
-                config={integConfig}
-                updateConfig={updateConfig}
-                integration={template}
-                setupCallout={setupCallout}
-                lockConnectionType={forceConnection !== undefined}
-              />
-            )}
-          </EuiPageContentBody>
+          <EuiPageContentBody>{content}</EuiPageContentBody>
         </EuiPageContent>
-        <EuiBottomBar>
-          <SetupBottomBar
-            config={integConfig}
-            integration={template}
-            loading={showLoading}
-            setLoading={setShowLoading}
-            setSetupCallout={setSetupCallout}
-            unsetIntegration={unsetIntegration}
-            setIsInstalling={setIsInstalling}
-          />
-        </EuiBottomBar>
+        <EuiBottomBar>{bottomBar}</EuiBottomBar>
       </>
     );
   } else if (renderType === 'flyout') {
@@ -442,9 +471,17 @@ export function SetupIntegrationForm({
 export function SetupIntegrationPage({
   integration,
   unsetIntegration,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
 }: {
   integration: string;
   unsetIntegration?: () => void;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
 }) {
   return (
     <EuiPage>
@@ -453,6 +490,10 @@ export function SetupIntegrationPage({
           integration={integration}
           unsetIntegration={unsetIntegration}
           renderType="page"
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
         />
       </EuiPageBody>
     </EuiPage>
