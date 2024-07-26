@@ -16,7 +16,6 @@
     "cypress:parallel": "cypress-parallel -s cypress:run -t 2 -d .cypress/integration"
   },
   "dependencies": {
-    "@ag-grid-community/styles": "^31.3.4",
     "@algolia/autocomplete-core": "^1.4.1",
     "@algolia/autocomplete-theme-classic": "^1.2.1",
     "@nteract/outputs": "^3.0.11",
