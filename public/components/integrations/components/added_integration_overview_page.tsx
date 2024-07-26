@@ -7,17 +7,18 @@
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { IntegrationHeader } from './integration_header';
-import { AddedIntegrationsTable } from './added_integration_table';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { AddedIntegrationOverviewPageProps } from './integration_types';
 import { HttpStart } from '../../../../../../src/core/public';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { AddedIntegrationsTable } from './added_integration_table';
+import { IntegrationHeader } from './integration_header';
+import { AddedIntegrationOverviewPageProps } from './integration_types';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
   data: AddedIntegrationsList;
   setData: React.Dispatch<React.SetStateAction<AddedIntegrationsList>>;
   http: HttpStart;
+  dataSourceEnabled: string;
 }
 
 export interface AddedIntegrationsList {
@@ -36,7 +37,7 @@ export interface AddedIntegrationType {
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
-  const { chrome, http } = props;
+  const { chrome, http, dataSourceEnabled } = props;
 
   const [data, setData] = useState<AddedIntegrationsList>({ hits: [] });
 
@@ -58,7 +59,13 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
     <EuiPage>
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        {AddedIntegrationsTable({ data, setData, loading: false, http })}
+        {AddedIntegrationsTable({
+          data,
+          setData,
+          loading: false,
+          http,
+          dataSourceEnabled,
+        })}
       </EuiPageBody>
     </EuiPage>
   );
