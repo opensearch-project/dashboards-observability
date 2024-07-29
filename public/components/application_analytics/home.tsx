@@ -4,40 +4,40 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import DSLService from 'public/services/requests/dsl';
-import PPLService from 'public/services/requests/ppl';
-import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from 'public/services/timestamp/timestamp';
 import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
+import React, { ReactChild, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { AppTable } from './components/app_table';
-import { Application } from './components/application';
-import { CreateApp } from './components/create';
-import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
-import { FilterType } from '../trace_analytics/components/common/filters/filters';
-import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { APP_ANALYTICS_API_PREFIX } from '../../../common/constants/application_analytics';
+import {
+  CUSTOM_PANELS_API_PREFIX,
+  CUSTOM_PANELS_DOCUMENTATION_URL,
+} from '../../../common/constants/custom_panels';
+import { observabilityApplicationsID } from '../../../common/constants/shared';
+import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
 import {
   ApplicationRequestType,
   ApplicationType,
 } from '../../../common/types/application_analytics';
+import DSLService from '../../services/requests/dsl';
+import PPLService from '../../services/requests/ppl';
+import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
+import TimestampUtils from '../../services/timestamp/timestamp';
+import { FilterType } from '../trace_analytics/components/common/filters/filters';
+import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
+import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
+import { AppTable } from './components/app_table';
+import { Application } from './components/application';
+import { CreateApp } from './components/create';
 import {
   calculateAvailability,
   fetchPanelsVizIdList,
   isNameValid,
   removeTabData,
 } from './helpers/utils';
-import {
-  CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_DOCUMENTATION_URL,
-} from '../../../common/constants/custom_panels';
-import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
-import { observabilityApplicationsID } from '../../../common/constants/shared';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -142,6 +142,7 @@ export const Home = (props: HomeProps) => {
     mode: 'data_prepper',
     dataPrepperIndicesExist: indicesExist,
     dataSourcePluggables,
+    attributesFilterFields: [],
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -202,7 +203,7 @@ export const Home = (props: HomeProps) => {
     if (!isEmpty(savedVizIdsToDelete)) {
       savedObjects
         .deleteSavedObjectsList({ objectIdList: savedVizIdsToDelete })
-        .then((res) => {
+        .then((_res) => {
           deletePanelForApp(appPanelId);
         })
         .catch((err) => {
@@ -300,7 +301,7 @@ export const Home = (props: HomeProps) => {
       .put(`${APP_ANALYTICS_API_PREFIX}/rename`, {
         body: JSON.stringify(requestBody),
       })
-      .then((res) => {
+      .then((_res) => {
         setApplicationList((prevApplicationList) => {
           const newApplicationData = [...prevApplicationList];
           const renamedApplication = newApplicationData.find(
