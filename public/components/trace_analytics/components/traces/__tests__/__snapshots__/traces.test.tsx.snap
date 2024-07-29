@@ -956,7 +956,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
@@ -2634,7 +2634,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
@@ -4315,7 +4315,7 @@ exports[`Traces component renders traces page 1`] = `
                                 hasArrow={true}
                                 isOpen={false}
                                 ownFocus={true}
-                                panelPaddingSize="m"
+                                panelPaddingSize="s"
                               >
                                 <div
                                   className="euiPopover euiPopover--anchorDownLeft"
