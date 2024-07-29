@@ -26,7 +26,6 @@ import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/s
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
 
 export interface IntegrationSetupInputs {
   displayName: string;
@@ -391,10 +390,7 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-  const IntegrationInputFormComponent =
-    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
-      ? SetupIntegrationInputsForSecurityLake
-      : SetupIntegrationFormInputs;
+  const IntegrationInputFormComponent = SetupIntegrationFormInputs;
   const content = (
     <>
       {showLoading ? (

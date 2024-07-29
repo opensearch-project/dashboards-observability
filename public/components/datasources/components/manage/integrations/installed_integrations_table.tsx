@@ -26,6 +26,7 @@ import { IntegrationHealthBadge } from '../../../../integrations/components/adde
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
 import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
+import _ from 'lodash';
 
 interface IntegrationInstanceTableEntry {
   name: string;
