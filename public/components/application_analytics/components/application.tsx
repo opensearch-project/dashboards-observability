@@ -18,23 +18,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { VisualizationType } from 'common/types/custom_panels';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { VisualizationType } from 'common/types/custom_panels';
-import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
-import { ServicesContent } from '../../trace_analytics/components/services/services_content';
-import {
-  filtersToDsl,
-  PanelTitle,
-} from '../../../../public/components/trace_analytics/components/common/helper_functions';
-import { SpanDetailTable } from '../../../../public/components/trace_analytics/components/traces/span_detail_table';
-import { Explorer } from '../../event_analytics/explorer/explorer';
-import { Configuration } from './configuration';
+import { useHistory } from 'react-router-dom';
 import {
   TAB_CONFIG_ID,
   TAB_CONFIG_TITLE,
@@ -48,22 +39,30 @@ import {
   TAB_TRACE_ID,
   TAB_TRACE_TITLE,
 } from '../../../../common/constants/application_analytics';
-import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB } from '../../../../common/constants/explorer';
-import { IQueryTab } from '../../../../common/types/explorer';
-import { NotificationsStart, Toast } from '../../../../../../src/core/public';
-import { AppAnalyticsComponentDeps } from '../home';
-import { CustomPanelView } from '../../../../public/components/custom_panels/custom_panel_view';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { NEW_TAB, TAB_CHART_ID, TAB_EVENT_ID } from '../../../../common/constants/explorer';
+import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
 import {
   ApplicationRequestType,
   ApplicationType,
 } from '../../../../common/types/application_analytics';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
-import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
-import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/components/traces/span_detail_flyout';
-import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
-import { fetchAppById, initializeTabData } from '../helpers/utils';
-import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
+import { IQueryTab } from '../../../../common/types/explorer';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { CustomPanelView } from '../../../../public/components/custom_panels/custom_panel_view';
+import {
+  filtersToDsl,
+  PanelTitle,
+} from '../../../../public/components/trace_analytics/components/common/helper_functions';
+import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/components/traces/span_detail_flyout';
+import { SpanDetailTable } from '../../../../public/components/trace_analytics/components/traces/span_detail_table';
+import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
+import { Explorer } from '../../event_analytics/explorer/explorer';
+import { ServicesContent } from '../../trace_analytics/components/services/services_content';
+import { fetchAppById, initializeTabData } from '../helpers/utils';
+import { AppAnalyticsComponentDeps } from '../home';
+import { Configuration } from './configuration';
+import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
+import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -302,6 +301,7 @@ export function Application(props: AppDetailProps) {
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
+          dataSourceMDSId={[{ id: '', label: '' }]}
         />
       </>
     );
