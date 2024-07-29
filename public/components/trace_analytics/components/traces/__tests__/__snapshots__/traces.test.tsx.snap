@@ -782,6 +782,7 @@ exports[`Traces component renders empty traces page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -808,6 +809,7 @@ exports[`Traces component renders empty traces page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -1103,7 +1105,9 @@ exports[`Traces component renders empty traces page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>
@@ -2460,6 +2464,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -2486,6 +2491,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -2783,7 +2789,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>
@@ -4141,6 +4149,7 @@ exports[`Traces component renders traces page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -4167,6 +4176,7 @@ exports[`Traces component renders traces page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -4464,7 +4474,9 @@ exports[`Traces component renders traces page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>

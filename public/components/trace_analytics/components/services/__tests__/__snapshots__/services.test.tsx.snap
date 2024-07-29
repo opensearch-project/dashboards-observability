@@ -764,6 +764,7 @@ exports[`Services component renders empty services page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -790,6 +791,7 @@ exports[`Services component renders empty services page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -1085,7 +1087,9 @@ exports[`Services component renders empty services page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>
@@ -2971,6 +2975,7 @@ exports[`Services component renders jaeger services page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -2997,6 +3002,7 @@ exports[`Services component renders jaeger services page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -3294,7 +3300,9 @@ exports[`Services component renders jaeger services page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>
@@ -4609,6 +4617,7 @@ exports[`Services component renders services page 1`] = `
                     },
                   ]
                 }
+                compressed={false}
                 dateFormat=""
                 end="now"
                 isAutoRefreshOnly={false}
@@ -4635,6 +4644,7 @@ exports[`Services component renders services page 1`] = `
                       >
                         <EuiFormControlLayout
                           className="euiSuperDatePicker"
+                          compressed={false}
                           isDisabled={false}
                           prepend={
                             <EuiQuickSelectPopover
@@ -4932,7 +4942,9 @@ exports[`Services component renders services page 1`] = `
                                   </button>
                                 </div>
                               </EuiDatePickerRange>
-                              <EuiFormControlLayoutIcons />
+                              <EuiFormControlLayoutIcons
+                                compressed={false}
+                              />
                             </div>
                           </div>
                         </EuiFormControlLayout>
