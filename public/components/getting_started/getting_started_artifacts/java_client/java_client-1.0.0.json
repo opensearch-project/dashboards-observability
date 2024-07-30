@@ -82,7 +82,7 @@
             "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf",
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf \\\n  https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf \n",
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf \\\n  https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf \n",
             "description": "Setup docker-compose fluent-bit's service configuration "
           },
           {
@@ -94,7 +94,7 @@
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java",
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/pom.xml"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java \n",
+            "content": "mkdir -p java-app\nwget -P java-app  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java \n",
             "description": "Setup docker-compose java-app service configuration "
           },
           {

@@ -82,7 +82,7 @@
             "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf",
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf\n",
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf\n",
             "description": "Setup docker-compose fluent-bit's service configuration "
           },
           {
@@ -93,7 +93,7 @@
             "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/Dockerfile",
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/app.py"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/app.py \n",
+            "content": "mkdir -p python-app\nwget -P python-app https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/app.py \n",
             "description": "Setup docker-compose golan-app service configuration "
           },
           {
