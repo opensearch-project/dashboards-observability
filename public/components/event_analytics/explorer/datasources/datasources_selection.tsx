@@ -314,6 +314,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
       onGetDataSetError={handleDataSetFetchError}
       onRefresh={onRefresh}
+      uiSettings={coreRefs.uiSettings!}
     />
   );
 };
