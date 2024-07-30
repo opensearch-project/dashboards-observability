@@ -6,8 +6,6 @@
 
 import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
-import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -36,8 +34,6 @@ export function TracesContent(props: TracesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
-    dataSourceManagement,
-    dataSourceMDSId,
     attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -45,7 +41,6 @@ export function TracesContent(props: TracesProps) {
   const [loading, setLoading] = useState(false);
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -114,17 +109,6 @@ export function TracesContent(props: TracesProps) {
 
   return (
     <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceView'}
-          componentConfig={{
-            activeOption: dataSourceMDSId,
-            fullWidth: true,
-            dataSourceFilter: dataSourceFilterFn,
-          }}
-        />
-      )}
       <SearchBar
         query={query}
         filters={filters}

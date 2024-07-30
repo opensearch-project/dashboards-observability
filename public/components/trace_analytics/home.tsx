@@ -5,7 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useEffect, useState } from 'react';
+import React, { ReactChild, useEffect, useMemo, useState } from 'react';
 import { HashRouter, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
@@ -19,7 +19,6 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
@@ -124,6 +123,33 @@ export const Home = (props: HomeProps) => {
   const { defaultRoute = '/services' } = props;
   const { chrome } = props;
   const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
+
+  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
+    DataSourceSelectableConfig
+  >();
+
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+
+    setDataSourceMDSId([{ id: dataConnectionId, label: dataConnectionLabel }]);
+  };
+
+  const dataSourceMenuComponent = useMemo(() => {
+    return (
+      <DataSourceMenu
+        setMenuMountPoint={props.setActionMenu}
+        componentType={'DataSourceSelectable'}
+        componentConfig={{
+          savedObjects: props.savedObjectsMDSClient.client,
+          notifications: props.notifications,
+          fullWidth: true,
+          onSelectedDataSources: onSelectedDataSource,
+          dataSourceFilter: dataSourceFilterFn,
+        }}
+      />
+    );
+  }, [props.setActionMenu, props.savedObjectsMDSClient.client, props.notifications]);
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -248,17 +274,6 @@ export const Home = (props: HomeProps) => {
     setSpanFlyout,
   };
 
-  const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
-    const { id = '', label = '' } = dataSources[0] || {};
-    if (dataSourceMDSId[0].id !== id || dataSourceMDSId[0].label !== label) {
-      setDataSourceMDSId([{ id, label }]);
-    }
-  };
-
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
-    DataSourceSelectableConfig
-  >();
-
   let flyout;
 
   if (currentSelectedService !== '') {
@@ -274,20 +289,6 @@ export const Home = (props: HomeProps) => {
 
   return (
     <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            savedObjects: props.savedObjectsMDSClient.client,
-            notifications: props.notifications,
-            fullWidth: true,
-            activeOption: dataSourceMDSId,
-            onSelectedDataSources: onSelectedDataSource,
-            dataSourceFilter: dataSourceFilterFn,
-          }}
-        />
-      )}
       <EuiGlobalToastList
         toasts={toasts}
         dismissToast={(removedToast) => {
@@ -302,6 +303,7 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) =>
             !isNavGroupEnabled ? (
               <TraceSideBar>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
                 <Traces
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
@@ -312,14 +314,18 @@ export const Home = (props: HomeProps) => {
                 />
               </TraceSideBar>
             ) : (
-              <Traces
-                page="traces"
-                childBreadcrumbs={traceBreadcrumbs}
-                traceIdColumnAction={traceIdColumnAction}
-                toasts={toasts}
-                dataSourceMDSId={dataSourceMDSId}
-                {...commonProps}
-              />
+              <>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+
+                <Traces
+                  page="traces"
+                  childBreadcrumbs={traceBreadcrumbs}
+                  traceIdColumnAction={traceIdColumnAction}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </>
             )
           }
         />
@@ -347,6 +353,7 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) =>
             !isNavGroupEnabled ? (
               <TraceSideBar>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
                 <Services
                   page="services"
                   childBreadcrumbs={serviceBreadcrumbs}
@@ -358,15 +365,18 @@ export const Home = (props: HomeProps) => {
                 />
               </TraceSideBar>
             ) : (
-              <Services
-                page="services"
-                childBreadcrumbs={serviceBreadcrumbs}
-                traceColumnAction={traceColumnAction}
-                setCurrentSelectedService={setCurrentSelectedService}
-                toasts={toasts}
-                dataSourceMDSId={dataSourceMDSId}
-                {...commonProps}
-              />
+              <>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  traceColumnAction={traceColumnAction}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </>
             )
           }
         />
