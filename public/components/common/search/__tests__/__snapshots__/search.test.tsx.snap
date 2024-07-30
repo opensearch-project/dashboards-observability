@@ -395,7 +395,6 @@ exports[`Explorer Search component renders basic component 1`] = `
                               },
                             ]
                           }
-                          compressed={false}
                           data-test-subj="pplSearchDatePicker"
                           dateFormat=""
                           end="now"
@@ -424,7 +423,6 @@ exports[`Explorer Search component renders basic component 1`] = `
                                 >
                                   <EuiFormControlLayout
                                     className="euiSuperDatePicker"
-                                    compressed={false}
                                     isDisabled={false}
                                     prepend={
                                       <EuiQuickSelectPopover
@@ -720,9 +718,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                             </button>
                                           </div>
                                         </EuiDatePickerRange>
-                                        <EuiFormControlLayoutIcons
-                                          compressed={false}
-                                        />
+                                        <EuiFormControlLayoutIcons />
                                       </div>
                                     </div>
                                   </EuiFormControlLayout>

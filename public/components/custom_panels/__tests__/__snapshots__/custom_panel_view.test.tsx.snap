@@ -1979,7 +1979,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 },
                               ]
                             }
-                            compressed={false}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -2006,7 +2005,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
-                                      compressed={false}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -2304,9 +2302,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               </button>
                                             </div>
                                           </EuiDatePickerRange>
-                                          <EuiFormControlLayoutIcons
-                                            compressed={false}
-                                          />
+                                          <EuiFormControlLayoutIcons />
                                         </div>
                                       </div>
                                     </EuiFormControlLayout>
@@ -2319,7 +2315,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
-                                      compressed={false}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -2347,7 +2342,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
-                                            size="m"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -2367,7 +2361,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
-                                              size="m"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
@@ -4237,7 +4230,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 },
                               ]
                             }
-                            compressed={false}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -4264,7 +4256,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
-                                      compressed={false}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -4560,9 +4551,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               </button>
                                             </div>
                                           </EuiDatePickerRange>
-                                          <EuiFormControlLayoutIcons
-                                            compressed={false}
-                                          />
+                                          <EuiFormControlLayoutIcons />
                                         </div>
                                       </div>
                                     </EuiFormControlLayout>
@@ -4575,7 +4564,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
-                                      compressed={false}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -4603,7 +4591,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
-                                            size="m"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -4623,7 +4610,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
-                                              size="m"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
