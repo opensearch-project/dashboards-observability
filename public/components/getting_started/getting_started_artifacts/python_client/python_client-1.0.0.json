@@ -103,7 +103,7 @@
             "phase": "docker",
             "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/docker-compose.yml"],
             "description": "Run docker-compose for the python-client live example and see the generated index",
-            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/docker-compose.yml && docker-compose up --build \n"
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/docker-compose.yml && docker-compose up --build  -d python-app fluent-bit \n"
           }
         ]
       },

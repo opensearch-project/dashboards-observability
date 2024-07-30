@@ -104,7 +104,7 @@
             "phase": "docker",
             "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/docker-compose.yml"],
             "description": "Run docker-compose for the java-client live example and see the generated index",
-            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/docker-compose.yml && docker-compose up --build \n"
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/docker-compose.yml && docker-compose up --build -d java-app fluent-bit \n"
           }
         ]
       },

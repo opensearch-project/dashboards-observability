@@ -85,10 +85,10 @@
             "label": "Environment Parameters",
             "phase": "docker",
             "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf",
-              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf"
             ],
-            "content": "mkdir -p fluent-bit\nwget -P fluent-bit  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf \\\n     https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf\n",
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf \\\n     https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf\n",
             "description": "Setup docker-compose fluent-bit's service configuration "
           },
           {
@@ -111,7 +111,7 @@
             "type": "console-cmd",
             "phase": "ingestion",
             "label": "Log Parsing",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf"],
             "description": "Setup Fluent-Bit parser config file parsing csv file",
             "content": "[PARSER]\n    Name        csv\n    Format      regex\n    Regex       ^(?<timestamp>[^,]+),(?<log_level>[^,]+),(?<message>[^,]+),(?<application>[^,]+),(?<host>[^,]+)$\n    Time_Key    timestamp\n    Time_Format %Y-%m-%d %H:%M:%S\n"
           },
@@ -120,7 +120,7 @@
             "type": "console-cmd",
             "phase": "ingestion",
             "label": "Agent Set-Up",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf"],
             "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
             "input-params": [
               {
