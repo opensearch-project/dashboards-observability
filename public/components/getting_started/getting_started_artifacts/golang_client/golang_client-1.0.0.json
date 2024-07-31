@@ -118,7 +118,11 @@
             "phase": "docker",
             "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/golang_client/getting-started/docker-compose.yml"],
             "description": "Run docker-compose for the gloang-client live example and see the generated index",
+<<<<<<< HEAD
             "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/golang_client/getting-started/docker-compose.yml && docker-compose up --build \n"
+=======
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/golang_client/getting-started/docker-compose.yml && docker compose up --build -d golang-app fluent-bit \n"
+>>>>>>> c258de2c (Fix docker links & index patterns names (#2017))
           }
         ]
       },

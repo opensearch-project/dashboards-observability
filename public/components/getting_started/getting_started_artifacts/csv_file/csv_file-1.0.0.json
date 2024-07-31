@@ -98,7 +98,11 @@
             "phase": "docker",
             "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit.yml"],
             "description": "Run docker-compose for the nginx live example and see the generated index",
+<<<<<<< HEAD
             "content": "wget -O fluent-bit.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit.yml && docker-compose -f fluent-bit.yml up -d\n"
+=======
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/docker-compose.yml && docker-compose up -d fluent-bit \n"
+>>>>>>> c258de2c (Fix docker links & index patterns names (#2017))
           }
         ]
       },
