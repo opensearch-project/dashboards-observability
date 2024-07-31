@@ -2,11 +2,14 @@ version: '3.8'
 
 services:
   fluent-bit:
-    image: fluent/fluent-bit:latest
     container_name: fluent-bit
+    image: fluent/fluent-bit:latest
     volumes:
-      - ./data:/fluent-bit/data
-    command: ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/data/fluent-bit.conf"]
+      - ./logs:/logs
+      - ./fluent-bit:/fluent-bit/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
     networks:
       - opensearch-net
 
