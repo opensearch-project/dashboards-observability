@@ -7,7 +7,7 @@
   "type": "logs",
   "labels": ["Logs", "Unstructured"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/csv_file/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file",
   "workflows": [
     {
       "name": "dashboards",
@@ -40,7 +40,7 @@
   },
   "components": [],
   "getting-started": {
-    "info": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/info/Getting-Started.md",
+    "info": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/Getting-Started.md",
     "ingestion": ["fluent-bit","data-prepper"],
     "structured": "true",
     "technology": "csv",
@@ -76,8 +76,8 @@
                 "type": "host-name"
               }
             ],
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/.env"],
-            "content": "wget https://raw.githubusercontent.com/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/.env",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/.env",
             "description": "Setup docker-compose env variables "
           },
           {
@@ -85,10 +85,10 @@
             "label": "Environment Parameters",
             "phase": "docker",
             "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/data/fluent-bit.conf",
-              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/csv_file/getting-started/fluent-bit/data/parsers.conf"
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/csv_file/getting-started/fluent-bit/data/fluent-bit.conf \\\n     https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf\n",
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf \\\n     https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf\n",
             "description": "Setup docker-compose fluent-bit's service configuration "
           },
           {
@@ -96,9 +96,9 @@
             "label": "live container",
             "type": "file-url",
             "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit.yml"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.yml"],
             "description": "Run docker-compose for the nginx live example and see the generated index",
-            "content": "wget -O fluent-bit.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit.yml && docker-compose -f fluent-bit.yml up -d\n"
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/docker-compose.yml && docker-compose up -d fluent-bit \n"
           }
         ]
       },
@@ -111,7 +111,7 @@
             "type": "console-cmd",
             "phase": "ingestion",
             "label": "Log Parsing",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/parsers.conf"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/parsers.conf"],
             "description": "Setup Fluent-Bit parser config file parsing csv file",
             "content": "[PARSER]\n    Name        csv\n    Format      regex\n    Regex       ^(?<timestamp>[^,]+),(?<log_level>[^,]+),(?<message>[^,]+),(?<application>[^,]+),(?<host>[^,]+)$\n    Time_Key    timestamp\n    Time_Format %Y-%m-%d %H:%M:%S\n"
           },
@@ -120,7 +120,7 @@
             "type": "console-cmd",
             "phase": "ingestion",
             "label": "Agent Set-Up",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/data/fluent-bit.conf"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.conf"],
             "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
             "input-params": [
               {
@@ -145,7 +145,7 @@
         "info": ["https://opensearch.org/docs/latest/im-plugin/index-templates"],
         "content": "PUT _index_template/csv_logs_template",
         "description": "Setup sample csv based schema logs index template in the dev console",
-        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/schema/csv-logs-1.0.0.mapping.json",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/schema/csv-logs-1.0.0.mapping.json",
         "index-pattern-name": "logs-*"
       }
     ],
@@ -153,7 +153,7 @@
       "type": ["logs"],
       "info": ["https://opensearch.org/docs/latest/dashboards/management/index-patterns/"],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/assets/fluent-bit-csv-upload-1.0.0.ndjson",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/assets/fluent-bit-csv-upload-1.0.0.ndjson",
       "index-patterns-name": ["logs-*"]
     }
   },
