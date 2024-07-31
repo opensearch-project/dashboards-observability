@@ -120,7 +120,7 @@ Under the `getting-started` section you can examine a live docker-compose sample
     |-- logs.csv
 
 ```
-Use the [docker-compose](../getting-started/fluent-bit/docker-complete.yml) you can find a complete:
+Use the [docker-compose](../getting-started/docker-complete.yml) you can find a complete:
 
 `docker compose -f docker-complete.yml up -d` would instantiate the services and start sending the csv sample logs into an index. 
 
