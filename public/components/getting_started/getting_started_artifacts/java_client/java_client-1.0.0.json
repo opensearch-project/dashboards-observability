@@ -94,7 +94,7 @@
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java",
               "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/pom.xml"
             ],
-            "content": "mkdir -p java-app\nwget -P java-app  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java \n",
+            "content": "mkdir -p java-app/src/main/java\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml\n\nwget -P java-app/src/main/java \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java\n",
             "description": "Setup docker-compose java-app service configuration "
           },
           {
