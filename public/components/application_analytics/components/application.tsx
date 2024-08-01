@@ -327,6 +327,7 @@ export function Application(props: AppDetailProps) {
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
+          dataSourceMDSId={[{ id: '', label: '' }]}
         />
         <EuiSpacer size="m" />
         <EuiPanel>
@@ -339,6 +340,7 @@ export function Application(props: AppDetailProps) {
             DSL={spanDSL}
             setTotal={setTotalSpans}
             mode="data_prepper"
+            dataSourceMDSId={''}
           />
         </EuiPanel>
       </>
@@ -549,6 +551,7 @@ export function Application(props: AppDetailProps) {
             closeFlyout={closeSpanFlyout}
             addSpanFilter={addSpanFilter}
             mode="data_prepper"
+            dataSourceMDSId=""
           />
         )}
         {traceFlyoutId && (
