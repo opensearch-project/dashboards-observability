@@ -19,6 +19,7 @@ import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/cor
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationConnectionType } from '../../../../common/types/integrations';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
@@ -76,8 +77,10 @@ const integrationConnectionSelectorItems: Array<{
 ];
 
 const suggestDataSources = async (
-  type: IntegrationConnectionType
+  type: IntegrationConnectionType,
+  dataSourceMDSId?: string
 ): Promise<Array<{ label: string }>> => {
+  console.log(dataSourceMDSId);
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -86,6 +89,7 @@ const suggestDataSources = async (
         query: {
           path: '_data_stream/ss4o_*',
           method: 'GET',
+          dataSourceMDSId,
         },
       });
       return (
@@ -94,7 +98,9 @@ const suggestDataSources = async (
         }) ?? []
       );
     } else if (type === 's3' || type === 'securityLake') {
-      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
+      const result = (await http.get(
+        `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`
+      )) as Array<{
         name: string;
         connector: string;
       }>;
@@ -196,6 +202,7 @@ export function IntegrationConnectionInputs({
   notifications,
   savedObjectsMDSClient,
   lockConnectionType,
+  handleSelectedDataSourceChange,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
@@ -204,9 +211,20 @@ export function IntegrationConnectionInputs({
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void;
   lockConnectionType?: boolean;
 }) {
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    setDataSourceMDSId(dataConnectionId);
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
 
   let DataSourceSelector;
   if (dataSourceEnabled) {
@@ -219,14 +237,14 @@ export function IntegrationConnectionInputs({
 
   useEffect(() => {
     const updateDataSources = async () => {
-      const data = await suggestDataSources(config.connectionType);
+      const data = await suggestDataSources(config.connectionType, dataSourceMDSId);
       setDataSourceSuggestions(data);
       setIsSuggestionsLoading(false);
     };
 
     setIsSuggestionsLoading(true);
     updateDataSources();
-  }, [config.connectionType]);
+  }, [config.connectionType, dataSourceMDSId]);
 
   return (
     <>
@@ -242,6 +260,8 @@ export function IntegrationConnectionInputs({
               disabled={false}
               fullWidth={false}
               removePrepend={true}
+              onSelectedDataSource={onSelectedDataSource}
+              dataSourceFilter={dataSourceFilterFn}
             />
           </EuiCompressedFormRow>
           <EuiSpacer />
@@ -438,6 +458,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
     dataSourceManagement,
     notifications,
     savedObjectsMDSClient,
+    handleSelectedDataSourceChange,
   } = props;
 
   return (
@@ -475,6 +496,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
         notifications={notifications}
         dataSourceEnabled={dataSourceEnabled}
         savedObjectsMDSClient={savedObjectsMDSClient}
+        handleSelectedDataSourceChange={handleSelectedDataSourceChange}
       />
       {config.connectionType === 's3' ? (
         <>

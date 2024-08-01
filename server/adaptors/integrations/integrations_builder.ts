@@ -4,14 +4,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { IntegrationReader } from './repository/integration_reader';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
   indexPattern: string;
+  dataSourceMDSId: string | undefined;
+  dataSourceMDSLabel: string | undefined;
   workflows?: string[];
   dataSource?: string;
   tableName?: string;
@@ -195,6 +197,12 @@ export class IntegrationInstanceBuilder {
       dataSource: options.indexPattern,
       creationDate: new Date().toISOString(),
       assets: refs,
+      references: [
+        {
+          dataSourceMDSId: options.dataSourceMDSId,
+          dataSourceMDSLabel: options.dataSourceMDSLabel,
+        },
+      ],
     });
   }
 }

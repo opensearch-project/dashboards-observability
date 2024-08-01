@@ -93,7 +93,9 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>- -</EuiText>
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {truncate(record.dataSourceMDSLabel || 'local cluster', { length: 100 })}
+        </EuiText>
       ),
     });
   }
@@ -155,11 +157,22 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   };
 
   const entries = props.data.hits.map((integration) => {
+    console.log(integration);
     const id = integration.id;
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;
     const name = integration.name;
-    return { id, templateName, creationDate, name, data: { templateName, name } };
+    const dataSourceMDSLabel = integration.references
+      ? integration.references[0].dataSourceMDSLabel
+      : 'Local cluster';
+    return {
+      id,
+      templateName,
+      creationDate,
+      name,
+      data: { templateName, name },
+      dataSourceMDSLabel,
+    };
   });
 
   return (

@@ -50,6 +50,10 @@ export interface IntegrationConfigProps {
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -138,12 +142,16 @@ const addIntegration = async ({
   integration,
   setLoading,
   setCalloutLikeToast,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
   setIsInstalling,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  dataSourceMDSId: string | undefined;
+  dataSourceMDSLabel: string | undefined;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) => {
   setLoading(true);
@@ -163,6 +171,8 @@ const addIntegration = async ({
       templateName: integration.name,
       integration,
       setToast: setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
       name: config.displayName,
       indexPattern: config.connectionDataSource,
       skipRedirect: setIsInstalling ? true : false,
@@ -180,7 +190,6 @@ const addIntegration = async ({
     const assets: { data: ParsedIntegrationAsset[] } = await http.get(
       `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
     );
-
     for (const query of assets.data.filter(
       (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
         a.type === 'query'
@@ -205,6 +214,8 @@ const addIntegration = async ({
       templateName: integration.name,
       integration,
       setToast: setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
       name: config.displayName,
       indexPattern: `flint_${config.connectionDataSource}_${
         config.connectionDatabaseName ?? 'default'
@@ -245,6 +256,8 @@ export function SetupBottomBar({
   loading,
   setLoading,
   setSetupCallout,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
   unsetIntegration,
   setIsInstalling,
 }: {
@@ -253,6 +266,8 @@ export function SetupBottomBar({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
+  dataSourceMDSId: string | undefined;
+  dataSourceMDSLabel: string | undefined;
   unsetIntegration?: () => void;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -306,6 +321,8 @@ export function SetupBottomBar({
                   setIsInstalling(newLoading);
                 },
                 setCalloutLikeToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
                 setIsInstalling,
               });
             } else {
@@ -314,6 +331,8 @@ export function SetupBottomBar({
                 config,
                 setLoading,
                 setCalloutLikeToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
                 setIsInstalling,
               });
             }
@@ -384,6 +403,8 @@ export function SetupIntegrationForm({
 
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
   const [showLoading, setShowLoading] = useState(false);
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
+  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
 
   useEffect(() => {
     const getTemplate = async () => {
@@ -396,6 +417,11 @@ export function SetupIntegrationForm({
 
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
+
+  const handleSelectedDataSourceChange = (id: string | undefined, label: string | undefined) => {
+    setDataSourceMDSId(id);
+    setDataSourceMDSLabel(label);
+  };
 
   const IntegrationInputFormComponent =
     forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
@@ -416,6 +442,7 @@ export function SetupIntegrationForm({
           notifications={notifications}
           dataSourceEnabled={dataSourceEnabled}
           savedObjectsMDSClient={savedObjectsMDSClient}
+          handleSelectedDataSourceChange={handleSelectedDataSourceChange}
         />
       )}
     </>
@@ -428,6 +455,8 @@ export function SetupIntegrationForm({
       loading={showLoading}
       setLoading={setShowLoading}
       setSetupCallout={setSetupCallout}
+      dataSourceMDSId={dataSourceMDSId}
+      dataSourceMDSLabel={dataSourceMDSLabel}
       unsetIntegration={unsetIntegration}
       setIsInstalling={setIsInstalling}
     />

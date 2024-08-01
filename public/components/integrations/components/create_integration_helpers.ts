@@ -2,10 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
 import { HttpSetup } from '../../../../../../src/core/public';
-import { coreRefs } from '../../../framework/core_refs';
+import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { coreRefs } from '../../../framework/core_refs';
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 
@@ -18,6 +18,8 @@ interface AddIntegrationRequestParams {
   templateName: string;
   integration: IntegrationConfig;
   setToast: (title: string, color?: Color, text?: string | undefined) => void;
+  dataSourceMDSId: string | undefined;
+  dataSourceMDSLabel: string | undefined;
   name?: string;
   indexPattern?: string;
   workflows?: string[];
@@ -299,6 +301,8 @@ export async function addIntegrationRequest({
   workflows,
   skipRedirect,
   dataSourceInfo,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
 }: AddIntegrationRequestParams): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
@@ -313,12 +317,16 @@ export async function addIntegrationRequest({
   }
 
   const createReqBody: {
+    dataSourceMDSId: string | undefined;
+    dataSourceMDSLabel: string | undefined;
     name?: string;
     indexPattern?: string;
     workflows?: string[];
     dataSource?: string;
     tableName?: string;
   } = {
+    dataSourceMDSId,
+    dataSourceMDSLabel,
     name,
     indexPattern,
     workflows,

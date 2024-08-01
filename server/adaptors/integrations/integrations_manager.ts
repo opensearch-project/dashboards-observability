@@ -4,12 +4,12 @@
  */
 
 import path from 'path';
-import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
+import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { IntegrationInstanceBuilder } from './integrations_builder';
-import { TemplateManager } from './repository/repository';
 import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
 import { IndexDataAdaptor } from './repository/index_data_adaptor';
+import { TemplateManager } from './repository/repository';
 
 export class IntegrationsManager {
   client: SavedObjectsClientContract;
@@ -157,6 +157,8 @@ export class IntegrationsManager {
     templateName: string,
     name: string,
     indexPattern: string,
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined,
     workflows?: string[],
     dataSource?: string,
     tableName?: string
@@ -173,11 +175,15 @@ export class IntegrationsManager {
       const result = await this.instanceBuilder.build(template, {
         name,
         indexPattern,
+        dataSourceMDSId,
+        dataSourceMDSLabel,
         workflows,
         dataSource,
         tableName,
       });
+      console.log(dataSourceMDSId, dataSourceMDSLabel);
       const test = await this.client.create('integration-instance', result);
+      console.log(test);
       return Promise.resolve({ ...result, id: test.id });
     } catch (err) {
       addRequestToMetric('integrations', 'create', err);

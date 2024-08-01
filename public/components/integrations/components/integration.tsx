@@ -5,7 +5,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiButton,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
@@ -14,16 +20,16 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { IntegrationOverview } from './integration_overview_panel';
-import { IntegrationDetails } from './integration_details_panel';
-import { IntegrationFields } from './integration_fields_panel';
-import { IntegrationAssets } from './integration_assets_panel';
-import { AvailableIntegrationProps } from './integration_types';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { useToast } from '../../../../public/components/common/toast';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
+import { IntegrationAssets } from './integration_assets_panel';
+import { IntegrationDetails } from './integration_details_panel';
+import { IntegrationFields } from './integration_fields_panel';
+import { IntegrationOverview } from './integration_overview_panel';
+import { IntegrationScreenshots } from './integration_screenshots_panel';
+import { AvailableIntegrationProps } from './integration_types';
 
 export function Integration(props: AvailableIntegrationProps) {
   const http = coreRefs.http!;
@@ -35,6 +41,9 @@ export function Integration(props: AvailableIntegrationProps) {
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = () => setIsModalVisible(true);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -131,6 +140,31 @@ export function Integration(props: AvailableIntegrationProps) {
     ));
   };
 
+  const mdsSelectorModal = () => {
+    if (isModalVisible) {
+      return (
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>Modal title</h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            This modal has the following setup:
+            <EuiSpacer />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      );
+    }
+  };
+
   if (Object.keys(integration).length === 0) {
     return (
       <EuiOverlayMask>
@@ -142,6 +176,10 @@ export function Integration(props: AvailableIntegrationProps) {
     <EuiPage>
       <EuiPageBody>
         <EuiSpacer size="xl" />
+        <div>
+          <EuiButton onClick={() => showModal()}>Show Modal</EuiButton>
+          {mdsSelectorModal()}
+        </div>
         <IntegrationOverview
           integration={integration}
           showFlyout={() => {

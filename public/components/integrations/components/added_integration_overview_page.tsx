@@ -33,6 +33,9 @@ export interface AddedIntegrationType {
   assets: any[];
   addedBy: string;
   id: string;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
+  references: [];
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
