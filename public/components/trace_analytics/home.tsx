@@ -120,7 +120,13 @@ export const Home = (props: HomeProps) => {
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
-  const { defaultRoute = '/services' } = props;
+  let defaultRoute = props.defaultRoute ?? '/services';
+  const currentHash = window.location.hash.split('#')[1] || '';
+
+  if (currentHash === '/traces' || currentHash === '/services') {
+    defaultRoute = currentHash;
+  }
+
   const { chrome } = props;
   const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
 
