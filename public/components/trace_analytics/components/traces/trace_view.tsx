@@ -233,12 +233,14 @@ export function TraceView(props: TraceViewProps) {
 
   useEffect(() => {
     setNavBreadCrumbs(
-      [props.parentBreadcrumb],
       [
+        props.parentBreadcrumb,
         {
           text: 'Trace analytics',
-          href: '#/',
+          href: '#/services',
         },
+      ],
+      [
         {
           text: 'Traces',
           href: '#/traces',
