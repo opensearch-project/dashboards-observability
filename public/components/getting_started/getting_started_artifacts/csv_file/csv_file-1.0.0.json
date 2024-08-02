@@ -76,8 +76,8 @@
                 "type": "host-name"
               }
             ],
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/csv_file/getting-started/fluent-bit/.env"],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/fluent-bit/.env",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/.env",
             "description": "Setup docker-compose env variables "
           },
           {
@@ -96,7 +96,7 @@
             "label": "live container",
             "type": "file-url",
             "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/fluent-bit/fluent-bit.yml"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/csv_file/getting-started/docker-compose.yml"],
             "description": "Run docker-compose for the nginx live example and see the generated index",
             "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/csv_file/getting-started/docker-compose.yml && docker-compose up -d fluent-bit \n"
           }
