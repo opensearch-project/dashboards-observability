@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "charts",
+    "contentManagement",
     "dashboard",
     "data",
     "embeddable",

@@ -5,10 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiPanel, EuiLink, EuiDescriptionList, EuiTitle, EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { coreRefs } from '../../../public/framework/core_refs';
+import { ContentManagementPluginStart } from '../../../../../src/plugins/content_management/public';
+import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
+import { i18n } from '@osd/i18n';
 
 const alertsPluginID = 'alerting';
 const anomalyPluginID = 'anomalyDetection';
@@ -72,6 +75,7 @@ export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
 interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
+  contentManagement: ContentManagementPluginStart;
 }
 
 const HomeContent = ({ alertsPluginExists, anomalyPluginExists }) => (
@@ -134,7 +138,119 @@ const HomeContent = ({ alertsPluginExists, anomalyPluginExists }) => (
   </div>
 );
 
-export const Home = (_props: HomeProps) => {
+export const LEARN_OPENSEARCH_CONFIG = {
+  title: i18n.translate('homepage.card.learnOpenSearch.title', {
+    defaultMessage: 'Learn Opensearch',
+  }),
+  list: [
+    {
+      label: 'Quickstart guide',
+      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      description: 'Get started in minutes with OpenSearch Dashboards',
+    },
+    {
+      label: 'Building data visualizations',
+      href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
+      description: 'Design interactive charts and graphs to unlock insights form your data.',
+    },
+    {
+      label: 'Creating dashboards',
+      href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
+      description: 'Build interactive dashboards to explore and analyze your data',
+    },
+  ],
+  allLink: 'https://opensearch.org/docs/latest/',
+};
+
+export const WHATS_NEW_CONFIG = {
+  title: i18n.translate('homepage.card.whatsNew.title', {
+    defaultMessage: `What's New`,
+  }),
+  list: [
+    {
+      label: 'Quickstart guide',
+      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      description: 'Get started in minutes with OpenSearch Dashboards',
+    },
+  ],
+};
+
+interface Config {
+  title: string;
+  list: Array<{
+    label: string;
+    href: string;
+    description: string;
+  }>;
+  allLink?: string;
+}
+
+export const HomeListCard = ({ config }: { config: Config }) => {
+  return (
+    <>
+      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+        <EuiTitle>
+          <h4>{config.title}</h4>
+        </EuiTitle>
+        <EuiSpacer />
+        {config.list.length > 0 && (
+          <EuiDescriptionList>
+            {config.list.map((item) => (
+              <>
+                <EuiDescriptionListTitle>
+                  <EuiLink href={item.href} target="_blank">
+                    {item.label}
+                  </EuiLink>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{item.description}</EuiDescriptionListDescription>
+              </>
+            ))}
+          </EuiDescriptionList>
+        )}
+
+        {config.allLink ? (
+          <>
+            <EuiSpacer />
+            <EuiLink href={config.allLink} target="_blank">
+              <EuiText size="s" style={{ display: 'inline' }}>
+                View all
+              </EuiText>
+            </EuiLink>
+          </>
+        ) : null}
+      </EuiPanel>
+    </>
+  );
+};
+
+coreRefs.contentManagement?.registerContentProvider({
+  id: 'obsCards',
+  getContent: () => ({
+    id: 'whats_new',
+    kind: 'custom',
+    order: 3,
+    render: () =>
+      React.createElement(HomeListCard, {
+        config: WHATS_NEW_CONFIG,
+      }),
+  }),
+  getTargetArea: () => HOME_CONTENT_AREAS.DELETE_EXAMPLE,
+});
+coreRefs.contentManagement?.registerContentProvider({
+  id: 'obsCards1',
+  getContent: () => ({
+    id: 'learn_opensearch',
+    kind: 'custom',
+    order: 4,
+    render: () =>
+      React.createElement(HomeListCard, {
+        config: LEARN_OPENSEARCH_CONFIG,
+      }),
+  }),
+  getTargetArea: () => HOME_CONTENT_AREAS.DELETE_EXAMPLE,
+});
+
+export const Home = ({ contentManagement, ..._props }: HomeProps) => {
   const [alertsPluginExists, setAlertsPluginExists] = useState(false);
   const [anomalyPluginExists, setAnomalyPluginExists] = useState(false);
 
@@ -142,20 +258,15 @@ export const Home = (_props: HomeProps) => {
     checkIfPluginsAreInstalled(setAlertsPluginExists, setAnomalyPluginExists);
   }, []);
 
+  const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
+
   return (
     <div>
       <HashRouter>
         <Switch>
-          <Route
-            exact
-            path="/"
-            render={() => (
-              <HomeContent
-                alertsPluginExists={alertsPluginExists}
-                anomalyPluginExists={anomalyPluginExists}
-              />
-            )}
-          />
+          <Route exact path="/">
+            {homepage}
+          </Route>
         </Switch>
       </HashRouter>
     </div>
