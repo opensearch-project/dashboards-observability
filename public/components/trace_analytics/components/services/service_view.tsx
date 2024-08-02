@@ -104,12 +104,14 @@ export function ServiceView(props: ServiceViewProps) {
   useEffect(() => {
     if (page !== 'serviceFlyout')
       setNavBreadCrumbs(
-        [props.parentBreadcrumb],
         [
+          props.parentBreadcrumb,
           {
             text: 'Trace analytics',
             href: '#/services',
           },
+        ],
+        [
           {
             text: 'Services',
             href: '#/services',
