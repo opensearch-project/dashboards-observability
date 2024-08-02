@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiSmallButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { LatencyPlt, LinePlt } from '../common/plots/latency_trend_plt';
 

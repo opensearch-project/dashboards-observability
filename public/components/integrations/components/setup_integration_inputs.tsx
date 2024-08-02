@@ -248,7 +248,7 @@ export function IntegrationConnectionInputs({
           <EuiSpacer />
         </>
       )}
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
       >
