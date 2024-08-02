@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-    ContentManagementPluginSetup,
-     ContentManagementPluginStart }
- from '../../../../src/plugins/content_management/public';
+import { ContentManagementPluginSetup } from '../../../../src/plugins/content_management/public';
 
 export const HOME_PAGE_ID = 'observabilityOverviewPage';
 export enum SECTIONS {
@@ -20,7 +17,7 @@ export enum HOME_CONTENT_AREAS {
   DELETE_EXAMPLE = `${HOME_PAGE_ID}/${SECTIONS.DELETE_EXAMPLE}`,
   DASHBOARD = `${HOME_PAGE_ID}/${SECTIONS.DASHBOARD}`,
 }
-  
+
 export const setupOverviewPage = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
     id: HOME_PAGE_ID,
@@ -39,14 +36,14 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
       {
         id: SECTIONS.GET_STARTED,
         order: 1000,
-        title: 'Define your path forward with OpenSearch',
+        title: 'Get started',
         kind: 'card',
       },
     ],
   });
 };
 
-export const initHome = (contentManagement: ContentManagementPluginStart) => {
-  //Delete if not needed
-  //If we need something updated on start
-};
+// export const initHome = (contentManagement: ContentManagementPluginStart) => {
+//   //Delete if not needed
+//   //If we need something updated on start
+// };
