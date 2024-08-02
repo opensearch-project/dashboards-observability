@@ -30,7 +30,7 @@ export function TraceSideBar(props: { children: React.ReactNode }) {
     {
       name: 'Trace analytics',
       id: 1,
-      href: '#/',
+      href: '#/services',
       items: [
         {
           name: 'Services',
