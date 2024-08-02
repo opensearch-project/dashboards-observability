@@ -106,10 +106,10 @@ export function ServiceView(props: ServiceViewProps) {
       setNavBreadCrumbs(
         [props.parentBreadcrumb],
         [
-          {
-            text: 'Trace analytics',
-            href: '#/',
-          },
+          // {
+          //   text: 'Trace analytics',
+          //   href: '#/services',
+          // },
           {
             text: 'Services',
             href: '#/services',

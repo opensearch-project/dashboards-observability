@@ -235,10 +235,10 @@ export function TraceView(props: TraceViewProps) {
     setNavBreadCrumbs(
       [props.parentBreadcrumb],
       [
-        {
-          text: 'Trace analytics',
-          href: '#/',
-        },
+        // {
+        //   text: 'Trace analytics',
+        //   href: '#/services',
+        // },
         {
           text: 'Traces',
           href: '#/traces',
