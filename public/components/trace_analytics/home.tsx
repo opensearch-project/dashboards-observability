@@ -123,7 +123,7 @@ export const Home = (props: HomeProps) => {
   let defaultRoute = props.defaultRoute ?? '/services';
   const currentHash = window.location.hash.split('#')[1] || '';
 
-  if (currentHash === '/traces' || currentHash === '/services') {
+  if (currentHash.startsWith('/traces') || currentHash.startsWith('/services')) {
     defaultRoute = currentHash;
   }
 
@@ -196,10 +196,14 @@ export const Home = (props: HomeProps) => {
   }, [mode]);
 
   const serviceBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/services',
-    },
+    ...(!isNavGroupEnabled
+      ? [
+          {
+            text: 'Trace analytics',
+            href: '#/services',
+          },
+        ]
+      : []),
     {
       text: 'Services',
       href: '#/services',
@@ -207,10 +211,14 @@ export const Home = (props: HomeProps) => {
   ];
 
   const traceBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/services',
-    },
+    ...(!isNavGroupEnabled
+      ? [
+          {
+            text: 'Trace analytics',
+            href: '#/services',
+          },
+        ]
+      : []),
     {
       text: 'Traces',
       href: '#/traces',
