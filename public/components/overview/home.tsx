@@ -110,6 +110,20 @@ configs.map((card) => {
   });
 });
 
+coreRefs.contentManagement?.registerContentProvider({
+  id: '',
+  getContent: () => ({
+    id: 'dashboard_content',
+    kind: 'dashboard',
+    order: 1000,
+    input: {
+      kind: 'dynamic',
+      get: () => Promise.resolve('e61829a0-48ad-11ef-9e1e-9fe5e67444b8'),
+    },
+  }),
+  getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
+});
+
 export const Home = ({ ..._props }: HomeProps) => {
   const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
 
