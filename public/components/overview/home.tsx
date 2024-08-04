@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiText } from '@elastic/eui';
+import { EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
@@ -110,28 +110,63 @@ configs.map((card) => {
   });
 });
 
-coreRefs.contentManagement?.registerContentProvider({
-  id: '',
-  getContent: () => ({
-    id: 'dashboard_content',
-    kind: 'dashboard',
-    order: 1000,
-    input: {
-      kind: 'dynamic',
-      get: () => Promise.resolve('e61829a0-48ad-11ef-9e1e-9fe5e67444b8'),
-    },
-  }),
-  getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
-});
-
 export const Home = ({ ..._props }: HomeProps) => {
   const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
+  const [ids, setIds] = useState<Array<{ value: string; text: string }>>([]);
+  const [value, setValue] = useState('');
+  const [_, setIsRegistered] = useState(false);
+
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue(e.target.value.toString());
+  };
+
+  useEffect(() => {
+    coreRefs.savedObjectsClient
+      ?.find({
+        type: 'dashboard',
+      })
+      .then((response) => {
+        const dashboardIds = response.savedObjects.map((dashboard) => ({
+          value: dashboard.id.toString(),
+          text: dashboard.id.toString(),
+        }));
+        setIds(dashboardIds);
+        setIsRegistered(true);
+      })
+      .catch((response) => {
+        console.log(response);
+      });
+  }, []);
+  useEffect(() => {
+    if (ids.length > 0) {
+      console.log(ids[0].value);
+      coreRefs.contentManagement?.registerContentProvider({
+        id: '',
+        getContent: () => ({
+          id: 'dashboard_content',
+          kind: 'dashboard',
+          order: 1000,
+          input: {
+            kind: 'dynamic',
+            get: () => Promise.resolve(ids[0].value),
+          },
+        }),
+        getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
+      });
+    }
+  }, [ids]);
 
   return (
     <div>
       <HashRouter>
         <Switch>
           <Route exact path="/">
+            <EuiSelect
+              options={ids}
+              value={value}
+              hasNoInitialSelection={true}
+              onChange={(e) => onChange(e)}
+            />
             {homepage}
           </Route>
         </Switch>
