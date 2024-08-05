@@ -71,13 +71,6 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       order: 400,
     },
   ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
-    {
-      id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-      order: 400,
-    },
-  ]);
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
