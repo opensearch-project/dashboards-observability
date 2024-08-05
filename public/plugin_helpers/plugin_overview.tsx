@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { ContentManagementPluginSetup } from '../../../../src/plugins/content_management/public';
 
 export const HOME_PAGE_ID = 'observabilityOverviewPage';
 export enum SECTIONS {
-  GET_STARTED = `get_started`,
-  DELETE_EXAMPLE = `service_cards`,
-  DASHBOARD = `dashboard`,
+  GET_STARTED = 'get_started',
+  SELECTOR = 'selector',
+  DASHBOARD = 'dashboard',
 }
 
 export enum HOME_CONTENT_AREAS {
   GET_STARTED = `${HOME_PAGE_ID}/${SECTIONS.GET_STARTED}`,
-  DELETE_EXAMPLE = `${HOME_PAGE_ID}/${SECTIONS.DELETE_EXAMPLE}`,
+  SELECTOR = `${HOME_PAGE_ID}/${SECTIONS.SELECTOR}`,
   DASHBOARD = `${HOME_PAGE_ID}/${SECTIONS.DASHBOARD}`,
 }
 
@@ -24,13 +25,17 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
     title: 'Home',
     sections: [
       {
-        id: SECTIONS.DELETE_EXAMPLE,
-        order: 3000,
-        kind: 'dashboard',
+        id: SECTIONS.SELECTOR,
+        order: 2000,
+        title: 'Selector Section',
+        kind: 'custom',
+        render: (contents) => (
+          <>{contents.map((content) => (content.kind === 'custom' ? content.render() : null))}</>
+        ),
       },
       {
         id: SECTIONS.DASHBOARD,
-        order: 2000,
+        order: 3000,
         kind: 'dashboard',
       },
       {
