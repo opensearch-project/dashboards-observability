@@ -101,7 +101,7 @@ const registerCards = async () => {
           getIcon: () => {},
           getFooter: () => {
             return (
-              <EuiText size="s" textAlign="center">
+              <EuiText size="s" textAlign="left">
                 {card.footer}
               </EuiText>
             );
@@ -258,10 +258,16 @@ export const Home = ({ ..._props }: HomeProps) => {
           />
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButton onClick={closeModal}>Cancel</EuiButton>
-          <EuiButton onClick={onClickAdd} fill>
-            Add
-          </EuiButton>
+          <EuiFlexGroup justifyContent="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={closeModal}>Cancel</EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={onClickAdd} fill>
+                Add
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>
     );
