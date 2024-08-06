@@ -11,12 +11,19 @@ import {
 } from '../../../../../src/core/server';
 import { QueryService } from '../../services/queryService';
 
-export function registerSqlRoute(server: IRouter, service: QueryService) {
+export function registerSqlRoute(
+  server: IRouter,
+  service: QueryService,
+  _dataSourceEnabled: boolean
+) {
   server.post(
     {
       path: '/api/sql/sqlquery',
       validate: {
         body: schema.any(),
+        query: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (
@@ -24,7 +31,7 @@ export function registerSqlRoute(server: IRouter, service: QueryService) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const retVal = await service.describeSQLQuery(request);
+      const retVal = await service.describeSQLQuery(context, request);
       return response.ok({
         body: retVal,
       });
@@ -36,6 +43,9 @@ export function registerSqlRoute(server: IRouter, service: QueryService) {
       path: '/api/sql/pplquery',
       validate: {
         body: schema.any(),
+        query: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
       },
     },
     async (
@@ -43,7 +53,7 @@ export function registerSqlRoute(server: IRouter, service: QueryService) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const retVal = await service.describePPLQuery(request);
+      const retVal = await service.describePPLQuery(context, request);
       return response.ok({
         body: retVal,
       });

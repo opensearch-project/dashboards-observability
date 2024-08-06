@@ -65,6 +65,7 @@ import {
 } from '../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
+  DATACONNECTIONS_BASE,
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_DESCRIBE_INDEX_REGEX,
@@ -72,6 +73,7 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
+import { DatasourceType } from '../../../../common/types/data_connections';
 import {
   IExplorerProps,
   IField,
@@ -87,6 +89,10 @@ import {
 } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
+import {
+  getRenderCreateAccelerationFlyout,
+  getRenderLogExplorerTablesFlyout,
+} from '../../../plugin';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
@@ -127,6 +133,7 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
+import { AccelerateCallout } from './accelerate_callout';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -173,14 +180,11 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
-  const {
-    isEventsLoading: _isPatternLoading,
-    getPatterns,
-    setDefaultPatternsField,
-  } = useFetchPatterns({
+  const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
     requestParams,
   });
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
@@ -207,6 +211,18 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const [dataSourceConnectionType, setDataSourceConnectionType] = useState<DatasourceType>(
+    'PROMETHEUS'
+  );
+  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
+  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
+  const onCreateAcceleration = () =>
+    renderCreateAccelerationFlyout({
+      dataSource: dataSourceName,
+      dataSourceType: dataSourceConnectionType,
+    });
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -249,6 +265,16 @@ export const Explorer = ({
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
 
+  const updateDataSourceConnectionInfo = () => {
+    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${dataSourceName}`).then((data: any) => {
+      setDataSourceConnectionType(data.connector);
+    });
+  };
+
+  useEffect(() => {
+    updateDataSourceConnectionInfo();
+  }, [dataSourceName]);
+
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
 
@@ -277,6 +303,8 @@ export const Explorer = ({
       datasourceName,
       datasourceType,
       queryToRun,
+      startTimeRange,
+      endTimeRange,
     }: any = historyFromRedirection.location.state;
     batch(() => {
       if (datasourceName && datasourceType) {
@@ -304,6 +332,18 @@ export const Explorer = ({
           })
         );
         setTempQuery(queryToRun);
+      }
+      if (startTimeRange && endTimeRange) {
+        dispatch(
+          changeData({
+            tabId,
+            data: {
+              [SELECTED_DATE_RANGE]: [startTimeRange, endTimeRange],
+            },
+          })
+        );
+        setStartTime(startTimeRange);
+        setEndTime(endTimeRange);
       }
     });
   }, []);
@@ -351,7 +391,7 @@ export const Explorer = ({
     setSummaryStatus?: boolean
   ) => {
     const curQuery: IQuery = queryRef.current!;
-    new PPLDataFetcher(
+    await new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },
       {
@@ -566,6 +606,11 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
+            {isS3Connection && (
+              <EuiFlexItem>
+                <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
+              </EuiFlexItem>
+            )}
             {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
@@ -679,7 +724,11 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults tabId={tabId} />
+          <NoResults
+            tabId={tabId}
+            dataSourceConnectionType={dataSourceConnectionType}
+            eventsLoading={eventsLoading}
+          />
         )}
       </div>
     );
@@ -693,6 +742,8 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
+    isS3Connection,
+    eventsLoading,
   ]);
 
   const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
@@ -738,11 +789,7 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization
-        currentDataSource={
-          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
-        }
-      />
+      <DirectQueryVisualization onCreateAcceleration={onCreateAcceleration} />
     );
   }, [
     query,
@@ -751,7 +798,7 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    explorerSearchMeta.datasources,
+    onCreateAcceleration,
   ]);
 
   const contentTabs = [
@@ -779,6 +826,7 @@ export const Explorer = ({
   };
 
   const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
+    setEventsLoading(true);
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (
@@ -799,6 +847,7 @@ export const Explorer = ({
       await updateQueryInStore(searchedQuery);
     }
     await fetchData(undefined, undefined, setSummaryStatus);
+    setEventsLoading(false);
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
@@ -1065,8 +1114,25 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
+                {isS3Connection && (
+                  <>
+                    <EuiLink
+                      style={{ paddingLeft: 130 }}
+                      onClick={() => {
+                        renderTablesFlyout(dataSourceName, dataSourceConnectionType);
+                      }}
+                    >
+                      View databases and tables
+                    </EuiLink>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {explorerSearchMeta.isPolling ? (
-                  <DirectQueryRunning tabId={tabId} />
+                  <DirectQueryRunning
+                    tabId={tabId}
+                    isS3Connection={isS3Connection}
+                    onCreateAcceleration={onCreateAcceleration}
+                  />
                 ) : (
                   <EuiTabbedContent
                     className="mainContentTabs"

@@ -31,6 +31,7 @@ import { ThroughputPlt } from '../common/plots/throughput_plt';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -53,6 +54,7 @@ export function DashboardContent(props: DashboardProps) {
     toasts,
     dataSourceMDSId,
     tenant,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -64,6 +66,7 @@ export function DashboardContent(props: DashboardProps) {
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
   const { setToast } = useToast();
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
@@ -77,8 +80,13 @@ export function DashboardContent(props: DashboardProps) {
   }, [showTimeoutToast]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, page);
+    if (isNavGroupEnabled) {
+      chrome.setBreadcrumbs([...childBreadcrumbs]);
+    } else {
+      chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    }
+
+    const validFilters = getValidFilterFields(mode, page, attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
         ...filter,
@@ -176,7 +184,6 @@ export function DashboardContent(props: DashboardProps) {
         setPercentileMap
       ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {
-      console.log(dataSourceMDSId, 'traces page');
       handleDashboardRequest(
         http,
         DSL,

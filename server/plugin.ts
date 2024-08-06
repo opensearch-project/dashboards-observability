@@ -21,6 +21,7 @@ import { PPLPlugin } from './adaptors/ppl_plugin';
 import { PPLParsers } from './parsers/ppl_parser';
 import { setupRoutes } from './routes/index';
 import {
+  notebookSavedObject,
   searchSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
@@ -218,6 +219,7 @@ export class ObservabilityPlugin
 
     core.savedObjects.registerType(visualizationSavedObject);
     core.savedObjects.registerType(searchSavedObject);
+    core.savedObjects.registerType(notebookSavedObject);
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,

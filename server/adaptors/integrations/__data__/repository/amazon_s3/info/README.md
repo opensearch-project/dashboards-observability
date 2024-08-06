@@ -16,4 +16,4 @@ AWS S3 integration includes dashboards, visualizations, queries, and an index ma
 
 The Dashboard uses the index alias `logs-aws-s3` for shortening the index name - be advised.
 
-![AWS S3 Dashboard](../static/dashboard_s3.png)
+![AWS S3 Dashboard](../static/dashboard.png)

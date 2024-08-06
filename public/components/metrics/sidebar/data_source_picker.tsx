@@ -17,17 +17,17 @@ export const DataSourcePicker = ({
   selectedDataSource,
   setSelectedDataSource,
 }: DataSourcePickerMenuProps) => {
-  const onChange = (selectedDataSource) => {
-    setSelectedDataSource(selectedDataSource);
+  const onChange = (selectedMetricSource) => {
+    setSelectedDataSource(selectedMetricSource);
   };
 
   return (
     <div className="metrics-data-source-picker">
       <EuiTitle size="xxxs">
-        <h5>Data source</h5>
+        <h5>Metrics source</h5>
       </EuiTitle>
       <EuiComboBox
-        placeholder="Select a data source"
+        placeholder="Select a metric source"
         singleSelection={{ asPlainText: true }}
         options={DATASOURCE_OPTIONS}
         selectedOptions={selectedDataSource || []}

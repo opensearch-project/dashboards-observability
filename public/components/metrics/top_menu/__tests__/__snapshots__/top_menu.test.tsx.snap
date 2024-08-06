@@ -342,6 +342,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                   },
                 ]
               }
+              compressed={false}
               dateFormat=""
               end="now"
               isAutoRefreshOnly={false}
@@ -368,6 +369,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                     >
                       <EuiFormControlLayout
                         className="euiSuperDatePicker"
+                        compressed={false}
                         isDisabled={false}
                         prepend={
                           <EuiQuickSelectPopover
@@ -516,7 +518,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               hasArrow={true}
                               isOpen={false}
                               ownFocus={true}
-                              panelPaddingSize="m"
+                              panelPaddingSize="s"
                             >
                               <div
                                 className="euiPopover euiPopover--anchorDownLeft"
@@ -663,7 +665,9 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 </button>
                               </div>
                             </EuiDatePickerRange>
-                            <EuiFormControlLayoutIcons />
+                            <EuiFormControlLayoutIcons
+                              compressed={false}
+                            />
                           </div>
                         </div>
                       </EuiFormControlLayout>
@@ -676,6 +680,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <EuiSuperUpdateButton
+                        compressed={false}
                         data-test-subj="superDatePickerApplyTimeButton"
                         isDisabled={false}
                         isLoading={false}
@@ -697,13 +702,13 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               className="euiSuperUpdateButton"
                               color="primary"
                               data-test-subj="superDatePickerApplyTimeButton"
-                              fill={true}
                               iconType="refresh"
                               isDisabled={false}
                               isLoading={false}
                               onBlur={[Function]}
                               onClick={[Function]}
                               onFocus={[Function]}
+                              size="m"
                               textProps={
                                 Object {
                                   "className": "euiSuperUpdateButton__text",
@@ -717,13 +722,13 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 data-test-subj="superDatePickerApplyTimeButton"
                                 disabled={false}
                                 element="button"
-                                fill={true}
                                 iconType="refresh"
                                 isDisabled={false}
                                 isLoading={false}
                                 onBlur={[Function]}
                                 onClick={[Function]}
                                 onFocus={[Function]}
+                                size="m"
                                 textProps={
                                   Object {
                                     "className": "euiSuperUpdateButton__text",
@@ -732,7 +737,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 type="button"
                               >
                                 <button
-                                  className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                  className="euiButton euiButton--primary euiSuperUpdateButton"
                                   data-test-subj="superDatePickerApplyTimeButton"
                                   disabled={false}
                                   onBlur={[Function]}

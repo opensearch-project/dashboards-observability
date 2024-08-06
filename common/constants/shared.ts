@@ -37,6 +37,14 @@ export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 1500;
 
+export const observabilityOverviewID = 'observability-overview';
+export const observabilityOverviewTitle = 'Observability overview';
+export const observabilityOverviewPluginOrder = 5088;
+
+export const observabilityGettingStartedID = 'observability-gettingStarted';
+export const observabilityGettingStartedTitle = 'Getting Started';
+export const observabilityGettingStartedPluginOrder = 5089;
+
 export const observabilityApplicationsID = 'observability-applications';
 export const observabilityApplicationsTitle = 'Applications';
 export const observabilityApplicationsPluginOrder = 5090;
@@ -52,6 +60,10 @@ export const observabilityMetricsPluginOrder = 5092;
 export const observabilityTracesID = 'observability-traces';
 export const observabilityTracesTitle = 'Traces';
 export const observabilityTracesPluginOrder = 5093;
+
+export const observabilityServicesID = 'observability-services';
+export const observabilityServicesTitle = 'Services';
+export const observabilityServicesPluginOrder = 5092;
 
 export const observabilityNotebookID = 'observability-notebooks';
 export const observabilityNotebookTitle = 'Notebooks';

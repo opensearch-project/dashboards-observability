@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../../src/core/public';
+import { ChromeStart, HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationOverviewPageProps {
   http: HttpStart;
@@ -13,6 +13,7 @@ export interface AvailableIntegrationOverviewPageProps {
 export interface AddedIntegrationOverviewPageProps {
   http: HttpStart;
   chrome: ChromeStart;
+  dataSourceEnabled: string;
 }
 
 export interface AvailableIntegrationProps {

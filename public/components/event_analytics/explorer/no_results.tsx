@@ -20,15 +20,71 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { DATA_SOURCE_TYPES, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
+import { CachedDataSourceStatus, DatasourceType } from '../../../../common/types/data_connections';
+import { CatalogCacheManager } from '../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../framework/core_refs';
+import { getRenderLogExplorerTablesFlyout } from '../../../plugin';
 import { selectQueryAssistantSummarization } from '../redux/slices/query_assistant_summarization_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectSearchMetaData } from '../redux/slices/search_meta_data_slice';
-import { DATA_SOURCE_TYPES, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { CatalogCacheManager } from '../../../framework/catalog_cache/cache_manager';
-import { CachedDataSourceStatus } from '../../../../common/types/data_connections';
 
-export const NoResults = ({ tabId }: any) => {
+export interface NoResultsProps {
+  tabId: string;
+  dataSourceConnectionType: DatasourceType;
+  eventsLoading: boolean;
+}
+
+const CreatedCodeBlock = ({ code }: { code: string }) => {
+  return (
+    <EuiCodeBlock isCopyable={true} paddingSize="m" fontSize="s" language="sql">
+      {code}
+    </EuiCodeBlock>
+  );
+};
+
+const LoadingResults: React.FC = () => (
+  <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} body={<p>Loading results...</p>} />
+);
+
+const OpenSearchIndexNoResults = () => {
+  return (
+    <EuiFlexGroup justifyContent="center" direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+              defaultMessage="No results match your search criteria"
+            />
+          }
+          color="warning"
+          iconType="help"
+          data-test-subj="observabilityNoResultsCallout"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <h2 data-test-subj="obsNoResultsTimefilter">
+            <FormattedMessage
+              id="observability.noResults.expandYourTimeRangeTitle"
+              defaultMessage="Select a data source, expand your time range, or modify the query"
+            />
+          </h2>
+          <p>
+            <FormattedMessage
+              id="observability.noResults.queryMayNotMatchTitle"
+              defaultMessage="After selection, check the time range, query filters, fields, and query"
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: NoResultsProps) => {
   // get the queries isLoaded, if it exists AND is true = show no res
   const queryInfo = useSelector(selectQueries)[tabId];
   const summaryData = useSelector(selectQueryAssistantSummarization)[tabId];
@@ -39,14 +95,6 @@ export const NoResults = ({ tabId }: any) => {
   const languageInUse = explorerSearchMeta?.lang;
 
   const queryInputted = queryInfo?.rawQuery !== '';
-
-  const CreatedCodeBlock = ({ code }: any) => {
-    return (
-      <EuiCodeBlock isCopyable={true} paddingSize="m" fontSize="s" language="sql">
-        {code}
-      </EuiCodeBlock>
-    );
-  };
 
   let arbitraryDatabaseName: string | undefined;
   let arbitraryTableName: string | undefined;
@@ -66,7 +114,9 @@ export const NoResults = ({ tabId }: any) => {
     }
   }
 
-  const S3Callouts = () => {
+  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
+
+  const renderS3Callouts = () => {
     return (
       <EuiFlexGroup justifyContent="center" direction="column">
         {queryInputted && (
@@ -96,9 +146,7 @@ export const NoResults = ({ tabId }: any) => {
               To start exploring this datasource, enter a query or{' '}
               <EuiLink
                 onClick={() => {
-                  coreRefs?.application!.navigateToApp('datasources', {
-                    path: `#/manage/${datasourceName}`,
-                  });
+                  renderTablesFlyout(datasourceName, dataSourceConnectionType);
                 }}
               >
                 view databases and tables.
@@ -126,7 +174,9 @@ export const NoResults = ({ tabId }: any) => {
                     <p>Show a list of tables within a database</p>
                     <EuiSpacer size="s" />
                     <CreatedCodeBlock
-                      code={`SHOW TABLE EXTENDED IN ${datasourceName}.<database> LIKE '*'`}
+                      code={`SHOW ${
+                        dataSourceConnectionType === 'SECURITYLAKE' ? 'TABLES' : 'TABLE EXTENDED'
+                      } IN ${datasourceName}.<database> LIKE '*'`}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -173,53 +223,13 @@ export const NoResults = ({ tabId }: any) => {
     );
   };
 
-  const OpenSearchIndexNoResults = () => {
-    return (
-      <EuiFlexGroup justifyContent="center" direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                defaultMessage="No results match your search criteria"
-              />
-            }
-            color="warning"
-            iconType="help"
-            data-test-subj="observabilityNoResultsCallout"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <h2 data-test-subj="obsNoResultsTimefilter">
-              <FormattedMessage
-                id="observability.noResults.expandYourTimeRangeTitle"
-                defaultMessage="Select a data source, expand your time range, or modify the query"
-              />
-            </h2>
-            <p>
-              <FormattedMessage
-                id="observability.noResults.queryMayNotMatchTitle"
-                defaultMessage="After selection, check the time range, query filters, fields, and query"
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   return (
     <EuiPage paddingSize="s">
       {coreRefs.queryAssistEnabled ? (
         <>
           {/* check to see if the rawQuery is empty or not */}
-          {queryAssistLoading ? (
-            <EuiEmptyPrompt
-              title={<EuiLoadingSpinner size="xl" />}
-              body={<p>Loading results...</p>}
-            />
+          {queryAssistLoading || eventsLoading ? (
+            <LoadingResults />
           ) : queryInfo?.rawQuery ? (
             <EuiFlexGroup justifyContent="center" direction="column">
               <EuiFlexItem grow={false}>
@@ -252,11 +262,20 @@ export const NoResults = ({ tabId }: any) => {
           ) : (
             <EuiEmptyPrompt
               iconType={'editorCodeBlock'}
-              title={<h2>Get started</h2>}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="observability.noResults.queryAssist.getStarted.title"
+                    defaultMessage="Get started"
+                  />
+                </h2>
+              }
               body={
                 <p>
-                  Run a query to view results, or use the Natural Language Query Generator to
-                  automatically generate complex queries using simple conversational prompts.
+                  <FormattedMessage
+                    id="observability.noResults.queryAssist.getStarted.body"
+                    defaultMessage="Enter your natural language question to automatically generate summaries and complex queries using simple conversational prompts."
+                  />
                 </p>
               }
             />
@@ -265,7 +284,9 @@ export const NoResults = ({ tabId }: any) => {
       ) : (
         <>
           {explorerSearchMeta?.datasources[0]?.type === DATA_SOURCE_TYPES.S3Glue ? (
-            <S3Callouts />
+            renderS3Callouts()
+          ) : eventsLoading ? (
+            <LoadingResults />
           ) : (
             <OpenSearchIndexNoResults />
           )}

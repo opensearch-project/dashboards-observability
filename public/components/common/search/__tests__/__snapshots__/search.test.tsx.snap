@@ -395,6 +395,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                               },
                             ]
                           }
+                          compressed={false}
                           data-test-subj="pplSearchDatePicker"
                           dateFormat=""
                           end="now"
@@ -423,6 +424,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                 >
                                   <EuiFormControlLayout
                                     className="euiSuperDatePicker"
+                                    compressed={false}
                                     isDisabled={false}
                                     prepend={
                                       <EuiQuickSelectPopover
@@ -571,7 +573,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                           hasArrow={true}
                                           isOpen={false}
                                           ownFocus={true}
-                                          panelPaddingSize="m"
+                                          panelPaddingSize="s"
                                         >
                                           <div
                                             className="euiPopover euiPopover--anchorDownLeft"
@@ -718,7 +720,9 @@ exports[`Explorer Search component renders basic component 1`] = `
                                             </button>
                                           </div>
                                         </EuiDatePickerRange>
-                                        <EuiFormControlLayoutIcons />
+                                        <EuiFormControlLayoutIcons
+                                          compressed={false}
+                                        />
                                       </div>
                                     </div>
                                   </EuiFormControlLayout>

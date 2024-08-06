@@ -5,7 +5,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -15,21 +14,24 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiTitle,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
+import { isArray } from 'lodash';
 import { DATA_SOURCE_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
   CachedAcceleration,
   CachedColumn,
+  DatasourceType,
 } from '../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../common/types/explorer';
 import { useToast } from '../../../../../../public/components/common/toast';
@@ -53,6 +55,7 @@ import {
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
   datasourceName: string;
+  dataSourceType: DatasourceType;
   resetFlyout: () => void;
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
@@ -64,6 +67,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   resetFlyout,
   handleRefresh,
   dataSourceMDSId,
+  dataSourceType,
 }: AssociatedObjectsFlyoutProps) => {
   const { loadStatus, startLoading } = useLoadTableColumnsToCache();
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
@@ -72,37 +76,39 @@ export const AssociatedObjectsDetailsFlyout = ({
 
   const DiscoverButton = () => {
     return (
-      <EuiButtonEmpty
-        onClick={() => {
-          if (tableDetail.type !== 'table') return;
-          redirectToExplorerWithDataSrc(
-            tableDetail.datasource,
-            DATA_SOURCE_TYPES.S3Glue,
-            tableDetail.database,
-            tableDetail.name
-          );
-          resetFlyout();
-        }}
-      >
-        <EuiIcon type={'discoverApp'} size="m" />
-      </EuiButtonEmpty>
+      <EuiToolTip content="Query in Log Explorer">
+        <EuiButtonIcon
+          iconType={'discoverApp'}
+          size="m"
+          onClick={() => {
+            if (tableDetail.type !== 'table') return;
+            redirectToExplorerWithDataSrc(
+              tableDetail.datasource,
+              DATA_SOURCE_TYPES.S3Glue,
+              tableDetail.database,
+              tableDetail.name
+            );
+            resetFlyout();
+          }}
+        />
+      </EuiToolTip>
     );
   };
 
+  const onCreateAcceleration = () =>
+    renderCreateAccelerationFlyout({
+      dataSource: datasourceName,
+      dataSourceType,
+      databaseName: tableDetail.database,
+      tableName: tableDetail.name,
+      handleRefresh,
+    });
+
   const AccelerateButton = () => {
     return (
-      <EuiButtonEmpty
-        onClick={() =>
-          renderCreateAccelerationFlyout({
-            dataSource: datasourceName,
-            databaseName: tableDetail.database,
-            tableName: tableDetail.name,
-            handleRefresh,
-          })
-        }
-      >
-        <EuiIcon type={'bolt'} size="m" />
-      </EuiButtonEmpty>
+      <EuiToolTip content="Create acceleration">
+        <EuiButtonIcon iconType="bolt" size="m" onClick={onCreateAcceleration} />
+      </EuiToolTip>
     );
   };
 
@@ -128,22 +134,34 @@ export const AssociatedObjectsDetailsFlyout = ({
     );
   };
 
-  const TableTitleComponent = (titleProps: { title: string }) => {
-    const { title } = titleProps;
+  const TableTitleComponent = (props: {
+    title: string;
+    description?: string;
+    horizontalRuleBottom?: boolean;
+  }) => {
+    const { title, description, horizontalRuleBottom } = props;
     return (
       <>
         <EuiTitle size="s">
           <h4>{title}</h4>
         </EuiTitle>
-        <EuiHorizontalRule margin="s" />
+        {description && <EuiText>{description}</EuiText>}
+        {horizontalRuleBottom && <EuiHorizontalRule margin="s" />}
       </>
     );
   };
 
-  const accelerationData = tableDetail.accelerations.map((acc, index) => ({
-    ...acc,
-    id: index,
-  }));
+  const accelerationData = isArray(tableDetail.accelerations)
+    ? tableDetail.accelerations.map((acc, index) => ({
+        ...acc,
+        id: index,
+      }))
+    : [
+        {
+          ...tableDetail.accelerations,
+          id: 0,
+        },
+      ];
 
   const accelerationColumns = [
     {
@@ -151,7 +169,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       name: 'Name',
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
-        const name = getAccelerationName(item, datasourceName);
+        const name = getAccelerationName(item);
         return (
           <EuiLink
             onClick={() =>
@@ -202,6 +220,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           onClick={() =>
             renderCreateAccelerationFlyout({
               dataSource: datasourceName,
+              dataSourceType,
               databaseName: tableDetail.database,
               tableName: tableDetail.name,
               handleRefresh,
@@ -298,17 +317,34 @@ export const AssociatedObjectsDetailsFlyout = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DiscoverButton />
+            <AccelerateButton />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <AccelerateButton />
+            <DiscoverButton />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ConnectionComponent />
         <EuiSpacer />
-        <TableTitleComponent title="Accelerations" />
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <TableTitleComponent
+              title="Accelerations"
+              description={
+                dataSourceType === 'SECURITYLAKE'
+                  ? 'Security Lake tables include basic acceleration with skipping index.'
+                  : undefined
+              }
+              horizontalRuleBottom={dataSourceType !== 'SECURITYLAKE'}
+            />
+          </EuiFlexItem>
+          {dataSourceType === 'SECURITYLAKE' && (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={onCreateAcceleration}>Create acceleration</EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         {accelerationData.length > 0 ? (
           <>
             <EuiInMemoryTable
@@ -322,7 +358,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           noDataMessage
         )}
         <EuiSpacer />
-        <TableTitleComponent title="Schema" />
+        <TableTitleComponent title="Schema" horizontalRuleBottom />
         <EuiInMemoryTable
           items={schemaData}
           columns={schemaColumns}

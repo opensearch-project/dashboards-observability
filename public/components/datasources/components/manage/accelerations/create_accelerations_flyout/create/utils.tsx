@@ -20,7 +20,7 @@ export const pluralizeTime = (timeWindow: number) => {
   return timeWindow > 1 ? 's' : '';
 };
 
-export const hasError = (formErrors: FormErrorsType, key?: keyof FormErrorsType) => {
+export const hasError = (formErrors: Partial<FormErrorsType>, key?: keyof FormErrorsType) => {
   if (!key) return Object.values(formErrors).some((e) => !!e.length);
   return !!formErrors[key]?.length;
 };

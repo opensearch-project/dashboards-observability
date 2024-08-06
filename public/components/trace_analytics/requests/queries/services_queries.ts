@@ -183,7 +183,7 @@ export const getServiceNodesQuery = (mode: TraceAnalyticsMode, tenant?: string) 
 export const getServiceEdgesQuery = (
   source: 'destination' | 'target',
   mode: TraceAnalyticsMode,
-  tenant?: string
+  tenant?: string,
 ) => {
   return {
     index: getTenantIndexName(
@@ -469,4 +469,86 @@ export const getServiceMetricsQuery = (
     dataPrepperQuery.query.bool.must.push(...DSL.custom.timeFilter);
   }
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
+};
+
+export const getServiceTrendsQuery = (_mode: TraceAnalyticsMode, serviceFilter: any) => {
+  const query = {
+    size: 0,
+    query: {
+      bool: {
+        must: [
+          {
+            range: {
+              startTime: {
+                gte: 'now-24h',
+                lte: 'now',
+              },
+            },
+          },
+          ...serviceFilter,
+        ],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      service_trends: {
+        terms: {
+          field: 'serviceName',
+          size: 10000,
+        },
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              field: 'startTime',
+              fixed_interval: '1h',
+            },
+            aggs: {
+              trace_count: {
+                cardinality: {
+                  field: 'traceId',
+                },
+              },
+              error_count: {
+                filter: {
+                  term: {
+                    'status.code': '2',
+                  },
+                },
+                aggs: {
+                  trace_count: {
+                    cardinality: {
+                      field: 'traceId',
+                    },
+                  },
+                },
+              },
+              error_rate: {
+                bucket_script: {
+                  buckets_path: {
+                    total: 'trace_count',
+                    errors: 'error_count>trace_count',
+                  },
+                  script: 'params.errors / params.total * 100',
+                },
+              },
+              average_latency: {
+                scripted_metric: {
+                  init_script: 'state.traceIdToLatencyMap = [:];',
+                  map_script:
+                    "\n                    if (doc.containsKey('traceGroupFields.durationInNanos') && !doc['traceGroupFields.durationInNanos'].empty) {\n                      def traceId = doc['traceId'].value;\n                      if (!state.traceIdToLatencyMap.containsKey(traceId)) {\n                        state.traceIdToLatencyMap[traceId] = doc['traceGroupFields.durationInNanos'].value;\n                      }\n                    }\n                  ",
+                  combine_script: 'return state.traceIdToLatencyMap',
+                  reduce_script:
+                    '\n                    def seenTraceIdsMap = [:];\n                    def totalLatency = 0.0;\n                    def traceCount = 0.0;\n\n                    for (s in states) {\n                      if (s == null) {\n                        continue;\n                      }\n\n                      for (entry in s.entrySet()) {\n                        def traceId = entry.getKey();\n                        def traceLatency = entry.getValue();\n                        if (!seenTraceIdsMap.containsKey(traceId)) {\n                          seenTraceIdsMap[traceId] = true;\n                          totalLatency += traceLatency;\n                          traceCount++;\n                        }\n                      }\n                    }\n\n                    def average_latency_nanos = totalLatency / traceCount;\n                    return Math.round(average_latency_nanos / 10000) / 100.0;\n                  ',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  return query;
 };

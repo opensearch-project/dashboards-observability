@@ -57,6 +57,7 @@ describe('Dashboard component', () => {
         dataPrepperIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -104,6 +105,7 @@ describe('Dashboard component', () => {
         jaegerIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -150,6 +152,7 @@ describe('Dashboard component', () => {
         dataPrepperIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 

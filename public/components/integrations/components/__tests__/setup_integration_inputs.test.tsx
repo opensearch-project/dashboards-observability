@@ -126,7 +126,42 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the workflows inputs', async () => {
     const wrapper = mount(
-      <IntegrationWorkflowsInputs updateConfig={() => {}} integration={TEST_INTEGRATION_CONFIG} />
+      <IntegrationWorkflowsInputs
+        config={TEST_INTEGRATION_SETUP_INPUTS}
+        updateConfig={() => {}}
+        integration={TEST_INTEGRATION_CONFIG}
+      />
+    );
+
+    await waitFor(() => {
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
+  it('Renders the workflows inputs with conditional workflows', async () => {
+    const wrapper = mount(
+      <IntegrationWorkflowsInputs
+        config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
+        updateConfig={() => {}}
+        integration={{
+          ...TEST_INTEGRATION_CONFIG,
+          workflows: [
+            {
+              name: 'workflow1',
+              label: 'Workflow 1',
+              description: 'This is a test workflow.',
+              enabled_by_default: true,
+            },
+            {
+              name: 'workflow2',
+              label: 'Workflow 2',
+              description: 'This should not render.',
+              enabled_by_default: true,
+              applicable_data_sources: ['index'],
+            },
+          ],
+        }}
+      />
     );
 
     await waitFor(() => {

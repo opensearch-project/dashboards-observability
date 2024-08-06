@@ -15,8 +15,36 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
   <Sidebar
     selectedDataSource=""
     selectedOTIndex=""
-    setSelectedDataSource={[MockFunction]}
-    setSelectedOTIndex={[MockFunction]}
+    setSelectedDataSource={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    setSelectedOTIndex={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
   >
     <I18nProvider>
       <IntlProvider
@@ -109,7 +137,21 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
           >
             <DataSourcePicker
               selectedDataSource=""
-              setSelectedDataSource={[MockFunction]}
+              setSelectedDataSource={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
             >
               <div
                 className="metrics-data-source-picker"
@@ -120,7 +162,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   <h5
                     className="euiTitle euiTitle--xxxsmall"
                   >
-                    Data source
+                    Metrics source
                   </h5>
                 </EuiTitle>
                 <EuiComboBox
@@ -142,7 +184,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                       },
                     ]
                   }
-                  placeholder="Select a data source"
+                  placeholder="Select a metric source"
                   selectedOptions={Array []}
                   singleSelection={
                     Object {
@@ -174,7 +216,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                       onFocus={[Function]}
                       onOpenListClick={[Function]}
                       onRemoveOption={[Function]}
-                      placeholder="Select a data source"
+                      placeholder="Select a metric source"
                       rootId={[Function]}
                       searchValue=""
                       selectedOptions={Array []}
@@ -217,7 +259,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                               <p
                                 className="euiComboBoxPlaceholder"
                               >
-                                Select a data source
+                                Select a metric source
                               </p>
                               <AutosizeInput
                                 aria-controls=""

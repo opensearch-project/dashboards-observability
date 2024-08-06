@@ -34,6 +34,7 @@ exports[`Latency trend plot component renders latency plot 1`] = `
         },
       ]
     }
+    height="200"
     layout={
       Object {
         "annotations": Array [
@@ -43,6 +44,9 @@ exports[`Latency trend plot component renders latency plot 1`] = `
             "ax": 0,
             "ay": -140,
             "borderpad": 10,
+            "font": Object {
+              "color": "#899195",
+            },
             "showarrow": true,
             "text": "Now: 284.47ms",
             "x": 1605027600000,
@@ -59,6 +63,8 @@ exports[`Latency trend plot component renders latency plot 1`] = `
           "r": 30,
           "t": 30,
         },
+        "paper_bgcolor": "rgba(0, 0, 0, 0)",
+        "plot_bgcolor": "rgba(0, 0, 0, 0)",
         "width": 400,
         "xaxis": Object {
           "color": "#899195",
@@ -68,7 +74,7 @@ exports[`Latency trend plot component renders latency plot 1`] = `
         },
         "yaxis": Object {
           "color": "#899195",
-          "gridcolor": "#d9d9d9",
+          "gridcolor": "rgba(217, 217, 217, 0.2)",
           "title": Object {
             "font": Object {
               "size": 12,

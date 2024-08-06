@@ -4,13 +4,14 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiSpacer, PropertySort } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DataSourceViewConfig } from '../../../../../../../src/plugins/data_source_management/public';
+import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { SearchBar } from '../common/search_bar';
+import { DashboardContent } from '../dashboard/dashboard_content';
 import { TracesProps } from './traces';
 import { TracesTable } from './traces_table';
 
@@ -24,7 +25,6 @@ export function TracesContent(props: TracesProps) {
     appConfigs,
     startTime,
     endTime,
-    parentBreadcrumb,
     childBreadcrumbs,
     traceIdColumnAction,
     setQuery,
@@ -37,15 +37,20 @@ export function TracesContent(props: TracesProps) {
     dataSourceManagement,
     dataSourceMDSId,
     tenant,
+    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
-  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, 'traces');
+    chrome.setBreadcrumbs([
+      ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
+      ...childBreadcrumbs,
+    ]);
+    const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
         ...filter,
@@ -63,6 +68,11 @@ export function TracesContent(props: TracesProps) {
     )
       refresh();
   }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
+
+  const onToggle = (isOpen: boolean) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setTrigger(newState);
+  };
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
@@ -97,18 +107,12 @@ export function TracesContent(props: TracesProps) {
     setLoading(false);
   };
 
+  const dashboardContent = () => {
+    return <DashboardContent {...props} />;
+  };
+
   return (
     <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceView'}
-          componentConfig={{
-            activeOption: dataSourceMDSId,
-            fullWidth: true,
-          }}
-        />
-      )}
       <SearchBar
         query={query}
         filters={filters}
@@ -122,7 +126,21 @@ export function TracesContent(props: TracesProps) {
         refresh={refresh}
         page={page}
         mode={mode}
+        attributesFilterFields={attributesFilterFields}
       />
+      <EuiSpacer size="m" />
+      <EuiPanel>
+        <EuiAccordion
+          id="accordion1"
+          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
+          forceState={trigger}
+          onToggle={onToggle}
+          data-test-subj="trace-groups-service-operation-accordian"
+        >
+          <EuiSpacer size="m" />
+          {trigger === 'open' && dashboardContent()}
+        </EuiAccordion>
+      </EuiPanel>
       <EuiSpacer size="m" />
       <TracesTable
         items={tableItems}

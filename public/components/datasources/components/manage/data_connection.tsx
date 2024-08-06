@@ -18,6 +18,7 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import escapeRegExp from 'lodash/escapeRegExp';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +30,7 @@ import {
 import {
   DatasourceDetails,
   PrometheusProperties,
+  StartLoadingParams,
 } from '../../../../../common/types/data_connections';
 import {
   useLoadAccelerationsToCache,
@@ -63,6 +65,8 @@ export const DataConnection = (props: { dataSource: string }) => {
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const accessControlTabId = 'access_control';
+  const [selectedTabId, setSelectedTabId] = useState<string>(accessControlTabId);
 
   const {
     loadStatus: databasesLoadStatus,
@@ -78,7 +82,12 @@ export const DataConnection = (props: { dataSource: string }) => {
     databasesLoadStatus,
     startLoadingDatabases,
     tablesLoadStatus,
-    startLoadingTables,
+    startLoadingTables: (loadingParams: StartLoadingParams) => {
+      startLoadingTables({
+        ...loadingParams,
+        dataSourceType: datasourceDetails.connector,
+      });
+    },
     accelerationsLoadStatus,
     startLoadingAccelerations,
   };
@@ -90,9 +99,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
 
   useEffect(() => {
-    const searchDataSourcePattern = new RegExp(
-      `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
-    );
+    const searchDataSourcePattern = new RegExp(`flint_${escapeRegExp(datasourceDetails.name)}_.*`);
     const findIntegrations = async () => {
       // TODO: we just get all results and filter, ideally we send a filtering query to the API
       // Should still be probably okay until we get cases of 500+ integration instances
@@ -123,7 +130,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   ) : null;
 
   const onclickAccelerationsCard = () => {
-    renderCreateAccelerationFlyout({ dataSource });
+    renderCreateAccelerationFlyout({ dataSource, dataSourceType: datasourceDetails.connector });
   };
 
   const onclickDiscoverCard = () => {
@@ -168,7 +175,7 @@ export const DataConnection = (props: { dataSource: string }) => {
             selectable={{
               onClick: onclickDiscoverCard,
               isDisabled: false,
-              children: 'Query in Observability Logs',
+              children: 'Query in Log Explorer',
             }}
           />
         </EuiFlexItem>
@@ -211,7 +218,7 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   const genericTabs = [
     {
-      id: 'access_control',
+      id: accessControlTabId,
       name: 'Access control',
       disabled: false,
       content: (
@@ -226,53 +233,54 @@ export const DataConnection = (props: { dataSource: string }) => {
     },
   ];
 
-  const conditionalTabs =
-    datasourceDetails.connector === 'S3GLUE'
-      ? [
-          {
-            id: 'associated_objects',
-            name: 'Associated Objects',
-            disabled: false,
-            content: (
-              <AssociatedObjectsTab
-                datasource={datasourceDetails}
-                cacheLoadingHooks={cacheLoadingHooks}
-                selectedDatabase={selectedDatabase}
-                setSelectedDatabase={setSelectedDatabase}
-              />
-            ),
-          },
-          {
-            id: 'acceleration_table',
-            name: 'Accelerations',
-            disabled: false,
-            content: (
-              <AccelerationTable
-                dataSourceName={dataSource}
-                cacheLoadingHooks={cacheLoadingHooks}
-              />
-            ),
-          },
-          {
-            id: 'installed_integrations',
-            name: 'Installed Integrations',
-            disabled: false,
-            content: (
-              <InstalledIntegrationsTable
-                integrations={dataSourceIntegrations}
-                datasourceType={datasourceDetails.connector}
-                datasourceName={datasourceDetails.name}
-                refreshInstances={refreshInstances}
-              />
-            ),
-          },
-        ]
-      : [];
+  const conditionalTabs = ['S3GLUE', 'SECURITYLAKE'].includes(datasourceDetails.connector)
+    ? [
+        {
+          id: 'associated_objects',
+          name: datasourceDetails.connector === 'SECURITYLAKE' ? 'Tables' : 'Associated Objects',
+          disabled: false,
+          content: (
+            <AssociatedObjectsTab
+              datasource={datasourceDetails}
+              cacheLoadingHooks={cacheLoadingHooks}
+              selectedDatabase={selectedDatabase}
+              setSelectedDatabase={setSelectedDatabase}
+            />
+          ),
+        },
+        {
+          id: 'acceleration_table',
+          name: 'Accelerations',
+          disabled: false,
+          content: (
+            <AccelerationTable
+              dataSourceName={dataSource}
+              dataSourceType={datasourceDetails.connector}
+              cacheLoadingHooks={cacheLoadingHooks}
+            />
+          ),
+        },
+        {
+          id: 'installed_integrations',
+          name: 'Installed Integrations',
+          disabled: false,
+          content: (
+            <InstalledIntegrationsTable
+              integrations={dataSourceIntegrations}
+              datasourceType={datasourceDetails.connector}
+              datasourceName={datasourceDetails.name}
+              refreshInstances={refreshInstances}
+            />
+          ),
+        },
+      ]
+    : [];
 
   const tabs = [...conditionalTabs, ...genericTabs];
 
   const QueryOrAccelerateData = () => {
     switch (datasourceDetails.connector) {
+      case 'SECURITYLAKE':
       case 'S3GLUE':
         return <DefaultDatasourceCards />;
       case 'PROMETHEUS':
@@ -309,14 +317,22 @@ export const DataConnection = (props: { dataSource: string }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup direction="column">
+            <EuiText className="overview-title">Query Access</EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query Access</EuiText>
                 <EuiText size="s" className="overview-content">
                   {datasourceDetails.allowedRoles.length > 0
                     ? `Restricted to ${datasourceDetails.allowedRoles.join(', ')}`
                     : 'Admin only'}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType={'pencil'}
+                  onClick={() => setSelectedTabId(accessControlTabId)}
+                >
+                  Edit
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -364,10 +380,13 @@ export const DataConnection = (props: { dataSource: string }) => {
 
   const DatasourceOverview = () => {
     switch (datasourceDetails.connector) {
+      case 'SECURITYLAKE':
       case 'S3GLUE':
         return <S3DatasourceOverview />;
       case 'PROMETHEUS':
         return <PrometheusDatasourceOverview />;
+      default:
+        return null;
     }
   };
 
@@ -410,7 +429,11 @@ export const DataConnection = (props: { dataSource: string }) => {
             >
               <QueryOrAccelerateData />
             </EuiAccordion>
-            <EuiTabbedContent tabs={tabs} />
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={tabs.find(({ id }) => id === selectedTabId)}
+              onTabClick={({ id }) => setSelectedTabId(id)}
+            />
           </>
         )}
 

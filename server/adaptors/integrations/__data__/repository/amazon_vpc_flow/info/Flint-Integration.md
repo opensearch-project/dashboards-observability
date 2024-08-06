@@ -181,7 +181,7 @@ MSCK REPAIR TABLE vpc_flow_logs_parquet
 
 ## Projection Views Creation
 
-The following statements creates a set of views (Materialized View, Covering Index, Skipping Index) that help the acceleration of queries using the flint based capability.
+The following statements creates a set of views (Materialized View, Covering Index, Skipping Index) that help the acceleration of queries using the S3 Glue based capability.
 The outcome of creating these acceleration tables is the synchronization of data being stored within opensearch index.
 
 This data can be one of the following
@@ -645,4 +645,4 @@ TBLPROPERTIES (
 
 VPC logs fields  - https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
 
-Flint integration Adaptation Tutorial - https://github.com/opensearch-project/opensearch-catalog/issues/144
+S3 Glue integration Adaptation Tutorial - https://github.com/opensearch-project/opensearch-catalog/issues/144

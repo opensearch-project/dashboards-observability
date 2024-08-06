@@ -32,9 +32,6 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityDataConnectionsID,
-  observabilityDataConnectionsPluginOrder,
-  observabilityDataConnectionsTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -51,12 +48,21 @@ import {
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesPluginOrder,
+  observabilityServicesTitle,
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedTitle,
+  observabilityGettingStartedPluginOrder,
+  observabilityOverviewID,
+  observabilityOverviewTitle,
+  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
+  DatasourceType,
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
   RenderAssociatedObjectsDetailsFlyoutParams,
@@ -106,6 +112,8 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
+import { registerAllPluginNavGroups } from './plugin_nav';
 
 export interface PublicConfig {
   query_assist: {
@@ -149,12 +157,20 @@ export const [
 ] = createGetterSetter<
   ({
     dataSource,
+    dataSourceType,
     dataSourceMDSId,
     databaseName,
     tableName,
     handleRefresh,
   }: RenderAccelerationFlyoutParams) => void
 >('renderCreateAccelerationFlyout');
+
+export const [
+  getRenderLogExplorerTablesFlyout,
+  setRenderLogExplorerTablesFlyout,
+] = createGetterSetter<(dataSourceName: string, dataSourceType: DatasourceType) => void>(
+  'renderLogExplorerTablesFlyout'
+);
 
 export class ObservabilityPlugin
   implements
@@ -260,7 +276,9 @@ export class ObservabilityPlugin
       // prometheus: openSearchLocalDataSourcePluggable
     };
 
-    const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
+    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
+      params: AppMountParameters
+    ) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
@@ -280,25 +298,10 @@ export class ObservabilityPlugin
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
         coreStart.savedObjects,
-        this.config
+        this.config,
+        defaultRoute,
       );
     };
-
-    core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
-
-    core.application.register({
-      id: observabilityLogsID,
-      title: observabilityLogsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityLogsPluginOrder,
-      mount: appMountWithStartPage('logs'),
-    });
 
     core.application.register({
       id: observabilityMetricsID,
@@ -309,27 +312,11 @@ export class ObservabilityPlugin
     });
 
     core.application.register({
-      id: observabilityTracesID,
-      title: observabilityTracesTitle,
+      id: observabilityApplicationsID,
+      title: observabilityApplicationsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityTracesPluginOrder,
-      mount: appMountWithStartPage('traces'),
-    });
-
-    core.application.register({
-      id: observabilityNotebookID,
-      title: observabilityNotebookTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityNotebookPluginOrder,
-      mount: appMountWithStartPage('notebooks'),
-    });
-
-    core.application.register({
-      id: observabilityPanelsID,
-      title: observabilityPanelsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('dashboards'),
+      order: observabilityApplicationsPluginOrder,
+      mount: appMountWithStartPage('applications'),
     });
 
     core.application.register({
@@ -340,22 +327,72 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityOverviewID,
+        title: observabilityOverviewTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityOverviewPluginOrder,
+        mount: appMountWithStartPage('overview'),
+      });
+
+      core.application.register({
+        id: observabilityGettingStartedID,
+        title: observabilityGettingStartedTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityGettingStartedPluginOrder,
+        mount: appMountWithStartPage('gettingStarted'),
+      });
+
+      core.application.register({
+        id: 'observability-traces-nav',
+        title: observabilityTracesTitle,
+        order: observabilityTracesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/traces'),
+      });
+
+      core.application.register({
+        id: 'observability-services-nav',
+        title: observabilityServicesTitle,
+        order: observabilityServicesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/services'),
+      });
+    } else {
+      core.application.register({
+        id: observabilityTracesID,
+        title: observabilityTracesTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityTracesPluginOrder,
+        mount: appMountWithStartPage('traces'),
+      });
+      // deprecated in new Nav Groups.
+      core.application.register({
+        id: observabilityPanelsID,
+        title: observabilityPanelsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityPanelsPluginOrder,
+        mount: appMountWithStartPage('dashboards'),
+      });
+      core.application.register({
+        id: observabilityLogsID,
+        title: observabilityLogsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityLogsPluginOrder,
+        mount: appMountWithStartPage('logs'),
+      });
+    }
+
     core.application.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDataConnectionsPluginOrder,
-      mount: appMountWithStartPage('dataconnections'),
+      id: observabilityNotebookID,
+      title: observabilityNotebookTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityNotebookPluginOrder,
+      mount: appMountWithStartPage('notebooks'),
     });
 
-    setupDeps.managementOverview?.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      order: 9070,
-      description: i18n.translate('observability.dataconnectionsDescription', {
-        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
-      }),
-    });
+    registerAllPluginNavGroups(core);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
@@ -506,6 +543,7 @@ export class ObservabilityPlugin
       dataSourceName,
       handleRefresh,
       dataSourceMDSId,
+      dataSourceType,
     }: RenderAssociatedObjectsDetailsFlyoutParams) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -515,6 +553,7 @@ export class ObservabilityPlugin
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
+            dataSourceType={dataSourceType}
           />
         )
       );
@@ -523,6 +562,7 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = ({
       dataSource,
+      dataSourceType,
       databaseName,
       tableName,
       handleRefresh,
@@ -532,6 +572,7 @@ export class ObservabilityPlugin
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={dataSource}
+            selectedDatasourceType={dataSourceType}
             resetFlyout={() => createAccelerationFlyout.close()}
             databaseName={databaseName}
             tableName={tableName}
@@ -542,6 +583,22 @@ export class ObservabilityPlugin
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
+
+    const renderLogExplorerTablesFlyout = (
+      dataSourceName: string,
+      dataSourceType: DatasourceType
+    ) => {
+      const createLogExplorerTablesFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          <TablesFlyout
+            dataSourceName={dataSourceName}
+            dataSourceType={dataSourceType}
+            resetFlyout={() => createLogExplorerTablesFlyout.close()}
+          />
+        )
+      );
+    };
+    setRenderLogExplorerTablesFlyout(renderLogExplorerTablesFlyout);
 
     const CatalogCacheManagerInstance = CatalogCacheManager;
     const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;

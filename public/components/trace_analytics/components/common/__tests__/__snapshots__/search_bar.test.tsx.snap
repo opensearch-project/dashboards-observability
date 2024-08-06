@@ -46,6 +46,7 @@ exports[`Search bar components renders date picker 1`] = `
       },
     ]
   }
+  compressed={false}
   dateFormat=""
   end="now"
   isAutoRefreshOnly={false}
@@ -72,6 +73,7 @@ exports[`Search bar components renders date picker 1`] = `
         >
           <EuiFormControlLayout
             className="euiSuperDatePicker"
+            compressed={false}
             isDisabled={false}
             prepend={
               <EuiQuickSelectPopover
@@ -220,7 +222,7 @@ exports[`Search bar components renders date picker 1`] = `
                   hasArrow={true}
                   isOpen={false}
                   ownFocus={true}
-                  panelPaddingSize="m"
+                  panelPaddingSize="s"
                 >
                   <div
                     className="euiPopover euiPopover--anchorDownLeft"
@@ -367,7 +369,9 @@ exports[`Search bar components renders date picker 1`] = `
                     </button>
                   </div>
                 </EuiDatePickerRange>
-                <EuiFormControlLayoutIcons />
+                <EuiFormControlLayoutIcons
+                  compressed={false}
+                />
               </div>
             </div>
           </EuiFormControlLayout>
@@ -379,8 +383,9 @@ exports[`Search bar components renders date picker 1`] = `
 `;
 
 exports[`Search bar components renders search bar 1`] = `
-<SearchBar
+<ForwardRef
   appConfigs={Array []}
+  attributesFilterFields={Array []}
   endTime="now"
   filters={Array []}
   mode="data_prepper"
@@ -554,6 +559,7 @@ exports[`Search bar components renders search bar 1`] = `
                 },
               ]
             }
+            compressed={false}
             dateFormat=""
             end="now"
             isAutoRefreshOnly={false}
@@ -580,6 +586,7 @@ exports[`Search bar components renders search bar 1`] = `
                   >
                     <EuiFormControlLayout
                       className="euiSuperDatePicker"
+                      compressed={false}
                       isDisabled={false}
                       prepend={
                         <EuiQuickSelectPopover
@@ -728,7 +735,7 @@ exports[`Search bar components renders search bar 1`] = `
                             hasArrow={true}
                             isOpen={false}
                             ownFocus={true}
-                            panelPaddingSize="m"
+                            panelPaddingSize="s"
                           >
                             <div
                               className="euiPopover euiPopover--anchorDownLeft"
@@ -877,7 +884,9 @@ exports[`Search bar components renders search bar 1`] = `
                               </button>
                             </div>
                           </EuiDatePickerRange>
-                          <EuiFormControlLayoutIcons />
+                          <EuiFormControlLayoutIcons
+                            compressed={false}
+                          />
                         </div>
                       </div>
                     </EuiFormControlLayout>
@@ -898,7 +907,7 @@ exports[`Search bar components renders search bar 1`] = `
             data-click-metric-element="trace_analytics.refresh_button"
             data-test-subj="superDatePickerApplyTimeButton"
             iconType="refresh"
-            onClick={[MockFunction]}
+            onClick={[Function]}
           >
             <EuiButtonDisplay
               baseClassName="euiButton"
@@ -908,7 +917,7 @@ exports[`Search bar components renders search bar 1`] = `
               element="button"
               iconType="refresh"
               isDisabled={false}
-              onClick={[MockFunction]}
+              onClick={[Function]}
               type="button"
             >
               <button
@@ -916,7 +925,7 @@ exports[`Search bar components renders search bar 1`] = `
                 data-click-metric-element="trace_analytics.refresh_button"
                 data-test-subj="superDatePickerApplyTimeButton"
                 disabled={false}
-                onClick={[MockFunction]}
+                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -990,6 +999,7 @@ exports[`Search bar components renders search bar 1`] = `
   </EuiSpacer>
   <Filters
     appConfigs={Array []}
+    attributesFilterFields={Array []}
     filters={Array []}
     mode="data_prepper"
     page="dashboard"
@@ -1175,5 +1185,5 @@ exports[`Search bar components renders search bar 1`] = `
       </div>
     </EuiFlexGroup>
   </Filters>
-</SearchBar>
+</ForwardRef>
 `;

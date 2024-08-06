@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { TraceAnalyticsMode } from '../../home';
@@ -42,18 +42,20 @@ export function SpanDetailPanel(props: {
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
-  const [_data, _setData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
+
+  const [DSL, setDSL] = useState<any>({});
+  let data: { gantt: any[]; table: any[]; ganttMaxX: number };
+  let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+
+  const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
     gantt: [],
     table: [],
     ganttMaxX: 0,
   });
-  const [DSL, setDSL] = useState<any>({});
-  let data: { gantt: any[]; table: any[]; ganttMaxX: number };
-  let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   if (props.data && props.setData) {
     [data, setData] = [props.data, props.setData];
   } else {
-    [data, setData] = [_data, _setData];
+    [data, setData] = [localData, localSetData];
   }
 
   const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
@@ -157,6 +159,8 @@ export function SpanDetailPanel(props: {
     const yTexts = yLabels.map((label) => label.substring(0, label.length - 36));
 
     return {
+      plot_bgcolor: 'rgba(0, 0, 0, 0)',
+      paper_bgcolor: 'rgba(0, 0, 0, 0)',
       height: 25 * plotTraces.length + 60,
       width: 800,
       margin: {
@@ -187,15 +191,18 @@ export function SpanDetailPanel(props: {
 
   const [currentSpan, setCurrentSpan] = useState('');
 
-  const onClick = (event: any) => {
-    if (!event?.points) return;
-    const point = event.points[0];
-    if (fromApp) {
-      props.openSpanFlyout(point.data.spanId);
-    } else {
-      setCurrentSpan(point.data.spanId);
-    }
-  };
+  const onClick = useCallback(
+    (event: any) => {
+      if (!event?.points) return;
+      const point = event.points[0];
+      if (fromApp) {
+        props.openSpanFlyout(point.data.spanId);
+      } else {
+        setCurrentSpan(point.data.spanId);
+      }
+    },
+    [props.openSpanFlyout, setCurrentSpan, fromApp]
+  );
 
   const renderFilters = useMemo(() => {
     return spanFilters.map(({ field, value }) => (
@@ -212,15 +219,15 @@ export function SpanDetailPanel(props: {
     ));
   }, [spanFilters]);
 
-  const onHover = () => {
+  const onHover = useCallback(() => {
     const dragLayer = document.getElementsByClassName('nsewdrag')?.[0];
     dragLayer.style.cursor = 'pointer';
-  };
+  }, []);
 
-  const onUnhover = () => {
+  const onUnhover = useCallback(() => {
     const dragLayer = document.getElementsByClassName('nsewdrag')?.[0];
     dragLayer.style.cursor = '';
-  };
+  }, []);
 
   const toggleOptions = [
     {
@@ -248,9 +255,23 @@ export function SpanDetailPanel(props: {
             setCurrentSpan(spanId);
           }
         }}
+        dataSourceMDSId={props.dataSourceMDSId}
       />
     ),
     [DSL, setCurrentSpan]
+  );
+
+  const ganttChart = useMemo(
+    () => (
+      <Plt
+        data={data.gantt}
+        layout={layout}
+        onClickHandler={onClick}
+        onHoverHandler={onHover}
+        onUnhoverHandler={onUnhover}
+      />
+    ),
+    [data.gantt, layout, onClick, onHover, onUnhover]
   );
 
   return (
@@ -279,17 +300,7 @@ export function SpanDetailPanel(props: {
         )}
         <EuiHorizontalRule margin="m" />
         <div style={{ overflowY: 'auto', maxHeight: 500 }}>
-          {toggleIdSelected === 'timeline' ? (
-            <Plt
-              data={data.gantt}
-              layout={layout}
-              onClickHandler={onClick}
-              onHoverHandler={onHover}
-              onUnhoverHandler={onUnhover}
-            />
-          ) : (
-            spanDetailTable
-          )}
+          {toggleIdSelected === 'timeline' ? ganttChart : spanDetailTable}
         </div>
       </EuiPanel>
       {!!currentSpan && (
@@ -300,6 +311,7 @@ export function SpanDetailPanel(props: {
           closeFlyout={() => setCurrentSpan('')}
           addSpanFilter={addSpanFilter}
           mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId}
         />
       )}
     </>

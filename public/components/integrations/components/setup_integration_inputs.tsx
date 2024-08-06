@@ -15,14 +15,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
-import { coreRefs } from '../../../framework/core_refs';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { IntegrationConnectionType } from '../../../../common/types/integrations';
+import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
 // TODO support localization
 const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
-  string,
+  IntegrationConnectionType,
   {
     title: string;
     lower: string;
@@ -31,6 +34,14 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
 > = new Map([
   [
     's3',
+    {
+      title: 'Data Source',
+      lower: 'data_source',
+      help: 'Select a data source to pull the data from.',
+    },
+  ],
+  [
+    'securityLake',
     {
       title: 'Data Source',
       lower: 'data_source',
@@ -47,7 +58,10 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   ],
 ]);
 
-const integrationConnectionSelectorItems = [
+const integrationConnectionSelectorItems: Array<{
+  value: 's3' | 'index' | 'securityLake';
+  text: string;
+}> = [
   {
     value: 's3',
     text: 'S3 Connection',
@@ -56,9 +70,15 @@ const integrationConnectionSelectorItems = [
     value: 'index',
     text: 'OpenSearch Index',
   },
+  {
+    value: 'securityLake',
+    text: 'Security Lake Connection',
+  },
 ];
 
-const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
+const suggestDataSources = async (
+  type: IntegrationConnectionType
+): Promise<Array<{ label: string }>> => {
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -74,17 +94,20 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
           return { label: item.name };
         }) ?? []
       );
-    } else if (type === 's3') {
+    } else if (type === 's3' || type === 'securityLake') {
       const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
         name: string;
         connector: string;
       }>;
+      const filterCondition =
+        type === 's3'
+          ? (item: { connector: string }) => item.connector === 'S3GLUE'
+          : (item: { connector: string }) => item.connector === 'SECURITYLAKE';
+
       return (
-        result
-          ?.filter((item) => item.connector === 'S3GLUE')
-          .map((item) => {
-            return { label: item.name };
-          }) ?? []
+        result?.filter(filterCondition).map((item) => {
+          return { label: item.name };
+        }) ?? []
       );
     } else {
       console.error(`Unknown connection type: ${type}`);
@@ -97,35 +120,46 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
 };
 
 export function SetupWorkflowSelector({
-  integration,
+  integrationWorkflows,
   useWorkflows,
   toggleWorkflow,
+  config,
 }: {
-  integration: IntegrationConfig;
+  integrationWorkflows?: IntegrationWorkflow[];
   useWorkflows: Map<string, boolean>;
   toggleWorkflow: (name: string) => void;
+  config: IntegrationSetupInputs;
 }) {
-  if (!integration.workflows) {
+  if (!integrationWorkflows) {
     return null;
   }
 
-  const cards = integration.workflows.map((workflow) => {
-    return (
-      <EuiCheckableCard
-        id={`workflow-checkbox-${workflow.name}`}
-        key={workflow.name}
-        label={workflow.label}
-        checkableType="checkbox"
-        value={workflow.name}
-        checked={useWorkflows.get(workflow.name)}
-        onChange={() => toggleWorkflow(workflow.name)}
-      >
-        {workflow.description}
-      </EuiCheckableCard>
-    );
-  });
+  const cards = integrationWorkflows
+    .filter((workflow) =>
+      workflow.applicable_data_sources
+        ? workflow.applicable_data_sources.includes(config.connectionType)
+        : true
+    )
+    .map((workflow) => {
+      return (
+        <>
+          <EuiCheckableCard
+            id={`workflow-checkbox-${workflow.name}`}
+            key={workflow.name}
+            label={workflow.label}
+            checkableType="checkbox"
+            value={workflow.name}
+            checked={useWorkflows.get(workflow.name)}
+            onChange={() => toggleWorkflow(workflow.name)}
+          >
+            {workflow.description}
+          </EuiCheckableCard>
+          <EuiSpacer size="s" />
+        </>
+      );
+    });
 
-  return cards;
+  return <>{cards}</>;
 }
 
 export function IntegrationDetailsInputs({
@@ -139,7 +173,7 @@ export function IntegrationDetailsInputs({
 }) {
   return (
     <EuiFormRow
-      label="Display Name"
+      label={'Integration display Name'}
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
@@ -158,15 +192,27 @@ export function IntegrationConnectionInputs({
   config,
   updateConfig,
   integration,
+  dataSourceEnabled,
+  dataSourceManagement,
+  notifications,
+  savedObjectsMDSClient,
   lockConnectionType,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
   lockConnectionType?: boolean;
 }) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
+  let DataSourceSelector;
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
     [] as Array<{ label: string }>
   );
@@ -185,13 +231,35 @@ export function IntegrationConnectionInputs({
 
   return (
     <>
+      {dataSourceEnabled && (
+        <>
+          <EuiFormRow
+            label="Data Source"
+            helpText="Select the type of remote data source to query from."
+          >
+            <DataSourceSelector
+              savedObjectsClient={savedObjectsMDSClient.client}
+              notifications={notifications}
+              disabled={false}
+              fullWidth={false}
+              removePrepend={true}
+            />
+          </EuiFormRow>
+          <EuiSpacer />
+        </>
+      )}
       <EuiFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
       >
         <EuiSelect
           options={integrationConnectionSelectorItems.filter((item) => {
-            if (item.value === 's3') {
+            if (item.value === 'securityLake') {
+              return (
+                integration.assets.some((asset) => asset.type === 'query') &&
+                integration.workflows?.some((workflow) => workflow.name.includes('security-lake'))
+              );
+            } else if (item.value === 's3') {
               return integration.assets.some((asset) => asset.type === 'query');
             } else if (item.value === 'index') {
               return integration.assets.some((asset) => asset.type === 'savedObjectBundle');
@@ -201,7 +269,10 @@ export function IntegrationConnectionInputs({
           })}
           value={config.connectionType}
           onChange={(event) =>
-            updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
+            updateConfig({
+              connectionType: event.target.value as IntegrationConnectionType,
+              connectionDataSource: '',
+            })
           }
           disabled={lockConnectionType}
         />
@@ -251,41 +322,47 @@ export function IntegrationQueryInputs({
 
   return (
     <>
+      {config.connectionType !== 'securityLake' && (
+        <>
+          <EuiFormRow
+            label="Spark Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Data Location"
+            isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBucketBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiFormRow
-        label="Spark Table Name"
-        helpText="Select a table name to associate with your data."
-        error={['Must be at least 1 character.']}
-        isInvalid={config.connectionTableName.length === 0}
-      >
-        <EuiFieldText
-          placeholder={integration.name}
-          value={config.connectionTableName}
-          onChange={(evt) => {
-            updateConfig({ connectionTableName: evt.target.value });
-          }}
-          isInvalid={config.connectionTableName.length === 0}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Data Location"
-        isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-        error={["Must be a URL starting with 's3://'."]}
-      >
-        <EuiFieldText
-          value={config.connectionLocation}
-          onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-          placeholder="s3://"
-          isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
-          onBlur={() => {
-            setIsBucketBlurred(true);
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label="S3 Checkpoint Location"
+        label={`S3 Checkpoint Location`}
         helpText={
-          'The Checkpoint location must be a unique directory and not the same as the Data ' +
-          'location. It will be used for caching intermediary results.'
+          config.connectionType === 'securityLake'
+            ? 'The checkpoint location for caching intermediary results.'
+            : 'The Checkpoint location must be a unique directory and not the same as the Data ' +
+              'location. It will be used for caching intermediary results.'
         }
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
@@ -305,11 +382,13 @@ export function IntegrationQueryInputs({
 }
 
 export function IntegrationWorkflowsInputs({
+  config,
   updateConfig,
-  integration,
+  workflows,
 }: {
+  config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
-  integration: IntegrationConfig;
+  workflows?: IntegrationWorkflow[];
 }) {
   const [useWorkflows, setUseWorkflows] = useState(new Map<string, boolean>());
   const toggleWorkflow = (name: string) => {
@@ -321,10 +400,10 @@ export function IntegrationWorkflowsInputs({
   };
 
   useEffect(() => {
-    if (integration.workflows) {
-      setUseWorkflows(new Map(integration.workflows.map((w) => [w.name, w.enabled_by_default])));
+    if (workflows) {
+      setUseWorkflows(new Map(workflows.map((w) => [w.name, w.enabled_by_default])));
     }
-  }, [integration.workflows]);
+  }, [workflows]);
 
   useEffect(() => {
     updateConfig({
@@ -340,7 +419,8 @@ export function IntegrationWorkflowsInputs({
       error={['Must select at least one workflow.']}
     >
       <SetupWorkflowSelector
-        integration={integration}
+        config={config}
+        integrationWorkflows={workflows}
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
       />
@@ -348,13 +428,19 @@ export function IntegrationWorkflowsInputs({
   );
 }
 
-export function SetupIntegrationFormInputs({
-  config,
-  updateConfig,
-  integration,
-  setupCallout,
-  lockConnectionType,
-}: IntegrationConfigProps) {
+export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
+  const {
+    config,
+    updateConfig,
+    integration,
+    setupCallout,
+    lockConnectionType,
+    dataSourceEnabled,
+    dataSourceManagement,
+    notifications,
+    savedObjectsMDSClient,
+  } = props;
+
   return (
     <EuiForm>
       <EuiTitle>
@@ -386,6 +472,10 @@ export function SetupIntegrationFormInputs({
         updateConfig={updateConfig}
         integration={integration}
         lockConnectionType={lockConnectionType}
+        dataSourceManagement={dataSourceManagement}
+        notifications={notifications}
+        dataSourceEnabled={dataSourceEnabled}
+        savedObjectsMDSClient={savedObjectsMDSClient}
       />
       {config.connectionType === 's3' ? (
         <>
@@ -423,7 +513,11 @@ export function SetupIntegrationFormInputs({
                 </EuiText>
               </EuiFormRow>
               <EuiSpacer />
-              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
+              <IntegrationWorkflowsInputs
+                config={config}
+                updateConfig={updateConfig}
+                workflows={integration.workflows}
+              />
             </>
           ) : null}
           {/* Bottom bar will overlap content if there isn't some space at the end */}
