@@ -33,6 +33,7 @@ let showModal;
 let dashboardSelected;
 let startDate;
 let setStartDate;
+let _closeModal;
 
 coreRefs.contentManagement?.registerContentProvider({
   id: 'custom_content',
@@ -60,7 +61,7 @@ export const Home = ({ ..._props }: HomeProps) => {
   [startDate, setStartDate] = useState(moment().toISOString());
 
   showModal = () => setIsModalVisible(true);
-  closeModal = () => setIsModalVisible(false);
+  _closeModal = () => setIsModalVisible(false);
 
   const navigateToApp = (appId: string, path: string) => {
     coreRefs?.application!.navigateToApp(appId, {
