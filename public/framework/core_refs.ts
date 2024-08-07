@@ -17,6 +17,7 @@ import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
 import PPLService from '../services/requests/ppl';
 import { DataSourceStart } from '../../../../src/plugins/data/public/data_sources/datasource_services/types';
+import { ContentManagementPluginStart } from '../../../../src/plugins/content_management/public';
 
 class CoreRefs {
   private static _instance: CoreRefs;
@@ -36,6 +37,7 @@ class CoreRefs {
   public overlays?: OverlayStart;
   public dataSource?: DataSourcePluginStart;
   public dataSources?: DataSourceStart;
+  public contentManagement?: ContentManagementPluginStart;
   private constructor() {
     // ...
   }

@@ -113,7 +113,8 @@ import {
   SetupDependencies,
 } from './types';
 import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
-import { registerAllPluginNavGroups } from './plugin_nav';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 
 interface PublicConfig {
   query_assist: {
@@ -178,7 +179,7 @@ export class ObservabilityPlugin
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies>,
+    core: CoreSetup<AppPluginStartDependencies>, 
     setupDeps: SetupDependencies
   ): ObservabilitySetup {
     uiSettingsService.init(core.uiSettings, core.notifications);
@@ -189,6 +190,8 @@ export class ObservabilityPlugin
     core.getStartServices().then(([coreStart]) => {
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
+
+    setupOverviewPage(setupDeps.contentManagement!);
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -430,7 +433,10 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
+  public start(
+    core: CoreStart, 
+    startDeps: AppPluginStartDependencies
+  ): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
     const dslService = new DSLService(core.http);
 
@@ -448,10 +454,11 @@ export class ObservabilityPlugin
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
+    coreRefs.contentManagement = startDeps.contentManagement;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
-
+    
     const getDataSourceTypeLabel = (type: string) => {
       if (type === DATA_SOURCE_TYPES.S3Glue) return S3_DATA_SOURCE_GROUP_DISPLAY_NAME;
       if (type === DATA_SOURCE_TYPES.SPARK) return S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME;
