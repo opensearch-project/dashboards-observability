@@ -18,7 +18,7 @@ import React from 'react';
 
 interface Props {
   closeModal: () => void;
-  dashboardSelected: boolean;
+  dashboardSelected: React.MutableRefObject<boolean>;
   dashboardIds: Array<{ value: string; label: string }>;
   selectedOptionsState: EuiComboBoxOptionOption[];
   onComboBoxChange: (options: EuiComboBoxOptionOption[]) => void;

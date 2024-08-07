@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -14,19 +20,26 @@ interface Props {
 
 export function DatePicker({ startDate, setStartDate, showModal }: Props) {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={startDate}
-          end={startDate}
-          onTimeChange={({ start }) => {
-            setStartDate(start);
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon iconType="gear" aria-label="Dashboard" color="success" onClick={showModal} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={startDate}
+            end={startDate}
+            onTimeChange={({ start }) => {
+              setStartDate(start);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="gear"
+            aria-label="Dashboard"
+            color="primary"
+            onClick={showModal}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

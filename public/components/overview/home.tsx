@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiText, EuiAccordion, EuiPanel, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiText, EuiComboBoxOptionOption } from '@elastic/eui';
 import moment from 'moment';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
@@ -22,12 +22,6 @@ import { SelectDashboardModal } from './components/select_dashboard_modal';
 const alertsPluginID = 'alerting';
 const anomalyPluginID = 'anomalyDetection';
 
-const navigateToApp = (appId: string, path: string) => {
-  coreRefs?.application!.navigateToApp(appId, {
-    path: `${path}`,
-  });
-};
-
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
 interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
@@ -35,88 +29,44 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   contentManagement: ContentManagementPluginStart;
 }
 
-const registerCards = async () => {
-  let alertsPluginExists = false;
-  let anomalyPluginExists = false;
+let showModal;
+let dashboardSelected;
+let startDate;
+let setStartDate;
 
-  try {
-    const response = await fetch('../api/status', {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'GET',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    });
-    const data = await response.json();
-
-    for (const status of data.status.statuses) {
-      if (status.id.includes(alertsPluginID)) {
-        alertsPluginExists = true;
-      }
-      if (status.id.includes(anomalyPluginID)) {
-        anomalyPluginExists = true;
-      }
-    }
-  } catch (error) {
-    console.error('Error checking plugin installation status:', error);
-  }
-
-  cardConfigs
-    .filter((card) => {
-      if (card.id === 'alerts') {
-        return alertsPluginExists;
-      } else if (card.id === 'anomaly') {
-        return anomalyPluginExists;
-      }
-      return true;
-    })
-    .forEach((card: GettingStartedConfig) => {
-      coreRefs.contentManagement?.registerContentProvider({
-        id: card.id,
-        getContent: () => ({
-          id: card.id,
-          kind: 'card',
-          order: card.order,
-          description: card.description,
-          title: card.title,
-          onClick: () => navigateToApp(card.url, '#/'),
-          getIcon: () => {},
-          getFooter: () => {
-            return (
-              <EuiText size="s" textAlign="left">
-                {card.footer}
-              </EuiText>
-            );
-          },
-        }),
-        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
-      });
-    });
-};
+coreRefs.contentManagement?.registerContentProvider({
+  id: 'custom_content',
+  getContent: () => ({
+    id: 'custom_content',
+    kind: 'custom',
+    order: 1500,
+    render: () =>
+      dashboardSelected ? (
+        <DatePicker startDate={startDate} setStartDate={setStartDate} showModal={showModal} />
+      ) : (
+        <AddDashboardCallout showModal={showModal} />
+      ),
+  }),
+  getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
+});
 
 export const Home = ({ ..._props }: HomeProps) => {
   const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
-  const [_dashboardIdsState, setDashboardIdsState] = useState<
-    Array<{ value: string; text: string }>
-  >([]);
-  const [_isRegistered, setIsRegistered] = useState(false);
+  const [_, setIsRegistered] = useState(false);
 
   const [dashboardIds, setDashboardIds] = useState<Array<{ value: string; label: string }>>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedOptionsState, setSelectedOptionsState] = useState<EuiComboBoxOptionOption[]>([]);
-  const dashboardSelected = useRef(false);
-  const [startDate, setStartDate] = useState(moment().toISOString());
+  [startDate, setStartDate] = useState(moment().toISOString());
 
-  const showModal = () => setIsModalVisible(true);
-  const closeModal = () => setIsModalVisible(false);
+  showModal = () => setIsModalVisible(true);
+  closeModal = () => setIsModalVisible(false);
+
+  const navigateToApp = (appId: string, path: string) => {
+    coreRefs?.application!.navigateToApp(appId, {
+      path: `${path}`,
+    });
+  };
 
   const onComboBoxChange = (options: EuiComboBoxOptionOption[]) => {
     setSelectedOptionsState(options);
@@ -124,48 +74,79 @@ export const Home = ({ ..._props }: HomeProps) => {
 
   const onClickAdd = () => {
     if (selectedOptionsState.length > 0) {
-      dashboardSelected.current = true;
+      dashboardSelected = true;
       uiSettingsService
         .set('observability:defaultDashboard', selectedOptionsState[0].value)
         .then(registerDashboard);
     }
-    closeModal();
+    setIsModalVisible(false);
   };
 
-  const registerSelect = () => {
-    coreRefs.contentManagement?.registerContentProvider({
-      id: 'custom_content',
-      getContent: () => ({
-        id: 'custom_content',
-        kind: 'custom',
-        order: 1500,
-        render: () => (
-          <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
-            <EuiAccordion
-              id="accordion1"
-              buttonContent={
-                <EuiText>
-                  <h3>Select Dashboard</h3>
+  const registerCards = async () => {
+    let alertsPluginExists = false;
+    let anomalyPluginExists = false;
+
+    try {
+      const response = await fetch('../api/status', {
+        headers: {
+          'Content-Type': 'application/json',
+          'osd-xsrf': 'true',
+          'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+          pragma: 'no-cache',
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'same-origin',
+        },
+        method: 'GET',
+        referrerPolicy: 'strict-origin-when-cross-origin',
+        mode: 'cors',
+        credentials: 'include',
+      });
+      const data = await response.json();
+
+      for (const status of data.status.statuses) {
+        if (status.id.includes(alertsPluginID)) {
+          alertsPluginExists = true;
+        }
+        if (status.id.includes(anomalyPluginID)) {
+          anomalyPluginExists = true;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking plugin installation status:', error);
+    }
+
+    cardConfigs
+      .filter((card) => {
+        if (card.id === 'alerts') {
+          return alertsPluginExists;
+        } else if (card.id === 'anomaly') {
+          return anomalyPluginExists;
+        }
+        return true;
+      })
+      .forEach((card: GettingStartedConfig) => {
+        coreRefs.contentManagement?.registerContentProvider({
+          id: card.id,
+          getContent: () => ({
+            id: card.id,
+            kind: 'card',
+            order: card.order,
+            description: card.description,
+            title: card.title,
+            onClick: () => navigateToApp(card.url, '#/'),
+            getIcon: () => {},
+            getFooter: () => {
+              return (
+                <EuiText size="s" textAlign="left">
+                  {card.footer}
                 </EuiText>
-              }
-              paddingSize="m"
-              initialIsOpen={true}
-            >
-              {dashboardSelected.current ? (
-                <DatePicker
-                  startDate={startDate}
-                  setStartDate={setStartDate}
-                  showModal={showModal}
-                />
-              ) : (
-                <AddDashboardCallout showModal={showModal} />
-              )}
-            </EuiAccordion>
-          </EuiPanel>
-        ),
-      }),
-      getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
-    });
+              );
+            },
+          }),
+          getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        });
+      });
   };
 
   const registerDashboard = () => {
@@ -188,10 +169,9 @@ export const Home = ({ ..._props }: HomeProps) => {
   useEffect(() => {
     registerCards();
     if (uiSettingsService.get('observability:defaultDashboard')) {
-      dashboardSelected.current = true;
+      dashboardSelected = true;
       registerDashboard();
     }
-    registerSelect();
   }, []);
 
   useEffect(() => {
@@ -205,7 +185,6 @@ export const Home = ({ ..._props }: HomeProps) => {
           text: dashboard.get('title').toString(),
           label: dashboard.attributes.title,
         }));
-        setDashboardIdsState(dashboards);
         setDashboardIds(dashboards);
       })
       .catch((error) => {
@@ -215,7 +194,7 @@ export const Home = ({ ..._props }: HomeProps) => {
 
   const modal = isModalVisible && (
     <SelectDashboardModal
-      closeModal={closeModal}
+      closeModal={() => setIsModalVisible(false)}
       dashboardSelected={dashboardSelected}
       dashboardIds={dashboardIds}
       selectedOptionsState={selectedOptionsState}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -13,10 +13,16 @@ interface Props {
 export function AddDashboardCallout({ showModal }: Props) {
   return (
     <>
-      <EuiText>
-        <p>Please select your observability overview dashboard.</p>
-      </EuiText>
-      <EuiButton onClick={showModal}>Add</EuiButton>
+      <EuiCallOut color="primary" iconType="gear" title="Select your dashboard">
+        <EuiText>
+          <p>
+            Select a dashboard to be displayed on this Overview page. This dashboard can later be
+            changed in advanced settings.
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton onClick={showModal}>Add</EuiButton>
+      </EuiCallOut>
     </>
   );
 }
