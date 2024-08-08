@@ -132,7 +132,7 @@ export function SpanDetailPanel(props: {
           };
     spanFilters.map(({ field, value }) => {
       if (value != null) {
-        spanDSL.query.bool.must.push({
+        spanDSL.query.bool.filter.push({
           term: {
             [field]: value,
           },

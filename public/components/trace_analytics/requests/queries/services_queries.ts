@@ -46,14 +46,14 @@ export const getServicesQuery = (
   };
   if (mode === 'jaeger') {
     if (serviceName) {
-      query.query.bool.must.push({
+      query.query.bool.filter.push({
         term: {
           'process.serviceName': serviceName,
         },
       });
     }
     DSL?.custom?.serviceNames?.map((service: string) => {
-      query.query.bool.must.push({
+      query.query.bool.filter.push({
         term: {
           'process.serviceName': service,
         },
@@ -68,14 +68,14 @@ export const getServicesQuery = (
     });
   } else {
     if (serviceName) {
-      query.query.bool.must.push({
+      query.query.bool.filter.push({
         term: {
           serviceName,
         },
       });
     }
     DSL?.custom?.serviceNames?.map((service: string) => {
-      query.query.bool.must.push({
+      query.query.bool.filter.push({
         term: {
           serviceName: service,
         },
@@ -457,8 +457,8 @@ export const getServiceMetricsQuery = (
     },
   };
   if (DSL.custom?.timeFilter.length > 0) {
-    jaegerQuery.query.bool.must.push(...DSL.custom.timeFilter);
-    dataPrepperQuery.query.bool.must.push(...DSL.custom.timeFilter);
+    jaegerQuery.query.bool.filter.push(...DSL.custom.timeFilter);
+    dataPrepperQuery.query.bool.filter.push(...DSL.custom.timeFilter);
   }
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };

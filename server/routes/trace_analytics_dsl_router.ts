@@ -126,6 +126,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
             })
           ),
           script_fields: schema.maybe(schema.any()),
+          track_total_hits: schema.maybe(schema.boolean()),
         }),
         query: schema.object({
           dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),

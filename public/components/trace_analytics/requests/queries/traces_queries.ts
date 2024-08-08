@@ -72,6 +72,7 @@ export const getTracesQuery = (
           order: {
             [field]: direction,
           },
+          execution_hint: 'map',
         },
         aggs: {
           latency: {
@@ -118,6 +119,7 @@ export const getTracesQuery = (
         },
       },
     },
+    track_total_hits: false,
   };
   const dataPrepperQuery: any = {
     size: 0,
@@ -137,6 +139,7 @@ export const getTracesQuery = (
           order: {
             [field]: direction,
           },
+          execution_hint: 'map',
         },
         aggs: {
           latency: {
@@ -173,14 +176,15 @@ export const getTracesQuery = (
         },
       },
     },
+    track_total_hits: false,
   };
   if (traceId) {
-    jaegerQuery.query.bool.must.push({
+    jaegerQuery.query.bool.filter.push({
       term: {
         traceID: traceId,
       },
     });
-    dataPrepperQuery.query.bool.must.push({
+    dataPrepperQuery.query.bool.filter.push({
       term: {
         traceId,
       },

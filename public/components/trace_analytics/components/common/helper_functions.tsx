@@ -403,10 +403,10 @@ export const filtersToDsl = (
       },
     },
   };
-  DSL.query.bool.must.push(timeFilter);
+  DSL.query.bool.filter.push(timeFilter);
   DSL.custom.timeFilter.push(timeFilter);
   if (query.length > 0) {
-    DSL.query.bool.must.push({
+    DSL.query.bool.filter.push({
       query_string: {
         query,
       },
