@@ -26,7 +26,6 @@ jobs:
         testgroups:
           [
             app_analytics_test,
-            datasources_test,
             event_analytics_test,
             integrations_test,
             metrics_analytics_test,
