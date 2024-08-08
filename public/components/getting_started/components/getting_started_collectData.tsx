@@ -40,6 +40,13 @@ interface CollectAndShipDataProps {
   onMoveToQueryData: (indexPatterns: string[]) => void;
   onSelectSource: (source: string) => void;
   onCardSelectionChange: (isSampleDataset: boolean) => void;
+  selectedDataSourceId: string;
+  selectedDataSourceLabel: string;
+}
+
+interface CollectorOption {
+  label: string;
+  value: string;
 }
 
 export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
@@ -48,6 +55,8 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   onMoveToQueryData,
   onSelectSource,
   onCardSelectionChange,
+  selectedDataSourceId,
+  selectedDataSourceLabel,
 }) => {
   const [collectionMethod, setCollectionMethod] = useState('');
   const [specificMethod, setSpecificMethod] = useState('');
@@ -56,7 +65,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [_selectedWorkflow, setSelectedWorkflow] = useState('');
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [selectedCard, setSelectedCard] = useState('');
-  const [collectorOptions, setCollectorOptions] = useState([]);
+  const [collectorOptions, setCollectorOptions] = useState<CollectorOption[]>([]);
 
   const technologyJsonMap: Record<string, any> = {
     otel: otelJson,
@@ -267,7 +276,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          await UploadAssets(specificMethod);
+          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
         }}
         fill
       >

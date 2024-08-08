@@ -33,7 +33,6 @@ export interface HomeProps extends RouteComponentProps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
-  // selectedDataSourceId: string;
 }
 
 export const Home = (props: HomeProps) => {
@@ -49,13 +48,14 @@ export const Home = (props: HomeProps) => {
     setActionMenu,
   } = props;
 
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState('');
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string>('');
+  const [selectedDataSourceLabel, setSelectedDataSourceLabel] = useState<string>('');
 
   const onSelectedDataSourceChange = (e: any) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
+    const dataSourceLabel = e[0] ? e[0].label : '';
     setSelectedDataSourceId(dataSourceId);
-    // DELETE BEFORE PR
-    console.log('Selected Data Source ID:', dataSourceId); // DELETE BEFORE PR
+    setSelectedDataSourceLabel(dataSourceLabel);
   };
 
   const DataSourceMenu = useMemo(() => {
@@ -94,14 +94,9 @@ export const Home = (props: HomeProps) => {
     savedObjectsMDSClient,
     parentBreadcrumb,
     selectedDataSourceId,
+    selectedDataSourceLabel,
     setActionMenu,
   };
-  // DO i need to unmount it if it is disabled.
-  // useEffect(() => {
-  //   return () => {
-  //     setActionMenu(undefined);
-  //   };
-  // }, [setActionMenu]);
 
   return (
     <div>
