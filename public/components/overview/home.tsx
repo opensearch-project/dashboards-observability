@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiText, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
@@ -30,10 +30,11 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
 }
 
 let showModal;
-let dashboardSelected;
+const wrapper = {
+  dashboardSelected: false,
+};
 let startDate;
 let setStartDate;
-let _closeModal;
 
 coreRefs.contentManagement?.registerContentProvider({
   id: 'custom_content',
@@ -42,7 +43,7 @@ coreRefs.contentManagement?.registerContentProvider({
     kind: 'custom',
     order: 1500,
     render: () =>
-      dashboardSelected ? (
+      wrapper.dashboardSelected ? (
         <DatePicker startDate={startDate} setStartDate={setStartDate} showModal={showModal} />
       ) : (
         <AddDashboardCallout showModal={showModal} />
@@ -54,33 +55,16 @@ coreRefs.contentManagement?.registerContentProvider({
 export const Home = ({ ..._props }: HomeProps) => {
   const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
   const [_, setIsRegistered] = useState(false);
-
   const [dashboardIds, setDashboardIds] = useState<Array<{ value: string; label: string }>>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedOptionsState, setSelectedOptionsState] = useState<EuiComboBoxOptionOption[]>([]);
   [startDate, setStartDate] = useState(moment().toISOString());
 
   showModal = () => setIsModalVisible(true);
-  _closeModal = () => setIsModalVisible(false);
 
   const navigateToApp = (appId: string, path: string) => {
     coreRefs?.application!.navigateToApp(appId, {
       path: `${path}`,
     });
-  };
-
-  const onComboBoxChange = (options: EuiComboBoxOptionOption[]) => {
-    setSelectedOptionsState(options);
-  };
-
-  const onClickAdd = () => {
-    if (selectedOptionsState.length > 0) {
-      dashboardSelected = true;
-      uiSettingsService
-        .set('observability:defaultDashboard', selectedOptionsState[0].value)
-        .then(registerDashboard);
-    }
-    setIsModalVisible(false);
   };
 
   const registerCards = async () => {
@@ -170,7 +154,7 @@ export const Home = ({ ..._props }: HomeProps) => {
   useEffect(() => {
     registerCards();
     if (uiSettingsService.get('observability:defaultDashboard')) {
-      dashboardSelected = true;
+      wrapper.dashboardSelected = true;
       registerDashboard();
     }
   }, []);
@@ -196,11 +180,10 @@ export const Home = ({ ..._props }: HomeProps) => {
   const modal = isModalVisible && (
     <SelectDashboardModal
       closeModal={() => setIsModalVisible(false)}
-      dashboardSelected={dashboardSelected}
+      wrapper={wrapper}
       dashboardIds={dashboardIds}
-      selectedOptionsState={selectedOptionsState}
-      onComboBoxChange={onComboBoxChange}
-      onClickAdd={onClickAdd}
+      registerDashboard={registerDashboard}
+      closeModalVisible={() => setIsModalVisible(false)}
     />
   );
 

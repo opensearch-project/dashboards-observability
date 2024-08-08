@@ -14,7 +14,7 @@ export function AddDashboardCallout({ showModal }: Props) {
   return (
     <>
       <EuiCallOut color="primary" iconType="gear" title="Select your dashboard">
-        <EuiText>
+        <EuiText size="s">
           <p>
             Select a dashboard to be displayed on this Overview page. This dashboard can later be
             changed in advanced settings.
