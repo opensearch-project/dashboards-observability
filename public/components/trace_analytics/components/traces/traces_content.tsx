@@ -6,25 +6,25 @@
 
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  PropertySort,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
+  PropertySort,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
+import { Filters } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
-import { TracesTable } from './traces_table';
-import { TracesProps } from './traces';
 import { DataSourcePicker } from '../dashboard/mode_picker';
-import { Filters } from '../common/filters/filters';
+import { TracesProps } from './traces';
+import { TracesTable } from './traces_table';
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -37,7 +37,8 @@ export function TracesContent(props: TracesProps) {
     startTime,
     endTime,
     childBreadcrumbs,
-    traceIdColumnAction,
+    getTraceViewUri,
+    openTraceFlyout,
     setQuery,
     setFilters,
     setStartTime,
@@ -175,7 +176,8 @@ export function TracesContent(props: TracesProps) {
             refresh={refresh}
             mode={mode}
             loading={loading}
-            traceIdColumnAction={traceIdColumnAction}
+            getTraceViewUri={getTraceViewUri}
+            openTraceFlyout={openTraceFlyout}
             jaegerIndicesExist={jaegerIndicesExist}
             dataPrepperIndicesExist={dataPrepperIndicesExist}
           />

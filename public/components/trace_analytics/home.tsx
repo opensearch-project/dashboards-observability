@@ -227,8 +227,7 @@ export const Home = (props: HomeProps) => {
 
   const traceColumnAction = () => location.assign('#/traces');
 
-  const traceIdColumnAction = (item: any) =>
-    location.assign(`#/traces/${encodeURIComponent(item)}`);
+  const getTraceViewUri = (traceId: string) => `#/traces/${encodeURIComponent(traceId)}`;
 
   const [spanFlyoutComponent, setSpanFlyoutComponent] = useState(<></>);
 
@@ -321,7 +320,7 @@ export const Home = (props: HomeProps) => {
                 <Traces
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
-                  traceIdColumnAction={traceIdColumnAction}
+                  getTraceViewUri={getTraceViewUri}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
                   {...commonProps}
@@ -334,7 +333,7 @@ export const Home = (props: HomeProps) => {
                 <Traces
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
-                  traceIdColumnAction={traceIdColumnAction}
+                  getTraceViewUri={getTraceViewUri}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
                   {...commonProps}

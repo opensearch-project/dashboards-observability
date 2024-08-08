@@ -71,3 +71,12 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   right: 20;
   z-index: 1000;
 }
+
+.traces-table {
+  &.traces-table-trace-id {
+    width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

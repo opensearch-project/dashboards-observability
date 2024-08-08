@@ -47,7 +47,11 @@ export const getTraceGroupPercentilesQuery = () => {
   return query;
 };
 
-export const getTracesQuery = (mode: TraceAnalyticsMode, traceId: string = '', sort?: PropertySort) => {
+export const getTracesQuery = (
+  mode: TraceAnalyticsMode,
+  traceId: string = '',
+  sort?: PropertySort
+) => {
   const field = sort?.field || '_key';
   const direction = sort?.direction || 'asc';
   const jaegerQuery: any = {
@@ -173,7 +177,7 @@ export const getTracesQuery = (mode: TraceAnalyticsMode, traceId: string = '', s
   if (traceId) {
     jaegerQuery.query.bool.must.push({
       term: {
-        "traceID": traceId,
+        traceID: traceId,
       },
     });
     dataPrepperQuery.query.bool.must.push({
@@ -193,7 +197,7 @@ export const getServiceBreakdownQuery = (traceId: string, mode: TraceAnalyticsMo
         must: [
           {
             term: {
-              "traceID": traceId,
+              traceID: traceId,
             },
           },
         ],
@@ -276,7 +280,7 @@ export const getServiceBreakdownQuery = (traceId: string, mode: TraceAnalyticsMo
       },
     },
   };
-  return mode === 'jaeger'? jaegerQuery : dataPrepperQuery;
+  return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
 export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, size = 3000) => {
@@ -288,7 +292,7 @@ export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, si
           must: [
             {
               term: {
-                "traceID": traceId,
+                traceID: traceId,
               },
             },
             {
@@ -318,11 +322,11 @@ export const getSpanDetailQuery = (mode: TraceAnalyticsMode, traceId: string, si
           'spanID',
           'tag',
           'duration',
-          'references'
-        ]
+          'references',
+        ],
       },
     };
-  } 
+  }
   return {
     size,
     query: {
@@ -374,7 +378,7 @@ export const getPayloadQuery = (mode: TraceAnalyticsMode, traceId: string, size 
           must: [
             {
               term: {
-                "traceID": traceId,
+                traceID: traceId,
               },
             },
           ],
@@ -413,7 +417,7 @@ export const getSpanFlyoutQuery = (mode: TraceAnalyticsMode, spanId?: string, si
           must: [
             {
               term: {
-                "spanID": spanId,
+                spanID: spanId,
               },
             },
           ],
@@ -457,47 +461,5 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
     },
     sort: spanSearchParams.sortingColumns,
   };
-  return query;
-};
-
-export const getValidTraceIdsQuery = (DSL) => {
-  const query: any = {
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      traces: {
-        terms: {
-          field: 'traceID',
-          size: 10000,
-        },
-      },
-    },
-  };
-  if (DSL.custom?.timeFilter.length > 0) query.query.bool.must.push(...DSL.custom.timeFilter);
-  if (DSL.custom?.traceGroupFields.length > 0) {
-    query.query.bool.filter.push({
-      terms: {
-        traceGroup: DSL.custom.traceGroup,
-      },
-    });
-  }
-  if (DSL.custom?.percentiles?.query.bool.should.length > 0) {
-    query.query.bool.should.push(...DSL.custom.percentiles.query.bool.should);
-    query.query.bool.minimum_should_match = DSL.custom.percentiles.query.bool.minimum_should_match;
-  }
-  if (DSL.custom?.serviceNames.length > 0) {
-    query.query.bool.filter.push({
-      terms: {
-        serviceName: DSL.custom.serviceNames,
-      },
-    });
-  }
   return query;
 };

@@ -8,7 +8,7 @@ exports[`Traces table component renders empty traces table message 1`] = `
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
+  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -234,7 +234,7 @@ exports[`Traces table component renders empty traces table message 2`] = `
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
+  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -394,7 +394,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
   loading={false}
   mode="jaeger"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
+  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -1413,7 +1413,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                   default="Rows per page"
                                   token="euiTablePagination.rowsPerPage"
                                 />
-                                : 
+                                :
                                 10
                               </EuiButtonEmpty>
                             }
@@ -1500,7 +1500,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                           >
                                             Rows per page
                                           </EuiI18n>
-                                          : 
+                                          :
                                           10
                                         </span>
                                       </span>
@@ -1782,7 +1782,7 @@ exports[`Traces table component renders traces table 1`] = `
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
+  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -3066,7 +3066,7 @@ exports[`Traces table component renders traces table 1`] = `
                                   default="Rows per page"
                                   token="euiTablePagination.rowsPerPage"
                                 />
-                                : 
+                                :
                                 10
                               </EuiButtonEmpty>
                             }
@@ -3152,7 +3152,7 @@ exports[`Traces table component renders traces table 1`] = `
                                           >
                                             Rows per page
                                           </EuiI18n>
-                                          : 
+                                          :
                                           10
                                         </span>
                                       </span>
