@@ -214,7 +214,7 @@ export const Explorer = ({
   const [dataSourceConnectionType, setDataSourceConnectionType] = useState<DatasourceType>(
     'PROMETHEUS'
   );
-  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
+  const dataSourceName = explorerSearchMeta?.datasources?.[0]?.label;
   const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
   const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
