@@ -30,6 +30,7 @@ interface ObservabilityAppDeps {
   pplService: any;
   dslService: any;
   savedObjects: any;
+  config: PublicConfig;
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
@@ -64,6 +65,7 @@ export const App = ({
   pplService,
   dslService,
   savedObjects,
+  config,
   timestampUtils,
   queryManager,
   startPage,
@@ -98,6 +100,7 @@ export const App = ({
             pplService={pplService}
             dslService={dslService}
             savedObjects={savedObjects}
+            config={config}
             timestampUtils={timestampUtils}
             queryManager={queryManager}
             parentBreadcrumb={parentBreadcrumb}

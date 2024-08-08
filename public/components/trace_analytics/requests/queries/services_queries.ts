@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getTenantIndexName } from '../../../../../common/utils/tenant_index_name';
 import {
   DATA_PREPPER_SERVICE_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
@@ -137,9 +138,12 @@ export const getRelatedServicesQuery = (serviceName: string) => {
   return query;
 };
 
-export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
+export const getServiceNodesQuery = (mode: TraceAnalyticsMode, tenant?: string) => {
   return {
-    index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+    index: getTenantIndexName(
+      mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+      tenant
+    ),
     size: 0,
     query: {
       bool: {
@@ -178,10 +182,14 @@ export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
 
 export const getServiceEdgesQuery = (
   source: 'destination' | 'target',
-  mode: TraceAnalyticsMode
+  mode: TraceAnalyticsMode,
+  tenant?: string,
 ) => {
   return {
-    index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+    index: getTenantIndexName(
+      mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+      tenant
+    ),
     size: 0,
     query: {
       bool: {

@@ -46,10 +46,11 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
   dataSourceMDSId: DataSourceOption[];
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
+  tenant?: string;
 }
 
 export function TraceView(props: TraceViewProps) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const page = 'traceView';
   const renderTitle = (traceId: string) => {
     return (
@@ -178,7 +179,8 @@ export function TraceView(props: TraceViewProps) {
       fields,
       setFields,
       mode,
-      props.dataSourceMDSId[0].id
+      props.dataSourceMDSId[0].id,
+      tenant
     );
     handlePayloadRequest(
       props.traceId,
@@ -186,7 +188,8 @@ export function TraceView(props: TraceViewProps) {
       payloadData,
       setPayloadData,
       mode,
-      props.dataSourceMDSId[0].id
+      props.dataSourceMDSId[0].id,
+      tenant
     );
     handleServicesPieChartRequest(
       props.traceId,
@@ -194,9 +197,18 @@ export function TraceView(props: TraceViewProps) {
       setServiceBreakdownData,
       setColorMap,
       mode,
-      props.dataSourceMDSId[0].id
+      props.dataSourceMDSId[0].id,
+      tenant
     );
-    handleServiceMapRequest(props.http, DSL, mode, props.dataSourceMDSId[0].id, setServiceMap);
+    handleServiceMapRequest(
+      props.http,
+      DSL,
+      mode,
+      props.dataSourceMDSId[0].id,
+      setServiceMap,
+      undefined,
+      tenant
+    );
   };
 
   useEffect(() => {
@@ -252,7 +264,8 @@ export function TraceView(props: TraceViewProps) {
       ]
     );
     refresh();
-  }, [props.mode]);
+  }, [props.mode, props.tenant]);
+
   return (
     <>
       <EuiPage>
@@ -288,6 +301,7 @@ export function TraceView(props: TraceViewProps) {
                 data={ganttData}
                 setData={setGanttData}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
+                tenant={tenant}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -805,7 +805,7 @@ export const getDashboardThroughputPltQuery = (mode: TraceAnalyticsMode, fixedIn
   };
 };
 
-export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
+export const getDashboardErrorTopGroupsQuery = () => {
   return {
     size: 0,
     query: {

@@ -10,6 +10,7 @@ import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
+import { PublicConfig } from '../plugin';
 
 export const Observability = (
   CoreStartProp: CoreStart,
@@ -24,7 +25,8 @@ export const Observability = (
   dataSourcePluggables: any,
   dataSourceManagement: DataSourceManagementPluginSetup,
   savedObjectsMDSClient: CoreStart['savedObjects'],
-  defaultRoute?: string
+  config: PublicConfig,
+  defaultRoute?: string,
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
@@ -35,6 +37,7 @@ export const Observability = (
       pplService={pplService}
       dslService={dslService}
       savedObjects={savedObjects}
+      config={config}
       timestampUtils={timestampUtils}
       queryManager={queryManager}
       startPage={startPage}
