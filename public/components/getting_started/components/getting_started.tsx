@@ -10,13 +10,17 @@ import { GettingStartedConnectionsHeader } from './getting_started_header';
 import { CollectAndShipData } from './getting_started_collectData';
 import { QueryAndAnalyze } from './getting_started_queryAndAnalyze';
 
-export const NewGettingStarted = (props: HomeProps) => {
-  const { chrome } = props;
+interface ExtendedHomeProps extends HomeProps {
+  selectedDataSourceId: string;
+  selectedDataSourceLabel: string;
+}
+
+export const NewGettingStarted = (props: ExtendedHomeProps) => {
+  const { chrome, selectedDataSourceId, selectedDataSourceLabel } = props;
   const [selectedSource, setSelectedSource] = useState('');
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
   const [isQueryDataOpen, setIsQueryDataOpen] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
-  const [isSampleDataset, setIsSampleDataset] = useState(false); // New state
+  const [isSampleDataset, setIsSampleDataset] = useState(false);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -25,7 +29,7 @@ export const NewGettingStarted = (props: HomeProps) => {
         href: '#/',
       },
     ]);
-  }, []);
+  }, [chrome]);
 
   const handleSelectSource = (source: string) => {
     setSelectedSource(source);
@@ -42,10 +46,9 @@ export const NewGettingStarted = (props: HomeProps) => {
     setIsQueryDataOpen(isOpen);
   };
 
-  const setQueryDataOpen = (patterns: string[]) => {
+  const setQueryDataOpen = () => {
     setIsPickYourSourceOpen(false);
     setIsQueryDataOpen(true);
-    setIndexPatterns(patterns);
   };
 
   const handleCardSelectionChange = (isSample: boolean) => {
@@ -64,6 +67,8 @@ export const NewGettingStarted = (props: HomeProps) => {
           onMoveToQueryData={setQueryDataOpen}
           onSelectSource={handleSelectSource}
           onCardSelectionChange={handleCardSelectionChange}
+          selectedDataSourceId={selectedDataSourceId}
+          selectedDataSourceLabel={selectedDataSourceLabel}
         />
         <EuiSpacer size="l" />
         {!isSampleDataset && (
@@ -71,7 +76,8 @@ export const NewGettingStarted = (props: HomeProps) => {
             isOpen={isQueryDataOpen}
             onToggle={toggleQueryData}
             selectedTechnology={selectedSource}
-            indexPatterns={indexPatterns}
+            selectedDataSourceId={selectedDataSourceId}
+            selectedDataSourceLabel={selectedDataSourceLabel}
           />
         )}
       </EuiPageBody>
