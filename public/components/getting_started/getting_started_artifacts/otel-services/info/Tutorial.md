@@ -6,7 +6,7 @@ This setup is essential for monitoring and observability in distributed systems,
 ## Purpose and Context
 
 The goal is to create an environment where OpenTelemetry Collector captures data from a sample openTelemetry demo web-store application and forwards its telemetry info to Data Prepper.
-Data Prepper processes this data and sends it to OpenSearch for storage and analysis. 
+Data Prepper processes this data and sends it to OpenSearch for storage and analysis.
 
 ## Prerequisites
 
@@ -30,6 +30,7 @@ Data Prepper processes this data and sends it to OpenSearch for storage and anal
 Clone the OpenTelemetry demo repository to your local machine.
 
 **Command:**
+
 ```sh
 git clone https://github.com/opensearch-project/opentelemetry-demo.git
 ```
@@ -43,20 +44,24 @@ Create a Docker network named `opensearch-net` for the OpenSearch and Data Prepp
 Use this specific command if your existing `opensearch` & `opensearch-dashboards` are already running within a docker-compose container.
 
 **Command:**
+
 ```sh
 docker network create opensearch-net
 ```
 
 **Description:**
 This network ensures that all containers can communicate with each other within the same network.
-If `opensearch` & `opensearch-dashboards` are running outside of a container scope - for example in your localhost, change the original docker network definition 
+If `opensearch` & `opensearch-dashboards` are running outside of a container scope - for example in your localhost, change the original docker network definition
+
 ```yaml
 networks:
-    opensearch-otel-demo:
+  opensearch-otel-demo:
 ```
-Into the following  
+
+Into the following
+
 ```yaml
-  network_mode: host
+network_mode: host
 ```
 
 ### 3. Update Docker Environment File
@@ -64,6 +69,7 @@ Into the following
 Download and update the Docker environment file with the necessary parameters.
 
 **Command:**
+
 ```sh
 wget https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/.env
 ```
@@ -72,6 +78,7 @@ wget https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/mai
 The `.env` file contains environment variables required for Docker Compose to configure the OpenSearch and Data Prepper containers.
 
 Update the following parameters:
+
 ```yaml
 # OpenSearch Node1
 OPENSEARCH_PORT=9200
@@ -84,15 +91,16 @@ OPENSEARCH_DASHBOARD_HOST=opensearch-dashboards
 OPENSEARCH_DASHBOARD_ADDR=${OPENSEARCH_DASHBOARD_HOST}:${OPENSEARCH_DASHBOARD_PORT}
 
 ```
-If running `opensearch` & `opensearch-dashboards` are running outside of a container scope -  also update the host names `OPENSEARCH_HOST`, `OPENSEARCH_DASHBOARD_HOST` appearing 
-in the `.env` file to be able to recognize your local running services.
 
+If running `opensearch` & `opensearch-dashboards` are running outside of a container scope - also update the host names `OPENSEARCH_HOST`, `OPENSEARCH_DASHBOARD_HOST` appearing
+in the `.env` file to be able to recognize your local running services.
 
 ### 4. Configure Data Prepper Pipelines
 
 Configure the Data Prepper pipelines for logs, traces, metrics, and services.
 
 #### Logs Exporter
+
 Update the pipelines.yaml:
 
 **Command:**
@@ -118,9 +126,11 @@ otel-logs-pipeline:
 ```
 
 #### Traces Exporter
+
 Update the pipelines.yaml:
 
 **Command:**
+
 ```yaml
 entry-pipeline:
   delay: "100"
@@ -148,9 +158,11 @@ raw-pipeline:
 ```
 
 #### Metrics Exporter
+
 Update the pipelines.yaml
 
 **Command:**
+
 ```yaml
 otel-metrics-pipeline:
   workers: 8
@@ -182,9 +194,11 @@ otel-metrics-pipeline:
 ```
 
 #### Services Exporter
+
 Update the pipelines.yaml
 
 **Command:**
+
 ```yaml
 service-map-pipeline:
   delay: "100"
@@ -207,9 +221,11 @@ service-map-pipeline:
 Integrate Data Prepper pipelines within the OpenTelemetry Collector configuration.
 
 #### Logs Services
+
 Update the otelcol-config.yml:
 
 **Command:**
+
 ```yaml
 receivers:
   otlp:
@@ -222,7 +238,7 @@ exporters:
     endpoint: "data-prepper:21892"
     tls:
       insecure: true
-      insecure_skip_verify: true 
+      insecure_skip_verify: true
 
 service:
   pipelines:
@@ -242,7 +258,7 @@ Update the otelcol-config.yml:
     endpoint: "data-prepper:21890"
     tls:
       insecure: true
-      insecure_skip_verify: true 
+      insecure_skip_verify: true
 
 service:
   pipelines:
@@ -253,15 +269,17 @@ service:
 ```
 
 #### Metrics Services
+
 Update the otelcol-config.yml:
 
 **Command:**
+
 ```yaml
   otlp/metrics:
     endpoint: "data-prepper:21891"
     tls:
       insecure: true
-      insecure_skip_verify: true 
+      insecure_skip_verify: true
 
 service:
   pipelines:
@@ -276,6 +294,7 @@ service:
 Start the Docker containers and validate the setup.
 
 **Command:**
+
 ```sh
 docker-compose up -d --scale opensearch-node1=0 --scale opensearch-node2=0 --scale opensearch-dashboards=0
 ```
@@ -288,7 +307,8 @@ The `--scale opensearch-node1=0 --scale opensearch-node2=0 --scale opensearch-da
 ---
 
 ## Additional Info
- - [Getting Started Info Document](https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/info/GettingStarted.md)
- - [OpenTelemetry Demo repository](https://github.com/opensearch-project/opentelemetry-demo)
- - [OTEL services Dashboard Installation Release](https://github.com/opensearch-project/opensearch-catalog/releases/tag/otel_services_dashboard-1.0.0)
- - [OTEL Demo Architecture](https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/info/OTEL%20Demo%20Architecture.md)
+
+- [Getting Started Info Document](https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/getting-started/GettingStarted.md)
+- [OpenTelemetry Demo repository](https://github.com/opensearch-project/opentelemetry-demo)
+- [OTEL services Dashboard Installation Release](https://github.com/opensearch-project/opensearch-catalog/releases/tag/otel_services_dashboard-1.0.0)
+- [OTEL Demo Architecture](https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/info/OTEL%20Demo%20Architecture.md)
