@@ -15,12 +15,14 @@ import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_ov
 import { cardConfigs, GettingStartedConfig } from './components/card_configs';
 import { uiSettingsService } from '../../../common/utils';
 import { AddDashboardCallout } from './components/add_dashboard_callout';
-import { DatePicker } from './components/date_picker';
+import { DashboardControls } from './components/dashboard_controls';
 import { SelectDashboardModal } from './components/select_dashboard_modal';
 
 // Plugin IDs
 const alertsPluginID = 'alerting';
 const anomalyPluginID = 'anomalyDetection';
+
+const uiSettingsKey = 'observability:defaultDashboard';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -35,6 +37,10 @@ const wrapper = {
 };
 let startDate;
 let setStartDate;
+let endDate;
+let setEndDate;
+let dashboardTitle;
+let setDashboardTitle;
 
 coreRefs.contentManagement?.registerContentProvider({
   id: 'custom_content',
@@ -44,7 +50,14 @@ coreRefs.contentManagement?.registerContentProvider({
     order: 1500,
     render: () =>
       wrapper.dashboardSelected ? (
-        <DatePicker startDate={startDate} setStartDate={setStartDate} showModal={showModal} />
+        <DashboardControls
+          dashboardTitle={dashboardTitle}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          showModal={showModal}
+        />
       ) : (
         <AddDashboardCallout showModal={showModal} />
       ),
@@ -52,12 +65,23 @@ coreRefs.contentManagement?.registerContentProvider({
   getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
 });
 
+export interface DashboardDictionary {
+  [key: string]: {
+    value: string;
+    label: string;
+    startDate: string;
+    endDate: string;
+  };
+}
+
 export const Home = ({ ..._props }: HomeProps) => {
   const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
   const [_, setIsRegistered] = useState(false);
-  const [dashboardIds, setDashboardIds] = useState<Array<{ value: string; label: string }>>([]);
+  const [dashboards, setDashboards] = useState<DashboardDictionary>({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   [startDate, setStartDate] = useState(moment().toISOString());
+  [endDate, setEndDate] = useState(moment().toISOString());
+  [dashboardTitle, setDashboardTitle] = useState('');
 
   showModal = () => setIsModalVisible(true);
 
@@ -143,21 +167,18 @@ export const Home = ({ ..._props }: HomeProps) => {
         order: 1000,
         input: {
           kind: 'dynamic',
-          get: () => Promise.resolve(uiSettingsService.get('observability:defaultDashboard')),
+          get: () => Promise.resolve(uiSettingsService.get(uiSettingsKey)),
         },
       }),
       getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
     });
     setIsRegistered(true);
-  };
-
-  useEffect(() => {
-    registerCards();
-    if (uiSettingsService.get('observability:defaultDashboard')) {
-      wrapper.dashboardSelected = true;
-      registerDashboard();
+    if (dashboards && dashboards[uiSettingsService.get(uiSettingsKey)]) {
+      setDashboardTitle(dashboards[uiSettingsService.get(uiSettingsKey)].label);
+      setStartDate(dashboards[uiSettingsService.get(uiSettingsKey)].startDate);
+      setEndDate(dashboards[uiSettingsService.get(uiSettingsKey)].endDate);
     }
-  }, []);
+  };
 
   useEffect(() => {
     coreRefs.savedObjectsClient
@@ -165,23 +186,38 @@ export const Home = ({ ..._props }: HomeProps) => {
         type: 'dashboard',
       })
       .then((response) => {
-        const dashboards = response.savedObjects.map((dashboard) => ({
-          value: dashboard.id.toString(),
-          text: dashboard.get('title').toString(),
-          label: dashboard.attributes.title,
-        }));
-        setDashboardIds(dashboards);
+        const savedDashoards = response.savedObjects.reduce((acc, savedDashboard) => {
+          const id = savedDashboard.id.toString();
+          acc[id] = {
+            label: savedDashboard.attributes.title,
+            startDate: savedDashboard.attributes.timeFrom,
+            endDate: savedDashboard.attributes.timeTo,
+          };
+          return acc;
+        }, {} as DashboardDictionary);
+        setDashboards(savedDashoards);
+        if (uiSettingsService.get(uiSettingsKey)) {
+          setDashboardTitle(dashboards[uiSettingsService.get(uiSettingsKey)].label);
+        }
       })
       .catch((error) => {
         console.error('Error fetching dashboards:', error);
       });
   }, []);
 
+  useEffect(() => {
+    registerCards();
+    if (uiSettingsService.get(uiSettingsKey)) {
+      wrapper.dashboardSelected = true;
+      registerDashboard();
+    }
+  }, [dashboards]);
+
   const modal = isModalVisible && (
     <SelectDashboardModal
       closeModal={() => setIsModalVisible(false)}
       wrapper={wrapper}
-      dashboardIds={dashboardIds}
+      dashboards={dashboards}
       registerDashboard={registerDashboard}
       closeModalVisible={() => setIsModalVisible(false)}
     />

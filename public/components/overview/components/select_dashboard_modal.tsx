@@ -17,18 +17,19 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { uiSettingsService } from '../../../../common/utils';
+import { DashboardDictionary } from '../home';
 
 interface Props {
   closeModal: () => void;
   wrapper: { dashboardSelected: boolean };
-  dashboardIds: Array<{ value: string; label: string }>;
+  dashboards: DashboardDictionary;
   registerDashboard: () => void;
   closeModalVisible: () => void;
 }
 export function SelectDashboardModal({
   closeModal,
   wrapper,
-  dashboardIds,
+  dashboards,
   registerDashboard,
   closeModalVisible,
 }: Props) {
@@ -57,11 +58,17 @@ export function SelectDashboardModal({
     setSelectedId(uiSettingsService.get('observability:defaultDashboard'));
   }, []);
 
+  const options: EuiComboBoxOptionOption[] = Object.keys(dashboards).map((key) => ({
+    value: key,
+    label: dashboards[key].label,
+  }));
+
   useEffect(() => {
     if (selectedId) {
-      const currentTitle = dashboardIds.find((item) => {
-        return item.value === selectedId;
-      });
+      const currentTitle: EuiComboBoxOptionOption = {
+        value: selectedId,
+        label: dashboards[selectedId].label,
+      };
       if (currentTitle) {
         const comboBoxOption: Array<EuiComboBoxOptionOption<string>> = [currentTitle];
         setSelectedOptionsState(comboBoxOption);
@@ -74,14 +81,14 @@ export function SelectDashboardModal({
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiText size="s">
-          <h2>Select Dashboard</h2>
+          <h2>{selectedId ? 'Update Dashboard' : 'Select Dashboard'}</h2>
         </EuiText>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiComboBox
           placeholder="Select a dashboard"
           singleSelection={{ asPlainText: true }}
-          options={dashboardIds}
+          options={options}
           selectedOptions={selectedOptionsState}
           onChange={onComboBoxChange}
         />
