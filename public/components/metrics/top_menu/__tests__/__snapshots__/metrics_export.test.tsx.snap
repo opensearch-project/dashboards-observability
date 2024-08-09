@@ -39,6 +39,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                   iconSide="right"
                   iconType="arrowDown"
                   onClick={[Function]}
+                  size="s"
                 >
                   <EuiButtonDisplay
                     baseClassName="euiButton"
@@ -49,10 +50,11 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                     iconType="arrowDown"
                     isDisabled={false}
                     onClick={[Function]}
+                    size="s"
                     type="button"
                   >
                     <button
-                      className="euiButton euiButton--primary"
+                      className="euiButton euiButton--primary euiButton--small"
                       data-test-subj="metrics__saveManagementPopover"
                       disabled={false}
                       onClick={[Function]}

@@ -51,6 +51,7 @@ const Savebutton = ({
 }) => {
   return (
     <EuiButton
+      size="s"
       iconSide="right"
       onClick={() => {
         setIsPanelOpen((staleState) => !staleState);
@@ -89,7 +90,7 @@ const MetricsExportPopOver = () => {
     const HeaderControl = coreRefs.navigationStart?.ui.HeaderControl;
     return HeaderControl ? (
       <HeaderControl
-        setMountPoint={coreRefs.application?.setAppBadgeControls}
+        setMountPoint={coreRefs.application?.setAppRightControls}
         controls={[{ renderComponent: <Savebutton setIsPanelOpen={setIsPanelOpen} /> }]}
       />
     ) : (
