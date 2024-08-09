@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,11 +14,10 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import max from 'lodash/max';
-import React, { useEffect } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { useSelector } from 'react-redux';
 import semver from 'semver';
+import max from 'lodash/max';
 import { MountPoint } from '../../../../../../src/core/public';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import {
@@ -64,39 +64,38 @@ const Savebutton = ({
   );
 };
 
+const HeaderControlledPopoverWrapper = ({ children }) => {
+  const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
+  const showActionsInHeader = uiSettingsService.get('home:useNewHomePage');
+
+  if (showActionsInHeader && HeaderControl) {
+    return (
+      <HeaderControl
+        setMountPoint={coreRefs.application?.setAppRightControls}
+        controls={[{ renderComponent: children }]}
+      />
+    );
+  }
+
+  return <>{children}</>;
+};
+
 const MetricsExportPopOver = () => {
   const availableObservabilityDashboards = useSelector(selectPanelList);
-  const [availableDashboards, setAvailableDashboards] = React.useState([]);
-  const [osdCoreDashboards, setOsdCoreDashboards] = React.useState([]);
+  const [availableDashboards, setAvailableDashboards] = useState([]);
+  const [osdCoreDashboards, setOsdCoreDashboards] = useState([]);
 
-  const [isPanelOpen, setIsPanelOpen] = React.useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   const dateSpanFilter = useSelector(dateSpanFilterSelector);
-  const [metricsToExport, setMetricsToExport] = React.useState<MetricType[]>([]);
+  const [metricsToExport, setMetricsToExport] = useState<MetricType[]>([]);
 
-  const [selectedPanelOptions, setSelectedPanelOptions] = React.useState<any[]>([]);
+  const [selectedPanelOptions, setSelectedPanelOptions] = useState<any[]>([]);
 
   const { toasts } = coreRefs;
-
-  const showActionsInHeader = uiSettingsService.get('home:useNewHomePage');
-
-  const HeaderControlledSavebutton = () => {
-    if (!showActionsInHeader) {
-      return <Savebutton setIsPanelOpen={setIsPanelOpen} />;
-    }
-    const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
-    return HeaderControl ? (
-      <HeaderControl
-        setMountPoint={coreRefs.application?.setAppRightControls}
-        controls={[{ renderComponent: <Savebutton setIsPanelOpen={setIsPanelOpen} /> }]}
-      />
-    ) : (
-      <Savebutton setIsPanelOpen={setIsPanelOpen} />
-    );
-  };
 
   const getCoreDashboards = async () => {
     if (!coreRefs.dashboard) return [];
@@ -387,44 +386,46 @@ const MetricsExportPopOver = () => {
   };
 
   return (
-    <EuiPopover
-      button={<HeaderControlledSavebutton />}
-      isOpen={isPanelOpen}
-      closePopover={() => setIsPanelOpen(false)}
-    >
-      <MetricsExportPanel
-        availableDashboards={availableDashboards ?? []}
-        metricsToExport={metricsToExport ?? []}
-        setMetricsToExport={setMetricsToExport}
-        selectedPanelOptions={selectedPanelOptions}
-        setSelectedPanelOptions={setSelectedPanelOptions}
-      />
-      <EuiPopoverFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              onClick={() => setIsPanelOpen(false)}
-              data-test-subj="metrics__SaveCancel"
-            >
-              Cancel
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={() => {
-                handleSavingObjects().then(() => setIsPanelOpen(false));
-              }}
-              data-test-subj="metrics__SaveConfirm"
-            >
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
-    </EuiPopover>
+    <HeaderControlledPopoverWrapper>
+      <EuiPopover
+        button={<Savebutton setIsPanelOpen={setIsPanelOpen} />}
+        isOpen={isPanelOpen}
+        closePopover={() => setIsPanelOpen(false)}
+      >
+        <MetricsExportPanel
+          availableDashboards={availableDashboards ?? []}
+          metricsToExport={metricsToExport ?? []}
+          setMetricsToExport={setMetricsToExport}
+          selectedPanelOptions={selectedPanelOptions}
+          setSelectedPanelOptions={setSelectedPanelOptions}
+        />
+        <EuiPopoverFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => setIsPanelOpen(false)}
+                data-test-subj="metrics__SaveCancel"
+              >
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                fill
+                onClick={() => {
+                  handleSavingObjects().then(() => setIsPanelOpen(false));
+                }}
+                data-test-subj="metrics__SaveConfirm"
+              >
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      </EuiPopover>
+    </HeaderControlledPopoverWrapper>
   );
 };
 

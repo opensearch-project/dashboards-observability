@@ -14,23 +14,27 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
 >
   <MetricsExport>
     <MetricsExportPopOver>
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={<HeaderControlledSavebutton />}
-        closePopover={[Function]}
-        display="inlineBlock"
-        hasArrow={true}
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="m"
-      >
-        <div
-          className="euiPopover euiPopover--anchorDownCenter"
+      <HeaderControlledPopoverWrapper>
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <Savebutton
+              setIsPanelOpen={[Function]}
+            />
+          }
+          closePopover={[Function]}
+          display="inlineBlock"
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={true}
+          panelPaddingSize="m"
         >
           <div
-            className="euiPopover__anchor"
+            className="euiPopover euiPopover--anchorDownCenter"
           >
-            <HeaderControlledSavebutton>
+            <div
+              className="euiPopover__anchor"
+            >
               <Savebutton
                 setIsPanelOpen={[Function]}
               >
@@ -119,10 +123,10 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                   </EuiButtonDisplay>
                 </EuiButton>
               </Savebutton>
-            </HeaderControlledSavebutton>
+            </div>
           </div>
-        </div>
-      </EuiPopover>
+        </EuiPopover>
+      </HeaderControlledPopoverWrapper>
     </MetricsExportPopOver>
   </MetricsExport>
 </Provider>
