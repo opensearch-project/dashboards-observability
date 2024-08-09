@@ -42,6 +42,7 @@ import {
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
+import { uiSettingsService } from '../../../../common/utils';
 
 const Savebutton = ({
   setIsPanelOpen,
@@ -78,6 +79,23 @@ const MetricsExportPopOver = () => {
   const [selectedPanelOptions, setSelectedPanelOptions] = React.useState<any[]>([]);
 
   const { toasts } = coreRefs;
+
+  const showActionsInHeader = uiSettingsService.get('home:useNewHomePage');
+
+  const HeaderControlledSavebutton = () => {
+    if (!showActionsInHeader) {
+      return <Savebutton setIsPanelOpen={setIsPanelOpen} />;
+    }
+    const HeaderControl = coreRefs.navigationStart?.ui.HeaderControl;
+    return HeaderControl ? (
+      <HeaderControl
+        setMountPoint={coreRefs.application?.setAppBadgeControls}
+        controls={[{ renderComponent: <Savebutton setIsPanelOpen={setIsPanelOpen} /> }]}
+      />
+    ) : (
+      <Savebutton setIsPanelOpen={setIsPanelOpen} />
+    );
+  };
 
   const getCoreDashboards = async () => {
     if (!coreRefs.dashboard) return [];
@@ -369,7 +387,7 @@ const MetricsExportPopOver = () => {
 
   return (
     <EuiPopover
-      button={<Savebutton setIsPanelOpen={setIsPanelOpen} />}
+      button={<HeaderControlledSavebutton />}
       isOpen={isPanelOpen}
       closePopover={() => setIsPanelOpen(false)}
     >
