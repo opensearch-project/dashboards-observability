@@ -80,6 +80,12 @@ exports[`Added Integration Table View Test Renders added integration table view 
           },
           "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
           "name": "nginx",
+          "references": Array [
+            Object {
+              "dataSourceMDSId": "f4cf2c60-2f4d-11ef-bf2d-65348e7e70ea",
+              "dataSourceMDSLabel": "dataSource",
+            },
+          ],
           "status": "active",
           "templateName": "nginx",
         },
@@ -148,6 +154,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "name": "nginx",
                   "templateName": "nginx",
                 },
+                "dataSourceMDSLabel": "dataSource",
                 "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
                 "name": "nginx",
                 "templateName": "nginx",
@@ -185,6 +192,19 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   ],
                   "type": "field_value_selection",
                 },
+                Object {
+                  "field": "dataSourceMDSLabel",
+                  "multiSelect": false,
+                  "name": "Data Source Name",
+                  "options": Array [
+                    Object {
+                      "name": "dataSource",
+                      "value": "dataSource",
+                      "view": "dataSource",
+                    },
+                  ],
+                  "type": "field_value_selection",
+                },
               ],
             }
           }
@@ -208,6 +228,19 @@ exports[`Added Integration Table View Test Renders added integration table view 
                         "name": "nginx",
                         "value": "nginx",
                         "view": "nginx",
+                      },
+                    ],
+                    "type": "field_value_selection",
+                  },
+                  Object {
+                    "field": "dataSourceMDSLabel",
+                    "multiSelect": false,
+                    "name": "Data Source Name",
+                    "options": Array [
+                      Object {
+                        "name": "dataSource",
+                        "value": "dataSource",
+                        "view": "dataSource",
                       },
                     ],
                     "type": "field_value_selection",
@@ -350,6 +383,19 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   "name": "nginx",
                                   "value": "nginx",
                                   "view": "nginx",
+                                },
+                              ],
+                              "type": "field_value_selection",
+                            },
+                            Object {
+                              "field": "dataSourceMDSLabel",
+                              "multiSelect": false,
+                              "name": "Data Source Name",
+                              "options": Array [
+                                Object {
+                                  "name": "dataSource",
+                                  "value": "dataSource",
+                                  "view": "dataSource",
                                 },
                               ],
                               "type": "field_value_selection",
@@ -539,6 +585,163 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 </div>
                               </EuiPopover>
                             </FieldValueSelectionFilter>
+                            <FieldValueSelectionFilter
+                              config={
+                                Object {
+                                  "field": "dataSourceMDSLabel",
+                                  "multiSelect": false,
+                                  "name": "Data Source Name",
+                                  "options": Array [
+                                    Object {
+                                      "name": "dataSource",
+                                      "value": "dataSource",
+                                      "view": "dataSource",
+                                    },
+                                  ],
+                                  "type": "field_value_selection",
+                                }
+                              }
+                              index={1}
+                              onChange={[Function]}
+                              query={
+                                Query {
+                                  "ast": _AST {
+                                    "_clauses": Array [],
+                                    "_indexedClauses": Object {
+                                      "field": Object {},
+                                      "group": Array [],
+                                      "is": Object {},
+                                      "term": Array [],
+                                    },
+                                  },
+                                  "syntax": Object {
+                                    "parse": [Function],
+                                    "print": [Function],
+                                    "printClause": [Function],
+                                  },
+                                  "text": "",
+                                }
+                              }
+                            >
+                              <EuiPopover
+                                anchorPosition="downCenter"
+                                button={
+                                  <EuiFilterButton
+                                    grow={true}
+                                    hasActiveFilters={false}
+                                    iconSide="right"
+                                    iconType="arrowDown"
+                                    onClick={[Function]}
+                                  >
+                                    Data Source Name
+                                  </EuiFilterButton>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="field_value_selection_1"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelClassName="euiFilterGroup__popoverPanel"
+                                panelPaddingSize="none"
+                              >
+                                <div
+                                  className="euiPopover euiPopover--anchorDownCenter"
+                                  id="field_value_selection_1"
+                                >
+                                  <div
+                                    className="euiPopover__anchor"
+                                  >
+                                    <EuiFilterButton
+                                      grow={true}
+                                      hasActiveFilters={false}
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      onClick={[Function]}
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFilterButton euiFilterButton--hasIcon"
+                                        color="text"
+                                        iconSide="right"
+                                        iconType="arrowDown"
+                                        onClick={[Function]}
+                                        textProps={
+                                          Object {
+                                            "className": "",
+                                          }
+                                        }
+                                        type="button"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <EuiButtonContent
+                                            className="euiButtonEmpty__content"
+                                            iconSide="right"
+                                            iconSize="m"
+                                            iconType="arrowDown"
+                                            textProps={
+                                              Object {
+                                                "className": "euiButtonEmpty__text",
+                                              }
+                                            }
+                                          >
+                                            <span
+                                              className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                            >
+                                              <EuiIcon
+                                                className="euiButtonContent__icon"
+                                                color="inherit"
+                                                size="m"
+                                                type="arrowDown"
+                                              >
+                                                <EuiIconBeaker
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <path
+                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                    />
+                                                  </svg>
+                                                </EuiIconBeaker>
+                                              </EuiIcon>
+                                              <span
+                                                className="euiButtonEmpty__text"
+                                              >
+                                                <span
+                                                  className="euiFilterButton__textShift"
+                                                  data-text="Data Source Name"
+                                                  title="Data Source Name"
+                                                >
+                                                  Data Source Name
+                                                </span>
+                                              </span>
+                                            </span>
+                                          </EuiButtonContent>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </EuiFilterButton>
+                                  </div>
+                                </div>
+                              </EuiPopover>
+                            </FieldValueSelectionFilter>
                           </div>
                         </EuiFilterGroup>
                       </EuiSearchFilters>
@@ -597,6 +800,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                       "name": "nginx",
                       "templateName": "nginx",
                     },
+                    "dataSourceMDSLabel": "dataSource",
                     "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
                     "name": "nginx",
                     "templateName": "nginx",

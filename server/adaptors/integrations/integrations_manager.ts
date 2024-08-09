@@ -181,9 +181,7 @@ export class IntegrationsManager {
         dataSource,
         tableName,
       });
-      console.log(dataSourceMDSId, dataSourceMDSLabel);
       const test = await this.client.create('integration-instance', result);
-      console.log(test);
       return Promise.resolve({ ...result, id: test.id });
     } catch (err) {
       addRequestToMetric('integrations', 'create', err);

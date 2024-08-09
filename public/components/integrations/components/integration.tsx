@@ -19,8 +19,10 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
+import { DataSourceSelectorProps } from '../../../../../../src/plugins/data_source_management/public/components/data_source_selector/data_source_selector';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
@@ -33,7 +35,14 @@ import { AvailableIntegrationProps } from './integration_types';
 
 export function Integration(props: AvailableIntegrationProps) {
   const http = coreRefs.http!;
-  const { integrationTemplateId, chrome } = props;
+  const {
+    integrationTemplateId,
+    chrome,
+    notifications,
+    dataSourceEnabled,
+    dataSourceManagement,
+    savedObjectsMDSClient,
+  } = props;
 
   const { setToast } = useToast();
   const [integration, setIntegration] = useState({} as IntegrationConfig);
@@ -44,6 +53,8 @@ export function Integration(props: AvailableIntegrationProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
+  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -126,6 +137,21 @@ export function Integration(props: AvailableIntegrationProps) {
     setSelectedTabId(id);
   };
 
+  let DataSourceSelector:
+    | ComponentType<DataSourceSelectorProps>
+    | React.JSX.IntrinsicAttributes
+    | null;
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
+
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    setDataSourceMDSId(dataConnectionId);
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    setDataSourceMDSLabel(dataConnectionLabel);
+  };
+
   const renderTabs = () => {
     return tabs.map((tab, index) => (
       <EuiTab
@@ -140,30 +166,56 @@ export function Integration(props: AvailableIntegrationProps) {
     ));
   };
 
-  const mdsSelectorModal = () => {
-    if (isModalVisible) {
-      return (
-        <EuiModal onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>Modal title</h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+  let modal = <></>;
 
-          <EuiModalBody>
-            This modal has the following setup:
-            <EuiSpacer />
-          </EuiModalBody>
+  if (isModalVisible) {
+    modal = (
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>Select Data Source</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      );
-    }
-  };
+        <EuiModalBody>
+          <DataSourceSelector
+            savedObjectsClient={savedObjectsMDSClient.client}
+            notifications={notifications}
+            disabled={false}
+            fullWidth={false}
+            removePrepend={true}
+            onSelectedDataSource={onSelectedDataSource}
+            dataSourceFilter={dataSourceFilterFn}
+          />
+          <EuiSpacer />
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButton onClick={closeModal}>Close</EuiButton>
+
+          <EuiButton
+            onClick={async () => {
+              setLoading(true);
+              await addIntegrationRequest({
+                addSample: true,
+                templateName: integration.name,
+                integration,
+                setToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
+              });
+              setLoading(false);
+              closeModal();
+            }}
+            isLoading={loading}
+            fill
+          >
+            Add
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
 
   if (Object.keys(integration).length === 0) {
     return (
@@ -176,24 +228,26 @@ export function Integration(props: AvailableIntegrationProps) {
     <EuiPage>
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        <div>
-          <EuiButton onClick={() => showModal()}>Show Modal</EuiButton>
-          {mdsSelectorModal()}
-        </div>
         <IntegrationOverview
           integration={integration}
           showFlyout={() => {
             window.location.hash = `#/available/${integration.name}/setup`;
           }}
           setUpSample={async () => {
-            setLoading(true);
-            await addIntegrationRequest({
-              addSample: true,
-              templateName: integration.name,
-              integration,
-              setToast,
-            });
-            setLoading(false);
+            if (dataSourceEnabled) {
+              showModal();
+            } else {
+              setLoading(true);
+              await addIntegrationRequest({
+                addSample: true,
+                templateName: integration.name,
+                integration,
+                setToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
+              });
+              setLoading(false);
+            }
           }}
           loading={loading}
         />
@@ -211,6 +265,7 @@ export function Integration(props: AvailableIntegrationProps) {
           : IntegrationFields({ integration, integrationMapping })}
         <EuiSpacer />
       </EuiPageBody>
+      {modal}
     </EuiPage>
   );
 }

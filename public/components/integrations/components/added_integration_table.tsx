@@ -134,8 +134,18 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     );
     setIsModalVisible(true);
   };
-
   const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
+  const mdsLabels = [
+    ...new Set(
+      props.data.hits.flatMap((hit) =>
+        hit.references.length > 0
+          ? hit.references.map((ref) => ref.dataSourceMDSLabel || 'Local cluster')
+          : []
+      )
+    ),
+  ].sort();
+
+  console.log(mdsLabels);
 
   const search = {
     box: {
@@ -153,11 +163,21 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           view: name,
         })),
       },
+      {
+        type: 'field_value_selection' as const,
+        field: 'dataSourceMDSLabel',
+        name: 'Data Source Name',
+        multiSelect: false,
+        options: mdsLabels.map((name) => ({
+          name,
+          value: name,
+          view: name,
+        })),
+      },
     ],
   };
 
   const entries = props.data.hits.map((integration) => {
-    console.log(integration);
     const id = integration.id;
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;

@@ -80,7 +80,6 @@ const suggestDataSources = async (
   type: IntegrationConnectionType,
   dataSourceMDSId?: string
 ): Promise<Array<{ label: string }>> => {
-  console.log(dataSourceMDSId);
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -89,7 +88,7 @@ const suggestDataSources = async (
         query: {
           path: '_data_stream/ss4o_*',
           method: 'GET',
-          dataSourceMDSId,
+          dataSourceId: dataSourceMDSId ?? '',
         },
       });
       return (

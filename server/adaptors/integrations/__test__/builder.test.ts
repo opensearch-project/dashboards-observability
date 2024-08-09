@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { IntegrationReader } from '../repository/integration_reader';
 import * as mockUtils from '../repository/utils';
@@ -83,6 +83,12 @@ describe('IntegrationInstanceBuilder', () => {
         templateName: 'sample',
         dataSource: 'instance-datasource',
         creationDate: expect.any(String),
+        references: [
+          {
+            dataSourceMDSId: undefined,
+            dataSourceMDSLabel: undefined,
+          },
+        ],
         assets: [
           {
             assetType: 'dashboard',
@@ -307,6 +313,12 @@ describe('IntegrationInstanceBuilder', () => {
         tags: undefined,
         creationDate: expect.any(String),
         assets: refs,
+        references: [
+          {
+            dataSourceMDSId: undefined,
+            dataSourceMDSLabel: undefined,
+          },
+        ],
       };
 
       const instance = await builder.buildInstance(

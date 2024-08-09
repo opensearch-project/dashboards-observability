@@ -42,6 +42,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "enabledWorkflows": Array [],
                           }
                         }
+                        handleSelectedDataSourceChange={[Function]}
                         integration={
                           Object {
                             "assets": Array [],
@@ -255,6 +256,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   "enabledWorkflows": Array [],
                                 }
                               }
+                              handleSelectedDataSourceChange={[Function]}
                               integration={
                                 Object {
                                   "assets": Array [],
@@ -935,6 +937,8 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "enabledWorkflows": Array [],
                           }
                         }
+                        dataSourceMDSId=""
+                        dataSourceMDSLabel=""
                         integration={
                           Object {
                             "assets": Array [],
