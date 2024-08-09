@@ -87,7 +87,7 @@ const MetricsExportPopOver = () => {
     if (!showActionsInHeader) {
       return <Savebutton setIsPanelOpen={setIsPanelOpen} />;
     }
-    const HeaderControl = coreRefs.navigationStart?.ui.HeaderControl;
+    const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
     return HeaderControl ? (
       <HeaderControl
         setMountPoint={coreRefs.application?.setAppRightControls}

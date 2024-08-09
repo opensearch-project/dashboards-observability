@@ -37,7 +37,7 @@ class CoreRefs {
   public overlays?: OverlayStart;
   public dataSource?: DataSourcePluginStart;
   public dataSources?: DataSourceStart;
-  public navigationStart?: NavigationPublicPluginStart;
+  public navigation?: NavigationPublicPluginStart;
   private constructor() {
     // ...
   }

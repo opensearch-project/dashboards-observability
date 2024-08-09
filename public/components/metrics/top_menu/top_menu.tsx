@@ -55,6 +55,7 @@ export const TopMenu = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
             <EuiSuperDatePicker
+              compressed={true}
               dateFormat={uiSettingsService.get('dateFormat')}
               start={dateSpanFilter.start}
               end={dateSpanFilter.end}
