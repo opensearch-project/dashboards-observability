@@ -25,7 +25,7 @@ export const UploadAssets = async (tutorialId: string, mdsId: string, mdsLabel: 
   const http = coreRefs.http;
 
   try {
-    const response = await http!.post(`/api/observability/gettingStarted/mdsLoading`, {
+    const response = await http!.post(`/api/observability/gettingStarted/createAssets`, {
       body: JSON.stringify({
         mdsId,
         mdsLabel,
@@ -35,8 +35,6 @@ export const UploadAssets = async (tutorialId: string, mdsId: string, mdsLabel: 
 
     if (response) {
       setToast('Created saved object assets successfully', 'success');
-    } else {
-      setToast('Failed to create saved object assets', 'danger');
     }
   } catch (err) {
     console.error(err.message);

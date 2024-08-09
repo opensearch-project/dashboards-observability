@@ -71,14 +71,22 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   }, [selectedTechnology, selectedDataSourceId]);
 
   const handleIndexPatternClick = (patternId: string) => {
+    const finalPatternId = selectedDataSourceId
+      ? `mds-${selectedDataSourceId}-objectId-${patternId}`
+      : patternId;
+
     coreRefs?.application!.navigateToApp('data-explorer', {
-      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${selectedDataSourceId}${patternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${finalPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
     });
   };
 
-  const redirectToDashboards = (path: string) => {
+  const redirectToDashboards = (dashboardId: string) => {
+    const finalDashboardId = selectedDataSourceId
+      ? `mds-${selectedDataSourceId}-objectId-${dashboardId}`
+      : dashboardId;
+
     coreRefs?.application!.navigateToApp('dashboards', {
-      path: `#/${path}`,
+      path: `#/view/${finalDashboardId}`,
     });
   };
 
@@ -129,7 +137,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
                   title={dashboard.title}
                   description={`Explore the ${dashboard.title} dashboard`}
                   onClick={() => {
-                    redirectToDashboards(`/view/${selectedDataSourceId}${dashboard.id}`);
+                    redirectToDashboards(dashboard.id);
                   }}
                 />
               </EuiFlexItem>

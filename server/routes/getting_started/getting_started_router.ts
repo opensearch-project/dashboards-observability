@@ -132,7 +132,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
 
   router.post(
     {
-      path: `/api/observability/gettingStarted/mdsLoading`,
+      path: `/api/observability/gettingStarted/createAssets`,
       validate: {
         body: schema.object({
           mdsId: schema.string(),
@@ -155,17 +155,25 @@ export function registerGettingStartedRoutes(router: IRouter) {
 
         const updatedObjects = loadedObjects.map((obj) => {
           if (mdsId) {
-            const newId = `${mdsId}${obj.id}`;
+            const newId = `mds-${mdsId}-objectId-${obj.id}`;
+
             const newReferences =
-              obj.references && obj.references.length > 0
-                ? obj.references
-                : [
-                    {
-                      id: mdsId,
-                      type: 'data-source',
-                      name: mdsLabel,
-                    },
-                  ];
+              obj.references?.map((ref: { type: string; id: any }) => {
+                if (ref.type === 'visualization') {
+                  return {
+                    ...ref,
+                    id: `mds-${mdsId}-objectId-${ref.id}`,
+                  };
+                }
+                return ref;
+              }) || [];
+
+            newReferences.push({
+              id: mdsId,
+              type: 'data-source',
+              name: mdsLabel,
+            });
+
             return {
               ...obj,
               id: newId,
