@@ -94,7 +94,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {truncate(record.dataSourceMDSLabel || 'local cluster', { length: 100 })}
+          {truncate(record.dataSourceMDSLabel || 'Local cluster', { length: 100 })}
         </EuiText>
       ),
     });
