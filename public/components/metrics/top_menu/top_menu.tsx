@@ -26,7 +26,7 @@ export const TopMenu = () => {
   return (
     dateSpanFilter && (
       <>
-        <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <div className="resolutionSelect">
               <EuiFieldText
@@ -50,7 +50,10 @@ export const TopMenu = () => {
               />
             </div>
           </EuiFlexItem>
-          <EuiFlexItem className="metrics-search-bar-datepicker">
+          <EuiFlexItem grow={false}>
+            <MetricsExport />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
             <EuiSuperDatePicker
               dateFormat={uiSettingsService.get('dateFormat')}
               start={dateSpanFilter.start}
@@ -58,9 +61,6 @@ export const TopMenu = () => {
               onTimeChange={(dateSpan) => dispatch(setDateSpan(dateSpan))}
               recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <MetricsExport />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
