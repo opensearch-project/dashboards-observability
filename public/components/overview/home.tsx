@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
 import { EuiText } from '@elastic/eui';
 import moment from 'moment';
-import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { coreRefs } from '../../framework/core_refs';
 import { ContentManagementPluginStart } from '../../../../../src/plugins/content_management/public';
@@ -24,23 +23,21 @@ const anomalyPluginID = 'anomalyDetection';
 
 const uiSettingsKey = 'observability:defaultDashboard';
 
-export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
-
-interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
+interface HomeProps extends RouteComponentProps {
   parentBreadcrumbs: ChromeBreadcrumb[];
   contentManagement: ContentManagementPluginStart;
 }
 
-let showModal;
+let showModal: { (): void; (): void; (): void };
 const wrapper = {
   dashboardSelected: false,
 };
-let startDate;
-let setStartDate;
-let endDate;
-let setEndDate;
-let dashboardTitle;
-let setDashboardTitle;
+let startDate: string;
+let setStartDate: (start: string) => void;
+let endDate: string;
+let setEndDate: (end: string) => void;
+let dashboardTitle: string;
+let setDashboardTitle: (arg0: string) => void;
 
 coreRefs.contentManagement?.registerContentProvider({
   id: 'custom_content',
@@ -144,7 +141,6 @@ export const Home = ({ ..._props }: HomeProps) => {
             description: card.description,
             title: card.title,
             onClick: () => navigateToApp(card.url, '#/'),
-            getIcon: () => {},
             getFooter: () => {
               return (
                 <EuiText size="s" textAlign="left">
@@ -173,10 +169,11 @@ export const Home = ({ ..._props }: HomeProps) => {
       getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
     });
     setIsRegistered(true);
-    if (dashboards && dashboards[uiSettingsService.get(uiSettingsKey)]) {
-      setDashboardTitle(dashboards[uiSettingsService.get(uiSettingsKey)].label);
-      setStartDate(dashboards[uiSettingsService.get(uiSettingsKey)].startDate);
-      setEndDate(dashboards[uiSettingsService.get(uiSettingsKey)].endDate);
+    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+    if (dashboards && defaultDashboard && dashboards[defaultDashboard]) {
+      setDashboardTitle(dashboards[defaultDashboard].label);
+      setStartDate(dashboards[defaultDashboard].startDate);
+      setEndDate(dashboards[defaultDashboard].endDate);
     }
   };
 
@@ -186,18 +183,25 @@ export const Home = ({ ..._props }: HomeProps) => {
         type: 'dashboard',
       })
       .then((response) => {
-        const savedDashoards = response.savedObjects.reduce((acc, savedDashboard) => {
+        const savedDashboards = response.savedObjects.reduce((acc, savedDashboard) => {
+          const dashboardAttributes = savedDashboard.attributes as {
+            title: string;
+            timeFrom: string;
+            timeTo: string;
+          };
           const id = savedDashboard.id.toString();
           acc[id] = {
-            label: savedDashboard.attributes.title,
-            startDate: savedDashboard.attributes.timeFrom,
-            endDate: savedDashboard.attributes.timeTo,
+            value: id,
+            label: dashboardAttributes.title,
+            startDate: dashboardAttributes.timeFrom,
+            endDate: dashboardAttributes.timeTo,
           };
           return acc;
         }, {} as DashboardDictionary);
-        setDashboards(savedDashoards);
-        if (uiSettingsService.get(uiSettingsKey)) {
-          setDashboardTitle(dashboards[uiSettingsService.get(uiSettingsKey)].label);
+        setDashboards(savedDashboards);
+        const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+        if (defaultDashboard && dashboards[defaultDashboard]) {
+          setDashboardTitle(dashboards[defaultDashboard].label);
         }
       })
       .catch((error) => {
@@ -207,7 +211,8 @@ export const Home = ({ ..._props }: HomeProps) => {
 
   useEffect(() => {
     registerCards();
-    if (uiSettingsService.get(uiSettingsKey)) {
+    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+    if (defaultDashboard) {
       wrapper.dashboardSelected = true;
       registerDashboard();
     }

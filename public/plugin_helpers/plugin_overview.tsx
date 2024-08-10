@@ -30,7 +30,13 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
         title: 'Selector Section',
         kind: 'custom',
         render: (contents) => (
-          <>{contents.map((content) => (content.kind === 'custom' ? content.render() : null))}</>
+          <>
+            {contents.map((content, index) =>
+              content.kind === 'custom' ? (
+                <React.Fragment key={index}>{content.render()}</React.Fragment>
+              ) : null
+            )}
+          </>
         ),
       },
       {
@@ -47,8 +53,3 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
     ],
   });
 };
-
-// export const initHome = (contentManagement: ContentManagementPluginStart) => {
-//   //Delete if not needed
-//   //If we need something updated on start
-// };

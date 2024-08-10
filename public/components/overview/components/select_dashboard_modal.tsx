@@ -26,6 +26,7 @@ interface Props {
   registerDashboard: () => void;
   closeModalVisible: () => void;
 }
+
 export function SelectDashboardModal({
   closeModal,
   wrapper,
@@ -33,13 +34,15 @@ export function SelectDashboardModal({
   registerDashboard,
   closeModalVisible,
 }: Props) {
-  const [selectedOptionsState, setSelectedOptionsState] = useState<EuiComboBoxOptionOption[]>([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedOptionsState, setSelectedOptionsState] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const [selectedId, setSelectedId] = useState<string>('');
   const [buttonIsActive, setButtonIsActive] = useState(false);
 
-  const onComboBoxChange = (options: EuiComboBoxOptionOption[]) => {
+  const onComboBoxChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
     if (options.length > 0) {
-      setButtonIsActive(options[0].value?.toString() !== selectedId);
+      setButtonIsActive(options[0].value !== selectedId);
     }
     setSelectedOptionsState(options);
   };
@@ -58,20 +61,19 @@ export function SelectDashboardModal({
     setSelectedId(uiSettingsService.get('observability:defaultDashboard'));
   }, []);
 
-  const options: EuiComboBoxOptionOption[] = Object.keys(dashboards).map((key) => ({
+  const options: Array<EuiComboBoxOptionOption<string>> = Object.keys(dashboards).map((key) => ({
     value: key,
     label: dashboards[key].label,
   }));
 
   useEffect(() => {
     if (selectedId) {
-      const currentTitle: EuiComboBoxOptionOption = {
+      const currentTitle: EuiComboBoxOptionOption<string> = {
         value: selectedId,
         label: dashboards[selectedId].label,
       };
       if (currentTitle) {
-        const comboBoxOption: Array<EuiComboBoxOptionOption<string>> = [currentTitle];
-        setSelectedOptionsState(comboBoxOption);
+        setSelectedOptionsState([currentTitle]);
         setButtonIsActive(false);
       }
     }
@@ -99,15 +101,9 @@ export function SelectDashboardModal({
             <EuiButton onClick={closeModal}>Cancel</EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {buttonIsActive ? (
-              <EuiButton onClick={onClickAdd} fill>
-                {wrapper.dashboardSelected ? 'Update' : 'Add'}
-              </EuiButton>
-            ) : (
-              <EuiButton onClick={onClickAdd} fill disabled>
-                {wrapper.dashboardSelected ? 'Update' : 'Add'}
-              </EuiButton>
-            )}
+            <EuiButton onClick={onClickAdd} fill disabled={!buttonIsActive}>
+              {wrapper.dashboardSelected ? 'Update' : 'Add'}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
