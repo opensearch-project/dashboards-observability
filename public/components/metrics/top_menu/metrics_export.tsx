@@ -59,7 +59,7 @@ const Savebutton = ({
       data-test-subj="metrics__saveManagementPopover"
       iconType="arrowDown"
     >
-      Save
+      Save as visualization
     </EuiButton>
   );
 };

@@ -115,7 +115,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                           <span
                             className="euiButton__text"
                           >
-                            Save
+                            Save as visualization
                           </span>
                         </span>
                       </EuiButtonContent>
