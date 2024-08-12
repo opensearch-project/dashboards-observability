@@ -14,7 +14,6 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiText,
-  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
@@ -55,6 +54,12 @@ export const MetricsExportPanel = ({
     setMetricsToExport(tempMetrics);
   };
 
+  // Temporary condition for UI testing (change to false to revert)
+  const showMetrics = true;
+
+  // Temporary metrics for UI testing
+  const tempMetrics = [{ name: 'Test Metric 1' }, { name: 'Test Metric 2' }];
+
   return (
     <div style={{ minWidth: '15vw' }}>
       <EuiTitle size="xs">
@@ -62,44 +67,17 @@ export const MetricsExportPanel = ({
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
 
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <EuiText size="s" color="subdued">
-            <p>
-              Save the view as visualization. You can add it to custom operational dashboards or
-              applications.
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <EuiFormRow label="Dashboards and applications - optional">
-            <EuiComboBox
-              placeholder="Select dashboards/applications"
-              onChange={(newOptions) => {
-                setSelectedPanelOptions(newOptions);
-              }}
-              selectedOptions={selectedPanelOptions}
-              options={
-                availableDashboards?.map((option: any) => {
-                  return {
-                    panel: option,
-                    label: option.title,
-                  };
-                }) ?? []
-              }
-              isClearable={true}
-              data-test-subj="eventExplorer__querySaveComboBox"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {metricsToExport.length > 0 && (
-        <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
-          {metricsToExport.map((metaData: any, index: number) => {
+      {showMetrics && (
+        <div
+          style={{
+            maxHeight: '30vh',
+            overflowY: 'scroll',
+            width: 'auto',
+            overflowX: 'hidden',
+            marginBottom: '16px',
+          }}
+        >
+          {tempMetrics.map((metaData: any, index: number) => {
             return (
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
@@ -119,6 +97,49 @@ export const MetricsExportPanel = ({
           })}
         </div>
       )}
+
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {!showMetrics && (
+          <EuiFlexItem style={{ maxWidth: '400px' }}>
+            <EuiText size="s" color="subdued">
+              <p>
+                Save the view as visualization. You can add it to custom operational dashboards or
+                applications.
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+
+        {showMetrics && (
+          <EuiFlexItem>
+            <EuiText size="s">
+              <p>
+                <strong>Add to custom operational dashboards or applications.</strong>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+
+        <EuiFlexItem style={{ maxWidth: '400px' }}>
+          <EuiFormRow label="Dashboards and applications - optional">
+            <EuiComboBox
+              placeholder="Select dashboards/applications"
+              onChange={(newOptions) => {
+                setSelectedPanelOptions(newOptions);
+              }}
+              selectedOptions={selectedPanelOptions}
+              options={
+                availableDashboards?.map((option: any) => ({
+                  panel: option,
+                  label: option.title,
+                })) ?? []
+              }
+              isClearable={true}
+              data-test-subj="eventExplorer__querySaveComboBox"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
