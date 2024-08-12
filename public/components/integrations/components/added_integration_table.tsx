@@ -145,8 +145,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     ),
   ].sort();
 
-  console.log(mdsLabels);
-
   const search = {
     box: {
       incremental: true,

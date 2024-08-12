@@ -210,10 +210,7 @@ export function IntegrationConnectionInputs({
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
-  handleSelectedDataSourceChange: (
-    dataSourceMDSId: string | undefined,
-    dataSourceMDSLabel: string | undefined
-  ) => void;
+  handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
   lockConnectionType?: boolean;
 }) {
   const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');

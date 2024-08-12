@@ -157,8 +157,8 @@ export class IntegrationsManager {
     templateName: string,
     name: string,
     indexPattern: string,
-    dataSourceMDSId: string | undefined,
-    dataSourceMDSLabel: string | undefined,
+    dataSourceMDSId?: string,
+    dataSourceMDSLabel?: string,
     workflows?: string[],
     dataSource?: string,
     tableName?: string

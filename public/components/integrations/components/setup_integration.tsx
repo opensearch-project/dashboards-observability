@@ -51,10 +51,7 @@ export interface IntegrationConfigProps {
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
-  handleSelectedDataSourceChange: (
-    dataSourceMDSId: string | undefined,
-    dataSourceMDSLabel: string | undefined
-  ) => void;
+  handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -426,7 +423,7 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-  const handleSelectedDataSourceChange = (id: string | undefined, label: string | undefined) => {
+  const handleSelectedDataSourceChange = (id?: string, label?: string) => {
     setDataSourceMDSId(id);
     setDataSourceMDSLabel(label);
   };
