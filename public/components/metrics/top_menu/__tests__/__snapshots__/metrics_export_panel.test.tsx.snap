@@ -68,295 +68,382 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
         }
       }
     >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        helpText="Search existing dashboards or applications by name"
-        label="Custom operational dashboards/application"
-        labelType="label"
+      <EuiTitle
+        size="xs"
+      >
+        <h3
+          className="euiTitle euiTitle--xsmall"
+        >
+          SAVE THE VIEW AS VISUALIZATION
+        </h3>
+      </EuiTitle>
+      <EuiHorizontalRule
+        margin="s"
+      >
+        <hr
+          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+        />
+      </EuiHorizontalRule>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
       >
         <div
-          className="euiFormRow"
-          id="random_html_id-row"
+          className="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
         >
-          <div
-            className="euiFormRow__labelWrapper"
-          >
-            <EuiFormLabel
-              className="euiFormRow__label"
-              htmlFor="random_html_id"
-              isFocused={false}
-              type="label"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="random_html_id"
-              >
-                Custom operational dashboards/application
-              </label>
-            </EuiFormLabel>
-          </div>
-          <div
-            className="euiFormRow__fieldWrapper"
-          >
-            <EuiComboBox
-              aria-describedby="random_html_id-help-0"
-              async={false}
-              compressed={false}
-              data-test-subj="eventExplorer__querySaveComboBox"
-              fullWidth={false}
-              id="random_html_id"
-              isClearable={true}
-              onBlur={[Function]}
-              onChange={[Function]}
-              onFocus={[Function]}
-              options={
-                Array [
-                  Object {
-                    "label": "[Flights] Global Flight Dashboard",
-                    "panel": Object {
-                      "attributes": Object {
-                        "title": "[Flights] Global Flight Dashboard",
-                      },
-                      "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-                      "title": "[Flights] Global Flight Dashboard",
-                      "type": "dashboard",
-                    },
-                  },
-                  Object {
-                    "label": "[Logs] Web traffic Panel",
-                    "panel": Object {
-                      "id": "fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
-                      "name": "[Logs] Web traffic Panel",
-                      "objectId": "observability-panel:fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
-                      "savedObject": true,
-                      "title": "[Logs] Web traffic Panel",
-                      "type": "observability-panel",
-                    },
-                  },
-                ]
+          <EuiFlexItem
+            style={
+              Object {
+                "maxWidth": "400px",
               }
-              placeholder="Select dashboards/applications"
-              selectedOptions={Array []}
-              singleSelection={false}
-              sortMatchesBy="none"
+            }
+          >
+            <div
+              className="euiFlexItem"
+              style={
+                Object {
+                  "maxWidth": "400px",
+                }
+              }
             >
-              <div
-                aria-describedby="random_html_id-help-0"
-                aria-expanded={false}
-                aria-haspopup="listbox"
-                className="euiComboBox"
-                data-test-subj="eventExplorer__querySaveComboBox"
-                onKeyDown={[Function]}
-                role="combobox"
+              <EuiText
+                color="subdued"
+                size="s"
               >
-                <EuiComboBoxInput
-                  autoSizeInputRef={[Function]}
-                  compressed={false}
-                  fullWidth={false}
-                  hasSelectedOptions={false}
-                  id="random_html_id"
-                  inputRef={[Function]}
-                  isListOpen={false}
-                  noIcon={false}
-                  onChange={[Function]}
-                  onClear={[Function]}
-                  onClick={[Function]}
-                  onCloseListClick={[Function]}
-                  onFocus={[Function]}
-                  onOpenListClick={[Function]}
-                  onRemoveOption={[Function]}
-                  placeholder="Select dashboards/applications"
-                  rootId={[Function]}
-                  searchValue=""
-                  selectedOptions={Array []}
-                  singleSelection={false}
-                  toggleButtonRef={[Function]}
-                  updatePosition={[Function]}
-                  value=""
+                <div
+                  className="euiText euiText--small"
                 >
-                  <EuiFormControlLayout
-                    compressed={false}
-                    fullWidth={false}
-                    icon={
-                      Object {
-                        "aria-label": "Open list of options",
-                        "data-test-subj": "comboBoxToggleListButton",
-                        "disabled": undefined,
-                        "onClick": [Function],
-                        "ref": [Function],
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                  <EuiTextColor
+                    color="subdued"
+                    component="div"
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiTextColor euiTextColor--subdued"
+                    >
+                      <p>
+                        Save the view as visualization. You can add it to custom operational dashboards or applications.
+                      </p>
+                    </div>
+                  </EuiTextColor>
+                </div>
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+          <EuiFlexItem
+            style={
+              Object {
+                "maxWidth": "400px",
+              }
+            }
+          >
+            <div
+              className="euiFlexItem"
+              style={
+                Object {
+                  "maxWidth": "400px",
+                }
+              }
+            >
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                helpText="Select or type dashboard or application names"
+                label="Dashboards and applications - optional"
+                labelType="label"
+              >
+                <div
+                  className="euiFormRow"
+                  id="random_html_id-row"
+                >
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
+                    <EuiFormLabel
+                      className="euiFormRow__label"
+                      htmlFor="random_html_id"
+                      isFocused={false}
+                      type="label"
+                    >
+                      <label
+                        className="euiFormLabel euiFormRow__label"
+                        htmlFor="random_html_id"
+                      >
+                        Dashboards and applications - optional
+                      </label>
+                    </EuiFormLabel>
+                  </div>
+                  <div
+                    className="euiFormRow__fieldWrapper"
+                  >
+                    <EuiComboBox
+                      aria-describedby="random_html_id-help-0"
+                      async={false}
+                      compressed={false}
+                      data-test-subj="eventExplorer__querySaveComboBox"
+                      fullWidth={false}
+                      id="random_html_id"
+                      isClearable={true}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      options={
+                        Array [
+                          Object {
+                            "label": "[Flights] Global Flight Dashboard",
+                            "panel": Object {
+                              "attributes": Object {
+                                "title": "[Flights] Global Flight Dashboard",
+                              },
+                              "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+                              "title": "[Flights] Global Flight Dashboard",
+                              "type": "dashboard",
+                            },
+                          },
+                          Object {
+                            "label": "[Logs] Web traffic Panel",
+                            "panel": Object {
+                              "id": "fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+                              "name": "[Logs] Web traffic Panel",
+                              "objectId": "observability-panel:fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+                              "savedObject": true,
+                              "title": "[Logs] Web traffic Panel",
+                              "type": "observability-panel",
+                            },
+                          },
+                        ]
+                      }
+                      placeholder="Select dashboards/applications"
+                      selectedOptions={Array []}
+                      singleSelection={false}
+                      sortMatchesBy="none"
                     >
                       <div
-                        className="euiFormControlLayout__childrenWrapper"
+                        aria-describedby="random_html_id-help-0"
+                        aria-expanded={false}
+                        aria-haspopup="listbox"
+                        className="euiComboBox"
+                        data-test-subj="eventExplorer__querySaveComboBox"
+                        onKeyDown={[Function]}
+                        role="combobox"
                       >
-                        <div
-                          className="euiComboBox__inputWrap euiComboBox__inputWrap-isClearable"
-                          data-test-subj="comboBoxInput"
+                        <EuiComboBoxInput
+                          autoSizeInputRef={[Function]}
+                          compressed={false}
+                          fullWidth={false}
+                          hasSelectedOptions={false}
+                          id="random_html_id"
+                          inputRef={[Function]}
+                          isListOpen={false}
+                          noIcon={false}
+                          onChange={[Function]}
+                          onClear={[Function]}
                           onClick={[Function]}
-                          tabIndex={-1}
+                          onCloseListClick={[Function]}
+                          onFocus={[Function]}
+                          onOpenListClick={[Function]}
+                          onRemoveOption={[Function]}
+                          placeholder="Select dashboards/applications"
+                          rootId={[Function]}
+                          searchValue=""
+                          selectedOptions={Array []}
+                          singleSelection={false}
+                          toggleButtonRef={[Function]}
+                          updatePosition={[Function]}
+                          value=""
                         >
-                          <p
-                            className="euiComboBoxPlaceholder"
-                          >
-                            Select dashboards/applications
-                          </p>
-                          <AutosizeInput
-                            aria-controls=""
-                            className="euiComboBox__input"
-                            data-test-subj="comboBoxSearchInput"
-                            id="random_html_id"
-                            injectStyles={true}
-                            inputRef={[Function]}
-                            minWidth={1}
-                            onBlur={[Function]}
-                            onChange={[Function]}
-                            onFocus={[Function]}
-                            role="textbox"
-                            style={
+                          <EuiFormControlLayout
+                            compressed={false}
+                            fullWidth={false}
+                            icon={
                               Object {
-                                "fontSize": 14,
+                                "aria-label": "Open list of options",
+                                "data-test-subj": "comboBoxToggleListButton",
+                                "disabled": undefined,
+                                "onClick": [Function],
+                                "ref": [Function],
+                                "side": "right",
+                                "type": "arrowDown",
                               }
                             }
-                            value=""
                           >
                             <div
-                              className="euiComboBox__input"
-                              style={
-                                Object {
-                                  "display": "inline-block",
-                                  "fontSize": 14,
-                                }
-                              }
+                              className="euiFormControlLayout"
                             >
-                              <input
-                                aria-controls=""
-                                data-test-subj="comboBoxSearchInput"
-                                id="random_html_id"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                role="textbox"
-                                style={
-                                  Object {
-                                    "boxSizing": "content-box",
-                                    "width": "2px",
-                                  }
-                                }
-                                value=""
-                              />
                               <div
-                                style={
-                                  Object {
-                                    "height": 0,
-                                    "left": 0,
-                                    "overflow": "scroll",
-                                    "position": "absolute",
-                                    "top": 0,
-                                    "visibility": "hidden",
-                                    "whiteSpace": "pre",
-                                  }
-                                }
-                              />
-                            </div>
-                          </AutosizeInput>
-                        </div>
-                        <EuiFormControlLayoutIcons
-                          compressed={false}
-                          icon={
-                            Object {
-                              "aria-label": "Open list of options",
-                              "data-test-subj": "comboBoxToggleListButton",
-                              "disabled": undefined,
-                              "onClick": [Function],
-                              "ref": [Function],
-                              "side": "right",
-                              "type": "arrowDown",
-                            }
-                          }
-                        >
-                          <div
-                            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                          >
-                            <EuiFormControlLayoutCustomIcon
-                              aria-label="Open list of options"
-                              data-test-subj="comboBoxToggleListButton"
-                              iconRef={[Function]}
-                              onClick={[Function]}
-                              size="m"
-                              type="arrowDown"
-                            >
-                              <button
-                                aria-label="Open list of options"
-                                className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                                data-test-subj="comboBoxToggleListButton"
-                                onClick={[Function]}
-                                type="button"
+                                className="euiFormControlLayout__childrenWrapper"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
-                                  type="arrowDown"
+                                <div
+                                  className="euiComboBox__inputWrap euiComboBox__inputWrap-isClearable"
+                                  data-test-subj="comboBoxInput"
+                                  onClick={[Function]}
+                                  tabIndex={-1}
                                 >
-                                  <EuiIconBeaker
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                    focusable="false"
-                                    role="img"
-                                    style={null}
+                                  <p
+                                    className="euiComboBoxPlaceholder"
                                   >
-                                    <svg
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                      focusable="false"
-                                      height={16}
-                                      role="img"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width={16}
-                                      xmlns="http://www.w3.org/2000/svg"
+                                    Select dashboards/applications
+                                  </p>
+                                  <AutosizeInput
+                                    aria-controls=""
+                                    className="euiComboBox__input"
+                                    data-test-subj="comboBoxSearchInput"
+                                    id="random_html_id"
+                                    injectStyles={true}
+                                    inputRef={[Function]}
+                                    minWidth={1}
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
+                                    role="textbox"
+                                    style={
+                                      Object {
+                                        "fontSize": 14,
+                                      }
+                                    }
+                                    value=""
+                                  >
+                                    <div
+                                      className="euiComboBox__input"
+                                      style={
+                                        Object {
+                                          "display": "inline-block",
+                                          "fontSize": 14,
+                                        }
+                                      }
                                     >
-                                      <path
-                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      <input
+                                        aria-controls=""
+                                        data-test-subj="comboBoxSearchInput"
+                                        id="random_html_id"
+                                        onBlur={[Function]}
+                                        onChange={[Function]}
+                                        onFocus={[Function]}
+                                        role="textbox"
+                                        style={
+                                          Object {
+                                            "boxSizing": "content-box",
+                                            "width": "2px",
+                                          }
+                                        }
+                                        value=""
                                       />
-                                    </svg>
-                                  </EuiIconBeaker>
-                                </EuiIcon>
-                              </button>
-                            </EuiFormControlLayoutCustomIcon>
-                          </div>
-                        </EuiFormControlLayoutIcons>
+                                      <div
+                                        style={
+                                          Object {
+                                            "height": 0,
+                                            "left": 0,
+                                            "overflow": "scroll",
+                                            "position": "absolute",
+                                            "top": 0,
+                                            "visibility": "hidden",
+                                            "whiteSpace": "pre",
+                                          }
+                                        }
+                                      />
+                                    </div>
+                                  </AutosizeInput>
+                                </div>
+                                <EuiFormControlLayoutIcons
+                                  compressed={false}
+                                  icon={
+                                    Object {
+                                      "aria-label": "Open list of options",
+                                      "data-test-subj": "comboBoxToggleListButton",
+                                      "disabled": undefined,
+                                      "onClick": [Function],
+                                      "ref": [Function],
+                                      "side": "right",
+                                      "type": "arrowDown",
+                                    }
+                                  }
+                                >
+                                  <div
+                                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <EuiFormControlLayoutCustomIcon
+                                      aria-label="Open list of options"
+                                      data-test-subj="comboBoxToggleListButton"
+                                      iconRef={[Function]}
+                                      onClick={[Function]}
+                                      size="m"
+                                      type="arrowDown"
+                                    >
+                                      <button
+                                        aria-label="Open list of options"
+                                        className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                        data-test-subj="comboBoxToggleListButton"
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <EuiIcon
+                                          aria-hidden="true"
+                                          className="euiFormControlLayoutCustomIcon__icon"
+                                          size="m"
+                                          type="arrowDown"
+                                        >
+                                          <EuiIconBeaker
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            role="img"
+                                            style={null}
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                              />
+                                            </svg>
+                                          </EuiIconBeaker>
+                                        </EuiIcon>
+                                      </button>
+                                    </EuiFormControlLayoutCustomIcon>
+                                  </div>
+                                </EuiFormControlLayoutIcons>
+                              </div>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiComboBoxInput>
                       </div>
-                    </div>
-                  </EuiFormControlLayout>
-                </EuiComboBoxInput>
-              </div>
-            </EuiComboBox>
-            <EuiFormHelpText
-              className="euiFormRow__text"
-              id="random_html_id-help-0"
-              key="Search existing dashboards or applications by name"
-            >
-              <div
-                className="euiFormHelpText euiFormRow__text"
-                id="random_html_id-help-0"
-              >
-                Search existing dashboards or applications by name
-              </div>
-            </EuiFormHelpText>
-          </div>
+                    </EuiComboBox>
+                    <EuiFormHelpText
+                      className="euiFormRow__text"
+                      id="random_html_id-help-0"
+                      key="Select or type dashboard or application names"
+                    >
+                      <div
+                        className="euiFormHelpText euiFormRow__text"
+                        id="random_html_id-help-0"
+                      >
+                        Select or type dashboard or application names
+                      </div>
+                    </EuiFormHelpText>
+                  </div>
+                </div>
+              </EuiFormRow>
+            </div>
+          </EuiFlexItem>
         </div>
-      </EuiFormRow>
+      </EuiFlexGroup>
       <div
         style={
           Object {

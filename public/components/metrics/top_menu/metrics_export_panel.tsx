@@ -11,6 +11,10 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiForm,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
@@ -53,28 +57,48 @@ export const MetricsExportPanel = ({
 
   return (
     <div style={{ minWidth: '15vw' }}>
-      <EuiFormRow
-        label="Custom operational dashboards/application"
-        helpText="Search existing dashboards or applications by name"
-      >
-        <EuiComboBox
-          placeholder="Select dashboards/applications"
-          onChange={(newOptions) => {
-            setSelectedPanelOptions(newOptions);
-          }}
-          selectedOptions={selectedPanelOptions}
-          options={
-            availableDashboards?.map((option: any) => {
-              return {
-                panel: option,
-                label: option.title,
-              };
-            }) ?? []
-          }
-          isClearable={true}
-          data-test-subj="eventExplorer__querySaveComboBox"
-        />
-      </EuiFormRow>
+      <EuiTitle size="xs">
+        <h3>SAVE THE VIEW AS VISUALIZATION</h3>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem style={{ maxWidth: '400px' }}>
+          <EuiText size="s" color="subdued">
+            <p>
+              Save the view as visualization. You can add it to custom operational dashboards or
+              applications.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiSpacer size="m" />
+
+        <EuiFlexItem style={{ maxWidth: '400px' }}>
+          <EuiFormRow
+            label="Dashboards and applications - optional"
+            helpText="Select or type dashboard or application names"
+          >
+            <EuiComboBox
+              placeholder="Select dashboards/applications"
+              onChange={(newOptions) => {
+                setSelectedPanelOptions(newOptions);
+              }}
+              selectedOptions={selectedPanelOptions}
+              options={
+                availableDashboards?.map((option: any) => {
+                  return {
+                    panel: option,
+                    label: option.title,
+                  };
+                }) ?? []
+              }
+              isClearable={true}
+              data-test-subj="eventExplorer__querySaveComboBox"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {metricsToExport.length > 0 && (
         <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
