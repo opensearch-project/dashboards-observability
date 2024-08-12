@@ -33,7 +33,7 @@ export interface AddedIntegrationType {
   assets: any[];
   addedBy: string;
   id: string;
-  references: [];
+  references?: [];
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {

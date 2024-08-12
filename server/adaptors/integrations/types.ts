@@ -113,7 +113,7 @@ interface IntegrationInstance {
   dataSource: string;
   creationDate: string;
   assets: AssetReference[];
-  references: [];
+  references?: [];
 }
 
 interface IntegrationInstanceResult extends IntegrationInstance {

@@ -262,8 +262,9 @@ export const addedIntegrationDataWithoutMDS: AddedIntegrationsTableProps = {
         id: 'ad7e6e30-0b99-11ee-b27c-c9863222e9bf',
         references: [
           {
-            dataSourceMDSId: '',
-            dataSourceMDSLabel: '',
+            id: '',
+            name: '',
+            tye: 'data-source',
           },
         ],
       },
