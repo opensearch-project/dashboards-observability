@@ -9,9 +9,9 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
-  EuiTitle,
   EuiFlexItem,
   EuiPageContentHeaderSection,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -32,9 +32,9 @@ export function IntegrationOverview(props: any) {
         <EuiPageContentHeaderSection>
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle data-test-subj="eventHomePageTitle" size="l">
+              <EuiText data-test-subj="eventHomePageTitle" size="s">
                 <h1>{config.displayName || config.name}</h1>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

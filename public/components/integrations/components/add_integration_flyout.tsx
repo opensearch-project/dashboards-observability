@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiLink,
   EuiCompressedFormRow,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -99,7 +98,10 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             }
           />
         </EuiCompressedFormRow>
-        <EuiCompressedFormRow label="Name" helpText="This will be used to label the newly added integration.">
+        <EuiCompressedFormRow
+          label="Name"
+          helpText="This will be used to label the newly added integration."
+        >
           <EuiCompressedFieldText
             data-test-subj="new-instance-name"
             name="first"
@@ -122,9 +124,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   return (
     <EuiFlyout data-test-subj="addIntegrationFlyout" onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle data-test-subj="addIntegrationFlyoutTitle">
+        <EuiText data-test-subj="addIntegrationFlyoutTitle" size="s">
           <h2>Add Integration</h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderContent()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
