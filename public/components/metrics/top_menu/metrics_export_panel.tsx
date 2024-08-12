@@ -75,10 +75,7 @@ export const MetricsExportPanel = ({
         <EuiSpacer size="m" />
 
         <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <EuiFormRow
-            label="Dashboards and applications - optional"
-            helpText="Select or type dashboard or application names"
-          >
+          <EuiFormRow label="Dashboards and applications - optional">
             <EuiComboBox
               placeholder="Select dashboards/applications"
               onChange={(newOptions) => {

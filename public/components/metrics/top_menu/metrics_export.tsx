@@ -52,6 +52,7 @@ const Savebutton = ({
   return (
     <EuiButton
       size="s"
+      fill={true}
       iconSide="right"
       onClick={() => {
         setIsPanelOpen((staleState) => !staleState);

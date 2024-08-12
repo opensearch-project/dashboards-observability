@@ -157,7 +157,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                helpText="Select or type dashboard or application names"
                 label="Dashboards and applications - optional"
                 labelType="label"
               >
@@ -186,7 +185,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                     className="euiFormRow__fieldWrapper"
                   >
                     <EuiComboBox
-                      aria-describedby="random_html_id-help-0"
                       async={false}
                       compressed={false}
                       data-test-subj="eventExplorer__querySaveComboBox"
@@ -228,7 +226,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                       sortMatchesBy="none"
                     >
                       <div
-                        aria-describedby="random_html_id-help-0"
                         aria-expanded={false}
                         aria-haspopup="listbox"
                         className="euiComboBox"
@@ -425,18 +422,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                         </EuiComboBoxInput>
                       </div>
                     </EuiComboBox>
-                    <EuiFormHelpText
-                      className="euiFormRow__text"
-                      id="random_html_id-help-0"
-                      key="Select or type dashboard or application names"
-                    >
-                      <div
-                        className="euiFormHelpText euiFormRow__text"
-                        id="random_html_id-help-0"
-                      >
-                        Select or type dashboard or application names
-                      </div>
-                    </EuiFormHelpText>
                   </div>
                 </div>
               </EuiFormRow>

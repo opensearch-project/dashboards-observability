@@ -326,6 +326,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                         >
                           <EuiButton
                             data-test-subj="metrics__saveManagementPopover"
+                            fill={true}
                             iconSide="right"
                             iconType="arrowDown"
                             onClick={[Function]}
@@ -336,6 +337,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               data-test-subj="metrics__saveManagementPopover"
                               disabled={false}
                               element="button"
+                              fill={true}
                               iconSide="right"
                               iconType="arrowDown"
                               isDisabled={false}
@@ -344,7 +346,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               type="button"
                             >
                               <button
-                                className="euiButton euiButton--primary euiButton--small"
+                                className="euiButton euiButton--primary euiButton--small euiButton--fill"
                                 data-test-subj="metrics__saveManagementPopover"
                                 disabled={false}
                                 onClick={[Function]}
