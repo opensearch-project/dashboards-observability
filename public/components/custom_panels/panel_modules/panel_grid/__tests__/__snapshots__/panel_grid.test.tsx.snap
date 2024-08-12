@@ -15,6 +15,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
+      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction] {
         "calls": Array [
@@ -276,6 +277,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],

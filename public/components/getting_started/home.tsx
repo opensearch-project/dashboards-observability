@@ -17,11 +17,8 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { NewGettingStarted } from './components/getting_started';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
-
-export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
