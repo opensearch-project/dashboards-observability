@@ -138,9 +138,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const mdsLabels = [
     ...new Set(
       props.data.hits.flatMap((hit) =>
-        hit.references.length > 0
-          ? hit.references.map((ref) => ref.dataSourceMDSLabel || 'Local cluster')
-          : []
+        hit.references.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
       )
     ),
   ].sort();
@@ -181,7 +179,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     const creationDate = integration.creationDate;
     const name = integration.name;
     const dataSourceMDSLabel = integration.references
-      ? integration.references[0].dataSourceMDSLabel
+      ? integration.references[0].name
       : 'Local cluster';
     return {
       id,

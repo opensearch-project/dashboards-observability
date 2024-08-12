@@ -136,8 +136,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             componentConfig={{
               activeOption: [
                 {
-                  id: data?.references?.[0]?.dataSourceMDSId,
-                  label: data?.references?.[0]?.dataSourceMDSLabel,
+                  id: data?.references?.[0]?.id,
+                  label: data?.references?.[0]?.name,
                 },
               ],
               fullWidth: true,

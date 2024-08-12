@@ -199,8 +199,9 @@ export class IntegrationInstanceBuilder {
       assets: refs,
       references: [
         {
-          dataSourceMDSId: options.dataSourceMDSId,
-          dataSourceMDSLabel: options.dataSourceMDSLabel,
+          id: options.dataSourceMDSId,
+          name: options.dataSourceMDSLabel,
+          type: 'data-source',
         },
       ],
     });

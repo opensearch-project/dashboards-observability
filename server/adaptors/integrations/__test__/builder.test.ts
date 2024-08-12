@@ -85,8 +85,9 @@ describe('IntegrationInstanceBuilder', () => {
         creationDate: expect.any(String),
         references: [
           {
-            dataSourceMDSId: undefined,
-            dataSourceMDSLabel: undefined,
+            id: undefined,
+            name: undefined,
+            type: 'data-source',
           },
         ],
         assets: [
@@ -315,8 +316,9 @@ describe('IntegrationInstanceBuilder', () => {
         assets: refs,
         references: [
           {
-            dataSourceMDSId: undefined,
-            dataSourceMDSLabel: undefined,
+            id: undefined,
+            name: undefined,
+            type: 'data-source',
           },
         ],
       };
