@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
@@ -54,12 +55,6 @@ export const MetricsExportPanel = ({
     setMetricsToExport(tempMetrics);
   };
 
-  // Temporary condition for UI testing (change to false to revert)
-  const showMetrics = true;
-
-  // Temporary metrics for UI testing
-  const tempMetrics = [{ name: 'Test Metric 1' }, { name: 'Test Metric 2' }];
-
   return (
     <div style={{ minWidth: '15vw' }}>
       <EuiTitle size="xs">
@@ -67,7 +62,7 @@ export const MetricsExportPanel = ({
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
 
-      {showMetrics && (
+      {metricsToExport.length > 0 && (
         <div
           style={{
             maxHeight: '30vh',
@@ -77,7 +72,7 @@ export const MetricsExportPanel = ({
             marginBottom: '16px',
           }}
         >
-          {tempMetrics.map((metaData: any, index: number) => {
+          {metricsToExport.map((metaData: any, index: number) => {
             return (
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
@@ -99,7 +94,7 @@ export const MetricsExportPanel = ({
       )}
 
       <EuiFlexGroup direction="column" gutterSize="none">
-        {!showMetrics && (
+        {!(metricsToExport.length > 0) && (
           <EuiFlexItem style={{ maxWidth: '400px' }}>
             <EuiText size="s" color="subdued">
               <p>
@@ -107,10 +102,11 @@ export const MetricsExportPanel = ({
                 applications.
               </p>
             </EuiText>
+            <EuiSpacer size="m" />
           </EuiFlexItem>
         )}
 
-        {showMetrics && (
+        {metricsToExport.length > 0 && (
           <EuiFlexItem>
             <EuiText size="s">
               <p>
