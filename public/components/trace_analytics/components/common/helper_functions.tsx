@@ -65,7 +65,7 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
-        body={<EuiText>{missingConfigurationBody}</EuiText>}
+        body={<EuiText size="s">{missingConfigurationBody}</EuiText>}
         actions={
           <EuiSmallButton
             color="primary"

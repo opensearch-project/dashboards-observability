@@ -18,7 +18,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { CustomInputModal } from './custom_modals/custom_input_modal';
 
@@ -38,7 +38,7 @@ export const getCustomModal = (
   btn1txt: string,
   btn2txt: string,
   openNoteName?: string,
-  helpText?: string,
+  helpText?: string
 ) => {
   return (
     <CustomInputModal
@@ -92,7 +92,12 @@ export const getSampleNotebooksModal = (
         confirmButtonText="Yes"
         defaultFocusedButton="confirm"
       >
-        <p>Do you want to add sample notebooks? This will also add Dashboards sample flights and logs data if they have not been added.</p>
+        <EuiText size="s">
+          <p>
+            Do you want to add sample notebooks? This will also add Dashboards sample flights and
+            logs data if they have not been added.
+          </p>
+        </EuiText>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
@@ -105,7 +110,7 @@ export const getDeleteModal = (
   onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
   title: string,
   message: string,
-  confirmMessage?: string,
+  confirmMessage?: string
 ) => {
   return (
     <EuiOverlayMask>
@@ -114,11 +119,11 @@ export const getDeleteModal = (
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelButtonText="Cancel"
-        confirmButtonText={confirmMessage || "Delete"}
+        confirmButtonText={confirmMessage || 'Delete'}
         buttonColor="danger"
         defaultFocusedButton="confirm"
       >
-        {message}
+        <EuiText size="s">{message}</EuiText>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
@@ -145,12 +150,16 @@ export const DeleteNotebookModal = ({
     <EuiOverlayMask>
       <EuiModal onClose={onCancel} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{title}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText>{message}</EuiText>
-          <EuiText>The action cannot be undone.</EuiText>
+          <EuiText size="s">{message}</EuiText>
+          <EuiText size="s">The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
             <EuiCompressedFormRow label={'To confirm deletion, enter "delete" in the text field'}>

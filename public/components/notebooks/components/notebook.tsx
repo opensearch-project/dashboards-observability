@@ -21,7 +21,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import CSS from 'csstype';
 import moment from 'moment';
@@ -1007,7 +1006,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           isOpen={this.state.isReportingActionsPopoverOpen}
           closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
         >
-          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} />
+          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} size="s" />
         </EuiPopover>
       </div>
     ) : null;
@@ -1059,7 +1058,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     isOpen={this.state.isParaActionsPopoverOpen}
                     closePopover={() => this.setState({ isParaActionsPopoverOpen: false })}
                   >
-                    <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} />
+                    <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} size="s" />
                   </EuiPopover>
                 </EuiFlexItem>
               )}
@@ -1084,7 +1083,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     isOpen={this.state.isNoteActionsPopoverOpen}
                     closePopover={() => this.setState({ isNoteActionsPopoverOpen: false })}
                   >
-                    <EuiContextMenu initialPanelId={0} panels={noteActionsPanels} />
+                    <EuiContextMenu initialPanelId={0} panels={noteActionsPanels} size="s" />
                   </EuiPopover>
                 </EuiFlexItem>
               ) : (
@@ -1098,20 +1097,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="delete-notebook"
                       onClick={() => this.showDeleteNotebookModal()}
                     >
                       Delete this notebook
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </>
               )}
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <EuiTitle size="l" data-test-subj="notebookTitle">
+            <EuiText size="s" data-test-subj="notebookTitle">
               <h1>{this.state.path}</h1>
-            </EuiTitle>
+            </EuiText>
             <EuiSpacer />
             {!this.state.savedObjectNotebook && (
               <EuiFlexGroup>
@@ -1133,7 +1132,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems={'flexStart'} gutterSize={'l'}>
               <EuiFlexItem grow={false}>
-                <EuiText>{createdText}</EuiText>
+                <EuiText size="s">{createdText}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
             {this.state.parsedPara.length > 0 ? (
@@ -1198,7 +1197,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       isOpen={this.state.isAddParaPopoverOpen}
                       closePopover={() => this.setState({ isAddParaPopoverOpen: false })}
                     >
-                      <EuiContextMenu initialPanelId={0} panels={addParaPanels} />
+                      <EuiContextMenu initialPanelId={0} panels={addParaPanels} size="s" />
                     </EuiPopover>
                   </>
                 )}
@@ -1210,7 +1209,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                   <EuiSpacer size="xxl" />
                   <EuiText textAlign="center">
                     <h2>No paragraphs</h2>
-                    <EuiText>
+                    <EuiText size="s">
                       Add a paragraph to compose your document or story. Notebooks now support two
                       types of input:
                     </EuiText>
