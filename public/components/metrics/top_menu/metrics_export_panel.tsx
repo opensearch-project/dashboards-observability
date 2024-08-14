@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
-  EuiFormRow,
   EuiFlexItem,
   EuiForm,
-  EuiTitle,
+  EuiFormRow,
   EuiHorizontalRule,
-  EuiText,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchPanels } from '../../../../public/components/custom_panels/redux/panel_slice';
@@ -77,7 +77,7 @@ export const MetricsExportPanel = ({
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label={'Metric Name #' + (index + 1)}>
+                    <EuiFormRow label={'Metric ' + (index + 1)}>
                       <EuiFieldText
                         key={`metric-name-input-id-${index}`}
                         value={metaData.name}

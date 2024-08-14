@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,10 +13,11 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
+import max from 'lodash/max';
+import React, { useEffect, useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { useSelector } from 'react-redux';
 import semver from 'semver';
-import max from 'lodash/max';
 import { MountPoint } from '../../../../../../src/core/public';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import {
@@ -42,7 +42,6 @@ import {
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
-import { uiSettingsService } from '../../../../common/utils';
 
 const Savebutton = ({
   setIsPanelOpen,
@@ -65,9 +64,9 @@ const Savebutton = ({
   );
 };
 
-const HeaderControlledPopoverWrapper = ({ children }) => {
+const HeaderControlledPopoverWrapper = ({ children }: { children: React.ReactElement }) => {
   const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
-  const showActionsInHeader = uiSettingsService.get('home:useNewHomePage');
+  const showActionsInHeader = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
   if (showActionsInHeader && HeaderControl) {
     return (

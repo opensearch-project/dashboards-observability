@@ -116,7 +116,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                       fullWidth={false}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
-                      label="Metric Name #1"
+                      label="Metric 1"
                       labelType="label"
                     >
                       <div
@@ -136,7 +136,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                               className="euiFormLabel euiFormRow__label"
                               htmlFor="random_html_id"
                             >
-                              Metric Name #1
+                              Metric 1
                             </label>
                           </EuiFormLabel>
                         </div>
@@ -209,7 +209,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                       fullWidth={false}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
-                      label="Metric Name #2"
+                      label="Metric 2"
                       labelType="label"
                     >
                       <div
@@ -229,7 +229,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                               className="euiFormLabel euiFormRow__label"
                               htmlFor="random_html_id"
                             >
-                              Metric Name #2
+                              Metric 2
                             </label>
                           </EuiFormLabel>
                         </div>
