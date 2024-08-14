@@ -73,6 +73,7 @@ export const AddVisualizationPopover = ({
       iconSide="right"
       disabled={addVizDisabled}
       onClick={onPopoverClick}
+      size="s"
     >
       Add visualization
     </EuiButton>
@@ -86,7 +87,11 @@ export const AddVisualizationPopover = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={getVizContextPanels()} />
+      <EuiContextMenu 
+        initialPanelId={0} 
+        panels={getVizContextPanels()} 
+        size="s"
+      />
     </EuiPopover>
   );
 };

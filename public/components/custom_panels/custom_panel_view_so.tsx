@@ -369,13 +369,19 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       iconType="cross"
       color="danger"
       onClick={() => editPanel('cancel')}
+      size="s"
     >
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiButton 
+    data-test-subj="savePanelButton" 
+    iconType="save" 
+    onClick={() => editPanel('save')}
+    size="s"
+    >
       Save
     </EuiButton>
   );
@@ -386,6 +392,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       iconType="pencil"
       onClick={() => editPanel('edit')}
       disabled={editDisabled}
+      size="s"
     >
       Edit
     </EuiButton>
@@ -397,6 +404,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       iconType="plusInCircle"
       onClick={onAddClick}
       isDisabled={addVizDisabled}
+      size="s"
     >
       Add
     </EuiButton>
@@ -410,6 +418,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       iconSide="right"
       onClick={() => setPanelsMenuPopover(true)}
       disabled={addVizDisabled}
+      size="s"
     >
       Dashboard Actions
     </EuiButton>
@@ -587,7 +596,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} />
+                        <EuiContextMenu 
+                          initialPanelId={0} 
+                          panels={panelActionsMenu} 
+                          size="s"
+                        />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -604,6 +617,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           <EuiPageContentBody>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
+                {/*Delete ADAM:: Unable to change the PPL Search bar size*/}
                 <Autocomplete
                   key={'autocomplete-search-bar'}
                   query={pplFilterValue}
@@ -641,6 +655,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                   onTimeChange={onDatePickerChange}
                   recentlyUsedRanges={recentlyUsedRanges}
                   isDisabled={dateDisabled}
+                  compressed
                 />
               </EuiFlexItem>
               {appPanel && (

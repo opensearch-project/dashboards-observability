@@ -231,7 +231,7 @@ export const CustomPanelTable = ({
   const deletePanel = () => {
     const customPanelString = `Observability Dashboard${
       selectedCustomPanels.length > 1 ? 's' : ''
-    }`;
+      }`;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
@@ -259,6 +259,7 @@ export const CustomPanelTable = ({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
+      size="s"
     >
       Actions
     </EuiButton>
@@ -273,6 +274,7 @@ export const CustomPanelTable = ({
         setIsActionsPopoverOpen(false);
         renamePanel();
       }}
+      size="s"
     >
       Rename
     </EuiContextMenuItem>,
@@ -284,6 +286,7 @@ export const CustomPanelTable = ({
         setIsActionsPopoverOpen(false);
         clonePanelModal();
       }}
+      size="s"
     >
       Duplicate
     </EuiContextMenuItem>,
@@ -295,6 +298,7 @@ export const CustomPanelTable = ({
         setIsActionsPopoverOpen(false);
         deletePanel();
       }}
+      size="s"
     >
       Delete
     </EuiContextMenuItem>,
@@ -305,6 +309,7 @@ export const CustomPanelTable = ({
         setIsActionsPopoverOpen(false);
         addSampledata();
       }}
+      size="s"
     >
       Add samples
     </EuiContextMenuItem>,
@@ -367,18 +372,14 @@ export const CustomPanelTable = ({
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton 
+                    fill href="#/create" 
+                    data-test-subj="customPanels__createNewPanels" 
+                    iconType="plus"
+                    iconSide="left"
+                    size="s"
                     >
-                      <EuiContextMenuPanel items={popoverItems()} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
                       Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
@@ -388,21 +389,37 @@ export const CustomPanelTable = ({
             <EuiHorizontalRule margin="m" />
             {customPanels.length > 0 ? (
               <>
-                <EuiFieldSearch
-                  fullWidth
-                  data-test-subj="operationalPanelSearchBar"
-                  placeholder="Search Observability Dashboard name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={true}>
+                    <EuiFieldSearch
+                      compressed
+                      fullWidth
+                      data-test-subj="operationalPanelSearchBar"
+                      placeholder="Search Observability Dashboard name"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      panelPaddingSize="none"
+                      button={popoverButton}
+                      isOpen={isActionsPopoverOpen}
+                      closePopover={() => setIsActionsPopoverOpen(false)}
+                    >
+                      <EuiContextMenuPanel items={popoverItems()} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
+                compressed
                   loading={loading}
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
+                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       : customPanels
                   }
                   itemId="id"
@@ -444,12 +461,19 @@ export const CustomPanelTable = ({
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
                       href="#/create"
+                      iconType="plus"
+                      iconSide="left"
+                      size="s"
                     >
                       Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fullWidth={false} onClick={() => addSampledata()}>
+                    <EuiButton 
+                      fullWidth={false} 
+                      onClick={() => addSampledata()}
+                      size="s"
+                    >
                       Add samples
                     </EuiButton>
                   </EuiFlexItem>
