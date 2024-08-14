@@ -49,6 +49,8 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
         order: 1000,
         title: 'Get started',
         kind: 'card',
+        wrap: false,
+        columns: 5,
       },
     ],
   });

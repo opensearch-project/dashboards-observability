@@ -143,7 +143,7 @@ export const Home = ({ ..._props }: HomeProps) => {
             onClick: () => navigateToApp(card.url, '#/'),
             getFooter: () => {
               return (
-                <EuiText size="s" textAlign="left">
+                <EuiText size="s" textAlign="center">
                   {card.footer}
                 </EuiText>
               );
