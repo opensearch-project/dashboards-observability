@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
-import { fetchDashboardIds, fetchIndexPatternIds } from './utils';
+import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
 
 interface Pattern {
   id: string;

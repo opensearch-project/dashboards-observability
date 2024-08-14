@@ -4,8 +4,6 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -14,6 +12,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
@@ -97,14 +97,14 @@ export function SelectDashboardFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="danger" iconType="cross" onClick={closeFlyout}>
+            <EuiSmallButtonEmpty color="danger" iconType="cross" onClick={closeFlyout}>
               Cancel
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClickAdd} fill disabled={!buttonIsActive}>
+            <EuiSmallButton onClick={onClickAdd} fill disabled={!buttonIsActive}>
               {wrapper.dashboardSelected ? 'Replace' : 'Add'}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

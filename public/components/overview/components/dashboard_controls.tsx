@@ -7,6 +7,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
@@ -15,14 +16,16 @@ import React from 'react';
 import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/date_picker/super_date_picker/super_date_picker';
 import { coreRefs } from '../../../framework/core_refs';
 import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
+import { redirectToDashboards } from '../../getting_started/components/utils';
 
-interface Props {
+export interface Props {
   dashboardTitle: string;
+  dashboardId: string;
   startDate: string;
   endDate: string;
   setStartDate: (start: string) => void;
   setEndDate: (end: string) => void;
-  showModal: () => void;
+  showFlyout: () => void;
 }
 
 export function DashboardControls(props: Props) {
@@ -48,11 +51,13 @@ export function DashboardControls(props: Props) {
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <EuiText size="s">
-          <h2>{props.dashboardTitle}</h2>
+          <EuiLink onClick={() => redirectToDashboards('/view/' + props.dashboardId)}>
+            <h2>{props.dashboardTitle}</h2>
+          </EuiLink>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
               start={props.startDate}
@@ -62,19 +67,12 @@ export function DashboardControls(props: Props) {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="gear"
-              aria-label="Dashboard"
-              color="primary"
-              onClick={props.showModal}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content="Enter fullscreen">
+            <EuiToolTip content="Replace dashboard">
               <EuiButtonIcon
-                iconType="fullScreen"
-                aria-label="Enter Fullscreen"
+                iconType="gear"
+                aria-label="Dashboard"
                 color="primary"
+                onClick={props.showFlyout}
                 display="base"
                 size="s"
               />

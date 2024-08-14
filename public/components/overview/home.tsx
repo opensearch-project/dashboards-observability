@@ -37,9 +37,11 @@ let setStartDate: (start: string) => void;
 let endDate: string;
 let setEndDate: (end: string) => void;
 let dashboardTitle: string;
-let setDashboardTitle: (arg0: string) => void;
+let setDashboardTitle: (title: string) => void;
+let dashboardId: string;
+let setDashboardId: (id: string) => void;
 
-const navigateToApp = (appId: string, path: string) => {
+export const navigateToApp = (appId: string, path: string) => {
   coreRefs?.application!.navigateToApp(appId, {
     path: `${path}`,
   });
@@ -55,6 +57,7 @@ coreRefs.contentManagement?.registerContentProvider({
       wrapper.dashboardSelected ? (
         <DashboardControls
           dashboardTitle={dashboardTitle}
+          dashboardId={dashboardId}
           startDate={startDate}
           setStartDate={setStartDate}
           endDate={endDate}
@@ -82,9 +85,11 @@ export const Home = ({ ..._props }: HomeProps) => {
   const [_, setIsRegistered] = useState(false);
   const [dashboards, setDashboards] = useState<DashboardDictionary>({});
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  [isFullscreen, setIsFullscreen] = useState(false);
   [startDate, setStartDate] = useState(moment().toISOString());
   [endDate, setEndDate] = useState(moment().toISOString());
   [dashboardTitle, setDashboardTitle] = useState('');
+  [dashboardId, setDashboardId] = useState('');
 
   showFlyout = () => setIsFlyoutVisible(true);
 
@@ -172,6 +177,7 @@ export const Home = ({ ..._props }: HomeProps) => {
     const defaultDashboard = uiSettingsService.get(uiSettingsKey);
     if (dashboards && defaultDashboard && dashboards[defaultDashboard]) {
       setDashboardTitle(dashboards[defaultDashboard].label);
+      setDashboardId(defaultDashboard);
       setStartDate(dashboards[defaultDashboard].startDate);
       setEndDate(dashboards[defaultDashboard].endDate);
     }
@@ -183,6 +189,7 @@ export const Home = ({ ..._props }: HomeProps) => {
         type: 'dashboard',
       })
       .then((response) => {
+        console.log(response);
         const savedDashboards = response.savedObjects.reduce((acc, savedDashboard) => {
           const dashboardAttributes = savedDashboard.attributes as {
             title: string;
@@ -202,6 +209,7 @@ export const Home = ({ ..._props }: HomeProps) => {
         const defaultDashboard = uiSettingsService.get(uiSettingsKey);
         if (defaultDashboard && dashboards[defaultDashboard]) {
           setDashboardTitle(dashboards[defaultDashboard].label);
+          setDashboardId(defaultDashboard);
         }
       })
       .catch((error) => {
@@ -232,8 +240,10 @@ export const Home = ({ ..._props }: HomeProps) => {
       <HashRouter>
         <Switch>
           <Route exact path="/">
-            {homepage}
-            {flyout}
+            <div>
+              {homepage}
+              {flyout}
+            </div>
           </Route>
         </Switch>
       </HashRouter>
