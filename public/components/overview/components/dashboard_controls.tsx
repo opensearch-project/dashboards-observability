@@ -9,6 +9,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/date_picker/super_date_picker/super_date_picker';
@@ -67,6 +68,17 @@ export function DashboardControls(props: Props) {
               color="primary"
               onClick={props.showModal}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Enter fullscreen">
+              <EuiButtonIcon
+                iconType="fullScreen"
+                aria-label="Enter Fullscreen"
+                color="primary"
+                display="base"
+                size="s"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

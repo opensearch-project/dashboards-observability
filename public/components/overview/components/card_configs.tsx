@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 // Plugin URLs
-const gettingStartedURL = 'observability-gettingStarted';
+export const gettingStartedURL = 'observability-gettingStarted';
 const discoverURL = 'data-explorer/discover';
 const metricsURL = 'observability-metrics';
 const tracesURL = 'observability-traces-nav#/traces';
@@ -30,7 +30,7 @@ export const GETTING_STARTED_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Add your data',
   }),
   description: 'Get started collecting and analyzing data.',
-  footer: 'with Getting Started Guide',
+  footer: 'Getting Started Guide',
   url: gettingStartedURL,
 };
 
@@ -41,7 +41,7 @@ const DISCOVER_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Discover insights',
   }),
   description: 'Uncover insights with raw data exploration.',
-  footer: 'with Discover',
+  footer: 'Discover',
   url: discoverURL,
 };
 
@@ -52,7 +52,7 @@ const METRICS_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Metrics',
   }),
   description: 'Transform logs into actionable visualizations with metrics extraction.',
-  footer: 'with Metrics',
+  footer: 'Metrics',
   url: metricsURL,
 };
 
@@ -63,7 +63,7 @@ const TRACES_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Traces',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
-  footer: 'with Traces',
+  footer: 'Traces',
   url: tracesURL,
 };
 
@@ -74,7 +74,7 @@ const SERVICES_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Services',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
-  footer: 'with Services',
+  footer: 'Services',
   url: servicesURL,
 };
 
@@ -85,7 +85,7 @@ const ALERTS_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Alerts',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
-  footer: 'with Alerts',
+  footer: 'Alerts',
   url: alertsURL,
 };
 
@@ -96,7 +96,7 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Anomaly Detection',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
-  footer: 'with Anomaly Detection',
+  footer: 'Anomaly Detection',
   url: anomalyDetectionURL,
 };
 

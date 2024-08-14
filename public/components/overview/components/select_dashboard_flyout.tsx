@@ -5,14 +5,15 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
@@ -20,19 +21,17 @@ import { uiSettingsService } from '../../../../common/utils';
 import { DashboardDictionary } from '../home';
 
 interface Props {
-  closeModal: () => void;
+  closeFlyout: () => void;
   wrapper: { dashboardSelected: boolean };
   dashboards: DashboardDictionary;
   registerDashboard: () => void;
-  closeModalVisible: () => void;
 }
 
-export function SelectDashboardModal({
-  closeModal,
+export function SelectDashboardFlyout({
+  closeFlyout,
   wrapper,
   dashboards,
   registerDashboard,
-  closeModalVisible,
 }: Props) {
   const [selectedOptionsState, setSelectedOptionsState] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -54,7 +53,7 @@ export function SelectDashboardModal({
         .set('observability:defaultDashboard', selectedOptionsState[0].value)
         .then(registerDashboard);
     }
-    closeModalVisible();
+    closeFlyout();
   };
 
   useEffect(() => {
@@ -80,33 +79,35 @@ export function SelectDashboardModal({
   }, [selectedId]);
 
   return (
-    <EuiModal onClose={closeModal}>
-      <EuiModalHeader>
+    <EuiFlyout onClose={closeFlyout} size="s">
+      <EuiFlyoutHeader>
         <EuiText size="s">
-          <h2>{selectedId ? 'Update Dashboard' : 'Select Dashboard'}</h2>
+          <h2>{selectedId ? 'Replace Dashboard' : 'Select Dashboard'}</h2>
         </EuiText>
-      </EuiModalHeader>
-      <EuiModalBody>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiComboBox
-          placeholder="Select a dashboard"
+          placeholder="Search"
           singleSelection={{ asPlainText: true }}
           options={options}
           selectedOptions={selectedOptionsState}
           onChange={onComboBoxChange}
         />
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={closeModal}>Cancel</EuiButton>
+            <EuiButtonEmpty color="danger" iconType="cross" onClick={closeFlyout}>
+              Cancel
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={onClickAdd} fill disabled={!buttonIsActive}>
-              {wrapper.dashboardSelected ? 'Update' : 'Add'}
+              {wrapper.dashboardSelected ? 'Replace' : 'Add'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }
