@@ -29,7 +29,7 @@ import {
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import last from 'lodash/last';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../src/core/public';
 import { CREATE_PANEL_MESSAGE } from '../../../common/constants/custom_panels';
@@ -119,7 +119,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    cloneCustomPanel,
     onEditClick,
     onAddClick,
   } = props;
@@ -131,7 +130,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [loading, setLoading] = useState(true);
 
   const [pplFilterValue, setPPLFilterValue] = useState('');
-  const [baseQuery, setBaseQuery] = useState('');
+  const [baseQuery, _setBaseQuery] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
 
   const [inputDisabled, setInputDisabled] = useState(true);
@@ -376,11 +375,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   );
 
   const saveButton = (
-    <EuiButton 
-    data-test-subj="savePanelButton" 
-    iconType="save" 
-    onClick={() => editPanel('save')}
-    size="s"
+    <EuiButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
+      size="s"
     >
       Save
     </EuiButton>
@@ -596,11 +595,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu 
-                          initialPanelId={0} 
-                          panels={panelActionsMenu} 
-                          size="s"
-                        />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -617,7 +612,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           <EuiPageContentBody>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                {/*Delete ADAM:: Unable to change the PPL Search bar size*/}
+                {/* Delete ADAM:: Unable to change the PPL Search bar size*/}
                 <Autocomplete
                   key={'autocomplete-search-bar'}
                   query={pplFilterValue}
@@ -640,7 +635,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                     <EuiLink
                       aria-label="ppl-info"
                       onClick={showHelpFlyout}
-                      style={{ padding: '10px' }}
+                      style={{ padding: '4px' }}
                     >
                       PPL
                     </EuiLink>
@@ -672,7 +667,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                 </>
               )}
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="s" />
             {panel.visualizations.length === 0 && (
               <EmptyPanelView
                 addVizDisabled={addVizDisabled}

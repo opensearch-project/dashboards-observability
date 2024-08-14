@@ -2,7 +2,7 @@
 
 exports[`<NoteTable /> spec renders the component 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -921,7 +921,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
 
 exports[`<NoteTable /> spec renders the empty component 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"

@@ -155,7 +155,7 @@ export const CustomPanelTable = ({
           sourcePanel = legacyFetchResult.operationalPanel;
         }
 
-        const { id, ...newPanel } = {
+        const { _id, ...newPanel } = {
           ...sourcePanel,
           title: newName,
         };
@@ -231,7 +231,7 @@ export const CustomPanelTable = ({
   const deletePanel = () => {
     const customPanelString = `Observability Dashboard${
       selectedCustomPanels.length > 1 ? 's' : ''
-      }`;
+    }`;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
@@ -373,12 +373,13 @@ export const CustomPanelTable = ({
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButton 
-                    fill href="#/create" 
-                    data-test-subj="customPanels__createNewPanels" 
-                    iconType="plus"
-                    iconSide="left"
-                    size="s"
+                    <EuiButton
+                      fill
+                      href="#/create"
+                      data-test-subj="customPanels__createNewPanels"
+                      iconType="plus"
+                      iconSide="left"
+                      size="s"
                     >
                       Create Dashboard
                     </EuiButton>
@@ -413,13 +414,13 @@ export const CustomPanelTable = ({
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
-                compressed
+                  compressed
                   loading={loading}
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                       : customPanels
                   }
                   itemId="id"
@@ -469,11 +470,7 @@ export const CustomPanelTable = ({
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton 
-                      fullWidth={false} 
-                      onClick={() => addSampledata()}
-                      size="s"
-                    >
+                    <EuiButton fullWidth={false} onClick={() => addSampledata()} size="s">
                       Add samples
                     </EuiButton>
                   </EuiFlexItem>

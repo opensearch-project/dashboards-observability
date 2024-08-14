@@ -247,6 +247,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                             autoComplete="off"
                             autoCorrect="off"
                             autoFocus={false}
+                            compressed={true}
                             data-test-subj="searchAutocompleteTextArea"
                             enterKeyHint="search"
                             id="autocomplete-textarea"
@@ -258,13 +259,6 @@ exports[`Explorer Search component renders basic component 1`] = `
                             onKeyDown={[Function]}
                             placeholder="Enter query"
                             spellCheck="false"
-                            style={
-                              Object {
-                                "height": "18px",
-                                "marginTop": "0px",
-                                "padding": "8px",
-                              }
-                            }
                             type="search"
                             value=""
                           >
@@ -276,7 +270,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                 autoComplete="off"
                                 autoCorrect="off"
                                 autoFocus={false}
-                                className="euiTextArea euiTextArea--resizeVertical"
+                                className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                 data-test-subj="searchAutocompleteTextArea"
                                 enterKeyHint="search"
                                 id="autocomplete-textarea"
@@ -287,15 +281,8 @@ exports[`Explorer Search component renders basic component 1`] = `
                                 onFocus={[Function]}
                                 onKeyDown={[Function]}
                                 placeholder="Enter query"
-                                rows={6}
+                                rows={3}
                                 spellCheck="false"
-                                style={
-                                  Object {
-                                    "height": "18px",
-                                    "marginTop": "0px",
-                                    "padding": "8px",
-                                  }
-                                }
                                 type="search"
                                 value=""
                               />

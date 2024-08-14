@@ -92,6 +92,7 @@ exports[`Empty panel view component renders empty panel view with disabled popov
                     iconSide="right"
                     iconType="arrowDown"
                     onClick={[Function]}
+                    size="s"
                   >
                     Add visualization
                   </EuiButton>
@@ -117,6 +118,7 @@ exports[`Empty panel view component renders empty panel view with disabled popov
                       iconSide="right"
                       iconType="arrowDown"
                       onClick={[Function]}
+                      size="s"
                     >
                       <EuiButtonDisplay
                         baseClassName="euiButton"
@@ -127,10 +129,11 @@ exports[`Empty panel view component renders empty panel view with disabled popov
                         iconType="arrowDown"
                         isDisabled={true}
                         onClick={[Function]}
+                        size="s"
                         type="button"
                       >
                         <button
-                          className="euiButton euiButton--primary euiButton-isDisabled"
+                          className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                           data-test-subj="addVisualizationButton"
                           disabled={true}
                           onClick={[Function]}
@@ -305,6 +308,7 @@ exports[`Empty panel view component renders empty panel view with enabled popove
                     iconSide="right"
                     iconType="arrowDown"
                     onClick={[Function]}
+                    size="s"
                   >
                     Add visualization
                   </EuiButton>
@@ -330,6 +334,7 @@ exports[`Empty panel view component renders empty panel view with enabled popove
                       iconSide="right"
                       iconType="arrowDown"
                       onClick={[Function]}
+                      size="s"
                     >
                       <EuiButtonDisplay
                         baseClassName="euiButton"
@@ -340,10 +345,11 @@ exports[`Empty panel view component renders empty panel view with enabled popove
                         iconType="arrowDown"
                         isDisabled={false}
                         onClick={[Function]}
+                        size="s"
                         type="button"
                       >
                         <button
-                          className="euiButton euiButton--primary"
+                          className="euiButton euiButton--primary euiButton--small"
                           data-test-subj="addVisualizationButton"
                           disabled={false}
                           onClick={[Function]}

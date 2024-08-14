@@ -39,7 +39,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -79,7 +79,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -122,7 +122,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -175,7 +175,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -186,7 +186,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -194,7 +194,6 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                     maxlength="16384"
                     placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                     spellcheck="false"
-                    style="margin-top: 0px; height: 18px; padding: 8px;"
                     type="search"
                     value=""
                   />
@@ -202,7 +201,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                 <button
                   aria-label="ppl-info"
                   class="euiLink euiLink--primary euiFormControlLayout__append"
-                  style="padding: 10px;"
+                  style="padding: 4px;"
                   type="button"
                 >
                   PPL
@@ -220,7 +219,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -282,7 +281,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 30 minutes
@@ -303,7 +302,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -337,7 +336,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--s"
         />
         <div>
           <div
@@ -384,7 +383,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -470,7 +469,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -510,7 +509,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -553,7 +552,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -606,7 +605,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -617,7 +616,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -625,7 +624,6 @@ exports[`Panels View Component render panel view so container and reload dashboa
                     maxlength="16384"
                     placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                     spellcheck="false"
-                    style="margin-top: 0px; height: 18px; padding: 8px;"
                     type="search"
                     value=""
                   />
@@ -633,7 +631,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                 <button
                   aria-label="ppl-info"
                   class="euiLink euiLink--primary euiFormControlLayout__append"
-                  style="padding: 10px;"
+                  style="padding: 4px;"
                   type="button"
                 >
                   PPL
@@ -651,7 +649,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -713,7 +711,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 30 minutes
@@ -734,7 +732,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -768,7 +766,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--s"
         />
         <div>
           <div
@@ -815,7 +813,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -888,6 +886,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -1285,6 +1284,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -1396,6 +1396,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 disabled={true}
                                 iconType="pencil"
                                 onClick={[Function]}
+                                size="s"
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
@@ -1405,10 +1406,11 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   iconType="pencil"
                                   isDisabled={true}
                                   onClick={[Function]}
+                                  size="s"
                                   type="button"
                                 >
                                   <button
-                                    className="euiButton euiButton--primary euiButton-isDisabled"
+                                    className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                                     data-test-subj="editPanelButton"
                                     disabled={true}
                                     onClick={[Function]}
@@ -1489,6 +1491,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     iconSide="right"
                                     iconType="arrowDown"
                                     onClick={[Function]}
+                                    size="s"
                                   >
                                     Dashboard Actions
                                   </EuiButton>
@@ -1514,6 +1517,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       <EuiButtonDisplay
                                         baseClassName="euiButton"
@@ -1524,10 +1528,11 @@ exports[`Panels View Component renders panel view container with visualizations 
                                         iconType="arrowDown"
                                         isDisabled={false}
                                         onClick={[Function]}
+                                        size="s"
                                         type="button"
                                       >
                                         <button
-                                          className="euiButton euiButton--primary"
+                                          className="euiButton euiButton--primary euiButton--small"
                                           data-test-subj="panelActionContextMenu"
                                           disabled={false}
                                           onClick={[Function]}
@@ -1616,6 +1621,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       Add visualization
                                     </EuiButton>
@@ -1641,6 +1647,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
@@ -1651,10 +1658,11 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
+                                            className="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
                                             onClick={[Function]}
@@ -1752,7 +1760,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 onClick={[Function]}
                                 style={
                                   Object {
-                                    "padding": "10px",
+                                    "padding": "4px",
                                   }
                                 }
                               >
@@ -1802,7 +1810,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     onClick={[Function]}
                                     style={
                                       Object {
-                                        "padding": "10px",
+                                        "padding": "4px",
                                       }
                                     }
                                   >
@@ -1815,6 +1823,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 autoComplete="off"
                                 autoCorrect="off"
                                 autoFocus={false}
+                                compressed={true}
                                 data-test-subj="searchAutocompleteTextArea"
                                 disabled={true}
                                 enterKeyHint="search"
@@ -1828,13 +1837,6 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 onKeyDown={[Function]}
                                 placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                 spellCheck="false"
-                                style={
-                                  Object {
-                                    "height": "18px",
-                                    "marginTop": "0px",
-                                    "padding": "8px",
-                                  }
-                                }
                                 type="search"
                                 value=""
                               >
@@ -1845,18 +1847,19 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       onClick={[Function]}
                                       style={
                                         Object {
-                                          "padding": "10px",
+                                          "padding": "4px",
                                         }
                                       }
                                     >
                                       PPL
                                     </EuiLink>
                                   }
+                                  compressed={true}
                                   fullWidth={true}
                                   inputId="autocomplete-textarea"
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
@@ -1869,7 +1872,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           autoComplete="off"
                                           autoCorrect="off"
                                           autoFocus={false}
-                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                                           data-test-subj="searchAutocompleteTextArea"
                                           disabled={true}
                                           enterKeyHint="search"
@@ -1882,18 +1885,13 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           onKeyDown={[Function]}
                                           placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                           spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
                                           type="search"
                                           value=""
                                         />
                                       </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons />
+                                      <EuiFormControlLayoutIcons
+                                        compressed={true}
+                                      />
                                     </div>
                                     <EuiLink
                                       aria-label="ppl-info"
@@ -1902,7 +1900,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       onClick={[Function]}
                                       style={
                                         Object {
-                                          "padding": "10px",
+                                          "padding": "4px",
                                         }
                                       }
                                     >
@@ -1913,7 +1911,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                         onClick={[Function]}
                                         style={
                                           Object {
-                                            "padding": "10px",
+                                            "padding": "4px",
                                           }
                                         }
                                         type="button"
@@ -1979,7 +1977,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 },
                               ]
                             }
-                            compressed={false}
+                            compressed={true}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -2006,7 +2004,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
-                                      compressed={false}
+                                      compressed={true}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -2067,7 +2065,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       }
                                     >
                                       <div
-                                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                                       >
                                         <EuiQuickSelectPopover
                                           applyTime={[Function]}
@@ -2285,7 +2283,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                                             >
                                               <button
-                                                className="euiSuperDatePicker__prettyFormat"
+                                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                                 data-test-subj="superDatePickerShowDatesButton"
                                                 disabled={false}
                                                 onClick={[Function]}
@@ -2305,7 +2303,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             </div>
                                           </EuiDatePickerRange>
                                           <EuiFormControlLayoutIcons
-                                            compressed={false}
+                                            compressed={true}
                                           />
                                         </div>
                                       </div>
@@ -2319,7 +2317,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
-                                      compressed={false}
+                                      compressed={true}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -2347,7 +2345,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
-                                            size="m"
+                                            size="s"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -2367,7 +2365,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
-                                              size="m"
+                                              size="s"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
@@ -2376,7 +2374,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}
@@ -2461,10 +2459,10 @@ exports[`Panels View Component renders panel view container with visualizations 
                     </div>
                   </EuiFlexGroup>
                   <EuiSpacer
-                    size="l"
+                    size="s"
                   >
                     <div
-                      className="euiSpacer euiSpacer--l"
+                      className="euiSpacer euiSpacer--s"
                     />
                   </EuiSpacer>
                   <EmptyPanelView
@@ -2558,6 +2556,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       Add visualization
                                     </EuiButton>
@@ -2583,6 +2582,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
@@ -2593,10 +2593,11 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
+                                            className="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
                                             onClick={[Function]}
@@ -2692,6 +2693,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -3089,6 +3091,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
@@ -3259,6 +3262,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -3545,6 +3549,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -3656,6 +3661,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 disabled={true}
                                 iconType="pencil"
                                 onClick={[Function]}
+                                size="s"
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
@@ -3665,10 +3671,11 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   iconType="pencil"
                                   isDisabled={true}
                                   onClick={[Function]}
+                                  size="s"
                                   type="button"
                                 >
                                   <button
-                                    className="euiButton euiButton--primary euiButton-isDisabled"
+                                    className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                                     data-test-subj="editPanelButton"
                                     disabled={true}
                                     onClick={[Function]}
@@ -3749,6 +3756,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     iconSide="right"
                                     iconType="arrowDown"
                                     onClick={[Function]}
+                                    size="s"
                                   >
                                     Dashboard Actions
                                   </EuiButton>
@@ -3774,6 +3782,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       <EuiButtonDisplay
                                         baseClassName="euiButton"
@@ -3784,10 +3793,11 @@ exports[`Panels View Component renders panel view container without visualizatio
                                         iconType="arrowDown"
                                         isDisabled={false}
                                         onClick={[Function]}
+                                        size="s"
                                         type="button"
                                       >
                                         <button
-                                          className="euiButton euiButton--primary"
+                                          className="euiButton euiButton--primary euiButton--small"
                                           data-test-subj="panelActionContextMenu"
                                           disabled={false}
                                           onClick={[Function]}
@@ -3875,6 +3885,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       Add visualization
                                     </EuiButton>
@@ -3900,6 +3911,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
@@ -3910,10 +3922,11 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
+                                            className="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
                                             onClick={[Function]}
@@ -4010,7 +4023,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 onClick={[Function]}
                                 style={
                                   Object {
-                                    "padding": "10px",
+                                    "padding": "4px",
                                   }
                                 }
                               >
@@ -4060,7 +4073,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     onClick={[Function]}
                                     style={
                                       Object {
-                                        "padding": "10px",
+                                        "padding": "4px",
                                       }
                                     }
                                   >
@@ -4073,6 +4086,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 autoComplete="off"
                                 autoCorrect="off"
                                 autoFocus={false}
+                                compressed={true}
                                 data-test-subj="searchAutocompleteTextArea"
                                 disabled={true}
                                 enterKeyHint="search"
@@ -4086,13 +4100,6 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 onKeyDown={[Function]}
                                 placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                 spellCheck="false"
-                                style={
-                                  Object {
-                                    "height": "18px",
-                                    "marginTop": "0px",
-                                    "padding": "8px",
-                                  }
-                                }
                                 type="search"
                                 value=""
                               >
@@ -4103,18 +4110,19 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       onClick={[Function]}
                                       style={
                                         Object {
-                                          "padding": "10px",
+                                          "padding": "4px",
                                         }
                                       }
                                     >
                                       PPL
                                     </EuiLink>
                                   }
+                                  compressed={true}
                                   fullWidth={true}
                                   inputId="autocomplete-textarea"
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
@@ -4127,7 +4135,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           autoComplete="off"
                                           autoCorrect="off"
                                           autoFocus={false}
-                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                                           data-test-subj="searchAutocompleteTextArea"
                                           disabled={true}
                                           enterKeyHint="search"
@@ -4140,18 +4148,13 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           onKeyDown={[Function]}
                                           placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                           spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
                                           type="search"
                                           value=""
                                         />
                                       </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons />
+                                      <EuiFormControlLayoutIcons
+                                        compressed={true}
+                                      />
                                     </div>
                                     <EuiLink
                                       aria-label="ppl-info"
@@ -4160,7 +4163,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       onClick={[Function]}
                                       style={
                                         Object {
-                                          "padding": "10px",
+                                          "padding": "4px",
                                         }
                                       }
                                     >
@@ -4171,7 +4174,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                         onClick={[Function]}
                                         style={
                                           Object {
-                                            "padding": "10px",
+                                            "padding": "4px",
                                           }
                                         }
                                         type="button"
@@ -4237,7 +4240,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 },
                               ]
                             }
-                            compressed={false}
+                            compressed={true}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -4264,7 +4267,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
-                                      compressed={false}
+                                      compressed={true}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -4325,7 +4328,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       }
                                     >
                                       <div
-                                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                                       >
                                         <EuiQuickSelectPopover
                                           applyTime={[Function]}
@@ -4541,7 +4544,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                                             >
                                               <button
-                                                className="euiSuperDatePicker__prettyFormat"
+                                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                                 data-test-subj="superDatePickerShowDatesButton"
                                                 disabled={false}
                                                 onClick={[Function]}
@@ -4561,7 +4564,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             </div>
                                           </EuiDatePickerRange>
                                           <EuiFormControlLayoutIcons
-                                            compressed={false}
+                                            compressed={true}
                                           />
                                         </div>
                                       </div>
@@ -4575,7 +4578,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
-                                      compressed={false}
+                                      compressed={true}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -4603,7 +4606,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
-                                            size="m"
+                                            size="s"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -4623,7 +4626,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
-                                              size="m"
+                                              size="s"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
@@ -4632,7 +4635,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}
@@ -4717,10 +4720,10 @@ exports[`Panels View Component renders panel view container without visualizatio
                     </div>
                   </EuiFlexGroup>
                   <EuiSpacer
-                    size="l"
+                    size="s"
                   >
                     <div
-                      className="euiSpacer euiSpacer--l"
+                      className="euiSpacer euiSpacer--s"
                     />
                   </EuiSpacer>
                   <EmptyPanelView
@@ -4814,6 +4817,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
+                                      size="s"
                                     >
                                       Add visualization
                                     </EuiButton>
@@ -4839,6 +4843,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
@@ -4849,10 +4854,11 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
+                                            className="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
                                             onClick={[Function]}
@@ -4947,6 +4953,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -5233,6 +5240,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],

@@ -139,7 +139,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
   return (
     <div className="aa-Autocomplete" {...autocomplete.getRootProps({ id: 'autocomplete-root' })}>
       <TextArea
-        style={{ marginTop: '0px', height: '18px', padding: '8px' }}
+        compressed
         {...autocomplete.getInputProps({
           id: 'autocomplete-textarea',
           'data-test-subj': 'searchAutocompleteTextArea',

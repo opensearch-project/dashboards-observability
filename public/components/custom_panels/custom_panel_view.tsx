@@ -466,10 +466,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   );
 
   const saveButton = (
-    <EuiButton 
-      data-test-subj="savePanelButton" 
-      iconType="save" 
-      onClick={() => editPanel('save')} 
+    <EuiButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
       size="s"
     >
       Save
@@ -647,11 +647,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu 
-                          initialPanelId={0} 
-                          panels={panelActionsMenu}
-                          size="s"
-                        />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -688,7 +684,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                     <EuiLink
                       aria-label="ppl-info"
                       onClick={showHelpFlyout}
-                      style={{ padding: '10px' }}
+                      style={{ padding: '4px' }}
                     >
                       PPL
                     </EuiLink>
@@ -720,7 +716,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                 </>
               )}
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="s" />
             {panelVisualizations.length === 0 && (
               <EmptyPanelView
                 addVizDisabled={addVizDisabled}

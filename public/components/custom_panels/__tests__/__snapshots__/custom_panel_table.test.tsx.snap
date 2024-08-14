@@ -2,7 +2,7 @@
 
 exports[`Panels Table Component render dashboard table container with panels 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -89,52 +89,10 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
               class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem"
-              >
-                <div
-                  class="euiPopover euiPopover--anchorDownCenter"
-                >
-                  <div
-                    class="euiPopover__anchor"
-                  >
-                    <button
-                      class="euiButton euiButton--primary"
-                      data-test-subj="operationalPanelsActionsButton"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                            fill-rule="non-zero"
-                          />
-                        </svg>
-                        <span
-                          class="euiButton__text"
-                        >
-                          Actions
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="euiFlexItem"
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <a
-                  class="euiButton euiButton--primary euiButton--fill"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill"
                   data-test-subj="customPanels__createNewPanels"
                   href="#/create"
                   rel="noreferrer"
@@ -142,6 +100,20 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
                   <span
                     class="euiButtonContent euiButton__content"
                   >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.25 3a.5.5 0 0 1 .5.5v3.75h3.75a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H8.75v3.75a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5V8.75H3.5a.5.5 0 0 1-.5-.5v-.5a.5.5 0 0 1 .5-.5h3.75V3.5a.5.5 0 0 1 .5-.5h.5Z"
+                      />
+                    </svg>
                     <span
                       class="euiButton__text"
                     >
@@ -157,39 +129,88 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
         />
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFlexItem"
           >
-            <input
-              class="euiFieldSearch euiFieldSearch--fullWidth"
-              data-test-subj="operationalPanelSearchBar"
-              placeholder="Search Observability Dashboard name"
-              type="search"
-              value=""
-            />
             <div
-              class="euiFormControlLayoutIcons"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <div
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <input
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                  data-test-subj="operationalPanelSearchBar"
+                  placeholder="Search Observability Dashboard name"
+                  type="search"
+                  value=""
+                />
+                <div
+                  class="euiFormControlLayoutIcons"
                 >
-                  <path
-                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                  />
-                </svg>
-              </span>
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorDownCenter"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="operationalPanelsActionsButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                    <span
+                      class="euiButton__text"
+                    >
+                      Actions
+                    </span>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -250,7 +271,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
                           >
                             <svg
                               aria-hidden="true"
-                              class="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                              class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                               focusable="false"
                               height="16"
                               role="img"
@@ -259,8 +280,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                                fill-rule="non-zero"
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                               />
                             </svg>
                             <span
@@ -277,7 +297,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
               </div>
             </div>
             <table
-              class="euiTable euiTable--responsive euiTable--auto"
+              class="euiTable euiTable--compressed euiTable--responsive euiTable--auto"
               id="random_html_id"
               tabindex="-1"
             >
@@ -730,7 +750,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
                       >
                         <svg
                           aria-hidden="true"
-                          class="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                          class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                           focusable="false"
                           height="16"
                           role="img"
@@ -739,8 +759,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                            fill-rule="non-zero"
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                           />
                         </svg>
                         <span
@@ -845,7 +864,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
 
 exports[`Panels Table Component renders empty dashboard table container 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -933,51 +952,10 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
               class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem"
-              >
-                <div
-                  class="euiPopover euiPopover--anchorDownCenter"
-                >
-                  <div
-                    class="euiPopover__anchor"
-                  >
-                    <button
-                      class="euiButton euiButton--primary"
-                      data-test-subj="operationalPanelsActionsButton"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                        <span
-                          class="euiButton__text"
-                        >
-                          Actions
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="euiFlexItem"
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <a
-                  class="euiButton euiButton--primary euiButton--fill"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill"
                   data-test-subj="customPanels__createNewPanels"
                   href="#/create"
                   rel="noreferrer"
@@ -985,6 +963,20 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
                   <span
                     class="euiButtonContent euiButton__content"
                   >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
                     <span
                       class="euiButton__text"
                     >
@@ -1039,7 +1031,7 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <a
-              class="euiButton euiButton--primary"
+              class="euiButton euiButton--primary euiButton--small"
               data-test-subj="customPanels__emptyCreateNewPanels"
               href="#/create"
               rel="noreferrer"
@@ -1047,6 +1039,20 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
               <span
                 class="euiButtonContent euiButton__content"
               >
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
                 <span
                   class="euiButton__text"
                 >
@@ -1059,7 +1065,7 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              class="euiButton euiButton--primary"
+              class="euiButton euiButton--primary euiButton--small"
               type="button"
             >
               <span
@@ -1085,7 +1091,7 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
 
 exports[`Panels Table Component renders empty panel table container2 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -1172,52 +1178,10 @@ exports[`Panels Table Component renders empty panel table container2 1`] = `
               class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem"
-              >
-                <div
-                  class="euiPopover euiPopover--anchorDownCenter"
-                >
-                  <div
-                    class="euiPopover__anchor"
-                  >
-                    <button
-                      class="euiButton euiButton--primary"
-                      data-test-subj="operationalPanelsActionsButton"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                            fill-rule="non-zero"
-                          />
-                        </svg>
-                        <span
-                          class="euiButton__text"
-                        >
-                          Actions
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="euiFlexItem"
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <a
-                  class="euiButton euiButton--primary euiButton--fill"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill"
                   data-test-subj="customPanels__createNewPanels"
                   href="#/create"
                   rel="noreferrer"
@@ -1225,6 +1189,20 @@ exports[`Panels Table Component renders empty panel table container2 1`] = `
                   <span
                     class="euiButtonContent euiButton__content"
                   >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.25 3a.5.5 0 0 1 .5.5v3.75h3.75a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H8.75v3.75a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5V8.75H3.5a.5.5 0 0 1-.5-.5v-.5a.5.5 0 0 1 .5-.5h3.75V3.5a.5.5 0 0 1 .5-.5h.5Z"
+                      />
+                    </svg>
                     <span
                       class="euiButton__text"
                     >
@@ -1240,39 +1218,89 @@ exports[`Panels Table Component renders empty panel table container2 1`] = `
           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
         />
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFlexItem"
           >
-            <input
-              class="euiFieldSearch euiFieldSearch--fullWidth"
-              data-test-subj="operationalPanelSearchBar"
-              placeholder="Search Observability Dashboard name"
-              type="search"
-              value=""
-            />
             <div
-              class="euiFormControlLayoutIcons"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <div
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <input
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                  data-test-subj="operationalPanelSearchBar"
+                  placeholder="Search Observability Dashboard name"
+                  type="search"
+                  value=""
+                />
+                <div
+                  class="euiFormControlLayoutIcons"
                 >
-                  <path
-                    d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
-                  />
-                </svg>
-              </span>
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorDownCenter"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="operationalPanelsActionsButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                        fill-rule="non-zero"
+                      />
+                    </svg>
+                    <span
+                      class="euiButton__text"
+                    >
+                      Actions
+                    </span>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1360,7 +1388,7 @@ exports[`Panels Table Component renders empty panel table container2 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--responsive euiTable--auto"
+              class="euiTable euiTable--compressed euiTable--responsive euiTable--auto"
               id="random_html_id"
               tabindex="-1"
             >
