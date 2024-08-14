@@ -29,6 +29,8 @@
     "observability"
   ],
   "supportedOSDataSourceVersions": ">=2.9.0",
-  "requiredOSDataSourcePlugins": ["opensearch-sql","opensearch-observability"]
-
+  "requiredOSDataSourcePlugins": [
+    "opensearch-sql",
+    "opensearch-observability"
+  ]
 }
