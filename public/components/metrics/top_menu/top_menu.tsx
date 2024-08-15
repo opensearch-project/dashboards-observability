@@ -26,10 +26,11 @@ export const TopMenu = () => {
   return (
     dateSpanFilter && (
       <>
-        <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <div className="resolutionSelect">
               <EuiFieldText
+                compressed
                 className="resolutionSelectText"
                 prepend="Span Interval"
                 value={dateSpanFilter.span}
@@ -50,17 +51,22 @@ export const TopMenu = () => {
               />
             </div>
           </EuiFlexItem>
-          <EuiFlexItem className="metrics-search-bar-datepicker">
-            <EuiSuperDatePicker
-              dateFormat={uiSettingsService.get('dateFormat')}
-              start={dateSpanFilter.start}
-              end={dateSpanFilter.end}
-              onTimeChange={(dateSpan) => dispatch(setDateSpan(dateSpan))}
-              recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
-            />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MetricsExport />
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
+                <EuiSuperDatePicker
+                  compressed={true}
+                  dateFormat={uiSettingsService.get('dateFormat')}
+                  start={dateSpanFilter.start}
+                  end={dateSpanFilter.end}
+                  onTimeChange={(dateSpan) => dispatch(setDateSpan(dateSpan))}
+                  recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <MetricsExport />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
