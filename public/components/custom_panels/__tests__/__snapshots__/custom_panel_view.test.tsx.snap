@@ -888,6 +888,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -1285,6 +1286,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -2692,6 +2694,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -3089,6 +3092,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
@@ -3259,6 +3263,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -3545,6 +3550,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -4947,6 +4953,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -5233,6 +5240,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
