@@ -4,9 +4,9 @@
  */
 
 import { EuiSearchBar } from '@elastic/eui';
-import React from 'react';
+import debounce from 'lodash/debounce';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
 import { searchSelector, setSearch } from '../redux/slices/metrics_slice';
 
 export const SearchBar = () => {
@@ -16,6 +16,15 @@ export const SearchBar = () => {
   const onChange = debounce(({ query }) => {
     dispatch(setSearch(query.text));
   }, 300);
+
+  // OUI doesn't pass down the prop
+  // Work around for OUI bug: https://github.com/opensearch-project/oui/issues/1343
+  useEffect(() => {
+    const element = document.querySelector('.euiFieldSearch');
+    if (element) {
+      element.classList.add('euiFieldSearch--compressed');
+    }
+  }, []);
 
   return (
     <div className="metrics-search-bar-input" data-test-subj="metricsSearch">
