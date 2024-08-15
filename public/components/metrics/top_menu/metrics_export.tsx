@@ -373,6 +373,7 @@ const MetricsExportPopOver = () => {
       button={<Savebutton setIsPanelOpen={setIsPanelOpen} />}
       isOpen={isPanelOpen}
       closePopover={() => setIsPanelOpen(false)}
+      panelPaddingSize="s"
     >
       <MetricsExportPanel
         availableDashboards={availableDashboards ?? []}

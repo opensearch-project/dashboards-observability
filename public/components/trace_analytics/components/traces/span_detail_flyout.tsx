@@ -16,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -125,7 +124,11 @@ export function SpanDetailFlyout(props: {
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(span, mode, 'SPAN_ID')}>
                 {(copy) => (
-                  <EuiSmallButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
@@ -145,7 +148,11 @@ export function SpanDetailFlyout(props: {
                 textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
               >
                 {(copy) => (
-                  <EuiSmallButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
@@ -306,9 +313,9 @@ export function SpanDetailFlyout(props: {
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
-              <EuiTitle>
+              <EuiText size="s">
                 <h2>Span detail</h2>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
             {mode === 'data_prepper' && (
               <EuiFlexItem>

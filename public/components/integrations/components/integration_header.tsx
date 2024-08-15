@@ -15,7 +15,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -106,9 +105,9 @@ export const IntegrationHeader = () => {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="integrations-header">
+          <EuiText size="s" data-test-subj="integrations-header">
             <h1>Integrations</h1>
-          </EuiTitle>
+          </EuiText>
         </EuiPageHeaderSection>
         <EuiPageHeaderSection>
           <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />

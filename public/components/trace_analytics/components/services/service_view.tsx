@@ -220,9 +220,9 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
-                <EuiTitle size="l">
+                <EuiText size="s">
                   <h2 className="overview-content">{serviceName}</h2>
-                </EuiTitle>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -231,7 +231,7 @@ export function ServiceView(props: ServiceViewProps) {
                   isOpen={actionsMenuPopover}
                   closePopover={() => setActionsMenuPopover(false)}
                 >
-                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
+                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} size="s" />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
