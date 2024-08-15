@@ -21,9 +21,9 @@ section.sidebar {
 }
 
 #metrics__mainContent {
-.dscAppContainer{
-.metricsSideBar {
-  padding: $euiSizeS;
+  .dscAppContainer {
+    .metricsSideBar {
+      padding: $euiSizeS;
       overflow: auto;
 
       &__fieldGroups {
@@ -44,8 +44,10 @@ section.sidebar {
       }
     }
     .metricsSideBar {
-  @include euiYScrollWithShadows;
-  .sidebar-list {
-    height: 100%;
+      @include euiYScrollWithShadows;
+      .sidebar-list {
+        height: 100%;
+      }
+    }
   }
-}}}
+}
