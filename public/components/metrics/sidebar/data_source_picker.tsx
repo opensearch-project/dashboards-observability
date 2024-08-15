@@ -27,6 +27,7 @@ export const DataSourcePicker = ({
         <h5>Metrics source</h5>
       </EuiTitle>
       <EuiComboBox
+        compressed
         placeholder="Select a metric source"
         singleSelection={{ asPlainText: true }}
         options={DATASOURCE_OPTIONS}

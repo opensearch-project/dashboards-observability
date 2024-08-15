@@ -609,7 +609,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                 showLabel={true}
               >
                 <div
-                  className="euiSwitch euiSwitch--compressed"
+                  className="euiSwitch euiSwitch--primary euiSwitch--compressed euiSwitch-isDisabled"
                 >
                   <button
                     aria-checked={false}
