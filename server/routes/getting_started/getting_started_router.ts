@@ -158,21 +158,20 @@ export function registerGettingStartedRoutes(router: IRouter) {
             const newId = `mds-${mdsId}-objectId-${obj.id}`;
 
             const newReferences =
-              obj.references?.map((ref: { type: string; id: any }) => {
-                if (ref.type === 'visualization') {
-                  return {
-                    ...ref,
-                    id: `mds-${mdsId}-objectId-${ref.id}`,
-                  };
-                }
-                return ref;
+              obj.references?.map((ref: { id: any }) => {
+                return {
+                  ...ref,
+                  id: `mds-${mdsId}-objectId-${ref.id}`,
+                };
               }) || [];
 
-            newReferences.push({
-              id: mdsId,
-              type: 'data-source',
-              name: mdsLabel,
-            });
+            if (obj.type === 'index-pattern') {
+              newReferences.push({
+                id: mdsId,
+                type: 'data-source',
+                name: mdsLabel,
+              });
+            }
 
             return {
               ...obj,
