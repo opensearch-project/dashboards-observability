@@ -2,9 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
@@ -14,15 +13,15 @@ import {
   handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
-import { FilterType } from '../common/filters/filters';
+import { FilterType, Filters } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
-import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
 import { coreRefs } from '../../../../framework/core_refs';
+import { DataSourcePicker } from '../dashboard/mode_picker';
 
-export function ServicesContent(props: ServicesProps) {
+export function ServicesContent(props) {
   const {
     page,
     http,
@@ -47,7 +46,6 @@ export function ServicesContent(props: ServicesProps) {
     attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
-
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
@@ -174,23 +172,46 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
-      <SearchBar
-        ref={searchBarRef}
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        style={{ padding: '0 16px' }}
+      >
+        <EuiFlexItem grow={false}>
+          <DataSourcePicker
+            modes={props.modes}
+            selectedMode={props.mode}
+            setMode={props.setMode!}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <SearchBar
+            ref={searchBarRef}
+            filters={filters}
+            setFilters={setFilters}
+            query={query}
+            setQuery={setQuery}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endTime={endTime}
+            setEndTime={setEndTime}
+            refresh={refresh}
+            page={page}
+            mode={mode}
+            attributesFilterFields={attributesFilterFields}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <Filters
         page={page}
+        filters={filters}
+        setFilters={setFilters}
+        appConfigs={appConfigs}
         mode={mode}
         attributesFilterFields={attributesFilterFields}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <ServicesTable
         items={tableItems}
         selectedItems={selectedItems}
@@ -208,7 +229,7 @@ export function ServicesContent(props: ServicesProps) {
         setIsServiceTrendEnabled={setIsServiceTrendEnabled}
         serviceTrends={serviceTrends}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (
         <ServiceMap
           addFilter={addFilter}
