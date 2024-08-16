@@ -83,13 +83,6 @@ describe('IntegrationInstanceBuilder', () => {
         templateName: 'sample',
         dataSource: 'instance-datasource',
         creationDate: expect.any(String),
-        references: [
-          {
-            id: undefined,
-            name: undefined,
-            type: 'data-source',
-          },
-        ],
         assets: [
           {
             assetType: 'dashboard',
@@ -314,13 +307,6 @@ describe('IntegrationInstanceBuilder', () => {
         tags: undefined,
         creationDate: expect.any(String),
         assets: refs,
-        references: [
-          {
-            id: undefined,
-            name: undefined,
-            type: 'data-source',
-          },
-        ],
       };
 
       const instance = await builder.buildInstance(

@@ -213,7 +213,7 @@ export function IntegrationConnectionInputs({
   handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
   lockConnectionType?: boolean;
 }) {
-  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
   const onSelectedDataSource = (e) => {
     const dataConnectionId = e[0] ? e[0].id : undefined;

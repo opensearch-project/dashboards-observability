@@ -135,13 +135,16 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     setIsModalVisible(true);
   };
   const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
-  const mdsLabels = [
-    ...new Set(
-      props.data.hits.flatMap((hit) =>
-        hit.references.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
-      )
-    ),
-  ].sort();
+  let mdsLabels;
+  if (dataSourceEnabled) {
+    mdsLabels = [
+      ...new Set(
+        props.data.hits.flatMap((hit) =>
+          hit.references.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
+        )
+      ),
+    ].sort();
+  }
 
   const search = {
     box: {
@@ -164,7 +167,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         field: 'dataSourceMDSLabel',
         name: 'Data Source Name',
         multiSelect: false,
-        options: mdsLabels.map((name) => ({
+        options: mdsLabels?.map((name) => ({
           name,
           value: name,
           view: name,

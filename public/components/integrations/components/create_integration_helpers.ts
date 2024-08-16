@@ -18,8 +18,8 @@ interface AddIntegrationRequestParams {
   templateName: string;
   integration: IntegrationConfig;
   setToast: (title: string, color?: Color, text?: string | undefined) => void;
-  dataSourceMDSId: string | undefined;
-  dataSourceMDSLabel: string | undefined;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   name?: string;
   indexPattern?: string;
   workflows?: string[];
@@ -323,8 +323,8 @@ export async function addIntegrationRequest({
   }
 
   const createReqBody: {
-    dataSourceMDSId: string | undefined;
-    dataSourceMDSLabel: string | undefined;
+    dataSourceMDSId?: string;
+    dataSourceMDSLabel?: string;
     name?: string;
     indexPattern?: string;
     workflows?: string[];

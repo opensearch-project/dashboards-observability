@@ -53,8 +53,8 @@ export function Integration(props: AvailableIntegrationProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
-  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
-  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
+  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string>('');
 
   useEffect(() => {
     chrome.setBreadcrumbs([

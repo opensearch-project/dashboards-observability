@@ -169,13 +169,6 @@ export const addedIntegrationData: AddedIntegrationsTableProps = {
           },
         ],
         id: 'ad7e6e30-0b99-11ee-b27c-c9863222e9bf',
-        references: [
-          {
-            id: 'f4cf2c60-2f4d-11ef-bf2d-65348e7e70ea',
-            name: 'dataSource',
-            type: 'data-source',
-          },
-        ],
       },
     ],
   },
@@ -260,13 +253,6 @@ export const addedIntegrationDataWithoutMDS: AddedIntegrationsTableProps = {
           },
         ],
         id: 'ad7e6e30-0b99-11ee-b27c-c9863222e9bf',
-        references: [
-          {
-            id: '',
-            name: '',
-            tye: 'data-source',
-          },
-        ],
       },
     ],
   },

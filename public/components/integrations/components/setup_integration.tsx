@@ -150,8 +150,8 @@ const addIntegration = async ({
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
-  dataSourceMDSId: string | undefined;
-  dataSourceMDSLabel: string | undefined;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) => {
   setLoading(true);
@@ -271,8 +271,8 @@ export function SetupBottomBar({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
-  dataSourceMDSId: string | undefined;
-  dataSourceMDSLabel: string | undefined;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   unsetIntegration?: () => void;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -408,8 +408,8 @@ export function SetupIntegrationForm({
 
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
   const [showLoading, setShowLoading] = useState(false);
-  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
-  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
+  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string>('');
 
   useEffect(() => {
     const getTemplate = async () => {
