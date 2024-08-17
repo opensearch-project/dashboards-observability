@@ -140,7 +140,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     mdsLabels = [
       ...new Set(
         props.data.hits.flatMap((hit) =>
-          hit.references.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
+          hit.references?.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
         )
       ),
     ].sort();
@@ -162,17 +162,21 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           view: name,
         })),
       },
-      {
-        type: 'field_value_selection' as const,
-        field: 'dataSourceMDSLabel',
-        name: 'Data Source Name',
-        multiSelect: false,
-        options: mdsLabels?.map((name) => ({
-          name,
-          value: name,
-          view: name,
-        })),
-      },
+      ...(dataSourceEnabled
+        ? [
+            {
+              type: 'field_value_selection' as const,
+              field: 'dataSourceMDSLabel',
+              name: 'Data Source Name',
+              multiSelect: false,
+              options: mdsLabels?.map((name) => ({
+                name,
+                value: name,
+                view: name,
+              })),
+            },
+          ]
+        : []),
     ],
   };
 
