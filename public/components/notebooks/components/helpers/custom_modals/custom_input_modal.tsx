@@ -90,6 +90,7 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
           <EuiSmallButton
             data-test-subj="custom-input-modal-confirm-button"
             onClick={() => runModal(value)}
+            fill
           >
             {btn2txt}
           </EuiSmallButton>

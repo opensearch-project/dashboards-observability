@@ -117,6 +117,7 @@ exports[`modal_containers spec render get custom modal 1`] = `
       </EuiSmallButtonEmpty>
       <EuiSmallButton
         data-test-subj="custom-input-modal-confirm-button"
+        fill={true}
         onClick={[Function]}
       >
         Confirm

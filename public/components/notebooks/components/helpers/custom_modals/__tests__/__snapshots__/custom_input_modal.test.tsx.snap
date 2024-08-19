@@ -46,6 +46,7 @@ exports[`<CustomInputModal /> spec renders the component 1`] = `
       </EuiSmallButtonEmpty>
       <EuiSmallButton
         data-test-subj="custom-input-modal-confirm-button"
+        fill={true}
         onClick={[Function]}
       >
         Confirm
@@ -101,6 +102,7 @@ exports[`<CustomInputModal /> spec renders the component 2`] = `
       </EuiSmallButtonEmpty>
       <EuiSmallButton
         data-test-subj="custom-input-modal-confirm-button"
+        fill={true}
         onClick={[Function]}
       >
         Confirm
