@@ -31,7 +31,7 @@ import {
  * btn2txt - string as content to fill "confirm button"
  * openNoteName - Default input value for the field
  */
-interface CustomInputModalProps {
+type CustomInputModalProps = {
   runModal: (value: string) => void;
   closeModal: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -42,7 +42,7 @@ interface CustomInputModalProps {
   btn2txt: string;
   openNoteName: string;
   helpText: string;
-}
+};
 
 export const CustomInputModal = (props: CustomInputModalProps) => {
   const {
