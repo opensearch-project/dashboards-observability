@@ -4,7 +4,6 @@
  */
 
 import { coreRefs } from '../../../framework/core_refs';
-import { uploadBundle } from '../../integrations/components/upload_flyout';
 import { useToast } from '../../../../public/components/common/toast';
 
 const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'indexPatterns') => {
@@ -21,18 +20,20 @@ const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'ind
   return responeData;
 };
 
-export const UploadAssets = async (tutorialId: string) => {
+export const UploadAssets = async (tutorialId: string, mdsId: string, mdsLabel: string) => {
   const { setToast } = useToast();
+  const http = coreRefs.http;
+
   try {
-    const responeData = await fetchAssets(tutorialId);
+    const response = await http!.post(`/api/observability/gettingStarted/createAssets`, {
+      body: JSON.stringify({
+        mdsId,
+        mdsLabel,
+        tutorialId,
+      }),
+    });
 
-    const blob = new Blob([responeData.data], { type: 'application/x-ndjson' });
-    const file = new File([blob], 'ndjson-file.ndjson');
-
-    const error = await uploadBundle(file);
-    if (error) {
-      console.error(error.message);
-    } else {
+    if (response) {
       setToast('Created saved object assets successfully', 'success');
     }
   } catch (err) {
