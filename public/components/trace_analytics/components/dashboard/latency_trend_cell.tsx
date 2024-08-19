@@ -5,10 +5,10 @@
 
 import {
   EuiButtonIcon,
-  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSmallButtonIcon,
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
