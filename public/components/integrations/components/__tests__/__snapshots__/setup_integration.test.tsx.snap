@@ -64,13 +64,17 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           <div
                             className="euiForm"
                           >
-                            <EuiTitle>
-                              <h1
-                                className="euiTitle euiTitle--medium"
+                            <EuiText
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small"
                               >
-                                Set Up Integration
-                              </h1>
-                            </EuiTitle>
+                                <h1>
+                                  Set Up Integration
+                                </h1>
+                              </div>
+                            </EuiText>
                             <EuiSpacer>
                               <div
                                 className="euiSpacer euiSpacer--l"
