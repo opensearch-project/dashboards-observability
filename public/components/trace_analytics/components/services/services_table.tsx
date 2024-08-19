@@ -18,6 +18,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
+  EuiPage,
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
@@ -264,7 +265,7 @@ export function ServicesTable(props: ServicesTableProps) {
 
   return (
     <>
-      <div style={{ padding: '0 16px' }}>
+      <EuiPage paddingSize="m">
         <EuiPanel>
           {titleBar}
           <EuiSpacer size="m" />
@@ -298,7 +299,7 @@ export function ServicesTable(props: ServicesTableProps) {
             <NoMatchMessage size="xl" />
           )}
         </EuiPanel>
-      </div>
+      </EuiPage>
     </>
   );
 }

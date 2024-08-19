@@ -2,12 +2,8 @@
 
 exports[`Service map component renders service map 1`] = `
 <Fragment>
-  <div
-    style={
-      Object {
-        "padding": "0 16px",
-      }
-    }
+  <EuiPage
+    paddingSize="m"
   >
     <EuiPanel>
       <PanelTitle
@@ -376,6 +372,6 @@ exports[`Service map component renders service map 1`] = `
     <EuiSpacer
       size="xl"
     />
-  </div>
+  </EuiPage>
 </Fragment>
 `;

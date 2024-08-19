@@ -1479,122 +1479,115 @@ exports[`Traces component renders empty traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <div
-      style={
-        Object {
-          "padding": "0 16px",
-        }
-      }
+    <EuiPage
+      paddingSize="m"
     >
-      <EuiPanel>
-        <div
-          className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-        >
-          <EuiAccordion
-            arrowDisplay="left"
-            buttonContent="Trace Groups"
-            data-test-subj="trace-groups-service-operation-accordian"
-            forceState="closed"
-            id="accordion1"
-            initialIsOpen={false}
-            isLoading={false}
-            isLoadingMessage={false}
-            onToggle={[Function]}
-            paddingSize="none"
+      <div
+        className="euiPage euiPage--paddingMedium euiPage--grow"
+      >
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
-            <div
-              className="euiAccordion"
+            <EuiAccordion
+              arrowDisplay="left"
+              buttonContent="Trace Groups"
               data-test-subj="trace-groups-service-operation-accordian"
+              forceState="closed"
+              id="accordion1"
+              initialIsOpen={false}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
+              paddingSize="none"
             >
               <div
-                className="euiAccordion__triggerWrapper"
+                className="euiAccordion"
+                data-test-subj="trace-groups-service-operation-accordian"
+                onToggle={[Function]}
               >
-                <button
-                  aria-controls="accordion1"
-                  aria-expanded={false}
-                  className="euiAccordion__button"
-                  id="random_html_id"
-                  onClick={[Function]}
-                  type="button"
+                <div
+                  className="euiAccordion__triggerWrapper"
                 >
-                  <span
-                    className="euiAccordion__iconWrapper"
+                  <button
+                    aria-controls="accordion1"
+                    aria-expanded={false}
+                    className="euiAccordion__button"
+                    id="random_html_id"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <EuiIcon
-                      className="euiAccordion__icon"
-                      size="m"
-                      type="arrowRight"
+                    <span
+                      className="euiAccordion__iconWrapper"
                     >
-                      <EuiIconBeaker
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        className="euiAccordion__icon"
+                        size="m"
+                        type="arrowRight"
                       >
-                        <svg
+                        <EuiIconBeaker
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                      </EuiIconBeaker>
-                    </EuiIcon>
-                  </span>
-                  <span
-                    className="euiIEFlexWrapFix"
-                  >
-                    Trace Groups
-                  </span>
-                </button>
-              </div>
-              <div
-                aria-labelledby="random_html_id"
-                className="euiAccordion__childWrapper"
-                id="accordion1"
-                role="region"
-                tabIndex={-1}
-              >
-                <EuiResizeObserver
-                  onResize={[Function]}
-                >
-                  <div>
-                    <div
-                      className=""
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </EuiIconBeaker>
+                      </EuiIcon>
+                    </span>
+                    <span
+                      className="euiIEFlexWrapFix"
                     >
-                      <EuiSpacer
-                        size="m"
+                      Trace Groups
+                    </span>
+                  </button>
+                </div>
+                <div
+                  aria-labelledby="random_html_id"
+                  className="euiAccordion__childWrapper"
+                  id="accordion1"
+                  role="region"
+                  tabIndex={-1}
+                >
+                  <EuiResizeObserver
+                    onResize={[Function]}
+                  >
+                    <div>
+                      <div
+                        className=""
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
+                        <EuiSpacer
+                          size="m"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                      </div>
                     </div>
-                  </div>
-                </EuiResizeObserver>
+                  </EuiResizeObserver>
+                </div>
               </div>
-            </div>
-          </EuiAccordion>
-        </div>
-      </EuiPanel>
-    </div>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
+            </EuiAccordion>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiPage>
     <TracesTable
       dataPrepperIndicesExist={true}
       items={Array []}
@@ -1603,146 +1596,146 @@ exports[`Traces component renders empty traces page 1`] = `
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
-      <div
-        style={
-          Object {
-            "padding": "0 16px",
-          }
-        }
+      <EuiPage
+        paddingSize="m"
       >
-        <EuiPanel>
-          <div
-            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
+        <div
+          className="euiPage euiPage--paddingMedium euiPage--grow"
+        >
+          <EuiPanel>
+            <div
+              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
             >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
               >
-                <EuiFlexItem
-                  grow={10}
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={10}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrow10"
+                    >
+                      <PanelTitle
+                        title="Traces"
+                        totalItems={0}
+                      >
+                        <EuiText
+                          size="m"
+                        >
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <span
+                              className="panel-title"
+                            >
+                              Traces
+                            </span>
+                            <span
+                              className="panel-title-count"
+                            >
+                               (0)
+                            </span>
+                          </div>
+                        </EuiText>
+                      </PanelTitle>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+              <EuiSpacer
+                size="m"
+              >
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiHorizontalRule
+                margin="none"
+              >
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full"
+                />
+              </EuiHorizontalRule>
+              <NoMatchMessage
+                size="xl"
+              >
+                <EuiSpacer
+                  size="xl"
                 >
                   <div
-                    className="euiFlexItem euiFlexItem--flexGrow10"
-                  >
-                    <PanelTitle
-                      title="Traces"
-                      totalItems={0}
-                    >
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <span
-                            className="panel-title"
-                          >
-                            Traces
-                          </span>
-                          <span
-                            className="panel-title-count"
-                          >
-                             (0)
-                          </span>
-                        </div>
-                      </EuiText>
-                    </PanelTitle>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiHorizontalRule
-              margin="none"
-            >
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full"
-              />
-            </EuiHorizontalRule>
-            <NoMatchMessage
-              size="xl"
-            >
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-              <EuiEmptyPrompt
-                body={
-                  <EuiText>
-                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                  </EuiText>
-                }
-                title={
-                  <h2>
-                    No matches
-                  </h2>
-                }
-              >
-                <div
-                  className="euiEmptyPrompt"
-                >
-                  <EuiTitle
-                    size="m"
-                  >
-                    <h2
-                      className="euiTitle euiTitle--medium"
-                    >
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+                <EuiEmptyPrompt
+                  body={
+                    <EuiText>
+                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                    </EuiText>
+                  }
+                  title={
+                    <h2>
                       No matches
                     </h2>
-                  </EuiTitle>
-                  <EuiTextColor
-                    color="subdued"
+                  }
+                >
+                  <div
+                    className="euiEmptyPrompt"
                   >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
+                    <EuiTitle
+                      size="m"
                     >
-                      <EuiSpacer
-                        size="m"
+                      <h2
+                        className="euiTitle euiTitle--medium"
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
-                      <EuiText>
-                        <div
-                          className="euiText euiText--medium"
+                        No matches
+                      </h2>
+                    </EuiTitle>
+                    <EuiTextColor
+                      color="subdued"
+                    >
+                      <span
+                        className="euiTextColor euiTextColor--subdued"
+                      >
+                        <EuiSpacer
+                          size="m"
                         >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiText>
-                    </span>
-                  </EuiTextColor>
-                </div>
-              </EuiEmptyPrompt>
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-            </NoMatchMessage>
-          </div>
-        </EuiPanel>
-      </div>
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiText>
+                      </span>
+                    </EuiTextColor>
+                  </div>
+                </EuiEmptyPrompt>
+                <EuiSpacer
+                  size="xl"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+              </NoMatchMessage>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiPage>
     </TracesTable>
   </TracesContent>
 </Traces>
@@ -3231,123 +3224,116 @@ exports[`Traces component renders jaeger traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <div
-      style={
-        Object {
-          "padding": "0 16px",
-        }
-      }
+    <EuiPage
+      paddingSize="m"
     >
-      <EuiPanel>
-        <div
-          className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-        >
-          <EuiAccordion
-            arrowDisplay="left"
-            buttonContent="Service and Operations"
-            data-test-subj="trace-groups-service-operation-accordian"
-            forceState="closed"
-            id="accordion1"
-            initialIsOpen={false}
-            isLoading={false}
-            isLoadingMessage={false}
-            onToggle={[Function]}
-            paddingSize="none"
+      <div
+        className="euiPage euiPage--paddingMedium euiPage--grow"
+      >
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
-            <div
-              className="euiAccordion"
+            <EuiAccordion
+              arrowDisplay="left"
+              buttonContent="Service and Operations"
               data-test-subj="trace-groups-service-operation-accordian"
+              forceState="closed"
+              id="accordion1"
+              initialIsOpen={false}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
+              paddingSize="none"
             >
               <div
-                className="euiAccordion__triggerWrapper"
+                className="euiAccordion"
+                data-test-subj="trace-groups-service-operation-accordian"
+                onToggle={[Function]}
               >
-                <button
-                  aria-controls="accordion1"
-                  aria-expanded={false}
-                  className="euiAccordion__button"
-                  id="random_html_id"
-                  onClick={[Function]}
-                  type="button"
+                <div
+                  className="euiAccordion__triggerWrapper"
                 >
-                  <span
-                    className="euiAccordion__iconWrapper"
+                  <button
+                    aria-controls="accordion1"
+                    aria-expanded={false}
+                    className="euiAccordion__button"
+                    id="random_html_id"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <EuiIcon
-                      className="euiAccordion__icon"
-                      size="m"
-                      type="arrowRight"
+                    <span
+                      className="euiAccordion__iconWrapper"
                     >
-                      <EuiIconArrowRight
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        className="euiAccordion__icon"
+                        size="m"
+                        type="arrowRight"
                       >
-                        <svg
+                        <EuiIconArrowRight
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiAccordion__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path
-                            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                            fillRule="nonzero"
-                          />
-                        </svg>
-                      </EuiIconArrowRight>
-                    </EuiIcon>
-                  </span>
-                  <span
-                    className="euiIEFlexWrapFix"
-                  >
-                    Service and Operations
-                  </span>
-                </button>
-              </div>
-              <div
-                aria-labelledby="random_html_id"
-                className="euiAccordion__childWrapper"
-                id="accordion1"
-                role="region"
-                tabIndex={-1}
-              >
-                <EuiResizeObserver
-                  onResize={[Function]}
-                >
-                  <div>
-                    <div
-                      className=""
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiAccordion__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                              fillRule="nonzero"
+                            />
+                          </svg>
+                        </EuiIconArrowRight>
+                      </EuiIcon>
+                    </span>
+                    <span
+                      className="euiIEFlexWrapFix"
                     >
-                      <EuiSpacer
-                        size="m"
+                      Service and Operations
+                    </span>
+                  </button>
+                </div>
+                <div
+                  aria-labelledby="random_html_id"
+                  className="euiAccordion__childWrapper"
+                  id="accordion1"
+                  role="region"
+                  tabIndex={-1}
+                >
+                  <EuiResizeObserver
+                    onResize={[Function]}
+                  >
+                    <div>
+                      <div
+                        className=""
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
+                        <EuiSpacer
+                          size="m"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                      </div>
                     </div>
-                  </div>
-                </EuiResizeObserver>
+                  </EuiResizeObserver>
+                </div>
               </div>
-            </div>
-          </EuiAccordion>
-        </div>
-      </EuiPanel>
-    </div>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
+            </EuiAccordion>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiPage>
     <TracesTable
       dataPrepperIndicesExist={false}
       items={Array []}
@@ -3357,146 +3343,146 @@ exports[`Traces component renders jaeger traces page 1`] = `
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
-      <div
-        style={
-          Object {
-            "padding": "0 16px",
-          }
-        }
+      <EuiPage
+        paddingSize="m"
       >
-        <EuiPanel>
-          <div
-            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
+        <div
+          className="euiPage euiPage--paddingMedium euiPage--grow"
+        >
+          <EuiPanel>
+            <div
+              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
             >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
               >
-                <EuiFlexItem
-                  grow={10}
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={10}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrow10"
+                    >
+                      <PanelTitle
+                        title="Traces"
+                        totalItems={0}
+                      >
+                        <EuiText
+                          size="m"
+                        >
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <span
+                              className="panel-title"
+                            >
+                              Traces
+                            </span>
+                            <span
+                              className="panel-title-count"
+                            >
+                               (0)
+                            </span>
+                          </div>
+                        </EuiText>
+                      </PanelTitle>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+              <EuiSpacer
+                size="m"
+              >
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiHorizontalRule
+                margin="none"
+              >
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full"
+                />
+              </EuiHorizontalRule>
+              <NoMatchMessage
+                size="xl"
+              >
+                <EuiSpacer
+                  size="xl"
                 >
                   <div
-                    className="euiFlexItem euiFlexItem--flexGrow10"
-                  >
-                    <PanelTitle
-                      title="Traces"
-                      totalItems={0}
-                    >
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <span
-                            className="panel-title"
-                          >
-                            Traces
-                          </span>
-                          <span
-                            className="panel-title-count"
-                          >
-                             (0)
-                          </span>
-                        </div>
-                      </EuiText>
-                    </PanelTitle>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiHorizontalRule
-              margin="none"
-            >
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full"
-              />
-            </EuiHorizontalRule>
-            <NoMatchMessage
-              size="xl"
-            >
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-              <EuiEmptyPrompt
-                body={
-                  <EuiText>
-                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                  </EuiText>
-                }
-                title={
-                  <h2>
-                    No matches
-                  </h2>
-                }
-              >
-                <div
-                  className="euiEmptyPrompt"
-                >
-                  <EuiTitle
-                    size="m"
-                  >
-                    <h2
-                      className="euiTitle euiTitle--medium"
-                    >
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+                <EuiEmptyPrompt
+                  body={
+                    <EuiText>
+                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                    </EuiText>
+                  }
+                  title={
+                    <h2>
                       No matches
                     </h2>
-                  </EuiTitle>
-                  <EuiTextColor
-                    color="subdued"
+                  }
+                >
+                  <div
+                    className="euiEmptyPrompt"
                   >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
+                    <EuiTitle
+                      size="m"
                     >
-                      <EuiSpacer
-                        size="m"
+                      <h2
+                        className="euiTitle euiTitle--medium"
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
-                      <EuiText>
-                        <div
-                          className="euiText euiText--medium"
+                        No matches
+                      </h2>
+                    </EuiTitle>
+                    <EuiTextColor
+                      color="subdued"
+                    >
+                      <span
+                        className="euiTextColor euiTextColor--subdued"
+                      >
+                        <EuiSpacer
+                          size="m"
                         >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiText>
-                    </span>
-                  </EuiTextColor>
-                </div>
-              </EuiEmptyPrompt>
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-            </NoMatchMessage>
-          </div>
-        </EuiPanel>
-      </div>
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiText>
+                      </span>
+                    </EuiTextColor>
+                  </div>
+                </EuiEmptyPrompt>
+                <EuiSpacer
+                  size="xl"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+              </NoMatchMessage>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiPage>
     </TracesTable>
   </TracesContent>
 </Traces>
@@ -4983,123 +4969,116 @@ exports[`Traces component renders traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <div
-      style={
-        Object {
-          "padding": "0 16px",
-        }
-      }
+    <EuiPage
+      paddingSize="m"
     >
-      <EuiPanel>
-        <div
-          className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-        >
-          <EuiAccordion
-            arrowDisplay="left"
-            buttonContent="Trace Groups"
-            data-test-subj="trace-groups-service-operation-accordian"
-            forceState="closed"
-            id="accordion1"
-            initialIsOpen={false}
-            isLoading={false}
-            isLoadingMessage={false}
-            onToggle={[Function]}
-            paddingSize="none"
+      <div
+        className="euiPage euiPage--paddingMedium euiPage--grow"
+      >
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
-            <div
-              className="euiAccordion"
+            <EuiAccordion
+              arrowDisplay="left"
+              buttonContent="Trace Groups"
               data-test-subj="trace-groups-service-operation-accordian"
+              forceState="closed"
+              id="accordion1"
+              initialIsOpen={false}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
+              paddingSize="none"
             >
               <div
-                className="euiAccordion__triggerWrapper"
+                className="euiAccordion"
+                data-test-subj="trace-groups-service-operation-accordian"
+                onToggle={[Function]}
               >
-                <button
-                  aria-controls="accordion1"
-                  aria-expanded={false}
-                  className="euiAccordion__button"
-                  id="random_html_id"
-                  onClick={[Function]}
-                  type="button"
+                <div
+                  className="euiAccordion__triggerWrapper"
                 >
-                  <span
-                    className="euiAccordion__iconWrapper"
+                  <button
+                    aria-controls="accordion1"
+                    aria-expanded={false}
+                    className="euiAccordion__button"
+                    id="random_html_id"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <EuiIcon
-                      className="euiAccordion__icon"
-                      size="m"
-                      type="arrowRight"
+                    <span
+                      className="euiAccordion__iconWrapper"
                     >
-                      <EuiIconArrowRight
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        className="euiAccordion__icon"
+                        size="m"
+                        type="arrowRight"
                       >
-                        <svg
+                        <EuiIconArrowRight
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiAccordion__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path
-                            d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                            fillRule="nonzero"
-                          />
-                        </svg>
-                      </EuiIconArrowRight>
-                    </EuiIcon>
-                  </span>
-                  <span
-                    className="euiIEFlexWrapFix"
-                  >
-                    Trace Groups
-                  </span>
-                </button>
-              </div>
-              <div
-                aria-labelledby="random_html_id"
-                className="euiAccordion__childWrapper"
-                id="accordion1"
-                role="region"
-                tabIndex={-1}
-              >
-                <EuiResizeObserver
-                  onResize={[Function]}
-                >
-                  <div>
-                    <div
-                      className=""
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiAccordion__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                              fillRule="nonzero"
+                            />
+                          </svg>
+                        </EuiIconArrowRight>
+                      </EuiIcon>
+                    </span>
+                    <span
+                      className="euiIEFlexWrapFix"
                     >
-                      <EuiSpacer
-                        size="m"
+                      Trace Groups
+                    </span>
+                  </button>
+                </div>
+                <div
+                  aria-labelledby="random_html_id"
+                  className="euiAccordion__childWrapper"
+                  id="accordion1"
+                  role="region"
+                  tabIndex={-1}
+                >
+                  <EuiResizeObserver
+                    onResize={[Function]}
+                  >
+                    <div>
+                      <div
+                        className=""
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
+                        <EuiSpacer
+                          size="m"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                      </div>
                     </div>
-                  </div>
-                </EuiResizeObserver>
+                  </EuiResizeObserver>
+                </div>
               </div>
-            </div>
-          </EuiAccordion>
-        </div>
-      </EuiPanel>
-    </div>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
+            </EuiAccordion>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiPage>
     <TracesTable
       dataPrepperIndicesExist={true}
       items={Array []}
@@ -5108,146 +5087,146 @@ exports[`Traces component renders traces page 1`] = `
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
-      <div
-        style={
-          Object {
-            "padding": "0 16px",
-          }
-        }
+      <EuiPage
+        paddingSize="m"
       >
-        <EuiPanel>
-          <div
-            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
+        <div
+          className="euiPage euiPage--paddingMedium euiPage--grow"
+        >
+          <EuiPanel>
+            <div
+              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
             >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
               >
-                <EuiFlexItem
-                  grow={10}
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={10}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrow10"
+                    >
+                      <PanelTitle
+                        title="Traces"
+                        totalItems={0}
+                      >
+                        <EuiText
+                          size="m"
+                        >
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <span
+                              className="panel-title"
+                            >
+                              Traces
+                            </span>
+                            <span
+                              className="panel-title-count"
+                            >
+                               (0)
+                            </span>
+                          </div>
+                        </EuiText>
+                      </PanelTitle>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+              <EuiSpacer
+                size="m"
+              >
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiHorizontalRule
+                margin="none"
+              >
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full"
+                />
+              </EuiHorizontalRule>
+              <NoMatchMessage
+                size="xl"
+              >
+                <EuiSpacer
+                  size="xl"
                 >
                   <div
-                    className="euiFlexItem euiFlexItem--flexGrow10"
-                  >
-                    <PanelTitle
-                      title="Traces"
-                      totalItems={0}
-                    >
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <span
-                            className="panel-title"
-                          >
-                            Traces
-                          </span>
-                          <span
-                            className="panel-title-count"
-                          >
-                             (0)
-                          </span>
-                        </div>
-                      </EuiText>
-                    </PanelTitle>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiHorizontalRule
-              margin="none"
-            >
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full"
-              />
-            </EuiHorizontalRule>
-            <NoMatchMessage
-              size="xl"
-            >
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-              <EuiEmptyPrompt
-                body={
-                  <EuiText>
-                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                  </EuiText>
-                }
-                title={
-                  <h2>
-                    No matches
-                  </h2>
-                }
-              >
-                <div
-                  className="euiEmptyPrompt"
-                >
-                  <EuiTitle
-                    size="m"
-                  >
-                    <h2
-                      className="euiTitle euiTitle--medium"
-                    >
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+                <EuiEmptyPrompt
+                  body={
+                    <EuiText>
+                      No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                    </EuiText>
+                  }
+                  title={
+                    <h2>
                       No matches
                     </h2>
-                  </EuiTitle>
-                  <EuiTextColor
-                    color="subdued"
+                  }
+                >
+                  <div
+                    className="euiEmptyPrompt"
                   >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
+                    <EuiTitle
+                      size="m"
                     >
-                      <EuiSpacer
-                        size="m"
+                      <h2
+                        className="euiTitle euiTitle--medium"
                       >
-                        <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
-                      <EuiText>
-                        <div
-                          className="euiText euiText--medium"
+                        No matches
+                      </h2>
+                    </EuiTitle>
+                    <EuiTextColor
+                      color="subdued"
+                    >
+                      <span
+                        className="euiTextColor euiTextColor--subdued"
+                      >
+                        <EuiSpacer
+                          size="m"
                         >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiText>
-                    </span>
-                  </EuiTextColor>
-                </div>
-              </EuiEmptyPrompt>
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-            </NoMatchMessage>
-          </div>
-        </EuiPanel>
-      </div>
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiText>
+                      </span>
+                    </EuiTextColor>
+                  </div>
+                </EuiEmptyPrompt>
+                <EuiSpacer
+                  size="xl"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+              </NoMatchMessage>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiPage>
     </TracesTable>
   </TracesContent>
 </Traces>

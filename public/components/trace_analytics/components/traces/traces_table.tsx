@@ -17,6 +17,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
   PropertySort,
+  EuiPage,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import truncate from 'lodash/truncate';
@@ -257,7 +258,7 @@ export function TracesTable(props: TracesTableProps) {
 
   return (
     <>
-      <div style={{ padding: '0 16px' }}>
+      <EuiPage paddingSize="m">
         <EuiPanel>
           {titleBar}
           <EuiSpacer size="m" />
@@ -284,7 +285,7 @@ export function TracesTable(props: TracesTableProps) {
             <NoMatchMessage size="xl" />
           )}
         </EuiPanel>
-      </div>
+      </EuiPage>
     </>
   );
 }

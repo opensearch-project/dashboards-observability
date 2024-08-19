@@ -547,7 +547,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -1810,7 +1810,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -3012,7 +3012,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -4189,7 +4189,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -5459,7 +5459,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -6636,7 +6636,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -7833,7 +7833,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -8971,7 +8971,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -10171,7 +10171,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -11314,7 +11314,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -12548,7 +12548,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -13725,7 +13725,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -14927,7 +14927,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -16104,7 +16104,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -17344,7 +17344,7 @@ Object {
                           class="euiSpacer euiSpacer--l"
                         />
                         <div
-                          style="padding: 0px 16px;"
+                          class="euiPage euiPage--paddingMedium euiPage--grow"
                         >
                           <div
                             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -18607,7 +18607,7 @@ Object {
                         class="euiSpacer euiSpacer--l"
                       />
                       <div
-                        style="padding: 0px 16px;"
+                        class="euiPage euiPage--paddingMedium euiPage--grow"
                       >
                         <div
                           class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"

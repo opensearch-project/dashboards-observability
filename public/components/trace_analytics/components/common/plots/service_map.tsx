@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiPage,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -202,7 +203,7 @@ export function ServiceMap({
 
   return (
     <>
-      <div style={{ padding: '0 16px' }}>
+      <EuiPage paddingSize="m">
         <EuiPanel>
           {page === 'app' ? (
             <PanelTitle title="Application Composition Map" />
@@ -283,7 +284,7 @@ export function ServiceMap({
         {filterByCurrService && items?.graph && (
           <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
         )}
-      </div>
+      </EuiPage>
     </>
   );
 }

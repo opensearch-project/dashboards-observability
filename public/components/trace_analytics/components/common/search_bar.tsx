@@ -12,8 +12,9 @@ import {
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { uiSettingsService } from '../../../../../common/utils';
-import { GlobalFilterButton } from './filters/filters'; // Import the GlobalFilterButton
+import { GlobalFilterButton } from './filters/filters';
 import { FilterType } from './filters/filters';
 
 export const renderDatePicker = (
@@ -70,26 +71,24 @@ export const SearchBar = forwardRef((props: SearchBarProps, ref) => {
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {!props.datepickerOnly && (
-          <>
-            <EuiFlexItem>
-              <EuiFieldSearch
-                prepend={
-                  <GlobalFilterButton filters={props.filters} setFilters={props.setFilters} />
-                }
-                compressed
-                fullWidth
-                isClearable={false}
-                placeholder="Trace ID, trace group name, service name"
-                data-test-subj="search-bar-input-box"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setGlobalQuery(e.target.value);
-                }}
-                onSearch={props.refresh}
-              />
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              prepend={<GlobalFilterButton filters={props.filters} setFilters={props.setFilters} />}
+              compressed
+              fullWidth
+              isClearable={false}
+              placeholder={i18n.translate('traceAnalytics.searchBar.placeholder', {
+                defaultMessage: 'Trace ID, trace group name, service name',
+              })}
+              data-test-subj="search-bar-input-box"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setGlobalQuery(e.target.value);
+              }}
+              onSearch={props.refresh}
+            />
+          </EuiFlexItem>
         )}
         <EuiFlexItem grow={false} style={{ maxWidth: '30vw' }}>
           <EuiSuperDatePicker

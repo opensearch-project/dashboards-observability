@@ -20,8 +20,9 @@ import { SearchBar } from '../common/search_bar';
 import { ServicesTable } from './services_table';
 import { coreRefs } from '../../../../framework/core_refs';
 import { DataSourcePicker } from '../dashboard/mode_picker';
+import { ServicesProps } from './services';
 
-export function ServicesContent(props) {
+export function ServicesContent(props: ServicesProps) {
   const {
     page,
     http,

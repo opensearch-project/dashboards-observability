@@ -11,6 +11,7 @@ import {
   PropertySort,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -158,7 +159,7 @@ export function TracesContent(props: TracesProps) {
         attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
-      <div style={{ padding: '0 16px' }}>
+      <EuiPage paddingSize="m">
         <EuiPanel>
           <EuiAccordion
             id="accordion1"
@@ -171,8 +172,7 @@ export function TracesContent(props: TracesProps) {
             {trigger === 'open' && dashboardContent()}
           </EuiAccordion>
         </EuiPanel>
-      </div>
-      <EuiSpacer size="m" />
+      </EuiPage>
       <TracesTable
         items={tableItems}
         refresh={refresh}
