@@ -17,6 +17,7 @@ export interface TracesProps extends TraceAnalyticsComponentDeps {
   traceIdColumnAction: any;
   toasts: Toast[];
   dataSourceMDSId: DataSourceOption[];
+  tenant?: string;
 }
 
 export function Traces(props: TracesProps) {

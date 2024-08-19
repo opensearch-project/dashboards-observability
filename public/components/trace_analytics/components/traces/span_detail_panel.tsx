@@ -34,16 +34,19 @@ export function SpanDetailPanel(props: {
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
   setData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  tenant?: string;
 }) {
-  const { mode } = props;
+  const { mode, tenant } = props;
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const fromApp = props.page === 'app';
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
+
   const [DSL, setDSL] = useState<any>({});
   let data: { gantt: any[]; table: any[]; ganttMaxX: number };
   let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+
   const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
     gantt: [],
     table: [],
@@ -91,7 +94,8 @@ export function SpanDetailPanel(props: {
       props.colorMap,
       refreshDSL,
       mode,
-      props.dataSourceMDSId
+      props.dataSourceMDSId,
+      tenant
     );
   }, 150);
 

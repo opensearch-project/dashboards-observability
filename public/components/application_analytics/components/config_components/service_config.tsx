@@ -38,6 +38,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
     http,
     selectedServices,
     setSelectedServices,
+    tenant,
   } = props;
   const { mode } = props;
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -49,7 +50,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   useEffect(() => {
-    handleServiceMapRequest(http, dslService, mode, '', setServiceMap);
+    handleServiceMapRequest(http, dslService, mode, '', setServiceMap, undefined, tenant);
   }, []);
 
   useEffect(() => {

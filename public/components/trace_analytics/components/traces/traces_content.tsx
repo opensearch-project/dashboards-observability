@@ -34,6 +34,9 @@ export function TracesContent(props: TracesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    dataSourceManagement,
+    dataSourceMDSId,
+    tenant,
     attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -98,7 +101,8 @@ export function TracesContent(props: TracesProps) {
       setTableItems,
       mode,
       props.dataSourceMDSId[0].id,
-      sort
+      sort,
+      tenant
     );
     setLoading(false);
   };
@@ -146,6 +150,7 @@ export function TracesContent(props: TracesProps) {
         traceIdColumnAction={traceIdColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        tenant={tenant}
       />
     </>
   );

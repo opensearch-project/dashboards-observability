@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getTenantIndexName } from '../../../../common/utils/tenant_index_name';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   DATA_PREPPER_INDEX_NAME,
@@ -19,7 +20,8 @@ export async function handleDslRequest(
   bodyQuery: any,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  setShowTimeoutToast?: () => void
+  setShowTimeoutToast?: () => void,
+  tenant?: string
 ) {
   if (DSL?.query) {
     bodyQuery.query.bool.must.push(...DSL.query.bool.must);
@@ -31,10 +33,16 @@ export async function handleDslRequest(
   }
   let body = bodyQuery;
   if (!bodyQuery.index) {
-    body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
+    body = {
+      ...bodyQuery,
+      index: getTenantIndexName(
+        mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME,
+        tenant
+      ),
+    };
   }
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   if (setShowTimeoutToast) {
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
@@ -64,13 +72,17 @@ export async function handleDslRequest(
 export async function handleJaegerIndicesExistRequest(
   http: CoreStart['http'],
   setJaegerIndicesExist,
-  dataSourceMDSId?: string
+  dataSourceMDSId?: string,
+  tenant?: string
 ) {
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   http
     .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE, {
+      body: JSON.stringify({
+        tenant,
+      }),
       query,
     })
     .then((exists) => setJaegerIndicesExist(exists))
@@ -80,13 +92,17 @@ export async function handleJaegerIndicesExistRequest(
 export async function handleDataPrepperIndicesExistRequest(
   http: CoreStart['http'],
   setDataPrepperIndicesExist,
-  dataSourceMDSId?: string
+  dataSourceMDSId?: string,
+  tenant?: string
 ) {
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   http
     .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE, {
+      body: JSON.stringify({
+        tenant,
+      }),
       query,
     })
     .then((exists) => setDataPrepperIndicesExist(exists))

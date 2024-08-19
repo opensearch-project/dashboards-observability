@@ -53,6 +53,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
     toasts,
     dataSourceMDSId,
+    tenant,
     attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -193,7 +194,8 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         dataSourceMDSId[0].id,
-        setPercentileMap
+        setPercentileMap,
+        tenant
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
       const serviceMapDSL = cloneDeep(DSL);
@@ -209,7 +211,8 @@ export function DashboardContent(props: DashboardProps) {
       throughputPltItems,
       setThroughputPltItems,
       mode,
-      dataSourceMDSId[0].id
+      dataSourceMDSId[0].id,
+      tenant
     );
 
     handleDashboardErrorRatePltRequest(
@@ -219,7 +222,8 @@ export function DashboardContent(props: DashboardProps) {
       errorRatePltItems,
       setErrorRatePltItems,
       mode,
-      dataSourceMDSId[0].id
+      dataSourceMDSId[0].id,
+      tenant
     );
   };
 
@@ -338,7 +342,7 @@ export function DashboardContent(props: DashboardProps) {
           )}
         </div>
       ) : (
-        <MissingConfigurationMessage mode={mode} />
+        <MissingConfigurationMessage mode={mode} tenant={tenant} />
       )}
     </>
   );

@@ -115,11 +115,14 @@ import {
 import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 import { registerAllPluginNavGroups } from './plugin_nav';
 
-interface PublicConfig {
+export interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
   summarize: {
+    enabled: boolean;
+  };
+  multitenancy: {
     enabled: boolean;
   };
 }
@@ -295,7 +298,8 @@ export class ObservabilityPlugin
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
         coreStart.savedObjects,
-        defaultRoute
+        this.config,
+        defaultRoute,
       );
     };
 

@@ -44,6 +44,7 @@ export function ServicesContent(props: ServicesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     dataSourceMDSId,
+    tenant,
     attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -128,14 +129,24 @@ export function ServicesContent(props: ServicesProps) {
       );
     }
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id),
+      handleServicesRequest(
+        http,
+        DSL,
+        setTableItems,
+        mode,
+        dataSourceMDSId[0].id,
+        undefined,
+        undefined,
+        tenant
+      ),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
         dataSourceMDSId[0].id,
         setServiceMap,
-        currService || filteredService
+        currService || filteredService,
+        tenant
       ),
     ]);
 
@@ -204,6 +215,7 @@ export function ServicesContent(props: ServicesProps) {
         setCurrentSelectedService={setCurrentSelectedService}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        tenant={tenant}
         isServiceTrendEnabled={isServiceTrendEnabled}
         setIsServiceTrendEnabled={setIsServiceTrendEnabled}
         serviceTrends={serviceTrends}

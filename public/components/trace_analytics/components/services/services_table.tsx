@@ -44,6 +44,7 @@ interface ServicesTableProps {
   mode: TraceAnalyticsMode;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  tenant?: string;
   isServiceTrendEnabled: boolean;
   setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   serviceTrends: ServiceTrends;
@@ -63,6 +64,7 @@ export function ServicesTable(props: ServicesTableProps) {
     setRedirect,
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    tenant,
     isServiceTrendEnabled,
     setIsServiceTrendEnabled,
     serviceTrends,
@@ -272,7 +274,7 @@ export function ServicesTable(props: ServicesTableProps) {
           (mode === 'data_prepper' && dataPrepperIndicesExist) ||
           (mode === 'jaeger' && jaegerIndicesExist)
         ) ? (
-          <MissingConfigurationMessage mode={mode} />
+          <MissingConfigurationMessage mode={mode} tenant={tenant} />
         ) : items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"
