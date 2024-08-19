@@ -5,10 +5,10 @@
 
 import React, { useState, ReactChildren, ReactChild } from 'react';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiPopover,
   EuiSwitch,
   EuiIcon,
@@ -85,7 +85,7 @@ export const GridHeader = ({
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: GRID_HEADER_COLUMN_MAX_WIDTH }}>
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           iconSize="s"
           color="text"
           aria-label="Next"
@@ -93,7 +93,7 @@ export const GridHeader = ({
           onClick={() => setIsFullScreenHandler(true)}
         >
           Full screen
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       </EuiFlexItem>
       {isFullScreen && (
         <EuiIcon
@@ -118,7 +118,7 @@ export const DensityPopover = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconSize="s"
       color="text"
       aria-label="Next"
@@ -126,7 +126,7 @@ export const DensityPopover = ({
       onClick={onButtonClick}
     >
       Density
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
   );
 
   return (
@@ -134,7 +134,7 @@ export const DensityPopover = ({
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         {ROW_DENSITIES.map((i: RowConfigType, index: number) => (
           <EuiFlexItem key={index} grow={false}>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               onClick={() => selectDensityHandler(i)}
               display={selectedDensity.icon === i.icon ? 'fill' : 'base'}
               iconType={i.icon}
@@ -161,7 +161,7 @@ export const ColumnVisiblityPopover = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconSize="s"
       color="text"
       aria-label="Next"
@@ -169,7 +169,7 @@ export const ColumnVisiblityPopover = ({
       onClick={onButtonClick}
     >
       Columns
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
   );
 
   return (

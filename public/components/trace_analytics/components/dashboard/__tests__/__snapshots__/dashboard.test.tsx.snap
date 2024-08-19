@@ -269,7 +269,7 @@ exports[`Dashboard component renders dashboard 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -280,7 +280,7 @@ exports[`Dashboard component renders dashboard 1`] = `
           title="data_prepper"
         >
           Data Prepper
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -296,7 +296,7 @@ exports[`Dashboard component renders dashboard 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -306,68 +306,80 @@ exports[`Dashboard component renders dashboard 1`] = `
             onClick={[Function]}
             title="data_prepper"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="data_prepper"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconArrowDown
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconArrowDown
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fillRule="non-zero"
-                        />
-                      </svg>
-                    </EuiIconArrowDown>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Data Prepper
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                            fillRule="non-zero"
+                          />
+                        </svg>
+                      </EuiIconArrowDown>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Data Prepper
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -1490,7 +1502,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -1501,7 +1513,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
           title="data_prepper"
         >
           Data Prepper
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -1517,7 +1529,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -1527,67 +1539,79 @@ exports[`Dashboard component renders empty dashboard 1`] = `
             onClick={[Function]}
             title="data_prepper"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="data_prepper"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconBeaker
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Data Prepper
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </EuiIconBeaker>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Data Prepper
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -2711,7 +2735,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -2722,7 +2746,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           title="jaeger"
         >
           Jaeger
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -2738,7 +2762,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -2748,68 +2772,80 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
             onClick={[Function]}
             title="jaeger"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="jaeger"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="jaeger"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconArrowDown
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconArrowDown
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fillRule="non-zero"
-                        />
-                      </svg>
-                    </EuiIconArrowDown>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Jaeger
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                            fillRule="non-zero"
+                          />
+                        </svg>
+                      </EuiIconArrowDown>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Jaeger
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>

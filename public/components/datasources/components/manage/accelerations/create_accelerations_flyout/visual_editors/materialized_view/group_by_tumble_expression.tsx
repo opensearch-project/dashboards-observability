@@ -4,15 +4,15 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiExpression,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopover,
-  EuiSelect,
+  EuiCompressedSelect,
 } from '@elastic/eui';
 import producer from 'immer';
 import React, { useState } from 'react';
@@ -93,8 +93,8 @@ export const GroupByTumbleExpression = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Time Field">
-              <EuiComboBox
+            <EuiCompressedFormRow label="Time Field">
+              <EuiCompressedComboBox
                 style={{ minWidth: '200px' }}
                 placeholder="Select one or more options"
                 singleSelection={{ asPlainText: true }}
@@ -105,25 +105,25 @@ export const GroupByTumbleExpression = ({
                 onChange={onChangeTimeField}
                 isClearable={false}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Tumble Window">
-              <EuiFieldNumber
+            <EuiCompressedFormRow label="Tumble Window">
+              <EuiCompressedFieldNumber
                 value={groupbyValues.tumbleWindow}
                 onChange={onChangeTumbleWindow}
                 min={1}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Tumble Interval">
-              <EuiSelect
+            <EuiCompressedFormRow label="Tumble Interval">
+              <EuiCompressedSelect
                 value={groupbyValues.tumbleInterval}
                 onChange={onChangeTumbleInterval}
                 options={ACCELERATION_TIME_INTERVAL}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>

@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiButton,
-  EuiFieldSearch,
+  EuiSmallButton,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -99,9 +99,9 @@ const AddIntegrationButton = ({
   toggleFlyout: () => void;
 }) => {
   return (
-    <EuiButton fill={fill} onClick={toggleFlyout}>
+    <EuiSmallButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
@@ -234,7 +234,7 @@ export const InstalledIntegrationsTable = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             fullWidth
             placeholder="Search..."
             onChange={(queryEvent) => {

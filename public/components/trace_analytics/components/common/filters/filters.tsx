@@ -6,7 +6,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -198,7 +198,7 @@ export function Filters(props: FiltersOwnProps) {
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         button={
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => setIsPopoverOpen(true)}
             iconType="filter"
             title="Change all filters"

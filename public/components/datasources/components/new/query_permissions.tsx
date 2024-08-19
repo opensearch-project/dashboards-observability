@@ -4,11 +4,11 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiRadioGroup,
+  EuiCompressedFormRow,
+  EuiCompressedRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -43,7 +43,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
         <EuiText size="xs">
           Select one or more OpenSearch roles that can query this data connection.
         </EuiText>
-        <EuiFormRow
+        <EuiCompressedFormRow
           isInvalid={selectedRoles.length === 0}
           error={
             selectedRoles.length === 0
@@ -51,7 +51,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
               : undefined
           }
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             placeholder="Select one or more options"
             options={roles}
             selectedOptions={selectedRoles}
@@ -60,7 +60,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
             data-test-subj="query-permissions-combo-box"
             isInvalid={selectedRoles.length === 0}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   };
@@ -80,7 +80,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiRadioGroup
+          <EuiCompressedRadioGroup
             options={accessLevelOptions}
             idSelected={selectedAccessLevel}
             onChange={(id) => {

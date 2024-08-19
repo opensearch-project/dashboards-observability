@@ -6,15 +6,16 @@
 import './docView.scss';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiCompressedFormRow,
   EuiFormRow,
   EuiSpacer,
   EuiText,
@@ -215,14 +216,14 @@ export const SurroundingFlyout = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             onClick={openDetailsFlyout}
             className="header-button"
             iconType="sortRight"
             iconSide="right"
           >
             View event details
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutHeader>
@@ -237,20 +238,20 @@ export const SurroundingFlyout = ({
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiButtonEmpty
+          <EuiCompressedFormRow>
+            <EuiSmallButtonEmpty
               isLoading={typeOfDocs === 'new' ? loadingNewEvents : loadingOldEvents}
               iconSide="left"
               onClick={() => loadButton(typeOfDocs)}
               iconType={iconType}
             >
               Load
-            </EuiButtonEmpty>
-          </EuiFormRow>
+            </EuiSmallButtonEmpty>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="cnt-picker">
-          <EuiFormRow>
-            <EuiFieldNumber
+          <EuiCompressedFormRow>
+            <EuiCompressedFieldNumber
               value={value}
               onChange={(e) => onChange(e)}
               aria-label={typeOfDocs === 'new' ? 'fetch newer events' : 'fetch older events'}
@@ -258,10 +259,10 @@ export const SurroundingFlyout = ({
               max={10000}
               onKeyDown={(e) => handleKeyDown(e, typeOfDocs)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="center">
+          <EuiFormRow display="centerCompressed">
             <EuiText>{typeOfDocs === 'new' ? 'newer' : 'older'} events</EuiText>
           </EuiFormRow>
         </EuiFlexItem>

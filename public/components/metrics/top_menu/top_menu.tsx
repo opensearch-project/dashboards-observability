@@ -4,11 +4,11 @@
  */
 
 import {
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
-  EuiSuperDatePicker,
+  EuiCompressedSelect,
+  EuiCompressedSuperDatePicker,
 } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,8 +29,7 @@ export const TopMenu = () => {
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <div className="resolutionSelect">
-              <EuiFieldText
-                compressed
+              <EuiCompressedFieldText
                 className="resolutionSelectText"
                 prepend="Span Interval"
                 value={dateSpanFilter.span}
@@ -38,7 +37,7 @@ export const TopMenu = () => {
                 onChange={(e) => dispatch(setDateSpan({ span: e.target.value }))}
                 data-test-subj="metrics__spanValue"
                 append={
-                  <EuiSelect
+                  <EuiCompressedSelect
                     className="resolutionSelectOption"
                     options={resolutionOptions}
                     value={dateSpanFilter.resolution}
@@ -54,8 +53,7 @@ export const TopMenu = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
-                <EuiSuperDatePicker
-                  compressed={true}
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={dateSpanFilter.start}
                   end={dateSpanFilter.end}

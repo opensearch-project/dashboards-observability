@@ -165,7 +165,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                     Metrics source
                   </h5>
                 </EuiTitle>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   async={false}
                   compressed={true}
                   data-test-subj="metricsDataSourcePicker"
@@ -390,7 +390,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                       </EuiFormControlLayout>
                     </EuiComboBoxInput>
                   </div>
-                </EuiComboBox>
+                </EuiCompressedComboBox>
               </div>
             </DataSourcePicker>
             <EuiSpacer

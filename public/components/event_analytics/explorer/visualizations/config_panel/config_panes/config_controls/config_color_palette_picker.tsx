@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiColorPalettePicker,
   EuiColorPicker,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import {
   DEFAULT_PALETTE,
@@ -80,9 +80,9 @@ export const ColorPalettePicker = ({
       <EuiFlexGroup gutterSize={'xs'}>
         {[SINGLE_COLOR_PALETTE, MULTI_COLOR_PALETTE].includes(selectedColor.name) && (
           <EuiFlexItem grow={1}>
-            <EuiFormRow helpText={selectedColor.name === MULTI_COLOR_PALETTE && 'Child field'}>
+            <EuiCompressedFormRow helpText={selectedColor.name === MULTI_COLOR_PALETTE && 'Child field'}>
               <EuiColorPicker onChange={onChildColorChange} color={childColor} />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         )}
         {selectedColor.name === MULTI_COLOR_PALETTE &&
@@ -91,12 +91,12 @@ export const ColorPalettePicker = ({
             .fill(0)
             .map((_, i) => (
               <EuiFlexItem grow={1} key={i}>
-                <EuiFormRow helpText={`Parent ${i + 1} field`}>
+                <EuiCompressedFormRow helpText={`Parent ${i + 1} field`}>
                   <EuiColorPicker
                     onChange={onParentColorChange(i)}
                     color={parentColors[i] ?? '#000000'}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             ))}
         <EuiFlexItem grow={3}>

@@ -38,7 +38,7 @@ exports[`Data Connection Inactive Page test Renders inactive data connection cal
           Associated objects and accelerations are not available while this connection is inactive.
         </p>
         <button
-          class="euiButton euiButton--warning"
+          class="euiButton euiButton--warning euiButton--small"
           type="button"
         >
           <span

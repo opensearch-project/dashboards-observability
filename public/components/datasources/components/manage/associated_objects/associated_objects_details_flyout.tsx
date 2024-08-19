@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -214,7 +214,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         </p>
       }
       actions={
-        <EuiButton
+        <EuiSmallButton
           color="primary"
           fill
           onClick={() =>
@@ -232,7 +232,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           {i18n.translate('datasources.associatedObjectsFlyout.createAccelerationButton', {
             defaultMessage: CREATE_ACCELERATION_DESCRIPTION,
           })}
-        </EuiButton>
+        </EuiSmallButton>
       }
     />
   );
@@ -341,7 +341,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           </EuiFlexItem>
           {dataSourceType === 'SECURITYLAKE' && (
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={onCreateAcceleration}>Create acceleration</EuiButton>
+              <EuiSmallButton onClick={onCreateAcceleration}>Create acceleration</EuiSmallButton>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -39,7 +39,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -79,7 +79,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -122,7 +122,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -175,7 +175,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -186,7 +186,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -220,7 +220,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -282,7 +282,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 1 day
@@ -303,7 +303,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -384,7 +384,7 @@ exports[`Panels View SO Component render panel view container and refresh panel 
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -470,7 +470,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -510,7 +510,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -553,7 +553,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -606,7 +606,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -617,7 +617,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -651,7 +651,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -713,7 +713,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 1 day
@@ -734,7 +734,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -815,7 +815,7 @@ exports[`Panels View SO Component render panel view so container and reload dash
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -903,7 +903,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -943,7 +943,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -986,7 +986,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -1039,7 +1039,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -1050,7 +1050,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -1084,7 +1084,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -1146,7 +1146,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 1 day
@@ -1167,7 +1167,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -1248,7 +1248,7 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >

@@ -93,7 +93,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       >
                         <div>
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -144,14 +144,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiFormRow__fieldWrapper"
                             >
                               <div
-                                class="euiFormControlLayout euiFormControlLayout--group"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
                                     aria-describedby="random_html_id-help-0"
-                                    class="euiFieldText euiFieldText--inGroup"
+                                    class="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                                     data-test-subj="data-source-name"
                                     id="random_html_id"
                                     name="first"
@@ -160,7 +160,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   />
                                 </div>
                                 <button
-                                  class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
                                   data-test-subj="validateIndex"
                                   disabled=""
                                   type="button"
@@ -185,7 +185,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             </div>
                           </div>
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -202,14 +202,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiFormRow__fieldWrapper"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
                                     aria-describedby="random_html_id-help-0"
-                                    class="euiFieldText"
+                                    class="euiFieldText euiFieldText--compressed"
                                     data-test-subj="new-instance-name"
                                     id="random_html_id"
                                     name="first"
@@ -241,7 +241,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--danger"
+                        class="euiButton euiButton--danger euiButton--small"
                         type="button"
                       >
                         <span
@@ -259,7 +259,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                        class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                         data-click-metric-element="integrations.create_from_setup"
                         data-test-subj="createInstanceButton"
                         disabled=""
@@ -428,7 +428,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               >
                                 <div>
                                   <div
-                                    class="euiFormRow"
+                                    class="euiFormRow euiFormRow--compressed"
                                     id="random_html_id-row"
                                   >
                                     <div
@@ -479,14 +479,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiFormRow__fieldWrapper"
                                     >
                                       <div
-                                        class="euiFormControlLayout euiFormControlLayout--group"
+                                        class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                       >
                                         <div
                                           class="euiFormControlLayout__childrenWrapper"
                                         >
                                           <input
                                             aria-describedby="random_html_id-help-0"
-                                            class="euiFieldText euiFieldText--inGroup"
+                                            class="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                                             data-test-subj="data-source-name"
                                             id="random_html_id"
                                             name="first"
@@ -495,7 +495,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           />
                                         </div>
                                         <button
-                                          class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                          class="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
                                           data-test-subj="validateIndex"
                                           disabled=""
                                           type="button"
@@ -520,7 +520,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFormRow"
+                                    class="euiFormRow euiFormRow--compressed"
                                     id="random_html_id-row"
                                   >
                                     <div
@@ -537,14 +537,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiFormRow__fieldWrapper"
                                     >
                                       <div
-                                        class="euiFormControlLayout"
+                                        class="euiFormControlLayout euiFormControlLayout--compressed"
                                       >
                                         <div
                                           class="euiFormControlLayout__childrenWrapper"
                                         >
                                           <input
                                             aria-describedby="random_html_id-help-0"
-                                            class="euiFieldText"
+                                            class="euiFieldText euiFieldText--compressed"
                                             data-test-subj="new-instance-name"
                                             id="random_html_id"
                                             name="first"
@@ -576,7 +576,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiFlexItem"
                             >
                               <button
-                                class="euiButton euiButton--danger"
+                                class="euiButton euiButton--danger euiButton--small"
                                 type="button"
                               >
                                 <span
@@ -594,7 +594,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiFlexItem"
                             >
                               <button
-                                class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                                 data-click-metric-element="integrations.create_from_setup"
                                 data-test-subj="createInstanceButton"
                                 disabled=""
@@ -695,7 +695,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 >
                                   <div>
                                     <div
-                                      class="euiFormRow"
+                                      class="euiFormRow euiFormRow--compressed"
                                       id="random_html_id-row"
                                     >
                                       <div
@@ -746,14 +746,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormRow__fieldWrapper"
                                       >
                                         <div
-                                          class="euiFormControlLayout euiFormControlLayout--group"
+                                          class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                         >
                                           <div
                                             class="euiFormControlLayout__childrenWrapper"
                                           >
                                             <input
                                               aria-describedby="random_html_id-help-0"
-                                              class="euiFieldText euiFieldText--inGroup"
+                                              class="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                                               data-test-subj="data-source-name"
                                               id="random_html_id"
                                               name="first"
@@ -762,7 +762,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             />
                                           </div>
                                           <button
-                                            class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                            class="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
                                             data-test-subj="validateIndex"
                                             disabled=""
                                             type="button"
@@ -787,7 +787,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       </div>
                                     </div>
                                     <div
-                                      class="euiFormRow"
+                                      class="euiFormRow euiFormRow--compressed"
                                       id="random_html_id-row"
                                     >
                                       <div
@@ -804,14 +804,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormRow__fieldWrapper"
                                       >
                                         <div
-                                          class="euiFormControlLayout"
+                                          class="euiFormControlLayout euiFormControlLayout--compressed"
                                         >
                                           <div
                                             class="euiFormControlLayout__childrenWrapper"
                                           >
                                             <input
                                               aria-describedby="random_html_id-help-0"
-                                              class="euiFieldText"
+                                              class="euiFieldText euiFieldText--compressed"
                                               data-test-subj="new-instance-name"
                                               id="random_html_id"
                                               name="first"
@@ -843,7 +843,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFlexItem"
                               >
                                 <button
-                                  class="euiButton euiButton--danger"
+                                  class="euiButton euiButton--danger euiButton--small"
                                   type="button"
                                 >
                                   <span
@@ -861,7 +861,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFlexItem"
                               >
                                 <button
-                                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                                   data-click-metric-element="integrations.create_from_setup"
                                   data-test-subj="createInstanceButton"
                                   disabled=""
@@ -962,7 +962,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   >
                                     <div>
                                       <div
-                                        class="euiFormRow"
+                                        class="euiFormRow euiFormRow--compressed"
                                         id="random_html_id-row"
                                       >
                                         <div
@@ -1013,14 +1013,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormRow__fieldWrapper"
                                         >
                                           <div
-                                            class="euiFormControlLayout euiFormControlLayout--group"
+                                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                           >
                                             <div
                                               class="euiFormControlLayout__childrenWrapper"
                                             >
                                               <input
                                                 aria-describedby="random_html_id-help-0"
-                                                class="euiFieldText euiFieldText--inGroup"
+                                                class="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                                                 data-test-subj="data-source-name"
                                                 id="random_html_id"
                                                 name="first"
@@ -1029,7 +1029,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               />
                                             </div>
                                             <button
-                                              class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                              class="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
                                               data-test-subj="validateIndex"
                                               disabled=""
                                               type="button"
@@ -1054,7 +1054,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         </div>
                                       </div>
                                       <div
-                                        class="euiFormRow"
+                                        class="euiFormRow euiFormRow--compressed"
                                         id="random_html_id-row"
                                       >
                                         <div
@@ -1071,14 +1071,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormRow__fieldWrapper"
                                         >
                                           <div
-                                            class="euiFormControlLayout"
+                                            class="euiFormControlLayout euiFormControlLayout--compressed"
                                           >
                                             <div
                                               class="euiFormControlLayout__childrenWrapper"
                                             >
                                               <input
                                                 aria-describedby="random_html_id-help-0"
-                                                class="euiFieldText"
+                                                class="euiFieldText euiFieldText--compressed"
                                                 data-test-subj="new-instance-name"
                                                 id="random_html_id"
                                                 name="first"
@@ -1110,7 +1110,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   class="euiFlexItem"
                                 >
                                   <button
-                                    class="euiButton euiButton--danger"
+                                    class="euiButton euiButton--danger euiButton--small"
                                     type="button"
                                   >
                                     <span
@@ -1128,7 +1128,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   class="euiFlexItem"
                                 >
                                   <button
-                                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                                     data-click-metric-element="integrations.create_from_setup"
                                     data-test-subj="createInstanceButton"
                                     disabled=""
@@ -1217,7 +1217,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     >
                                       <div>
                                         <div
-                                          class="euiFormRow"
+                                          class="euiFormRow euiFormRow--compressed"
                                           id="random_html_id-row"
                                         >
                                           <div
@@ -1268,14 +1268,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiFormRow__fieldWrapper"
                                           >
                                             <div
-                                              class="euiFormControlLayout euiFormControlLayout--group"
+                                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                             >
                                               <div
                                                 class="euiFormControlLayout__childrenWrapper"
                                               >
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
-                                                  class="euiFieldText euiFieldText--inGroup"
+                                                  class="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                                                   data-test-subj="data-source-name"
                                                   id="random_html_id"
                                                   name="first"
@@ -1284,7 +1284,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 />
                                               </div>
                                               <button
-                                                class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
                                                 data-test-subj="validateIndex"
                                                 disabled=""
                                                 type="button"
@@ -1309,7 +1309,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           </div>
                                         </div>
                                         <div
-                                          class="euiFormRow"
+                                          class="euiFormRow euiFormRow--compressed"
                                           id="random_html_id-row"
                                         >
                                           <div
@@ -1326,14 +1326,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiFormRow__fieldWrapper"
                                           >
                                             <div
-                                              class="euiFormControlLayout"
+                                              class="euiFormControlLayout euiFormControlLayout--compressed"
                                             >
                                               <div
                                                 class="euiFormControlLayout__childrenWrapper"
                                               >
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
-                                                  class="euiFieldText"
+                                                  class="euiFieldText euiFieldText--compressed"
                                                   data-test-subj="new-instance-name"
                                                   id="random_html_id"
                                                   name="first"
@@ -1365,7 +1365,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiFlexItem"
                                   >
                                     <button
-                                      class="euiButton euiButton--danger"
+                                      class="euiButton euiButton--danger euiButton--small"
                                       type="button"
                                     >
                                       <span
@@ -1383,7 +1383,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiFlexItem"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                      class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                                       data-click-metric-element="integrations.create_from_setup"
                                       data-test-subj="createInstanceButton"
                                       disabled=""
@@ -1540,9 +1540,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     className="euiForm"
                                   >
                                     <div>
-                                      <EuiFormRow
+                                      <EuiCompressedFormRow
                                         describedByIds={Array []}
-                                        display="row"
+                                        display="rowCompressed"
                                         error={Array []}
                                         fullWidth={false}
                                         hasChildLabel={true}
@@ -1566,7 +1566,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         labelType="label"
                                       >
                                         <div
-                                          className="euiFormRow"
+                                          className="euiFormRow euiFormRow--compressed"
                                           id="random_html_id-row"
                                         >
                                           <div
@@ -1659,15 +1659,15 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <div
                                             className="euiFormRow__fieldWrapper"
                                           >
-                                            <EuiFieldText
+                                            <EuiCompressedFieldText
                                               append={
-                                                <EuiButton
+                                                <EuiSmallButton
                                                   data-test-subj="validateIndex"
                                                   disabled={true}
                                                   onClick={[Function]}
                                                 >
                                                   Validate
-                                                </EuiButton>
+                                                </EuiSmallButton>
                                               }
                                               aria-describedby="random_html_id-help-0"
                                               data-test-subj="data-source-name"
@@ -1679,97 +1679,131 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               onFocus={[Function]}
                                               value=""
                                             >
-                                              <EuiFormControlLayout
+                                              <EuiFieldText
                                                 append={
-                                                  <EuiButton
+                                                  <EuiSmallButton
                                                     data-test-subj="validateIndex"
                                                     disabled={true}
                                                     onClick={[Function]}
                                                   >
                                                     Validate
-                                                  </EuiButton>
+                                                  </EuiSmallButton>
                                                 }
-                                                fullWidth={false}
-                                                inputId="random_html_id"
+                                                aria-describedby="random_html_id-help-0"
+                                                compressed={true}
+                                                data-test-subj="data-source-name"
+                                                id="random_html_id"
+                                                isInvalid={false}
+                                                name="first"
+                                                onBlur={[Function]}
+                                                onChange={[Function]}
+                                                onFocus={[Function]}
+                                                value=""
                                               >
-                                                <div
-                                                  className="euiFormControlLayout euiFormControlLayout--group"
+                                                <EuiFormControlLayout
+                                                  append={
+                                                    <EuiSmallButton
+                                                      data-test-subj="validateIndex"
+                                                      disabled={true}
+                                                      onClick={[Function]}
+                                                    >
+                                                      Validate
+                                                    </EuiSmallButton>
+                                                  }
+                                                  compressed={true}
+                                                  fullWidth={false}
+                                                  inputId="random_html_id"
                                                 >
                                                   <div
-                                                    className="euiFormControlLayout__childrenWrapper"
+                                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                                   >
-                                                    <EuiValidatableControl
-                                                      isInvalid={false}
+                                                    <div
+                                                      className="euiFormControlLayout__childrenWrapper"
                                                     >
-                                                      <input
-                                                        aria-describedby="random_html_id-help-0"
-                                                        className="euiFieldText euiFieldText--inGroup"
-                                                        data-test-subj="data-source-name"
-                                                        id="random_html_id"
-                                                        name="first"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        type="text"
-                                                        value=""
+                                                      <EuiValidatableControl
+                                                        isInvalid={false}
+                                                      >
+                                                        <input
+                                                          aria-describedby="random_html_id-help-0"
+                                                          className="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
+                                                          data-test-subj="data-source-name"
+                                                          id="random_html_id"
+                                                          name="first"
+                                                          onBlur={[Function]}
+                                                          onChange={[Function]}
+                                                          onFocus={[Function]}
+                                                          type="text"
+                                                          value=""
+                                                        />
+                                                      </EuiValidatableControl>
+                                                      <EuiFormControlLayoutIcons
+                                                        compressed={true}
                                                       />
-                                                    </EuiValidatableControl>
-                                                    <EuiFormControlLayoutIcons />
-                                                  </div>
-                                                  <EuiButton
-                                                    className="euiFormControlLayout__append"
-                                                    data-test-subj="validateIndex"
-                                                    disabled={true}
-                                                    key="0/.0"
-                                                    onClick={[Function]}
-                                                  >
-                                                    <EuiButtonDisplay
-                                                      baseClassName="euiButton"
+                                                    </div>
+                                                    <EuiSmallButton
                                                       className="euiFormControlLayout__append"
                                                       data-test-subj="validateIndex"
                                                       disabled={true}
-                                                      element="button"
-                                                      isDisabled={true}
+                                                      key="0/.0"
                                                       onClick={[Function]}
-                                                      type="button"
                                                     >
-                                                      <button
-                                                        className="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                      <EuiButton
+                                                        className="euiFormControlLayout__append"
                                                         data-test-subj="validateIndex"
                                                         disabled={true}
                                                         onClick={[Function]}
-                                                        style={
-                                                          Object {
-                                                            "minWidth": undefined,
-                                                          }
-                                                        }
-                                                        type="button"
+                                                        size="s"
                                                       >
-                                                        <EuiButtonContent
-                                                          className="euiButton__content"
-                                                          iconSide="left"
-                                                          textProps={
-                                                            Object {
-                                                              "className": "euiButton__text",
-                                                            }
-                                                          }
+                                                        <EuiButtonDisplay
+                                                          baseClassName="euiButton"
+                                                          className="euiFormControlLayout__append"
+                                                          data-test-subj="validateIndex"
+                                                          disabled={true}
+                                                          element="button"
+                                                          isDisabled={true}
+                                                          onClick={[Function]}
+                                                          size="s"
+                                                          type="button"
                                                         >
-                                                          <span
-                                                            className="euiButtonContent euiButton__content"
+                                                          <button
+                                                            className="euiButton euiButton--primary euiButton--small euiButton-isDisabled euiFormControlLayout__append"
+                                                            data-test-subj="validateIndex"
+                                                            disabled={true}
+                                                            onClick={[Function]}
+                                                            style={
+                                                              Object {
+                                                                "minWidth": undefined,
+                                                              }
+                                                            }
+                                                            type="button"
                                                           >
-                                                            <span
-                                                              className="euiButton__text"
+                                                            <EuiButtonContent
+                                                              className="euiButton__content"
+                                                              iconSide="left"
+                                                              textProps={
+                                                                Object {
+                                                                  "className": "euiButton__text",
+                                                                }
+                                                              }
                                                             >
-                                                              Validate
-                                                            </span>
-                                                          </span>
-                                                        </EuiButtonContent>
-                                                      </button>
-                                                    </EuiButtonDisplay>
-                                                  </EuiButton>
-                                                </div>
-                                              </EuiFormControlLayout>
-                                            </EuiFieldText>
+                                                              <span
+                                                                className="euiButtonContent euiButton__content"
+                                                              >
+                                                                <span
+                                                                  className="euiButton__text"
+                                                                >
+                                                                  Validate
+                                                                </span>
+                                                              </span>
+                                                            </EuiButtonContent>
+                                                          </button>
+                                                        </EuiButtonDisplay>
+                                                      </EuiButton>
+                                                    </EuiSmallButton>
+                                                  </div>
+                                                </EuiFormControlLayout>
+                                              </EuiFieldText>
+                                            </EuiCompressedFieldText>
                                             <EuiFormHelpText
                                               className="euiFormRow__text"
                                               id="random_html_id-help-0"
@@ -1784,10 +1818,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             </EuiFormHelpText>
                                           </div>
                                         </div>
-                                      </EuiFormRow>
-                                      <EuiFormRow
+                                      </EuiCompressedFormRow>
+                                      <EuiCompressedFormRow
                                         describedByIds={Array []}
-                                        display="row"
+                                        display="rowCompressed"
                                         fullWidth={false}
                                         hasChildLabel={true}
                                         hasEmptyLabelSpace={false}
@@ -1796,7 +1830,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         labelType="label"
                                       >
                                         <div
-                                          className="euiFormRow"
+                                          className="euiFormRow euiFormRow--compressed"
                                           id="random_html_id-row"
                                         >
                                           <div
@@ -1819,7 +1853,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <div
                                             className="euiFormRow__fieldWrapper"
                                           >
-                                            <EuiFieldText
+                                            <EuiCompressedFieldText
                                               aria-describedby="random_html_id-help-0"
                                               data-test-subj="new-instance-name"
                                               id="random_html_id"
@@ -1829,35 +1863,50 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               onFocus={[Function]}
                                               value="test"
                                             >
-                                              <EuiFormControlLayout
-                                                fullWidth={false}
-                                                inputId="random_html_id"
+                                              <EuiFieldText
+                                                aria-describedby="random_html_id-help-0"
+                                                compressed={true}
+                                                data-test-subj="new-instance-name"
+                                                id="random_html_id"
+                                                name="first"
+                                                onBlur={[Function]}
+                                                onChange={[Function]}
+                                                onFocus={[Function]}
+                                                value="test"
                                               >
-                                                <div
-                                                  className="euiFormControlLayout"
+                                                <EuiFormControlLayout
+                                                  compressed={true}
+                                                  fullWidth={false}
+                                                  inputId="random_html_id"
                                                 >
                                                   <div
-                                                    className="euiFormControlLayout__childrenWrapper"
+                                                    className="euiFormControlLayout euiFormControlLayout--compressed"
                                                   >
-                                                    <EuiValidatableControl>
-                                                      <input
-                                                        aria-describedby="random_html_id-help-0"
-                                                        className="euiFieldText"
-                                                        data-test-subj="new-instance-name"
-                                                        id="random_html_id"
-                                                        name="first"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        type="text"
-                                                        value="test"
+                                                    <div
+                                                      className="euiFormControlLayout__childrenWrapper"
+                                                    >
+                                                      <EuiValidatableControl>
+                                                        <input
+                                                          aria-describedby="random_html_id-help-0"
+                                                          className="euiFieldText euiFieldText--compressed"
+                                                          data-test-subj="new-instance-name"
+                                                          id="random_html_id"
+                                                          name="first"
+                                                          onBlur={[Function]}
+                                                          onChange={[Function]}
+                                                          onFocus={[Function]}
+                                                          type="text"
+                                                          value="test"
+                                                        />
+                                                      </EuiValidatableControl>
+                                                      <EuiFormControlLayoutIcons
+                                                        compressed={true}
                                                       />
-                                                    </EuiValidatableControl>
-                                                    <EuiFormControlLayoutIcons />
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              </EuiFormControlLayout>
-                                            </EuiFieldText>
+                                                </EuiFormControlLayout>
+                                              </EuiFieldText>
+                                            </EuiCompressedFieldText>
                                             <EuiFormHelpText
                                               className="euiFormRow__text"
                                               id="random_html_id-help-0"
@@ -1872,7 +1921,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             </EuiFormHelpText>
                                           </div>
                                         </div>
-                                      </EuiFormRow>
+                                      </EuiCompressedFormRow>
                                     </div>
                                   </form>
                                 </EuiForm>
@@ -1892,111 +1941,128 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <div
                                     className="euiFlexItem"
                                   >
-                                    <EuiButton
+                                    <EuiSmallButton
                                       color="danger"
                                       onClick={[Function]}
                                     >
-                                      <EuiButtonDisplay
-                                        baseClassName="euiButton"
+                                      <EuiButton
                                         color="danger"
-                                        disabled={false}
-                                        element="button"
-                                        isDisabled={false}
                                         onClick={[Function]}
-                                        type="button"
+                                        size="s"
                                       >
-                                        <button
-                                          className="euiButton euiButton--danger"
+                                        <EuiButtonDisplay
+                                          baseClassName="euiButton"
+                                          color="danger"
                                           disabled={false}
+                                          element="button"
+                                          isDisabled={false}
                                           onClick={[Function]}
-                                          style={
-                                            Object {
-                                              "minWidth": undefined,
-                                            }
-                                          }
+                                          size="s"
                                           type="button"
                                         >
-                                          <EuiButtonContent
-                                            className="euiButton__content"
-                                            iconSide="left"
-                                            textProps={
+                                          <button
+                                            className="euiButton euiButton--danger euiButton--small"
+                                            disabled={false}
+                                            onClick={[Function]}
+                                            style={
                                               Object {
-                                                "className": "euiButton__text",
+                                                "minWidth": undefined,
                                               }
                                             }
+                                            type="button"
                                           >
-                                            <span
-                                              className="euiButtonContent euiButton__content"
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconSide="left"
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
                                             >
                                               <span
-                                                className="euiButton__text"
+                                                className="euiButtonContent euiButton__content"
                                               >
-                                                Cancel
+                                                <span
+                                                  className="euiButton__text"
+                                                >
+                                                  Cancel
+                                                </span>
                                               </span>
-                                            </span>
-                                          </EuiButtonContent>
-                                        </button>
-                                      </EuiButtonDisplay>
-                                    </EuiButton>
+                                            </EuiButtonContent>
+                                          </button>
+                                        </EuiButtonDisplay>
+                                      </EuiButton>
+                                    </EuiSmallButton>
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
                                   <div
                                     className="euiFlexItem"
                                   >
-                                    <EuiButton
+                                    <EuiSmallButton
                                       data-click-metric-element="integrations.create_from_setup"
                                       data-test-subj="createInstanceButton"
                                       disabled={true}
                                       fill={true}
                                       onClick={[Function]}
                                     >
-                                      <EuiButtonDisplay
-                                        baseClassName="euiButton"
+                                      <EuiButton
                                         data-click-metric-element="integrations.create_from_setup"
                                         data-test-subj="createInstanceButton"
                                         disabled={true}
-                                        element="button"
                                         fill={true}
-                                        isDisabled={true}
                                         onClick={[Function]}
-                                        type="button"
+                                        size="s"
                                       >
-                                        <button
-                                          className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                        <EuiButtonDisplay
+                                          baseClassName="euiButton"
                                           data-click-metric-element="integrations.create_from_setup"
                                           data-test-subj="createInstanceButton"
                                           disabled={true}
+                                          element="button"
+                                          fill={true}
+                                          isDisabled={true}
                                           onClick={[Function]}
-                                          style={
-                                            Object {
-                                              "minWidth": undefined,
-                                            }
-                                          }
+                                          size="s"
                                           type="button"
                                         >
-                                          <EuiButtonContent
-                                            className="euiButton__content"
-                                            iconSide="left"
-                                            textProps={
+                                          <button
+                                            className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                            data-click-metric-element="integrations.create_from_setup"
+                                            data-test-subj="createInstanceButton"
+                                            disabled={true}
+                                            onClick={[Function]}
+                                            style={
                                               Object {
-                                                "className": "euiButton__text",
+                                                "minWidth": undefined,
                                               }
                                             }
+                                            type="button"
                                           >
-                                            <span
-                                              className="euiButtonContent euiButton__content"
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconSide="left"
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
                                             >
                                               <span
-                                                className="euiButton__text"
+                                                className="euiButtonContent euiButton__content"
                                               >
-                                                Add Integration
+                                                <span
+                                                  className="euiButton__text"
+                                                >
+                                                  Add Integration
+                                                </span>
                                               </span>
-                                            </span>
-                                          </EuiButtonContent>
-                                        </button>
-                                      </EuiButtonDisplay>
-                                    </EuiButton>
+                                            </EuiButtonContent>
+                                          </button>
+                                        </EuiButtonDisplay>
+                                      </EuiButton>
+                                    </EuiSmallButton>
                                   </div>
                                 </EuiFlexItem>
                               </div>

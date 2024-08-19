@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiLink,
@@ -47,9 +47,9 @@ export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () =>
     <EuiContextMenuItem href={OPENSEARCH_CATALOG_URL}>View Catalog</EuiContextMenuItem>,
   ];
   const button = (
-    <EuiButton iconType="arrowDown" fill={true} onClick={onButtonClick}>
+    <EuiSmallButton iconType="arrowDown" fill={true} onClick={onButtonClick}>
       Catalog
-    </EuiButton>
+    </EuiSmallButton>
   );
   return (
     <EuiPopover

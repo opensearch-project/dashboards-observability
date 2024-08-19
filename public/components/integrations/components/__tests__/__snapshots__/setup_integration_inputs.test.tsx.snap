@@ -116,9 +116,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
       Query Fields
     </h3>
   </EuiText>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -132,7 +132,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
         To set up the integration, we need to know some information about how to process your data.
       </p>
     </EuiText>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer />
   <IntegrationQueryInputs
     config={
@@ -184,9 +184,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
       Integration Resources
     </h3>
   </EuiText>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -200,7 +200,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
         This integration offers different kinds of resources compatible with your data source. These can include dashboards, visualizations, indexes, and queries. Select at least one of the following options.
       </p>
     </EuiText>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
     config={
@@ -347,9 +347,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
       Query Fields
     </h3>
   </EuiText>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -363,7 +363,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
         To set up the integration, we need to know some information about how to process your data.
       </p>
     </EuiText>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer />
   <IntegrationQueryInputs
     config={
@@ -415,9 +415,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
       Integration Resources
     </h3>
   </EuiText>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -431,7 +431,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
         This integration offers different kinds of resources compatible with your data source. These can include dashboards, visualizations, indexes, and queries. Select at least one of the following options.
       </p>
     </EuiText>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer />
   <IntegrationWorkflowsInputs
     config={
@@ -507,9 +507,9 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
   }
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -518,7 +518,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -541,7 +541,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiSelect
+        <EuiCompressedSelect
           aria-describedby="random_html_id-help-0"
           id="random_html_id"
           onBlur={[Function]}
@@ -557,101 +557,119 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
           }
           value="s3"
         >
-          <EuiFormControlLayout
-            compressed={false}
-            fullWidth={false}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
+          <EuiSelect
+            aria-describedby="random_html_id-help-0"
+            compressed={true}
+            id="random_html_id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "OpenSearch Index",
+                  "value": "index",
+                },
+              ]
             }
-            inputId="random_html_id"
-            isLoading={false}
+            value="s3"
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              icon={
+                Object {
+                  "side": "right",
+                  "type": "arrowDown",
+                }
+              }
+              inputId="random_html_id"
+              isLoading={false}
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl>
-                  <select
-                    aria-describedby="random_html_id-help-0"
-                    className="euiSelect"
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onMouseUp={[Function]}
-                    value="s3"
-                  >
-                    <option
-                      key="0"
-                      value="index"
-                    >
-                      OpenSearch Index
-                    </option>
-                  </select>
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons
-                  compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
-                  isLoading={false}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <EuiFormControlLayoutCustomIcon
-                      size="m"
-                      type="arrowDown"
+                  <EuiValidatableControl>
+                    <select
+                      aria-describedby="random_html_id-help-0"
+                      className="euiSelect euiSelect--compressed"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseUp={[Function]}
+                      value="s3"
                     >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
+                      <option
+                        key="0"
+                        value="index"
                       >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiFormControlLayoutCustomIcon__icon"
-                          size="m"
-                          type="arrowDown"
+                        OpenSearch Index
+                      </option>
+                    </select>
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
+                    icon={
+                      Object {
+                        "side": "right",
+                        "type": "arrowDown",
+                      }
+                    }
+                    isLoading={false}
+                  >
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <EuiFormControlLayoutCustomIcon
+                        size="s"
+                        type="arrowDown"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
                         >
-                          <EuiIconBeaker
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            size="s"
+                            type="arrowDown"
                           >
-                            <svg
+                            <EuiIconBeaker
                               aria-hidden={true}
-                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                              />
-                            </svg>
-                          </EuiIconBeaker>
-                        </EuiIcon>
-                      </span>
-                    </EuiFormControlLayoutCustomIcon>
-                  </div>
-                </EuiFormControlLayoutIcons>
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </span>
+                      </EuiFormControlLayoutCustomIcon>
+                    </div>
+                  </EuiFormControlLayoutIcons>
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiSelect>
+            </EuiFormControlLayout>
+          </EuiSelect>
+        </EuiCompressedSelect>
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
@@ -666,10 +684,10 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -678,7 +696,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -701,10 +719,10 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           aria-describedby="random_html_id-help-0"
           async={false}
-          compressed={false}
+          compressed={true}
           customOptionText="Select {searchValue} as your data_source"
           data-test-subj="data-source-name"
           fullWidth={false}
@@ -734,14 +752,14 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
             aria-describedby="random_html_id-help-0"
             aria-expanded={false}
             aria-haspopup="listbox"
-            className="euiComboBox"
+            className="euiComboBox euiComboBox--compressed"
             data-test-subj="data-source-name"
             onKeyDown={[Function]}
             role="combobox"
           >
             <EuiComboBoxInput
               autoSizeInputRef={[Function]}
-              compressed={false}
+              compressed={true}
               fullWidth={false}
               hasSelectedOptions={true}
               id="random_html_id"
@@ -781,7 +799,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                     "onClick": [Function],
                   }
                 }
-                compressed={false}
+                compressed={true}
                 fullWidth={false}
                 icon={
                   Object {
@@ -797,13 +815,13 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                 isLoading={true}
               >
                 <div
-                  className="euiFormControlLayout"
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
                 >
                   <div
                     className="euiFormControlLayout__childrenWrapper"
                   >
                     <div
-                      className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
+                      className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
                       data-test-subj="comboBoxInput"
                       onClick={[Function]}
                       tabIndex={-1}
@@ -891,7 +909,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                           "onClick": [Function],
                         }
                       }
-                      compressed={false}
+                      compressed={true}
                       icon={
                         Object {
                           "aria-label": "Open list of options",
@@ -911,7 +929,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                         <EuiFormControlLayoutClearButton
                           data-test-subj="comboBoxClearButton"
                           onClick={[Function]}
-                          size="m"
+                          size="s"
                         >
                           <EuiI18n
                             default="Clear input"
@@ -919,7 +937,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                           >
                             <button
                               aria-label="Clear input"
-                              className="euiFormControlLayoutClearButton"
+                              className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
                               data-test-subj="comboBoxClearButton"
                               onClick={[Function]}
                               type="button"
@@ -967,7 +985,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                           data-test-subj="comboBoxToggleListButton"
                           iconRef={[Function]}
                           onClick={[Function]}
-                          size="m"
+                          size="s"
                           type="arrowDown"
                         >
                           <button
@@ -980,19 +998,19 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
                             <EuiIcon
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <EuiIconBeaker
                                 aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                 focusable="false"
                                 role="img"
                                 style={null}
                               >
                                 <svg
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   height={16}
                                   role="img"
@@ -1016,7 +1034,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
               </EuiFormControlLayout>
             </EuiComboBoxInput>
           </div>
-        </EuiComboBox>
+        </EuiCompressedComboBox>
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
@@ -1031,7 +1049,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationConnectionInputs>
 `;
 
@@ -1081,9 +1099,9 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
   lockConnectionType={true}
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1092,7 +1110,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -1115,7 +1133,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiSelect
+        <EuiCompressedSelect
           aria-describedby="random_html_id-help-0"
           disabled={true}
           id="random_html_id"
@@ -1132,103 +1150,122 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
           }
           value="s3"
         >
-          <EuiFormControlLayout
-            compressed={false}
-            fullWidth={false}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
+          <EuiSelect
+            aria-describedby="random_html_id-help-0"
+            compressed={true}
+            disabled={true}
+            id="random_html_id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "OpenSearch Index",
+                  "value": "index",
+                },
+              ]
             }
-            inputId="random_html_id"
-            isLoading={false}
+            value="s3"
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              icon={
+                Object {
+                  "side": "right",
+                  "type": "arrowDown",
+                }
+              }
+              inputId="random_html_id"
+              isLoading={false}
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl>
-                  <select
-                    aria-describedby="random_html_id-help-0"
-                    className="euiSelect"
-                    disabled={true}
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onMouseUp={[Function]}
-                    value="s3"
-                  >
-                    <option
-                      key="0"
-                      value="index"
-                    >
-                      OpenSearch Index
-                    </option>
-                  </select>
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons
-                  compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
-                  isLoading={false}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <EuiFormControlLayoutCustomIcon
-                      size="m"
-                      type="arrowDown"
+                  <EuiValidatableControl>
+                    <select
+                      aria-describedby="random_html_id-help-0"
+                      className="euiSelect euiSelect--compressed"
+                      disabled={true}
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseUp={[Function]}
+                      value="s3"
                     >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
+                      <option
+                        key="0"
+                        value="index"
                       >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiFormControlLayoutCustomIcon__icon"
-                          size="m"
-                          type="arrowDown"
+                        OpenSearch Index
+                      </option>
+                    </select>
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
+                    icon={
+                      Object {
+                        "side": "right",
+                        "type": "arrowDown",
+                      }
+                    }
+                    isLoading={false}
+                  >
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <EuiFormControlLayoutCustomIcon
+                        size="s"
+                        type="arrowDown"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
                         >
-                          <EuiIconArrowDown
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            size="s"
+                            type="arrowDown"
                           >
-                            <svg
+                            <EuiIconArrowDown
                               aria-hidden={true}
-                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                              className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                                fillRule="non-zero"
-                              />
-                            </svg>
-                          </EuiIconArrowDown>
-                        </EuiIcon>
-                      </span>
-                    </EuiFormControlLayoutCustomIcon>
-                  </div>
-                </EuiFormControlLayoutIcons>
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                  fillRule="non-zero"
+                                />
+                              </svg>
+                            </EuiIconArrowDown>
+                          </EuiIcon>
+                        </span>
+                      </EuiFormControlLayoutCustomIcon>
+                    </div>
+                  </EuiFormControlLayoutIcons>
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiSelect>
+            </EuiFormControlLayout>
+          </EuiSelect>
+        </EuiCompressedSelect>
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
@@ -1243,10 +1280,10 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1255,7 +1292,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -1278,10 +1315,10 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           aria-describedby="random_html_id-help-0"
           async={false}
-          compressed={false}
+          compressed={true}
           customOptionText="Select {searchValue} as your data_source"
           data-test-subj="data-source-name"
           fullWidth={false}
@@ -1312,14 +1349,14 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
             aria-describedby="random_html_id-help-0"
             aria-expanded={false}
             aria-haspopup="listbox"
-            className="euiComboBox euiComboBox-isDisabled"
+            className="euiComboBox euiComboBox--compressed euiComboBox-isDisabled"
             data-test-subj="data-source-name"
             onKeyDown={[Function]}
             role="combobox"
           >
             <EuiComboBoxInput
               autoSizeInputRef={[Function]}
-              compressed={false}
+              compressed={true}
               fullWidth={false}
               hasSelectedOptions={true}
               id="random_html_id"
@@ -1353,7 +1390,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
               value="ss4o_logs-nginx-test"
             >
               <EuiFormControlLayout
-                compressed={false}
+                compressed={true}
                 fullWidth={false}
                 icon={
                   Object {
@@ -1369,13 +1406,13 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
                 isLoading={true}
               >
                 <div
-                  className="euiFormControlLayout"
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
                 >
                   <div
                     className="euiFormControlLayout__childrenWrapper"
                   >
                     <div
-                      className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+                      className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
                       data-test-subj="comboBoxInput"
                       onClick={[Function]}
                       tabIndex={-1}
@@ -1459,7 +1496,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
                       </AutosizeInput>
                     </div>
                     <EuiFormControlLayoutIcons
-                      compressed={false}
+                      compressed={true}
                       icon={
                         Object {
                           "aria-label": "Open list of options",
@@ -1489,7 +1526,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
                           disabled={true}
                           iconRef={[Function]}
                           onClick={[Function]}
-                          size="m"
+                          size="s"
                           type="arrowDown"
                         >
                           <button
@@ -1503,19 +1540,19 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
                             <EuiIcon
                               aria-hidden="true"
                               className="euiFormControlLayoutCustomIcon__icon"
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <EuiIconArrowDown
                                 aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                 focusable="false"
                                 role="img"
                                 style={null}
                               >
                                 <svg
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   height={16}
                                   role="img"
@@ -1540,7 +1577,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
               </EuiFormControlLayout>
             </EuiComboBoxInput>
           </div>
-        </EuiComboBox>
+        </EuiCompressedComboBox>
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
@@ -1555,7 +1592,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationConnectionInputs>
 `;
 
@@ -1604,9 +1641,9 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
   }
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must be at least 1 character.",
@@ -1620,7 +1657,7 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -1646,7 +1683,7 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           data-test-subj="new-instance-name"
           id="random_html_id"
           isInvalid={false}
@@ -1656,39 +1693,54 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
           placeholder="sample Integration"
           value="Test Instance Name"
         >
-          <EuiFormControlLayout
-            fullWidth={false}
-            inputId="random_html_id"
+          <EuiFieldText
+            compressed={true}
+            data-test-subj="new-instance-name"
+            id="random_html_id"
+            isInvalid={false}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            placeholder="sample Integration"
+            value="Test Instance Name"
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              inputId="random_html_id"
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl
-                  isInvalid={false}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <input
-                    className="euiFieldText"
-                    data-test-subj="new-instance-name"
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    placeholder="sample Integration"
-                    type="text"
-                    value="Test Instance Name"
+                  <EuiValidatableControl
+                    isInvalid={false}
+                  >
+                    <input
+                      className="euiFieldText euiFieldText--compressed"
+                      data-test-subj="new-instance-name"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="sample Integration"
+                      type="text"
+                      value="Test Instance Name"
+                    />
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
                   />
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons />
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiFieldText>
+            </EuiFormControlLayout>
+          </EuiFieldText>
+        </EuiCompressedFieldText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationDetailsInputs>
 `;
 
@@ -1850,9 +1902,9 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
   }
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must be at least 1 character.",
@@ -1867,7 +1919,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -1893,7 +1945,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           aria-describedby="random_html_id-help-0 random_html_id-error-0"
           id="random_html_id"
           isInvalid={true}
@@ -1903,36 +1955,51 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
           placeholder="sample"
           value=""
         >
-          <EuiFormControlLayout
-            fullWidth={false}
-            inputId="random_html_id"
+          <EuiFieldText
+            aria-describedby="random_html_id-help-0 random_html_id-error-0"
+            compressed={true}
+            id="random_html_id"
+            isInvalid={true}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            placeholder="sample"
+            value=""
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              inputId="random_html_id"
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl
-                  isInvalid={true}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <input
-                    aria-describedby="random_html_id-help-0 random_html_id-error-0"
-                    className="euiFieldText"
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    placeholder="sample"
-                    type="text"
-                    value=""
+                  <EuiValidatableControl
+                    isInvalid={true}
+                  >
+                    <input
+                      aria-describedby="random_html_id-help-0 random_html_id-error-0"
+                      className="euiFieldText euiFieldText--compressed"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="sample"
+                      type="text"
+                      value=""
+                    />
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
                   />
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons />
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiFieldText>
+            </EuiFormControlLayout>
+          </EuiFieldText>
+        </EuiCompressedFieldText>
         <EuiFormErrorText
           className="euiFormRow__text"
           id="random_html_id-error-0"
@@ -1960,10 +2027,10 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must be a URL starting with 's3://'.",
@@ -1977,7 +2044,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -2003,7 +2070,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           id="random_html_id"
           isInvalid={false}
           onBlur={[Function]}
@@ -2012,41 +2079,55 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
           placeholder="s3://"
           value=""
         >
-          <EuiFormControlLayout
-            fullWidth={false}
-            inputId="random_html_id"
+          <EuiFieldText
+            compressed={true}
+            id="random_html_id"
+            isInvalid={false}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            placeholder="s3://"
+            value=""
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              inputId="random_html_id"
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl
-                  isInvalid={false}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <input
-                    className="euiFieldText"
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    placeholder="s3://"
-                    type="text"
-                    value=""
+                  <EuiValidatableControl
+                    isInvalid={false}
+                  >
+                    <input
+                      className="euiFieldText euiFieldText--compressed"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="s3://"
+                      type="text"
+                      value=""
+                    />
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
                   />
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons />
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiFieldText>
+            </EuiFormControlLayout>
+          </EuiFieldText>
+        </EuiCompressedFieldText>
       </div>
     </div>
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must be a URL starting with 's3://'.",
@@ -2061,7 +2142,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -2087,7 +2168,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
       <div
         className="euiFormRow__fieldWrapper"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           aria-describedby="random_html_id-help-0"
           id="random_html_id"
           isInvalid={false}
@@ -2097,36 +2178,51 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
           placeholder="s3://"
           value=""
         >
-          <EuiFormControlLayout
-            fullWidth={false}
-            inputId="random_html_id"
+          <EuiFieldText
+            aria-describedby="random_html_id-help-0"
+            compressed={true}
+            id="random_html_id"
+            isInvalid={false}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            placeholder="s3://"
+            value=""
           >
-            <div
-              className="euiFormControlLayout"
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              inputId="random_html_id"
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
-                <EuiValidatableControl
-                  isInvalid={false}
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <input
-                    aria-describedby="random_html_id-help-0"
-                    className="euiFieldText"
-                    id="random_html_id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    placeholder="s3://"
-                    type="text"
-                    value=""
+                  <EuiValidatableControl
+                    isInvalid={false}
+                  >
+                    <input
+                      aria-describedby="random_html_id-help-0"
+                      className="euiFieldText euiFieldText--compressed"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="s3://"
+                      type="text"
+                      value=""
+                    />
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
                   />
-                </EuiValidatableControl>
-                <EuiFormControlLayoutIcons />
+                </div>
               </div>
-            </div>
-          </EuiFormControlLayout>
-        </EuiFieldText>
+            </EuiFormControlLayout>
+          </EuiFieldText>
+        </EuiCompressedFieldText>
         <EuiFormHelpText
           className="euiFormRow__text"
           id="random_html_id-help-0"
@@ -2141,7 +2237,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
         </EuiFormHelpText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationQueryInputs>
 `;
 
@@ -2190,9 +2286,9 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
   }
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must select at least one workflow.",
@@ -2205,7 +2301,7 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -2245,7 +2341,7 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
         </EuiFormErrorText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationWorkflowsInputs>
 `;
 
@@ -2303,9 +2399,9 @@ exports[`Integration Setup Inputs Renders the workflows inputs with conditional 
   }
   updateConfig={[Function]}
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must select at least one workflow.",
@@ -2318,7 +2414,7 @@ exports[`Integration Setup Inputs Renders the workflows inputs with conditional 
     labelType="label"
   >
     <div
-      className="euiFormRow"
+      className="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -2358,6 +2454,6 @@ exports[`Integration Setup Inputs Renders the workflows inputs with conditional 
         </EuiFormErrorText>
       </div>
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </IntegrationWorkflowsInputs>
 `;

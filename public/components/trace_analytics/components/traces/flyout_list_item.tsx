@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,7 +37,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
         <EuiFlexItem grow={false}>
           {hover && props.addSpanFilter && (
             <EuiToolTip position="top" content="Filter spans on this value">
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="span-flyout-filter-icon"
                 iconType="filter"
                 onClick={props.addSpanFilter}

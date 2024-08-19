@@ -66,7 +66,7 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
           <EuiPopover
             anchorPosition="upCenter"
             button={
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 iconType="gear"
                 onClick={[Function]}
               />
@@ -84,49 +84,55 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
               <div
                 className="euiPopover__anchor"
               >
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   iconType="gear"
                   onClick={[Function]}
                 >
-                  <button
-                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                    disabled={false}
+                  <EuiButtonIcon
+                    iconType="gear"
                     onClick={[Function]}
-                    type="button"
+                    size="s"
                   >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiButtonIcon__icon"
-                      color="inherit"
-                      size="m"
-                      type="gear"
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
                     >
-                      <EuiIconBeaker
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="gear"
                       >
-                        <svg
+                        <EuiIconBeaker
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                      </EuiIconBeaker>
-                    </EuiIcon>
-                  </button>
-                </EuiButtonIcon>
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </EuiIconBeaker>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </EuiSmallButtonIcon>
               </div>
               <EuiPortal>
                 <Portal
@@ -180,21 +186,21 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                               class="euiSpacer euiSpacer--s"
                             />
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
                                 class="euiFormRow__fieldWrapper"
                               >
                                 <div
-                                  class="euiFormControlLayout"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed"
                                 >
                                   <div
                                     class="euiFormControlLayout__childrenWrapper"
                                   >
                                     <input
                                       aria-describedby="random_html_id-help-0"
-                                      class="euiFieldText"
+                                      class="euiFieldText euiFieldText--compressed"
                                       id="random_html_id"
                                       type="text"
                                       value="[a-zA-Zd]"
@@ -497,9 +503,9 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                           className="euiSpacer euiSpacer--s"
                                         />
                                       </EuiSpacer>
-                                      <EuiFormRow
+                                      <EuiCompressedFormRow
                                         describedByIds={Array []}
-                                        display="row"
+                                        display="rowCompressed"
                                         fullWidth={false}
                                         hasChildLabel={true}
                                         hasEmptyLabelSpace={false}
@@ -520,13 +526,13 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                         labelType="label"
                                       >
                                         <div
-                                          className="euiFormRow"
+                                          className="euiFormRow euiFormRow--compressed"
                                           id="random_html_id-row"
                                         >
                                           <div
                                             className="euiFormRow__fieldWrapper"
                                           >
-                                            <EuiFieldText
+                                            <EuiCompressedFieldText
                                               aria-describedby="random_html_id-help-0"
                                               id="random_html_id"
                                               onBlur={[Function]}
@@ -534,33 +540,46 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                               onFocus={[Function]}
                                               value="[a-zA-Zd]"
                                             >
-                                              <EuiFormControlLayout
-                                                fullWidth={false}
-                                                inputId="random_html_id"
+                                              <EuiFieldText
+                                                aria-describedby="random_html_id-help-0"
+                                                compressed={true}
+                                                id="random_html_id"
+                                                onBlur={[Function]}
+                                                onChange={[Function]}
+                                                onFocus={[Function]}
+                                                value="[a-zA-Zd]"
                                               >
-                                                <div
-                                                  className="euiFormControlLayout"
+                                                <EuiFormControlLayout
+                                                  compressed={true}
+                                                  fullWidth={false}
+                                                  inputId="random_html_id"
                                                 >
                                                   <div
-                                                    className="euiFormControlLayout__childrenWrapper"
+                                                    className="euiFormControlLayout euiFormControlLayout--compressed"
                                                   >
-                                                    <EuiValidatableControl>
-                                                      <input
-                                                        aria-describedby="random_html_id-help-0"
-                                                        className="euiFieldText"
-                                                        id="random_html_id"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        type="text"
-                                                        value="[a-zA-Zd]"
+                                                    <div
+                                                      className="euiFormControlLayout__childrenWrapper"
+                                                    >
+                                                      <EuiValidatableControl>
+                                                        <input
+                                                          aria-describedby="random_html_id-help-0"
+                                                          className="euiFieldText euiFieldText--compressed"
+                                                          id="random_html_id"
+                                                          onBlur={[Function]}
+                                                          onChange={[Function]}
+                                                          onFocus={[Function]}
+                                                          type="text"
+                                                          value="[a-zA-Zd]"
+                                                        />
+                                                      </EuiValidatableControl>
+                                                      <EuiFormControlLayoutIcons
+                                                        compressed={true}
                                                       />
-                                                    </EuiValidatableControl>
-                                                    <EuiFormControlLayoutIcons />
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              </EuiFormControlLayout>
-                                            </EuiFieldText>
+                                                </EuiFormControlLayout>
+                                              </EuiFieldText>
+                                            </EuiCompressedFieldText>
                                             <EuiFormHelpText
                                               className="euiFormRow__text"
                                               id="random_html_id-help-0"
@@ -641,7 +660,7 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                             </EuiFormHelpText>
                                           </div>
                                         </div>
-                                      </EuiFormRow>
+                                      </EuiCompressedFormRow>
                                       <EuiPopoverFooter>
                                         <div
                                           className="euiPopoverFooter"

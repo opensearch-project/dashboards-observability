@@ -24,7 +24,7 @@ describe('Mode picker component', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
-    wrapper.find('[className="dscIndexPattern__triggerButton"]').simulate('click');
+    wrapper.find('EuiSmallButtonEmpty[className="dscIndexPattern__triggerButton"]').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 });

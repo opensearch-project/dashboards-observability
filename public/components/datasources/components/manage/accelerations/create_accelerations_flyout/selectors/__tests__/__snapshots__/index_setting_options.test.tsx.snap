@@ -14,7 +14,7 @@ Array [
     className="euiSpacer euiSpacer--s"
   />,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -49,7 +49,7 @@ Array [
                 value="autoInterval"
               />,
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -64,7 +64,7 @@ Array [
                     aria-describedby="random_html_id-help-0"
                     aria-haspopup="true"
                     aria-labelledby="random_html_id random_html_id"
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -81,7 +81,7 @@ Array [
                     >
                       <svg
                         aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                        className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
@@ -111,7 +111,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -129,7 +129,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -137,7 +137,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Refresh increments"
-            className="euiFieldNumber euiFieldNumber--inGroup"
+            className="euiFieldNumber euiFieldNumber--compressed euiFieldNumber--inGroup"
             id="random_html_id"
             min={1}
             onBlur={[Function]}
@@ -149,13 +149,13 @@ Array [
           />
         </div>
         <div
-          className="euiFormControlLayout"
+          className="euiFormControlLayout euiFormControlLayout--compressed"
         >
           <div
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiFormControlLayout__append"
+              className="euiSelect euiSelect--compressed euiFormControlLayout__append"
               onBlur={[Function]}
               onChange={[Function]}
               onMouseUp={[Function]}
@@ -194,7 +194,7 @@ Array [
               >
                 <svg
                   aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                   focusable="false"
                   height={16}
                   role="img"
@@ -221,7 +221,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -273,7 +273,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout"
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -281,7 +281,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
-            className="euiFieldText"
+            className="euiFieldText euiFieldText--compressed"
             id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -317,7 +317,7 @@ Array [
     className="euiSpacer euiSpacer--s"
   />,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -352,7 +352,7 @@ Array [
                 value="autoInterval"
               />,
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -367,7 +367,7 @@ Array [
                     aria-describedby="random_html_id-help-0"
                     aria-haspopup="true"
                     aria-labelledby="random_html_id random_html_id"
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -384,7 +384,7 @@ Array [
                     >
                       <svg
                         aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                        className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
@@ -415,7 +415,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -433,7 +433,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -441,7 +441,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Refresh increments"
-            className="euiFieldNumber euiFieldNumber--inGroup"
+            className="euiFieldNumber euiFieldNumber--compressed euiFieldNumber--inGroup"
             id="random_html_id"
             min={1}
             onBlur={[Function]}
@@ -453,13 +453,13 @@ Array [
           />
         </div>
         <div
-          className="euiFormControlLayout"
+          className="euiFormControlLayout euiFormControlLayout--compressed"
         >
           <div
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiFormControlLayout__append"
+              className="euiSelect euiSelect--compressed euiFormControlLayout__append"
               onBlur={[Function]}
               onChange={[Function]}
               onMouseUp={[Function]}
@@ -498,7 +498,7 @@ Array [
               >
                 <svg
                   aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                   focusable="false"
                   height={16}
                   role="img"
@@ -526,7 +526,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -577,7 +577,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout"
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -585,7 +585,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
-            className="euiFieldText"
+            className="euiFieldText euiFieldText--compressed"
             id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -621,7 +621,7 @@ Array [
     className="euiSpacer euiSpacer--s"
   />,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -656,7 +656,7 @@ Array [
                 value="autoInterval"
               />,
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -671,7 +671,7 @@ Array [
                     aria-describedby="random_html_id-help-0"
                     aria-haspopup="true"
                     aria-labelledby="random_html_id random_html_id"
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -688,7 +688,7 @@ Array [
                     >
                       <svg
                         aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                        className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
@@ -719,7 +719,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -737,7 +737,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -745,7 +745,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Refresh increments"
-            className="euiFieldNumber euiFieldNumber--inGroup"
+            className="euiFieldNumber euiFieldNumber--compressed euiFieldNumber--inGroup"
             id="random_html_id"
             min={1}
             onBlur={[Function]}
@@ -757,13 +757,13 @@ Array [
           />
         </div>
         <div
-          className="euiFormControlLayout"
+          className="euiFormControlLayout euiFormControlLayout--compressed"
         >
           <div
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiFormControlLayout__append"
+              className="euiSelect euiSelect--compressed euiFormControlLayout__append"
               onBlur={[Function]}
               onChange={[Function]}
               onMouseUp={[Function]}
@@ -802,7 +802,7 @@ Array [
               >
                 <svg
                   aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                   focusable="false"
                   height={16}
                   role="img"
@@ -830,7 +830,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -881,7 +881,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout"
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
@@ -889,7 +889,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Use aria labels when no actual label is in use"
-            className="euiFieldText"
+            className="euiFieldText euiFieldText--compressed"
             id="random_html_id"
             onBlur={[Function]}
             onChange={[Function]}

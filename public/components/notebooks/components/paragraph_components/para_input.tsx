@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiCodeBlock,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHighlight,
   EuiLink,
   EuiModal,
@@ -25,7 +25,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { Input, Prompt } from '@nteract/presentational-components';
 import React, { useState } from 'react';
@@ -72,7 +72,7 @@ export const ParaInput = (props: {
       <div style={{ width: '100%' }}>
         {/* If the para is selected show the editor else display the code in the paragraph */}
         {para.isSelected ? (
-          <EuiTextArea
+          <EuiCompressedTextArea
             data-test-subj={`editorArea-${index}`}
             placeholder={inputPlaceholderString}
             id="editorArea"
@@ -134,8 +134,8 @@ export const ParaInput = (props: {
       <>
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
           <EuiFlexItem grow={6}>
-            <EuiFormRow label="Title" fullWidth>
-              <EuiComboBox
+            <EuiCompressedFormRow label="Title" fullWidth>
+              <EuiCompressedComboBox
                 placeholder="Find visualization"
                 singleSelection={{ asPlainText: true }}
                 options={props.visOptions}
@@ -146,10 +146,10 @@ export const ParaInput = (props: {
                   props.setIsOutputStale(true);
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="para-input-visualization-browse-button"
               onClick={() => {
                 setSelectableOptions([
@@ -161,11 +161,11 @@ export const ParaInput = (props: {
               }}
             >
               Browse
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={2} />
           <EuiFlexItem grow={9}>
-            <EuiFormRow label="Date range" fullWidth>
+            <EuiCompressedFormRow label="Date range" fullWidth>
               <EuiSuperDatePicker
                 start={props.startTime}
                 end={props.endTime}
@@ -177,7 +177,7 @@ export const ParaInput = (props: {
                   props.setIsOutputStale(true);
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>
@@ -219,14 +219,14 @@ export const ParaInput = (props: {
               </EuiModalBody>
 
               <EuiModalFooter>
-                <EuiButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiButtonEmpty>
-                <EuiButton
+                <EuiSmallButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiSmallButtonEmpty>
+                <EuiSmallButton
                   data-test-subj="para-input-select-button"
                   onClick={() => onSelect()}
                   fill
                 >
                   Select
-                </EuiButton>
+                </EuiSmallButton>
               </EuiModalFooter>
             </EuiModal>
           </EuiOverlayMask>

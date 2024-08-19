@@ -14,7 +14,7 @@ Array [
     className="euiSpacer euiSpacer--s"
   />,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -83,7 +83,7 @@ Array [
                 value="skipping"
               />,
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -98,7 +98,7 @@ Array [
                     aria-describedby="random_html_id-help-0"
                     aria-haspopup="true"
                     aria-labelledby="random_html_id random_html_id"
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -115,7 +115,7 @@ Array [
                     >
                       <svg
                         aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                        className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
@@ -161,7 +161,7 @@ Array [
     className="euiSpacer euiSpacer--s"
   />,
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -229,7 +229,7 @@ Array [
                 value="skipping"
               />,
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -244,7 +244,7 @@ Array [
                     aria-describedby="random_html_id-help-0"
                     aria-haspopup="true"
                     aria-labelledby="random_html_id random_html_id"
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -261,7 +261,7 @@ Array [
                     >
                       <svg
                         aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                        className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
