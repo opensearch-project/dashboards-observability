@@ -16,6 +16,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 /*
@@ -71,7 +72,11 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{titletxt}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{titletxt}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
