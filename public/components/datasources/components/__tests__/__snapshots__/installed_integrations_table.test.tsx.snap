@@ -111,50 +111,56 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
                 <AddIntegrationButton
                   toggleFlyout={[Function]}
                 >
-                  <EuiButton
+                  <EuiSmallButton
                     onClick={[Function]}
                   >
-                    <EuiButtonDisplay
-                      baseClassName="euiButton"
-                      disabled={false}
-                      element="button"
-                      isDisabled={false}
+                    <EuiButton
                       onClick={[Function]}
-                      type="button"
+                      size="s"
                     >
-                      <button
-                        className="euiButton euiButton--primary"
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
                         disabled={false}
+                        element="button"
+                        isDisabled={false}
                         onClick={[Function]}
-                        style={
-                          Object {
-                            "minWidth": undefined,
-                          }
-                        }
+                        size="s"
                         type="button"
                       >
-                        <EuiButtonContent
-                          className="euiButton__content"
-                          iconSide="left"
-                          textProps={
+                        <button
+                          className="euiButton euiButton--primary euiButton--small"
+                          disabled={false}
+                          onClick={[Function]}
+                          style={
                             Object {
-                              "className": "euiButton__text",
+                              "minWidth": undefined,
                             }
                           }
+                          type="button"
                         >
-                          <span
-                            className="euiButtonContent euiButton__content"
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
                           >
                             <span
-                              className="euiButton__text"
+                              className="euiButtonContent euiButton__content"
                             >
-                              Add Integrations
+                              <span
+                                className="euiButton__text"
+                              >
+                                Add Integrations
+                              </span>
                             </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonDisplay>
-                  </EuiButton>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
+                  </EuiSmallButton>
                 </AddIntegrationButton>
               </div>
             </EuiFlexItem>
@@ -235,8 +241,8 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
             <div
               className="euiFlexItem"
             >
-              <EuiFieldSearch
-                compressed={false}
+              <EuiCompressedFieldSearch
+                compressed={true}
                 fullWidth={true}
                 incremental={false}
                 isClearable={true}
@@ -245,20 +251,20 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                 placeholder="Search..."
               >
                 <EuiFormControlLayout
-                  compressed={false}
+                  compressed={true}
                   fullWidth={true}
                   icon="search"
                   isLoading={false}
                 >
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <EuiValidatableControl>
                         <input
-                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                           onChange={[Function]}
                           onKeyUp={[Function]}
                           placeholder="Search..."
@@ -266,7 +272,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                         />
                       </EuiValidatableControl>
                       <EuiFormControlLayoutIcons
-                        compressed={false}
+                        compressed={true}
                         icon="search"
                         isLoading={false}
                       >
@@ -274,7 +280,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                           className="euiFormControlLayoutIcons"
                         >
                           <EuiFormControlLayoutCustomIcon
-                            size="m"
+                            size="s"
                             type="search"
                           >
                             <span
@@ -283,19 +289,19 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="search"
                               >
                                 <EuiIconBeaker
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -317,7 +323,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                     </div>
                   </div>
                 </EuiFormControlLayout>
-              </EuiFieldSearch>
+              </EuiCompressedFieldSearch>
             </div>
           </EuiFlexItem>
           <EuiFlexItem
@@ -330,52 +336,59 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                 fill={true}
                 toggleFlyout={[Function]}
               >
-                <EuiButton
+                <EuiSmallButton
                   fill={true}
                   onClick={[Function]}
                 >
-                  <EuiButtonDisplay
-                    baseClassName="euiButton"
-                    disabled={false}
-                    element="button"
+                  <EuiButton
                     fill={true}
-                    isDisabled={false}
                     onClick={[Function]}
-                    type="button"
+                    size="s"
                   >
-                    <button
-                      className="euiButton euiButton--primary euiButton--fill"
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
                       disabled={false}
+                      element="button"
+                      fill={true}
+                      isDisabled={false}
                       onClick={[Function]}
-                      style={
-                        Object {
-                          "minWidth": undefined,
-                        }
-                      }
+                      size="s"
                       type="button"
                     >
-                      <EuiButtonContent
-                        className="euiButton__content"
-                        iconSide="left"
-                        textProps={
+                      <button
+                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
                           Object {
-                            "className": "euiButton__text",
+                            "minWidth": undefined,
                           }
                         }
+                        type="button"
                       >
-                        <span
-                          className="euiButtonContent euiButton__content"
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
                         >
                           <span
-                            className="euiButton__text"
+                            className="euiButtonContent euiButton__content"
                           >
-                            Add Integrations
+                            <span
+                              className="euiButton__text"
+                            >
+                              Add Integrations
+                            </span>
                           </span>
-                        </span>
-                      </EuiButtonContent>
-                    </button>
-                  </EuiButtonDisplay>
-                </EuiButton>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </EuiSmallButton>
               </AddIntegrationButton>
             </div>
           </EuiFlexItem>

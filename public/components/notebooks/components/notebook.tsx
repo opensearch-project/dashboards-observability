@@ -1098,12 +1098,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="delete-notebook"
                       onClick={() => this.showDeleteNotebookModal()}
                     >
                       Delete this notebook
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </>
               )}

@@ -33,7 +33,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 class="euiPopover__anchor"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   id="reportingActionsButton"
                   type="button"
                 >
@@ -76,7 +76,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
               class="euiPopover__anchor"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="notebook-paragraph-actions-button"
                 type="button"
               >
@@ -117,7 +117,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
               class="euiPopover__anchor"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="notebook-notebook-actions-button"
                 type="button"
               >
@@ -264,7 +264,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                   class="euiCard__footer"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="emptyNotebookAddCodeBlockBtn"
                     style="margin-bottom: 17px;"
                     type="button"
@@ -328,7 +328,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                   class="euiCard__footer"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     style="margin-bottom: 17px;"
                     type="button"
                   >
@@ -388,7 +388,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary"
+            class="euiButton euiButton--primary euiButton--small"
             data-test-subj="upgrade-notebook-callout"
             type="button"
           >
@@ -407,7 +407,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            class="euiButton euiButton--primary"
+            class="euiButton euiButton--primary euiButton--small"
             data-test-subj="delete-notebook"
             type="button"
           >
@@ -453,7 +453,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
                   class="euiSpacer euiSpacer--s"
                 />
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="upgrade-notebook"
                   type="button"
                 >

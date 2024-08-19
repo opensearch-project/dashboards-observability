@@ -93,14 +93,14 @@ exports[`Helper functions renders no match and missing configuration messages 2`
 <Fragment>
   <EuiEmptyPrompt
     actions={
-      <EuiButton
+      <EuiSmallButton
         color="primary"
         iconSide="right"
         iconType="popout"
         onClick={[Function]}
       >
         Learn more
-      </EuiButton>
+      </EuiSmallButton>
     }
     body={
       <EuiText>

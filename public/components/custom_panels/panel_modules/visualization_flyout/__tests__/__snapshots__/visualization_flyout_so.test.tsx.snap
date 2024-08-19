@@ -60,23 +60,23 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="closeFlyoutButton"
                 onClick={[MockFunction]}
               >
                 Cancel
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="addFlyoutButton"
                 fill={true}
                 onClick={[Function]}
               >
                 Add
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
@@ -205,7 +205,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary"
+                              class="euiButton euiButton--primary euiButton--small"
                               data-test-subj="closeFlyoutButton"
                               type="button"
                             >
@@ -224,7 +224,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary euiButton--fill"
+                              class="euiButton euiButton--primary euiButton--small euiButton--fill"
                               data-test-subj="addFlyoutButton"
                               type="button"
                             >
@@ -421,7 +421,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                     class="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary"
+                                      class="euiButton euiButton--primary euiButton--small"
                                       data-test-subj="closeFlyoutButton"
                                       type="button"
                                     >
@@ -440,7 +440,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                     class="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary euiButton--fill"
+                                      class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                       data-test-subj="addFlyoutButton"
                                       type="button"
                                     >
@@ -569,7 +569,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <button
-                                        class="euiButton euiButton--primary"
+                                        class="euiButton euiButton--primary euiButton--small"
                                         data-test-subj="closeFlyoutButton"
                                         type="button"
                                       >
@@ -588,7 +588,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <button
-                                        class="euiButton euiButton--primary euiButton--fill"
+                                        class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                         data-test-subj="addFlyoutButton"
                                         type="button"
                                       >
@@ -717,7 +717,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <button
-                                          class="euiButton euiButton--primary"
+                                          class="euiButton euiButton--primary euiButton--small"
                                           data-test-subj="closeFlyoutButton"
                                           type="button"
                                         >
@@ -736,7 +736,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <button
-                                          class="euiButton euiButton--primary euiButton--fill"
+                                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                           data-test-subj="addFlyoutButton"
                                           type="button"
                                         >
@@ -853,7 +853,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                           class="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <button
-                                            class="euiButton euiButton--primary"
+                                            class="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="closeFlyoutButton"
                                             type="button"
                                           >
@@ -872,7 +872,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                           class="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <button
-                                            class="euiButton euiButton--primary euiButton--fill"
+                                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                             data-test-subj="addFlyoutButton"
                                             type="button"
                                           >
@@ -1087,53 +1087,60 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         <div
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
-                                          <EuiButton
+                                          <EuiSmallButton
                                             data-test-subj="closeFlyoutButton"
                                             onClick={[MockFunction]}
                                           >
-                                            <EuiButtonDisplay
-                                              baseClassName="euiButton"
+                                            <EuiButton
                                               data-test-subj="closeFlyoutButton"
-                                              disabled={false}
-                                              element="button"
-                                              isDisabled={false}
                                               onClick={[MockFunction]}
-                                              type="button"
+                                              size="s"
                                             >
-                                              <button
-                                                className="euiButton euiButton--primary"
+                                              <EuiButtonDisplay
+                                                baseClassName="euiButton"
                                                 data-test-subj="closeFlyoutButton"
                                                 disabled={false}
+                                                element="button"
+                                                isDisabled={false}
                                                 onClick={[MockFunction]}
-                                                style={
-                                                  Object {
-                                                    "minWidth": undefined,
-                                                  }
-                                                }
+                                                size="s"
                                                 type="button"
                                               >
-                                                <EuiButtonContent
-                                                  className="euiButton__content"
-                                                  iconSide="left"
-                                                  textProps={
+                                                <button
+                                                  className="euiButton euiButton--primary euiButton--small"
+                                                  data-test-subj="closeFlyoutButton"
+                                                  disabled={false}
+                                                  onClick={[MockFunction]}
+                                                  style={
                                                     Object {
-                                                      "className": "euiButton__text",
+                                                      "minWidth": undefined,
                                                     }
                                                   }
+                                                  type="button"
                                                 >
-                                                  <span
-                                                    className="euiButtonContent euiButton__content"
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
                                                   >
                                                     <span
-                                                      className="euiButton__text"
+                                                      className="euiButtonContent euiButton__content"
                                                     >
-                                                      Cancel
+                                                      <span
+                                                        className="euiButton__text"
+                                                      >
+                                                        Cancel
+                                                      </span>
                                                     </span>
-                                                  </span>
-                                                </EuiButtonContent>
-                                              </button>
-                                            </EuiButtonDisplay>
-                                          </EuiButton>
+                                                  </EuiButtonContent>
+                                                </button>
+                                              </EuiButtonDisplay>
+                                            </EuiButton>
+                                          </EuiSmallButton>
                                         </div>
                                       </EuiFlexItem>
                                       <EuiFlexItem
@@ -1142,55 +1149,63 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         <div
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
-                                          <EuiButton
+                                          <EuiSmallButton
                                             data-test-subj="addFlyoutButton"
                                             fill={true}
                                             onClick={[Function]}
                                           >
-                                            <EuiButtonDisplay
-                                              baseClassName="euiButton"
+                                            <EuiButton
                                               data-test-subj="addFlyoutButton"
-                                              disabled={false}
-                                              element="button"
                                               fill={true}
-                                              isDisabled={false}
                                               onClick={[Function]}
-                                              type="button"
+                                              size="s"
                                             >
-                                              <button
-                                                className="euiButton euiButton--primary euiButton--fill"
+                                              <EuiButtonDisplay
+                                                baseClassName="euiButton"
                                                 data-test-subj="addFlyoutButton"
                                                 disabled={false}
+                                                element="button"
+                                                fill={true}
+                                                isDisabled={false}
                                                 onClick={[Function]}
-                                                style={
-                                                  Object {
-                                                    "minWidth": undefined,
-                                                  }
-                                                }
+                                                size="s"
                                                 type="button"
                                               >
-                                                <EuiButtonContent
-                                                  className="euiButton__content"
-                                                  iconSide="left"
-                                                  textProps={
+                                                <button
+                                                  className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                                  data-test-subj="addFlyoutButton"
+                                                  disabled={false}
+                                                  onClick={[Function]}
+                                                  style={
                                                     Object {
-                                                      "className": "euiButton__text",
+                                                      "minWidth": undefined,
                                                     }
                                                   }
+                                                  type="button"
                                                 >
-                                                  <span
-                                                    className="euiButtonContent euiButton__content"
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
                                                   >
                                                     <span
-                                                      className="euiButton__text"
+                                                      className="euiButtonContent euiButton__content"
                                                     >
-                                                      Add
+                                                      <span
+                                                        className="euiButton__text"
+                                                      >
+                                                        Add
+                                                      </span>
                                                     </span>
-                                                  </span>
-                                                </EuiButtonContent>
-                                              </button>
-                                            </EuiButtonDisplay>
-                                          </EuiButton>
+                                                  </EuiButtonContent>
+                                                </button>
+                                              </EuiButtonDisplay>
+                                            </EuiButton>
+                                          </EuiSmallButton>
                                         </div>
                                       </EuiFlexItem>
                                     </div>
@@ -1341,23 +1356,23 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="closeFlyoutButton"
                 onClick={[MockFunction]}
               >
                 Cancel
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="addFlyoutButton"
                 fill={true}
                 onClick={[Function]}
               >
                 Add
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
@@ -1486,7 +1501,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary"
+                              class="euiButton euiButton--primary euiButton--small"
                               data-test-subj="closeFlyoutButton"
                               type="button"
                             >
@@ -1505,7 +1520,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary euiButton--fill"
+                              class="euiButton euiButton--primary euiButton--small euiButton--fill"
                               data-test-subj="addFlyoutButton"
                               type="button"
                             >
@@ -1702,7 +1717,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                     class="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary"
+                                      class="euiButton euiButton--primary euiButton--small"
                                       data-test-subj="closeFlyoutButton"
                                       type="button"
                                     >
@@ -1721,7 +1736,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                     class="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary euiButton--fill"
+                                      class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                       data-test-subj="addFlyoutButton"
                                       type="button"
                                     >
@@ -1850,7 +1865,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <button
-                                        class="euiButton euiButton--primary"
+                                        class="euiButton euiButton--primary euiButton--small"
                                         data-test-subj="closeFlyoutButton"
                                         type="button"
                                       >
@@ -1869,7 +1884,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <button
-                                        class="euiButton euiButton--primary euiButton--fill"
+                                        class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                         data-test-subj="addFlyoutButton"
                                         type="button"
                                       >
@@ -1998,7 +2013,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <button
-                                          class="euiButton euiButton--primary"
+                                          class="euiButton euiButton--primary euiButton--small"
                                           data-test-subj="closeFlyoutButton"
                                           type="button"
                                         >
@@ -2017,7 +2032,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <button
-                                          class="euiButton euiButton--primary euiButton--fill"
+                                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                           data-test-subj="addFlyoutButton"
                                           type="button"
                                         >
@@ -2134,7 +2149,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                           class="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <button
-                                            class="euiButton euiButton--primary"
+                                            class="euiButton euiButton--primary euiButton--small"
                                             data-test-subj="closeFlyoutButton"
                                             type="button"
                                           >
@@ -2153,7 +2168,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                           class="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <button
-                                            class="euiButton euiButton--primary euiButton--fill"
+                                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
                                             data-test-subj="addFlyoutButton"
                                             type="button"
                                           >
@@ -2368,53 +2383,60 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         <div
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
-                                          <EuiButton
+                                          <EuiSmallButton
                                             data-test-subj="closeFlyoutButton"
                                             onClick={[MockFunction]}
                                           >
-                                            <EuiButtonDisplay
-                                              baseClassName="euiButton"
+                                            <EuiButton
                                               data-test-subj="closeFlyoutButton"
-                                              disabled={false}
-                                              element="button"
-                                              isDisabled={false}
                                               onClick={[MockFunction]}
-                                              type="button"
+                                              size="s"
                                             >
-                                              <button
-                                                className="euiButton euiButton--primary"
+                                              <EuiButtonDisplay
+                                                baseClassName="euiButton"
                                                 data-test-subj="closeFlyoutButton"
                                                 disabled={false}
+                                                element="button"
+                                                isDisabled={false}
                                                 onClick={[MockFunction]}
-                                                style={
-                                                  Object {
-                                                    "minWidth": undefined,
-                                                  }
-                                                }
+                                                size="s"
                                                 type="button"
                                               >
-                                                <EuiButtonContent
-                                                  className="euiButton__content"
-                                                  iconSide="left"
-                                                  textProps={
+                                                <button
+                                                  className="euiButton euiButton--primary euiButton--small"
+                                                  data-test-subj="closeFlyoutButton"
+                                                  disabled={false}
+                                                  onClick={[MockFunction]}
+                                                  style={
                                                     Object {
-                                                      "className": "euiButton__text",
+                                                      "minWidth": undefined,
                                                     }
                                                   }
+                                                  type="button"
                                                 >
-                                                  <span
-                                                    className="euiButtonContent euiButton__content"
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
                                                   >
                                                     <span
-                                                      className="euiButton__text"
+                                                      className="euiButtonContent euiButton__content"
                                                     >
-                                                      Cancel
+                                                      <span
+                                                        className="euiButton__text"
+                                                      >
+                                                        Cancel
+                                                      </span>
                                                     </span>
-                                                  </span>
-                                                </EuiButtonContent>
-                                              </button>
-                                            </EuiButtonDisplay>
-                                          </EuiButton>
+                                                  </EuiButtonContent>
+                                                </button>
+                                              </EuiButtonDisplay>
+                                            </EuiButton>
+                                          </EuiSmallButton>
                                         </div>
                                       </EuiFlexItem>
                                       <EuiFlexItem
@@ -2423,55 +2445,63 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         <div
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
-                                          <EuiButton
+                                          <EuiSmallButton
                                             data-test-subj="addFlyoutButton"
                                             fill={true}
                                             onClick={[Function]}
                                           >
-                                            <EuiButtonDisplay
-                                              baseClassName="euiButton"
+                                            <EuiButton
                                               data-test-subj="addFlyoutButton"
-                                              disabled={false}
-                                              element="button"
                                               fill={true}
-                                              isDisabled={false}
                                               onClick={[Function]}
-                                              type="button"
+                                              size="s"
                                             >
-                                              <button
-                                                className="euiButton euiButton--primary euiButton--fill"
+                                              <EuiButtonDisplay
+                                                baseClassName="euiButton"
                                                 data-test-subj="addFlyoutButton"
                                                 disabled={false}
+                                                element="button"
+                                                fill={true}
+                                                isDisabled={false}
                                                 onClick={[Function]}
-                                                style={
-                                                  Object {
-                                                    "minWidth": undefined,
-                                                  }
-                                                }
+                                                size="s"
                                                 type="button"
                                               >
-                                                <EuiButtonContent
-                                                  className="euiButton__content"
-                                                  iconSide="left"
-                                                  textProps={
+                                                <button
+                                                  className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                                  data-test-subj="addFlyoutButton"
+                                                  disabled={false}
+                                                  onClick={[Function]}
+                                                  style={
                                                     Object {
-                                                      "className": "euiButton__text",
+                                                      "minWidth": undefined,
                                                     }
                                                   }
+                                                  type="button"
                                                 >
-                                                  <span
-                                                    className="euiButtonContent euiButton__content"
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
                                                   >
                                                     <span
-                                                      className="euiButton__text"
+                                                      className="euiButtonContent euiButton__content"
                                                     >
-                                                      Add
+                                                      <span
+                                                        className="euiButton__text"
+                                                      >
+                                                        Add
+                                                      </span>
                                                     </span>
-                                                  </span>
-                                                </EuiButtonContent>
-                                              </button>
-                                            </EuiButtonDisplay>
-                                          </EuiButton>
+                                                  </EuiButtonContent>
+                                                </button>
+                                              </EuiButtonDisplay>
+                                            </EuiButton>
+                                          </EuiSmallButton>
                                         </div>
                                       </EuiFlexItem>
                                     </div>
