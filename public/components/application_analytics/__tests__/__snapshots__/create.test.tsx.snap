@@ -59,7 +59,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -77,13 +77,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -94,7 +94,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -112,13 +112,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -268,7 +268,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -303,13 +303,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -455,7 +455,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -475,18 +475,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -523,7 +523,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -664,13 +664,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -683,7 +683,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -855,7 +855,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -876,18 +876,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -924,7 +924,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -1078,7 +1078,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -1100,7 +1100,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -1124,7 +1124,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -1316,7 +1316,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -1334,13 +1334,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -1351,7 +1351,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -1369,13 +1369,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -1525,7 +1525,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -1560,13 +1560,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -1712,7 +1712,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -1732,18 +1732,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -1780,7 +1780,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -1921,13 +1921,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -1940,7 +1940,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -2112,7 +2112,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -2133,18 +2133,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -2181,7 +2181,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -2335,7 +2335,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -2357,7 +2357,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -2381,7 +2381,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -2513,7 +2513,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -2531,13 +2531,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -2548,7 +2548,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -2566,13 +2566,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -2723,7 +2723,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -2758,13 +2758,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -2908,7 +2908,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -2928,18 +2928,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -2976,7 +2976,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -3117,13 +3117,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -3136,7 +3136,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -3311,7 +3311,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -3332,18 +3332,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -3411,7 +3411,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -3565,7 +3565,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -3587,7 +3587,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -3611,7 +3611,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -3684,7 +3684,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -3702,13 +3702,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -3719,7 +3719,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -3737,13 +3737,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -3894,7 +3894,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -3929,13 +3929,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -4079,7 +4079,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -4099,18 +4099,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -4147,7 +4147,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -4288,13 +4288,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -4307,7 +4307,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -4482,7 +4482,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -4503,18 +4503,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -4582,7 +4582,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -4736,7 +4736,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -4758,7 +4758,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -4782,7 +4782,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -4914,7 +4914,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -4932,13 +4932,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -4949,7 +4949,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -4967,13 +4967,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -5124,7 +5124,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -5159,13 +5159,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -5312,7 +5312,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -5332,18 +5332,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -5411,7 +5411,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -5552,13 +5552,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -5571,7 +5571,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -5743,7 +5743,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -5764,18 +5764,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -5812,7 +5812,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -5966,7 +5966,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -5988,7 +5988,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -6012,7 +6012,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -6085,7 +6085,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -6103,13 +6103,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -6120,7 +6120,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -6138,13 +6138,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -6295,7 +6295,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -6330,13 +6330,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -6483,7 +6483,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -6503,18 +6503,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -6582,7 +6582,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -6723,13 +6723,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -6742,7 +6742,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -6914,7 +6914,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -6935,18 +6935,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -6983,7 +6983,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -7137,7 +7137,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -7159,7 +7159,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -7183,7 +7183,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -7313,7 +7313,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -7331,13 +7331,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -7348,7 +7348,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -7366,13 +7366,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -7522,7 +7522,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -7557,13 +7557,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -7706,7 +7706,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -7726,18 +7726,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -7774,7 +7774,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -7914,13 +7914,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -7933,7 +7933,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -8104,7 +8104,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -8125,18 +8125,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -8173,7 +8173,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -8326,7 +8326,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -8348,7 +8348,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -8372,7 +8372,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -8445,7 +8445,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -8463,13 +8463,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -8480,7 +8480,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -8498,13 +8498,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -8654,7 +8654,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -8689,13 +8689,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -8838,7 +8838,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -8858,18 +8858,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -8906,7 +8906,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -9046,13 +9046,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -9065,7 +9065,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -9236,7 +9236,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -9257,18 +9257,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -9305,7 +9305,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -9458,7 +9458,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -9480,7 +9480,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -9504,7 +9504,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -9634,7 +9634,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -9652,13 +9652,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -9669,7 +9669,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -9687,13 +9687,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -9844,7 +9844,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -9879,13 +9879,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -10031,7 +10031,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -10051,18 +10051,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -10099,7 +10099,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -10240,13 +10240,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -10259,7 +10259,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -10431,7 +10431,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -10452,18 +10452,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -10500,7 +10500,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -10654,7 +10654,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -10676,7 +10676,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="createButton"
                     type="button"
                   >
@@ -10699,7 +10699,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill"
                     data-test-subj="createAndSetButton"
                     type="button"
                   >
@@ -10771,7 +10771,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -10789,13 +10789,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -10806,7 +10806,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -10824,13 +10824,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -10981,7 +10981,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -11016,13 +11016,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -11168,7 +11168,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -11188,18 +11188,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -11236,7 +11236,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -11377,13 +11377,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -11396,7 +11396,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -11568,7 +11568,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -11589,18 +11589,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -11637,7 +11637,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -11791,7 +11791,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -11813,7 +11813,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="createButton"
                   type="button"
                 >
@@ -11836,7 +11836,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill"
                   data-test-subj="createAndSetButton"
                   type="button"
                 >
@@ -11967,7 +11967,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -11985,13 +11985,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -12002,7 +12002,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -12020,13 +12020,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -12177,7 +12177,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -12212,13 +12212,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -12365,7 +12365,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -12385,18 +12385,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -12464,7 +12464,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -12605,13 +12605,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -12624,7 +12624,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -12796,7 +12796,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -12817,18 +12817,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -12865,7 +12865,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -13019,7 +13019,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -13041,7 +13041,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -13065,7 +13065,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -13138,7 +13138,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -13156,13 +13156,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -13173,7 +13173,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -13191,13 +13191,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -13348,7 +13348,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -13383,13 +13383,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -13536,7 +13536,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -13556,18 +13556,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -13635,7 +13635,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -13776,13 +13776,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -13795,7 +13795,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -13967,7 +13967,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -13988,18 +13988,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -14036,7 +14036,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -14190,7 +14190,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -14212,7 +14212,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -14236,7 +14236,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -14368,7 +14368,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -14386,13 +14386,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -14403,7 +14403,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -14421,13 +14421,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -14578,7 +14578,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -14613,13 +14613,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -14763,7 +14763,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -14783,18 +14783,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -14831,7 +14831,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -14972,13 +14972,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -14991,7 +14991,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -15166,7 +15166,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -15187,18 +15187,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -15266,7 +15266,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -15420,7 +15420,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -15442,7 +15442,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -15466,7 +15466,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -15539,7 +15539,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -15557,13 +15557,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -15574,7 +15574,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -15592,13 +15592,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -15749,7 +15749,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -15784,13 +15784,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -15934,7 +15934,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -15954,18 +15954,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -16002,7 +16002,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -16143,13 +16143,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -16162,7 +16162,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -16337,7 +16337,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -16358,18 +16358,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -16437,7 +16437,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -16591,7 +16591,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -16613,7 +16613,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -16637,7 +16637,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"
@@ -16772,7 +16772,7 @@ Object {
                 class="euiForm"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="nameFormRow"
                   id="random_html_id-row"
                 >
@@ -16790,13 +16790,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="name"
                           type="text"
@@ -16807,7 +16807,7 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow euiFormRow--compressed"
                   data-test-subj="descriptionFormRow"
                   id="random_html_id-row"
                 >
@@ -16825,13 +16825,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout"
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText"
+                          class="euiFieldText euiFieldText--compressed"
                           id="random_html_id"
                           name="description"
                           type="text"
@@ -16981,7 +16981,7 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormRow"
+                              class="euiFormRow euiFormRow--compressed"
                               id="random_html_id-row"
                             >
                               <div
@@ -17016,13 +17016,13 @@ Object {
                                       autocapitalize="off"
                                       autocomplete="off"
                                       autocorrect="off"
-                                      class="euiTextArea euiTextArea--resizeVertical"
+                                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                       data-test-subj="searchAutocompleteTextArea"
                                       enterkeyhint="search"
                                       id="autocomplete-textarea"
                                       maxlength="16384"
                                       placeholder="Enter query"
-                                      rows="6"
+                                      rows="3"
                                       spellcheck="false"
                                       style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
@@ -17168,7 +17168,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -17188,18 +17188,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select services and entities"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="servicesEntitiesComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -17236,7 +17236,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -17377,13 +17377,13 @@ Object {
                               class="euiFlexItem"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <input
-                                    class="euiFieldSearch"
+                                    class="euiFieldSearch euiFieldSearch--compressed"
                                     placeholder="Service name"
                                     type="search"
                                     value=""
@@ -17396,7 +17396,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -17568,7 +17568,7 @@ Object {
                         class="euiAccordion__padding--l"
                       >
                         <div
-                          class="euiFormRow"
+                          class="euiFormRow euiFormRow--compressed"
                           id="random_html_id-row"
                         >
                           <div
@@ -17589,18 +17589,18 @@ Object {
                               aria-expanded="false"
                               aria-haspopup="listbox"
                               aria-label="Select trace groups"
-                              class="euiComboBox"
+                              class="euiComboBox euiComboBox--compressed"
                               data-test-subj="traceGroupsComboBox"
                               role="combobox"
                             >
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    class="euiComboBox__inputWrap"
+                                    class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     tabindex="-1"
                                   >
@@ -17637,7 +17637,7 @@ Object {
                                     >
                                       <svg
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
                                         role="img"
@@ -17791,7 +17791,7 @@ Object {
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="cancelCreateButton"
                   type="button"
                 >
@@ -17813,7 +17813,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                     data-test-subj="createButton"
                     disabled=""
                     type="button"
@@ -17837,7 +17837,7 @@ Object {
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                     data-test-subj="createAndSetButton"
                     disabled=""
                     type="button"
@@ -18029,7 +18029,7 @@ Object {
               class="euiForm"
             >
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="nameFormRow"
                 id="random_html_id-row"
               >
@@ -18047,13 +18047,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="name"
                         type="text"
@@ -18064,7 +18064,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFormRow"
+                class="euiFormRow euiFormRow--compressed"
                 data-test-subj="descriptionFormRow"
                 id="random_html_id-row"
               >
@@ -18082,13 +18082,13 @@ Object {
                   class="euiFormRow__fieldWrapper"
                 >
                   <div
-                    class="euiFormControlLayout"
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       class="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        class="euiFieldText"
+                        class="euiFieldText euiFieldText--compressed"
                         id="random_html_id"
                         name="description"
                         type="text"
@@ -18238,7 +18238,7 @@ Object {
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -18273,13 +18273,13 @@ Object {
                                     autocapitalize="off"
                                     autocomplete="off"
                                     autocorrect="off"
-                                    class="euiTextArea euiTextArea--resizeVertical"
+                                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                                     data-test-subj="searchAutocompleteTextArea"
                                     enterkeyhint="search"
                                     id="autocomplete-textarea"
                                     maxlength="16384"
                                     placeholder="Enter query"
-                                    rows="6"
+                                    rows="3"
                                     spellcheck="false"
                                     style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
@@ -18425,7 +18425,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -18445,18 +18445,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select services and entities"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="servicesEntitiesComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -18493,7 +18493,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -18634,13 +18634,13 @@ Object {
                             class="euiFlexItem"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
-                                  class="euiFieldSearch"
+                                  class="euiFieldSearch euiFieldSearch--compressed"
                                   placeholder="Service name"
                                   type="search"
                                   value=""
@@ -18653,7 +18653,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -18825,7 +18825,7 @@ Object {
                       class="euiAccordion__padding--l"
                     >
                       <div
-                        class="euiFormRow"
+                        class="euiFormRow euiFormRow--compressed"
                         id="random_html_id-row"
                       >
                         <div
@@ -18846,18 +18846,18 @@ Object {
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-label="Select trace groups"
-                            class="euiComboBox"
+                            class="euiComboBox euiComboBox--compressed"
                             data-test-subj="traceGroupsComboBox"
                             role="combobox"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div
-                                  class="euiComboBox__inputWrap"
+                                  class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                   data-test-subj="comboBoxInput"
                                   tabindex="-1"
                                 >
@@ -18894,7 +18894,7 @@ Object {
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -19048,7 +19048,7 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 data-test-subj="cancelCreateButton"
                 type="button"
               >
@@ -19070,7 +19070,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                   data-test-subj="createButton"
                   disabled=""
                   type="button"
@@ -19094,7 +19094,7 @@ Object {
                 class="euiToolTipAnchor"
               >
                 <button
-                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
                   data-test-subj="createAndSetButton"
                   disabled=""
                   type="button"

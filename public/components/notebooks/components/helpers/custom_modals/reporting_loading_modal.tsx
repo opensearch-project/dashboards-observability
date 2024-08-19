@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  EuiOverlayMask, 
-  EuiModal, 
-  EuiModalHeader, 
-  EuiTitle, 
-  EuiText, 
-  EuiModalBody, 
-  EuiSpacer, 
-  EuiFlexGroup, 
-  EuiFlexItem, 
-  EuiLoadingSpinner, 
-  EuiButton 
+import {
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalHeader,
+  EuiTitle,
+  EuiText,
+  EuiModalBody,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSmallButton
 } from "@elastic/eui";
 import React from "react";
 
@@ -22,7 +22,7 @@ export function GenerateReportLoadingModal(props: { setShowLoading: any; }) {
   const {
     setShowLoading
   } = props;
-  
+
   const closeModal = () => {
     setShowLoading(false);
   };
@@ -54,12 +54,12 @@ export function GenerateReportLoadingModal(props: { setShowLoading: any; }) {
             <EuiSpacer size="l" />
             <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="reporting-loading-modal-close-button"
                   onClick={closeModal}
                 >
                   Close
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalBody>

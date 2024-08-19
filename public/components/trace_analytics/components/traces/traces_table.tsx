@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -75,13 +75,13 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={item}>
                   {(copy) => (
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="Copy trace id"
                       iconType="copyClipboard"
                       onClick={copy}
                     >
                       Click to copy
-                    </EuiButtonIcon>
+                    </EuiSmallButtonIcon>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -175,13 +175,13 @@ export function TracesTable(props: TracesTableProps) {
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={item}>
                     {(copy) => (
-                      <EuiButtonIcon
+                      <EuiSmallButtonIcon
                         aria-label="Copy trace id"
                         iconType="copyClipboard"
                         onClick={copy}
                       >
                         Click to copy
-                      </EuiButtonIcon>
+                      </EuiSmallButtonIcon>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>

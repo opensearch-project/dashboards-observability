@@ -6,10 +6,10 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -252,14 +252,14 @@ export const CustomPanelTable = ({
   };
 
   const popoverButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="operationalPanelsActionsButton"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
     >
       Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const popoverItems = (): ReactElement[] => [
@@ -376,9 +376,9 @@ export const CustomPanelTable = ({
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
+                    <EuiSmallButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
                       Create Dashboard
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>
@@ -386,7 +386,7 @@ export const CustomPanelTable = ({
             <EuiHorizontalRule margin="m" />
             {customPanels.length > 0 ? (
               <>
-                <EuiFieldSearch
+                <EuiCompressedFieldSearch
                   fullWidth
                   data-test-subj="operationalPanelSearchBar"
                   placeholder="Search Observability Dashboard name"
@@ -438,18 +438,18 @@ export const CustomPanelTable = ({
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
                       href="#/create"
                     >
                       Create Dashboard
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fullWidth={false} onClick={() => addSampledata()}>
+                    <EuiSmallButton fullWidth={false} onClick={() => addSampledata()}>
                       Add samples
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="xxl" />

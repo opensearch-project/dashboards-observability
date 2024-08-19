@@ -6,11 +6,12 @@
 import React, { useEffect, useState, useContext, Fragment } from 'react';
 import {
   EuiTitle,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiSpacer,
+  EuiSmallButton,
   EuiButton,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
@@ -172,7 +173,7 @@ export const LogsViewConfigPanelItem = ({
   const getLogsViewUI = () => {
     const list = configList[GROUPBY] ? configList[GROUPBY] : [];
     const listUI = list.map((field, index) => (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Field"
         labelAppend={
           <EuiText size="xs">
@@ -184,7 +185,7 @@ export const LogsViewConfigPanelItem = ({
           </EuiText>
         }
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           aria-label="logsViewField"
           placeholder="Select a field"
           singleSelection={{ asPlainText: true }}
@@ -195,7 +196,7 @@ export const LogsViewConfigPanelItem = ({
             updateLogsViewConfig(e.length > 0 ? e[0].label : '', field as ConfigListEntry)
           }
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ));
     return (
       <Fragment key="logsViewUI">
@@ -203,7 +204,7 @@ export const LogsViewConfigPanelItem = ({
         <EuiSpacer size="s" />
         {
           <EuiFlexItem grow>
-            <EuiButton
+            <EuiSmallButton
               fullWidth
               iconType="plusInCircleFilled"
               color="primary"
@@ -211,7 +212,7 @@ export const LogsViewConfigPanelItem = ({
               disabled={queriedFields.length !== 0}
             >
               Add
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         }
       </Fragment>

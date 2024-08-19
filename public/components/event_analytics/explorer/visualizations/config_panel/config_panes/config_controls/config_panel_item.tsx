@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { uniqueId, isEmpty } from 'lodash';
-import { EuiTitle, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiCompressedComboBox, EuiSpacer } from '@elastic/eui';
 
 export const PanelItem = ({
   paddingTitle,
@@ -29,7 +29,7 @@ export const PanelItem = ({
         <h3>{paddingTitle}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiComboBox
+      <EuiCompressedComboBox
         id={uniqueId('axis-select-')}
         placeholder="Select a field"
         options={options}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { ParentUnitType, TreemapParentsProps } from '../../../../../../../../common/types/explorer';
@@ -50,7 +50,7 @@ export const ConfigTreemapParentFields = ({
                     {obj.label !== '' ? obj.label : `Parent ${index + 1}`}
                   </EuiLink>
                 </EuiText>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   color="subdued"
                   iconType="cross"
                   aria-label="clear-field"
@@ -64,7 +64,7 @@ export const ConfigTreemapParentFields = ({
       <EuiSpacer size="s" />
       <EuiPanel className="panelItem_button" grow>
         <EuiText size="s">{addButtonText}</EuiText>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           iconType="plusInCircle"
           aria-label="clear-field"
           iconSize="s"

@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiExpression,
   EuiFlexGroup,
@@ -85,7 +85,7 @@ export const CoveringIndexBuilder = ({
           >
             <>
               <EuiPopoverTitle paddingSize="l">Columns</EuiPopoverTitle>
-              <EuiComboBox
+              <EuiCompressedComboBox
                 placeholder="Select one or more options"
                 options={accelerationFormData.dataTableFields.map((x) => ({ label: x.fieldName }))}
                 selectedOptions={selectedOptions}

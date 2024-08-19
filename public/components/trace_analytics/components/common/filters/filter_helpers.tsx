@@ -4,10 +4,10 @@
  */
 
 import {
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
   EuiFormControlLayoutDelimited,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import _ from 'lodash';
@@ -157,13 +157,13 @@ export const getValueComponent = (
   const textField = (
     <>
       <EuiSpacer size="s" />
-      <EuiFormRow label={'Value'}>
-        <EuiFieldText
+      <EuiCompressedFormRow label={'Value'}>
+        <EuiCompressedFieldText
           placeholder="Enter a value"
           value={value}
           onChange={(e) => setValue(e.target.value)}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 
@@ -189,7 +189,7 @@ export const getValueComponent = (
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiFormRow label={'Value'}>
+        <EuiCompressedFormRow label={'Value'}>
           <EuiFormControlLayoutDelimited
             startControl={
               <input
@@ -210,7 +210,7 @@ export const getValueComponent = (
               />
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     );
   };
@@ -219,8 +219,8 @@ export const getValueComponent = (
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiFormRow label={'Value'}>
-          <EuiComboBox
+        <EuiCompressedFormRow label={'Value'}>
+          <EuiCompressedComboBox
             placeholder="Select a value"
             options={[
               {
@@ -234,7 +234,7 @@ export const getValueComponent = (
             selectedOptions={value || []}
             singleSelection={true}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     );
   };

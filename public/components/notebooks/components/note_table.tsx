@@ -4,10 +4,10 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -163,14 +163,14 @@ export function NoteTable({
   };
 
   const popoverButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="notebookTableActionBtn"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
     >
       Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const popoverItems: ReactElement[] = [
@@ -270,9 +270,9 @@ export function NoteTable({
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/create" data-test-subj="createNotebookPrimaryBtn">
+                    <EuiSmallButton fill href="#/create" data-test-subj="createNotebookPrimaryBtn">
                       Create notebook
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>
@@ -280,7 +280,7 @@ export function NoteTable({
             <EuiHorizontalRule margin="m" />
             {notebooks.length > 0 ? (
               <>
-                <EuiFieldSearch
+                <EuiCompressedFieldSearch
                   fullWidth
                   placeholder="Search notebook name"
                   value={searchQuery}
@@ -331,22 +331,22 @@ export function NoteTable({
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       href="#/create"
                       data-test-subj="notebookEmptyTableCreateBtn"
                       fullWidth={false}
                     >
                       Create notebook
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="notebookEmptyTableAddSamplesBtn"
                       fullWidth={false}
                       onClick={() => addSampleNotebooksModal()}
                     >
                       Add samples
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="xxl" />

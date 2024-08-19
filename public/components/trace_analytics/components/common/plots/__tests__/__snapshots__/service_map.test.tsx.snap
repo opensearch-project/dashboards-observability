@@ -46,8 +46,8 @@ exports[`Service map component renders service map 1`] = `
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFieldSearch
-          compressed={false}
+        <EuiCompressedFieldSearch
+          compressed={true}
           fullWidth={false}
           incremental={false}
           isClearable={true}

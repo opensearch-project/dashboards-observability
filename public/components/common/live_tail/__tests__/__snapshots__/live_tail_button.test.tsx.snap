@@ -8,89 +8,98 @@ exports[`Live tail button change live tail to 10s interval 1`] = `
   liveTailName="10s"
   setIsLiveTailPopoverOpen={[MockFunction]}
 >
-  <EuiButton
+  <EuiSmallButton
     data-test-subj=""
     iconSide="left"
     iconType="stop"
     onClick={[Function]}
   >
-    <EuiButtonDisplay
-      baseClassName="euiButton"
+    <EuiButton
       data-test-subj=""
-      disabled={false}
-      element="button"
       iconSide="left"
       iconType="stop"
-      isDisabled={false}
       onClick={[Function]}
-      type="button"
+      size="s"
     >
-      <button
-        className="euiButton euiButton--primary"
+      <EuiButtonDisplay
+        baseClassName="euiButton"
         data-test-subj=""
         disabled={false}
+        element="button"
+        iconSide="left"
+        iconType="stop"
+        isDisabled={false}
         onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
+        size="s"
         type="button"
       >
-        <EuiButtonContent
-          className="euiButton__content"
-          iconSide="left"
-          iconType="stop"
-          textProps={
+        <button
+          className="euiButton euiButton--primary euiButton--small"
+          data-test-subj=""
+          disabled={false}
+          onClick={[Function]}
+          style={
             Object {
-              "className": "euiButton__text",
+              "minWidth": undefined,
             }
           }
+          type="button"
         >
-          <span
-            className="euiButtonContent euiButton__content"
+          <EuiButtonContent
+            className="euiButton__content"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
           >
-            <EuiIcon
-              className="euiButtonContent__icon"
-              color="inherit"
-              size="m"
-              type="stop"
+            <span
+              className="euiButtonContent euiButton__content"
             >
-              <EuiIconStop
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                focusable="false"
-                role="img"
-                style={null}
+              <EuiIcon
+                className="euiButtonContent__icon"
+                color="inherit"
+                size="m"
+                type="stop"
               >
-                <svg
+                <EuiIconStop
                   aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                   focusable="false"
-                  height={16}
                   role="img"
                   style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M4 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z"
-                    fillRule="evenodd"
-                  />
-                </svg>
-              </EuiIconStop>
-            </EuiIcon>
-            <span
-              className="euiButton__text"
-            >
-              10s
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z"
+                      fillRule="evenodd"
+                    />
+                  </svg>
+                </EuiIconStop>
+              </EuiIcon>
+              <span
+                className="euiButton__text"
+              >
+                10s
+              </span>
             </span>
-          </span>
-        </EuiButtonContent>
-      </button>
-    </EuiButtonDisplay>
-  </EuiButton>
+          </EuiButtonContent>
+        </button>
+      </EuiButtonDisplay>
+    </EuiButton>
+  </EuiSmallButton>
 </LiveTailButton>
 `;
 
@@ -102,88 +111,97 @@ exports[`Live tail button starts live tail with 5s interval 1`] = `
   liveTailName="5s"
   setIsLiveTailPopoverOpen={[MockFunction]}
 >
-  <EuiButton
+  <EuiSmallButton
     data-test-subj=""
     iconSide="left"
     iconType="stop"
     onClick={[Function]}
   >
-    <EuiButtonDisplay
-      baseClassName="euiButton"
+    <EuiButton
       data-test-subj=""
-      disabled={false}
-      element="button"
       iconSide="left"
       iconType="stop"
-      isDisabled={false}
       onClick={[Function]}
-      type="button"
+      size="s"
     >
-      <button
-        className="euiButton euiButton--primary"
+      <EuiButtonDisplay
+        baseClassName="euiButton"
         data-test-subj=""
         disabled={false}
+        element="button"
+        iconSide="left"
+        iconType="stop"
+        isDisabled={false}
         onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
+        size="s"
         type="button"
       >
-        <EuiButtonContent
-          className="euiButton__content"
-          iconSide="left"
-          iconType="stop"
-          textProps={
+        <button
+          className="euiButton euiButton--primary euiButton--small"
+          data-test-subj=""
+          disabled={false}
+          onClick={[Function]}
+          style={
             Object {
-              "className": "euiButton__text",
+              "minWidth": undefined,
             }
           }
+          type="button"
         >
-          <span
-            className="euiButtonContent euiButton__content"
+          <EuiButtonContent
+            className="euiButton__content"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
           >
-            <EuiIcon
-              className="euiButtonContent__icon"
-              color="inherit"
-              size="m"
-              type="stop"
+            <span
+              className="euiButtonContent euiButton__content"
             >
-              <EuiIconBeaker
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                focusable="false"
-                role="img"
-                style={null}
+              <EuiIcon
+                className="euiButtonContent__icon"
+                color="inherit"
+                size="m"
+                type="stop"
               >
-                <svg
+                <EuiIconBeaker
                   aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                   focusable="false"
-                  height={16}
                   role="img"
                   style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                  />
-                </svg>
-              </EuiIconBeaker>
-            </EuiIcon>
-            <span
-              className="euiButton__text"
-            >
-              5s
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </EuiIconBeaker>
+              </EuiIcon>
+              <span
+                className="euiButton__text"
+              >
+                5s
+              </span>
             </span>
-          </span>
-        </EuiButtonContent>
-      </button>
-    </EuiButtonDisplay>
-  </EuiButton>
+          </EuiButtonContent>
+        </button>
+      </EuiButtonDisplay>
+    </EuiButton>
+  </EuiSmallButton>
 </LiveTailButton>
 `;
 
@@ -192,88 +210,97 @@ exports[`Live tail off button stop live tail 1`] = `
   StopLive={[MockFunction]}
   dataTestSubj=""
 >
-  <EuiButton
+  <EuiSmallButton
     color="danger"
     data-test-subj=""
     iconType="stop"
     onClick={[Function]}
   >
-    <EuiButtonDisplay
-      baseClassName="euiButton"
+    <EuiButton
       color="danger"
       data-test-subj=""
-      disabled={false}
-      element="button"
       iconType="stop"
-      isDisabled={false}
       onClick={[Function]}
-      type="button"
+      size="s"
     >
-      <button
-        className="euiButton euiButton--danger"
+      <EuiButtonDisplay
+        baseClassName="euiButton"
+        color="danger"
         data-test-subj=""
         disabled={false}
+        element="button"
+        iconType="stop"
+        isDisabled={false}
         onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
+        size="s"
         type="button"
       >
-        <EuiButtonContent
-          className="euiButton__content"
-          iconSide="left"
-          iconType="stop"
-          textProps={
+        <button
+          className="euiButton euiButton--danger euiButton--small"
+          data-test-subj=""
+          disabled={false}
+          onClick={[Function]}
+          style={
             Object {
-              "className": "euiButton__text",
+              "minWidth": undefined,
             }
           }
+          type="button"
         >
-          <span
-            className="euiButtonContent euiButton__content"
+          <EuiButtonContent
+            className="euiButton__content"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
           >
-            <EuiIcon
-              className="euiButtonContent__icon"
-              color="inherit"
-              size="m"
-              type="stop"
+            <span
+              className="euiButtonContent euiButton__content"
             >
-              <EuiIconStop
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                focusable="false"
-                role="img"
-                style={null}
+              <EuiIcon
+                className="euiButtonContent__icon"
+                color="inherit"
+                size="m"
+                type="stop"
               >
-                <svg
+                <EuiIconStop
                   aria-hidden={true}
                   className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                   focusable="false"
-                  height={16}
                   role="img"
                   style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M4 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z"
-                    fillRule="evenodd"
-                  />
-                </svg>
-              </EuiIconStop>
-            </EuiIcon>
-            <span
-              className="euiButton__text"
-            >
-              Stop
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z"
+                      fillRule="evenodd"
+                    />
+                  </svg>
+                </EuiIconStop>
+              </EuiIcon>
+              <span
+                className="euiButton__text"
+              >
+                Stop
+              </span>
             </span>
-          </span>
-        </EuiButtonContent>
-      </button>
-    </EuiButtonDisplay>
-  </EuiButton>
+          </EuiButtonContent>
+        </button>
+      </EuiButtonDisplay>
+    </EuiButton>
+  </EuiSmallButton>
 </StopLiveButton>
 `;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiText, EuiCompressedFormRow, EuiCompressedFieldText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 
@@ -44,7 +44,7 @@ export const NameRow = (props: ConfigureNameProps) => {
   };
 
   return (
-    <EuiFormRow label="Data source name" isInvalid={currentError.length !== 0} error={currentError}>
+    <EuiCompressedFormRow label="Data source name" isInvalid={currentError.length !== 0} error={currentError}>
       <>
         <EuiText size="xs">
           <p>
@@ -52,7 +52,7 @@ export const NameRow = (props: ConfigureNameProps) => {
             and concise.
           </p>
         </EuiText>
-        <EuiFieldText
+        <EuiCompressedFieldText
           data-test-subj="name"
           placeholder="Title"
           value={name}
@@ -63,6 +63,6 @@ export const NameRow = (props: ConfigureNameProps) => {
           isInvalid={currentError.length !== 0}
         />
       </>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

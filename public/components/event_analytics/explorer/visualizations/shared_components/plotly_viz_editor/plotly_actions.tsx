@@ -31,7 +31,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 interface PlotlyEditorActionsMenuProps {
@@ -49,7 +49,7 @@ function PlotlyEditorActionsMenu({ formatHJson }: PlotlyEditorActionsMenuProps) 
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const button = <EuiButtonIcon iconType="wrench" onClick={onButtonClick} />;
+  const button = <EuiSmallButtonIcon iconType="wrench" onClick={onButtonClick} />;
 
   const items = [
     <EuiContextMenuItem key="hjson" onClick={onHJsonCLick}>

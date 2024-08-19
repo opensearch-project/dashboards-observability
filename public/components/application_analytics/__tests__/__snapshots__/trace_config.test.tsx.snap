@@ -403,9 +403,9 @@ exports[`Trace Config component renders empty trace config 1`] = `
               <div
                 className="euiAccordion__padding--l"
               >
-                <EuiFormRow
+                <EuiCompressedFormRow
                   describedByIds={Array []}
-                  display="row"
+                  display="rowCompressed"
                   fullWidth={false}
                   hasChildLabel={true}
                   hasEmptyLabelSpace={false}
@@ -414,7 +414,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                   labelType="label"
                 >
                   <div
-                    className="euiFormRow"
+                    className="euiFormRow euiFormRow--compressed"
                     id="random_html_id-row"
                   >
                     <div
@@ -437,11 +437,11 @@ exports[`Trace Config component renders empty trace config 1`] = `
                     <div
                       className="euiFormRow__fieldWrapper"
                     >
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         aria-describedby="random_html_id-help-0"
                         aria-label="Select trace groups"
                         async={false}
-                        compressed={false}
+                        compressed={true}
                         data-test-subj="traceGroupsComboBox"
                         fullWidth={false}
                         id="random_html_id"
@@ -461,14 +461,14 @@ exports[`Trace Config component renders empty trace config 1`] = `
                           aria-expanded={false}
                           aria-haspopup="listbox"
                           aria-label="Select trace groups"
-                          className="euiComboBox"
+                          className="euiComboBox euiComboBox--compressed"
                           data-test-subj="traceGroupsComboBox"
                           onKeyDown={[Function]}
                           role="combobox"
                         >
                           <EuiComboBoxInput
                             autoSizeInputRef={[Function]}
-                            compressed={false}
+                            compressed={true}
                             fullWidth={false}
                             hasSelectedOptions={false}
                             id="random_html_id"
@@ -491,7 +491,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                             value=""
                           >
                             <EuiFormControlLayout
-                              compressed={false}
+                              compressed={true}
                               fullWidth={false}
                               icon={
                                 Object {
@@ -506,13 +506,13 @@ exports[`Trace Config component renders empty trace config 1`] = `
                               }
                             >
                               <div
-                                className="euiFormControlLayout"
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    className="euiComboBox__inputWrap"
+                                    className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     onClick={[Function]}
                                     tabIndex={-1}
@@ -583,7 +583,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                                     </AutosizeInput>
                                   </div>
                                   <EuiFormControlLayoutIcons
-                                    compressed={false}
+                                    compressed={true}
                                     icon={
                                       Object {
                                         "aria-label": "Open list of options",
@@ -604,7 +604,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                                         data-test-subj="comboBoxToggleListButton"
                                         iconRef={[Function]}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                         type="arrowDown"
                                       >
                                         <button
@@ -617,19 +617,19 @@ exports[`Trace Config component renders empty trace config 1`] = `
                                           <EuiIcon
                                             aria-hidden="true"
                                             className="euiFormControlLayoutCustomIcon__icon"
-                                            size="m"
+                                            size="s"
                                             type="arrowDown"
                                           >
                                             <EuiIconBeaker
                                               aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               role="img"
                                               style={null}
                                             >
                                               <svg
                                                 aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
                                                 height={16}
                                                 role="img"
@@ -653,7 +653,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                             </EuiFormControlLayout>
                           </EuiComboBoxInput>
                         </div>
-                      </EuiComboBox>
+                      </EuiCompressedComboBox>
                       <EuiFormHelpText
                         className="euiFormRow__text"
                         id="random_html_id-help-0"
@@ -668,7 +668,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                       </EuiFormHelpText>
                     </div>
                   </div>
-                </EuiFormRow>
+                </EuiCompressedFormRow>
                 <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
@@ -1336,9 +1336,9 @@ exports[`Trace Config component renders with one trace selected 1`] = `
               <div
                 className="euiAccordion__padding--l"
               >
-                <EuiFormRow
+                <EuiCompressedFormRow
                   describedByIds={Array []}
-                  display="row"
+                  display="rowCompressed"
                   fullWidth={false}
                   hasChildLabel={true}
                   hasEmptyLabelSpace={false}
@@ -1347,7 +1347,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                   labelType="label"
                 >
                   <div
-                    className="euiFormRow"
+                    className="euiFormRow euiFormRow--compressed"
                     id="random_html_id-row"
                   >
                     <div
@@ -1370,11 +1370,11 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                     <div
                       className="euiFormRow__fieldWrapper"
                     >
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         aria-describedby="random_html_id-help-0"
                         aria-label="Select trace groups"
                         async={false}
-                        compressed={false}
+                        compressed={true}
                         data-test-subj="traceGroupsComboBox"
                         fullWidth={false}
                         id="random_html_id"
@@ -1394,14 +1394,14 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                           aria-expanded={false}
                           aria-haspopup="listbox"
                           aria-label="Select trace groups"
-                          className="euiComboBox"
+                          className="euiComboBox euiComboBox--compressed"
                           data-test-subj="traceGroupsComboBox"
                           onKeyDown={[Function]}
                           role="combobox"
                         >
                           <EuiComboBoxInput
                             autoSizeInputRef={[Function]}
-                            compressed={false}
+                            compressed={true}
                             fullWidth={false}
                             hasSelectedOptions={false}
                             id="random_html_id"
@@ -1424,7 +1424,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                             value=""
                           >
                             <EuiFormControlLayout
-                              compressed={false}
+                              compressed={true}
                               fullWidth={false}
                               icon={
                                 Object {
@@ -1439,13 +1439,13 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                               }
                             >
                               <div
-                                className="euiFormControlLayout"
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    className="euiComboBox__inputWrap"
+                                    className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     onClick={[Function]}
                                     tabIndex={-1}
@@ -1516,7 +1516,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                                     </AutosizeInput>
                                   </div>
                                   <EuiFormControlLayoutIcons
-                                    compressed={false}
+                                    compressed={true}
                                     icon={
                                       Object {
                                         "aria-label": "Open list of options",
@@ -1537,7 +1537,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                                         data-test-subj="comboBoxToggleListButton"
                                         iconRef={[Function]}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                         type="arrowDown"
                                       >
                                         <button
@@ -1550,19 +1550,19 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                                           <EuiIcon
                                             aria-hidden="true"
                                             className="euiFormControlLayoutCustomIcon__icon"
-                                            size="m"
+                                            size="s"
                                             type="arrowDown"
                                           >
                                             <EuiIconArrowDown
                                               aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                              className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               role="img"
                                               style={null}
                                             >
                                               <svg
                                                 aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
                                                 height={16}
                                                 role="img"
@@ -1587,7 +1587,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                             </EuiFormControlLayout>
                           </EuiComboBoxInput>
                         </div>
-                      </EuiComboBox>
+                      </EuiCompressedComboBox>
                       <EuiFormHelpText
                         className="euiFormRow__text"
                         id="random_html_id-help-0"
@@ -1602,7 +1602,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                       </EuiFormHelpText>
                     </div>
                   </div>
-                </EuiFormRow>
+                </EuiCompressedFormRow>
                 <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"

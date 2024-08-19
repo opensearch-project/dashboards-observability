@@ -5,12 +5,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButton,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
@@ -200,20 +200,20 @@ export const CreateApp = (props: CreateAppProps) => {
             </EuiPageContentHeader>
             <EuiHorizontalRule />
             <EuiForm component="form">
-              <EuiFormRow label="Name" data-test-subj="nameFormRow">
-                <EuiFieldText
+              <EuiCompressedFormRow label="Name" data-test-subj="nameFormRow">
+                <EuiCompressedFieldText
                   name="name"
                   value={name}
                   onChange={(e) => setNameWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
-              <EuiFormRow label="Description" data-test-subj="descriptionFormRow">
-                <EuiFieldText
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow label="Description" data-test-subj="descriptionFormRow">
+                <EuiCompressedFieldText
                   name="description"
                   value={description}
                   onChange={(e) => setDescriptionWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiForm>
           </EuiPageContent>
           <EuiSpacer />
@@ -243,33 +243,33 @@ export const CreateApp = (props: CreateAppProps) => {
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="cancelCreateButton" onClick={onCancel}>
+              <EuiSmallButton data-test-subj="cancelCreateButton" onClick={onCancel}>
                 Cancel
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip position="top" content={missingField(false)}>
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="createButton"
                   isDisabled={isDisabled}
                   onClick={editMode ? onUpdate : () => onCreate('create')}
                   fill={editMode ? true : false}
                 >
                   {editMode ? 'Save' : 'Create'}
-                </EuiButton>
+                </EuiSmallButton>
               </EuiToolTip>
             </EuiFlexItem>
             {editMode || (
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={missingField(true)}>
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createAndSetButton"
                     fill
                     isDisabled={isDisabled || !query}
                     onClick={() => onCreate('createSetAvailability')}
                   >
                     Create and Set Availability
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiToolTip>
               </EuiFlexItem>
             )}

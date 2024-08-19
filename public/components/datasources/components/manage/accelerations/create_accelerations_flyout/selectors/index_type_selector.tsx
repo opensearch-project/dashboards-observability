@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiCompressedFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiCompressedSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
@@ -97,7 +103,7 @@ export const IndexTypeSelector = ({
         <h3>Acceleration setting</h3>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Acceleration type"
         helpText="Select the type of acceleration according to your use case."
         labelAppend={
@@ -108,14 +114,14 @@ export const IndexTypeSelector = ({
           </EuiText>
         }
       >
-        <EuiSuperSelect
+        <EuiCompressedSuperSelect
           options={superSelectOptions}
           valueOfSelected={value}
           onChange={onChangeSupeSelect}
           itemLayoutAlign="top"
           hasDividers
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 };

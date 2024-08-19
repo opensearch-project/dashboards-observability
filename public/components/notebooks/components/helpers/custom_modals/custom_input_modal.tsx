@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiForm,
   EuiModal,
   EuiModalBody,
@@ -13,9 +13,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiSmallButton,
 } from '@elastic/eui';
 
 /*
@@ -60,22 +60,22 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label={labelTxt} helpText={helpText}>
-              <EuiFieldText
+            <EuiCompressedFormRow label={labelTxt} helpText={helpText}>
+              <EuiCompressedFieldText
                 data-test-subj="custom-input-modal-input"
                 name="input"
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>{btn1txt}</EuiButtonEmpty>
-          <EuiButton data-test-subj="custom-input-modal-confirm-button" onClick={() => runModal(value)} fill>
+          <EuiSmallButtonEmpty onClick={closeModal}>{btn1txt}</EuiSmallButtonEmpty>
+          <EuiSmallButton data-test-subj="custom-input-modal-confirm-button" onClick={() => runModal(value)} fill>
             {btn2txt}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>

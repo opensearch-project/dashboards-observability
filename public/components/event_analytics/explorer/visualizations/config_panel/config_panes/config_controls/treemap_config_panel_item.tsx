@@ -5,10 +5,10 @@
 
 import {
   EuiButton,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -144,7 +144,7 @@ export const TreemapConfigPanelItem = ({
           title={`Parent ${index + 1}`}
           closeMenu={() => isHandlePanelClickBack(selectedAxis)}
         />
-        <EuiComboBox
+        <EuiCompressedComboBox
           id={htmlIdGenerator('axis-select-')}
           placeholder="Select a field"
           options={options}
@@ -209,8 +209,8 @@ export const TreemapConfigPanelItem = ({
       </EuiTitle>
       <div className="first-division">
         <EuiPanel color="subdued">
-          <EuiFormRow label="Child Field">
-            <EuiComboBox
+          <EuiCompressedFormRow label="Child Field">
+            <EuiCompressedComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(GROUPBY)}
               selectedOptions={
@@ -223,7 +223,7 @@ export const TreemapConfigPanelItem = ({
                 updateList(GROUPBY, CHILDFIELD, val.length > 0 ? val[0].label : '')
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
 
           <EuiSpacer size="s" />
           <EuiTitle size="xxxs">
@@ -243,8 +243,8 @@ export const TreemapConfigPanelItem = ({
       </EuiTitle>
       <div className="first-division">
         <EuiPanel color="subdued">
-          <EuiFormRow label="Value Field">
-            <EuiComboBox
+          <EuiCompressedFormRow label="Value Field">
+            <EuiCompressedComboBox
               placeholder="Select a field"
               options={getOptionsAvailable(AGGREGATIONS)}
               selectedOptions={
@@ -257,7 +257,7 @@ export const TreemapConfigPanelItem = ({
                 updateList(AGGREGATIONS, VALUEFIELD, val.length > 0 ? val[0].label : '')
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiPanel>
       </div>
       <EuiSpacer size="s" />

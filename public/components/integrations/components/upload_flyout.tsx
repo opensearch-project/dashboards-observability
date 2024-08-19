@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiButton,
-  EuiFilePicker,
+  EuiSmallButton,
+  EuiCompressedFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -13,7 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
@@ -112,19 +112,19 @@ export const IntegrationUploadPicker = ({
 
   return (
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Select file"
         isInvalid={checkCompleted && isInvalid}
         error={['Must be an ndjson bundle of integration templates']}
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           id="integrationBundlePicker"
           initialPromptText="Select or drag and drop integration bundles"
           onChange={handleFileChange}
           isInvalid={checkCompleted && isInvalid}
           onBlur={() => setBlurred(true)}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   );
 };
@@ -147,10 +147,10 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose}>Cancel</EuiButton>
+            <EuiSmallButton onClick={onClose}>Cancel</EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               fill
               disabled={isInvalid}
               onClick={async () => {
@@ -164,7 +164,7 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
               }}
             >
               Upload
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

@@ -5,7 +5,7 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
@@ -67,14 +67,14 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
         title={<h2>Trace Analytics not set up</h2>}
         body={<EuiText>{missingConfigurationBody}</EuiText>}
         actions={
-          <EuiButton
+          <EuiSmallButton
             color="primary"
             iconSide="right"
             iconType="popout"
             onClick={() => window.open(TRACE_ANALYTICS_DOCUMENTATION_LINK, '_blank')}
           >
             Learn more
-          </EuiButton>
+          </EuiSmallButton>
         }
       />
     </>

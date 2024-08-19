@@ -5,7 +5,7 @@
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -124,7 +124,11 @@ export function SpanDetailFlyout(props: {
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(span, mode, 'SPAN_ID')}>
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
@@ -144,7 +148,11 @@ export function SpanDetailFlyout(props: {
                 textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
               >
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>

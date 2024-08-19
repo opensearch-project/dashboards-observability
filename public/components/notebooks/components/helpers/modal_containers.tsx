@@ -7,11 +7,11 @@ import React, { useState } from 'react';
 import {
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -153,21 +153,21 @@ export const DeleteNotebookModal = ({
           <EuiText>The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiFormRow label={'To confirm deletion, enter "delete" in the text field'}>
-              <EuiFieldText
+            <EuiCompressedFormRow label={'To confirm deletion, enter "delete" in the text field'}>
+              <EuiCompressedFieldText
                 data-test-subj="delete-notebook-modal-input"
                 name="input"
                 placeholder="delete"
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-          <EuiButton
+          <EuiSmallButtonEmpty onClick={onCancel}>Cancel</EuiSmallButtonEmpty>
+          <EuiSmallButton
             data-test-subj="delete-notebook-modal-delete-button"
             onClick={() => onConfirm()}
             color="danger"
@@ -175,7 +175,7 @@ export const DeleteNotebookModal = ({
             disabled={value !== 'delete'}
           >
             Delete
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>

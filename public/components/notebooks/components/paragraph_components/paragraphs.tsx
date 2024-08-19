@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiComboBoxOptionOption,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -427,7 +427,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           <EuiFlexItem>
             <EuiText style={{ fontSize: 17 }}>
               {`[${idx + 1}] ${type} `}
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 data-test-subj="paragraphToggleInputBtn"
                 aria-label="Toggle show input"
                 iconType={para.isInputExpanded ? 'arrowUp' : 'arrowDown'}
@@ -443,7 +443,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             <EuiPopover
               panelPaddingSize="none"
               button={
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   aria-label="Open paragraph menu"
                   iconType="boxesHorizontal"
                   onClick={() => setIsPopoverOpen(true)}
@@ -585,7 +585,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           {para.isInputExpanded && (
             <>
               <EuiSpacer size="s" />
-              <EuiFormRow
+              <EuiCompressedFormRow
                 fullWidth={true}
                 helpText={paragraphLabel}
                 isInvalid={showQueryParagraphError}
@@ -611,7 +611,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   dataSourceEnabled={dataSourceEnabled}
                   savedObjectsMDSClient={savedObjectsMDSClient}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
               {runParaError && (
                 <EuiText color="danger" size="s" data-test-subj="paragraphInputErrorText">{`${
                   para.isVizualisation ? 'Visualization' : 'Input'
@@ -620,13 +620,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj={`runRefreshBtn-${index}`}
                     onClick={() => onRunPara()}
                     fill
                   >
                     {isOutputAvailable ? 'Refresh' : 'Run'}
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
                 {isOutputAvailable && renderOutputTimestampMessage()}
               </EuiFlexGroup>

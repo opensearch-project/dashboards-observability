@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -196,7 +196,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         </p>
       }
       actions={
-        <EuiButton
+        <EuiSmallButton
           color="primary"
           fill
           onClick={() =>
@@ -213,7 +213,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           {i18n.translate('datasources.associatedObjectsFlyout.createAccelerationButton', {
             defaultMessage: CREATE_ACCELERATION_DESCRIPTION,
           })}
-        </EuiButton>
+        </EuiSmallButton>
       }
     />
   );
