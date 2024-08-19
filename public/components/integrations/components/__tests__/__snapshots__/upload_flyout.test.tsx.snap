@@ -22,22 +22,22 @@ exports[`Integration Upload Flyout Renders integration upload flyout as expected
       <EuiFlexItem
         grow={false}
       >
-        <EuiButton
+        <EuiSmallButton
           onClick={[Function]}
         >
           Cancel
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <EuiButton
+        <EuiSmallButton
           disabled={true}
           fill={true}
           onClick={[Function]}
         >
           Upload
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
@@ -46,9 +46,9 @@ exports[`Integration Upload Flyout Renders integration upload flyout as expected
 
 exports[`Integration Upload Flyout Renders the clean integration picker as expected 1`] = `
 <EuiForm>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={
       Array [
         "Must be an ndjson bundle of integration templates",
@@ -61,8 +61,8 @@ exports[`Integration Upload Flyout Renders the clean integration picker as expec
     label="Select file"
     labelType="label"
   >
-    <EuiFilePicker
-      compressed={false}
+    <EuiCompressedFilePicker
+      compressed={true}
       display="large"
       id="integrationBundlePicker"
       initialPromptText="Select or drag and drop integration bundles"
@@ -70,6 +70,6 @@ exports[`Integration Upload Flyout Renders the clean integration picker as expec
       onBlur={[Function]}
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiForm>
 `;

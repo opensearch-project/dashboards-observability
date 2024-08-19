@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiTitle } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { DATASOURCE_OPTIONS } from '../../../../common/constants/metrics';
 import { OptionType } from '../../../../common/types/metrics';
@@ -26,8 +26,7 @@ export const DataSourcePicker = ({
       <EuiTitle size="xxxs">
         <h5>Metrics source</h5>
       </EuiTitle>
-      <EuiComboBox
-        compressed
+      <EuiCompressedComboBox
         placeholder="Select a metric source"
         singleSelection={{ asPlainText: true }}
         options={DATASOURCE_OPTIONS}

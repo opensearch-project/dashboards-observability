@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -37,7 +37,7 @@ export const ServiceMapNodeDetails = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             aria-label="Close node details"
             iconType="cross"
             color="text"
@@ -52,7 +52,7 @@ export const ServiceMapNodeDetails = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiButton
+          <EuiSmallButton
             fill
             onClick={() =>
               setCurrentSelectedService &&
@@ -61,14 +61,14 @@ export const ServiceMapNodeDetails = ({
             }
           >
             View service details
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
+          <EuiSmallButton
             onClick={() => selectedNodeDetails && addServiceFilter(selectedNodeDetails?.label)}
           >
             Filter map
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

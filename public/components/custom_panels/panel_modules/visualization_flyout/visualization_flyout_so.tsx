@@ -5,8 +5,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
   EuiDatePicker,
@@ -16,7 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiLoadingChart,
   EuiModal,
@@ -24,7 +24,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
   EuiSpacer,
   EuiText,
@@ -146,9 +146,9 @@ export const VisaulizationFlyoutSO = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill>
+          <EuiSmallButton onClick={closeModal} fill>
             Close
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );
@@ -210,7 +210,7 @@ export const VisaulizationFlyoutSO = ({
       content="Picker is disabled. Please edit date/time from panel"
       display="block"
     >
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Panel Time Range"
         fullWidth
         isInvalid={startDate > endDate}
@@ -243,7 +243,7 @@ export const VisaulizationFlyoutSO = ({
             />
           }
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiToolTip>
   );
 
@@ -272,14 +272,14 @@ export const VisaulizationFlyoutSO = ({
       <EuiFlyoutBody>
         <>
           <EuiSpacer size="s" />
-          <EuiFormRow label="Visualization name">
-            <EuiSelect
+          <EuiCompressedFormRow label="Visualization name">
+            <EuiCompressedSelect
               hasNoInitialSelection
               onChange={(e) => onChangeSelection(e)}
               options={visualizationOptions}
               value={selectValue}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="l" />
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
@@ -288,7 +288,7 @@ export const VisaulizationFlyoutSO = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="refreshPreview"
                 iconType="refresh"
                 onClick={onRefreshPreview}
@@ -311,14 +311,14 @@ export const VisaulizationFlyoutSO = ({
     <EuiFlyoutFooter>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="closeFlyoutButton" onClick={closeFlyout}>
+          <EuiSmallButton data-test-subj="closeFlyoutButton" onClick={closeFlyout}>
             Cancel
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="addFlyoutButton" onClick={addVisualization} fill>
+          <EuiSmallButton data-test-subj="addFlyoutButton" onClick={addVisualization} fill>
             Add
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
@@ -373,9 +373,9 @@ export const VisaulizationFlyoutSO = ({
                 </EuiText>
                 {isPreviewError.hasOwnProperty('errorDetails') &&
                 isPreviewError.errorDetails !== '' ? (
-                  <EuiButton color="danger" onClick={() => showModal('errorModal')} size="s">
+                  <EuiSmallButton color="danger" onClick={() => showModal('errorModal')} size="s">
                     See error details
-                  </EuiButton>
+                  </EuiSmallButton>
                 ) : (
                   <></>
                 )}

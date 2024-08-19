@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiProgress,
   EuiSpacer,
@@ -71,15 +71,15 @@ export const DirectQueryRunning = ({
             <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiButton color="success" onClick={cancelQuery}>
+                <EuiSmallButton color="success" onClick={cancelQuery}>
                   Cancel
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
               {isS3Connection && (
                 <EuiFlexItem>
-                  <EuiButton fill onClick={onCreateAcceleration}>
+                  <EuiSmallButton fill onClick={onCreateAcceleration}>
                     Create acceleration
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

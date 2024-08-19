@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiCallOut,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -130,7 +130,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
           <EuiText>
             <h3>Included resources</h3>
           </EuiText>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText grow={false} size="xs">
               <p>
                 This integration offers resources compatible with your data source. These can
@@ -138,7 +138,7 @@ export const SetupIntegrationInputsForSecurityLake = ({
                 following options.
               </p>
             </EuiText>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
           <IntegrationWorkflowsInputs
             updateConfig={updateConfig}

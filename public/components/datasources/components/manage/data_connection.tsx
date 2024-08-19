@@ -18,7 +18,7 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import escapeRegExp from 'lodash/escapeRegExp';
 import React, { useEffect, useState } from 'react';
@@ -327,12 +327,12 @@ export const DataConnection = (props: { dataSource: string }) => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
+                <EuiSmallButtonEmpty
                   iconType={'pencil'}
                   onClick={() => setSelectedTabId(accessControlTabId)}
                 >
                   Edit
-                </EuiButtonEmpty>
+                </EuiSmallButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

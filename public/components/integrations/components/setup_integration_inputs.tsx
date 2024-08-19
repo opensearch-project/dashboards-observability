@@ -6,11 +6,11 @@
 import {
   EuiCallOut,
   EuiCheckableCard,
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
   EuiForm,
-  EuiFormRow,
-  EuiSelect,
+  EuiCompressedFormRow,
+  EuiCompressedSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -172,19 +172,19 @@ export function IntegrationDetailsInputs({
   integration: IntegrationConfig;
 }) {
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={'Integration display Name'}
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         value={config.displayName}
         onChange={(event) => updateConfig({ displayName: event.target.value })}
         placeholder={`${integration.name} Integration`}
         isInvalid={config.displayName.length === 0}
         data-test-subj="new-instance-name"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 
@@ -233,7 +233,7 @@ export function IntegrationConnectionInputs({
     <>
       {dataSourceEnabled && (
         <>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label="Data Source"
             helpText="Select the type of remote data source to query from."
           >
@@ -244,15 +244,15 @@ export function IntegrationConnectionInputs({
               fullWidth={false}
               removePrepend={true}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
         </>
       )}
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
       >
-        <EuiSelect
+        <EuiCompressedSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 'securityLake') {
               return (
@@ -276,9 +276,9 @@ export function IntegrationConnectionInputs({
           }
           disabled={lockConnectionType}
         />
-      </EuiFormRow>
-      <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
-        <EuiComboBox
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow label={connectionType.title} helpText={connectionType.help}>
+        <EuiCompressedComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
           onChange={(selected) => {
@@ -303,7 +303,7 @@ export function IntegrationConnectionInputs({
           data-test-subj="data-source-name"
           isDisabled={lockConnectionType}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 }
@@ -324,13 +324,13 @@ export function IntegrationQueryInputs({
     <>
       {config.connectionType !== 'securityLake' && (
         <>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label="Spark Table Name"
             helpText="Select a table name to associate with your data."
             error={['Must be at least 1 character.']}
             isInvalid={config.connectionTableName.length === 0}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               placeholder={integration.name}
               value={config.connectionTableName}
               onChange={(evt) => {
@@ -338,13 +338,13 @@ export function IntegrationQueryInputs({
               }}
               isInvalid={config.connectionTableName.length === 0}
             />
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             label="S3 Data Location"
             isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
             error={["Must be a URL starting with 's3://'."]}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={config.connectionLocation}
               onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
               placeholder="s3://"
@@ -353,10 +353,10 @@ export function IntegrationQueryInputs({
                 setIsBucketBlurred(true);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       )}
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={`S3 Checkpoint Location`}
         helpText={
           config.connectionType === 'securityLake'
@@ -367,7 +367,7 @@ export function IntegrationQueryInputs({
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={config.checkpointLocation}
           onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
           placeholder="s3://"
@@ -376,7 +376,7 @@ export function IntegrationQueryInputs({
             setIsCheckpointBlurred(true);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 }
@@ -414,7 +414,7 @@ export function IntegrationWorkflowsInputs({
   }, [useWorkflows]);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       isInvalid={![...useWorkflows.values()].includes(true)}
       error={['Must select at least one workflow.']}
     >
@@ -424,7 +424,7 @@ export function IntegrationWorkflowsInputs({
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 
@@ -483,14 +483,14 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
           <EuiText>
             <h3>Query Fields</h3>
           </EuiText>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText grow={false} size="xs">
               <p>
                 To set up the integration, we need to know some information about how to process
                 your data.
               </p>
             </EuiText>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
           <IntegrationQueryInputs
             config={config}
@@ -503,7 +503,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
               <EuiText>
                 <h3>Integration Resources</h3>
               </EuiText>
-              <EuiFormRow>
+              <EuiCompressedFormRow>
                 <EuiText grow={false} size="xs">
                   <p>
                     This integration offers different kinds of resources compatible with your data
@@ -511,7 +511,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
                     Select at least one of the following options.
                   </p>
                 </EuiText>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
               <EuiSpacer />
               <IntegrationWorkflowsInputs
                 config={config}

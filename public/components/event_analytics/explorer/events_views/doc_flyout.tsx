@@ -6,7 +6,7 @@
 import './docView.scss';
 import React from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -108,13 +108,13 @@ export const DocFlyout = ({
               )
             }
           >
-            <EuiButton
+            <EuiSmallButton
               onClick={openSurroundingFlyout}
               className="header-button"
               isDisabled={rawQuery.match(PPL_STATS_REGEX) || !doc.hasOwnProperty(timeStampField)}
             >
               View surrounding events
-            </EuiButton>
+            </EuiSmallButton>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

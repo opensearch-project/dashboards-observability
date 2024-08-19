@@ -8,7 +8,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiButton,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexItem,
   EuiBadge,
   EuiOverlayMask,
@@ -127,7 +127,7 @@ export const LogConfig = (props: LogConfigProps) => {
             </EuiCallOut>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               label="Base Query"
               helpText="The default logs view in the application will be filtered by this query."
             >
@@ -157,7 +157,7 @@ export const LogConfig = (props: LogConfigProps) => {
                   PPL
                 </EuiBadge>
               </EuiFlexItem>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>

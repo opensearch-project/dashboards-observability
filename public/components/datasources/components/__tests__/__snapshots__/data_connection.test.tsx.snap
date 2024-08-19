@@ -71,7 +71,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
               Associated objects and accelerations are not available while this connection is inactive.
             </p>
             <button
-              class="euiButton euiButton--warning"
+              class="euiButton euiButton--warning euiButton--small"
               type="button"
             >
               <span
@@ -179,7 +179,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButtonEmpty euiButtonEmpty--primary"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                   type="button"
                 >
                   <span
@@ -611,7 +611,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButton euiButton--primary"
+                  class="euiButton euiButton--primary euiButton--small"
                   data-test-subj="createButton"
                   type="button"
                 >

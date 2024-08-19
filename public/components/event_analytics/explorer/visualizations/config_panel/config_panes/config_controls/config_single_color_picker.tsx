@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiColorPicker,
-  EuiFormRow,
+  EuiCompressedFormRow,
   colorPalette,
 } from '@elastic/eui';
 import { lightenColor } from '../../../../../../event_analytics/utils/utils';
@@ -29,9 +29,9 @@ export const SingleColorPicker = ({ title, selectedColor, onSelectChange }: any)
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize={'xs'}>
         <EuiFlexItem grow={3}>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiColorPicker onChange={onColorChange} color={selectedColor.color} />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

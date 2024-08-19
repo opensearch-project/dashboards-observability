@@ -10,7 +10,7 @@ import uniqueId from 'lodash/uniqueId';
 import has from 'lodash/has';
 import forEach from 'lodash/forEach';
 import isEqual from 'lodash/isEqual';
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiLink } from '@elastic/eui';
 import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
@@ -142,7 +142,7 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
   const getExpColapTd = () => {
     return (
       <td className="osdDocTableCell__toggleDetails" key={uniqueId('grid-td-')}>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           className="euiButtonIcon euiButtonIcon--text"
           data-test-subj="eventExplorer__flyoutArrow"
           onClick={() => {
@@ -292,7 +292,7 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
 
   return (
     <>
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         onClick={() => toggleDetailOpen()}
         iconType={detailsOpen || surroundingEventsOpen ? 'minimize' : 'inspect'}
         aria-label="inspect document details"

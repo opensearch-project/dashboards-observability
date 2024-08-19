@@ -9,8 +9,8 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
-  EuiComboBox,
-  EuiFormRow,
+  EuiCompressedComboBox,
+  EuiCompressedFormRow,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
@@ -246,11 +246,11 @@ export const TraceConfig = (props: TraceConfigProps) => {
         }}
         paddingSize="l"
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Trace Groups"
           helpText="Select one or multiple trace groups, or type a custom one"
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-label="Select trace groups"
             placeholder="Select or add trace groups"
             options={traceOptions}
@@ -260,7 +260,7 @@ export const TraceConfig = (props: TraceConfigProps) => {
             isClearable={false}
             data-test-subj="traceGroupsComboBox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
         <DashboardTable
           items={traceItems}

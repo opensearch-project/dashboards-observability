@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -219,7 +219,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
         <>
           {dataSourceDescription}
           <EuiSpacer size="m" />
-          <EuiFormRow
+          <EuiCompressedFormRow
             label="Database"
             helpText="Select the database that contains the tables you'd like to use."
             isInvalid={hasError(dataSourceFormData.formErrors, 'databaseError')}
@@ -227,7 +227,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a database"
                   singleSelection={{ asPlainText: true }}
                   options={databases}
@@ -263,8 +263,8 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             label="Table"
             helpText={
               tableFieldsLoading
@@ -276,7 +276,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a table"
                   singleSelection={{ asPlainText: true }}
                   options={tables}
@@ -314,7 +314,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       )}
     </>

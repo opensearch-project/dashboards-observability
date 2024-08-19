@@ -6,7 +6,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -20,7 +20,7 @@ import {
   EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiSuperDatePicker,
+  EuiCompressedSuperDatePicker,
   EuiTitle,
   OnTimeChangeProps,
   ShortDate,
@@ -454,47 +454,47 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const cancelButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
       onClick={() => editPanel('cancel')}
     >
       Cancel
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiSmallButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const editButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="editPanelButton"
       iconType="pencil"
       onClick={() => editPanel('edit')}
       disabled={editDisabled}
     >
       Edit
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const addButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="addVisualizationButton"
       iconType="plusInCircle"
       onClick={onAddClick}
       isDisabled={addVizDisabled}
     >
       Add
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   // Panel Actions Button
   const panelActionsButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="panelActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
@@ -502,7 +502,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       disabled={addVizDisabled}
     >
       Dashboard Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   let flyout;
@@ -683,7 +683,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={startTime}
                   end={endTime}

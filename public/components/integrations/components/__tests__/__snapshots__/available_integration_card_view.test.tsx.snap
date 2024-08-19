@@ -76,8 +76,8 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
             <div
               className="euiFlexItem"
             >
-              <EuiFieldSearch
-                compressed={false}
+              <EuiCompressedFieldSearch
+                compressed={true}
                 data-test-subj="search-bar-input-box"
                 fullWidth={true}
                 incremental={false}
@@ -87,20 +87,20 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                 placeholder="Search..."
               >
                 <EuiFormControlLayout
-                  compressed={false}
+                  compressed={true}
                   fullWidth={true}
                   icon="search"
                   isLoading={false}
                 >
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <EuiValidatableControl>
                         <input
-                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                           data-test-subj="search-bar-input-box"
                           onChange={[Function]}
                           onKeyUp={[Function]}
@@ -109,7 +109,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         />
                       </EuiValidatableControl>
                       <EuiFormControlLayoutIcons
-                        compressed={false}
+                        compressed={true}
                         icon="search"
                         isLoading={false}
                       >
@@ -117,7 +117,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                           className="euiFormControlLayoutIcons"
                         >
                           <EuiFormControlLayoutCustomIcon
-                            size="m"
+                            size="s"
                             type="search"
                           >
                             <span
@@ -126,19 +126,19 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="search"
                               >
                                 <EuiIconBeaker
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -160,7 +160,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                     </div>
                   </div>
                 </EuiFormControlLayout>
-              </EuiFieldSearch>
+              </EuiCompressedFieldSearch>
             </div>
           </EuiFlexItem>
           <EuiFlexItem

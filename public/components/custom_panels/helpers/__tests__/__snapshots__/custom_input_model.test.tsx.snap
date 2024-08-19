@@ -13,9 +13,9 @@ exports[`Custom Input Model component renders custom input modal with multiple a
     </EuiModalHeader>
     <EuiModalBody>
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -23,28 +23,28 @@ exports[`Custom Input Model component renders custom input modal with multiple a
           label="test label"
           labelType="label"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="customModalFieldText"
             name="input"
             onChange={[Function]}
             value="Test Panel"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={[MockFunction]}
       >
         btn test
-      </EuiButtonEmpty>
-      <EuiButton
+      </EuiSmallButtonEmpty>
+      <EuiSmallButton
         data-test-subj="runModalButton"
         fill={true}
         onClick={[Function]}
       >
         btn test 2
-      </EuiButton>
+      </EuiSmallButton>
     </EuiModalFooter>
   </EuiModal>
 </EuiOverlayMask>
@@ -63,37 +63,37 @@ exports[`Custom Input Model component renders custom input modal with single arg
     </EuiModalHeader>
     <EuiModalBody>
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="test label"
           labelType="label"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="customModalFieldText"
             name="input"
             onChange={[Function]}
             value=""
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={[MockFunction]}
       >
         btn test
-      </EuiButtonEmpty>
-      <EuiButton
+      </EuiSmallButtonEmpty>
+      <EuiSmallButton
         data-test-subj="runModalButton"
         fill={true}
         onClick={[Function]}
       >
         btn test 2
-      </EuiButton>
+      </EuiSmallButton>
     </EuiModalFooter>
   </EuiModal>
 </EuiOverlayMask>

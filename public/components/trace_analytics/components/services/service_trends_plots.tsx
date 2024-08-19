@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiI18nNumber,
@@ -68,7 +68,7 @@ export const ServiceTrendsPlots = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   aria-label="Close popover"
                   iconType="cross"
                   color="text"
