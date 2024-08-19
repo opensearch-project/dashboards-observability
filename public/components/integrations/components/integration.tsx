@@ -125,7 +125,6 @@ export function Integration(props: AvailableIntegrationProps) {
         disabled={tab.disabled}
         key={index}
         data-test-subj={tab.id}
-        s
       >
         {tab.name}
       </EuiTab>
