@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { EuiOverlayMask, EuiConfirmModal, EuiText } from '@elastic/eui';
 
 export const getSampleDataModal = (
   onCancel: (
@@ -22,10 +22,12 @@ export const getSampleDataModal = (
         confirmButtonText="Yes"
         defaultFocusedButton="confirm"
       >
-        <p>
-          Do you want to add sample data? This will also add Dashboards sample flights and logs
-          data if they have not been added.
-        </p>
+        <EuiText size="s">
+          <p>
+            Do you want to add sample data? This will also add Dashboards sample flights and logs
+            data if they have not been added.
+          </p>
+        </EuiText>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );

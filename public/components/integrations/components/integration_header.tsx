@@ -59,7 +59,7 @@ export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () =>
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <EuiContextMenuPanel items={items} size="s" />
     </EuiPopover>
   );
 };
@@ -121,7 +121,9 @@ export const IntegrationHeader = () => {
         </EuiLink>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+      <EuiTabs display="condensed" size="s">
+        {renderTabs()}
+      </EuiTabs>
       <EuiSpacer size="s" />
       {showUploadFlyout ? (
         <IntegrationUploadFlyout onClose={() => setShowUploadFlyout(false)} />

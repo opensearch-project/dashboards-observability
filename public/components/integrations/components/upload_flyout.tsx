@@ -14,6 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiCompressedFormRow,
+  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
@@ -136,7 +137,11 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
 
   return (
     <EuiFlyout onClose={onClose} size="s">
-      <EuiFlyoutHeader>Upload Integrations</EuiFlyoutHeader>
+      <EuiFlyoutHeader>
+        <EuiText size="s">
+          <h2>Upload Integrations</h2>
+        </EuiText>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <IntegrationUploadPicker
           onFileSelected={setBundle}

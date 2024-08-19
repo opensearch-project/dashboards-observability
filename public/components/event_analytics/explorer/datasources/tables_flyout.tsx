@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiCopy,
   EuiSmallButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import {
   useLoadDatabasesToCache,
@@ -237,7 +238,11 @@ export const TablesFlyout = ({
             return (
               <EuiCopy textToCopy={`${dataSourceName}.${selectedDatabase}.${name}`}>
                 {(copy) => (
-                  <EuiSmallButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             );
@@ -260,9 +265,9 @@ export const TablesFlyout = ({
   return (
     <EuiFlyout onClose={resetFlyout}>
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle>
-          <h1>{dataSourceName}</h1>
-        </EuiTitle>
+        <EuiText size="s">
+          <h2>{dataSourceName}</h2>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTitle size="m">

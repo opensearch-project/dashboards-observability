@@ -146,7 +146,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       ) : (
         <>
           <EuiSpacer size="xxl" />
-          <EuiText textAlign="center">
+          <EuiText textAlign="center" size="s">
             <h2>No Integrations Available</h2>
           </EuiText>
           <EuiSpacer size="m" />

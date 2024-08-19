@@ -16,7 +16,6 @@ import {
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { PPL_DOCUMENTATION_URL } from '../../../../common/constants/shared';
 import find from 'lodash/find';
@@ -50,9 +49,9 @@ export const PPLReferenceFlyout = ({ module, closeFlyout }: Props) => {
 
   const flyoutHeader = (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
+      <EuiText size="s">
         <h2 id="pplReferenceFlyout">OpenSearch PPL Reference Manual</h2>
-      </EuiTitle>
+      </EuiText>
     </EuiFlyoutHeader>
   );
 

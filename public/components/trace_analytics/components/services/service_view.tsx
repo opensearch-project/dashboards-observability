@@ -23,7 +23,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -240,9 +239,9 @@ export function ServiceView(props: ServiceViewProps) {
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem>
-              <EuiTitle size="l">
-                <h2 className="overview-content">{serviceName}</h2>
-              </EuiTitle>
+              <EuiText size="s">
+                <h1 className="overview-content">{serviceName}</h1>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}

@@ -210,7 +210,7 @@ export function Filters(props: FiltersOwnProps) {
         withTitle
         data-test-subj="global-filter-button"
       >
-        <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} />
+        <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} size="s" />
       </EuiPopover>
     );
   };

@@ -21,9 +21,9 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiCompressedSuperDatePicker,
-  EuiTitle,
   OnTimeChangeProps,
   ShortDate,
+  EuiText,
 } from '@elastic/eui';
 import last from 'lodash/last';
 import isEmpty from 'lodash/isEmpty';
@@ -465,7 +465,11 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   );
 
   const saveButton = (
-    <EuiSmallButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiSmallButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
+    >
       Save
     </EuiSmallButton>
   );
@@ -612,9 +616,9 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
             {appPanel || (
               <>
                 <EuiPageHeaderSection>
-                  <EuiTitle size="l">
+                  <EuiText size="s">
                     <h1 data-test-subj="panelNameHeader">{openPanelName}</h1>
-                  </EuiTitle>
+                  </EuiText>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
@@ -638,7 +642,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

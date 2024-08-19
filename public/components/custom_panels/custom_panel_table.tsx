@@ -342,9 +342,9 @@ export const CustomPanelTable = ({
         <EuiPageBody component="div">
           <EuiPageHeader>
             <EuiPageHeaderSection>
-              <EuiTitle size="l">
+              <EuiText size="s">
                 <h1>Observability dashboards</h1>
-              </EuiTitle>
+              </EuiText>
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContent id="customPanelArea">
@@ -374,11 +374,15 @@ export const CustomPanelTable = ({
                       isOpen={isActionsPopoverOpen}
                       closePopover={() => setIsActionsPopoverOpen(false)}
                     >
-                      <EuiContextMenuPanel items={popoverItems()} />
+                      <EuiContextMenuPanel items={popoverItems()} size="s" />
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiSmallButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
+                    <EuiSmallButton
+                      fill
+                      href="#/create"
+                      data-test-subj="customPanels__createNewPanels"
+                    >
                       Create Dashboard
                     </EuiSmallButton>
                   </EuiFlexItem>

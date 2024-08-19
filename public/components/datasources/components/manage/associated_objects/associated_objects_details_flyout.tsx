@@ -312,7 +312,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
           <EuiFlexItem>
-            <EuiText size="m">
+            <EuiText size="s">
               <h2 className="accsDetailFlyoutTitle">{tableDetail.name}</h2>
             </EuiText>
           </EuiFlexItem>

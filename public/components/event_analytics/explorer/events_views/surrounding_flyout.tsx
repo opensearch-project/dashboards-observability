@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiDataGrid,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -195,11 +194,11 @@ export const SurroundingFlyout = ({
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiText size="s">
             <h2 id="surroundingFyout" className="vertical-center">
               View surrounding events
             </h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon

@@ -44,15 +44,21 @@ export const DeleteModal = ({
     <EuiOverlayMask>
       <EuiModal onClose={onCancel} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{title}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText>{message}</EuiText>
-          <EuiText>The action cannot be undone.</EuiText>
+          <EuiText size="s">{message}</EuiText>
+          <EuiText size="s">The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiCompressedFormRow label={`To confirm deletion, enter "${deletePrompt}" in the text field`}>
+            <EuiCompressedFormRow
+              label={`To confirm deletion, enter "${deletePrompt}" in the text field`}
+            >
               <EuiCompressedFieldText
                 name="input"
                 placeholder={deletePrompt}

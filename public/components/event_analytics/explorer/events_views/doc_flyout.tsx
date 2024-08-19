@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import moment from 'moment';
 import { FlyoutContainers } from '../../../common/flyout_containers';
@@ -71,7 +71,7 @@ export const DocFlyout = ({
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiText size="s">
             <h2 id="eventsDocFyout" className="vertical-center">
               {doc.hasOwnProperty(timeStampField)
                 ? `Event: ${moment(doc[timeStampField]).format(
@@ -79,7 +79,7 @@ export const DocFlyout = ({
                   )}`
                 : `Event Details`}
             </h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
