@@ -8,14 +8,24 @@ exports[`modal_containers spec render delete notebooks modal 1`] = `
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        title
+        <EuiText
+          size="s"
+        >
+          <h2>
+            title
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
-      <EuiText>
+      <EuiText
+        size="s"
+      >
         message
       </EuiText>
-      <EuiText>
+      <EuiText
+        size="s"
+      >
         The action cannot be undone.
       </EuiText>
       <EuiSpacer />
@@ -69,7 +79,13 @@ exports[`modal_containers spec render get custom modal 1`] = `
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        title
+        <EuiText
+          size="s"
+        >
+          <h2>
+            title
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -101,7 +117,6 @@ exports[`modal_containers spec render get custom modal 1`] = `
       </EuiSmallButtonEmpty>
       <EuiSmallButton
         data-test-subj="custom-input-modal-confirm-button"
-        fill={true}
         onClick={[Function]}
       >
         Confirm

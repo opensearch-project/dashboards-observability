@@ -186,7 +186,11 @@ export const ParaInput = (props: {
           <EuiOverlayMask>
             <EuiModal onClose={() => setIsModalOpen(false)} style={{ width: 500 }}>
               <EuiModalHeader>
-                <EuiModalHeaderTitle>Browse visualizations</EuiModalHeaderTitle>
+                <EuiModalHeaderTitle>
+                  <EuiText size="s">
+                    <h2>Browse visualizations</h2>
+                  </EuiText>
+                </EuiModalHeaderTitle>
               </EuiModalHeader>
 
               <EuiModalBody>
@@ -219,7 +223,9 @@ export const ParaInput = (props: {
               </EuiModalBody>
 
               <EuiModalFooter>
-                <EuiSmallButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiSmallButtonEmpty>
+                <EuiSmallButtonEmpty onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </EuiSmallButtonEmpty>
                 <EuiSmallButton
                   data-test-subj="para-input-select-button"
                   onClick={() => onSelect()}
