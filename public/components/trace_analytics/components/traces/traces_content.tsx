@@ -4,7 +4,15 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiPanel,
+  EuiSpacer,
+  PropertySort,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleTracesRequest } from '../../requests/traces_request_handler';
@@ -12,8 +20,10 @@ import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
-import { TracesProps } from './traces';
 import { TracesTable } from './traces_table';
+import { TracesProps } from './traces';
+import { DataSourcePicker } from '../dashboard/mode_picker';
+import { Filters } from '../common/filters/filters';
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -109,35 +119,60 @@ export function TracesContent(props: TracesProps) {
 
   return (
     <>
-      <SearchBar
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        style={{ padding: '0 16px' }}
+      >
+        <EuiFlexItem grow={false}>
+          <DataSourcePicker
+            modes={props.modes}
+            selectedMode={props.mode}
+            setMode={props.setMode!}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <SearchBar
+            query={query}
+            filters={filters}
+            appConfigs={appConfigs}
+            setFilters={setFilters}
+            setQuery={setQuery}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endTime={endTime}
+            setEndTime={setEndTime}
+            refresh={refresh}
+            page={page}
+            mode={mode}
+            attributesFilterFields={attributesFilterFields}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <Filters
         page={page}
+        filters={filters}
+        setFilters={setFilters}
+        appConfigs={appConfigs}
         mode={mode}
         attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
-      <EuiPanel>
-        <EuiAccordion
-          id="accordion1"
-          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
-          forceState={trigger}
-          onToggle={onToggle}
-          data-test-subj="trace-groups-service-operation-accordian"
-        >
-          <EuiSpacer size="m" />
-          {trigger === 'open' && dashboardContent()}
-        </EuiAccordion>
-      </EuiPanel>
-      <EuiSpacer size="m" />
+      <EuiPage paddingSize="m">
+        <EuiPanel>
+          <EuiAccordion
+            id="accordion1"
+            buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
+            forceState={trigger}
+            onToggle={onToggle}
+            data-test-subj="trace-groups-service-operation-accordian"
+          >
+            <EuiSpacer size="m" />
+            {trigger === 'open' && dashboardContent()}
+          </EuiAccordion>
+        </EuiPanel>
+      </EuiPage>
       <TracesTable
         items={tableItems}
         refresh={refresh}

@@ -5,13 +5,14 @@
 
 import {
   EuiButtonGroup,
-  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiPage,
+  EuiCompressedFieldSearch,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -202,85 +203,87 @@ export function ServiceMap({
 
   return (
     <>
-      <EuiPanel>
-        {page === 'app' ? (
-          <PanelTitle title="Application Composition Map" />
-        ) : (
-          <PanelTitle title="Service map" />
-        )}
-        <EuiSpacer size="m" />
-        <EuiButtonGroup
-          options={toggleButtons}
-          idSelected={idSelected}
-          onChange={(id) => setIdSelected(id as 'latency' | 'error_rate' | 'throughput')}
-          buttonSize="s"
-          color="text"
-        />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiText>Focus on</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCompressedFieldSearch
-              placeholder="Service name"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onSearch={(service) => onFocus(service)}
-              isInvalid={query.length > 0 && invalid}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-
-        {Object.keys(serviceMap).length > 0 ? (
-          <EuiFlexGroup gutterSize="none" responsive={false}>
-            <EuiFlexItem>
-              <div style={{ position: 'relative' }}>
-                {items?.graph && (
-                  <Graph
-                    graph={items.graph}
-                    options={options}
-                    events={events}
-                    getNetwork={(networkInstance: any) => {
-                      setNetwork(networkInstance);
-                      if (currService) onFocus(currService, networkInstance);
-                    }}
-                  />
-                )}
-                {selectedNodeDetails && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 20,
-                      right: 20,
-                      zIndex: 1000,
-                    }}
-                  >
-                    <ServiceMapNodeDetails
-                      selectedNodeDetails={selectedNodeDetails}
-                      setSelectedNodeDetails={setSelectedNodeDetails}
-                      addServiceFilter={addServiceFilter}
-                      setCurrentSelectedService={setCurrentSelectedService}
-                    />
-                  </div>
-                )}
-              </div>
-            </EuiFlexItem>
+      <EuiPage paddingSize="m">
+        <EuiPanel>
+          {page === 'app' ? (
+            <PanelTitle title="Application Composition Map" />
+          ) : (
+            <PanelTitle title="Service map" />
+          )}
+          <EuiSpacer size="m" />
+          <EuiButtonGroup
+            options={toggleButtons}
+            idSelected={idSelected}
+            onChange={(id) => setIdSelected(id as 'latency' | 'error_rate' | 'throughput')}
+            buttonSize="s"
+            color="text"
+          />
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
+              <EuiText>Focus on</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCompressedFieldSearch
+                placeholder="Service name"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onSearch={(service) => onFocus(service)}
+                isInvalid={query.length > 0 && invalid}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-        ) : (
-          <div style={{ minHeight: 434 }}>
-            <NoMatchMessage size="s" />
-          </div>
+          <EuiSpacer />
+
+          {Object.keys(serviceMap).length > 0 ? (
+            <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexItem>
+                <div style={{ position: 'relative' }}>
+                  {items?.graph && (
+                    <Graph
+                      graph={items.graph}
+                      options={options}
+                      events={events}
+                      getNetwork={(networkInstance: any) => {
+                        setNetwork(networkInstance);
+                        if (currService) onFocus(currService, networkInstance);
+                      }}
+                    />
+                  )}
+                  {selectedNodeDetails && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 20,
+                        right: 20,
+                        zIndex: 1000,
+                      }}
+                    >
+                      <ServiceMapNodeDetails
+                        selectedNodeDetails={selectedNodeDetails}
+                        setSelectedNodeDetails={setSelectedNodeDetails}
+                        addServiceFilter={addServiceFilter}
+                        setCurrentSelectedService={setCurrentSelectedService}
+                      />
+                    </div>
+                  )}
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <div style={{ minHeight: 434 }}>
+              <NoMatchMessage size="s" />
+            </div>
+          )}
+        </EuiPanel>
+        <EuiSpacer size="xl" />
+        {filterByCurrService && items?.graph && (
+          <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
         )}
-      </EuiPanel>
-      <EuiSpacer size="xl" />
-      {filterByCurrService && items?.graph && (
-        <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
-      )}
+      </EuiPage>
     </>
   );
 }
