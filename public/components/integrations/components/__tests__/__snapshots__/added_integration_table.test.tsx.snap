@@ -385,6 +385,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             <FieldValueSelectionFilter
                               config={
                                 Object {
+                                  "compressed": undefined,
                                   "field": "templateName",
                                   "multiSelect": false,
                                   "name": "Type",
@@ -1887,6 +1888,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             <FieldValueSelectionFilter
                               config={
                                 Object {
+                                  "compressed": undefined,
                                   "field": "templateName",
                                   "multiSelect": false,
                                   "name": "Type",
