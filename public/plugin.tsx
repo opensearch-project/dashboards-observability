@@ -113,7 +113,8 @@ import {
   SetupDependencies,
 } from './types';
 import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
-import { registerAllPluginNavGroups } from './plugin_nav';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 
 interface PublicConfig {
   query_assist: {
@@ -189,6 +190,8 @@ export class ObservabilityPlugin
     core.getStartServices().then(([coreStart]) => {
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
+
+    setupOverviewPage(setupDeps.contentManagement!);
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -449,6 +452,7 @@ export class ObservabilityPlugin
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;
+    coreRefs.contentManagement = startDeps.contentManagement;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);

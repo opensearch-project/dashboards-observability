@@ -3,159 +3,239 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
-import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
+import { EuiText } from '@elastic/eui';
+import moment from 'moment';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
-import { coreRefs } from '../../../public/framework/core_refs';
+import { coreRefs } from '../../framework/core_refs';
+import { ContentManagementPluginStart } from '../../../../../src/plugins/content_management/public';
+import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
+import { cardConfigs, GettingStartedConfig } from './components/card_configs';
+import { uiSettingsService } from '../../../common/utils';
+import { AddDashboardCallout } from './components/add_dashboard_callout';
+import { DashboardControls } from './components/dashboard_controls';
+import { SelectDashboardModal } from './components/select_dashboard_modal';
 
+// Plugin IDs
 const alertsPluginID = 'alerting';
 const anomalyPluginID = 'anomalyDetection';
 
-// Plugin URLs
-const gettingStartedURL = 'observability-gettingStarted';
-const discoverURL = 'data-explorer';
-const metricsURL = 'observability-metrics';
-const tracesURL = 'observability-traces-nav#/traces';
-const alertsURL = 'alerting';
-const anomalyDetectionURL = 'anomaly-detection-dashboards';
+const uiSettingsKey = 'observability:defaultDashboard';
 
-const checkIfPluginsAreInstalled = async (
-  setAlertsPluginExists: React.Dispatch<React.SetStateAction<boolean>>,
-  setAnomalyPluginExists: React.Dispatch<React.SetStateAction<boolean>>
-) => {
-  try {
-    const response = await fetch('../api/status', {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'GET',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    });
-    const data = await response.json();
-
-    let alertsExists = false;
-    let anomalyExists = false;
-
-    for (const status of data.status.statuses) {
-      if (status.id.includes(alertsPluginID)) {
-        alertsExists = true;
-      }
-      if (status.id.includes(anomalyPluginID)) {
-        anomalyExists = true;
-      }
-    }
-
-    setAlertsPluginExists(alertsExists);
-    setAnomalyPluginExists(anomalyExists);
-  } catch (error) {
-    console.error('Error checking plugin installation status:', error);
-  }
-};
-
-const navigateToApp = (appId: string, path: string) => {
-  coreRefs?.application!.navigateToApp(appId, {
-    path: `${path}`,
-  });
-};
-
-export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
-
-interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
+interface HomeProps extends RouteComponentProps {
   parentBreadcrumbs: ChromeBreadcrumb[];
+  contentManagement: ContentManagementPluginStart;
 }
 
-const HomeContent = ({ alertsPluginExists, anomalyPluginExists }) => (
-  <div>
-    <EuiSpacer size="l" />
-    <EuiText>
-      <h2>Observability overview</h2>
-    </EuiText>
-    <EuiSpacer size="l" />
-    <EuiFlexGroup gutterSize="l">
-      {[
-        {
-          id: gettingStartedURL,
-          title: 'Get started collecting and analyzing data.',
-          description: 'getting started guide',
-        },
-        {
-          id: discoverURL,
-          title: 'Uncover insights with raw data exploration.',
-          description: 'with Discover',
-          path: 'discover',
-        },
-        {
-          id: metricsURL,
-          title: 'Transform logs into actionable visualizations with metrics extraction.',
-          description: 'with Metrics',
-        },
-        {
-          id: tracesURL,
-          title: 'Unveil performance bottlenecks with event flow visualization.',
-          description: 'with Traces',
-        },
-        {
-          id: alertsURL,
-          title: 'Proactively identify risks with customizable alert triggers.',
-          description: 'with Alerts',
-          exists: alertsPluginExists,
-        },
-        {
-          id: anomalyDetectionURL,
-          title: 'Unveil anomalies with real-time data monitoring.',
-          description: 'with Anomaly Detectors',
-          exists: anomalyPluginExists,
-        },
-      ]
-        .filter((card) => card.exists !== false)
-        .map((card) => (
-          <EuiFlexItem key={card.id} style={{ maxWidth: '300px' }}>
-            <EuiCard
-              textAlign="left"
-              layout="vertical"
-              title={card.title}
-              footer={card.description}
-              onClick={() => navigateToApp(card.id, `${card.path ?? '#/'}`)}
-            />
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGroup>
-    <EuiSpacer size="l" />
-  </div>
-);
+let showModal: { (): void; (): void; (): void };
+const wrapper = {
+  dashboardSelected: false,
+};
+let startDate: string;
+let setStartDate: (start: string) => void;
+let endDate: string;
+let setEndDate: (end: string) => void;
+let dashboardTitle: string;
+let setDashboardTitle: (arg0: string) => void;
 
-export const Home = (_props: HomeProps) => {
-  const [alertsPluginExists, setAlertsPluginExists] = useState(false);
-  const [anomalyPluginExists, setAnomalyPluginExists] = useState(false);
+coreRefs.contentManagement?.registerContentProvider({
+  id: 'custom_content',
+  getContent: () => ({
+    id: 'custom_content',
+    kind: 'custom',
+    order: 1500,
+    render: () =>
+      wrapper.dashboardSelected ? (
+        <DashboardControls
+          dashboardTitle={dashboardTitle}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          showModal={showModal}
+        />
+      ) : (
+        <AddDashboardCallout showModal={showModal} />
+      ),
+  }),
+  getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
+});
+
+export interface DashboardDictionary {
+  [key: string]: {
+    value: string;
+    label: string;
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export const Home = ({ ..._props }: HomeProps) => {
+  const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
+  const [_, setIsRegistered] = useState(false);
+  const [dashboards, setDashboards] = useState<DashboardDictionary>({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  [startDate, setStartDate] = useState(moment().toISOString());
+  [endDate, setEndDate] = useState(moment().toISOString());
+  [dashboardTitle, setDashboardTitle] = useState('');
+
+  showModal = () => setIsModalVisible(true);
+
+  const navigateToApp = (appId: string, path: string) => {
+    coreRefs?.application!.navigateToApp(appId, {
+      path: `${path}`,
+    });
+  };
+
+  const registerCards = async () => {
+    let alertsPluginExists = false;
+    let anomalyPluginExists = false;
+
+    try {
+      const response = await fetch('../api/status', {
+        headers: {
+          'Content-Type': 'application/json',
+          'osd-xsrf': 'true',
+          'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+          pragma: 'no-cache',
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'same-origin',
+        },
+        method: 'GET',
+        referrerPolicy: 'strict-origin-when-cross-origin',
+        mode: 'cors',
+        credentials: 'include',
+      });
+      const data = await response.json();
+
+      for (const status of data.status.statuses) {
+        if (status.id.includes(alertsPluginID)) {
+          alertsPluginExists = true;
+        }
+        if (status.id.includes(anomalyPluginID)) {
+          anomalyPluginExists = true;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking plugin installation status:', error);
+    }
+
+    cardConfigs
+      .filter((card) => {
+        if (card.id === 'alerts') {
+          return alertsPluginExists;
+        } else if (card.id === 'anomaly') {
+          return anomalyPluginExists;
+        }
+        return true;
+      })
+      .forEach((card: GettingStartedConfig) => {
+        coreRefs.contentManagement?.registerContentProvider({
+          id: card.id,
+          getContent: () => ({
+            id: card.id,
+            kind: 'card',
+            order: card.order,
+            description: card.description,
+            title: card.title,
+            onClick: () => navigateToApp(card.url, '#/'),
+            getFooter: () => {
+              return (
+                <EuiText size="s" textAlign="left">
+                  {card.footer}
+                </EuiText>
+              );
+            },
+          }),
+          getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        });
+      });
+  };
+
+  const registerDashboard = () => {
+    coreRefs.contentManagement?.registerContentProvider({
+      id: 'dashboard_content',
+      getContent: () => ({
+        id: 'dashboard_content',
+        kind: 'dashboard',
+        order: 1000,
+        input: {
+          kind: 'dynamic',
+          get: () => Promise.resolve(uiSettingsService.get(uiSettingsKey)),
+        },
+      }),
+      getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
+    });
+    setIsRegistered(true);
+    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+    if (dashboards && defaultDashboard && dashboards[defaultDashboard]) {
+      setDashboardTitle(dashboards[defaultDashboard].label);
+      setStartDate(dashboards[defaultDashboard].startDate);
+      setEndDate(dashboards[defaultDashboard].endDate);
+    }
+  };
 
   useEffect(() => {
-    checkIfPluginsAreInstalled(setAlertsPluginExists, setAnomalyPluginExists);
+    coreRefs.savedObjectsClient
+      ?.find({
+        type: 'dashboard',
+      })
+      .then((response) => {
+        const savedDashboards = response.savedObjects.reduce((acc, savedDashboard) => {
+          const dashboardAttributes = savedDashboard.attributes as {
+            title: string;
+            timeFrom: string;
+            timeTo: string;
+          };
+          const id = savedDashboard.id.toString();
+          acc[id] = {
+            value: id,
+            label: dashboardAttributes.title,
+            startDate: dashboardAttributes.timeFrom,
+            endDate: dashboardAttributes.timeTo,
+          };
+          return acc;
+        }, {} as DashboardDictionary);
+        setDashboards(savedDashboards);
+        const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+        if (defaultDashboard && dashboards[defaultDashboard]) {
+          setDashboardTitle(dashboards[defaultDashboard].label);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching dashboards:', error);
+      });
   }, []);
+
+  useEffect(() => {
+    registerCards();
+    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
+    if (defaultDashboard) {
+      wrapper.dashboardSelected = true;
+      registerDashboard();
+    }
+  }, [dashboards]);
+
+  const modal = isModalVisible && (
+    <SelectDashboardModal
+      closeModal={() => setIsModalVisible(false)}
+      wrapper={wrapper}
+      dashboards={dashboards}
+      registerDashboard={registerDashboard}
+      closeModalVisible={() => setIsModalVisible(false)}
+    />
+  );
 
   return (
     <div>
       <HashRouter>
         <Switch>
-          <Route
-            exact
-            path="/"
-            render={() => (
-              <HomeContent
-                alertsPluginExists={alertsPluginExists}
-                anomalyPluginExists={anomalyPluginExists}
-              />
-            )}
-          />
+          <Route exact path="/">
+            {homepage}
+            {modal}
+          </Route>
         </Switch>
       </HashRouter>
     </div>
