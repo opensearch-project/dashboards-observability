@@ -1181,7 +1181,6 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                       config={
                                         Object {
                                           "cache": 60000,
-                                          "compressed": undefined,
                                           "field": "accelerations",
                                           "multiSelect": true,
                                           "name": "Accelerations",

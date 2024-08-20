@@ -711,7 +711,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   <FieldValueSelectionFilter
                                     config={
                                       Object {
-                                        "compressed": undefined,
                                         "field": "assetType",
                                         "multiSelect": false,
                                         "name": "Type",
