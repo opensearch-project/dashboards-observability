@@ -22,14 +22,16 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Anirudha Jadhav         | [anirudha](https://github.com/anirudha)           | Amazon      |
 | Paul Sebastian          | [paulstn](https://github.com/paulstn)             | Amazon      |
 | Sumukh Hanumantha Swamy | [sumukhswamy](https://github.com/sumukhswamy)     | Amazon      |
+| Sean Li                 | [sejli](https://github.com/sejli)                 | Amazon      |
+| Adam Tackett            | [TackAdam](https://github.com/TackAdam)           | Amazon      |
+| Jialiang Liang          | [RyanL1997](https://github.com/sumukhswamy)       | Amazon      |
 
 ## Emeritus Maintainers
 
-| Maintainer        | GitHub ID                                               | Affiliation |
-| ----------------- | ------------------------------------------------------- | ----------- |
-| Charlotte Henkle  | [CEHENKLE](https://github.com/CEHENKLE)                 | Amazon      |
-| Nick Knize        | [nknize](https://github.com/nknize)                     | Amazon      |
-| David Cui         | [davidcui1225](https://github.com/davidcui1225)         | Amazon      |
-| Eugene Lee        | [eugenesk24](https://github.com/eugenesk24)             | Amazon      |
-| Zhongnan Su       | [zhongnansu](https://github.com/zhongnansu)             | Amazon      |
-| Sean Li           | [sejli](https://github.com/sejli)                       | Amazon      |
+| Maintainer       | GitHub ID                                       | Affiliation |
+| ---------------- | ----------------------------------------------- | ----------- |
+| Charlotte Henkle | [CEHENKLE](https://github.com/CEHENKLE)         | Amazon      |
+| Nick Knize       | [nknize](https://github.com/nknize)             | Amazon      |
+| David Cui        | [davidcui1225](https://github.com/davidcui1225) | Amazon      |
+| Eugene Lee       | [eugenesk24](https://github.com/eugenesk24)     | Amazon      |
+| Zhongnan Su      | [zhongnansu](https://github.com/zhongnansu)     | Amazon      |
