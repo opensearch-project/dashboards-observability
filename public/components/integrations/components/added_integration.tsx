@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import truncate from 'lodash/truncate';
@@ -125,9 +124,9 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiTitle data-test-subj="eventHomePageTitle" size="l">
+                  <EuiText data-test-subj="eventHomePageTitle" size="s">
                     <h1>{data?.name}</h1>
-                  </EuiTitle>
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem style={{ justifyContent: 'center' }}>
                   <IntegrationHealthBadge status={data?.status} />
