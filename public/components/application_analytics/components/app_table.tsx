@@ -29,6 +29,7 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeaderTitle,
+  EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
 import truncate from 'lodash/truncate';
@@ -38,6 +39,9 @@ import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -221,6 +225,18 @@ export function AppTable(props: AppTableProps) {
 
   return (
     <>
+      {!newNavigation && (
+        <div style={{ paddingLeft: '16px', paddingTop: '8px' }}>
+          <EuiTitle size="l">
+            <h3>
+              Applications
+              <EuiText size="m" style={{ display: 'inline' }}>
+                {` (${applications.length})`}
+              </EuiText>
+            </h3>
+          </EuiTitle>
+        </div>
+      )}
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageContent id="applicationArea">
@@ -244,6 +260,7 @@ export function AppTable(props: AppTableProps) {
                         {createButtonText}
                       </EuiSmallButton>,
                     ]}
+                    badgeContent={applications.length}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

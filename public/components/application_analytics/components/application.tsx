@@ -8,7 +8,6 @@ import {
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
   EuiSelectOption,
@@ -64,6 +63,7 @@ import { Configuration } from './configuration';
 import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { coreRefs } from '../../../framework/core_refs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -519,18 +519,21 @@ export function Application(props: AppDetailProps) {
     <div>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              {!newNavigation && (
+          <EuiPageHeaderSection>
+            {!newNavigation && (
+              <>
                 <EuiTitle size="l">
                   <h1 data-test-subj="applicationTitle">{application.name}</h1>
                 </EuiTitle>
-              )}
-              <EuiText>
-                <p>{application.description}</p>
-              </EuiText>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
+                <EuiText>
+                  <p>{application.description}</p>
+                </EuiText>
+              </>
+            )}
+            {newNavigation && (
+              <HeaderControlledComponentsWrapper description={application.description} />
+            )}
+          </EuiPageHeaderSection>
           <EuiTabbedContent
             className="appAnalyticsTabs"
             initialSelectedTab={appAnalyticsTabs[0]}
