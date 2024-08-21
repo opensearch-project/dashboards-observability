@@ -31,7 +31,7 @@ interface IntegrationFlyoutProps {
 }
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName, integrationType, http } = props;
+  const { onClose, onCreate, integrationName, integrationType } = props;
 
   const [isDataSourceValid, setDataSourceValid] = useState<null | false | true>(null);
 
