@@ -127,7 +127,7 @@ export const VisaulizationFlyoutSO = ({
   const [modalContent, setModalContent] = useState(<></>);
 
   const closeModal = () => setIsModalVisible(false);
-  const showModal = (modalType: string) => {
+  const showModal = (_: string) => {
     setModalContent(
       <EuiModal onClose={closeModal}>
         <EuiModalHeader>
@@ -178,7 +178,7 @@ export const VisaulizationFlyoutSO = ({
         replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle)
       );
     } else {
-      const visualizationsWithNewPanel = addVisualizationPanel({
+      addVisualizationPanel({
         savedVisualizationId: selectValue,
         onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
         onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`,

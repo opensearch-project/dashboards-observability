@@ -127,7 +127,7 @@ export const VisaulizationFlyout = ({
   const [modalContent, setModalContent] = useState(<></>);
 
   const closeModal = () => setIsModalVisible(false);
-  const showModal = (modalType: string) => {
+  const showModal = (_: string) => {
     setModalContent(
       <EuiModal onClose={closeModal}>
         <EuiModalHeader>

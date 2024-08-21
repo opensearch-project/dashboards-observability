@@ -29,7 +29,7 @@ import {
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import last from 'lodash/last';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../src/core/public';
 import { CREATE_PANEL_MESSAGE } from '../../../common/constants/custom_panels';
@@ -119,7 +119,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    cloneCustomPanel,
     onEditClick,
     onAddClick,
   } = props;
@@ -131,7 +130,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [loading, setLoading] = useState(true);
 
   const [pplFilterValue, setPPLFilterValue] = useState('');
-  const [baseQuery, setBaseQuery] = useState('');
+  const [baseQuery, _] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
 
   const [inputDisabled, setInputDisabled] = useState(true);

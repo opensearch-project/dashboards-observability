@@ -155,7 +155,7 @@ export const CustomPanelTable = ({
           sourcePanel = legacyFetchResult.operationalPanel;
         }
 
-        const { id, ...newPanel } = {
+        const { ...newPanel } = {
           ...sourcePanel,
           title: newName,
         };

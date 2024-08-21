@@ -34,7 +34,7 @@ import {
  * optionalArgs - Arguments needed to pass them to runModal function
  */
 
-type CustomInputModalProps = {
+interface CustomInputModalProps {
   runModal:
     | ((value: string, value2: string, value3: string, value4: string) => void)
     | ((value: string) => void);
@@ -48,7 +48,7 @@ type CustomInputModalProps = {
   openPanelName?: string;
   helpText?: string;
   optionalArgs?: string[];
-};
+}
 
 export const CustomInputModal = (props: CustomInputModalProps) => {
   const {
