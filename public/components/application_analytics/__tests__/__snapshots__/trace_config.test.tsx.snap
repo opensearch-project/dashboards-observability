@@ -845,7 +845,9 @@ exports[`Trace Config component renders empty trace config 1`] = `
                         </EuiSpacer>
                         <EuiEmptyPrompt
                           body={
-                            <EuiText>
+                            <EuiText
+                              size="s"
+                            >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </EuiText>
                           }
@@ -884,9 +886,11 @@ exports[`Trace Config component renders empty trace config 1`] = `
                                   <div
                                     className="euiText euiText--medium"
                                   >
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       <div
-                                        className="euiText euiText--medium"
+                                        className="euiText euiText--small"
                                       >
                                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                       </div>
@@ -1779,7 +1783,9 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                         </EuiSpacer>
                         <EuiEmptyPrompt
                           body={
-                            <EuiText>
+                            <EuiText
+                              size="s"
+                            >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </EuiText>
                           }
@@ -1818,9 +1824,11 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                                   <div
                                     className="euiText euiText--medium"
                                   >
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       <div
-                                        className="euiText euiText--medium"
+                                        className="euiText euiText--small"
                                       >
                                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                       </div>

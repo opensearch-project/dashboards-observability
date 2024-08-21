@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
@@ -55,9 +54,9 @@ export function TraceView(props: TraceViewProps) {
     return (
       <>
         <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2 className="overview-content">{traceId}</h2>
-          </EuiTitle>
+          <EuiText size="s">
+            <h1 className="overview-content">{traceId}</h1>
+          </EuiText>
         </EuiFlexItem>
       </>
     );
