@@ -9,10 +9,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiSelect,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedTextArea,
+  EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -107,8 +107,8 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           currentError={error}
           setErrorForForm={setError}
         />
-        <EuiFormRow label="Description - Optional">
-          <EuiTextArea
+        <EuiCompressedFormRow label="Description - Optional">
+          <EuiCompressedTextArea
             placeholder="Describe data source"
             value={details}
             onBlur={(e) => {
@@ -118,7 +118,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
               setDetails(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
 
         <EuiText>
@@ -126,7 +126,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiText>
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Authentication Method">
+        <EuiCompressedFormRow label="Authentication Method">
           <>
             <EuiText size="xs">
               <p>
@@ -134,16 +134,16 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 engine to connect to AWS Glue Data Catalog.
               </p>
             </EuiText>
-            <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
+            <EuiCompressedFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow label="AWS Glue Data Catalog authentication ARN">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog authentication ARN">
           <>
             <EuiText size="xs">
               <p>This should be the IAM role ARN</p>
             </EuiText>
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="role-ARN"
               placeholder="Role ARN"
               value={arn}
@@ -155,7 +155,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <EuiSpacer />
 
@@ -164,7 +164,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiText>
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="AWS Glue Data Catalog index store URI">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog index store URI">
           <>
             <EuiText size="xs">
               <p>
@@ -172,7 +172,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 Catalog. This OpenSearch instance is used for writing index data back.
               </p>
             </EuiText>
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="index-URI"
               placeholder="Index store URI"
               value={store}
@@ -184,14 +184,14 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow label="AWS Glue Data Catalog index store authentication">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog index store authentication">
           <>
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>
             </EuiText>
-            <EuiSelect
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}
@@ -200,7 +200,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <AuthDetails
           currentUsername={currentUsername}
           setUsernameForRequest={setUsernameForRequest}

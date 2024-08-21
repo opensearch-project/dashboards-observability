@@ -393,6 +393,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                       <FieldValueSelectionFilter
                         config={
                           Object {
+                            "compressed": undefined,
                             "field": "type",
                             "multiSelect": "or",
                             "name": "Type",

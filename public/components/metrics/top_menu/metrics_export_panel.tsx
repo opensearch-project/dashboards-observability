@@ -4,12 +4,12 @@
  */
 
 import {
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
   EuiFlexGroup,
+  EuiCompressedFormRow,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
@@ -77,14 +77,14 @@ export const MetricsExportPanel = ({
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label={'Metric ' + (index + 1)}>
-                      <EuiFieldText
+                    <EuiCompressedFormRow label={'Metric ' + (index + 1)}>
+                      <EuiCompressedFieldText
                         key={`metric-name-input-id-${index}`}
                         value={metaData.name}
                         onChange={(e) => onNameChange(index, e.target.value)}
                         data-test-subj="metrics__querySaveName"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiForm>
@@ -117,8 +117,8 @@ export const MetricsExportPanel = ({
         )}
 
         <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <EuiFormRow label="Dashboards and applications - optional">
-            <EuiComboBox
+          <EuiCompressedFormRow label="Dashboards and applications - optional">
+            <EuiCompressedComboBox
               placeholder="Select dashboards/applications"
               onChange={(newOptions) => {
                 setSelectedPanelOptions(newOptions);
@@ -133,7 +133,7 @@ export const MetricsExportPanel = ({
               isClearable={true}
               data-test-subj="eventExplorer__querySaveComboBox"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

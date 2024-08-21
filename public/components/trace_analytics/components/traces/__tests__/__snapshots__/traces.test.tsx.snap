@@ -257,7 +257,7 @@ exports[`Traces component renders empty traces page 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -268,7 +268,7 @@ exports[`Traces component renders empty traces page 1`] = `
           title="data_prepper"
         >
           Data Prepper
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -284,7 +284,7 @@ exports[`Traces component renders empty traces page 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -294,67 +294,79 @@ exports[`Traces component renders empty traces page 1`] = `
             onClick={[Function]}
             title="data_prepper"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="data_prepper"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconBeaker
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Data Prepper
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </EuiIconBeaker>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Data Prepper
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -635,8 +647,8 @@ exports[`Traces component renders empty traces page 1`] = `
             <div
               className="euiFlexItem"
             >
-              <EuiFieldSearch
-                compressed={false}
+              <EuiCompressedFieldSearch
+                compressed={true}
                 data-test-subj="search-bar-input-box"
                 fullWidth={true}
                 incremental={false}
@@ -648,20 +660,20 @@ exports[`Traces component renders empty traces page 1`] = `
                 value=""
               >
                 <EuiFormControlLayout
-                  compressed={false}
+                  compressed={true}
                   fullWidth={true}
                   icon="search"
                   isLoading={false}
                 >
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <EuiValidatableControl>
                         <input
-                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                           data-test-subj="search-bar-input-box"
                           onChange={[Function]}
                           onKeyUp={[Function]}
@@ -671,7 +683,7 @@ exports[`Traces component renders empty traces page 1`] = `
                         />
                       </EuiValidatableControl>
                       <EuiFormControlLayoutIcons
-                        compressed={false}
+                        compressed={true}
                         icon="search"
                         isLoading={false}
                       >
@@ -679,7 +691,7 @@ exports[`Traces component renders empty traces page 1`] = `
                           className="euiFormControlLayoutIcons"
                         >
                           <EuiFormControlLayoutCustomIcon
-                            size="m"
+                            size="s"
                             type="search"
                           >
                             <span
@@ -688,19 +700,19 @@ exports[`Traces component renders empty traces page 1`] = `
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="search"
                               >
                                 <EuiIconBeaker
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -722,7 +734,7 @@ exports[`Traces component renders empty traces page 1`] = `
                     </div>
                   </div>
                 </EuiFormControlLayout>
-              </EuiFieldSearch>
+              </EuiCompressedFieldSearch>
             </div>
           </EuiFlexItem>
           <EuiFlexItem
@@ -1128,89 +1140,98 @@ exports[`Traces component renders empty traces page 1`] = `
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <EuiButton
+              <EuiSmallButton
                 data-click-metric-element="trace_analytics.refresh_button"
                 data-test-subj="superDatePickerApplyTimeButton"
                 iconType="refresh"
                 onClick={[Function]}
               >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
+                <EuiButton
                   data-click-metric-element="trace_analytics.refresh_button"
                   data-test-subj="superDatePickerApplyTimeButton"
-                  disabled={false}
-                  element="button"
                   iconType="refresh"
-                  isDisabled={false}
                   onClick={[Function]}
-                  type="button"
+                  size="s"
                 >
-                  <button
-                    className="euiButton euiButton--primary"
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
                     data-click-metric-element="trace_analytics.refresh_button"
                     data-test-subj="superDatePickerApplyTimeButton"
                     disabled={false}
+                    element="button"
+                    iconType="refresh"
+                    isDisabled={false}
                     onClick={[Function]}
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
+                    size="s"
                     type="button"
                   >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconSide="left"
-                      iconType="refresh"
-                      textProps={
+                    <button
+                      className="euiButton euiButton--primary euiButton--small"
+                      data-click-metric-element="trace_analytics.refresh_button"
+                      data-test-subj="superDatePickerApplyTimeButton"
+                      disabled={false}
+                      onClick={[Function]}
+                      style={
                         Object {
-                          "className": "euiButton__text",
+                          "minWidth": undefined,
                         }
                       }
+                      type="button"
                     >
-                      <span
-                        className="euiButtonContent euiButton__content"
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        iconType="refresh"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
                       >
-                        <EuiIcon
-                          className="euiButtonContent__icon"
-                          color="inherit"
-                          size="m"
-                          type="refresh"
+                        <span
+                          className="euiButtonContent euiButton__content"
                         >
-                          <EuiIconBeaker
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            className="euiButtonContent__icon"
+                            color="inherit"
+                            size="m"
+                            type="refresh"
                           >
-                            <svg
+                            <EuiIconBeaker
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                              />
-                            </svg>
-                          </EuiIconBeaker>
-                        </EuiIcon>
-                        <span
-                          className="euiButton__text"
-                        >
-                          Refresh
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                          <span
+                            className="euiButton__text"
+                          >
+                            Refresh
+                          </span>
                         </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonDisplay>
-              </EuiButton>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </EuiSmallButton>
             </div>
           </EuiFlexItem>
         </div>
@@ -1272,7 +1293,7 @@ exports[`Traces component renders empty traces page 1`] = `
                   <EuiPopover
                     anchorPosition="rightUp"
                     button={
-                      <EuiButtonIcon
+                      <EuiSmallButtonIcon
                         aria-label="Change all filters"
                         iconType="filter"
                         onClick={[Function]}
@@ -1296,53 +1317,61 @@ exports[`Traces component renders empty traces page 1`] = `
                       <div
                         className="euiPopover__anchor"
                       >
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="Change all filters"
                           iconType="filter"
                           onClick={[Function]}
                           title="Change all filters"
                         >
-                          <button
+                          <EuiButtonIcon
                             aria-label="Change all filters"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
+                            iconType="filter"
                             onClick={[Function]}
+                            size="s"
                             title="Change all filters"
-                            type="button"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              color="inherit"
-                              size="m"
-                              type="filter"
+                            <button
+                              aria-label="Change all filters"
+                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                              disabled={false}
+                              onClick={[Function]}
+                              title="Change all filters"
+                              type="button"
                             >
-                              <EuiIconBeaker
-                                aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                role="img"
-                                style={null}
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="filter"
                               >
-                                <svg
+                                <EuiIconBeaker
                                   aria-hidden={true}
                                   className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                                   focusable="false"
-                                  height={16}
                                   role="img"
                                   style={null}
-                                  viewBox="0 0 16 16"
-                                  width={16}
-                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                              </EuiIconBeaker>
-                            </EuiIcon>
-                          </button>
-                        </EuiButtonIcon>
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </EuiIconBeaker>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiSmallButtonIcon>
                       </div>
                     </div>
                   </EuiPopover>
@@ -1942,7 +1971,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -1953,7 +1982,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
           title="jaeger"
         >
           Jaeger
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -1969,7 +1998,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -1979,68 +2008,80 @@ exports[`Traces component renders jaeger traces page 1`] = `
             onClick={[Function]}
             title="jaeger"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="jaeger"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="jaeger"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconArrowDown
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconArrowDown
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fillRule="non-zero"
-                        />
-                      </svg>
-                    </EuiIconArrowDown>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Jaeger
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                            fillRule="non-zero"
+                          />
+                        </svg>
+                      </EuiIconArrowDown>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Jaeger
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -2321,8 +2362,8 @@ exports[`Traces component renders jaeger traces page 1`] = `
             <div
               className="euiFlexItem"
             >
-              <EuiFieldSearch
-                compressed={false}
+              <EuiCompressedFieldSearch
+                compressed={true}
                 data-test-subj="search-bar-input-box"
                 fullWidth={true}
                 incremental={false}
@@ -2334,20 +2375,20 @@ exports[`Traces component renders jaeger traces page 1`] = `
                 value=""
               >
                 <EuiFormControlLayout
-                  compressed={false}
+                  compressed={true}
                   fullWidth={true}
                   icon="search"
                   isLoading={false}
                 >
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <EuiValidatableControl>
                         <input
-                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                           data-test-subj="search-bar-input-box"
                           onChange={[Function]}
                           onKeyUp={[Function]}
@@ -2357,7 +2398,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                         />
                       </EuiValidatableControl>
                       <EuiFormControlLayoutIcons
-                        compressed={false}
+                        compressed={true}
                         icon="search"
                         isLoading={false}
                       >
@@ -2365,7 +2406,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           className="euiFormControlLayoutIcons"
                         >
                           <EuiFormControlLayoutCustomIcon
-                            size="m"
+                            size="s"
                             type="search"
                           >
                             <span
@@ -2374,19 +2415,19 @@ exports[`Traces component renders jaeger traces page 1`] = `
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="search"
                               >
                                 <EuiIconSearch
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -2408,7 +2449,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                     </div>
                   </div>
                 </EuiFormControlLayout>
-              </EuiFieldSearch>
+              </EuiCompressedFieldSearch>
             </div>
           </EuiFlexItem>
           <EuiFlexItem
@@ -2816,89 +2857,98 @@ exports[`Traces component renders jaeger traces page 1`] = `
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <EuiButton
+              <EuiSmallButton
                 data-click-metric-element="trace_analytics.refresh_button"
                 data-test-subj="superDatePickerApplyTimeButton"
                 iconType="refresh"
                 onClick={[Function]}
               >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
+                <EuiButton
                   data-click-metric-element="trace_analytics.refresh_button"
                   data-test-subj="superDatePickerApplyTimeButton"
-                  disabled={false}
-                  element="button"
                   iconType="refresh"
-                  isDisabled={false}
                   onClick={[Function]}
-                  type="button"
+                  size="s"
                 >
-                  <button
-                    className="euiButton euiButton--primary"
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
                     data-click-metric-element="trace_analytics.refresh_button"
                     data-test-subj="superDatePickerApplyTimeButton"
                     disabled={false}
+                    element="button"
+                    iconType="refresh"
+                    isDisabled={false}
                     onClick={[Function]}
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
+                    size="s"
                     type="button"
                   >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconSide="left"
-                      iconType="refresh"
-                      textProps={
+                    <button
+                      className="euiButton euiButton--primary euiButton--small"
+                      data-click-metric-element="trace_analytics.refresh_button"
+                      data-test-subj="superDatePickerApplyTimeButton"
+                      disabled={false}
+                      onClick={[Function]}
+                      style={
                         Object {
-                          "className": "euiButton__text",
+                          "minWidth": undefined,
                         }
                       }
+                      type="button"
                     >
-                      <span
-                        className="euiButtonContent euiButton__content"
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        iconType="refresh"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
                       >
-                        <EuiIcon
-                          className="euiButtonContent__icon"
-                          color="inherit"
-                          size="m"
-                          type="refresh"
+                        <span
+                          className="euiButtonContent euiButton__content"
                         >
-                          <EuiIconRefresh
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            className="euiButtonContent__icon"
+                            color="inherit"
+                            size="m"
+                            type="refresh"
                           >
-                            <svg
+                            <EuiIconRefresh
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
-                              />
-                            </svg>
-                          </EuiIconRefresh>
-                        </EuiIcon>
-                        <span
-                          className="euiButton__text"
-                        >
-                          Refresh
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                                />
+                              </svg>
+                            </EuiIconRefresh>
+                          </EuiIcon>
+                          <span
+                            className="euiButton__text"
+                          >
+                            Refresh
+                          </span>
                         </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonDisplay>
-              </EuiButton>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </EuiSmallButton>
             </div>
           </EuiFlexItem>
         </div>
@@ -2960,7 +3010,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                   <EuiPopover
                     anchorPosition="rightUp"
                     button={
-                      <EuiButtonIcon
+                      <EuiSmallButtonIcon
                         aria-label="Change all filters"
                         iconType="filter"
                         onClick={[Function]}
@@ -2984,54 +3034,62 @@ exports[`Traces component renders jaeger traces page 1`] = `
                       <div
                         className="euiPopover__anchor"
                       >
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="Change all filters"
                           iconType="filter"
                           onClick={[Function]}
                           title="Change all filters"
                         >
-                          <button
+                          <EuiButtonIcon
                             aria-label="Change all filters"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
+                            iconType="filter"
                             onClick={[Function]}
+                            size="s"
                             title="Change all filters"
-                            type="button"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              color="inherit"
-                              size="m"
-                              type="filter"
+                            <button
+                              aria-label="Change all filters"
+                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                              disabled={false}
+                              onClick={[Function]}
+                              title="Change all filters"
+                              type="button"
                             >
-                              <EuiIconFilter
-                                aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                focusable="false"
-                                role="img"
-                                style={null}
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="filter"
                               >
-                                <svg
+                                <EuiIconFilter
                                   aria-hidden={true}
                                   className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                   focusable="false"
-                                  height={16}
                                   role="img"
                                   style={null}
-                                  viewBox="0 0 16 16"
-                                  width={16}
-                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <path
-                                    d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </EuiIconFilter>
-                            </EuiIcon>
-                          </button>
-                        </EuiButtonIcon>
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                </EuiIconFilter>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiSmallButtonIcon>
                       </div>
                     </div>
                   </EuiPopover>
@@ -3632,7 +3690,7 @@ exports[`Traces component renders traces page 1`] = `
       anchorClassName="eui-textTruncate"
       anchorPosition="downCenter"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="dscIndexPattern__triggerButton"
           color="text"
           data-test-subj="indexPattern-switch-link"
@@ -3643,7 +3701,7 @@ exports[`Traces component renders traces page 1`] = `
           title="data_prepper"
         >
           Data Prepper
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="eui-textTruncate"
       closePopover={[Function]}
@@ -3659,7 +3717,7 @@ exports[`Traces component renders traces page 1`] = `
         <div
           className="euiPopover__anchor eui-textTruncate"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="dscIndexPattern__triggerButton"
             color="text"
             data-test-subj="indexPattern-switch-link"
@@ -3669,68 +3727,80 @@ exports[`Traces component renders traces page 1`] = `
             onClick={[Function]}
             title="data_prepper"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+            <EuiButtonEmpty
+              className="dscIndexPattern__triggerButton"
+              color="text"
               data-test-subj="indexPattern-switch-link"
-              disabled={false}
+              flush="left"
+              iconSide="right"
+              iconType="arrowDown"
               onClick={[Function]}
+              size="s"
               title="data_prepper"
-              type="button"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <EuiIconArrowDown
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowDown"
                     >
-                      <svg
+                      <EuiIconArrowDown
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                         focusable="false"
-                        height={16}
                         role="img"
                         style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fillRule="non-zero"
-                        />
-                      </svg>
-                    </EuiIconArrowDown>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Data Prepper
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                            fillRule="non-zero"
+                          />
+                        </svg>
+                      </EuiIconArrowDown>
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Data Prepper
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -4010,8 +4080,8 @@ exports[`Traces component renders traces page 1`] = `
             <div
               className="euiFlexItem"
             >
-              <EuiFieldSearch
-                compressed={false}
+              <EuiCompressedFieldSearch
+                compressed={true}
                 data-test-subj="search-bar-input-box"
                 fullWidth={true}
                 incremental={false}
@@ -4023,20 +4093,20 @@ exports[`Traces component renders traces page 1`] = `
                 value=""
               >
                 <EuiFormControlLayout
-                  compressed={false}
+                  compressed={true}
                   fullWidth={true}
                   icon="search"
                   isLoading={false}
                 >
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <EuiValidatableControl>
                         <input
-                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                           data-test-subj="search-bar-input-box"
                           onChange={[Function]}
                           onKeyUp={[Function]}
@@ -4046,7 +4116,7 @@ exports[`Traces component renders traces page 1`] = `
                         />
                       </EuiValidatableControl>
                       <EuiFormControlLayoutIcons
-                        compressed={false}
+                        compressed={true}
                         icon="search"
                         isLoading={false}
                       >
@@ -4054,7 +4124,7 @@ exports[`Traces component renders traces page 1`] = `
                           className="euiFormControlLayoutIcons"
                         >
                           <EuiFormControlLayoutCustomIcon
-                            size="m"
+                            size="s"
                             type="search"
                           >
                             <span
@@ -4063,19 +4133,19 @@ exports[`Traces component renders traces page 1`] = `
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="search"
                               >
                                 <EuiIconSearch
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -4097,7 +4167,7 @@ exports[`Traces component renders traces page 1`] = `
                     </div>
                   </div>
                 </EuiFormControlLayout>
-              </EuiFieldSearch>
+              </EuiCompressedFieldSearch>
             </div>
           </EuiFlexItem>
           <EuiFlexItem
@@ -4505,89 +4575,98 @@ exports[`Traces component renders traces page 1`] = `
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <EuiButton
+              <EuiSmallButton
                 data-click-metric-element="trace_analytics.refresh_button"
                 data-test-subj="superDatePickerApplyTimeButton"
                 iconType="refresh"
                 onClick={[Function]}
               >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
+                <EuiButton
                   data-click-metric-element="trace_analytics.refresh_button"
                   data-test-subj="superDatePickerApplyTimeButton"
-                  disabled={false}
-                  element="button"
                   iconType="refresh"
-                  isDisabled={false}
                   onClick={[Function]}
-                  type="button"
+                  size="s"
                 >
-                  <button
-                    className="euiButton euiButton--primary"
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
                     data-click-metric-element="trace_analytics.refresh_button"
                     data-test-subj="superDatePickerApplyTimeButton"
                     disabled={false}
+                    element="button"
+                    iconType="refresh"
+                    isDisabled={false}
                     onClick={[Function]}
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
+                    size="s"
                     type="button"
                   >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconSide="left"
-                      iconType="refresh"
-                      textProps={
+                    <button
+                      className="euiButton euiButton--primary euiButton--small"
+                      data-click-metric-element="trace_analytics.refresh_button"
+                      data-test-subj="superDatePickerApplyTimeButton"
+                      disabled={false}
+                      onClick={[Function]}
+                      style={
                         Object {
-                          "className": "euiButton__text",
+                          "minWidth": undefined,
                         }
                       }
+                      type="button"
                     >
-                      <span
-                        className="euiButtonContent euiButton__content"
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        iconType="refresh"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
                       >
-                        <EuiIcon
-                          className="euiButtonContent__icon"
-                          color="inherit"
-                          size="m"
-                          type="refresh"
+                        <span
+                          className="euiButtonContent euiButton__content"
                         >
-                          <EuiIconRefresh
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
+                          <EuiIcon
+                            className="euiButtonContent__icon"
+                            color="inherit"
+                            size="m"
+                            type="refresh"
                           >
-                            <svg
+                            <EuiIconRefresh
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                               focusable="false"
-                              height={16}
                               role="img"
                               style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
-                              />
-                            </svg>
-                          </EuiIconRefresh>
-                        </EuiIcon>
-                        <span
-                          className="euiButton__text"
-                        >
-                          Refresh
+                              <svg
+                                aria-hidden={true}
+                                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                                />
+                              </svg>
+                            </EuiIconRefresh>
+                          </EuiIcon>
+                          <span
+                            className="euiButton__text"
+                          >
+                            Refresh
+                          </span>
                         </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonDisplay>
-              </EuiButton>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </EuiSmallButton>
             </div>
           </EuiFlexItem>
         </div>
@@ -4649,7 +4728,7 @@ exports[`Traces component renders traces page 1`] = `
                   <EuiPopover
                     anchorPosition="rightUp"
                     button={
-                      <EuiButtonIcon
+                      <EuiSmallButtonIcon
                         aria-label="Change all filters"
                         iconType="filter"
                         onClick={[Function]}
@@ -4673,54 +4752,62 @@ exports[`Traces component renders traces page 1`] = `
                       <div
                         className="euiPopover__anchor"
                       >
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="Change all filters"
                           iconType="filter"
                           onClick={[Function]}
                           title="Change all filters"
                         >
-                          <button
+                          <EuiButtonIcon
                             aria-label="Change all filters"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
+                            iconType="filter"
                             onClick={[Function]}
+                            size="s"
                             title="Change all filters"
-                            type="button"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              color="inherit"
-                              size="m"
-                              type="filter"
+                            <button
+                              aria-label="Change all filters"
+                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                              disabled={false}
+                              onClick={[Function]}
+                              title="Change all filters"
+                              type="button"
                             >
-                              <EuiIconFilter
-                                aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                focusable="false"
-                                role="img"
-                                style={null}
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="filter"
                               >
-                                <svg
+                                <EuiIconFilter
                                   aria-hidden={true}
                                   className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                   focusable="false"
-                                  height={16}
                                   role="img"
                                   style={null}
-                                  viewBox="0 0 16 16"
-                                  width={16}
-                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <path
-                                    d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </EuiIconFilter>
-                            </EuiIcon>
-                          </button>
-                        </EuiButtonIcon>
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                </EuiIconFilter>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiSmallButtonIcon>
                       </div>
                     </div>
                   </EuiPopover>

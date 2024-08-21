@@ -30,9 +30,9 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
             <div
               className="resolutionSelect"
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 append={
-                  <EuiSelect
+                  <EuiCompressedSelect
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
                     data-test-subj="metrics__spanResolutionSelect"
@@ -66,16 +66,15 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                 }
                 aria-label="resolutionField"
                 className="resolutionSelectText"
-                compressed={true}
                 data-test-subj="metrics__spanValue"
                 isInvalid={false}
                 onChange={[Function]}
                 prepend="Span Interval"
                 value={1}
               >
-                <EuiFormControlLayout
+                <EuiFieldText
                   append={
-                    <EuiSelect
+                    <EuiCompressedSelect
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
@@ -107,192 +106,269 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                       value="h"
                     />
                   }
+                  aria-label="resolutionField"
+                  className="resolutionSelectText"
                   compressed={true}
-                  fullWidth={false}
+                  data-test-subj="metrics__spanValue"
+                  isInvalid={false}
+                  onChange={[Function]}
                   prepend="Span Interval"
+                  value={1}
                 >
-                  <div
-                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
-                  >
-                    <EuiFormLabel
-                      className="euiFormControlLayout__prepend"
-                    >
-                      <label
-                        className="euiFormLabel euiFormControlLayout__prepend"
-                      >
-                        Span Interval
-                      </label>
-                    </EuiFormLabel>
-                    <div
-                      className="euiFormControlLayout__childrenWrapper"
-                    >
-                      <EuiValidatableControl
-                        isInvalid={false}
-                      >
-                        <input
-                          aria-label="resolutionField"
-                          className="euiFieldText resolutionSelectText euiFieldText--compressed euiFieldText--inGroup"
-                          data-test-subj="metrics__spanValue"
-                          onChange={[Function]}
-                          type="text"
-                          value={1}
-                        />
-                      </EuiValidatableControl>
-                      <EuiFormControlLayoutIcons
-                        compressed={true}
-                      />
-                    </div>
-                    <EuiSelect
-                      aria-label="resolutionSelect"
-                      className="euiFormControlLayout__append resolutionSelectOption"
-                      data-test-subj="metrics__spanResolutionSelect"
-                      key="0/.0"
-                      onChange={[Function]}
-                      options={
-                        Array [
-                          Object {
-                            "text": "seconds",
-                            "value": "s",
-                          },
-                          Object {
-                            "text": "minutes",
-                            "value": "m",
-                          },
-                          Object {
-                            "text": "hours",
-                            "value": "h",
-                          },
-                          Object {
-                            "text": "days",
-                            "value": "d",
-                          },
-                          Object {
-                            "text": "years",
-                            "value": "y",
-                          },
-                        ]
-                      }
-                      value="h"
-                    >
-                      <EuiFormControlLayout
-                        compressed={false}
-                        fullWidth={false}
-                        icon={
-                          Object {
-                            "side": "right",
-                            "type": "arrowDown",
-                          }
+                  <EuiFormControlLayout
+                    append={
+                      <EuiCompressedSelect
+                        aria-label="resolutionSelect"
+                        className="resolutionSelectOption"
+                        data-test-subj="metrics__spanResolutionSelect"
+                        onChange={[Function]}
+                        options={
+                          Array [
+                            Object {
+                              "text": "seconds",
+                              "value": "s",
+                            },
+                            Object {
+                              "text": "minutes",
+                              "value": "m",
+                            },
+                            Object {
+                              "text": "hours",
+                              "value": "h",
+                            },
+                            Object {
+                              "text": "days",
+                              "value": "d",
+                            },
+                            Object {
+                              "text": "years",
+                              "value": "y",
+                            },
+                          ]
                         }
-                        isLoading={false}
+                        value="h"
+                      />
+                    }
+                    compressed={true}
+                    fullWidth={false}
+                    prepend="Span Interval"
+                  >
+                    <div
+                      className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                    >
+                      <EuiFormLabel
+                        className="euiFormControlLayout__prepend"
                       >
-                        <div
-                          className="euiFormControlLayout"
+                        <label
+                          className="euiFormLabel euiFormControlLayout__prepend"
                         >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl>
-                              <select
-                                aria-label="resolutionSelect"
-                                className="euiSelect euiFormControlLayout__append resolutionSelectOption"
-                                data-test-subj="metrics__spanResolutionSelect"
-                                onChange={[Function]}
-                                onMouseUp={[Function]}
-                                value="h"
-                              >
-                                <option
-                                  key="0"
-                                  value="s"
-                                >
-                                  seconds
-                                </option>
-                                <option
-                                  key="1"
-                                  value="m"
-                                >
-                                  minutes
-                                </option>
-                                <option
-                                  key="2"
-                                  value="h"
-                                >
-                                  hours
-                                </option>
-                                <option
-                                  key="3"
-                                  value="d"
-                                >
-                                  days
-                                </option>
-                                <option
-                                  key="4"
-                                  value="y"
-                                >
-                                  years
-                                </option>
-                              </select>
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons
-                              compressed={false}
-                              icon={
-                                Object {
-                                  "side": "right",
-                                  "type": "arrowDown",
-                                }
+                          Span Interval
+                        </label>
+                      </EuiFormLabel>
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <EuiValidatableControl
+                          isInvalid={false}
+                        >
+                          <input
+                            aria-label="resolutionField"
+                            className="euiFieldText resolutionSelectText euiFieldText--compressed euiFieldText--inGroup"
+                            data-test-subj="metrics__spanValue"
+                            onChange={[Function]}
+                            type="text"
+                            value={1}
+                          />
+                        </EuiValidatableControl>
+                        <EuiFormControlLayoutIcons
+                          compressed={true}
+                        />
+                      </div>
+                      <EuiCompressedSelect
+                        aria-label="resolutionSelect"
+                        className="euiFormControlLayout__append resolutionSelectOption"
+                        data-test-subj="metrics__spanResolutionSelect"
+                        key="0/.0"
+                        onChange={[Function]}
+                        options={
+                          Array [
+                            Object {
+                              "text": "seconds",
+                              "value": "s",
+                            },
+                            Object {
+                              "text": "minutes",
+                              "value": "m",
+                            },
+                            Object {
+                              "text": "hours",
+                              "value": "h",
+                            },
+                            Object {
+                              "text": "days",
+                              "value": "d",
+                            },
+                            Object {
+                              "text": "years",
+                              "value": "y",
+                            },
+                          ]
+                        }
+                        value="h"
+                      >
+                        <EuiSelect
+                          aria-label="resolutionSelect"
+                          className="euiFormControlLayout__append resolutionSelectOption"
+                          compressed={true}
+                          data-test-subj="metrics__spanResolutionSelect"
+                          onChange={[Function]}
+                          options={
+                            Array [
+                              Object {
+                                "text": "seconds",
+                                "value": "s",
+                              },
+                              Object {
+                                "text": "minutes",
+                                "value": "m",
+                              },
+                              Object {
+                                "text": "hours",
+                                "value": "h",
+                              },
+                              Object {
+                                "text": "days",
+                                "value": "d",
+                              },
+                              Object {
+                                "text": "years",
+                                "value": "y",
+                              },
+                            ]
+                          }
+                          value="h"
+                        >
+                          <EuiFormControlLayout
+                            compressed={true}
+                            fullWidth={false}
+                            icon={
+                              Object {
+                                "side": "right",
+                                "type": "arrowDown",
                               }
-                              isLoading={false}
+                            }
+                            isLoading={false}
+                          >
+                            <div
+                              className="euiFormControlLayout euiFormControlLayout--compressed"
                             >
                               <div
-                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                className="euiFormControlLayout__childrenWrapper"
                               >
-                                <EuiFormControlLayoutCustomIcon
-                                  size="m"
-                                  type="arrowDown"
-                                >
-                                  <span
-                                    className="euiFormControlLayoutCustomIcon"
+                                <EuiValidatableControl>
+                                  <select
+                                    aria-label="resolutionSelect"
+                                    className="euiSelect euiSelect--compressed euiFormControlLayout__append resolutionSelectOption"
+                                    data-test-subj="metrics__spanResolutionSelect"
+                                    onChange={[Function]}
+                                    onMouseUp={[Function]}
+                                    value="h"
                                   >
-                                    <EuiIcon
-                                      aria-hidden="true"
-                                      className="euiFormControlLayoutCustomIcon__icon"
-                                      size="m"
+                                    <option
+                                      key="0"
+                                      value="s"
+                                    >
+                                      seconds
+                                    </option>
+                                    <option
+                                      key="1"
+                                      value="m"
+                                    >
+                                      minutes
+                                    </option>
+                                    <option
+                                      key="2"
+                                      value="h"
+                                    >
+                                      hours
+                                    </option>
+                                    <option
+                                      key="3"
+                                      value="d"
+                                    >
+                                      days
+                                    </option>
+                                    <option
+                                      key="4"
+                                      value="y"
+                                    >
+                                      years
+                                    </option>
+                                  </select>
+                                </EuiValidatableControl>
+                                <EuiFormControlLayoutIcons
+                                  compressed={true}
+                                  icon={
+                                    Object {
+                                      "side": "right",
+                                      "type": "arrowDown",
+                                    }
+                                  }
+                                  isLoading={false}
+                                >
+                                  <div
+                                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <EuiFormControlLayoutCustomIcon
+                                      size="s"
                                       type="arrowDown"
                                     >
-                                      <EuiIconBeaker
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                        focusable="false"
-                                        role="img"
-                                        style={null}
+                                      <span
+                                        className="euiFormControlLayoutCustomIcon"
                                       >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                          focusable="false"
-                                          height={16}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
+                                        <EuiIcon
+                                          aria-hidden="true"
+                                          className="euiFormControlLayoutCustomIcon__icon"
+                                          size="s"
+                                          type="arrowDown"
                                         >
-                                          <path
-                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                          />
-                                        </svg>
-                                      </EuiIconBeaker>
-                                    </EuiIcon>
-                                  </span>
-                                </EuiFormControlLayoutCustomIcon>
+                                          <EuiIconBeaker
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            role="img"
+                                            style={null}
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                              />
+                                            </svg>
+                                          </EuiIconBeaker>
+                                        </EuiIcon>
+                                      </span>
+                                    </EuiFormControlLayoutCustomIcon>
+                                  </div>
+                                </EuiFormControlLayoutIcons>
                               </div>
-                            </EuiFormControlLayoutIcons>
-                          </div>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiSelect>
-                  </div>
-                </EuiFormControlLayout>
-              </EuiFieldText>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiSelect>
+                      </EuiCompressedSelect>
+                    </div>
+                  </EuiFormControlLayout>
+                </EuiFieldText>
+              </EuiCompressedFieldText>
             </div>
           </div>
         </EuiFlexItem>
@@ -315,7 +391,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                   <div
                     className="euiFlexItem euiFlexItem--flexGrowZero metrics-search-bar-datepicker"
                   >
-                    <EuiSuperDatePicker
+                    <EuiCompressedSuperDatePicker
                       commonlyUsedRanges={
                         Array [
                           Object {
@@ -834,7 +910,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                           </EuiFlexItem>
                         </div>
                       </EuiFlexGroup>
-                    </EuiSuperDatePicker>
+                    </EuiCompressedSuperDatePicker>
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem

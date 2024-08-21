@@ -61,9 +61,9 @@ exports[`Saved query table component Renders saved query table 1`] = `
         Custom operational dashboards/application
       </h3>
     </EuiTitle>
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -71,16 +71,16 @@ exports[`Saved query table component Renders saved query table 1`] = `
       labelType="label"
     >
       <div
-        className="euiFormRow"
+        className="euiFormRow euiFormRow--compressed"
         id="random_html_id-row"
       >
         <div
           className="euiFormRow__fieldWrapper"
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-describedby="random_html_id-help-0"
             async={false}
-            compressed={false}
+            compressed={true}
             data-test-subj="eventExplorer__querySaveComboBox"
             fullWidth={false}
             id="random_html_id"
@@ -123,14 +123,14 @@ exports[`Saved query table component Renders saved query table 1`] = `
               aria-describedby="random_html_id-help-0"
               aria-expanded={false}
               aria-haspopup="listbox"
-              className="euiComboBox"
+              className="euiComboBox euiComboBox--compressed"
               data-test-subj="eventExplorer__querySaveComboBox"
               onKeyDown={[Function]}
               role="combobox"
             >
               <EuiComboBoxInput
                 autoSizeInputRef={[Function]}
-                compressed={false}
+                compressed={true}
                 fullWidth={false}
                 hasSelectedOptions={true}
                 id="random_html_id"
@@ -185,7 +185,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                       "onClick": [Function],
                     }
                   }
-                  compressed={false}
+                  compressed={true}
                   fullWidth={false}
                   icon={
                     Object {
@@ -200,13 +200,13 @@ exports[`Saved query table component Renders saved query table 1`] = `
                   }
                 >
                   <div
-                    className="euiFormControlLayout"
+                    className="euiFormControlLayout euiFormControlLayout--compressed"
                   >
                     <div
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <div
-                        className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                        className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
                         data-test-subj="comboBoxInput"
                         onClick={[Function]}
                         tabIndex={-1}
@@ -354,7 +354,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                             "onClick": [Function],
                           }
                         }
-                        compressed={false}
+                        compressed={true}
                         icon={
                           Object {
                             "aria-label": "Open list of options",
@@ -373,7 +373,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                           <EuiFormControlLayoutClearButton
                             data-test-subj="comboBoxClearButton"
                             onClick={[Function]}
-                            size="m"
+                            size="s"
                           >
                             <EuiI18n
                               default="Clear input"
@@ -381,7 +381,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                             >
                               <button
                                 aria-label="Clear input"
-                                className="euiFormControlLayoutClearButton"
+                                className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
                                 data-test-subj="comboBoxClearButton"
                                 onClick={[Function]}
                                 type="button"
@@ -422,7 +422,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                             data-test-subj="comboBoxToggleListButton"
                             iconRef={[Function]}
                             onClick={[Function]}
-                            size="m"
+                            size="s"
                             type="arrowDown"
                           >
                             <button
@@ -435,19 +435,19 @@ exports[`Saved query table component Renders saved query table 1`] = `
                               <EuiIcon
                                 aria-hidden="true"
                                 className="euiFormControlLayoutCustomIcon__icon"
-                                size="m"
+                                size="s"
                                 type="arrowDown"
                               >
                                 <EuiIconBeaker
                                   aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                   focusable="false"
                                   role="img"
                                   style={null}
                                 >
                                   <svg
                                     aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height={16}
                                     role="img"
@@ -471,7 +471,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                 </EuiFormControlLayout>
               </EuiComboBoxInput>
             </div>
-          </EuiComboBox>
+          </EuiCompressedComboBox>
           <EuiFormHelpText
             className="euiFormRow__text"
             id="random_html_id-help-0"
@@ -486,7 +486,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
           </EuiFormHelpText>
         </div>
       </div>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiTitle
       size="xxs"
     >
@@ -496,9 +496,9 @@ exports[`Saved query table component Renders saved query table 1`] = `
         Name
       </h3>
     </EuiTitle>
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -506,13 +506,13 @@ exports[`Saved query table component Renders saved query table 1`] = `
       labelType="label"
     >
       <div
-        className="euiFormRow"
+        className="euiFormRow euiFormRow--compressed"
         id="random_html_id-row"
       >
         <div
           className="euiFormRow__fieldWrapper"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             aria-describedby="random_html_id-help-0"
             data-test-subj="eventExplorer__querySaveName"
             id="random_html_id"
@@ -523,36 +523,51 @@ exports[`Saved query table component Renders saved query table 1`] = `
             onFocus={[Function]}
             value="Count by depature"
           >
-            <EuiFormControlLayout
-              fullWidth={false}
-              inputId="random_html_id"
+            <EuiFieldText
+              aria-describedby="random_html_id-help-0"
+              compressed={true}
+              data-test-subj="eventExplorer__querySaveName"
+              id="random_html_id"
+              isInvalid={false}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              value="Count by depature"
             >
-              <div
-                className="euiFormControlLayout"
+              <EuiFormControlLayout
+                compressed={true}
+                fullWidth={false}
+                inputId="random_html_id"
               >
                 <div
-                  className="euiFormControlLayout__childrenWrapper"
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
                 >
-                  <EuiValidatableControl
-                    isInvalid={false}
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
                   >
-                    <input
-                      aria-describedby="random_html_id-help-0"
-                      className="euiFieldText"
-                      data-test-subj="eventExplorer__querySaveName"
-                      id="random_html_id"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      type="text"
-                      value="Count by depature"
+                    <EuiValidatableControl
+                      isInvalid={false}
+                    >
+                      <input
+                        aria-describedby="random_html_id-help-0"
+                        className="euiFieldText euiFieldText--compressed"
+                        data-test-subj="eventExplorer__querySaveName"
+                        id="random_html_id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        type="text"
+                        value="Count by depature"
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons
+                      compressed={true}
                     />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons />
+                  </div>
                 </div>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
+              </EuiFormControlLayout>
+            </EuiFieldText>
+          </EuiCompressedFieldText>
           <EuiFormHelpText
             className="euiFormRow__text"
             id="random_html_id-help-0"
@@ -567,7 +582,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
           </EuiFormHelpText>
         </div>
       </div>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressedSwitch"

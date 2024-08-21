@@ -9,7 +9,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiLink,
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -38,9 +38,9 @@ export const DataConnectionsDescription = (props: DataConnectionsDescriptionProp
           </>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={refresh} iconType="refresh">
+          <EuiSmallButton onClick={refresh} iconType="refresh">
             Refresh
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 

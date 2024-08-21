@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -135,7 +135,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               </EuiFlexGroup>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   iconType="trash"
                   aria-label="Delete"
                   color="danger"

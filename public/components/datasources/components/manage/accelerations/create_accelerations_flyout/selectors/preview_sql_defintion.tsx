@@ -5,7 +5,7 @@
 
 import {
   EuiAccordion,
-  EuiButton,
+  EuiSmallButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -103,9 +103,9 @@ export const PreviewSQLDefinition = ({
   };
 
   const queryWorkbenchButton = sqlWorkbenchPLuginExists ? (
-    <EuiButton iconSide="right" onClick={openInWorkbench}>
+    <EuiSmallButton iconSide="right" onClick={openInWorkbench}>
       Edit in Query Workbench
-    </EuiButton>
+    </EuiSmallButton>
   ) : (
     <></>
   );
@@ -132,18 +132,18 @@ export const PreviewSQLDefinition = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             {isPreviewStale && isPreviewTriggered ? (
-              <EuiButton
+              <EuiSmallButton
                 iconType="kqlFunction"
                 iconSide="left"
                 color="success"
                 onClick={onClickPreview}
               >
                 Update preview
-              </EuiButton>
+              </EuiSmallButton>
             ) : (
-              <EuiButton color="success" onClick={onClickPreview}>
+              <EuiSmallButton color="success" onClick={onClickPreview}>
                 Generate preview
-              </EuiButton>
+              </EuiSmallButton>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{queryWorkbenchButton}</EuiFlexItem>

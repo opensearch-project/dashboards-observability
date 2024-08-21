@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiButtonGroup,
 } from '@elastic/eui';
 import _ from 'lodash';
@@ -91,7 +91,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     <EuiPanel>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             fullWidth
             isClearable={false}
             placeholder="Search..."

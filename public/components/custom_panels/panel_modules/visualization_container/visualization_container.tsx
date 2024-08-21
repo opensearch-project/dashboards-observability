@@ -5,7 +5,8 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -145,9 +146,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -169,9 +170,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -379,7 +380,7 @@ export const VisualizationContainer = ({
               ) : (
                 <EuiPopover
                   button={
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="actionMenuButton"
                       iconType="boxesHorizontal"
                       onClick={onActionsMenuClick}

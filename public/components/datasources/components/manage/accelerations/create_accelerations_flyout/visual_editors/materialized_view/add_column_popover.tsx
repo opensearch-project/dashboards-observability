@@ -6,12 +6,12 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -115,20 +115,20 @@ export const AddColumnPopOver = ({
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Function">
-              <EuiComboBox
+            <EuiCompressedFormRow label="Function">
+              <EuiCompressedComboBox
                 singleSelection={{ asPlainText: true }}
                 options={ACCELERATION_AGGREGRATION_FUNCTIONS}
                 selectedOptions={selectedFunction}
                 onChange={setSelectedFunction}
                 isClearable={false}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           {selectedFunction[0].label !== 'window.start' && (
             <EuiFlexItem>
-              <EuiFormRow label="Aggregation field">
-                <EuiComboBox
+              <EuiCompressedFormRow label="Aggregation field">
+                <EuiCompressedComboBox
                   singleSelection={{ asPlainText: true }}
                   options={[
                     { label: '*', disabled: selectedFunction[0].label !== 'count' },
@@ -138,14 +138,14 @@ export const AddColumnPopOver = ({
                   onChange={setSelectedField}
                   isClearable={false}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFormRow label="Column alias - optional">
-          <EuiFieldText name="aliasField" onChange={onChangeAlias} />
-        </EuiFormRow>
+        <EuiCompressedFormRow label="Column alias - optional">
+          <EuiCompressedFieldText name="aliasField" onChange={onChangeAlias} />
+        </EuiCompressedFormRow>
       </>
       <EuiPopoverFooter>
         <EuiButton size="s" fill onClick={onAddExpression}>

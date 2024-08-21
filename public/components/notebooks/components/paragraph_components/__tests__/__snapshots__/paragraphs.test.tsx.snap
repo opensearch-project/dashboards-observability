@@ -17,7 +17,7 @@ exports[`<Paragraphs /> spec renders the component 1`] = `
         [1] Code block 
         <button
           aria-label="Toggle show input"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
           data-test-subj="paragraphToggleInputBtn"
           type="button"
         >
@@ -49,7 +49,7 @@ exports[`<Paragraphs /> spec renders the component 1`] = `
         >
           <button
             aria-label="Open paragraph menu"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
             type="button"
           >
             <svg
@@ -84,7 +84,7 @@ exports[`<Paragraphs /> spec renders the component 1`] = `
       class="euiSpacer euiSpacer--s"
     />
     <div
-      class="euiFormRow euiFormRow--fullWidth"
+      class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
@@ -253,7 +253,7 @@ exports[`<Paragraphs /> spec renders the component 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <button
-          class="euiButton euiButton--primary euiButton--fill"
+          class="euiButton euiButton--primary euiButton--small euiButton--fill"
           data-test-subj="runRefreshBtn-0"
           type="button"
         >

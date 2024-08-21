@@ -7,11 +7,11 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldText,
+  EuiSmallButtonIcon,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiPopover,
   EuiPopoverFooter,
@@ -54,7 +54,7 @@ export const PatternsHeader = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               iconType="gear"
               onClick={() => setIsPatternConfigPopoverOpen(!isPatternConfigPopoverOpen)}
             />
@@ -69,7 +69,7 @@ export const PatternsHeader = ({
           <EuiText size="s">Log patterns allow you to cluster your logs, to help</EuiText>
           <EuiText size="s">summarize large volume of logs.</EuiText>
           <EuiSpacer size="s" />
-          <EuiFormRow
+          <EuiCompressedFormRow
             helpText={
               <EuiText size="s">
                 Pattern regex is used to reduce logs into log groups.{' '}
@@ -79,11 +79,11 @@ export const PatternsHeader = ({
               </EuiText>
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={patternRegexInput}
               onChange={(e) => setPatternRegexInput(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiPopoverFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>

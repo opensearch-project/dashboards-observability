@@ -3,7 +3,7 @@
 exports[`Index options acceleration components renders acceleration index options with covering index options 1`] = `
 Array [
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -34,7 +34,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
@@ -74,7 +74,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
-            className="euiFieldText euiFieldText--inGroup"
+            className="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
             disabled={false}
             id="random_html_id"
             onBlur={[Function]}
@@ -107,7 +107,7 @@ Array [
 exports[`Index options acceleration components renders acceleration index options with default options 1`] = `
 Array [
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -138,7 +138,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
@@ -178,7 +178,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
-            className="euiFieldText euiFieldText--inGroup"
+            className="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
             disabled={true}
             id="random_html_id"
             onBlur={[Function]}
@@ -211,7 +211,7 @@ Array [
 exports[`Index options acceleration components renders acceleration index options with materialized index options 1`] = `
 Array [
   <div
-    className="euiFormRow"
+    className="euiFormRow euiFormRow--compressed"
     id="random_html_id-row"
   >
     <div
@@ -242,7 +242,7 @@ Array [
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout euiFormControlLayout--group"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
       >
         <label
           className="euiFormLabel euiFormControlLayout__prepend"
@@ -282,7 +282,7 @@ Array [
           <input
             aria-describedby="random_html_id-help-0"
             aria-label="Enter Index Name"
-            className="euiFieldText euiFieldText--inGroup"
+            className="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
             disabled={false}
             id="random_html_id"
             onBlur={[Function]}

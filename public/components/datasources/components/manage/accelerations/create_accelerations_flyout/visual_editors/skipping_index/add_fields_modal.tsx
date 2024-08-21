@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiInMemoryTable,
   EuiModal,
   EuiModalBody,
@@ -84,8 +84,8 @@ export const AddFieldsModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={() => setIsAddModalVisible(false)}>Cancel</EuiButton>
-        <EuiButton
+        <EuiSmallButton onClick={() => setIsAddModalVisible(false)}>Cancel</EuiSmallButton>
+        <EuiSmallButton
           onClick={() => {
             setAccelerationFormData(
               producer((accData) => {
@@ -105,7 +105,7 @@ export const AddFieldsModal = ({
           fill
         >
           Add
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

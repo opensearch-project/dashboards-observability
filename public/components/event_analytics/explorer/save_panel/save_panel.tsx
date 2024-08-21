@@ -6,9 +6,10 @@
 import React, { useState } from 'react';
 import {
   EuiTitle,
-  EuiComboBox,
+  EuiCompressedComboBox,
+  EuiCompressedFormRow,
   EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
@@ -78,8 +79,8 @@ export const SavePanel = ({
           <EuiTitle size="xxs">
             <h3>{'Custom operational dashboards/application'}</h3>
           </EuiTitle>
-          <EuiFormRow helpText="Search existing dashboards or applications by name">
-            <EuiComboBox
+          <EuiCompressedFormRow helpText="Search existing dashboards or applications by name">
+            <EuiCompressedComboBox
               placeholder="Select dashboards/applications"
               onChange={(daOptions) => {
                 handleOptionChange(daOptions);
@@ -95,14 +96,14 @@ export const SavePanel = ({
               singleSelection={{ asPlainText: true }}
               data-test-subj="eventExplorer__querySaveComboBox"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       )}
       <EuiTitle size="xxs">
         <h3>Name</h3>
       </EuiTitle>
-      <EuiFormRow helpText="Name for your savings">
-        <EuiFieldText
+      <EuiCompressedFormRow helpText="Name for your savings">
+        <EuiCompressedFieldText
           key={'save-panel-id'}
           value={savePanelName}
           isInvalid={isEmpty(savePanelName)}
@@ -111,7 +112,7 @@ export const SavePanel = ({
           }}
           data-test-subj="eventExplorer__querySaveName"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {showOptionList && (
         <>
           <EuiFormRow display="columnCompressedSwitch">
