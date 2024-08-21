@@ -62,7 +62,7 @@ coreRefs.contentManagement?.registerContentProvider({
           setStartDate={setStartDate}
           endDate={endDate}
           setEndDate={setEndDate}
-          showModal={showFlyout}
+          showFlyout={showFlyout}
         />
       ) : (
         <AddDashboardCallout showFlyout={showFlyout} navigateToApp={navigateToApp} />
@@ -85,7 +85,6 @@ export const Home = ({ ..._props }: HomeProps) => {
   const [_, setIsRegistered] = useState(false);
   const [dashboards, setDashboards] = useState<DashboardDictionary>({});
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  [isFullscreen, setIsFullscreen] = useState(false);
   [startDate, setStartDate] = useState(moment().toISOString());
   [endDate, setEndDate] = useState(moment().toISOString());
   [dashboardTitle, setDashboardTitle] = useState('');
