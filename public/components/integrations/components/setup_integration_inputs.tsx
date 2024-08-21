@@ -13,7 +13,6 @@ import {
   EuiCompressedSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
@@ -404,9 +403,9 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
 
   return (
     <EuiForm>
-      <EuiTitle>
+      <EuiText size="s">
         <h1>Set Up Integration</h1>
-      </EuiTitle>
+      </EuiText>
       <EuiSpacer />
       {setupCallout.show ? (
         <EuiCallOut title={setupCallout.title} color="danger">

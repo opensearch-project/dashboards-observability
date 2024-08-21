@@ -15,7 +15,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
@@ -61,7 +60,7 @@ export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () =>
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <EuiContextMenuPanel items={items} size="s" />
     </EuiPopover>
   );
 };
@@ -107,9 +106,9 @@ export const IntegrationHeader = () => {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="integrations-header">
+          <EuiText size="s" data-test-subj="integrations-header">
             <h1>Integrations</h1>
-          </EuiTitle>
+          </EuiText>
         </EuiPageHeaderSection>
         <EuiPageHeaderSection>
           <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />
@@ -123,7 +122,9 @@ export const IntegrationHeader = () => {
         </EuiLink>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+      <EuiTabs display="condensed" size="s">
+        {renderTabs()}
+      </EuiTabs>
       <EuiSpacer size="s" />
       {showUploadFlyout ? (
         <IntegrationUploadFlyout onClose={() => setShowUploadFlyout(false)} />
