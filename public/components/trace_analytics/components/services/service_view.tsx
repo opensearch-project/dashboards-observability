@@ -23,7 +23,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -220,9 +219,9 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
-                <EuiTitle size="l">
+                <EuiText size="s">
                   <h2 className="overview-content">{serviceName}</h2>
-                </EuiTitle>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -231,7 +230,7 @@ export function ServiceView(props: ServiceViewProps) {
                   isOpen={actionsMenuPopover}
                   closePopover={() => setActionsMenuPopover(false)}
                 >
-                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
+                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} size="s" />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -240,9 +239,9 @@ export function ServiceView(props: ServiceViewProps) {
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem>
-              <EuiTitle size="l">
-                <h2 className="overview-content">{serviceName}</h2>
-              </EuiTitle>
+              <EuiText size="s">
+                <h1 className="overview-content">{serviceName}</h1>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
