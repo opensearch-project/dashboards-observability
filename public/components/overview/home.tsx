@@ -29,9 +29,7 @@ interface HomeProps extends RouteComponentProps {
 }
 
 let showFlyout: { (): void; (): void; (): void };
-const wrapper = {
-  dashboardSelected: false,
-};
+const wrapper = { dashboardSelected: false };
 let startDate: string;
 let setStartDate: (start: string) => void;
 let endDate: string;
@@ -179,6 +177,9 @@ export const Home = ({ ..._props }: HomeProps) => {
       setDashboardId(defaultDashboard);
       setStartDate(dashboards[defaultDashboard].startDate);
       setEndDate(dashboards[defaultDashboard].endDate);
+      wrapper.dashboardSelected = true;
+    } else {
+      wrapper.dashboardSelected = false;
     }
   };
 
@@ -188,7 +189,6 @@ export const Home = ({ ..._props }: HomeProps) => {
         type: 'dashboard',
       })
       .then((response) => {
-        console.log(response);
         const savedDashboards = response.savedObjects.reduce((acc, savedDashboard) => {
           const dashboardAttributes = savedDashboard.attributes as {
             title: string;
@@ -204,11 +204,22 @@ export const Home = ({ ..._props }: HomeProps) => {
           };
           return acc;
         }, {} as DashboardDictionary);
+
         setDashboards(savedDashboards);
+
         const defaultDashboard = uiSettingsService.get(uiSettingsKey);
-        if (defaultDashboard && dashboards[defaultDashboard]) {
-          setDashboardTitle(dashboards[defaultDashboard].label);
+
+        if (defaultDashboard && savedDashboards[defaultDashboard]) {
+          setDashboardTitle(savedDashboards[defaultDashboard].label);
           setDashboardId(defaultDashboard);
+          setStartDate(savedDashboards[defaultDashboard].startDate);
+          setEndDate(savedDashboards[defaultDashboard].endDate);
+          wrapper.dashboardSelected = true;
+        } else {
+          uiSettingsService.set('observability:defaultDashboard', null);
+          setDashboardTitle('');
+          setDashboardId('');
+          wrapper.dashboardSelected = false;
         }
       })
       .catch((error) => {
