@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { uiSettingsService } from '../../../../common/utils';
 import { DashboardDictionary } from '../home';
 
-interface Props {
+export interface Props {
   closeFlyout: () => void;
   wrapper: { dashboardSelected: boolean };
   dashboards: DashboardDictionary;
