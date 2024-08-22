@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTableFieldDataColumnType,
@@ -265,41 +264,39 @@ export function ServicesTable(props: ServicesTableProps) {
 
   return (
     <>
-      <EuiPage paddingSize="m">
-        <EuiPanel>
-          {titleBar}
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="none" />
-          {!(
-            (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-            (mode === 'jaeger' && jaegerIndicesExist)
-          ) ? (
-            <MissingConfigurationMessage mode={mode} />
-          ) : items?.length > 0 ? (
-            <EuiInMemoryTable
-              tableLayout="auto"
-              items={items}
-              columns={columns}
-              pagination={{
-                initialPageSize: 10,
-                pageSizeOptions: [5, 10, 15],
-              }}
-              sorting={{
-                sort: {
-                  field: 'name',
-                  direction: 'asc',
-                },
-              }}
-              loading={loading}
-              selection={selectionValue}
-              isSelectable={true}
-              itemId="itemId"
-            />
-          ) : (
-            <NoMatchMessage size="xl" />
-          )}
-        </EuiPanel>
-      </EuiPage>
+      <EuiPanel>
+        {titleBar}
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+        {!(
+          (mode === 'data_prepper' && dataPrepperIndicesExist) ||
+          (mode === 'jaeger' && jaegerIndicesExist)
+        ) ? (
+          <MissingConfigurationMessage mode={mode} />
+        ) : items?.length > 0 ? (
+          <EuiInMemoryTable
+            tableLayout="auto"
+            items={items}
+            columns={columns}
+            pagination={{
+              initialPageSize: 10,
+              pageSizeOptions: [5, 10, 15],
+            }}
+            sorting={{
+              sort: {
+                field: 'name',
+                direction: 'asc',
+              },
+            }}
+            loading={loading}
+            selection={selectionValue}
+            isSelectable={true}
+            itemId="itemId"
+          />
+        ) : (
+          <NoMatchMessage size="xl" />
+        )}
+      </EuiPanel>
     </>
   );
 }

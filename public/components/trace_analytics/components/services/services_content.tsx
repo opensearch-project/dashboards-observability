@@ -4,7 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
@@ -175,77 +175,81 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        style={{ padding: '0 24px' }}
-      >
-        <EuiFlexItem grow={false}>
-          <DataSourcePicker
-            modes={props.modes}
-            selectedMode={props.mode}
-            setMode={props.setMode!}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <SearchBar
-            ref={searchBarRef}
+      <EuiPage paddingSize="m">
+        <EuiPageBody>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+            // style={{ padding: '0 24px' }}
+          >
+            <EuiFlexItem grow={false}>
+              <DataSourcePicker
+                modes={props.modes}
+                selectedMode={props.mode}
+                setMode={props.setMode!}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <SearchBar
+                ref={searchBarRef}
+                filters={filters}
+                setFilters={setFilters}
+                query={query}
+                setQuery={setQuery}
+                startTime={startTime}
+                setStartTime={setStartTime}
+                endTime={endTime}
+                setEndTime={setEndTime}
+                refresh={refresh}
+                page={page}
+                mode={mode}
+                attributesFilterFields={attributesFilterFields}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <Filters
+            page={page}
             filters={filters}
             setFilters={setFilters}
-            query={query}
-            setQuery={setQuery}
-            startTime={startTime}
-            setStartTime={setStartTime}
-            endTime={endTime}
-            setEndTime={setEndTime}
-            refresh={refresh}
-            page={page}
+            appConfigs={appConfigs}
             mode={mode}
             attributesFilterFields={attributesFilterFields}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <Filters
-        page={page}
-        filters={filters}
-        setFilters={setFilters}
-        appConfigs={appConfigs}
-        mode={mode}
-        attributesFilterFields={attributesFilterFields}
-      />
-      <EuiSpacer size="s" />
-      <ServicesTable
-        items={tableItems}
-        selectedItems={selectedItems}
-        setSelectedItems={setSelectedItems}
-        addServicesGroupFilter={addServicesGroupFilter}
-        addFilter={addFilter}
-        setRedirect={setRedirect}
-        mode={mode}
-        loading={loading}
-        traceColumnAction={traceColumnAction}
-        setCurrentSelectedService={setCurrentSelectedService}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-        isServiceTrendEnabled={isServiceTrendEnabled}
-        setIsServiceTrendEnabled={setIsServiceTrendEnabled}
-        serviceTrends={serviceTrends}
-      />
-      <EuiSpacer size="s" />
-      {mode === 'data_prepper' && dataPrepperIndicesExist ? (
-        <ServiceMap
-          addFilter={addFilter}
-          serviceMap={serviceMap}
-          idSelected={serviceMapIdSelected}
-          setIdSelected={setServiceMapIdSelected}
-          currService={filteredService}
-          page={page}
-          setCurrentSelectedService={setCurrentSelectedService}
-        />
-      ) : (
-        <div />
-      )}
+          <EuiSpacer size="s" />
+          <ServicesTable
+            items={tableItems}
+            selectedItems={selectedItems}
+            setSelectedItems={setSelectedItems}
+            addServicesGroupFilter={addServicesGroupFilter}
+            addFilter={addFilter}
+            setRedirect={setRedirect}
+            mode={mode}
+            loading={loading}
+            traceColumnAction={traceColumnAction}
+            setCurrentSelectedService={setCurrentSelectedService}
+            jaegerIndicesExist={jaegerIndicesExist}
+            dataPrepperIndicesExist={dataPrepperIndicesExist}
+            isServiceTrendEnabled={isServiceTrendEnabled}
+            setIsServiceTrendEnabled={setIsServiceTrendEnabled}
+            serviceTrends={serviceTrends}
+          />
+          <EuiSpacer size="s" />
+          {mode === 'data_prepper' && dataPrepperIndicesExist ? (
+            <ServiceMap
+              addFilter={addFilter}
+              serviceMap={serviceMap}
+              idSelected={serviceMapIdSelected}
+              setIdSelected={setServiceMapIdSelected}
+              currService={filteredService}
+              page={page}
+              setCurrentSelectedService={setCurrentSelectedService}
+            />
+          ) : (
+            <div />
+          )}
+        </EuiPageBody>
+      </EuiPage>
     </>
   );
 }

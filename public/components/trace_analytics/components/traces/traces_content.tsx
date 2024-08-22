@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
+  EuiPageBody,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -119,69 +120,67 @@ export function TracesContent(props: TracesProps) {
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        style={{ padding: '0 24px' }}
-      >
-        <EuiFlexItem grow={false}>
-          <DataSourcePicker
-            modes={props.modes}
-            selectedMode={props.mode}
-            setMode={props.setMode!}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <SearchBar
-            query={query}
-            filters={filters}
-            appConfigs={appConfigs}
-            setFilters={setFilters}
-            setQuery={setQuery}
-            startTime={startTime}
-            setStartTime={setStartTime}
-            endTime={endTime}
-            setEndTime={setEndTime}
-            refresh={refresh}
+      <EuiPage paddingSize="m">
+        <EuiPageBody>
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <DataSourcePicker
+                modes={props.modes}
+                selectedMode={props.mode}
+                setMode={props.setMode!}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <SearchBar
+                query={query}
+                filters={filters}
+                appConfigs={appConfigs}
+                setFilters={setFilters}
+                setQuery={setQuery}
+                startTime={startTime}
+                setStartTime={setStartTime}
+                endTime={endTime}
+                setEndTime={setEndTime}
+                refresh={refresh}
+                page={page}
+                mode={mode}
+                attributesFilterFields={attributesFilterFields}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <Filters
             page={page}
+            filters={filters}
+            setFilters={setFilters}
+            appConfigs={appConfigs}
             mode={mode}
             attributesFilterFields={attributesFilterFields}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <Filters
-        page={page}
-        filters={filters}
-        setFilters={setFilters}
-        appConfigs={appConfigs}
-        mode={mode}
-        attributesFilterFields={attributesFilterFields}
-      />
-      <EuiSpacer size="m" />
-      <EuiPage paddingSize="m">
-        <EuiPanel>
-          <EuiAccordion
-            id="accordion1"
-            buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
-            forceState={trigger}
-            onToggle={onToggle}
-            data-test-subj="trace-groups-service-operation-accordian"
-          >
-            <EuiSpacer size="m" />
-            {trigger === 'open' && dashboardContent()}
-          </EuiAccordion>
-        </EuiPanel>
+          <EuiSpacer size="s" />
+          <EuiPanel>
+            <EuiAccordion
+              id="accordion1"
+              buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
+              forceState={trigger}
+              onToggle={onToggle}
+              data-test-subj="trace-groups-service-operation-accordian"
+            >
+              <EuiSpacer size="m" />
+              {trigger === 'open' && dashboardContent()}
+            </EuiAccordion>
+          </EuiPanel>
+          <EuiSpacer size="s" />
+          <TracesTable
+            items={tableItems}
+            refresh={refresh}
+            mode={mode}
+            loading={loading}
+            traceIdColumnAction={traceIdColumnAction}
+            jaegerIndicesExist={jaegerIndicesExist}
+            dataPrepperIndicesExist={dataPrepperIndicesExist}
+          />
+        </EuiPageBody>
       </EuiPage>
-      <TracesTable
-        items={tableItems}
-        refresh={refresh}
-        mode={mode}
-        loading={loading}
-        traceIdColumnAction={traceIdColumnAction}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-      />
     </>
   );
 }

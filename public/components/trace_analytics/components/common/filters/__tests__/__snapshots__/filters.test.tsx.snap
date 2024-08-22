@@ -11,21 +11,9 @@ exports[`Filter component renders filters 1`] = `
     alignItems="center"
     gutterSize="xs"
     responsive={false}
-    style={
-      Object {
-        "minHeight": 32,
-        "padding": "0 16px",
-      }
-    }
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-      style={
-        Object {
-          "minHeight": 32,
-          "padding": "0 16px",
-        }
-      }
     >
       <EuiFlexItem
         grow={false}

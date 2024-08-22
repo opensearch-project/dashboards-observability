@@ -224,12 +224,7 @@ export function Filters(props: FiltersOwnProps) {
   const filterComponents = useMemo(() => renderFilters(), [props.filters]);
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      style={{ minHeight: 32, padding: '0 16px' }}
-    >
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {filterComponents}
       <EuiFlexItem grow={false}>
         <AddFilterButton />
