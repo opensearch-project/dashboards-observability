@@ -8,7 +8,13 @@ exports[`Custom Input Model component renders custom input modal with multiple a
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        Input test
+        <EuiText
+          size="s"
+        >
+          <h2>
+            Input test
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -58,7 +64,13 @@ exports[`Custom Input Model component renders custom input modal with single arg
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        Input test
+        <EuiText
+          size="s"
+        >
+          <h2>
+            Input test
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>

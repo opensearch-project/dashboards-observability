@@ -16,6 +16,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 /*
@@ -33,7 +34,7 @@ import {
  * optionalArgs - Arguments needed to pass them to runModal function
  */
 
-type CustomInputModalProps = {
+interface CustomInputModalProps {
   runModal:
     | ((value: string, value2: string, value3: string, value4: string) => void)
     | ((value: string) => void);
@@ -47,7 +48,7 @@ type CustomInputModalProps = {
   openPanelName?: string;
   helpText?: string;
   optionalArgs?: string[];
-};
+}
 
 export const CustomInputModal = (props: CustomInputModalProps) => {
   const {
@@ -71,7 +72,11 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{titletxt}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{titletxt}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>

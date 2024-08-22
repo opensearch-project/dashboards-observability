@@ -78,11 +78,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                     <div
                       class="euiFlexItem"
                     >
-                      <h2
-                        class="euiTitle euiTitle--medium"
+                      <div
+                        class="euiText euiText--small"
                       >
-                        Span detail
-                      </h2>
+                        <h2>
+                          Span detail
+                        </h2>
+                      </div>
                     </div>
                     <div
                       class="euiFlexItem"
@@ -255,11 +257,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                             <div
                               class="euiFlexItem"
                             >
-                              <h2
-                                class="euiTitle euiTitle--medium"
+                              <div
+                                class="euiText euiText--small"
                               >
-                                Span detail
-                              </h2>
+                                <h2>
+                                  Span detail
+                                </h2>
+                              </div>
                             </div>
                             <div
                               class="euiFlexItem"
@@ -364,11 +368,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               <div
                                 class="euiFlexItem"
                               >
-                                <h2
-                                  class="euiTitle euiTitle--medium"
+                                <div
+                                  class="euiText euiText--small"
                                 >
-                                  Span detail
-                                </h2>
+                                  <h2>
+                                    Span detail
+                                  </h2>
+                                </div>
                               </div>
                               <div
                                 class="euiFlexItem"
@@ -473,11 +479,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                 <div
                                   class="euiFlexItem"
                                 >
-                                  <h2
-                                    class="euiTitle euiTitle--medium"
+                                  <div
+                                    class="euiText euiText--small"
                                   >
-                                    Span detail
-                                  </h2>
+                                    <h2>
+                                      Span detail
+                                    </h2>
+                                  </div>
                                 </div>
                                 <div
                                   class="euiFlexItem"
@@ -570,11 +578,13 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                   <div
                                     class="euiFlexItem"
                                   >
-                                    <h2
-                                      class="euiTitle euiTitle--medium"
+                                    <div
+                                      class="euiText euiText--small"
                                     >
-                                      Span detail
-                                    </h2>
+                                      <h2>
+                                        Span detail
+                                      </h2>
+                                    </div>
                                   </div>
                                   <div
                                     class="euiFlexItem"
@@ -736,13 +746,17 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                   <div
                                     className="euiFlexItem"
                                   >
-                                    <EuiTitle>
-                                      <h2
-                                        className="euiTitle euiTitle--medium"
+                                    <EuiText
+                                      size="s"
+                                    >
+                                      <div
+                                        className="euiText euiText--small"
                                       >
-                                        Span detail
-                                      </h2>
-                                    </EuiTitle>
+                                        <h2>
+                                          Span detail
+                                        </h2>
+                                      </div>
+                                    </EuiText>
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>

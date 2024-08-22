@@ -11,7 +11,7 @@ exports[`<ParaOutput /> spec renders dashboards visualization outputs 1`] = `
 
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
 <div
-  class="euiText euiText--medium wrapAll markdown-output-text"
+  class="euiText euiText--small wrapAll markdown-output-text"
   data-test-subj="markdownOutputText"
 >
   <div

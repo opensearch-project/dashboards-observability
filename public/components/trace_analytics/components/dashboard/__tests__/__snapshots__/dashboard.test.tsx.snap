@@ -791,7 +791,9 @@ exports[`Dashboard component renders dashboard 1`] = `
               </EuiSpacer>
               <EuiEmptyPrompt
                 body={
-                  <EuiText>
+                  <EuiText
+                    size="s"
+                  >
                     No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                   </EuiText>
                 }
@@ -830,9 +832,11 @@ exports[`Dashboard component renders dashboard 1`] = `
                         <div
                           className="euiText euiText--medium"
                         >
-                          <EuiText>
+                          <EuiText
+                            size="s"
+                          >
                             <div
-                              className="euiText euiText--medium"
+                              className="euiText euiText--small"
                             >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </div>
@@ -982,7 +986,9 @@ exports[`Dashboard component renders dashboard 1`] = `
                                 </EuiSpacer>
                                 <EuiEmptyPrompt
                                   body={
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                     </EuiText>
                                   }
@@ -1021,9 +1027,11 @@ exports[`Dashboard component renders dashboard 1`] = `
                                           <div
                                             className="euiText euiText--medium"
                                           >
-                                            <EuiText>
+                                            <EuiText
+                                              size="s"
+                                            >
                                               <div
-                                                className="euiText euiText--medium"
+                                                className="euiText euiText--small"
                                               >
                                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                               </div>
@@ -1156,7 +1164,9 @@ exports[`Dashboard component renders dashboard 1`] = `
                                 </EuiSpacer>
                                 <EuiEmptyPrompt
                                   body={
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                     </EuiText>
                                   }
@@ -1195,9 +1205,11 @@ exports[`Dashboard component renders dashboard 1`] = `
                                           <div
                                             className="euiText euiText--medium"
                                           >
-                                            <EuiText>
+                                            <EuiText
+                                              size="s"
+                                            >
                                               <div
-                                                className="euiText euiText--medium"
+                                                className="euiText euiText--small"
                                               >
                                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                               </div>
@@ -2023,7 +2035,9 @@ exports[`Dashboard component renders empty dashboard 1`] = `
               </EuiSpacer>
               <EuiEmptyPrompt
                 body={
-                  <EuiText>
+                  <EuiText
+                    size="s"
+                  >
                     No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                   </EuiText>
                 }
@@ -2062,9 +2076,11 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                         <div
                           className="euiText euiText--medium"
                         >
-                          <EuiText>
+                          <EuiText
+                            size="s"
+                          >
                             <div
-                              className="euiText euiText--medium"
+                              className="euiText euiText--small"
                             >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </div>
@@ -2214,7 +2230,9 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                 </EuiSpacer>
                                 <EuiEmptyPrompt
                                   body={
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                     </EuiText>
                                   }
@@ -2253,9 +2271,11 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                           <div
                                             className="euiText euiText--medium"
                                           >
-                                            <EuiText>
+                                            <EuiText
+                                              size="s"
+                                            >
                                               <div
-                                                className="euiText euiText--medium"
+                                                className="euiText euiText--small"
                                               >
                                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                               </div>
@@ -2388,7 +2408,9 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                 </EuiSpacer>
                                 <EuiEmptyPrompt
                                   body={
-                                    <EuiText>
+                                    <EuiText
+                                      size="s"
+                                    >
                                       No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                     </EuiText>
                                   }
@@ -2427,9 +2449,11 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                                           <div
                                             className="euiText euiText--medium"
                                           >
-                                            <EuiText>
+                                            <EuiText
+                                              size="s"
+                                            >
                                               <div
-                                                className="euiText euiText--medium"
+                                                className="euiText euiText--small"
                                               >
                                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                               </div>
@@ -3420,7 +3444,9 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                   </EuiSpacer>
                   <EuiEmptyPrompt
                     body={
-                      <EuiText>
+                      <EuiText
+                        size="s"
+                      >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                       </EuiText>
                     }
@@ -3459,9 +3485,11 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             <div
                               className="euiText euiText--medium"
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                 </div>
@@ -3581,7 +3609,9 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                 </EuiSpacer>
                 <EuiEmptyPrompt
                   body={
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                     </EuiText>
                   }
@@ -3620,9 +3650,11 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                           <div
                             className="euiText euiText--medium"
                           >
-                            <EuiText>
+                            <EuiText
+                              size="s"
+                            >
                               <div
-                                className="euiText euiText--medium"
+                                className="euiText euiText--small"
                               >
                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                               </div>
