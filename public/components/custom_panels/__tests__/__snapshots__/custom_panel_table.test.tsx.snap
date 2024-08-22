@@ -16,11 +16,13 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
+          <div
+            class="euiText euiText--small"
           >
-            Observability dashboards
-          </h1>
+            <h1>
+              Observability dashboards
+            </h1>
+          </div>
         </div>
       </header>
       <div
@@ -859,11 +861,13 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
+          <div
+            class="euiText euiText--small"
           >
-            Observability dashboards
-          </h1>
+            <h1>
+              Observability dashboards
+            </h1>
+          </div>
         </div>
       </header>
       <div
@@ -1099,11 +1103,13 @@ exports[`Panels Table Component renders empty panel table container2 1`] = `
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
+          <div
+            class="euiText euiText--small"
           >
-            Observability dashboards
-          </h1>
+            <h1>
+              Observability dashboards
+            </h1>
+          </div>
         </div>
       </header>
       <div

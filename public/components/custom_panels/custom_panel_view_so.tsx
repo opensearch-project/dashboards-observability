@@ -22,14 +22,14 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiCompressedSuperDatePicker,
-  EuiTitle,
+  EuiText,
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import { last } from 'lodash';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../src/core/public';
 import { CREATE_PANEL_MESSAGE } from '../../../common/constants/custom_panels';
@@ -119,7 +119,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    cloneCustomPanel,
     onEditClick,
     onAddClick,
   } = props;
@@ -131,7 +130,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [loading, setLoading] = useState(true);
 
   const [pplFilterValue, setPPLFilterValue] = useState('');
-  const [baseQuery, setBaseQuery] = useState('');
+  const [baseQuery, _] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
 
   const [inputDisabled, setInputDisabled] = useState(true);
@@ -375,7 +374,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   );
 
   const saveButton = (
-    <EuiSmallButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiSmallButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
+    >
       Save
     </EuiSmallButton>
   );
@@ -562,9 +565,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
             {appPanel || (
               <>
                 <EuiPageHeaderSection>
-                  <EuiTitle size="l">
+                  <EuiText size="s">
                     <h1 data-test-subj="panelNameHeader">{panel?.title}</h1>
-                  </EuiTitle>
+                  </EuiText>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
@@ -587,7 +590,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

@@ -86,7 +86,7 @@ export const AddVisualizationPopover = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={getVizContextPanels()} />
+      <EuiContextMenu initialPanelId={0} panels={getVizContextPanels()} size="s" />
     </EuiPopover>
   );
 };
