@@ -71,12 +71,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                 <div
                   class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                 >
-                  <h2
-                    class="euiTitle euiTitle--medium"
+                  <div
+                    class="euiText euiText--small"
                     data-test-subj="addIntegrationFlyoutTitle"
                   >
-                    Add Integration
-                  </h2>
+                    <h2>
+                      Add Integration
+                    </h2>
+                  </div>
                 </div>
                 <div
                   class="euiFlyoutBody"
@@ -406,12 +408,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                         <div
                           class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                         >
-                          <h2
-                            class="euiTitle euiTitle--medium"
+                          <div
+                            class="euiText euiText--small"
                             data-test-subj="addIntegrationFlyoutTitle"
                           >
-                            Add Integration
-                          </h2>
+                            <h2>
+                              Add Integration
+                            </h2>
+                          </div>
                         </div>
                         <div
                           class="euiFlyoutBody"
@@ -673,12 +677,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                           <div
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
-                            <h2
-                              class="euiTitle euiTitle--medium"
+                            <div
+                              class="euiText euiText--small"
                               data-test-subj="addIntegrationFlyoutTitle"
                             >
-                              Add Integration
-                            </h2>
+                              <h2>
+                                Add Integration
+                              </h2>
+                            </div>
                           </div>
                           <div
                             class="euiFlyoutBody"
@@ -940,12 +946,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             <div
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
-                              <h2
-                                class="euiTitle euiTitle--medium"
+                              <div
+                                class="euiText euiText--small"
                                 data-test-subj="addIntegrationFlyoutTitle"
                               >
-                                Add Integration
-                              </h2>
+                                <h2>
+                                  Add Integration
+                                </h2>
+                              </div>
                             </div>
                             <div
                               class="euiFlyoutBody"
@@ -1195,12 +1203,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               <div
                                 class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                               >
-                                <h2
-                                  class="euiTitle euiTitle--medium"
+                                <div
+                                  class="euiText euiText--small"
                                   data-test-subj="addIntegrationFlyoutTitle"
                                 >
-                                  Add Integration
-                                </h2>
+                                  <h2>
+                                    Add Integration
+                                  </h2>
+                                </div>
                               </div>
                               <div
                                 class="euiFlyoutBody"
@@ -1510,16 +1520,19 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                           <div
                             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
-                            <EuiTitle
+                            <EuiText
                               data-test-subj="addIntegrationFlyoutTitle"
+                              size="s"
                             >
-                              <h2
-                                className="euiTitle euiTitle--medium"
+                              <div
+                                className="euiText euiText--small"
                                 data-test-subj="addIntegrationFlyoutTitle"
                               >
-                                Add Integration
-                              </h2>
-                            </EuiTitle>
+                                <h2>
+                                  Add Integration
+                                </h2>
+                              </div>
+                            </EuiText>
                           </div>
                         </EuiFlyoutHeader>
                         <EuiFlyoutBody>

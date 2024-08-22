@@ -1635,7 +1635,9 @@ exports[`Services component renders empty services page 1`] = `
             </EuiSpacer>
             <EuiEmptyPrompt
               body={
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                 </EuiText>
               }
@@ -1674,9 +1676,11 @@ exports[`Services component renders empty services page 1`] = `
                       <div
                         className="euiText euiText--medium"
                       >
-                        <EuiText>
+                        <EuiText
+                          size="s"
+                        >
                           <div
-                            className="euiText euiText--medium"
+                            className="euiText euiText--small"
                           >
                             No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                           </div>
@@ -2168,7 +2172,9 @@ exports[`Services component renders empty services page 1`] = `
               </EuiSpacer>
               <EuiEmptyPrompt
                 body={
-                  <EuiText>
+                  <EuiText
+                    size="s"
+                  >
                     No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                   </EuiText>
                 }
@@ -2207,9 +2213,11 @@ exports[`Services component renders empty services page 1`] = `
                         <div
                           className="euiText euiText--medium"
                         >
-                          <EuiText>
+                          <EuiText
+                            size="s"
+                          >
                             <div
-                              className="euiText euiText--medium"
+                              className="euiText euiText--small"
                             >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </div>
@@ -3845,7 +3853,9 @@ exports[`Services component renders jaeger services page 1`] = `
             </EuiSpacer>
             <EuiEmptyPrompt
               body={
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                 </EuiText>
               }
@@ -3884,9 +3894,11 @@ exports[`Services component renders jaeger services page 1`] = `
                       <div
                         className="euiText euiText--medium"
                       >
-                        <EuiText>
+                        <EuiText
+                          size="s"
+                        >
                           <div
-                            className="euiText euiText--medium"
+                            className="euiText euiText--small"
                           >
                             No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                           </div>
@@ -5557,7 +5569,9 @@ exports[`Services component renders services page 1`] = `
             </EuiSpacer>
             <EuiEmptyPrompt
               body={
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                 </EuiText>
               }
@@ -5596,9 +5610,11 @@ exports[`Services component renders services page 1`] = `
                       <div
                         className="euiText euiText--medium"
                       >
-                        <EuiText>
+                        <EuiText
+                          size="s"
+                        >
                           <div
-                            className="euiText euiText--medium"
+                            className="euiText euiText--small"
                           >
                             No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                           </div>
@@ -6090,7 +6106,9 @@ exports[`Services component renders services page 1`] = `
               </EuiSpacer>
               <EuiEmptyPrompt
                 body={
-                  <EuiText>
+                  <EuiText
+                    size="s"
+                  >
                     No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                   </EuiText>
                 }
@@ -6129,9 +6147,11 @@ exports[`Services component renders services page 1`] = `
                         <div
                           className="euiText euiText--medium"
                         >
-                          <EuiText>
+                          <EuiText
+                            size="s"
+                          >
                             <div
-                              className="euiText euiText--medium"
+                              className="euiText euiText--small"
                             >
                               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                             </div>

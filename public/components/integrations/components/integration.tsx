@@ -164,7 +164,9 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer />
         {IntegrationScreenshots({ integration, http })}
         <EuiSpacer />
-        <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+        <EuiTabs display="condensed" size="s">
+          {renderTabs()}
+        </EuiTabs>
         <EuiSpacer size="s" />
         {selectedTabId === 'assets'
           ? IntegrationAssets({ integration, integrationAssets })

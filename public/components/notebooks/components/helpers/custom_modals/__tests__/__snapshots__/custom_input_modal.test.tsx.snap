@@ -8,7 +8,13 @@ exports[`<CustomInputModal /> spec renders the component 1`] = `
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        title
+        <EuiText
+          size="s"
+        >
+          <h2>
+            title
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -58,7 +64,13 @@ exports[`<CustomInputModal /> spec renders the component 2`] = `
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        title
+        <EuiText
+          size="s"
+        >
+          <h2>
+            title
+          </h2>
+        </EuiText>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>

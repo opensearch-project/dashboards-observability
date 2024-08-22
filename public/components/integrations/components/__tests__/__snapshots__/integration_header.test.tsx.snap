@@ -11,17 +11,19 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
           <div
             className="euiPageHeaderSection"
           >
-            <EuiTitle
+            <EuiText
               data-test-subj="integrations-header"
-              size="l"
+              size="s"
             >
-              <h1
-                className="euiTitle euiTitle--large"
+              <div
+                className="euiText euiText--small"
                 data-test-subj="integrations-header"
               >
-                Integrations
-              </h1>
-            </EuiTitle>
+                <h1>
+                  Integrations
+                </h1>
+              </div>
+            </EuiText>
           </div>
         </EuiPageHeaderSection>
         <EuiPageHeaderSection>
@@ -234,9 +236,10 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
     </EuiSpacer>
     <EuiTabs
       display="condensed"
+      size="s"
     >
       <div
-        className="euiTabs euiTabs--condensed"
+        className="euiTabs euiTabs--condensed euiTabs--small"
         role="tablist"
       >
         <EuiTab

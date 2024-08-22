@@ -58,6 +58,7 @@ export const ServiceTrendsPlots = ({
             anchorPosition="downCenter"
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
+            panelPaddingSize="s"
           >
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>

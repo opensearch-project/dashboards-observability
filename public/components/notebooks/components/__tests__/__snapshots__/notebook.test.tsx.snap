@@ -152,12 +152,14 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
       <div
         class="euiSpacer euiSpacer--s"
       />
-      <h1
-        class="euiTitle euiTitle--large"
+      <div
+        class="euiText euiText--small"
         data-test-subj="notebookTitle"
       >
-        sample-notebook-1
-      </h1>
+        <h1>
+          sample-notebook-1
+        </h1>
+      </div>
       <div
         class="euiSpacer euiSpacer--l"
       />
@@ -171,7 +173,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiText euiText--medium"
+            class="euiText euiText--small"
           >
             <div>
               <p>
@@ -203,7 +205,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 No paragraphs
               </h2>
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--small"
               >
                 Add a paragraph to compose your document or story. Notebooks now support two types of input:
               </div>
@@ -426,10 +428,12 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
       <div
         class="euiSpacer euiSpacer--s"
       />
-      <h1
-        class="euiTitle euiTitle--large"
+      <div
+        class="euiText euiText--small"
         data-test-subj="notebookTitle"
-      />
+      >
+        <h1 />
+      </div>
       <div
         class="euiSpacer euiSpacer--l"
       />
@@ -485,7 +489,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiText euiText--medium"
+            class="euiText euiText--small"
           >
             <div>
               <p>
@@ -517,7 +521,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
                 No paragraphs
               </h2>
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--small"
               >
                 Add a paragraph to compose your document or story. Notebooks now support two types of input:
               </div>
