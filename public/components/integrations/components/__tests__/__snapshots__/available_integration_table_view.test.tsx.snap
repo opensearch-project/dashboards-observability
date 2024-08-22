@@ -457,6 +457,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                         >
                                           <EuiButtonContent
                                             className="euiButton__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconType="list"
                                             textProps={
@@ -579,6 +580,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                         >
                                           <EuiButtonContent
                                             className="euiButton__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconType="grid"
                                             textProps={
@@ -1222,6 +1224,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1425,6 +1428,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                 >
                                                   <EuiButtonContent
                                                     className="euiButtonEmpty__content"
+                                                    iconGap="m"
                                                     iconSide="left"
                                                     iconSize="m"
                                                     textProps={

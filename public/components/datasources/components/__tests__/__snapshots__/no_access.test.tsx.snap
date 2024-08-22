@@ -146,6 +146,7 @@ exports[`No access test Renders no access view of data source 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {

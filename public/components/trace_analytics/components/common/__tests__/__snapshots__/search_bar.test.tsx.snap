@@ -255,6 +255,7 @@ exports[`Search bar components renders date picker 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="s"
                             iconType="arrowDown"
@@ -768,6 +769,7 @@ exports[`Search bar components renders search bar 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -943,6 +945,7 @@ exports[`Search bar components renders search bar 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     iconType="refresh"
                     textProps={
@@ -1173,6 +1176,7 @@ exports[`Search bar components renders search bar 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="s"
                           textProps={

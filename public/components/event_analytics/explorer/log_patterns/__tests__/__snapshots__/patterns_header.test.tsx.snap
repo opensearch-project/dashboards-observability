@@ -689,6 +689,7 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                                     >
                                                       <EuiButtonContent
                                                         className="euiButtonEmpty__content"
+                                                        iconGap="m"
                                                         iconSide="left"
                                                         iconSize="m"
                                                         textProps={
@@ -745,6 +746,7 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButton__content"
+                                                          iconGap="m"
                                                           iconSide="left"
                                                           textProps={
                                                             Object {
