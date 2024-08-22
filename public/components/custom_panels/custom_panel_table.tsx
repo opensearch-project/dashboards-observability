@@ -46,7 +46,6 @@ import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { getCustomModal } from './helpers/modal_containers';
 import { CustomPanelListType, CustomPanelType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
-import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import {
   createPanel,
@@ -337,7 +336,7 @@ export const CustomPanelTable = ({
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
   return (
-    <div style={pageStyles}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
@@ -368,20 +367,12 @@ export const CustomPanelTable = ({
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems()} size="s" />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
                     <EuiSmallButton
                       fill
                       href="#/create"
                       data-test-subj="customPanels__createNewPanels"
+                      iconType="plus"
+                      iconSide="left"
                     >
                       Create Dashboard
                     </EuiSmallButton>
@@ -392,13 +383,25 @@ export const CustomPanelTable = ({
             <EuiHorizontalRule margin="m" />
             {customPanels.length > 0 ? (
               <>
-                <EuiCompressedFieldSearch
-                  fullWidth
-                  data-test-subj="operationalPanelSearchBar"
-                  placeholder="Search Observability Dashboard name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiCompressedFieldSearch
+                    fullWidth
+                    data-test-subj="operationalPanelSearchBar"
+                    placeholder="Search Observability Dashboard name"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <EuiFlexItem>
+                    <EuiPopover
+                      panelPaddingSize="none"
+                      button={popoverButton}
+                      isOpen={isActionsPopoverOpen}
+                      closePopover={() => setIsActionsPopoverOpen(false)}
+                    >
+                      <EuiContextMenuPanel items={popoverItems()} size="s" />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
                   loading={loading}
@@ -448,6 +451,8 @@ export const CustomPanelTable = ({
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
                       href="#/create"
+                      iconType="plus"
+                      iconSide="left"
                     >
                       Create Dashboard
                     </EuiSmallButton>
@@ -465,6 +470,6 @@ export const CustomPanelTable = ({
         </EuiPageBody>
       </EuiPage>
       {isModalVisible && modalLayout}
-    </div>
+    </>
   );
 };
