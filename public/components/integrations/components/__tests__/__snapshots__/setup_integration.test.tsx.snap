@@ -982,6 +982,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="m"
                                         iconType="cross"
@@ -1089,6 +1090,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="arrowRight"
                                           isLoading={false}

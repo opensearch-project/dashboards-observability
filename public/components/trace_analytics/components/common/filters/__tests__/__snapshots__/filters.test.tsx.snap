@@ -166,6 +166,7 @@ exports[`Filter component renders filters 1`] = `
                     >
                       <EuiButtonContent
                         className="euiButtonEmpty__content"
+                        iconGap="m"
                         iconSide="left"
                         iconSize="s"
                         textProps={
