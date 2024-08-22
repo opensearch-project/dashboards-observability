@@ -234,9 +234,9 @@ export function NoteTable({
         <EuiPageBody component="div">
           <EuiPageHeader>
             <EuiPageHeaderSection>
-              <EuiTitle size="l">
+              <EuiText size="s">
                 <h1>Notebooks</h1>
-              </EuiTitle>
+              </EuiText>
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContent id="notebookArea">
@@ -266,7 +266,7 @@ export function NoteTable({
                       isOpen={isActionsPopoverOpen}
                       closePopover={() => setIsActionsPopoverOpen(false)}
                     >
-                      <EuiContextMenuPanel items={popoverItems} />
+                      <EuiContextMenuPanel items={popoverItems} size="s" />
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -322,7 +322,7 @@ export function NoteTable({
                 <EuiText textAlign="center" data-test-subj="notebookEmptyTableText">
                   <h2>No notebooks</h2>
                   <EuiSpacer size="m" />
-                  <EuiText color="subdued">
+                  <EuiText color="subdued" size="s">
                     Use notebooks to create post-mortem reports, build live infrastructure
                     <br />
                     reports, or foster explorative collaborations with data.

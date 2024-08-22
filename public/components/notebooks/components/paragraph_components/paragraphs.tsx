@@ -452,7 +452,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
             >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
+              <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
             </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -474,7 +474,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText color="subdued" data-test-subj="lastRunText">
+            <EuiText color="subdued" data-test-subj="lastRunText" size="s">
               {`Last successful run ${moment(props.dateModified).format(UI_DATE_FORMAT)}.`}
             </EuiText>
           </EuiFlexItem>
@@ -489,12 +489,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             <EuiIcon type="questionInCircle" color="primary" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               {`Output available from ${moment(props.dateModified).format(UI_DATE_FORMAT)}`}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
+            <EuiText size="s">
               <EuiLink
                 data-test-subj="viewBothLink"
                 onClick={() => props.setSelectedViewId('view_both', index)}
@@ -623,7 +623,6 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   <EuiSmallButton
                     data-test-subj={`runRefreshBtn-${index}`}
                     onClick={() => onRunPara()}
-                    fill
                   >
                     {isOutputAvailable ? 'Refresh' : 'Run'}
                   </EuiSmallButton>
