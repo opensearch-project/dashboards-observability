@@ -6,7 +6,13 @@ exports[`Integration Upload Flyout Renders integration upload flyout as expected
   size="s"
 >
   <EuiFlyoutHeader>
-    Upload Integrations
+    <EuiText
+      size="s"
+    >
+      <h2>
+        Upload Integrations
+      </h2>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <IntegrationUploadPicker

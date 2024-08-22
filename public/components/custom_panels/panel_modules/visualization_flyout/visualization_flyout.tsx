@@ -28,7 +28,6 @@ import {
   EuiSelectOption,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
@@ -128,17 +127,19 @@ export const VisaulizationFlyout = ({
   const [modalContent, setModalContent] = useState(<></>);
 
   const closeModal = () => setIsModalVisible(false);
-  const showModal = (modalType: string) => {
+  const showModal = (_: string) => {
     setModalContent(
       <EuiModal onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>{isPreviewError.errorMessage}</h1>
+            <EuiText size="s">
+              <h2>{isPreviewError.errorMessage}</h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          Error Details
+          <EuiText size="s">Error Details</EuiText>
           <EuiSpacer />
           <EuiCodeBlock language="html" isCopyable>
             {isPreviewError.errorDetails}
@@ -267,11 +268,11 @@ export const VisaulizationFlyout = ({
 
   const flyoutHeader = (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
+      <EuiText size="s">
         <h2 id="addVisualizationFlyout">
           {isFlyoutReplacement ? 'Replace visualization' : 'Select existing visualization'}
         </h2>
-      </EuiTitle>
+      </EuiText>
     </EuiFlyoutHeader>
   );
 

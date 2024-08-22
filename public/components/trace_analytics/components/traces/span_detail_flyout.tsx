@@ -16,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -314,9 +313,9 @@ export function SpanDetailFlyout(props: {
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
-              <EuiTitle>
+              <EuiText size="s">
                 <h2>Span detail</h2>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
             {mode === 'data_prepper' && (
               <EuiFlexItem>

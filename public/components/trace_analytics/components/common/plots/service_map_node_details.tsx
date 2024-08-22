@@ -46,9 +46,9 @@ export const ServiceMapNodeDetails = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiText>{selectedNodeDetails?.average_latency}</EuiText>
-      <EuiText>{selectedNodeDetails?.error_rate}</EuiText>
-      <EuiText>{selectedNodeDetails?.throughput}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.average_latency}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.error_rate}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.throughput}</EuiText>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>

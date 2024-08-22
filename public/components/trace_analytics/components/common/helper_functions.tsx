@@ -5,7 +5,7 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import { EuiSmallButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSmallButtonEmpty, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
@@ -45,7 +45,7 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
       <EuiEmptyPrompt
         title={<h2>No matches</h2>}
         body={
-          <EuiText>
+          <EuiText size="s">
             No data matches the selected filter. Clear the filter and/or increase the time range to
             see more results.
           </EuiText>
@@ -65,16 +65,16 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
-        body={<EuiText>{missingConfigurationBody}</EuiText>}
+        body={<EuiText size="s">{missingConfigurationBody}</EuiText>}
         actions={
-          <EuiSmallButton
+          <EuiSmallButtonEmpty
             color="primary"
             iconSide="right"
             iconType="popout"
             onClick={() => window.open(TRACE_ANALYTICS_DOCUMENTATION_LINK, '_blank')}
           >
             Learn more
-          </EuiSmallButton>
+          </EuiSmallButtonEmpty>
         }
       />
     </>

@@ -2,11 +2,13 @@
 
 exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] = `
 <EuiForm>
-  <EuiTitle>
+  <EuiText
+    size="s"
+  >
     <h1>
       Set Up Integration
     </h1>
-  </EuiTitle>
+  </EuiText>
   <EuiSpacer />
   <EuiSpacer />
   <EuiText>
@@ -233,11 +235,13 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
 
 exports[`Integration Setup Inputs Renders the S3 connector form without workflows 1`] = `
 <EuiForm>
-  <EuiTitle>
+  <EuiText
+    size="s"
+  >
     <h1>
       Set Up Integration
     </h1>
-  </EuiTitle>
+  </EuiText>
   <EuiSpacer />
   <EuiSpacer />
   <EuiText>
@@ -1746,11 +1750,13 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
 
 exports[`Integration Setup Inputs Renders the index form as expected 1`] = `
 <EuiForm>
-  <EuiTitle>
+  <EuiText
+    size="s"
+  >
     <h1>
       Set Up Integration
     </h1>
-  </EuiTitle>
+  </EuiText>
   <EuiSpacer />
   <EuiSpacer />
   <EuiText>

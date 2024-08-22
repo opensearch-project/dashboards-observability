@@ -126,15 +126,17 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                 <div
                                   className="euiFlexItem euiFlexItem--flexGrowZero"
                                 >
-                                  <EuiTitle
+                                  <EuiText
                                     data-test-subj="eventHomePageTitle"
-                                    size="l"
+                                    size="s"
                                   >
-                                    <h1
-                                      className="euiTitle euiTitle--large"
+                                    <div
+                                      className="euiText euiText--small"
                                       data-test-subj="eventHomePageTitle"
-                                    />
-                                  </EuiTitle>
+                                    >
+                                      <h1 />
+                                    </div>
+                                  </EuiText>
                                 </div>
                               </EuiFlexItem>
                               <EuiFlexItem
