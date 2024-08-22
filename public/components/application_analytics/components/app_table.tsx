@@ -30,6 +30,7 @@ import {
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiTitle,
+  EuiPageHeader,
 } from '@elastic/eui';
 import moment from 'moment';
 import truncate from 'lodash/truncate';
@@ -225,20 +226,15 @@ export function AppTable(props: AppTableProps) {
 
   return (
     <>
-      {!newNavigation && (
-        <div style={{ paddingLeft: '16px', paddingTop: '8px' }}>
-          <EuiTitle size="l">
-            <h3>
-              Applications
-              <EuiText size="m" style={{ display: 'inline' }}>
-                {` (${applications.length})`}
-              </EuiText>
-            </h3>
-          </EuiTitle>
-        </div>
-      )}
       <EuiPage>
         <EuiPageBody component="div">
+          <EuiPageHeader>
+            {!newNavigation && (
+              <EuiTitle size="l">
+                <h3>Applications {` (${applications.length})`}</h3>
+              </EuiTitle>
+            )}
+          </EuiPageHeader>
           <EuiPageContent id="applicationArea">
             <EuiPageContentHeader>
               <EuiFlexGroup gutterSize="s" alignItems="center">
