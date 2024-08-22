@@ -9,15 +9,15 @@ exports[`Service view component renders service view 1`] = `
         gutterSize="s"
       >
         <EuiFlexItem>
-          <EuiTitle
-            size="l"
+          <EuiText
+            size="s"
           >
-            <h2
+            <h1
               className="overview-content"
             >
               order
-            </h2>
-          </EuiTitle>
+            </h1>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}

@@ -27,7 +27,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
-          panelPaddingSize="m"
+          panelPaddingSize="s"
         >
           <div
             className="euiPopover euiPopover--anchorDownCenter"
