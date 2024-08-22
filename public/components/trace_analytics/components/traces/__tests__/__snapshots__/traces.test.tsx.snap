@@ -576,6 +576,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -1184,6 +1185,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -1453,6 +1455,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -2326,6 +2329,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -2936,6 +2940,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -3207,6 +3212,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -4080,6 +4086,7 @@ exports[`Traces component renders traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -4690,6 +4697,7 @@ exports[`Traces component renders traces page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -4961,6 +4969,7 @@ exports[`Traces component renders traces page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={

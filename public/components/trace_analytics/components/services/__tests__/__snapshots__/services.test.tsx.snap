@@ -558,6 +558,7 @@ exports[`Services component renders empty services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -1165,6 +1166,7 @@ exports[`Services component renders empty services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -1434,6 +1436,7 @@ exports[`Services component renders empty services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -1568,6 +1571,7 @@ exports[`Services component renders empty services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -1608,6 +1612,7 @@ exports[`Services component renders empty services page 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="s"
                                         textProps={
@@ -1851,6 +1856,7 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -1931,6 +1937,7 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -2011,6 +2018,7 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -2840,6 +2848,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -3449,6 +3458,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -3720,6 +3730,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -3855,6 +3866,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -4550,6 +4562,7 @@ exports[`Services component renders services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -5159,6 +5172,7 @@ exports[`Services component renders services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
+                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -5430,6 +5444,7 @@ exports[`Services component renders services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -5564,6 +5579,7 @@ exports[`Services component renders services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -5604,6 +5620,7 @@ exports[`Services component renders services page 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="s"
                                         textProps={
@@ -5847,6 +5864,7 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -5927,6 +5945,7 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -6007,6 +6026,7 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
