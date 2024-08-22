@@ -177,12 +177,7 @@ export function ServicesContent(props: ServicesProps) {
     <>
       <EuiPage paddingSize="m">
         <EuiPageBody>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            // style={{ padding: '0 24px' }}
-          >
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <DataSourcePicker
                 modes={props.modes}
