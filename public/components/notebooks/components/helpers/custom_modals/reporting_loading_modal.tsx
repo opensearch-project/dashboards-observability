@@ -7,21 +7,18 @@ import {
   EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
-  EuiTitle,
   EuiText,
   EuiModalBody,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSmallButton
-} from "@elastic/eui";
-import React from "react";
+  EuiSmallButton,
+} from '@elastic/eui';
+import React from 'react';
 
-export function GenerateReportLoadingModal(props: { setShowLoading: any; }) {
-  const {
-    setShowLoading
-  } = props;
+export function GenerateReportLoadingModal(props: { setShowLoading: any }) {
+  const { setShowLoading } = props;
 
   const closeModal = () => {
     setShowLoading(false);
@@ -36,15 +33,15 @@ export function GenerateReportLoadingModal(props: { setShowLoading: any; }) {
           id="downloadInProgressLoadingModal"
         >
           <EuiModalHeader>
-            <EuiTitle>
-              <EuiText textAlign="right">
-                <h2>Generating report</h2>
-              </EuiText>
-            </EuiTitle>
+            <EuiText size="s" textAlign="right">
+              <h2>Generating report</h2>
+            </EuiText>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText>Preparing your file for download.</EuiText>
-            <EuiText>You can close this dialog while we continue in the background.</EuiText>
+            <EuiText size="s">Preparing your file for download.</EuiText>
+            <EuiText size="s">
+              You can close this dialog while we continue in the background.
+            </EuiText>
             <EuiSpacer />
             <EuiFlexGroup justifyContent="center" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -67,4 +64,4 @@ export function GenerateReportLoadingModal(props: { setShowLoading: any; }) {
       </EuiOverlayMask>
     </div>
   );
-};
+}

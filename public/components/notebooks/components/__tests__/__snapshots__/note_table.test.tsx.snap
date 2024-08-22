@@ -16,11 +16,13 @@ exports[`<NoteTable /> spec renders the component 1`] = `
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
+          <div
+            class="euiText euiText--small"
           >
-            Notebooks
-          </h1>
+            <h1>
+              Notebooks
+            </h1>
+          </div>
         </div>
       </header>
       <div
@@ -935,11 +937,13 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
+          <div
+            class="euiText euiText--small"
           >
-            Notebooks
-          </h1>
+            <h1>
+              Notebooks
+            </h1>
+          </div>
         </div>
       </header>
       <div
@@ -1094,7 +1098,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
               class="euiSpacer euiSpacer--m"
             />
             <div
-              class="euiText euiText--medium"
+              class="euiText euiText--small"
             >
               <div
                 class="euiTextColor euiTextColor--subdued"
