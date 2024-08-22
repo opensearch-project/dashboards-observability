@@ -127,6 +127,7 @@ export function Filters(props: FiltersOwnProps) {
     const button = (
       <EuiButtonEmpty
         size="xs"
+        flush="left"
         onClick={() => {
           setIsPopoverOpen(true);
         }}
