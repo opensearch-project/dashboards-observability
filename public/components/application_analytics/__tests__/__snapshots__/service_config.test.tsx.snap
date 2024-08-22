@@ -669,535 +669,543 @@ exports[`Service Config component renders empty service config 1`] = `
                   serviceMap={Object {}}
                   setIdSelected={[Function]}
                 >
-                  <EuiPanel>
+                  <EuiPage
+                    paddingSize="m"
+                  >
                     <div
-                      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                      className="euiPage euiPage--paddingMedium euiPage--grow"
                     >
-                      <PanelTitle
-                        title="Service map"
-                      >
-                        <EuiText
-                          size="m"
-                        >
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            <span
-                              className="panel-title"
-                            >
-                              Service map
-                            </span>
-                          </div>
-                        </EuiText>
-                      </PanelTitle>
-                      <EuiSpacer
-                        size="m"
-                      >
+                      <EuiPanel>
                         <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
-                      <EuiButtonGroup
-                        buttonSize="s"
-                        color="text"
-                        idSelected="latency"
-                        onChange={[Function]}
-                        options={
-                          Array [
-                            Object {
-                              "id": "latency",
-                              "label": "Duration",
-                            },
-                            Object {
-                              "id": "error_rate",
-                              "label": "Errors",
-                            },
-                            Object {
-                              "id": "throughput",
-                              "label": "Request Rate",
-                            },
-                          ]
-                        }
-                      >
-                        <fieldset
-                          className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
-                          disabled={false}
+                          className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                         >
-                          <EuiScreenReaderOnly>
-                            <legend
-                              className="euiScreenReaderOnly"
-                            />
-                          </EuiScreenReaderOnly>
-                          <div
-                            className="euiButtonGroup__buttons"
+                          <PanelTitle
+                            title="Service map"
                           >
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="latency"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={true}
-                              key="0"
-                              label="Duration"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
+                            <EuiText
+                              size="m"
                             >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className="euiButtonGroupButton-isSelected"
-                                color="text"
-                                element="label"
-                                fill={true}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Duration",
-                                    "ref": [Function],
-                                    "title": "Duration",
-                                  }
-                                }
+                              <div
+                                className="euiText euiText--medium"
                               >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                <span
+                                  className="panel-title"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  Service map
+                                </span>
+                              </div>
+                            </EuiText>
+                          </PanelTitle>
+                          <EuiSpacer
+                            size="m"
+                          >
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiButtonGroup
+                            buttonSize="s"
+                            color="text"
+                            idSelected="latency"
+                            onChange={[Function]}
+                            options={
+                              Array [
+                                Object {
+                                  "id": "latency",
+                                  "label": "Duration",
+                                },
+                                Object {
+                                  "id": "error_rate",
+                                  "label": "Errors",
+                                },
+                                Object {
+                                  "id": "throughput",
+                                  "label": "Request Rate",
+                                },
+                              ]
+                            }
+                          >
+                            <fieldset
+                              className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                              disabled={false}
+                            >
+                              <EuiScreenReaderOnly>
+                                <legend
+                                  className="euiScreenReaderOnly"
+                                />
+                              </EuiScreenReaderOnly>
+                              <div
+                                className="euiButtonGroup__buttons"
+                              >
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="latency"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={true}
+                                  key="0"
+                                  label="Duration"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
+                                >
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className="euiButtonGroupButton-isSelected"
+                                    color="text"
+                                    element="label"
+                                    fill={true}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Duration",
                                         "ref": [Function],
                                         "title": "Duration",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Duration"
-                                        title="Duration"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Duration",
+                                            "ref": [Function],
+                                            "title": "Duration",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={true}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="latency"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Duration
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="error_rate"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={false}
-                              key="1"
-                              label="Errors"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className=""
-                                color="text"
-                                element="label"
-                                fill={false}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Errors",
-                                    "ref": [Function],
-                                    "title": "Errors",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                        <span
+                                          className="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Duration"
+                                            title="Duration"
+                                          >
+                                            <input
+                                              checked={true}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="latency"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Duration
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="error_rate"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={false}
+                                  key="1"
+                                  label="Errors"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className=""
+                                    color="text"
+                                    element="label"
+                                    fill={false}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Errors",
                                         "ref": [Function],
                                         "title": "Errors",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Errors"
-                                        title="Errors"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Errors",
+                                            "ref": [Function],
+                                            "title": "Errors",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={false}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="error_rate"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Errors
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="throughput"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={false}
-                              key="2"
-                              label="Request Rate"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className=""
-                                color="text"
-                                element="label"
-                                fill={false}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Request Rate",
-                                    "ref": [Function],
-                                    "title": "Request Rate",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                        <span
+                                          className="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Errors"
+                                            title="Errors"
+                                          >
+                                            <input
+                                              checked={false}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="error_rate"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Errors
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="throughput"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={false}
+                                  key="2"
+                                  label="Request Rate"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className=""
+                                    color="text"
+                                    element="label"
+                                    fill={false}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Request Rate",
                                         "ref": [Function],
                                         "title": "Request Rate",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Request Rate"
-                                        title="Request Rate"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Request Rate",
+                                            "ref": [Function],
+                                            "title": "Request Rate",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={false}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="throughput"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Request Rate
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                          </div>
-                        </fieldset>
-                      </EuiButtonGroup>
-                      <EuiHorizontalRule
-                        margin="m"
-                      >
-                        <hr
-                          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-                        />
-                      </EuiHorizontalRule>
-                      <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
-                      >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiCompressedFieldSearch
-                                compressed={true}
-                                fullWidth={false}
-                                incremental={false}
-                                isClearable={true}
-                                isInvalid={false}
-                                isLoading={false}
-                                onChange={[Function]}
-                                onSearch={[Function]}
-                                placeholder="Service name"
-                                value=""
-                              >
-                                <EuiFormControlLayout
-                                  compressed={true}
-                                  fullWidth={false}
-                                  icon="search"
-                                  isLoading={false}
-                                >
-                                  <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout__childrenWrapper"
-                                    >
-                                      <EuiValidatableControl
-                                        isInvalid={false}
-                                      >
-                                        <input
-                                          className="euiFieldSearch euiFieldSearch--compressed"
-                                          onChange={[Function]}
-                                          onKeyUp={[Function]}
-                                          placeholder="Service name"
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons
-                                        compressed={true}
-                                        icon="search"
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayoutIcons"
+                                        <span
+                                          className="euiButtonContent euiButton__content"
                                         >
-                                          <EuiFormControlLayoutCustomIcon
-                                            size="s"
-                                            type="search"
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Request Rate"
+                                            title="Request Rate"
                                           >
-                                            <span
-                                              className="euiFormControlLayoutCustomIcon"
-                                            >
-                                              <EuiIcon
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
-                                                size="s"
-                                                type="search"
-                                              >
-                                                <EuiIconBeaker
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  >
-                                                    <path
-                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                    />
-                                                  </svg>
-                                                </EuiIconBeaker>
-                                              </EuiIcon>
-                                            </span>
-                                          </EuiFormControlLayoutCustomIcon>
-                                        </div>
-                                      </EuiFormControlLayoutIcons>
-                                    </div>
-                                  </div>
-                                </EuiFormControlLayout>
-                              </EuiCompressedFieldSearch>
-                            </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                      <EuiSpacer>
-                        <div
-                          className="euiSpacer euiSpacer--l"
-                        />
-                      </EuiSpacer>
-                      <div
-                        style={
-                          Object {
-                            "minHeight": 434,
-                          }
-                        }
-                      >
-                        <NoMatchMessage
-                          size="s"
-                        >
-                          <EuiSpacer
-                            size="s"
+                                            <input
+                                              checked={false}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="throughput"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Request Rate
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                              </div>
+                            </fieldset>
+                          </EuiButtonGroup>
+                          <EuiHorizontalRule
+                            margin="m"
                           >
-                            <div
-                              className="euiSpacer euiSpacer--s"
+                            <hr
+                              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                             />
-                          </EuiSpacer>
-                          <EuiEmptyPrompt
-                            body={
-                              <EuiText
-                                size="s"
-                              >
-                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                              </EuiText>
-                            }
-                            title={
-                              <h2>
-                                No matches
-                              </h2>
-                            }
+                          </EuiHorizontalRule>
+                          <EuiFlexGroup
+                            alignItems="center"
+                            gutterSize="s"
                           >
                             <div
-                              className="euiEmptyPrompt"
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
-                              <EuiTitle
-                                size="m"
+                              <EuiFlexItem
+                                grow={false}
                               >
-                                <h2
-                                  className="euiTitle euiTitle--medium"
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
                                 >
-                                  No matches
-                                </h2>
-                              </EuiTitle>
-                              <EuiTextColor
-                                color="subdued"
-                              >
-                                <span
-                                  className="euiTextColor euiTextColor--subdued"
-                                >
-                                  <EuiSpacer
-                                    size="m"
-                                  >
-                                    <div
-                                      className="euiSpacer euiSpacer--m"
-                                    />
-                                  </EuiSpacer>
                                   <EuiText>
                                     <div
                                       className="euiText euiText--medium"
                                     >
-                                      <EuiText
-                                        size="s"
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                        >
-                                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                        </div>
-                                      </EuiText>
+                                      Focus on
                                     </div>
                                   </EuiText>
-                                </span>
-                              </EuiTextColor>
+                                </div>
+                              </EuiFlexItem>
+                              <EuiFlexItem>
+                                <div
+                                  className="euiFlexItem"
+                                >
+                                  <EuiCompressedFieldSearch
+                                    compressed={true}
+                                    fullWidth={false}
+                                    incremental={false}
+                                    isClearable={true}
+                                    isInvalid={false}
+                                    isLoading={false}
+                                    onChange={[Function]}
+                                    onSearch={[Function]}
+                                    placeholder="Service name"
+                                    value=""
+                                  >
+                                    <EuiFormControlLayout
+                                      compressed={true}
+                                      fullWidth={false}
+                                      icon="search"
+                                      isLoading={false}
+                                    >
+                                      <div
+                                        className="euiFormControlLayout euiFormControlLayout--compressed"
+                                      >
+                                        <div
+                                          className="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <EuiValidatableControl
+                                            isInvalid={false}
+                                          >
+                                            <input
+                                              className="euiFieldSearch euiFieldSearch--compressed"
+                                              onChange={[Function]}
+                                              onKeyUp={[Function]}
+                                              placeholder="Service name"
+                                              type="search"
+                                              value=""
+                                            />
+                                          </EuiValidatableControl>
+                                          <EuiFormControlLayoutIcons
+                                            compressed={true}
+                                            icon="search"
+                                            isLoading={false}
+                                          >
+                                            <div
+                                              className="euiFormControlLayoutIcons"
+                                            >
+                                              <EuiFormControlLayoutCustomIcon
+                                                size="s"
+                                                type="search"
+                                              >
+                                                <span
+                                                  className="euiFormControlLayoutCustomIcon"
+                                                >
+                                                  <EuiIcon
+                                                    aria-hidden="true"
+                                                    className="euiFormControlLayoutCustomIcon__icon"
+                                                    size="s"
+                                                    type="search"
+                                                  >
+                                                    <EuiIconBeaker
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                      focusable="false"
+                                                      role="img"
+                                                      style={null}
+                                                    >
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconBeaker>
+                                                  </EuiIcon>
+                                                </span>
+                                              </EuiFormControlLayoutCustomIcon>
+                                            </div>
+                                          </EuiFormControlLayoutIcons>
+                                        </div>
+                                      </div>
+                                    </EuiFormControlLayout>
+                                  </EuiCompressedFieldSearch>
+                                </div>
+                              </EuiFlexItem>
                             </div>
-                          </EuiEmptyPrompt>
-                          <EuiSpacer
-                            size="s"
-                          >
+                          </EuiFlexGroup>
+                          <EuiSpacer>
                             <div
-                              className="euiSpacer euiSpacer--s"
+                              className="euiSpacer euiSpacer--l"
                             />
                           </EuiSpacer>
-                        </NoMatchMessage>
-                      </div>
+                          <div
+                            style={
+                              Object {
+                                "minHeight": 434,
+                              }
+                            }
+                          >
+                            <NoMatchMessage
+                              size="s"
+                            >
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                              <EuiEmptyPrompt
+                                body={
+                                  <EuiText
+                                    size="s"
+                                  >
+                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                  </EuiText>
+                                }
+                                title={
+                                  <h2>
+                                    No matches
+                                  </h2>
+                                }
+                              >
+                                <div
+                                  className="euiEmptyPrompt"
+                                >
+                                  <EuiTitle
+                                    size="m"
+                                  >
+                                    <h2
+                                      className="euiTitle euiTitle--medium"
+                                    >
+                                      No matches
+                                    </h2>
+                                  </EuiTitle>
+                                  <EuiTextColor
+                                    color="subdued"
+                                  >
+                                    <span
+                                      className="euiTextColor euiTextColor--subdued"
+                                    >
+                                      <EuiSpacer
+                                        size="m"
+                                      >
+                                        <div
+                                          className="euiSpacer euiSpacer--m"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiText>
+                                        <div
+                                          className="euiText euiText--medium"
+                                        >
+                                          <EuiText
+                                            size="s"
+                                          >
+                                            <div
+                                              className="euiText euiText--small"
+                                            >
+                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiText>
+                                    </span>
+                                  </EuiTextColor>
+                                </div>
+                              </EuiEmptyPrompt>
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                            </NoMatchMessage>
+                          </div>
+                        </div>
+                      </EuiPanel>
+                      <EuiSpacer
+                        size="xl"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--xl"
+                        />
+                      </EuiSpacer>
                     </div>
-                  </EuiPanel>
-                  <EuiSpacer
-                    size="xl"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--xl"
-                    />
-                  </EuiSpacer>
+                  </EuiPage>
                 </ServiceMap>
               </div>
             </div>
@@ -1894,535 +1902,543 @@ exports[`Service Config component renders with one service selected 1`] = `
                   serviceMap={Object {}}
                   setIdSelected={[Function]}
                 >
-                  <EuiPanel>
+                  <EuiPage
+                    paddingSize="m"
+                  >
                     <div
-                      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                      className="euiPage euiPage--paddingMedium euiPage--grow"
                     >
-                      <PanelTitle
-                        title="Service map"
-                      >
-                        <EuiText
-                          size="m"
-                        >
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            <span
-                              className="panel-title"
-                            >
-                              Service map
-                            </span>
-                          </div>
-                        </EuiText>
-                      </PanelTitle>
-                      <EuiSpacer
-                        size="m"
-                      >
+                      <EuiPanel>
                         <div
-                          className="euiSpacer euiSpacer--m"
-                        />
-                      </EuiSpacer>
-                      <EuiButtonGroup
-                        buttonSize="s"
-                        color="text"
-                        idSelected="latency"
-                        onChange={[Function]}
-                        options={
-                          Array [
-                            Object {
-                              "id": "latency",
-                              "label": "Duration",
-                            },
-                            Object {
-                              "id": "error_rate",
-                              "label": "Errors",
-                            },
-                            Object {
-                              "id": "throughput",
-                              "label": "Request Rate",
-                            },
-                          ]
-                        }
-                      >
-                        <fieldset
-                          className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
-                          disabled={false}
+                          className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                         >
-                          <EuiScreenReaderOnly>
-                            <legend
-                              className="euiScreenReaderOnly"
-                            />
-                          </EuiScreenReaderOnly>
-                          <div
-                            className="euiButtonGroup__buttons"
+                          <PanelTitle
+                            title="Service map"
                           >
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="latency"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={true}
-                              key="0"
-                              label="Duration"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
+                            <EuiText
+                              size="m"
                             >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className="euiButtonGroupButton-isSelected"
-                                color="text"
-                                element="label"
-                                fill={true}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Duration",
-                                    "ref": [Function],
-                                    "title": "Duration",
-                                  }
-                                }
+                              <div
+                                className="euiText euiText--medium"
                               >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                <span
+                                  className="panel-title"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  Service map
+                                </span>
+                              </div>
+                            </EuiText>
+                          </PanelTitle>
+                          <EuiSpacer
+                            size="m"
+                          >
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiButtonGroup
+                            buttonSize="s"
+                            color="text"
+                            idSelected="latency"
+                            onChange={[Function]}
+                            options={
+                              Array [
+                                Object {
+                                  "id": "latency",
+                                  "label": "Duration",
+                                },
+                                Object {
+                                  "id": "error_rate",
+                                  "label": "Errors",
+                                },
+                                Object {
+                                  "id": "throughput",
+                                  "label": "Request Rate",
+                                },
+                              ]
+                            }
+                          >
+                            <fieldset
+                              className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                              disabled={false}
+                            >
+                              <EuiScreenReaderOnly>
+                                <legend
+                                  className="euiScreenReaderOnly"
+                                />
+                              </EuiScreenReaderOnly>
+                              <div
+                                className="euiButtonGroup__buttons"
+                              >
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="latency"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={true}
+                                  key="0"
+                                  label="Duration"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
+                                >
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className="euiButtonGroupButton-isSelected"
+                                    color="text"
+                                    element="label"
+                                    fill={true}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Duration",
                                         "ref": [Function],
                                         "title": "Duration",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Duration"
-                                        title="Duration"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Duration",
+                                            "ref": [Function],
+                                            "title": "Duration",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={true}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="latency"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Duration
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="error_rate"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={false}
-                              key="1"
-                              label="Errors"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className=""
-                                color="text"
-                                element="label"
-                                fill={false}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Errors",
-                                    "ref": [Function],
-                                    "title": "Errors",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                        <span
+                                          className="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Duration"
+                                            title="Duration"
+                                          >
+                                            <input
+                                              checked={true}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="latency"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Duration
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="error_rate"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={false}
+                                  key="1"
+                                  label="Errors"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className=""
+                                    color="text"
+                                    element="label"
+                                    fill={false}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Errors",
                                         "ref": [Function],
                                         "title": "Errors",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Errors"
-                                        title="Errors"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Errors",
+                                            "ref": [Function],
+                                            "title": "Errors",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={false}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="error_rate"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Errors
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              id="throughput"
-                              isDisabled={false}
-                              isIconOnly={false}
-                              isSelected={false}
-                              key="2"
-                              label="Request Rate"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className=""
-                                color="text"
-                                element="label"
-                                fill={false}
-                                htmlFor="random_html_id"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Request Rate",
-                                    "ref": [Function],
-                                    "title": "Request Rate",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
+                                        <span
+                                          className="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Errors"
+                                            title="Errors"
+                                          >
+                                            <input
+                                              checked={false}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="error_rate"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Errors
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                                <EuiButtonGroupButton
+                                  color="text"
+                                  element="label"
+                                  id="throughput"
+                                  isDisabled={false}
+                                  isIconOnly={false}
+                                  isSelected={false}
+                                  key="2"
+                                  label="Request Rate"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  size="s"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButtonGroupButton"
+                                    className=""
+                                    color="text"
+                                    element="label"
+                                    fill={false}
+                                    htmlFor="random_html_id"
+                                    isDisabled={false}
+                                    onClick={[Function]}
+                                    size="s"
                                     textProps={
                                       Object {
-                                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                                        "className": "euiButtonGroupButton__textShift",
                                         "data-text": "Request Rate",
                                         "ref": [Function],
                                         "title": "Request Rate",
                                       }
                                     }
                                   >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
+                                    <label
+                                      className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                      disabled={false}
+                                      htmlFor="random_html_id"
+                                      onClick={[Function]}
+                                      style={
+                                        Object {
+                                          "minWidth": undefined,
+                                        }
+                                      }
                                     >
-                                      <span
-                                        className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Request Rate"
-                                        title="Request Rate"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconSide="left"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text euiButtonGroupButton__textShift",
+                                            "data-text": "Request Rate",
+                                            "ref": [Function],
+                                            "title": "Request Rate",
+                                          }
+                                        }
                                       >
-                                        <input
-                                          checked={false}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="throughput"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        Request Rate
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                          </div>
-                        </fieldset>
-                      </EuiButtonGroup>
-                      <EuiHorizontalRule
-                        margin="m"
-                      >
-                        <hr
-                          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-                        />
-                      </EuiHorizontalRule>
-                      <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
-                      >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiCompressedFieldSearch
-                                compressed={true}
-                                fullWidth={false}
-                                incremental={false}
-                                isClearable={true}
-                                isInvalid={false}
-                                isLoading={false}
-                                onChange={[Function]}
-                                onSearch={[Function]}
-                                placeholder="Service name"
-                                value=""
-                              >
-                                <EuiFormControlLayout
-                                  compressed={true}
-                                  fullWidth={false}
-                                  icon="search"
-                                  isLoading={false}
-                                >
-                                  <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout__childrenWrapper"
-                                    >
-                                      <EuiValidatableControl
-                                        isInvalid={false}
-                                      >
-                                        <input
-                                          className="euiFieldSearch euiFieldSearch--compressed"
-                                          onChange={[Function]}
-                                          onKeyUp={[Function]}
-                                          placeholder="Service name"
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons
-                                        compressed={true}
-                                        icon="search"
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayoutIcons"
+                                        <span
+                                          className="euiButtonContent euiButton__content"
                                         >
-                                          <EuiFormControlLayoutCustomIcon
-                                            size="s"
-                                            type="search"
+                                          <span
+                                            className="euiButton__text euiButtonGroupButton__textShift"
+                                            data-text="Request Rate"
+                                            title="Request Rate"
                                           >
-                                            <span
-                                              className="euiFormControlLayoutCustomIcon"
-                                            >
-                                              <EuiIcon
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
-                                                size="s"
-                                                type="search"
-                                              >
-                                                <EuiIconSearch
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  >
-                                                    <path
-                                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
-                                                    />
-                                                  </svg>
-                                                </EuiIconSearch>
-                                              </EuiIcon>
-                                            </span>
-                                          </EuiFormControlLayoutCustomIcon>
-                                        </div>
-                                      </EuiFormControlLayoutIcons>
-                                    </div>
-                                  </div>
-                                </EuiFormControlLayout>
-                              </EuiCompressedFieldSearch>
-                            </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                      <EuiSpacer>
-                        <div
-                          className="euiSpacer euiSpacer--l"
-                        />
-                      </EuiSpacer>
-                      <div
-                        style={
-                          Object {
-                            "minHeight": 434,
-                          }
-                        }
-                      >
-                        <NoMatchMessage
-                          size="s"
-                        >
-                          <EuiSpacer
-                            size="s"
+                                            <input
+                                              checked={false}
+                                              className="euiScreenReaderOnly"
+                                              data-test-subj="throughput"
+                                              disabled={false}
+                                              id="random_html_id"
+                                              name="random_html_id"
+                                              onChange={[Function]}
+                                              type="radio"
+                                            />
+                                            Request Rate
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </label>
+                                  </EuiButtonDisplay>
+                                </EuiButtonGroupButton>
+                              </div>
+                            </fieldset>
+                          </EuiButtonGroup>
+                          <EuiHorizontalRule
+                            margin="m"
                           >
-                            <div
-                              className="euiSpacer euiSpacer--s"
+                            <hr
+                              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                             />
-                          </EuiSpacer>
-                          <EuiEmptyPrompt
-                            body={
-                              <EuiText
-                                size="s"
-                              >
-                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                              </EuiText>
-                            }
-                            title={
-                              <h2>
-                                No matches
-                              </h2>
-                            }
+                          </EuiHorizontalRule>
+                          <EuiFlexGroup
+                            alignItems="center"
+                            gutterSize="s"
                           >
                             <div
-                              className="euiEmptyPrompt"
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
-                              <EuiTitle
-                                size="m"
+                              <EuiFlexItem
+                                grow={false}
                               >
-                                <h2
-                                  className="euiTitle euiTitle--medium"
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
                                 >
-                                  No matches
-                                </h2>
-                              </EuiTitle>
-                              <EuiTextColor
-                                color="subdued"
-                              >
-                                <span
-                                  className="euiTextColor euiTextColor--subdued"
-                                >
-                                  <EuiSpacer
-                                    size="m"
-                                  >
-                                    <div
-                                      className="euiSpacer euiSpacer--m"
-                                    />
-                                  </EuiSpacer>
                                   <EuiText>
                                     <div
                                       className="euiText euiText--medium"
                                     >
-                                      <EuiText
-                                        size="s"
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                        >
-                                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                        </div>
-                                      </EuiText>
+                                      Focus on
                                     </div>
                                   </EuiText>
-                                </span>
-                              </EuiTextColor>
+                                </div>
+                              </EuiFlexItem>
+                              <EuiFlexItem>
+                                <div
+                                  className="euiFlexItem"
+                                >
+                                  <EuiCompressedFieldSearch
+                                    compressed={true}
+                                    fullWidth={false}
+                                    incremental={false}
+                                    isClearable={true}
+                                    isInvalid={false}
+                                    isLoading={false}
+                                    onChange={[Function]}
+                                    onSearch={[Function]}
+                                    placeholder="Service name"
+                                    value=""
+                                  >
+                                    <EuiFormControlLayout
+                                      compressed={true}
+                                      fullWidth={false}
+                                      icon="search"
+                                      isLoading={false}
+                                    >
+                                      <div
+                                        className="euiFormControlLayout euiFormControlLayout--compressed"
+                                      >
+                                        <div
+                                          className="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <EuiValidatableControl
+                                            isInvalid={false}
+                                          >
+                                            <input
+                                              className="euiFieldSearch euiFieldSearch--compressed"
+                                              onChange={[Function]}
+                                              onKeyUp={[Function]}
+                                              placeholder="Service name"
+                                              type="search"
+                                              value=""
+                                            />
+                                          </EuiValidatableControl>
+                                          <EuiFormControlLayoutIcons
+                                            compressed={true}
+                                            icon="search"
+                                            isLoading={false}
+                                          >
+                                            <div
+                                              className="euiFormControlLayoutIcons"
+                                            >
+                                              <EuiFormControlLayoutCustomIcon
+                                                size="s"
+                                                type="search"
+                                              >
+                                                <span
+                                                  className="euiFormControlLayoutCustomIcon"
+                                                >
+                                                  <EuiIcon
+                                                    aria-hidden="true"
+                                                    className="euiFormControlLayoutCustomIcon__icon"
+                                                    size="s"
+                                                    type="search"
+                                                  >
+                                                    <EuiIconSearch
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                                      focusable="false"
+                                                      role="img"
+                                                      style={null}
+                                                    >
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconSearch>
+                                                  </EuiIcon>
+                                                </span>
+                                              </EuiFormControlLayoutCustomIcon>
+                                            </div>
+                                          </EuiFormControlLayoutIcons>
+                                        </div>
+                                      </div>
+                                    </EuiFormControlLayout>
+                                  </EuiCompressedFieldSearch>
+                                </div>
+                              </EuiFlexItem>
                             </div>
-                          </EuiEmptyPrompt>
-                          <EuiSpacer
-                            size="s"
-                          >
+                          </EuiFlexGroup>
+                          <EuiSpacer>
                             <div
-                              className="euiSpacer euiSpacer--s"
+                              className="euiSpacer euiSpacer--l"
                             />
                           </EuiSpacer>
-                        </NoMatchMessage>
-                      </div>
+                          <div
+                            style={
+                              Object {
+                                "minHeight": 434,
+                              }
+                            }
+                          >
+                            <NoMatchMessage
+                              size="s"
+                            >
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                              <EuiEmptyPrompt
+                                body={
+                                  <EuiText
+                                    size="s"
+                                  >
+                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                  </EuiText>
+                                }
+                                title={
+                                  <h2>
+                                    No matches
+                                  </h2>
+                                }
+                              >
+                                <div
+                                  className="euiEmptyPrompt"
+                                >
+                                  <EuiTitle
+                                    size="m"
+                                  >
+                                    <h2
+                                      className="euiTitle euiTitle--medium"
+                                    >
+                                      No matches
+                                    </h2>
+                                  </EuiTitle>
+                                  <EuiTextColor
+                                    color="subdued"
+                                  >
+                                    <span
+                                      className="euiTextColor euiTextColor--subdued"
+                                    >
+                                      <EuiSpacer
+                                        size="m"
+                                      >
+                                        <div
+                                          className="euiSpacer euiSpacer--m"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiText>
+                                        <div
+                                          className="euiText euiText--medium"
+                                        >
+                                          <EuiText
+                                            size="s"
+                                          >
+                                            <div
+                                              className="euiText euiText--small"
+                                            >
+                                              No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiText>
+                                    </span>
+                                  </EuiTextColor>
+                                </div>
+                              </EuiEmptyPrompt>
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                            </NoMatchMessage>
+                          </div>
+                        </div>
+                      </EuiPanel>
+                      <EuiSpacer
+                        size="xl"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--xl"
+                        />
+                      </EuiSpacer>
                     </div>
-                  </EuiPanel>
-                  <EuiSpacer
-                    size="xl"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--xl"
-                    />
-                  </EuiSpacer>
+                  </EuiPage>
                 </ServiceMap>
               </div>
             </div>

@@ -179,7 +179,7 @@ export function ServicesContent(props: ServicesProps) {
         gutterSize="s"
         alignItems="center"
         justifyContent="spaceBetween"
-        style={{ padding: '0 16px' }}
+        style={{ padding: '0 24px' }}
       >
         <EuiFlexItem grow={false}>
           <DataSourcePicker
