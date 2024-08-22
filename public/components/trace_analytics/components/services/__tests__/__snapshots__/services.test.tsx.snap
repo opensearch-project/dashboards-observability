@@ -1399,6 +1399,7 @@ exports[`Services component renders empty services page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -1421,11 +1422,12 @@ exports[`Services component renders empty services page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"
@@ -3683,6 +3685,7 @@ exports[`Services component renders jaeger services page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -3705,11 +3708,12 @@ exports[`Services component renders jaeger services page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"
@@ -5391,6 +5395,7 @@ exports[`Services component renders services page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -5413,11 +5418,12 @@ exports[`Services component renders services page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"

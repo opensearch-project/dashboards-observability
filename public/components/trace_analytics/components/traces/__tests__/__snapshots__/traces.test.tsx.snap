@@ -1418,6 +1418,7 @@ exports[`Traces component renders empty traces page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -1440,11 +1441,12 @@ exports[`Traces component renders empty traces page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"
@@ -3170,6 +3172,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -3192,11 +3195,12 @@ exports[`Traces component renders jaeger traces page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"
@@ -4922,6 +4926,7 @@ exports[`Traces component renders traces page 1`] = `
                           anchorPosition="downLeft"
                           button={
                             <EuiButtonEmpty
+                              flush="left"
                               onClick={[Function]}
                               size="xs"
                             >
@@ -4944,11 +4949,12 @@ exports[`Traces component renders traces page 1`] = `
                               className="euiPopover__anchor"
                             >
                               <EuiButtonEmpty
+                                flush="left"
                                 onClick={[Function]}
                                 size="xs"
                               >
                                 <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                   disabled={false}
                                   onClick={[Function]}
                                   type="button"

@@ -26,6 +26,7 @@ exports[`Filter component renders filters 1`] = `
               anchorPosition="downLeft"
               button={
                 <EuiButtonEmpty
+                  flush="left"
                   onClick={[Function]}
                   size="xs"
                 >
@@ -48,11 +49,12 @@ exports[`Filter component renders filters 1`] = `
                   className="euiPopover__anchor"
                 >
                   <EuiButtonEmpty
+                    flush="left"
                     onClick={[Function]}
                     size="xs"
                   >
                     <button
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                       disabled={false}
                       onClick={[Function]}
                       type="button"
