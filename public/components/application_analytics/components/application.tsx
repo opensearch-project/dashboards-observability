@@ -520,7 +520,9 @@ export function Application(props: AppDetailProps) {
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeaderSection>
-            {!newNavigation && (
+            {newNavigation ? (
+              <HeaderControlledComponentsWrapper description={application.description} />
+            ) : (
               <>
                 <EuiTitle size="l">
                   <h1 data-test-subj="applicationTitle">{application.name}</h1>
@@ -529,9 +531,6 @@ export function Application(props: AppDetailProps) {
                   <p>{application.description}</p>
                 </EuiText>
               </>
-            )}
-            {newNavigation && (
-              <HeaderControlledComponentsWrapper description={application.description} />
             )}
           </EuiPageHeaderSection>
           <EuiTabbedContent

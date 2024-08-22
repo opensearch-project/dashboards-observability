@@ -62,11 +62,5 @@ export const HeaderControlledComponentsWrapper = ({
   }
 
   // Only render the components if the nav group is disabled
-  return (
-    <>
-      {components.map((component, index) =>
-        React.cloneElement(component, { key: `component-fallback-${index}` })
-      )}
-    </>
-  );
+  return <>{components}</>;
 };
