@@ -15,10 +15,13 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -446,10 +449,13 @@ exports[`Panels View Component render panel view so container and reload dashboa
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -1354,14 +1360,17 @@ exports[`Panels View Component renders panel view container with visualizations 
                     <div
                       className="euiPageHeaderSection"
                     >
-                      <EuiTitle
-                        size="l"
+                      <EuiText
+                        size="s"
                       >
-                        <h1
-                          className="euiTitle euiTitle--large"
-                          data-test-subj="panelNameHeader"
-                        />
-                      </EuiTitle>
+                        <div
+                          className="euiText euiText--small"
+                        >
+                          <h1
+                            data-test-subj="panelNameHeader"
+                          />
+                        </div>
+                      </EuiText>
                       <EuiFlexItem>
                         <div
                           className="euiFlexItem"
@@ -3705,14 +3714,17 @@ exports[`Panels View Component renders panel view container without visualizatio
                     <div
                       className="euiPageHeaderSection"
                     >
-                      <EuiTitle
-                        size="l"
+                      <EuiText
+                        size="s"
                       >
-                        <h1
-                          className="euiTitle euiTitle--large"
-                          data-test-subj="panelNameHeader"
-                        />
-                      </EuiTitle>
+                        <div
+                          className="euiText euiText--small"
+                        >
+                          <h1
+                            data-test-subj="panelNameHeader"
+                          />
+                        </div>
+                      </EuiText>
                       <EuiFlexItem>
                         <div
                           className="euiFlexItem"
