@@ -14,7 +14,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ACCELERATION_INDEX_TYPES } from '../../../../../../common/constants/data_sources';
 import {
   AssociatedObject,
@@ -48,6 +48,7 @@ import {
   ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION,
   isCatalogCacheFetching,
 } from './utils/associated_objects_tab_utils';
+import { checkIsConnectionWithLakeFormation } from '../../../utils/helpers';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
@@ -58,6 +59,10 @@ export interface AssociatedObjectsTabProps {
 
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props) => {
   const { datasource, cacheLoadingHooks, selectedDatabase, setSelectedDatabase } = props;
+  const isS3ConnectionWithLakeFormation = useMemo(
+    () => checkIsConnectionWithLakeFormation(datasource),
+    [datasource]
+  );
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
   const [isObjectsLoading, setIsObjectsLoading] = useState<boolean>(false);
@@ -107,17 +112,15 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const AssociatedObjectsHeader = () => {
     const panelTitle = i18n.translate('datasources.associatedObjectsTab.panelTitle', {
-      defaultMessage:
-        datasource.connector === 'SECURITYLAKE'
-          ? ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION
-          : ASSC_OBJ_PANEL_TITLE,
+      defaultMessage: isS3ConnectionWithLakeFormation
+        ? ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION
+        : ASSC_OBJ_PANEL_TITLE,
     });
 
     const panelDescription = i18n.translate('datasources.associatedObjectsTab.panelDescription', {
-      defaultMessage:
-        datasource.connector === 'SECURITYLAKE'
-          ? ASSC_OBJ_PANEL_DESCRIPTION_FOR_S3_WITH_LAKE_FORMATION
-          : ASSC_OBJ_PANEL_DESCRIPTION,
+      defaultMessage: isS3ConnectionWithLakeFormation
+        ? ASSC_OBJ_PANEL_DESCRIPTION_FOR_S3_WITH_LAKE_FORMATION
+        : ASSC_OBJ_PANEL_DESCRIPTION,
     });
 
     const LastUpdatedText = () => {
@@ -153,11 +156,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
             onClick={onRefreshButtonClick}
           />
         </EuiFlexItem>
-        {datasource.connector !== 'SECURITYLAKE' && (
+        {!isS3ConnectionWithLakeFormation && (
           <EuiFlexItem grow={false}>
             <CreateAccelerationFlyoutButton
               dataSourceName={datasource.name}
-              dataSourceType={datasource.connector}
               renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
               handleRefresh={onRefreshButtonClick}
             />
@@ -334,31 +336,28 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         columns: table.columns,
       };
     });
-    // For security lake connections we don't want to show accelerations, so we simply assign empty array
-    const accelerationObjects: AssociatedObject[] =
-      datasource.connector === 'SECURITYLAKE'
-        ? []
-        : cachedAccelerations
-            .filter(
-              (acceleration: CachedAcceleration) => acceleration.database === selectedDatabase
-            )
-            .map((acceleration: CachedAcceleration) => ({
-              tableName: acceleration.table,
-              datasource: datasource.name,
-              id: acceleration.indexName,
-              name: getAccelerationName(acceleration),
-              database: acceleration.database,
-              type: ACCELERATION_INDEX_TYPES.find(
-                (accelType) => accelType.value === acceleration.type
-              )!.value as AssociatedObjectIndexType,
-              accelerations:
-                acceleration.type === 'covering' || acceleration.type === 'skipping'
-                  ? tableObjects.find(
-                      (tableObject: AssociatedObject) => tableObject.name === acceleration.table
-                    ) || []
-                  : [],
-              columns: undefined,
-            }));
+    // For data connections using lake formation we don't want to show accelerations, so we simply assign empty array
+    const accelerationObjects: AssociatedObject[] = isS3ConnectionWithLakeFormation
+      ? []
+      : cachedAccelerations
+          .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
+          .map((acceleration: CachedAcceleration) => ({
+            tableName: acceleration.table,
+            datasource: datasource.name,
+            id: acceleration.indexName,
+            name: getAccelerationName(acceleration),
+            database: acceleration.database,
+            type: ACCELERATION_INDEX_TYPES.find(
+              (accelType) => accelType.value === acceleration.type
+            )!.value as AssociatedObjectIndexType,
+            accelerations:
+              acceleration.type === 'covering' || acceleration.type === 'skipping'
+                ? tableObjects.find(
+                    (tableObject: AssociatedObject) => tableObject.name === acceleration.table
+                  ) || []
+                : [],
+            columns: undefined,
+          }));
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);
   }, [selectedDatabase, cachedTables, cachedAccelerations]);
 
@@ -367,7 +366,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   return (
     <>
       <EuiSpacer />
-      {datasource.connector !== 'SECURITYLAKE' && (
+      {!isS3ConnectionWithLakeFormation && (
         <>
           <AccelerationsRecommendationCallout />
           <EuiSpacer />
@@ -418,9 +417,9 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                         ).length > 0 ? (
                           <AssociatedObjectsTable
                             datasourceName={datasource.name}
-                            dataSourceType={datasource.connector}
                             associatedObjects={associatedObjects}
                             cachedAccelerations={cachedAccelerations}
+                            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
                             handleRefresh={onRefreshButtonClick}
                           />
                         ) : (

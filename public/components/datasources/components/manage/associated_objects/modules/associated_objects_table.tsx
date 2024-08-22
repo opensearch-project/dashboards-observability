@@ -18,7 +18,6 @@ import {
 import {
   AssociatedObject,
   CachedAcceleration,
-  DatasourceType,
 } from '../../../../../../../common/types/data_connections';
 import {
   getRenderAccelerationDetailsFlyout,
@@ -37,9 +36,9 @@ import {
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
-  dataSourceType: DatasourceType;
   associatedObjects: AssociatedObject[];
   cachedAccelerations: CachedAcceleration[];
+  isS3ConnectionWithLakeFormation: boolean;
   handleRefresh: () => void;
 }
 
@@ -57,9 +56,9 @@ interface AssociatedTableFilter {
 
 export const AssociatedObjectsTable = ({
   datasourceName,
-  dataSourceType,
   associatedObjects,
   cachedAccelerations,
+  isS3ConnectionWithLakeFormation,
   handleRefresh,
 }: AssociatedObjectsTableProps) => {
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
@@ -69,7 +68,7 @@ export const AssociatedObjectsTable = ({
     {
       field: 'name',
       name: i18n.translate('datasources.associatedObjectsTab.column.name', {
-        defaultMessage: dataSourceType === 'SECURITYLAKE' ? 'Table' : 'Name',
+        defaultMessage: isS3ConnectionWithLakeFormation ? 'Table' : 'Name',
       }),
       sortable: true,
       'data-test-subj': 'nameCell',
@@ -80,7 +79,7 @@ export const AssociatedObjectsTable = ({
               renderAssociatedObjectsDetailsFlyout({
                 tableDetail: item,
                 dataSourceName: datasourceName,
-                dataSourceType,
+                isS3ConnectionWithLakeFormation,
                 handleRefresh,
               });
             } else {
@@ -101,7 +100,7 @@ export const AssociatedObjectsTable = ({
     {
       field: 'accelerations',
       name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
-        defaultMessage: dataSourceType === 'SECURITYLAKE' ? 'Accelerations' : 'Associations',
+        defaultMessage: isS3ConnectionWithLakeFormation ? 'Accelerations' : 'Associations',
       }),
       sortable: true,
       render: (accelerations: CachedAcceleration[] | AssociatedObject, obj: AssociatedObject) => {
@@ -130,7 +129,7 @@ export const AssociatedObjectsTable = ({
                 renderAssociatedObjectsDetailsFlyout({
                   tableDetail: obj,
                   dataSourceName: datasourceName,
-                  dataSourceType,
+                  isS3ConnectionWithLakeFormation,
                   handleRefresh,
                 })
               }
@@ -145,7 +144,7 @@ export const AssociatedObjectsTable = ({
                 renderAssociatedObjectsDetailsFlyout({
                   tableDetail: accelerations,
                   dataSourceName: datasourceName,
-                  dataSourceType,
+                  isS3ConnectionWithLakeFormation,
                   handleRefresh,
                 })
               }
@@ -177,7 +176,6 @@ export const AssociatedObjectsTable = ({
           onClick: (item: AssociatedObject) =>
             renderCreateAccelerationFlyout({
               dataSource: datasourceName,
-              dataSourceType,
               databaseName: item.database,
               tableName: item.tableName,
               handleRefresh,
@@ -216,7 +214,7 @@ export const AssociatedObjectsTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<AssociatedObject>>;
 
-  if (dataSourceType !== 'SECURITYLAKE') {
+  if (!isS3ConnectionWithLakeFormation) {
     columns.splice(1, 0, {
       field: 'type',
       name: i18n.translate('datasources.associatedObjectsTab.column.type', {
@@ -276,10 +274,9 @@ export const AssociatedObjectsTable = ({
     filters: searchFilters,
     box: {
       incremental: true,
-      placeholder:
-        dataSourceType === 'SECURITYLAKE'
-          ? ASSC_OBJ_TABLE_FOR_S3_WITH_LAKE_FORMATION_SEARCH_HINT
-          : ASSC_OBJ_TABLE_SEARCH_HINT,
+      placeholder: isS3ConnectionWithLakeFormation
+        ? ASSC_OBJ_TABLE_FOR_S3_WITH_LAKE_FORMATION_SEARCH_HINT
+        : ASSC_OBJ_TABLE_SEARCH_HINT,
       schema: {
         fields: { name: { type: 'string' }, database: { type: 'string' } },
       },

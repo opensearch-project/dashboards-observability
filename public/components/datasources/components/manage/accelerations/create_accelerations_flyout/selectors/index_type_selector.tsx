@@ -8,10 +8,9 @@ import {
   EuiLink,
   EuiSpacer,
   EuiCompressedSuperSelect,
-  EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useRef } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACC_INDEX_TYPE_DOCUMENTATION_URL,
@@ -19,25 +18,32 @@ import {
 import {
   AccelerationIndexType,
   CreateAccelerationForm,
-  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
-  dataSourceType: DatasourceType;
+  isS3ConnectionWithLakeFormation: boolean;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   initiateColumnLoad: (dataSource: string, database: string, dataTable: string) => void;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
-  dataSourceType,
+  isS3ConnectionWithLakeFormation,
   setAccelerationFormData,
   initiateColumnLoad,
 }: IndexTypeSelectorProps) => {
-  const [value, setValue] = useState<AccelerationIndexType>(
-    dataSourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping'
-  );
+  const [value, setValue] = useState('skipping');
+  // This is used to track if user changed the value
+  // If so, we skip changing it based on 'isS3ConnectionWithLakeFormation' in the effect below
+  const valueSetAlready = useRef(false);
+
+  useEffect(() => {
+    if (!valueSetAlready.current) {
+      const defaultSelectedOption = isS3ConnectionWithLakeFormation ? 'materialized' : 'skipping';
+      updateState(defaultSelectedOption);
+    }
+  }, [isS3ConnectionWithLakeFormation]);
 
   useEffect(() => {
     initiateColumnLoad(
@@ -47,41 +53,41 @@ export const IndexTypeSelector = ({
     );
   }, [accelerationFormData.dataTable]);
 
-  const updateState = (indexType: AccelerationIndexType) => {
+  const updateState = (indexType: string) => {
     setAccelerationFormData({
       ...accelerationFormData,
-      accelerationIndexType: indexType,
+      accelerationIndexType: indexType as AccelerationIndexType,
       accelerationIndexName:
         indexType === 'skipping' ? ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME : '',
     });
     setValue(indexType);
   };
 
-  const onChangeSupeSelect = (indexType: AccelerationIndexType) => {
+  const onChangeSupeSelect = (indexType: string) => {
     updateState(indexType);
+    valueSetAlready.current = true;
   };
 
-  const baseOptions: Array<EuiSuperSelectOption<AccelerationIndexType>> =
-    dataSourceType.toUpperCase() !== 'SECURITYLAKE'
-      ? [
-          {
-            value: 'skipping',
-            inputDisplay: 'Skipping index',
-            dropdownDisplay: (
-              <Fragment>
-                <strong>Skipping index</strong>
-                <EuiText size="s" color="subdued">
-                  <p className="EuiTextColor--subdued">
-                    Accelerate direct queries by storing table meta-data in OpenSearch.
-                  </p>
-                </EuiText>
-              </Fragment>
-            ),
-          },
-        ]
-      : [];
+  const baseOptions = !isS3ConnectionWithLakeFormation
+    ? [
+        {
+          value: 'skipping',
+          inputDisplay: 'Skipping index',
+          dropdownDisplay: (
+            <Fragment>
+              <strong>Skipping index</strong>
+              <EuiText size="s" color="subdued">
+                <p className="EuiTextColor--subdued">
+                  Accelerate direct queries by storing table meta-data in OpenSearch.
+                </p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+      ]
+    : [];
 
-  const superSelectOptions: Array<EuiSuperSelectOption<AccelerationIndexType>> = [
+  const superSelectOptions = [
     ...baseOptions,
     {
       value: 'covering',

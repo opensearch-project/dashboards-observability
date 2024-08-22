@@ -11,6 +11,7 @@ import {
   EuiText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFormRow,
 } from '@elastic/eui';
 import { coreRefs } from '../../../framework/core_refs';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../datasources/components/manage/accelerations/create_accelerations_flyout/selectors/source_selector';
 import { IntegrationConfigProps } from './setup_integration';
 import {
-  IntegrationConnectionInputs,
   IntegrationDetailsInputs,
   IntegrationQueryInputs,
   IntegrationWorkflowsInputs,
@@ -30,7 +30,6 @@ export const SetupIntegrationInputsForSecurityLake = ({
   updateConfig,
   integration,
   setupCallout,
-  lockConnectionType,
 }: IntegrationConfigProps) => {
   const http = coreRefs.http!;
   const [dataSourceFormData, setDataSourceFormData] = useState<BaseDataSourceForm>({
@@ -40,30 +39,12 @@ export const SetupIntegrationInputsForSecurityLake = ({
     formErrors: {},
   });
 
-  const [securityLakeWorkflows, setSecurityLakeWorkflows] = useState<
-    IntegrationWorkflow[] | undefined
-  >(undefined);
-
   useEffect(() => {
     updateConfig({
       connectionDatabaseName: dataSourceFormData.database,
       connectionTableName: dataSourceFormData.dataTable,
     });
-  }, [dataSourceFormData]);
-
-  useEffect(() => {
-    setDataSourceFormData({
-      ...dataSourceFormData,
-      dataSource: config.connectionDataSource,
-    });
-  }, [config.connectionDataSource]);
-
-  useEffect(() => {
-    // TODO: Refactor the filter condition to use `applicable_data_sources` #1855
-    setSecurityLakeWorkflows(
-      integration.workflows?.filter((workflow) => workflow.name.includes('security-lake'))
-    );
-  }, integration.workflows);
+  }, [dataSourceFormData, updateConfig]);
 
   return (
     <>
@@ -85,47 +66,54 @@ export const SetupIntegrationInputsForSecurityLake = ({
         integration={integration}
       />
       <EuiSpacer />
-      <EuiText>
-        <h3>Integration data location</h3>
-      </EuiText>
-
-      {!lockConnectionType && (
+      {config.connectionType === 's3' ? (
         <>
-          <EuiSpacer />
-          <IntegrationConnectionInputs
+          <EuiText>
+            <h3>Integration data location</h3>
+          </EuiText>
+          <EuiSpacer size="s" />
+
+          <DataSourceSelector
+            http={http!}
+            dataSourceFormProps={{
+              formType: 'SetupIntegration',
+              dataSourceFormData,
+              setDataSourceFormData,
+            }}
+            selectedDatasource={config.connectionDataSource}
+            dataSourcesPreselected={false}
+            tableFieldsLoading={false}
+            hideHeader={true}
+          />
+
+          <EuiSpacer size="m" />
+
+          <IntegrationQueryInputs
             config={config}
             updateConfig={updateConfig}
             integration={integration}
-            lockConnectionType={lockConnectionType}
+            isS3ConnectionWithLakeFormation={true}
           />
-        </>
-      )}
-
-      <EuiSpacer size="s" />
-      <DataSourceSelector
-        http={http!}
-        dataSourceFormProps={{
-          formType: 'SetupIntegration',
-          dataSourceFormData,
-          setDataSourceFormData,
-        }}
-        selectedDatasource={config.connectionDataSource}
-        selectedDataSourceType="SECURITYLAKE"
-        dataSourcesPreselected={false}
-        tableFieldsLoading={false}
-        hideHeader={true}
-        hideDataSourceDescription={!lockConnectionType}
-      />
-
-      <EuiSpacer size="m" />
-
-      <IntegrationQueryInputs
-        config={config}
-        updateConfig={updateConfig}
-        integration={integration}
-      />
-      {securityLakeWorkflows && (
-        <>
+          {integration.workflows ? (
+            <>
+              <EuiSpacer />
+              <EuiText>
+                <h3>Included resources</h3>
+              </EuiText>
+              <EuiFormRow>
+                <EuiText grow={false} size="xs">
+                  <p>
+                    This integration offers resources compatible with your data source. These can
+                    include dashboards, visualizations, indexes, and queries. Select at least one of
+                    the following options.
+                  </p>
+                </EuiText>
+              </EuiFormRow>
+              <EuiSpacer />
+              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
+            </>
+          ) : null}
+          {/* Bottom bar will overlap content if there isn't some space at the end */}
           <EuiSpacer />
           <EuiText>
             <h3>Included resources</h3>
@@ -140,15 +128,8 @@ export const SetupIntegrationInputsForSecurityLake = ({
             </EuiText>
           </EuiCompressedFormRow>
           <EuiSpacer />
-          <IntegrationWorkflowsInputs
-            updateConfig={updateConfig}
-            workflows={securityLakeWorkflows}
-          />
         </>
-      )}
-      {/* Bottom bar will overlap content if there isn't some space at the end */}
-      <EuiSpacer />
-      <EuiSpacer />
+      ) : null}
     </>
   );
 };

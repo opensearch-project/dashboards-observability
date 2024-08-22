@@ -24,7 +24,6 @@ import {
 import {
   CachedTable,
   CreateAccelerationForm,
-  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
 import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
@@ -40,10 +39,11 @@ import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationButton } from './create_acceleration_button';
 import { CreateAccelerationHeader } from './create_acceleration_header';
 import { hasError } from './utils';
+import { DATACONNECTIONS_BASE } from '../../../../../../../../common/constants/shared';
+import { checkIsConnectionWithLakeFormation } from '../../../../../utils/helpers';
 
 export interface CreateAccelerationProps {
   selectedDatasource: string;
-  selectedDatasourceType: DatasourceType;
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
@@ -53,7 +53,6 @@ export interface CreateAccelerationProps {
 
 export const CreateAcceleration = ({
   selectedDatasource,
-  selectedDatasourceType,
   resetFlyout,
   databaseName,
   tableName,
@@ -62,12 +61,13 @@ export const CreateAcceleration = ({
 }: CreateAccelerationProps) => {
   const { setToast } = useToast();
   const http = coreRefs!.http;
+  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState(false);
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
     database: databaseName ?? '',
     dataTable: tableName ?? '',
     dataTableFields: [],
-    accelerationIndexType: selectedDatasourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping',
+    accelerationIndexType: 'skipping',
     skippingIndexQueryData: [],
     coveringIndexQueryData: [],
     materializedViewQueryData: {
@@ -170,6 +170,16 @@ export const CreateAcceleration = ({
     }
   };
 
+  const updateDataSourceConnectionInfo = () => {
+    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${selectedDatasource}`).then((data: any) => {
+      setIsS3ConnectionWithLakeFormation(checkIsConnectionWithLakeFormation(data));
+    });
+  };
+
+  useEffect(() => {
+    updateDataSourceConnectionInfo();
+  }, [selectedDatasource]);
+
   useEffect(() => {
     if (databaseName !== undefined && tableName !== undefined) {
       initiateColumnLoad(
@@ -235,7 +245,6 @@ export const CreateAcceleration = ({
                 setDataSourceFormData: setAccelerationFormData,
               }}
               selectedDatasource={selectedDatasource}
-              selectedDataSourceType={selectedDatasourceType}
               dataSourcesPreselected={dataSourcesPreselected}
               tableFieldsLoading={tableFieldsLoading}
               dataSourceMDSId={dataSourceMDSId}
@@ -243,7 +252,7 @@ export const CreateAcceleration = ({
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
               accelerationFormData={accelerationFormData}
-              dataSourceType={selectedDatasourceType}
+              isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
               setAccelerationFormData={setAccelerationFormData}
               initiateColumnLoad={initiateColumnLoad}
             />

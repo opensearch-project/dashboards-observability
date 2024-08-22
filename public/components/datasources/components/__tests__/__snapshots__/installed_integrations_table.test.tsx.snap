@@ -424,7 +424,6 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
           Array [
             Object {
               "assets": 3,
-              "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
               "locator": Object {
                 "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
                 "name": "aws_waf-sample",
@@ -460,7 +459,6 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
             Array [
               Object {
                 "assets": 3,
-                "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
                 "locator": Object {
                   "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
                   "name": "aws_waf-sample",

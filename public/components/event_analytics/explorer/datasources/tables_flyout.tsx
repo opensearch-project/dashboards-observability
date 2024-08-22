@@ -30,7 +30,6 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CachedTable,
-  DatasourceType,
 } from '../../../../../common/types/data_connections';
 import { isCatalogCacheFetching } from '../../../datasources/components/manage/associated_objects/utils/associated_objects_tab_utils';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
@@ -41,7 +40,6 @@ import { AssociatedObjectsTabEmpty } from '../../../datasources/components/manag
 
 export interface TablesFlyoutProps {
   dataSourceName: string;
-  dataSourceType: DatasourceType;
   resetFlyout: () => void;
 }
 
@@ -50,11 +48,7 @@ interface TableItemType {
   type: string;
 }
 
-export const TablesFlyout = ({
-  dataSourceName,
-  dataSourceType,
-  resetFlyout,
-}: TablesFlyoutProps) => {
+export const TablesFlyout = ({ dataSourceName, resetFlyout }: TablesFlyoutProps) => {
   const { setToast } = useToast();
   const {
     loadStatus: databasesLoadStatus,
@@ -146,7 +140,7 @@ export const TablesFlyout = ({
           databaseCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(tablesLoadStatus)
       ) {
-        startLoadingTables({ dataSourceName, databaseName: selectedDatabase, dataSourceType });
+        startLoadingTables({ dataSourceName, databaseName: selectedDatabase });
         setIsObjectsLoading(true);
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
@@ -237,7 +231,11 @@ export const TablesFlyout = ({
             return (
               <EuiCopy textToCopy={`${dataSourceName}.${selectedDatabase}.${name}`}>
                 {(copy) => (
-                  <EuiSmallButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             );

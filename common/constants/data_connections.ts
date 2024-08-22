@@ -19,7 +19,6 @@ export const QUERY_ALL = 'query-all';
 export const DatasourceTypeToDisplayName: { [key in DatasourceType]: string } = {
   PROMETHEUS: 'Prometheus',
   S3GLUE: 'Amazon S3',
-  SECURITYLAKE: 'Amazon Security Lake',
 };
 
 export const PrometheusURL = 'Prometheus';

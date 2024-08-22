@@ -5,8 +5,6 @@
 
 import {
   EuiBottomBar,
-  EuiSmallButton,
-  EuiSmallButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,22 +15,22 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { Color } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { IntegrationConnectionType } from '../../../../common/types/integrations';
 import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
 
 export interface IntegrationSetupInputs {
   displayName: string;
-  connectionType: IntegrationConnectionType;
+  connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
@@ -379,7 +377,10 @@ export function SetupIntegrationForm({
   unsetIntegration?: () => void;
   forceConnection?: {
     name: string;
-    type: IntegrationConnectionType;
+    type: string;
+    properties?: {
+      lakeFormationEnabled?: boolean;
+    };
   };
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
@@ -423,6 +424,7 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
+<<<<<<< HEAD
   const handleSelectedDataSourceChange = (id?: string, label?: string) => {
     setDataSourceMDSId(id);
     setDataSourceMDSLabel(label);
@@ -432,6 +434,12 @@ export function SetupIntegrationForm({
     forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
       ? SetupIntegrationInputsForSecurityLake
       : SetupIntegrationFormInputs;
+=======
+  const IntegrationInputFormComponent = forceConnection?.properties?.lakeFormationEnabled
+    ? SetupIntegrationInputsForSecurityLake
+    : SetupIntegrationFormInputs;
+
+>>>>>>> a371170d (reverted commit 19d68b2)
   const content = (
     <>
       {showLoading ? (

@@ -65,7 +65,6 @@ import {
 } from '../../../../common/constants/explorer';
 import { QUERY_ASSIST_API } from '../../../../common/constants/query_assist';
 import {
-  DATACONNECTIONS_BASE,
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_DESCRIBE_INDEX_REGEX,
@@ -73,7 +72,6 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
-import { DatasourceType } from '../../../../common/types/data_connections';
 import {
   IExplorerProps,
   IField,
@@ -211,18 +209,11 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
-  const [dataSourceConnectionType, setDataSourceConnectionType] = useState<DatasourceType>(
-    'PROMETHEUS'
-  );
   const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
   const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
   const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
-  const onCreateAcceleration = () =>
-    renderCreateAccelerationFlyout({
-      dataSource: dataSourceName,
-      dataSourceType: dataSourceConnectionType,
-    });
+  const onCreateAcceleration = () => renderCreateAccelerationFlyout(dataSourceName);
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -264,16 +255,6 @@ export const Explorer = ({
   liveTailTabIdRef.current = liveTailTabId;
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
-
-  const updateDataSourceConnectionInfo = () => {
-    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${dataSourceName}`).then((data: any) => {
-      setDataSourceConnectionType(data.connector);
-    });
-  };
-
-  useEffect(() => {
-    updateDataSourceConnectionInfo();
-  }, [dataSourceName]);
 
   const findAutoInterval = (start: string = '', end: string = '') => {
     const minInterval = findMinInterval(start, end);
@@ -724,11 +705,7 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults
-            tabId={tabId}
-            dataSourceConnectionType={dataSourceConnectionType}
-            eventsLoading={eventsLoading}
-          />
+          <NoResults tabId={tabId} eventsLoading={eventsLoading} />
         )}
       </div>
     );
@@ -1119,7 +1096,7 @@ export const Explorer = ({
                     <EuiLink
                       style={{ paddingLeft: 130 }}
                       onClick={() => {
-                        renderTablesFlyout(dataSourceName, dataSourceConnectionType);
+                        renderTablesFlyout(dataSourceName);
                       }}
                     >
                       View databases and tables
