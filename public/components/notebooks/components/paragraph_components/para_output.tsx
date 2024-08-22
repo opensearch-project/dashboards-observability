@@ -108,6 +108,7 @@ const OutputBody = ({
             key={key}
             className="wrapAll markdown-output-text"
             data-test-subj="markdownOutputText"
+            size="s"
           >
             <MarkdownRender source={val} />
           </EuiText>
