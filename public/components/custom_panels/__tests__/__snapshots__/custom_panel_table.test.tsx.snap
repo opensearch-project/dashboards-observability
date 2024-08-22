@@ -2,7 +2,7 @@
 
 exports[`Panels Table Component render dashboard table container with panels 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -847,7 +847,7 @@ exports[`Panels Table Component render dashboard table container with panels 1`]
 
 exports[`Panels Table Component renders empty dashboard table container 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -1089,7 +1089,7 @@ exports[`Panels Table Component renders empty dashboard table container 1`] = `
 
 exports[`Panels Table Component renders empty panel table container2 1`] = `
 <div
-  style="float: left; width: 100%; max-width: 1130px;"
+  style="float: left; width: 100%;"
 >
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
