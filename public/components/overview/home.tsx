@@ -16,6 +16,7 @@ import { uiSettingsService } from '../../../common/utils';
 import { AddDashboardCallout } from './components/add_dashboard_callout';
 import { DashboardControls } from './components/dashboard_controls';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
+import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 
 // Plugin IDs
 const alertsPluginID = 'alerting';
@@ -235,6 +236,18 @@ export const Home = ({ ..._props }: HomeProps) => {
       registerDashboard();
     }
   }, [dashboards]);
+
+  useEffect(() => {
+    setNavBreadCrumbs(
+      [],
+      [
+        {
+          text: 'Observability overview',
+          href: '#/',
+        },
+      ]
+    );
+  }, []);
 
   const flyout = isFlyoutVisible && (
     <SelectDashboardFlyout
