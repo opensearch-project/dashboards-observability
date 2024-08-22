@@ -15,10 +15,13 @@ exports[`Panels View SO Component render panel view container and refresh panel 
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -446,10 +449,13 @@ exports[`Panels View SO Component render panel view so container and reload dash
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -879,10 +885,13 @@ exports[`Panels View SO Component renders panels view SO container with visualiz
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
