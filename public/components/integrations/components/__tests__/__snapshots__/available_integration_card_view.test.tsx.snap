@@ -257,6 +257,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             iconType="list"
                             textProps={
@@ -379,6 +380,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             iconType="grid"
                             textProps={

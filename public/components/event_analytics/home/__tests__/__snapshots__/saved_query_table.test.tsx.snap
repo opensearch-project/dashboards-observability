@@ -496,6 +496,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="m"
                                       iconType="arrowDown"
@@ -1467,6 +1468,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="s"
                                     iconType="arrowDown"
@@ -1670,6 +1672,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                                           >
                                             <EuiButtonContent
                                               className="euiButtonEmpty__content"
+                                              iconGap="m"
                                               iconSide="left"
                                               iconSize="m"
                                               textProps={

@@ -327,6 +327,7 @@ exports[`Dashboard component renders dashboard 1`] = `
               >
                 <EuiButtonContent
                   className="euiButtonEmpty__content"
+                  iconGap="m"
                   iconSide="right"
                   iconSize="m"
                   iconType="arrowDown"
@@ -1572,6 +1573,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
               >
                 <EuiButtonContent
                   className="euiButtonEmpty__content"
+                  iconGap="m"
                   iconSide="right"
                   iconSize="m"
                   iconType="arrowDown"
@@ -2817,6 +2819,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
               >
                 <EuiButtonContent
                   className="euiButtonEmpty__content"
+                  iconGap="m"
                   iconSide="right"
                   iconSize="m"
                   iconType="arrowDown"
@@ -3292,6 +3295,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -3375,6 +3379,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {

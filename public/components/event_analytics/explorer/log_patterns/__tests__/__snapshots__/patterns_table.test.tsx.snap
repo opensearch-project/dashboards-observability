@@ -331,6 +331,7 @@ exports[`Pattern table component Renders pattern table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -1001,6 +1002,7 @@ exports[`Pattern table component Renders pattern table 1`] = `
                               >
                                 <EuiButtonContent
                                   className="euiButtonEmpty__content"
+                                  iconGap="m"
                                   iconSide="right"
                                   iconSize="s"
                                   iconType="arrowDown"
@@ -1204,6 +1206,7 @@ exports[`Pattern table component Renders pattern table 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="m"
                                             textProps={
