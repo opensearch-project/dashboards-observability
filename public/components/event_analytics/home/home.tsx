@@ -5,8 +5,6 @@
 
 import {
   EuiSmallButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,12 +17,11 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -72,7 +69,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   const history = useHistory();
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const [_isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -190,17 +187,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     }
   };
 
-  const popoverButton = (
-    <EuiSmallButton
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
-      data-test-subj="eventHomeAction"
-    >
-      Actions
-    </EuiSmallButton>
-  );
-
   const deleteHistory = () => {
     const customPanelString = `${selectedHistories.length > 1 ? 'histories' : 'history'}`;
     setModalLayout(
@@ -214,30 +200,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     showModal();
   };
 
-  const popoverItems: ReactElement[] = [
-    <EuiContextMenuItem
-      key="delete"
-      disabled={savedHistories.length === 0 || selectedHistories.length === 0}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        deleteHistory();
-      }}
-      data-test-subj="eventHomeAction__delete"
-    >
-      Delete
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="addSample"
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        addSampledata();
-      }}
-      data-test-subj="eventHomeAction__addSamples"
-    >
-      Add samples
-    </EuiContextMenuItem>,
-  ];
-
   return (
     <>
       <EuiPage>
@@ -249,7 +211,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
-          <EuiSpacer size="m" />
           <EuiPageContent className="event-home">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
@@ -271,16 +232,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems} />
-                    </EuiPopover>
-                  </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiSmallButton
                       key="redirect"
@@ -306,6 +257,9 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                     isTableLoading={isTableLoading}
                     handleSelectHistory={setSelectedHistories}
                     selectedHistories={selectedHistories}
+                    addSampledata={addSampledata}
+                    deleteHistoryList={deleteHistoryList}
+                    showDeleteConfirmation={deleteHistory}
                   />
                 ) : (
                   <>
