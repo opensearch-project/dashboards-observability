@@ -265,8 +265,22 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             }
                           }
                         >
+<<<<<<< HEAD
                           <span
                             className="euiButtonContent euiButton__content"
+=======
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconType="refresh"
+                            isLoading={false}
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                           >
                             <EuiIcon
                               className="euiButtonContent__icon"
@@ -355,8 +369,20 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                             }
                           }
                         >
+<<<<<<< HEAD
                           <span
                             className="euiButtonContent euiButton__content"
+=======
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconGap="m"
+                            iconSide="left"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                           >
                             <span
                               className="euiButton__text"
@@ -1258,6 +1284,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 >
                                                   <EuiButtonContent
                                                     className="euiButtonEmpty__content"
+                                                    iconGap="m"
                                                     iconSide="right"
                                                     iconSize="m"
                                                     iconType="arrowDown"
@@ -1615,6 +1642,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -4557,6 +4585,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               >
                                                 <EuiButtonContent
                                                   className="euiButtonEmpty__content"
+                                                  iconGap="m"
                                                   iconSide="right"
                                                   iconSize="s"
                                                   iconType="arrowDown"
@@ -4760,6 +4789,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                         >
                                                           <EuiButtonContent
                                                             className="euiButtonEmpty__content"
+                                                            iconGap="m"
                                                             iconSide="left"
                                                             iconSize="m"
                                                             textProps={
@@ -5142,8 +5172,22 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                             }
                           }
                         >
+<<<<<<< HEAD
                           <span
                             className="euiButtonContent euiButton__content"
+=======
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconType="refresh"
+                            isLoading={false}
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                           >
                             <EuiIcon
                               className="euiButtonContent__icon"
@@ -5232,8 +5276,20 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                             }
                           }
                         >
+<<<<<<< HEAD
                           <span
                             className="euiButtonContent euiButton__content"
+=======
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconGap="m"
+                            iconSide="left"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                           >
                             <span
                               className="euiButton__text"
@@ -5354,8 +5410,21 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                       }
                     }
                   >
+<<<<<<< HEAD
                     <span
                       className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+=======
+                    <EuiButtonContent
+                      className="euiButton__content"
+                      iconGap="m"
+                      iconSide="right"
+                      iconType="popout"
+                      textProps={
+                        Object {
+                          "className": "euiButton__text",
+                        }
+                      }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                     >
                       <EuiIcon
                         className="euiButtonContent__icon"

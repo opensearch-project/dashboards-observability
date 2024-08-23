@@ -5,13 +5,13 @@
 
 import {
   EuiButtonGroup,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiCompressedFieldSearch,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore

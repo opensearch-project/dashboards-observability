@@ -812,6 +812,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                               >
                                                 <EuiButtonContent
                                                   className="euiButtonEmpty__content"
+                                                  iconGap="m"
                                                   iconSide="right"
                                                   iconSize="m"
                                                   iconType="arrowDown"

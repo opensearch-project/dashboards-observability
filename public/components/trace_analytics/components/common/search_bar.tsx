@@ -4,17 +4,18 @@
  */
 
 import {
-  EuiButton,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSuperDatePicker,
+  EuiButtonIcon,
+  EuiCompressedFieldSearch,
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { uiSettingsService } from '../../../../../common/utils';
-import { Filters, FiltersProps } from './filters/filters';
+import { FiltersProps } from './filters/filters';
+import { GlobalFilterButton } from './filters/filters';
 
 export const renderDatePicker = (
   startTime: string,
@@ -69,13 +70,17 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         {!props.datepickerOnly && (
           <EuiFlexItem>
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
+              prepend={<GlobalFilterButton filters={props.filters} setFilters={props.setFilters} />}
+              compressed
               fullWidth
               isClearable={false}
-              placeholder="Trace ID, trace group name, service name"
+              placeholder={i18n.translate('traceAnalytics.searchBar.placeholder', {
+                defaultMessage: 'Trace ID, trace group name, service name',
+              })}
               data-test-subj="search-bar-input-box"
               value={query}
               onChange={(e) => {
@@ -86,34 +91,30 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
             />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false} style={{ maxWidth: '40vw' }}>
-          {renderDatePicker(props.startTime, props.setStartTime, props.endTime, props.setEndTime)}
+        <EuiFlexItem grow={false} style={{ maxWidth: '30vw' }}>
+          <EuiSuperDatePicker
+            compressed
+            start={props.startTime}
+            end={props.endTime}
+            onTimeChange={(e) => {
+              props.setStartTime(e.start);
+              props.setEndTime(e.end);
+            }}
+            showUpdateButton={false}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label="Refresh"
+            display="base"
+            onClick={() => props.refresh()}
+            size="s"
             data-test-subj="superDatePickerApplyTimeButton"
             data-click-metric-element="trace_analytics.refresh_button"
-            iconType="refresh"
-            onClick={() => props.refresh()}
-          >
-            Refresh
-          </EuiButton>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {!props.datepickerOnly && (
-        <>
-          <EuiSpacer size="s" />
-          <Filters
-            page={props.page}
-            filters={props.filters}
-            setFilters={props.setFilters}
-            appConfigs={props.appConfigs}
-            mode={props.mode}
-            attributesFilterFields={props.attributesFilterFields}
-          />
-        </>
-      )}
     </>
   );
 });

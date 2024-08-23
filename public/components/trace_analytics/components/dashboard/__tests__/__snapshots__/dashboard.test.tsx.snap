@@ -312,6 +312,7 @@ exports[`Dashboard component renders dashboard 1`] = `
               title="data_prepper"
               type="button"
             >
+<<<<<<< HEAD
               <EuiButtonContent
                 className="euiButtonEmpty__content"
                 iconSide="right"
@@ -320,6 +321,26 @@ exports[`Dashboard component renders dashboard 1`] = `
                 textProps={
                   Object {
                     "className": "euiButtonEmpty__text",
+=======
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
+              >
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconGap="m"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                   }
                 }
               >
@@ -1529,6 +1550,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
               title="data_prepper"
               type="button"
             >
+<<<<<<< HEAD
               <EuiButtonContent
                 className="euiButtonEmpty__content"
                 iconSide="right"
@@ -1537,6 +1559,26 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                 textProps={
                   Object {
                     "className": "euiButtonEmpty__text",
+=======
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="data_prepper"
+                type="button"
+              >
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconGap="m"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                   }
                 }
               >
@@ -2746,6 +2788,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
               title="jaeger"
               type="button"
             >
+<<<<<<< HEAD
               <EuiButtonContent
                 className="euiButtonEmpty__content"
                 iconSide="right"
@@ -2754,6 +2797,26 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                 textProps={
                   Object {
                     "className": "euiButtonEmpty__text",
+=======
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+                data-test-subj="indexPattern-switch-link"
+                disabled={false}
+                onClick={[Function]}
+                title="jaeger"
+                type="button"
+              >
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconGap="m"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                   }
                 }
               >
@@ -3220,6 +3283,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -3303,6 +3367,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {

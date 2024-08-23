@@ -111,8 +111,21 @@ exports[`Explorer Search component renders basic component 1`] = `
                                       }
                                     }
                                   >
+<<<<<<< HEAD
                                     <span
                                       className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+=======
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconGap="m"
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                     >
                                       <EuiIcon
                                         className="euiButtonContent__icon"
@@ -604,6 +617,7 @@ exports[`Explorer Search component renders basic component 1`] = `
                                                 >
                                                   <EuiButtonContent
                                                     className="euiButtonEmpty__content"
+                                                    iconGap="m"
                                                     iconSide="right"
                                                     iconSize="s"
                                                     iconType="arrowDown"
@@ -794,8 +808,21 @@ exports[`Explorer Search component renders basic component 1`] = `
                                     }
                                   }
                                 >
+<<<<<<< HEAD
                                   <span
                                     className="euiButtonContent euiButton__content"
+=======
+                                  <EuiButtonContent
+                                    className="euiButton__content"
+                                    iconGap="m"
+                                    iconSide="left"
+                                    iconType="play"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButton__text",
+                                      }
+                                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                   >
                                     <EuiIcon
                                       className="euiButtonContent__icon"
@@ -908,8 +935,21 @@ exports[`Explorer Search component renders basic component 1`] = `
                                         }
                                       }
                                     >
+<<<<<<< HEAD
                                       <span
                                         className="euiButtonContent euiButton__content"
+=======
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconGap="m"
+                                        iconSide="left"
+                                        iconType="clock"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text",
+                                          }
+                                        }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                       >
                                         <EuiIcon
                                           className="euiButtonContent__icon"

@@ -11,19 +11,9 @@ exports[`Filter component renders filters 1`] = `
     alignItems="center"
     gutterSize="xs"
     responsive={false}
-    style={
-      Object {
-        "minHeight": 32,
-      }
-    }
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-      style={
-        Object {
-          "minHeight": 32,
-        }
-      }
     >
       <EuiFlexItem
         grow={false}
@@ -31,6 +21,7 @@ exports[`Filter component renders filters 1`] = `
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
+<<<<<<< HEAD
           <GlobalFilterButton>
             <EuiPopover
               anchorPosition="rightUp"
@@ -118,11 +109,14 @@ exports[`Filter component renders filters 1`] = `
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
+=======
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
           <AddFilterButton>
             <EuiPopover
               anchorPosition="downLeft"
               button={
                 <EuiButtonEmpty
+                  flush="left"
                   onClick={[Function]}
                   size="xs"
                 >
@@ -136,28 +130,28 @@ exports[`Filter component renders filters 1`] = `
               isOpen={false}
               ownFocus={true}
               panelPaddingSize="m"
-              withTitle={true}
             >
               <div
                 className="euiPopover euiPopover--anchorDownLeft"
                 data-test-subj="addfilter"
-                withTitle={true}
               >
                 <div
                   className="euiPopover__anchor"
                 >
                   <EuiButtonEmpty
+                    flush="left"
                     onClick={[Function]}
                     size="xs"
                   >
                     <button
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                       disabled={false}
                       onClick={[Function]}
                       type="button"
                     >
                       <EuiButtonContent
                         className="euiButtonEmpty__content"
+                        iconGap="m"
                         iconSide="left"
                         iconSize="s"
                         textProps={

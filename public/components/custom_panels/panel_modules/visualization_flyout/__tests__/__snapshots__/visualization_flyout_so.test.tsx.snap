@@ -1121,8 +1121,20 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                                     }
                                                   }
                                                 >
+<<<<<<< HEAD
                                                   <span
                                                     className="euiButtonContent euiButton__content"
+=======
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconGap="m"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                                   >
                                                     <span
                                                       className="euiButton__text"
@@ -1178,8 +1190,20 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                                     }
                                                   }
                                                 >
+<<<<<<< HEAD
                                                   <span
                                                     className="euiButtonContent euiButton__content"
+=======
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconGap="m"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                                   >
                                                     <span
                                                       className="euiButton__text"
@@ -2402,8 +2426,20 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                                     }
                                                   }
                                                 >
+<<<<<<< HEAD
                                                   <span
                                                     className="euiButtonContent euiButton__content"
+=======
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconGap="m"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                                   >
                                                     <span
                                                       className="euiButton__text"
@@ -2459,8 +2495,20 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                                     }
                                                   }
                                                 >
+<<<<<<< HEAD
                                                   <span
                                                     className="euiButtonContent euiButton__content"
+=======
+                                                  <EuiButtonContent
+                                                    className="euiButton__content"
+                                                    iconGap="m"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButton__text",
+                                                      }
+                                                    }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                                   >
                                                     <span
                                                       className="euiButton__text"

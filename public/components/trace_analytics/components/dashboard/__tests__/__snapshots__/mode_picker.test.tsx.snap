@@ -66,6 +66,7 @@ exports[`Mode picker component renders mode picker 1`] = `
             title="jaeger"
             type="button"
           >
+<<<<<<< HEAD
             <EuiButtonContent
               className="euiButtonEmpty__content"
               iconSide="right"
@@ -74,6 +75,26 @@ exports[`Mode picker component renders mode picker 1`] = `
               textProps={
                 Object {
                   "className": "euiButtonEmpty__text",
+=======
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="jaeger"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconGap="m"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                 }
               }
             >
@@ -191,6 +212,7 @@ exports[`Mode picker component renders mode picker 2`] = `
             title="jaeger"
             type="button"
           >
+<<<<<<< HEAD
             <EuiButtonContent
               className="euiButtonEmpty__content"
               iconSide="right"
@@ -199,6 +221,26 @@ exports[`Mode picker component renders mode picker 2`] = `
               textProps={
                 Object {
                   "className": "euiButtonEmpty__text",
+=======
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="jaeger"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconGap="m"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                 }
               }
             >

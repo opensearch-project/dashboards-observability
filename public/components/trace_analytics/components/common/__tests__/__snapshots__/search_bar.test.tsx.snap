@@ -253,6 +253,7 @@ exports[`Search bar components renders date picker 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="s"
                             iconType="arrowDown"
@@ -395,10 +396,11 @@ exports[`Search bar components renders search bar 1`] = `
   startTime="now-5m"
 >
   <EuiFlexGroup
+    alignItems="center"
     gutterSize="s"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem>
         <div
@@ -414,6 +416,12 @@ exports[`Search bar components renders search bar 1`] = `
             onChange={[Function]}
             onSearch={[MockFunction]}
             placeholder="Trace ID, trace group name, service name"
+            prepend={
+              <GlobalFilterButton
+                filters={Array []}
+                setFilters={[MockFunction]}
+              />
+            }
             value="test"
           >
             <EuiFormControlLayout
@@ -421,16 +429,120 @@ exports[`Search bar components renders search bar 1`] = `
               fullWidth={true}
               icon="search"
               isLoading={false}
+              prepend={
+                <GlobalFilterButton
+                  filters={Array []}
+                  setFilters={[MockFunction]}
+                />
+              }
             >
               <div
+<<<<<<< HEAD
                 className="euiFormControlLayout euiFormControlLayout--fullWidth"
+=======
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
               >
+                <GlobalFilterButton
+                  className="euiFormControlLayout__prepend"
+                  filters={Array []}
+                  key="0/.0"
+                  setFilters={[MockFunction]}
+                >
+                  <EuiPopover
+                    anchorPosition="rightUp"
+                    button={
+                      <EuiSmallButtonIcon
+                        aria-label="Change all filters"
+                        iconType="filter"
+                        onClick={[Function]}
+                        title="Change all filters"
+                      />
+                    }
+                    closePopover={[Function]}
+                    data-test-subj="global-filter-button"
+                    display="inlineBlock"
+                    hasArrow={true}
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="none"
+                  >
+                    <div
+                      className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
+                    >
+                      <div
+                        className="euiPopover__anchor"
+                      >
+                        <EuiSmallButtonIcon
+                          aria-label="Change all filters"
+                          iconType="filter"
+                          onClick={[Function]}
+                          title="Change all filters"
+                        >
+                          <EuiButtonIcon
+                            aria-label="Change all filters"
+                            iconType="filter"
+                            onClick={[Function]}
+                            size="s"
+                            title="Change all filters"
+                          >
+                            <button
+                              aria-label="Change all filters"
+                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                              disabled={false}
+                              onClick={[Function]}
+                              title="Change all filters"
+                              type="button"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="filter"
+                              >
+                                <EuiIconBeaker
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </EuiIconBeaker>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiSmallButtonIcon>
+                      </div>
+                    </div>
+                  </EuiPopover>
+                </GlobalFilterButton>
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <EuiValidatableControl>
                     <input
+<<<<<<< HEAD
                       className="euiFieldSearch euiFieldSearch--fullWidth"
+=======
+                      className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch--inGroup"
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                       data-test-subj="search-bar-input-box"
                       onChange={[Function]}
                       onKeyUp={[Function]}
@@ -498,7 +610,7 @@ exports[`Search bar components renders search bar 1`] = `
         grow={false}
         style={
           Object {
-            "maxWidth": "40vw",
+            "maxWidth": "30vw",
           }
         }
       >
@@ -506,7 +618,7 @@ exports[`Search bar components renders search bar 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
           style={
             Object {
-              "maxWidth": "40vw",
+              "maxWidth": "30vw",
             }
           }
         >
@@ -555,7 +667,12 @@ exports[`Search bar components renders search bar 1`] = `
                 },
               ]
             }
+<<<<<<< HEAD
             dateFormat=""
+=======
+            compressed={true}
+            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
             end="now"
             isAutoRefreshOnly={false}
             isDisabled={false}
@@ -581,6 +698,10 @@ exports[`Search bar components renders search bar 1`] = `
                   >
                     <EuiFormControlLayout
                       className="euiSuperDatePicker"
+<<<<<<< HEAD
+=======
+                      compressed={true}
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                       isDisabled={false}
                       prepend={
                         <EuiQuickSelectPopover
@@ -629,7 +750,7 @@ exports[`Search bar components renders search bar 1`] = `
                               },
                             ]
                           }
-                          dateFormat=""
+                          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
                           end="now"
                           isAutoRefreshOnly={false}
                           isDisabled={false}
@@ -641,7 +762,7 @@ exports[`Search bar components renders search bar 1`] = `
                       }
                     >
                       <div
-                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                       >
                         <EuiQuickSelectPopover
                           applyTime={[Function]}
@@ -690,7 +811,7 @@ exports[`Search bar components renders search bar 1`] = `
                               },
                             ]
                           }
-                          dateFormat=""
+                          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
                           end="now"
                           isAutoRefreshOnly={false}
                           isDisabled={false}
@@ -762,6 +883,7 @@ exports[`Search bar components renders search bar 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -859,7 +981,7 @@ exports[`Search bar components renders search bar 1`] = `
                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                             >
                               <button
-                                className="euiSuperDatePicker__prettyFormat"
+                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                 data-test-subj="superDatePickerShowDatesButton"
                                 disabled={false}
                                 onClick={[Function]}
@@ -878,7 +1000,13 @@ exports[`Search bar components renders search bar 1`] = `
                               </button>
                             </div>
                           </EuiDatePickerRange>
+<<<<<<< HEAD
                           <EuiFormControlLayoutIcons />
+=======
+                          <EuiFormControlLayoutIcons
+                            compressed={true}
+                          />
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                         </div>
                       </div>
                     </EuiFormControlLayout>
@@ -895,12 +1023,20 @@ exports[`Search bar components renders search bar 1`] = `
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
+<<<<<<< HEAD
           <EuiButton
+=======
+          <EuiButtonIcon
+            aria-label="Refresh"
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
             data-click-metric-element="trace_analytics.refresh_button"
             data-test-subj="superDatePickerApplyTimeButton"
+            display="base"
             iconType="refresh"
             onClick={[Function]}
+            size="s"
           >
+<<<<<<< HEAD
             <EuiButtonDisplay
               baseClassName="euiButton"
               data-click-metric-element="trace_analytics.refresh_button"
@@ -978,10 +1114,55 @@ exports[`Search bar components renders search bar 1`] = `
               </button>
             </EuiButtonDisplay>
           </EuiButton>
+=======
+            <button
+              aria-label="Refresh"
+              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
+              data-click-metric-element="trace_analytics.refresh_button"
+              data-test-subj="superDatePickerApplyTimeButton"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="refresh"
+              >
+                <EuiIconBeaker
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  role="img"
+                  style={null}
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </EuiIconBeaker>
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
         </div>
       </EuiFlexItem>
     </div>
   </EuiFlexGroup>
+<<<<<<< HEAD
   <EuiSpacer
     size="s"
   >
@@ -1177,5 +1358,7 @@ exports[`Search bar components renders search bar 1`] = `
       </div>
     </EuiFlexGroup>
   </Filters>
+=======
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
 </ForwardRef>
 `;

@@ -47,8 +47,21 @@ exports[`Live tail button change live tail to 10s interval 1`] = `
             }
           }
         >
+<<<<<<< HEAD
           <span
             className="euiButtonContent euiButton__content"
+=======
+          <EuiButtonContent
+            className="euiButton__content"
+            iconGap="m"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
           >
             <EuiIcon
               className="euiButtonContent__icon"
@@ -141,8 +154,21 @@ exports[`Live tail button starts live tail with 5s interval 1`] = `
             }
           }
         >
+<<<<<<< HEAD
           <span
             className="euiButtonContent euiButton__content"
+=======
+          <EuiButtonContent
+            className="euiButton__content"
+            iconGap="m"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
           >
             <EuiIcon
               className="euiButtonContent__icon"
@@ -231,8 +257,21 @@ exports[`Live tail off button stop live tail 1`] = `
             }
           }
         >
+<<<<<<< HEAD
           <span
             className="euiButtonContent euiButton__content"
+=======
+          <EuiButtonContent
+            className="euiButton__content"
+            iconGap="m"
+            iconSide="left"
+            iconType="stop"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
           >
             <EuiIcon
               className="euiButtonContent__icon"

@@ -369,6 +369,7 @@ exports[`Service Config component renders empty service config 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -774,6 +775,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -854,6 +856,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -934,6 +937,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -1587,6 +1591,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -1993,6 +1998,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2073,6 +2079,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2153,6 +2160,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {

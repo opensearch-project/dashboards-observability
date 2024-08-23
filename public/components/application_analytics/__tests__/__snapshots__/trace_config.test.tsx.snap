@@ -365,6 +365,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -1296,6 +1297,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {

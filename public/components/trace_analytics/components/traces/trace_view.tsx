@@ -39,6 +39,9 @@ import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_fun
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
+import { coreRefs } from '../../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -54,11 +57,13 @@ export function TraceView(props: TraceViewProps) {
   const renderTitle = (traceId: string) => {
     return (
       <>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2 className="overview-content">{traceId}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        {!newNavigation && (
+          <EuiFlexItem>
+            <EuiText size="s">
+              <h1 className="overview-content">{traceId}</h1>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </>
     );
   };

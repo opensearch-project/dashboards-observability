@@ -1757,8 +1757,20 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                           <span
                                                             className="euiButtonContent euiButton__content"
                                                           >
+<<<<<<< HEAD
                                                             <span
                                                               className="euiButton__text"
+=======
+                                                            <EuiButtonContent
+                                                              className="euiButton__content"
+                                                              iconGap="m"
+                                                              iconSide="left"
+                                                              textProps={
+                                                                Object {
+                                                                  "className": "euiButton__text",
+                                                                }
+                                                              }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                                             >
                                                               Validate
                                                             </span>
@@ -1925,8 +1937,20 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               }
                                             }
                                           >
+<<<<<<< HEAD
                                             <span
                                               className="euiButtonContent euiButton__content"
+=======
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconGap="m"
+                                              iconSide="left"
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                             >
                                               <span
                                                 className="euiButton__text"
@@ -1984,8 +2008,20 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               }
                                             }
                                           >
+<<<<<<< HEAD
                                             <span
                                               className="euiButtonContent euiButton__content"
+=======
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconGap="m"
+                                              iconSide="left"
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                                             >
                                               <span
                                                 className="euiButton__text"

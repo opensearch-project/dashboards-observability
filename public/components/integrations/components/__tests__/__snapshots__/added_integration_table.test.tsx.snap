@@ -476,6 +476,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
+                                            iconGap="m"
                                             iconSide="right"
                                             iconSize="m"
                                             iconType="arrowDown"
@@ -1188,6 +1189,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1391,6 +1393,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                                 >
                                                   <EuiButtonContent
                                                     className="euiButtonEmpty__content"
+                                                    iconGap="m"
                                                     iconSide="left"
                                                     iconSize="m"
                                                     textProps={

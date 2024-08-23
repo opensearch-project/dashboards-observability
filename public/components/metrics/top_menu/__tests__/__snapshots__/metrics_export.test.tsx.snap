@@ -76,8 +76,21 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                         }
                       }
                     >
+<<<<<<< HEAD
                       <span
                         className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+=======
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconGap="m"
+                        iconSide="right"
+                        iconType="arrowDown"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
+>>>>>>> de3acb06 ([Feature] Traces/Services UI update (#2078))
                       >
                         <EuiIcon
                           className="euiButtonContent__icon"
