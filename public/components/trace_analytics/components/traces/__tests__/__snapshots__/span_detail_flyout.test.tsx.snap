@@ -775,6 +775,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="left"
                                           iconSize="s"
                                           textProps={

@@ -1792,6 +1792,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                           >
                                                             <EuiButtonContent
                                                               className="euiButton__content"
+                                                              iconGap="m"
                                                               iconSide="left"
                                                               textProps={
                                                                 Object {
@@ -1986,6 +1987,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="left"
                                               textProps={
                                                 Object {
@@ -2055,6 +2057,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="left"
                                               textProps={
                                                 Object {

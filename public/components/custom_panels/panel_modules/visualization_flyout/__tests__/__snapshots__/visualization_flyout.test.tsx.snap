@@ -1127,6 +1127,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   textProps={
                                                     Object {
@@ -1192,6 +1193,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   textProps={
                                                     Object {
@@ -2446,6 +2448,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   textProps={
                                                     Object {
@@ -2511,6 +2514,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   textProps={
                                                     Object {
