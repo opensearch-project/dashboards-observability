@@ -65,75 +65,6 @@ export function Filters(props: FiltersOwnProps) {
     [props.page, props.mode, props.attributesFilterFields]
   );
 
-  const globalPopoverPanels = [
-    {
-      id: 0,
-      title: 'Change all filters',
-      items: [
-        {
-          name: 'Enable all',
-          icon: <EuiIcon type="eye" size="m" />,
-          onClick: () => {
-            props.setFilters(
-              props.filters.map((filter) => ({
-                ...filter,
-                disabled: filter.locked ? filter.disabled : false,
-              }))
-            );
-          },
-        },
-        {
-          name: 'Disable all',
-          icon: <EuiIcon type="eyeClosed" size="m" />,
-          onClick: () => {
-            props.setFilters(
-              props.filters.map((filter) => ({
-                ...filter,
-                disabled: filter.locked ? filter.disabled : true,
-              }))
-            );
-          },
-        },
-        {
-          name: 'Invert inclusion',
-          icon: <EuiIcon type="invert" size="m" />,
-          onClick: () => {
-            props.setFilters(
-              // if filter.custom.query exists, it's a customized filter and "inverted" is alwasy false
-              props.filters.map((filter) => ({
-                ...filter,
-                inverted: filter.locked
-                  ? filter.inverted
-                  : filter.custom?.query
-                  ? false
-                  : !filter.inverted,
-              }))
-            );
-          },
-        },
-        {
-          name: 'Invert enabled/disabled',
-          icon: <EuiIcon type="eye" size="m" />,
-          onClick: () => {
-            props.setFilters(
-              props.filters.map((filter) => ({
-                ...filter,
-                disabled: filter.locked ? filter.disabled : !filter.disabled,
-              }))
-            );
-          },
-        },
-        {
-          name: 'Remove all',
-          icon: <EuiIcon type="trash" size="m" />,
-          onClick: () => {
-            props.setFilters([]);
-          },
-        },
-      ],
-    },
-  ];
-
   const getFilterPopoverPanels = (
     filter: FilterType,
     index: number,
@@ -191,35 +122,12 @@ export function Filters(props: FiltersOwnProps) {
     },
   ];
 
-  const GlobalFilterButton = () => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    return (
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        button={
-          <EuiSmallButtonIcon
-            onClick={() => setIsPopoverOpen(true)}
-            iconType="filter"
-            title="Change all filters"
-            aria-label="Change all filters"
-          />
-        }
-        anchorPosition="rightUp"
-        panelPaddingSize="none"
-        withTitle
-        data-test-subj="global-filter-button"
-      >
-        <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} size="s" />
-      </EuiPopover>
-    );
-  };
-
   const AddFilterButton = () => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const button = (
       <EuiButtonEmpty
         size="xs"
+        flush="left"
         onClick={() => {
           setIsPopoverOpen(true);
         }}
@@ -235,7 +143,6 @@ export function Filters(props: FiltersOwnProps) {
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downLeft"
         data-test-subj="addfilter"
-        withTitle
       >
         <EuiPopoverTitle>{'Add filter'}</EuiPopoverTitle>
         <FilterEditPopover
@@ -318,10 +225,7 @@ export function Filters(props: FiltersOwnProps) {
   const filterComponents = useMemo(() => renderFilters(), [props.filters]);
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} style={{ minHeight: 32 }}>
-      <EuiFlexItem grow={false}>
-        <GlobalFilterButton />
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {filterComponents}
       <EuiFlexItem grow={false}>
         <AddFilterButton />
@@ -329,3 +233,104 @@ export function Filters(props: FiltersOwnProps) {
     </EuiFlexGroup>
   );
 }
+
+export const GlobalFilterButton = ({ filters, setFilters }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const togglePopover = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const globalPopoverPanels = [
+    {
+      id: 0,
+      title: 'Change all filters',
+      items: [
+        {
+          name: 'Enable all',
+          icon: <EuiIcon type="eye" size="m" />,
+          onClick: () => {
+            setFilters(
+              filters.map((filter) => ({
+                ...filter,
+                disabled: filter.locked ? filter.disabled : false,
+              }))
+            );
+            togglePopover();
+          },
+        },
+        {
+          name: 'Disable all',
+          icon: <EuiIcon type="eyeClosed" size="m" />,
+          onClick: () => {
+            setFilters(
+              filters.map((filter) => ({
+                ...filter,
+                disabled: filter.locked ? filter.disabled : true,
+              }))
+            );
+            togglePopover();
+          },
+        },
+        {
+          name: 'Invert inclusion',
+          icon: <EuiIcon type="invert" size="m" />,
+          onClick: () => {
+            setFilters(
+              filters.map((filter) => ({
+                ...filter,
+                inverted: filter.locked
+                  ? filter.inverted
+                  : filter.custom?.query
+                  ? false
+                  : !filter.inverted,
+              }))
+            );
+            togglePopover();
+          },
+        },
+        {
+          name: 'Invert enabled/disabled',
+          icon: <EuiIcon type="eye" size="m" />,
+          onClick: () => {
+            setFilters(
+              filters.map((filter) => ({
+                ...filter,
+                disabled: filter.locked ? filter.disabled : !filter.disabled,
+              }))
+            );
+            togglePopover();
+          },
+        },
+        {
+          name: 'Remove all',
+          icon: <EuiIcon type="trash" size="m" />,
+          onClick: () => {
+            setFilters([]);
+            togglePopover();
+          },
+        },
+      ],
+    },
+  ];
+
+  return (
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      button={
+        <EuiSmallButtonIcon
+          onClick={togglePopover}
+          iconType="filter"
+          title="Change all filters"
+          aria-label="Change all filters"
+        />
+      }
+      anchorPosition="rightUp"
+      panelPaddingSize="none"
+      data-test-subj="global-filter-button"
+    >
+      <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} size="s" />
+    </EuiPopover>
+  );
+};

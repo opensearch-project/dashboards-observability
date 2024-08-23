@@ -94,6 +94,7 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               iconType="arrowDown"
                               textProps={

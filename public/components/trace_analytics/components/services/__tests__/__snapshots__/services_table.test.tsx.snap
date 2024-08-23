@@ -93,6 +93,7 @@ exports[`Services table component renders empty jaeger services table message 1`
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -311,6 +312,7 @@ exports[`Services table component renders empty services table message 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -351,6 +353,7 @@ exports[`Services table component renders empty services table message 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="left"
                             iconSize="s"
                             textProps={
@@ -577,6 +580,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -959,6 +963,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -2098,6 +2103,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -2303,6 +2309,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
@@ -2519,6 +2526,7 @@ exports[`Services table component renders services table 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -2559,6 +2567,7 @@ exports[`Services table component renders services table 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="left"
                             iconSize="s"
                             textProps={
@@ -2997,6 +3006,7 @@ exports[`Services table component renders services table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -4344,6 +4354,7 @@ exports[`Services table component renders services table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -4547,6 +4558,7 @@ exports[`Services table component renders services table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={

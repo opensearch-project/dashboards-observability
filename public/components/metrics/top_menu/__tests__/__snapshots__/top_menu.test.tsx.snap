@@ -645,6 +645,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="right"
                                                 iconSize="s"
                                                 iconType="arrowDown"
@@ -846,6 +847,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                         >
                                           <EuiButtonContent
                                             className="euiButton__content"
+                                            iconGap="m"
                                             iconSide="left"
                                             iconType="refresh"
                                             isLoading={false}
@@ -980,6 +982,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="arrowDown"
                                           textProps={
