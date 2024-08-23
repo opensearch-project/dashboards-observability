@@ -111,7 +111,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 import { registerAllPluginNavGroups } from './plugin_nav';
 
 interface PublicConfig {
@@ -159,11 +158,6 @@ export const [
     handleRefresh,
   }: RenderAccelerationFlyoutParams) => void
 >('renderCreateAccelerationFlyout');
-
-export const [
-  getRenderLogExplorerTablesFlyout,
-  setRenderLogExplorerTablesFlyout,
-] = createGetterSetter<(dataSourceName: string) => void>('renderLogExplorerTablesFlyout');
 
 export class ObservabilityPlugin
   implements
@@ -536,7 +530,6 @@ export class ObservabilityPlugin
       dataSourceName,
       handleRefresh,
       dataSourceMDSId,
-      isS3ConnectionWithLakeFormation,
     }: RenderAssociatedObjectsDetailsFlyoutParams) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -546,7 +539,6 @@ export class ObservabilityPlugin
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
-            isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
           />
         )
       );
@@ -574,18 +566,6 @@ export class ObservabilityPlugin
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
-
-    const renderLogExplorerTablesFlyout = (dataSourceName: string) => {
-      const createLogExplorerTablesFlyout = core.overlays.openFlyout(
-        toMountPoint(
-          <TablesFlyout
-            dataSourceName={dataSourceName}
-            resetFlyout={() => createLogExplorerTablesFlyout.close()}
-          />
-        )
-      );
-    };
-    setRenderLogExplorerTablesFlyout(renderLogExplorerTablesFlyout);
 
     const CatalogCacheManagerInstance = CatalogCacheManager;
     const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;

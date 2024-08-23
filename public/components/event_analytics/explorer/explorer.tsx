@@ -87,10 +87,6 @@ import {
 } from '../../../../common/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
-import {
-  getRenderCreateAccelerationFlyout,
-  getRenderLogExplorerTablesFlyout,
-} from '../../../plugin';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
@@ -131,7 +127,6 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
-import { AccelerateCallout } from './accelerate_callout';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
@@ -209,11 +204,6 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
-  const dataSourceName = explorerSearchMeta?.datasources[0]?.label;
-  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
-  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
-  const isS3Connection = explorerSearchMeta.datasources?.[0]?.type === 's3glue';
-  const onCreateAcceleration = () => renderCreateAccelerationFlyout(dataSourceName);
   const currentPluggable = useMemo(() => {
     return explorerSearchMeta.datasources?.[0]?.type
       ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
@@ -587,11 +577,6 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {isS3Connection && (
-              <EuiFlexItem>
-                <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />
-              </EuiFlexItem>
-            )}
             {showTimeBasedComponents && (
               <>
                 <EuiFlexItem grow={false}>
@@ -719,7 +704,6 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isQueryRunning,
-    isS3Connection,
     eventsLoading,
   ]);
 
@@ -766,7 +750,11 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization onCreateAcceleration={onCreateAcceleration} />
+      <DirectQueryVisualization
+        currentDataSource={
+          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
+        }
+      />
     );
   }, [
     query,
@@ -775,7 +763,7 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    onCreateAcceleration,
+    explorerSearchMeta.datasources,
   ]);
 
   const contentTabs = [
@@ -1091,25 +1079,8 @@ export const Explorer = ({
                   isAppAnalytics={appLogEvents}
                   pplService={pplService}
                 />
-                {isS3Connection && (
-                  <>
-                    <EuiLink
-                      style={{ paddingLeft: 130 }}
-                      onClick={() => {
-                        renderTablesFlyout(dataSourceName);
-                      }}
-                    >
-                      View databases and tables
-                    </EuiLink>
-                    <EuiSpacer size="m" />
-                  </>
-                )}
                 {explorerSearchMeta.isPolling ? (
-                  <DirectQueryRunning
-                    tabId={tabId}
-                    isS3Connection={isS3Connection}
-                    onCreateAcceleration={onCreateAcceleration}
-                  />
+                  <DirectQueryRunning tabId={tabId} />
                 ) : (
                   <EuiTabbedContent
                     className="mainContentTabs"

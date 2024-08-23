@@ -1659,7 +1659,7 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Integration display Name"
+    label="Display Name"
     labelType="label"
   >
     <div
@@ -1682,7 +1682,7 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
             className="euiFormLabel euiFormRow__label"
             htmlFor="random_html_id"
           >
-            Integration display Name
+            Display Name
           </label>
         </EuiFormLabel>
       </div>
@@ -2475,13 +2475,6 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
               </EuiPanel>
             </_EuiSplitPanelOuter>
           </EuiCheckableCard>
-          <EuiSpacer
-            size="s"
-          >
-            <div
-              className="euiSpacer euiSpacer--s"
-            />
-          </EuiSpacer>
         </SetupWorkflowSelector>
       </div>
     </div>

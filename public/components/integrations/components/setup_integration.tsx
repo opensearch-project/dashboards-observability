@@ -36,7 +36,6 @@ export interface IntegrationSetupInputs {
   checkpointLocation: string;
   connectionTableName: string;
   enabledWorkflows: string[];
-  connectionDatabaseName?: string;
 }
 
 export interface IntegrationConfigProps {
@@ -110,9 +109,7 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.${config.connectionDatabaseName ?? 'default'}.${
-    config.connectionTableName
-  }`;
+  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -220,9 +217,7 @@ const addIntegration = async ({
       dataSourceMDSId,
       dataSourceMDSLabel,
       name: config.displayName,
-      indexPattern: `flint_${config.connectionDataSource}_${
-        config.connectionDatabaseName ?? 'default'
-      }_${config.connectionTableName}__*`,
+      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
       workflows: config.enabledWorkflows,
       skipRedirect: setIsInstalling ? true : false,
       dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
@@ -378,9 +373,6 @@ export function SetupIntegrationForm({
   forceConnection?: {
     name: string;
     type: string;
-    properties?: {
-      lakeFormationEnabled?: boolean;
-    };
   };
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
@@ -424,22 +416,12 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-<<<<<<< HEAD
+  const IntegrationInputFormComponent = SetupIntegrationFormInputs;
   const handleSelectedDataSourceChange = (id?: string, label?: string) => {
     setDataSourceMDSId(id);
     setDataSourceMDSLabel(label);
   };
 
-  const IntegrationInputFormComponent =
-    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
-      ? SetupIntegrationInputsForSecurityLake
-      : SetupIntegrationFormInputs;
-=======
-  const IntegrationInputFormComponent = forceConnection?.properties?.lakeFormationEnabled
-    ? SetupIntegrationInputsForSecurityLake
-    : SetupIntegrationFormInputs;
-
->>>>>>> a371170d (reverted commit 19d68b2)
   const content = (
     <>
       {showLoading ? (
@@ -487,13 +469,33 @@ export function SetupIntegrationForm({
   } else if (renderType === 'flyout') {
     return (
       <>
-        <EuiFlyoutBody>{content}</EuiFlyoutBody>
-        <EuiFlyoutFooter>{bottomBar}</EuiFlyoutFooter>
+        <EuiFlyoutBody>
+          {showLoading ? (
+            <LoadingPage />
+          ) : (
+            <SetupIntegrationFormInputs
+              config={integConfig}
+              updateConfig={updateConfig}
+              integration={template}
+              setupCallout={setupCallout}
+              lockConnectionType={forceConnection !== undefined}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <SetupBottomBar
+            config={integConfig}
+            integration={template}
+            loading={showLoading}
+            setLoading={setShowLoading}
+            setSetupCallout={setSetupCallout}
+            unsetIntegration={unsetIntegration}
+            setIsInstalling={setIsInstalling}
+          />
+        </EuiFlyoutFooter>
       </>
     );
   }
-
-  return null;
 }
 
 export function SetupIntegrationPage({

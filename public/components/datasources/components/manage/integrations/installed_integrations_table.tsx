@@ -123,21 +123,17 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
   );
 };
 
-export interface InstallIntegrationFlyoutProps {
-  datasourceType: DatasourceType;
-  datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
-  closeFlyout: () => void;
-  refreshInstances: () => void;
-}
-
 export const InstallIntegrationFlyout = ({
+  closeFlyout,
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
-  closeFlyout,
   refreshInstances,
-}: InstallIntegrationFlyoutProps) => {
+}: {
+  closeFlyout: () => void;
+  datasourceType: DatasourceType;
+  datasourceName: string;
+  refreshInstances: () => void;
+}) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
   } as AvailableIntegrationsList);
@@ -185,9 +181,6 @@ export const InstallIntegrationFlyout = ({
               ? {
                   name: datasourceName,
                   type: 's3',
-                  properties: {
-                    lakeFormationEnabled: isS3ConnectionWithLakeFormation,
-                  },
                 }
               : undefined
           }
@@ -208,13 +201,11 @@ export const InstalledIntegrationsTable = ({
   integrations,
   datasourceType,
   datasourceName,
-  isS3ConnectionWithLakeFormation,
   refreshInstances,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
   datasourceName: string;
-  isS3ConnectionWithLakeFormation?: boolean;
   refreshInstances: () => void;
 }) => {
   const [query, setQuery] = useState('');
@@ -265,7 +256,6 @@ export const InstalledIntegrationsTable = ({
           closeFlyout={() => setShowAvailableFlyout(false)}
           datasourceType={datasourceType}
           datasourceName={datasourceName}
-          isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
           refreshInstances={refreshInstances}
         />
       ) : null}

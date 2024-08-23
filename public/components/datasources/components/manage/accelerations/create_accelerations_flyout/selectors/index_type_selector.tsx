@@ -10,7 +10,7 @@ import {
   EuiCompressedSuperSelect,
   EuiText,
 } from '@elastic/eui';
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACC_INDEX_TYPE_DOCUMENTATION_URL,
@@ -22,28 +22,16 @@ import {
 
 interface IndexTypeSelectorProps {
   accelerationFormData: CreateAccelerationForm;
-  isS3ConnectionWithLakeFormation: boolean;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   initiateColumnLoad: (dataSource: string, database: string, dataTable: string) => void;
 }
 
 export const IndexTypeSelector = ({
   accelerationFormData,
-  isS3ConnectionWithLakeFormation,
   setAccelerationFormData,
   initiateColumnLoad,
 }: IndexTypeSelectorProps) => {
   const [value, setValue] = useState('skipping');
-  // This is used to track if user changed the value
-  // If so, we skip changing it based on 'isS3ConnectionWithLakeFormation' in the effect below
-  const valueSetAlready = useRef(false);
-
-  useEffect(() => {
-    if (!valueSetAlready.current) {
-      const defaultSelectedOption = isS3ConnectionWithLakeFormation ? 'materialized' : 'skipping';
-      updateState(defaultSelectedOption);
-    }
-  }, [isS3ConnectionWithLakeFormation]);
 
   useEffect(() => {
     initiateColumnLoad(
@@ -53,7 +41,7 @@ export const IndexTypeSelector = ({
     );
   }, [accelerationFormData.dataTable]);
 
-  const updateState = (indexType: string) => {
+  const onChangeSupeSelect = (indexType: string) => {
     setAccelerationFormData({
       ...accelerationFormData,
       accelerationIndexType: indexType as AccelerationIndexType,
@@ -63,32 +51,21 @@ export const IndexTypeSelector = ({
     setValue(indexType);
   };
 
-  const onChangeSupeSelect = (indexType: string) => {
-    updateState(indexType);
-    valueSetAlready.current = true;
-  };
-
-  const baseOptions = !isS3ConnectionWithLakeFormation
-    ? [
-        {
-          value: 'skipping',
-          inputDisplay: 'Skipping index',
-          dropdownDisplay: (
-            <Fragment>
-              <strong>Skipping index</strong>
-              <EuiText size="s" color="subdued">
-                <p className="EuiTextColor--subdued">
-                  Accelerate direct queries by storing table meta-data in OpenSearch.
-                </p>
-              </EuiText>
-            </Fragment>
-          ),
-        },
-      ]
-    : [];
-
   const superSelectOptions = [
-    ...baseOptions,
+    {
+      value: 'skipping',
+      inputDisplay: 'Skipping index',
+      dropdownDisplay: (
+        <Fragment>
+          <strong>Skipping index</strong>
+          <EuiText size="s" color="subdued">
+            <p className="EuiTextColor--subdued">
+              Accelerate direct queries by storing table meta-data in OpenSearch.
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
+    },
     {
       value: 'covering',
       inputDisplay: 'Covering index',

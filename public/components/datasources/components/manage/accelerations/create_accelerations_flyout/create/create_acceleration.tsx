@@ -34,13 +34,11 @@ import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
 import { IndexTypeSelector } from '../selectors/index_type_selector';
 import { PreviewSQLDefinition } from '../selectors/preview_sql_defintion';
-import { DataSourceSelector } from '../selectors/source_selector';
+import { AccelerationDataSourceSelector } from '../selectors/source_selector';
 import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationButton } from './create_acceleration_button';
 import { CreateAccelerationHeader } from './create_acceleration_header';
 import { hasError } from './utils';
-import { DATACONNECTIONS_BASE } from '../../../../../../../../common/constants/shared';
-import { checkIsConnectionWithLakeFormation } from '../../../../../utils/helpers';
 
 export interface CreateAccelerationProps {
   selectedDatasource: string;
@@ -61,7 +59,6 @@ export const CreateAcceleration = ({
 }: CreateAccelerationProps) => {
   const { setToast } = useToast();
   const http = coreRefs!.http;
-  const [isS3ConnectionWithLakeFormation, setIsS3ConnectionWithLakeFormation] = useState(false);
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
     database: databaseName ?? '',
@@ -170,16 +167,6 @@ export const CreateAcceleration = ({
     }
   };
 
-  const updateDataSourceConnectionInfo = () => {
-    coreRefs.http!.get(`${DATACONNECTIONS_BASE}/${selectedDatasource}`).then((data: any) => {
-      setIsS3ConnectionWithLakeFormation(checkIsConnectionWithLakeFormation(data));
-    });
-  };
-
-  useEffect(() => {
-    updateDataSourceConnectionInfo();
-  }, [selectedDatasource]);
-
   useEffect(() => {
     if (databaseName !== undefined && tableName !== undefined) {
       initiateColumnLoad(
@@ -237,13 +224,10 @@ export const CreateAcceleration = ({
             component="div"
             id="acceleration-form"
           >
-            <DataSourceSelector
+            <AccelerationDataSourceSelector
               http={http!}
-              dataSourceFormProps={{
-                formType: 'CreateAcceleration',
-                dataSourceFormData: accelerationFormData,
-                setDataSourceFormData: setAccelerationFormData,
-              }}
+              accelerationFormData={accelerationFormData}
+              setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
               dataSourcesPreselected={dataSourcesPreselected}
               tableFieldsLoading={tableFieldsLoading}
@@ -252,7 +236,6 @@ export const CreateAcceleration = ({
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
               accelerationFormData={accelerationFormData}
-              isS3ConnectionWithLakeFormation={isS3ConnectionWithLakeFormation}
               setAccelerationFormData={setAccelerationFormData}
               initiateColumnLoad={initiateColumnLoad}
             />

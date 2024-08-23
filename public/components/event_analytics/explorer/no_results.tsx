@@ -24,7 +24,6 @@ import { DATA_SOURCE_TYPES, QUERY_LANGUAGE } from '../../../../common/constants/
 import { CachedDataSourceStatus } from '../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../framework/core_refs';
-import { getRenderLogExplorerTablesFlyout } from '../../../plugin';
 import { selectQueryAssistantSummarization } from '../redux/slices/query_assistant_summarization_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectSearchMetaData } from '../redux/slices/search_meta_data_slice';
@@ -113,8 +112,6 @@ export const NoResults = ({ tabId, eventsLoading }: NoResultsProps) => {
     }
   }
 
-  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
-
   const renderS3Callouts = () => {
     return (
       <EuiFlexGroup justifyContent="center" direction="column">
@@ -145,7 +142,9 @@ export const NoResults = ({ tabId, eventsLoading }: NoResultsProps) => {
               To start exploring this datasource, enter a query or{' '}
               <EuiLink
                 onClick={() => {
-                  renderTablesFlyout(datasourceName);
+                  coreRefs?.application!.navigateToApp('datasources', {
+                    path: `#/manage/${datasourceName}`,
+                  });
                 }}
               >
                 view databases and tables.

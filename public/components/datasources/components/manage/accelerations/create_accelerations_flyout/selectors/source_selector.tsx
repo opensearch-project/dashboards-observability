@@ -30,42 +30,25 @@ import { hasError, validateDataTable, validateDatabase } from '../create/utils';
 import { SelectorLoadDatabases } from './selector_helpers/load_databases';
 import { SelectorLoadObjects } from './selector_helpers/load_objects';
 
-export type BaseDataSourceForm = Pick<
-  CreateAccelerationForm,
-  'dataSource' | 'database' | 'dataTable'
-> & { formErrors: Partial<CreateAccelerationForm['formErrors']> };
-
-type DataSourceFormProps =
-  | {
-      formType: 'CreateAcceleration';
-      dataSourceFormData: CreateAccelerationForm;
-      setDataSourceFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
-    }
-  | {
-      formType: 'SetupIntegration';
-      dataSourceFormData: BaseDataSourceForm;
-      setDataSourceFormData: React.Dispatch<React.SetStateAction<BaseDataSourceForm>>;
-    };
-
-interface DataSourceSelectorProps {
+interface AccelerationDataSourceSelectorProps {
   http: CoreStart['http'];
-  dataSourceFormProps: DataSourceFormProps;
+  accelerationFormData: CreateAccelerationForm;
+  setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   selectedDatasource: string;
   dataSourcesPreselected: boolean;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
-  hideHeader?: boolean;
 }
 
-export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
+export const AccelerationDataSourceSelector = ({
   http,
-  dataSourceFormProps: { dataSourceFormData, setDataSourceFormData },
+  accelerationFormData,
+  setAccelerationFormData,
   selectedDatasource,
   dataSourcesPreselected,
   tableFieldsLoading,
   dataSourceMDSId,
-  hideHeader,
-}) => {
+}: AccelerationDataSourceSelectorProps) => {
   const { setToast } = useToast();
   const [databases, setDatabases] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -82,7 +65,9 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   const dataSourceDescription = (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>Data source</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{dataSourceFormData.dataSource}</EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>
+        {accelerationFormData.dataSource}
+      </EuiDescriptionListDescription>
     </EuiDescriptionList>
   );
 
@@ -109,7 +94,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   };
 
   const loadDatabases = () => {
-    const dsCache = CatalogCacheManager.getOrCreateDataSource(dataSourceFormData.dataSource);
+    const dsCache = CatalogCacheManager.getOrCreateDataSource(accelerationFormData.dataSource);
 
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
       const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
@@ -124,7 +109,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     setSelectedDatabase([]);
     setTables([]);
     setSelectedTable([]);
-    setDataSourceFormData({ ...(dataSourceFormData as any), database: '', dataTable: '' });
+    setAccelerationFormData({ ...accelerationFormData, database: '', dataTable: '' });
   };
 
   const loadTables = () => {
@@ -132,8 +117,8 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
       let dbCache = {} as CachedDatabase;
       try {
         dbCache = CatalogCacheManager.getDatabase(
-          dataSourceFormData.dataSource,
-          dataSourceFormData.database
+          accelerationFormData.dataSource,
+          accelerationFormData.database
         );
         if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
           const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));
@@ -150,7 +135,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
         console.error(error);
       }
       setSelectedTable([]);
-      setDataSourceFormData({ ...(dataSourceFormData as any), dataTable: '' });
+      setAccelerationFormData({ ...accelerationFormData, dataTable: '' });
     }
   };
 
@@ -159,32 +144,28 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (dataSourceFormData.dataSource !== '') {
+    if (accelerationFormData.dataSource !== '') {
       loadDatabases();
     }
-  }, [dataSourceFormData.dataSource]);
+  }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
-    if (dataSourceFormData.database !== '') {
+    if (accelerationFormData.database !== '') {
       loadTables();
     }
-  }, [dataSourceFormData.database]);
+  }, [accelerationFormData.database]);
 
   return (
     <>
-      {!hideHeader && (
-        <>
-          <EuiText data-test-subj="datasource-selector-header">
-            <h3>Select data source</h3>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            Select the data source to accelerate data from. External data sources may take time to
-            load.
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <EuiText data-test-subj="datasource-selector-header">
+        <h3>Select data source</h3>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        Select the data source to accelerate data from. External data sources may take time to load.
+      </EuiText>
+      <EuiSpacer size="m" />
+
       {dataSourcesPreselected ? (
         <>
           <EuiFlexGroup>
@@ -193,7 +174,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Database</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {dataSourceFormData.database}
+                  {accelerationFormData.database}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
@@ -201,7 +182,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               <EuiDescriptionList>
                 <EuiDescriptionListTitle>Table</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {dataSourceFormData.dataTable}
+                  {accelerationFormData.dataTable}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
@@ -214,8 +195,8 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           <EuiCompressedFormRow
             label="Database"
             helpText="Select the database that contains the tables you'd like to use."
-            isInvalid={hasError(dataSourceFormData.formErrors, 'databaseError')}
-            error={dataSourceFormData.formErrors.databaseError}
+            isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
+            error={accelerationFormData.formErrors.databaseError}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
@@ -226,7 +207,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                   selectedOptions={selectedDatabase}
                   onChange={(databaseOptions) => {
                     if (databaseOptions.length > 0) {
-                      setDataSourceFormData(
+                      setAccelerationFormData(
                         producer((accData) => {
                           accData.database = databaseOptions[0].label;
                           accData.formErrors.databaseError = validateDatabase(
@@ -238,7 +219,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                     }
                   }}
                   isClearable={false}
-                  isInvalid={hasError(dataSourceFormData.formErrors, 'databaseError')}
+                  isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
                   isDisabled={
                     loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
                   }
@@ -246,7 +227,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SelectorLoadDatabases
-                  dataSourceName={dataSourceFormData.dataSource}
+                  dataSourceName={accelerationFormData.dataSource}
                   loadDatabases={loadDatabases}
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
@@ -263,8 +244,8 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                 ? 'Loading tables fields'
                 : 'Select the Spark table that has the data you would like to index.'
             }
-            isInvalid={hasError(dataSourceFormData.formErrors, 'dataTableError')}
-            error={dataSourceFormData.formErrors.dataTableError}
+            isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
+            error={accelerationFormData.formErrors.dataTableError}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
@@ -275,7 +256,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                   selectedOptions={selectedTable}
                   onChange={(tableOptions) => {
                     if (tableOptions.length > 0) {
-                      setDataSourceFormData(
+                      setAccelerationFormData(
                         producer((accData) => {
                           accData.dataTable = tableOptions[0].label;
                           accData.formErrors.dataTableError = validateDataTable(
@@ -287,7 +268,7 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
                     }
                   }}
                   isClearable={false}
-                  isInvalid={hasError(dataSourceFormData.formErrors, 'dataTableError')}
+                  isInvalid={hasError(accelerationFormData.formErrors, 'dataTableError')}
                   isDisabled={
                     loadingComboBoxes.database || loadingComboBoxes.dataTable || tableFieldsLoading
                   }
@@ -295,8 +276,8 @@ export const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SelectorLoadObjects
-                  dataSourceName={dataSourceFormData.dataSource}
-                  databaseName={dataSourceFormData.database}
+                  dataSourceName={accelerationFormData.dataSource}
+                  databaseName={accelerationFormData.database}
                   loadTables={loadTables}
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}

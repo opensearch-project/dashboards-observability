@@ -159,16 +159,16 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             class="euiFlexItem"
           >
             <div
-              class="euiText euiText--medium overview-title"
-            >
-              Query Access
-            </div>
-            <div
-              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
             >
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Query Access
+                </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
@@ -466,7 +466,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         <span
                           class="euiButtonEmpty__text"
                         >
-                          Query in Log Explorer
+                          Query in Observability Logs
                         </span>
                       </span>
                     </button>
