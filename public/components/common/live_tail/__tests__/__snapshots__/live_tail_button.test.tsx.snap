@@ -47,6 +47,7 @@ exports[`Live tail button change live tail to 10s interval 1`] = `
         >
           <EuiButtonContent
             className="euiButton__content"
+            iconGap="m"
             iconSide="left"
             iconType="stop"
             textProps={
@@ -150,6 +151,7 @@ exports[`Live tail button starts live tail with 5s interval 1`] = `
         >
           <EuiButtonContent
             className="euiButton__content"
+            iconGap="m"
             iconSide="left"
             iconType="stop"
             textProps={
@@ -249,6 +251,7 @@ exports[`Live tail off button stop live tail 1`] = `
         >
           <EuiButtonContent
             className="euiButton__content"
+            iconGap="m"
             iconSide="left"
             iconType="stop"
             textProps={

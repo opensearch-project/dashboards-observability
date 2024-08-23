@@ -264,6 +264,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             iconType="refresh"
                             isLoading={false}
@@ -364,6 +365,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             textProps={
                               Object {
@@ -1277,6 +1279,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                 >
                                                   <EuiButtonContent
                                                     className="euiButtonEmpty__content"
+                                                    iconGap="m"
                                                     iconSide="right"
                                                     iconSize="m"
                                                     iconType="arrowDown"
@@ -1634,6 +1637,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -4576,6 +4580,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                               >
                                                 <EuiButtonContent
                                                   className="euiButtonEmpty__content"
+                                                  iconGap="m"
                                                   iconSide="right"
                                                   iconSize="s"
                                                   iconType="arrowDown"
@@ -4779,6 +4784,7 @@ exports[`AssociatedObjectsTab Component renders correctly with associated object
                                                         >
                                                           <EuiButtonContent
                                                             className="euiButtonEmpty__content"
+                                                            iconGap="m"
                                                             iconSide="left"
                                                             iconSize="m"
                                                             textProps={
@@ -5160,6 +5166,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             iconType="refresh"
                             isLoading={false}
@@ -5260,6 +5267,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             textProps={
                               Object {
@@ -5389,6 +5397,7 @@ exports[`AssociatedObjectsTab Component renders tab with no databases or objects
                   >
                     <EuiButtonContent
                       className="euiButton__content"
+                      iconGap="m"
                       iconSide="right"
                       iconType="popout"
                       textProps={

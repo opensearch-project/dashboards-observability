@@ -152,6 +152,7 @@ exports[`Empty panel view component renders empty panel view with disabled popov
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="right"
                               iconType="arrowDown"
                               textProps={
@@ -375,6 +376,7 @@ exports[`Empty panel view component renders empty panel view with enabled popove
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="right"
                               iconType="arrowDown"
                               textProps={
