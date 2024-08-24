@@ -139,7 +139,6 @@ export const LONG_CHART_COLOR = PLOTLY_COLOR[1];
 export const pageStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
-  maxWidth: '1130px',
 };
 
 export enum VIS_CHART_TYPES {

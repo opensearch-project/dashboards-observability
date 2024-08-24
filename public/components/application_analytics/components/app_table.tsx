@@ -4,42 +4,45 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import '../app_analytics.scss';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBadge,
-  EuiSmallButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
   EuiToolTip,
+  EuiFieldText,
+  EuiButton,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeaderTitle,
+  EuiTitle,
+  EuiPageHeader,
 } from '@elastic/eui';
-import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
-import { DeleteModal } from '../../common/helpers/delete_modal';
+import truncate from 'lodash/truncate';
 import { AppAnalyticsComponentDeps } from '../home';
-import { getCustomModal } from '../../custom_panels/helpers/modal_containers';
-import { pageStyles, UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ApplicationType, AvailabilityType } from '../../../../common/types/application_analytics';
+import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { DeleteModal } from '../../common/helpers/delete_modal';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -62,10 +65,12 @@ export function AppTable(props: AppTableProps) {
     clearStorage,
     moveToApp,
   } = props;
+
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
-  const [selectedApplications, setSelectedApplications] = useState<ApplicationType[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [newName, setNewName] = useState('');
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationType | null>(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const createButtonText = 'Create application';
 
   useEffect(() => {
@@ -89,98 +94,59 @@ export function AppTable(props: AppTableProps) {
 
   const closeModal = () => {
     setIsModalVisible(false);
+    setIsDeleteModalVisible(false);
+    setNewName('');
+    setSelectedApplication(null);
   };
 
-  const showModal = () => {
+  const onRename = async () => {
+    if (selectedApplication && newName.trim()) {
+      await renameApplication(newName.trim(), selectedApplication.id);
+      closeModal();
+    }
+  };
+
+  const renameApp = (app: ApplicationType) => {
+    setSelectedApplication(app);
+    setNewName(app.name);
     setIsModalVisible(true);
   };
 
-  const onRename = async (newApplicationName: string) => {
-    renameApplication(newApplicationName, selectedApplications[0].id);
-    closeModal();
+  const confirmDelete = async () => {
+    if (selectedApplication) {
+      const toastMessage = `Application${
+        applications.length > 1 ? 's' : ' "' + selectedApplication.name + '"'
+      } successfully deleted!`;
+      await deleteApplication(
+        [selectedApplication.id],
+        [selectedApplication.panelId],
+        toastMessage
+      );
+      closeModal();
+    }
   };
 
-  const onDelete = async () => {
-    closeModal();
-    const toastMessage = `Application${
-      selectedApplications.length > 1 ? 's' : ' "' + selectedApplications[0].name + '"'
-    } successfully deleted!`;
-    await deleteApplication(
-      selectedApplications.map((app) => app.id),
-      selectedApplications.map((app) => app.panelId),
-      toastMessage
-    );
+  const deleteApp = (app: ApplicationType) => {
+    setSelectedApplication(app);
+    setIsDeleteModalVisible(true);
   };
 
-  const renameApp = () => {
-    setModalLayout(
-      getCustomModal(
-        onRename,
-        closeModal,
-        'Name',
-        'Rename application',
-        'Cancel',
-        'Rename',
-        selectedApplications[0].name
-      )
-    );
-    showModal();
-  };
-
-  const deleteApp = () => {
-    const applicationString = `application${selectedApplications.length > 1 ? 's' : ''}`;
-    setModalLayout(
-      <DeleteModal
-        onConfirm={onDelete}
-        onCancel={closeModal}
-        title={`Delete ${selectedApplications.length} ${applicationString}`}
-        message={`Are you sure you want to delete the selected ${selectedApplications.length} ${applicationString}?`}
-      />
-    );
-    showModal();
-  };
-
-  const popoverButton = (
-    <EuiSmallButton
-      data-test-subj="appAnalyticsActionsButton"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
-    >
-      Actions
-    </EuiSmallButton>
-  );
-
-  const popoverItems: ReactElement[] = [
-    <EuiContextMenuItem
-      key="rename"
-      data-test-subj="renameApplicationContextMenuItem"
-      disabled={applications.length === 0 || selectedApplications.length !== 1}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        renameApp();
-      }}
-    >
-      Rename
-    </EuiContextMenuItem>,
-    // <EuiContextMenuItem
-    //   key="duplicate"
-    //   disabled={applications.length === 0 || selectedApplications.length !== 1}
-    // >
-    //   Duplicate
-    // </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      data-test-subj="deleteApplicationContextMenuItem"
-      disabled={applications.length === 0 || selectedApplications.length === 0}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        deleteApp();
-      }}
-    >
-      Delete
-    </EuiContextMenuItem>,
-    // <EuiContextMenuItem key="addSample">Add sample application</EuiContextMenuItem>,
+  const actions = [
+    {
+      name: 'Rename',
+      description: 'Rename this application',
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (app: ApplicationType) => renameApp(app),
+    },
+    {
+      name: 'Delete',
+      description: 'Delete this application',
+      icon: 'trash',
+      type: 'icon',
+      color: 'danger',
+      onClick: (app: ApplicationType) => deleteApp(app),
+    },
   ];
 
   const renderAvailability = (value: AvailabilityType, record: ApplicationType) => {
@@ -248,59 +214,64 @@ export function AppTable(props: AppTableProps) {
       sortable: true,
       render: (value) => <EuiText>{moment(value).format(UI_DATE_FORMAT)}</EuiText>,
     },
-  ] as Array<EuiTableFieldDataColumnType<ApplicationType>>;
+    {
+      name: 'Actions',
+      actions,
+    },
+  ];
+
+  const filteredApplications = applications.filter((app) =>
+    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div style={pageStyles}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
-            <EuiPageHeaderSection>
+            {!newNavigation && (
               <EuiTitle size="l">
-                <h1>Overview</h1>
+                <h3>Applications {` (${applications.length})`}</h3>
               </EuiTitle>
-            </EuiPageHeaderSection>
+            )}
           </EuiPageHeader>
           <EuiPageContent id="applicationArea">
             <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-                  <h3>
-                    Applications<span className="panel-header-count"> ({applications.length})</span>
-                  </h3>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSmallButton fill href="#/create">
-                      {createButtonText}
-                    </EuiSmallButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageContentHeaderSection>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiFieldSearch
+                    compressed
+                    fullWidth
+                    placeholder="Search applications"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    isClearable={true}
+                    aria-label="Search applications"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <HeaderControlledComponentsWrapper
+                    components={[
+                      <EuiSmallButton fill href="#/create" iconType="plus" iconSide="left">
+                        {createButtonText}
+                      </EuiSmallButton>,
+                    ]}
+                    badgeContent={applications.length}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPageContentHeader>
             <EuiHorizontalRule />
-            {applications.length > 0 ? (
+            {filteredApplications.length > 0 ? (
               <EuiInMemoryTable
                 loading={props.loading}
-                items={applications}
+                items={filteredApplications}
                 itemId="id"
                 columns={tableColumns}
                 tableLayout="auto"
                 pagination={{
                   initialPageSize: 10,
-                  pageSizeOptions: [8, 10, 13],
+                  pageSizeOptions: [5, 10, 20],
                 }}
                 sorting={{
                   sort: {
@@ -309,10 +280,6 @@ export function AppTable(props: AppTableProps) {
                   },
                 }}
                 allowNeutralSort={false}
-                isSelectable={true}
-                selection={{
-                  onSelectionChange: (items) => setSelectedApplications(items),
-                }}
               />
             ) : (
               <>
@@ -323,13 +290,15 @@ export function AppTable(props: AppTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiSmallButton fullWidth={false} href={`#/create`}>
+                    <EuiSmallButton
+                      fullWidth={false}
+                      href={`#/create`}
+                      iconType="plus"
+                      iconSide="left"
+                    >
                       {createButtonText}
                     </EuiSmallButton>
                   </EuiFlexItem>
-                  {/* <EuiFlexItem grow={false}>
-                    <EuiSmallButton fullWidth={false}>Add sample applications</EuiSmallButton>
-                  </EuiFlexItem> */}
                 </EuiFlexGroup>
                 <EuiSpacer size="xxl" />
               </>
@@ -337,7 +306,42 @@ export function AppTable(props: AppTableProps) {
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
-      {isModalVisible && modalLayout}
-    </div>
+
+      {isModalVisible && (
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Rename Application</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiFieldText
+              fullWidth
+              placeholder="New application name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              aria-label="Application name input"
+            />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} color="text">
+              Cancel
+            </EuiButton>
+            <EuiButton onClick={onRename} fill>
+              Rename
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+
+      {isDeleteModalVisible && (
+        <DeleteModal
+          onConfirm={confirmDelete}
+          onCancel={closeModal}
+          title={`Delete Application`}
+          message={`Are you sure you want to delete the application "${selectedApplication?.name}"?`}
+        />
+      )}
+    </>
   );
 }
