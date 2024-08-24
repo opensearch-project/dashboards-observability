@@ -1440,6 +1440,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     >
                                       <EuiButtonContent
                                         className="euiButton__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconType="pencil"
                                         textProps={
@@ -1569,6 +1570,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="right"
                                               iconType="arrowDown"
                                               textProps={
@@ -1706,6 +1708,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             >
                                               <EuiButtonContent
                                                 className="euiButton__content"
+                                                iconGap="m"
                                                 iconSide="right"
                                                 iconType="arrowDown"
                                                 textProps={
@@ -2276,6 +2279,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -2479,6 +2483,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   iconType="refresh"
                                                   isLoading={false}
@@ -2706,6 +2711,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             >
                                               <EuiButtonContent
                                                 className="euiButton__content"
+                                                iconGap="m"
                                                 iconSide="right"
                                                 iconType="arrowDown"
                                                 textProps={
@@ -3794,6 +3800,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     >
                                       <EuiButtonContent
                                         className="euiButton__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconType="pencil"
                                         textProps={
@@ -3923,6 +3930,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="right"
                                               iconType="arrowDown"
                                               textProps={
@@ -4059,6 +4067,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             >
                                               <EuiButtonContent
                                                 className="euiButton__content"
+                                                iconGap="m"
                                                 iconSide="right"
                                                 iconType="arrowDown"
                                                 textProps={
@@ -4628,6 +4637,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -4829,6 +4839,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   iconType="refresh"
                                                   isLoading={false}
@@ -5056,6 +5067,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             >
                                               <EuiButtonContent
                                                 className="euiButton__content"
+                                                iconGap="m"
                                                 iconSide="right"
                                                 iconType="arrowDown"
                                                 textProps={
