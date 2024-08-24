@@ -185,6 +185,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             textProps={
                               Object {
@@ -265,6 +266,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             textProps={
                               Object {

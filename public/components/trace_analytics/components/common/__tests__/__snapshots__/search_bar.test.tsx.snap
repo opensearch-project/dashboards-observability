@@ -255,6 +255,7 @@ exports[`Search bar components renders date picker 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="s"
                             iconType="arrowDown"
@@ -399,10 +400,11 @@ exports[`Search bar components renders search bar 1`] = `
   startTime="now-5m"
 >
   <EuiFlexGroup
+    alignItems="center"
     gutterSize="s"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem>
         <div
@@ -418,6 +420,12 @@ exports[`Search bar components renders search bar 1`] = `
             onChange={[Function]}
             onSearch={[MockFunction]}
             placeholder="Trace ID, trace group name, service name"
+            prepend={
+              <GlobalFilterButton
+                filters={Array []}
+                setFilters={[MockFunction]}
+              />
+            }
             value="test"
           >
             <EuiFormControlLayout
@@ -425,16 +433,112 @@ exports[`Search bar components renders search bar 1`] = `
               fullWidth={true}
               icon="search"
               isLoading={false}
+              prepend={
+                <GlobalFilterButton
+                  filters={Array []}
+                  setFilters={[MockFunction]}
+                />
+              }
             >
               <div
-                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
+                <GlobalFilterButton
+                  className="euiFormControlLayout__prepend"
+                  filters={Array []}
+                  key="0/.0"
+                  setFilters={[MockFunction]}
+                >
+                  <EuiPopover
+                    anchorPosition="rightUp"
+                    button={
+                      <EuiSmallButtonIcon
+                        aria-label="Change all filters"
+                        iconType="filter"
+                        onClick={[Function]}
+                        title="Change all filters"
+                      />
+                    }
+                    closePopover={[Function]}
+                    data-test-subj="global-filter-button"
+                    display="inlineBlock"
+                    hasArrow={true}
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="none"
+                  >
+                    <div
+                      className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
+                    >
+                      <div
+                        className="euiPopover__anchor"
+                      >
+                        <EuiSmallButtonIcon
+                          aria-label="Change all filters"
+                          iconType="filter"
+                          onClick={[Function]}
+                          title="Change all filters"
+                        >
+                          <EuiButtonIcon
+                            aria-label="Change all filters"
+                            iconType="filter"
+                            onClick={[Function]}
+                            size="s"
+                            title="Change all filters"
+                          >
+                            <button
+                              aria-label="Change all filters"
+                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                              disabled={false}
+                              onClick={[Function]}
+                              title="Change all filters"
+                              type="button"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="filter"
+                              >
+                                <EuiIconBeaker
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </EuiIconBeaker>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiSmallButtonIcon>
+                      </div>
+                    </div>
+                  </EuiPopover>
+                </GlobalFilterButton>
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <EuiValidatableControl>
                     <input
-                      className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                      className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch--inGroup"
                       data-test-subj="search-bar-input-box"
                       onChange={[Function]}
                       onKeyUp={[Function]}
@@ -502,7 +606,7 @@ exports[`Search bar components renders search bar 1`] = `
         grow={false}
         style={
           Object {
-            "maxWidth": "40vw",
+            "maxWidth": "30vw",
           }
         }
       >
@@ -510,7 +614,7 @@ exports[`Search bar components renders search bar 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
           style={
             Object {
-              "maxWidth": "40vw",
+              "maxWidth": "30vw",
             }
           }
         >
@@ -559,8 +663,8 @@ exports[`Search bar components renders search bar 1`] = `
                 },
               ]
             }
-            compressed={false}
-            dateFormat=""
+            compressed={true}
+            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
             end="now"
             isAutoRefreshOnly={false}
             isDisabled={false}
@@ -586,7 +690,7 @@ exports[`Search bar components renders search bar 1`] = `
                   >
                     <EuiFormControlLayout
                       className="euiSuperDatePicker"
-                      compressed={false}
+                      compressed={true}
                       isDisabled={false}
                       prepend={
                         <EuiQuickSelectPopover
@@ -635,7 +739,7 @@ exports[`Search bar components renders search bar 1`] = `
                               },
                             ]
                           }
-                          dateFormat=""
+                          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
                           end="now"
                           isAutoRefreshOnly={false}
                           isDisabled={false}
@@ -647,7 +751,7 @@ exports[`Search bar components renders search bar 1`] = `
                       }
                     >
                       <div
-                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                       >
                         <EuiQuickSelectPopover
                           applyTime={[Function]}
@@ -696,7 +800,7 @@ exports[`Search bar components renders search bar 1`] = `
                               },
                             ]
                           }
-                          dateFormat=""
+                          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
                           end="now"
                           isAutoRefreshOnly={false}
                           isDisabled={false}
@@ -768,6 +872,7 @@ exports[`Search bar components renders search bar 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -865,7 +970,7 @@ exports[`Search bar components renders search bar 1`] = `
                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                             >
                               <button
-                                className="euiSuperDatePicker__prettyFormat"
+                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                 data-test-subj="superDatePickerShowDatesButton"
                                 disabled={false}
                                 onClick={[Function]}
@@ -885,7 +990,7 @@ exports[`Search bar components renders search bar 1`] = `
                             </div>
                           </EuiDatePickerRange>
                           <EuiFormControlLayoutIcons
-                            compressed={false}
+                            compressed={true}
                           />
                         </div>
                       </div>
@@ -903,304 +1008,60 @@ exports[`Search bar components renders search bar 1`] = `
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <EuiSmallButton
+          <EuiButtonIcon
+            aria-label="Refresh"
             data-click-metric-element="trace_analytics.refresh_button"
             data-test-subj="superDatePickerApplyTimeButton"
+            display="base"
             iconType="refresh"
             onClick={[Function]}
+            size="s"
           >
-            <EuiButton
+            <button
+              aria-label="Refresh"
+              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
               data-click-metric-element="trace_analytics.refresh_button"
               data-test-subj="superDatePickerApplyTimeButton"
-              iconType="refresh"
+              disabled={false}
               onClick={[Function]}
-              size="s"
+              type="button"
             >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-click-metric-element="trace_analytics.refresh_button"
-                data-test-subj="superDatePickerApplyTimeButton"
-                disabled={false}
-                element="button"
-                iconType="refresh"
-                isDisabled={false}
-                onClick={[Function]}
-                size="s"
-                type="button"
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="refresh"
               >
-                <button
-                  className="euiButton euiButton--primary euiButton--small"
-                  data-click-metric-element="trace_analytics.refresh_button"
-                  data-test-subj="superDatePickerApplyTimeButton"
-                  disabled={false}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
+                <EuiIconBeaker
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  role="img"
+                  style={null}
                 >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="refresh"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="refresh"
-                      >
-                        <EuiIconBeaker
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                            />
-                          </svg>
-                        </EuiIconBeaker>
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Refresh
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
-          </EuiSmallButton>
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </EuiIconBeaker>
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
         </div>
       </EuiFlexItem>
     </div>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  >
-    <div
-      className="euiSpacer euiSpacer--s"
-    />
-  </EuiSpacer>
-  <Filters
-    appConfigs={Array []}
-    attributesFilterFields={Array []}
-    filters={Array []}
-    mode="data_prepper"
-    page="dashboard"
-    setFilters={[MockFunction]}
-  >
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      responsive={false}
-      style={
-        Object {
-          "minHeight": 32,
-        }
-      }
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-        style={
-          Object {
-            "minHeight": 32,
-          }
-        }
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <GlobalFilterButton>
-              <EuiPopover
-                anchorPosition="rightUp"
-                button={
-                  <EuiSmallButtonIcon
-                    aria-label="Change all filters"
-                    iconType="filter"
-                    onClick={[Function]}
-                    title="Change all filters"
-                  />
-                }
-                closePopover={[Function]}
-                data-test-subj="global-filter-button"
-                display="inlineBlock"
-                hasArrow={true}
-                isOpen={false}
-                ownFocus={true}
-                panelPaddingSize="none"
-                withTitle={true}
-              >
-                <div
-                  className="euiPopover euiPopover--anchorRightUp"
-                  data-test-subj="global-filter-button"
-                  withTitle={true}
-                >
-                  <div
-                    className="euiPopover__anchor"
-                  >
-                    <EuiSmallButtonIcon
-                      aria-label="Change all filters"
-                      iconType="filter"
-                      onClick={[Function]}
-                      title="Change all filters"
-                    >
-                      <EuiButtonIcon
-                        aria-label="Change all filters"
-                        iconType="filter"
-                        onClick={[Function]}
-                        size="s"
-                        title="Change all filters"
-                      >
-                        <button
-                          aria-label="Change all filters"
-                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
-                          disabled={false}
-                          onClick={[Function]}
-                          title="Change all filters"
-                          type="button"
-                        >
-                          <EuiIcon
-                            aria-hidden="true"
-                            className="euiButtonIcon__icon"
-                            color="inherit"
-                            size="m"
-                            type="filter"
-                          >
-                            <EuiIconBeaker
-                              aria-hidden={true}
-                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              role="img"
-                              style={null}
-                            >
-                              <svg
-                                aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                height={16}
-                                role="img"
-                                style={null}
-                                viewBox="0 0 16 16"
-                                width={16}
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                />
-                              </svg>
-                            </EuiIconBeaker>
-                          </EuiIcon>
-                        </button>
-                      </EuiButtonIcon>
-                    </EuiSmallButtonIcon>
-                  </div>
-                </div>
-              </EuiPopover>
-            </GlobalFilterButton>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <AddFilterButton>
-              <EuiPopover
-                anchorPosition="downLeft"
-                button={
-                  <EuiButtonEmpty
-                    onClick={[Function]}
-                    size="xs"
-                  >
-                    + Add filter
-                  </EuiButtonEmpty>
-                }
-                closePopover={[Function]}
-                data-test-subj="addfilter"
-                display="inlineBlock"
-                hasArrow={true}
-                isOpen={false}
-                ownFocus={true}
-                panelPaddingSize="m"
-                withTitle={true}
-              >
-                <div
-                  className="euiPopover euiPopover--anchorDownLeft"
-                  data-test-subj="addfilter"
-                  withTitle={true}
-                >
-                  <div
-                    className="euiPopover__anchor"
-                  >
-                    <EuiButtonEmpty
-                      onClick={[Function]}
-                      size="xs"
-                    >
-                      <button
-                        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconSide="left"
-                          iconSize="s"
-                          textProps={
-                            Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
-                            >
-                              + Add filter
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </div>
-                </div>
-              </EuiPopover>
-            </AddFilterButton>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </Filters>
 </ForwardRef>
 `;

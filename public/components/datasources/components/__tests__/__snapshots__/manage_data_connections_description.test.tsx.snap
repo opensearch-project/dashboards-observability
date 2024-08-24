@@ -104,6 +104,7 @@ exports[`Manage Data Connections Description test Renders manage data connection
                   >
                     <EuiButtonContent
                       className="euiButton__content"
+                      iconGap="m"
                       iconSide="left"
                       iconType="refresh"
                       textProps={

@@ -637,6 +637,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButtonEmpty__content"
+                    iconGap="m"
                     iconSide="left"
                     iconSize="m"
                     textProps={
@@ -700,6 +701,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                   >
                     <EuiButtonContent
                       className="euiButton__content"
+                      iconGap="m"
                       iconSide="left"
                       textProps={
                         Object {

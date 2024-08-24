@@ -18,7 +18,8 @@ import {
   EuiText,
   PropertySort,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
@@ -50,11 +51,9 @@ export function TracesTable(props: TracesTableProps) {
     );
   };
 
-  const columns = useMemo(
-    () => {
-      if (mode === 'data_prepper') {
-        return(
-      [
+  const columns = useMemo(() => {
+    if (mode === 'data_prepper') {
+      return [
         {
           field: 'trace_id',
           name: 'Trace ID',
@@ -64,11 +63,11 @@ export function TracesTable(props: TracesTableProps) {
           render: (item) => (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={10}>
-                <EuiLink data-test-subj='trace-link' onClick={() => traceIdColumnAction(item)}>
+                <EuiLink data-test-subj="trace-link" onClick={() => traceIdColumnAction(item)}>
                   {item.length < 24 ? (
                     item
                   ) : (
-                    <div title={item}>{_.truncate(item, { length: 24 })}</div>
+                    <div title={item}>{truncate(item, { length: 24 })}</div>
                   )}
                 </EuiLink>
               </EuiFlexItem>
@@ -98,11 +97,7 @@ export function TracesTable(props: TracesTableProps) {
           render: (item) =>
             item ? (
               <EuiText size="s">
-                {item.length < 36 ? (
-                  item
-                ) : (
-                  <div title={item}>{_.truncate(item, { length: 36 })}</div>
-                )}
+                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
               </EuiText>
             ) : (
               '-'
@@ -126,7 +121,7 @@ export function TracesTable(props: TracesTableProps) {
           align: 'right',
           sortable: true,
           render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}th`}</EuiText> : '-',
+            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}th`}</EuiText> : '-',
         },
         {
           field: 'error_count',
@@ -151,79 +146,76 @@ export function TracesTable(props: TracesTableProps) {
           sortable: true,
           render: (item) => (item === 0 || item ? item : '-'),
         },
-      ] as Array<EuiTableFieldDataColumnType<any>>)
+      ] as Array<EuiTableFieldDataColumnType<any>>;
     } else {
-      return (
-        [
-          {
-            field: 'trace_id',
-            name: 'Trace ID',
-            align: 'left',
-            sortable: true,
-            truncateText: true,
-            render: (item) => (
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={10}>
-                  <EuiLink onClick={() => traceIdColumnAction(item)}>
-                    {item.length < 24 ? (
-                      item
-                    ) : (
-                      <div title={item}>{_.truncate(item, { length: 24 })}</div>
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={item}>
-                    {(copy) => (
-                      <EuiSmallButtonIcon
-                        aria-label="Copy trace id"
-                        iconType="copyClipboard"
-                        onClick={copy}
-                      >
-                        Click to copy
-                      </EuiSmallButtonIcon>
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-                <EuiFlexItem grow={3} />
-              </EuiFlexGroup>
+      return [
+        {
+          field: 'trace_id',
+          name: 'Trace ID',
+          align: 'left',
+          sortable: true,
+          truncateText: true,
+          render: (item) => (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={10}>
+                <EuiLink onClick={() => traceIdColumnAction(item)}>
+                  {item.length < 24 ? (
+                    item
+                  ) : (
+                    <div title={item}>{truncate(item, { length: 24 })}</div>
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={item}>
+                  {(copy) => (
+                    <EuiSmallButtonIcon
+                      aria-label="Copy trace id"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                    >
+                      Click to copy
+                    </EuiSmallButtonIcon>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+              <EuiFlexItem grow={3} />
+            </EuiFlexGroup>
+          ),
+        },
+        {
+          field: 'latency',
+          name: 'Latency (ms)',
+          align: 'right',
+          sortable: true,
+          truncateText: true,
+        },
+        {
+          field: 'error_count',
+          name: 'Errors',
+          align: 'right',
+          sortable: true,
+          render: (item) =>
+            item == null ? (
+              '-'
+            ) : item > 0 ? (
+              <EuiText color="danger" size="s">
+                Yes
+              </EuiText>
+            ) : (
+              'No'
             ),
-          },
-          {
-            field: 'latency',
-            name: 'Latency (ms)',
-            align: 'right',
-            sortable: true,
-            truncateText: true,
-          },
-          {
-            field: 'error_count',
-            name: 'Errors',
-            align: 'right',
-            sortable: true,
-            render: (item) =>
-              item == null ? (
-                '-'
-              ) : item > 0 ? (
-                <EuiText color="danger" size="s">
-                  Yes
-                </EuiText>
-              ) : (
-                'No'
-              ),
-          },
-          {
-            field: 'last_updated',
-            name: 'Last updated',
-            align: 'left',
-            sortable: true,
-            render: (item) => (item === 0 || item ? item : '-'),
-          },
-        ] as Array<EuiTableFieldDataColumnType<any>>)
+        },
+        {
+          field: 'last_updated',
+          name: 'Last updated',
+          align: 'left',
+          sortable: true,
+          render: (item) => (item === 0 || item ? item : '-'),
+        },
+      ] as Array<EuiTableFieldDataColumnType<any>>;
     }
-    },
-    [items]
-  );
+  }, [items]);
 
   const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
 
@@ -234,7 +226,7 @@ export function TracesTable(props: TracesTableProps) {
     },
   });
 
-  const onTableChange = async ({ currPage, sort }: { currPage: any; sort: any }) => {
+  const onTableChange = async ({ _currPage, sort }: { currPage: any; sort: any }) => {
     if (typeof sort?.field !== 'string') return;
 
     // maps table column key to DSL aggregation name
@@ -269,8 +261,11 @@ export function TracesTable(props: TracesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!((mode === 'data_prepper' && props.dataPrepperIndicesExist) || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
-          <MissingConfigurationMessage mode={mode}/>
+        {!(
+          (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
+          (mode === 'jaeger' && props.jaegerIndicesExist)
+        ) ? (
+          <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"
