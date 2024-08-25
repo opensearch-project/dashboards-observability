@@ -46,7 +46,6 @@ import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { getCustomModal } from './helpers/modal_containers';
 import { CustomPanelListType, CustomPanelType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
-import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import {
   createPanel,
@@ -337,7 +336,7 @@ export const CustomPanelTable = ({
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
   return (
-    <div style={pageStyles}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
@@ -465,6 +464,6 @@ export const CustomPanelTable = ({
         </EuiPageBody>
       </EuiPage>
       {isModalVisible && modalLayout}
-    </div>
+    </>
   );
 };
