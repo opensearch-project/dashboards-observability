@@ -10,7 +10,8 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSpacer
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 
