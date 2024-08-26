@@ -7,6 +7,7 @@ import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
+  MountPoint,
   NotificationsStart,
   SavedObjectsStart,
 } from '../../../../../src/core/public';
@@ -26,6 +27,7 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 export const Home = (props: HomeProps) => {
@@ -36,6 +38,7 @@ export const Home = (props: HomeProps) => {
     dataSourceManagement,
     savedObjectsMDSClient,
     notifications,
+    setActionMenu,
   } = props;
 
   const commonProps = {
@@ -69,6 +72,11 @@ export const Home = (props: HomeProps) => {
               <AddedIntegration
                 integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
                 {...commonProps}
+                dataSourceManagement={dataSourceManagement}
+                notifications={notifications}
+                dataSourceEnabled={dataSourceEnabled}
+                savedObjectsMDSClient={savedObjectsMDSClient}
+                setActionMenu={setActionMenu}
               />
             )}
           />
@@ -79,6 +87,10 @@ export const Home = (props: HomeProps) => {
               <Integration
                 integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
                 {...commonProps}
+                dataSourceManagement={dataSourceManagement}
+                notifications={notifications}
+                dataSourceEnabled={dataSourceEnabled}
+                savedObjectsMDSClient={savedObjectsMDSClient}
               />
             )}
           />

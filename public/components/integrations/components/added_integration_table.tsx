@@ -93,7 +93,9 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>- -</EuiText>
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {truncate(record.dataSourceMDSLabel || 'Local cluster', { length: 100 })}
+        </EuiText>
       ),
     });
   }
@@ -132,8 +134,17 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     );
     setIsModalVisible(true);
   };
-
   const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
+  let mdsLabels;
+  if (dataSourceEnabled) {
+    mdsLabels = [
+      ...new Set(
+        props.data.hits.flatMap((hit) =>
+          hit.references?.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
+        )
+      ),
+    ].sort();
+  }
 
   const search = {
     box: {
@@ -151,6 +162,21 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           view: name,
         })),
       },
+      ...(dataSourceEnabled
+        ? [
+            {
+              type: 'field_value_selection' as const,
+              field: 'dataSourceMDSLabel',
+              name: 'Data Source Name',
+              multiSelect: false,
+              options: mdsLabels?.map((name) => ({
+                name,
+                value: name,
+                view: name,
+              })),
+            },
+          ]
+        : []),
     ],
   };
 
@@ -159,7 +185,17 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;
     const name = integration.name;
-    return { id, templateName, creationDate, name, data: { templateName, name } };
+    const dataSourceMDSLabel = integration.references
+      ? integration.references[0].name
+      : 'Local cluster';
+    return {
+      id,
+      templateName,
+      creationDate,
+      name,
+      data: { templateName, name },
+      dataSourceMDSLabel,
+    };
   });
 
   return (

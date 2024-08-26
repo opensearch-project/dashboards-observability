@@ -18,7 +18,7 @@ export interface AddedIntegrationsTableProps {
   data: AddedIntegrationsList;
   setData: React.Dispatch<React.SetStateAction<AddedIntegrationsList>>;
   http: HttpStart;
-  dataSourceEnabled: string;
+  dataSourceEnabled: boolean;
 }
 
 export interface AddedIntegrationsList {
@@ -34,6 +34,7 @@ export interface AddedIntegrationType {
   assets: any[];
   addedBy: string;
   id: string;
+  references?: [];
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
