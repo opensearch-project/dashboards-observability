@@ -36,7 +36,7 @@ import {
   CREATE_NOTE_MESSAGE,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
-import { UI_DATE_FORMAT, pageStyles } from '../../../../common/constants/shared';
+import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import {
   DeleteNotebookModal,
   getCustomModal,
@@ -229,7 +229,7 @@ export function NoteTable({
   >;
 
   return (
-    <div style={pageStyles}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
@@ -356,6 +356,6 @@ export function NoteTable({
         </EuiPageBody>
       </EuiPage>
       {isModalVisible && modalLayout}
-    </div>
+    </>
   );
 }
