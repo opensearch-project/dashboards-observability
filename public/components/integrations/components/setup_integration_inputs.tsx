@@ -80,8 +80,7 @@ const suggestDataSources = async (
           return { label: item.name };
         }) ?? []
       );
-    } 
-    else if (type === 's3') {
+    } else if (type === 's3') {
       const result = (await http.get(
         `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`
       )) as Array<{
