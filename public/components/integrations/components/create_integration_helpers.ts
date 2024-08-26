@@ -2,10 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
 import { HttpSetup } from '../../../../../../src/core/public';
+import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
+import { CONSOLE_PROXY, DSL_BASE, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../framework/core_refs';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 
@@ -18,6 +18,8 @@ interface AddIntegrationRequestParams {
   templateName: string;
   integration: IntegrationConfig;
   setToast: (title: string, color?: Color, text?: string | undefined) => void;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   name?: string;
   indexPattern?: string;
   workflows?: string[];
@@ -131,13 +133,13 @@ export const checkDataSourceName = (
 
 export const fetchDataSourceMappings = async (
   targetDataSource: string,
-  http: HttpSetup
+  http: HttpSetup,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   return http
-    .post(CONSOLE_PROXY, {
+    .post(`${DSL_BASE}/integrations/mapping`, {
       query: {
-        path: `${targetDataSource}/_mapping`,
-        method: 'GET',
+        dataSourceMDSId,
       },
     })
     .then((response) => {
@@ -204,7 +206,8 @@ export const doExistingDataSourceValidation = async (
 
 const createComponentMapping = async (
   componentName: string,
-  payload: ComponentMappingPayload
+  payload: ComponentMappingPayload,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
@@ -213,6 +216,7 @@ const createComponentMapping = async (
     query: {
       path: `_component_template/ss4o_${componentName}-${version}-template`,
       method: 'POST',
+      dataSourceId: dataSourceMDSId,
     },
   });
 };
@@ -221,7 +225,8 @@ const createIndexMapping = async (
   componentName: string,
   payload: ComponentMappingPayload,
   dataSourceName: string,
-  integration: IntegrationConfig
+  integration: IntegrationConfig,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
@@ -231,6 +236,7 @@ const createIndexMapping = async (
     query: {
       path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
       method: 'POST',
+      dataSourceId: dataSourceMDSId,
     },
   });
 };
@@ -239,7 +245,8 @@ const createIndexPatternMappings = async (
   targetDataSource: string,
   integrationTemplateId: string,
   integration: IntegrationConfig,
-  setToast: (title: string, color?: Color, text?: string | undefined) => void
+  setToast: (title: string, color?: Color, text?: string | undefined) => void,
+  dataSourceMDSId?: string
 ): Promise<void> => {
   // TODO the nested methods still need the dataSource -> indexPattern rename applied, sub-methods
   // here still have old naming convention
@@ -262,21 +269,21 @@ const createIndexPatternMappings = async (
         if (key === integration.type) {
           return Promise.resolve();
         }
-        return createComponentMapping(key, mapping as ComponentMappingPayload);
+        return createComponentMapping(key, mapping as ComponentMappingPayload, dataSourceMDSId);
       })
     );
     // In order to see our changes, we need to manually provoke a refresh
-    await http.post(CONSOLE_PROXY, {
+    await http.post(`${DSL_BASE}/integrations/refresh`, {
       query: {
-        path: '_refresh',
-        method: 'GET',
+        dataSourceMDSId,
       },
     });
     await createIndexMapping(
       integration.type,
       mappings[integration.type],
       targetDataSource,
-      integration
+      integration,
+      dataSourceMDSId
     );
   } catch (err) {
     error = err.message;
@@ -299,6 +306,8 @@ export async function addIntegrationRequest({
   workflows,
   skipRedirect,
   dataSourceInfo,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
 }: AddIntegrationRequestParams): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
@@ -306,19 +315,24 @@ export async function addIntegrationRequest({
       `ss4o_${integration.type}-${templateName}-*-sample`,
       templateName,
       integration,
-      setToast
+      setToast,
+      dataSourceMDSId
     );
     name = `${templateName}-sample`;
     indexPattern = `ss4o_${integration.type}-${templateName}-sample-sample`;
   }
 
   const createReqBody: {
+    dataSourceMDSId?: string;
+    dataSourceMDSLabel?: string;
     name?: string;
     indexPattern?: string;
     workflows?: string[];
     dataSource?: string;
     tableName?: string;
   } = {
+    dataSourceMDSId,
+    dataSourceMDSLabel,
     name,
     indexPattern,
     workflows,
