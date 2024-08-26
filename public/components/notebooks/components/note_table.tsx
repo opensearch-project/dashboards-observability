@@ -44,6 +44,9 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface NoteTableProps {
   loading: boolean;
@@ -185,16 +188,6 @@ export function NoteTable({
     >
       Delete
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="addSample"
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        addSampleNotebooksModal();
-      }}
-      data-test-subj="add-samples-btn"
-    >
-      Add samples
-    </EuiContextMenuItem>,
   ];
 
   const tableColumns = [
@@ -232,13 +225,15 @@ export function NoteTable({
     <>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiText size="s">
-                <h1>Notebooks</h1>
-              </EuiText>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
+          {!newNavigation && (
+            <EuiPageHeader>
+              <EuiPageHeaderSection>
+                <EuiText size="s">
+                  <h3>Notebooks</h3>
+                </EuiText>
+              </EuiPageHeaderSection>
+            </EuiPageHeader>
+          )}
           <EuiPageContent id="notebookArea">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
@@ -259,18 +254,23 @@ export function NoteTable({
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
+                  <EuiFlexItem grow={false}>
+                    <EuiSmallButton
+                      data-test-subj="notebookEmptyTableAddSamplesBtn"
+                      fullWidth={false}
+                      onClick={() => addSampleNotebooksModal()}
                     >
-                      <EuiContextMenuPanel items={popoverItems} size="s" />
-                    </EuiPopover>
+                      Add sample notebooks
+                    </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiSmallButton fill href="#/create" data-test-subj="createNotebookPrimaryBtn">
+                    <EuiSmallButton
+                      fill
+                      href="#/create"
+                      data-test-subj="createNotebookPrimaryBtn"
+                      iconType="plus"
+                      iconSide="left"
+                    >
                       Create notebook
                     </EuiSmallButton>
                   </EuiFlexItem>
@@ -280,12 +280,26 @@ export function NoteTable({
             <EuiHorizontalRule margin="m" />
             {notebooks.length > 0 ? (
               <>
-                <EuiCompressedFieldSearch
-                  fullWidth
-                  placeholder="Search notebook name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiCompressedFieldSearch
+                      fullWidth
+                      placeholder="Search notebook name"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      panelPaddingSize="none"
+                      button={popoverButton}
+                      isOpen={isActionsPopoverOpen}
+                      closePopover={() => setIsActionsPopoverOpen(false)}
+                    >
+                      <EuiContextMenuPanel items={popoverItems} size="s" />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
                   loading={loading}
@@ -335,6 +349,8 @@ export function NoteTable({
                       href="#/create"
                       data-test-subj="notebookEmptyTableCreateBtn"
                       fullWidth={false}
+                      iconType="plus"
+                      iconSide="left"
                     >
                       Create notebook
                     </EuiSmallButton>
@@ -345,7 +361,7 @@ export function NoteTable({
                       fullWidth={false}
                       onClick={() => addSampleNotebooksModal()}
                     >
-                      Add samples
+                      Add sample notebooks
                     </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
