@@ -365,7 +365,7 @@ export class ObservabilityPlugin
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
       });
-      // deprecated in new Nav Groups and in NEO.
+      // deprecated in new Nav Groups and when MDS is enabled.
       if (!setupDeps.dataSource) {
         core.application.register({
           id: observabilityPanelsID,
