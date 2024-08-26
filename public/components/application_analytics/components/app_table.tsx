@@ -185,7 +185,7 @@ export function AppTable(props: AppTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiLink data-test-subj={`${record.name}ApplicationLink`} href={`#/${record.id}`}>
-          {_.truncate(record.name, { length: 100 })}
+          {truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
     },
