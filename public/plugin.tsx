@@ -32,6 +32,9 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -44,6 +47,9 @@ import {
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityOverviewID,
+  observabilityOverviewPluginOrder,
+  observabilityOverviewTitle,
   observabilityPanelsID,
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
@@ -53,12 +59,6 @@ import {
   observabilityTracesID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  observabilityGettingStartedID,
-  observabilityGettingStartedTitle,
-  observabilityGettingStartedPluginOrder,
-  observabilityOverviewID,
-  observabilityOverviewTitle,
-  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -79,6 +79,7 @@ import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
 import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
+import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
@@ -102,6 +103,7 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
+import { registerAllPluginNavGroups } from './plugin_nav';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -112,8 +114,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
-import { registerAllPluginNavGroups } from './plugin_nav';
 
 interface PublicConfig {
   query_assist: {
@@ -307,13 +307,15 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('metrics'),
     });
 
-    core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
+    if (!setupDeps.dataSource) {
+      core.application.register({
+        id: observabilityApplicationsID,
+        title: observabilityApplicationsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityApplicationsPluginOrder,
+        mount: appMountWithStartPage('applications'),
+      });
+    }
 
     core.application.register({
       id: observabilityIntegrationsID,
@@ -363,21 +365,23 @@ export class ObservabilityPlugin
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
       });
-      // deprecated in new Nav Groups.
-      core.application.register({
-        id: observabilityPanelsID,
-        title: observabilityPanelsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityPanelsPluginOrder,
-        mount: appMountWithStartPage('dashboards'),
-      });
-      core.application.register({
-        id: observabilityLogsID,
-        title: observabilityLogsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityLogsPluginOrder,
-        mount: appMountWithStartPage('logs'),
-      });
+      // deprecated in new Nav Groups and in NEO.
+      if (!setupDeps.dataSource) {
+        core.application.register({
+          id: observabilityPanelsID,
+          title: observabilityPanelsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityPanelsPluginOrder,
+          mount: appMountWithStartPage('dashboards'),
+        });
+        core.application.register({
+          id: observabilityLogsID,
+          title: observabilityLogsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityLogsPluginOrder,
+          mount: appMountWithStartPage('logs'),
+        });
+      }
     }
 
     core.application.register({
