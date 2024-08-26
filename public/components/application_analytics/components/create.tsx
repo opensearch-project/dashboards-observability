@@ -26,7 +26,6 @@ import {
 import DSLService from 'public/services/requests/dsl';
 import React, { ReactChild, useEffect, useState } from 'react';
 import PPLService from 'public/services/requests/ppl';
-import { last } from 'lodash';
 import { AppAnalyticsComponentDeps } from '../home';
 import { TraceConfig } from './config_components/trace_config';
 import { ServiceConfig } from './config_components/service_config';
@@ -40,6 +39,9 @@ import {
 import { fetchAppById } from '../helpers/utils';
 import { observabilityApplicationsID } from '../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -180,14 +182,16 @@ export const CreateApp = (props: CreateAppProps) => {
   };
 
   return (
-    <div style={{ maxWidth: '1130px' }}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
             <EuiPageHeaderSection>
-              <EuiTitle data-test-subj="createPageTitle" size="l">
-                <h1>{editMode ? 'Edit' : 'Create'} application</h1>
-              </EuiTitle>
+              {!newNavigation && (
+                <EuiTitle data-test-subj="createPageTitle" size="l">
+                  <h1>{editMode ? 'Edit' : 'Create'} application</h1>
+                </EuiTitle>
+              )}
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContent id="appInfo">
@@ -277,6 +281,6 @@ export const CreateApp = (props: CreateAppProps) => {
         </EuiPageBody>
       </EuiPage>
       {flyout}
-    </div>
+    </>
   );
 };

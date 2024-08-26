@@ -8,7 +8,6 @@ import {
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
   EuiSelectOption,
@@ -63,6 +62,10 @@ import { AppAnalyticsComponentDeps } from '../home';
 import { Configuration } from './configuration';
 import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
+import { coreRefs } from '../../../framework/core_refs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -491,11 +494,15 @@ export function Application(props: AppDetailProps) {
       tabTitle: TAB_TRACE_TITLE,
       getContent: () => getTrace(),
     }),
-    getAppAnalyticsTab({
-      tabId: TAB_LOG_ID,
-      tabTitle: TAB_LOG_TITLE,
-      getContent: () => getLog(),
-    }),
+    ...(!newNavigation
+      ? [
+          getAppAnalyticsTab({
+            tabId: TAB_LOG_ID,
+            tabTitle: TAB_LOG_TITLE,
+            getContent: () => getLog(),
+          }),
+        ]
+      : []),
     getAppAnalyticsTab({
       tabId: TAB_PANEL_ID,
       tabTitle: TAB_PANEL_TITLE,
@@ -512,16 +519,20 @@ export function Application(props: AppDetailProps) {
     <div>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1 data-test-subj="applicationTitle">{application.name}</h1>
-              </EuiTitle>
-              <EuiText>
-                <p>{application.description}</p>
-              </EuiText>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
+          <EuiPageHeaderSection>
+            {newNavigation ? (
+              <HeaderControlledComponentsWrapper description={application.description} />
+            ) : (
+              <>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="applicationTitle">{application.name}</h1>
+                </EuiTitle>
+                <EuiText>
+                  <p>{application.description}</p>
+                </EuiText>
+              </>
+            )}
+          </EuiPageHeaderSection>
           <EuiTabbedContent
             className="appAnalyticsTabs"
             initialSelectedTab={appAnalyticsTabs[0]}
