@@ -5,10 +5,10 @@
 
 import {
   EuiCompressedFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiCompressedSelect,
   EuiCompressedSuperDatePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';

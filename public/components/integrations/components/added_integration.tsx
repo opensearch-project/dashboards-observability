@@ -22,14 +22,16 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import truncate from 'lodash/truncate';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+import React, { useEffect, useState } from 'react';
+import { DataSourceViewConfig } from '../../../../../../src/plugins/data_source_management/public';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { DeleteModal } from '../../common/helpers/delete_modal';
-import { AddedIntegrationProps } from './integration_types';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
+import { DeleteModal } from '../../common/helpers/delete_modal';
+import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+import { AddedIntegrationProps } from './integration_types';
 
 export const IntegrationHealthBadge = ({ status }: { status?: string }) => {
   switch (status) {
@@ -45,7 +47,14 @@ export const IntegrationHealthBadge = ({ status }: { status?: string }) => {
 };
 
 export function AddedIntegration(props: AddedIntegrationProps) {
-  const { http, integrationInstanceId, chrome } = props;
+  const {
+    http,
+    integrationInstanceId,
+    chrome,
+    dataSourceEnabled,
+    dataSourceManagement,
+    setActionMenu,
+  } = props;
 
   const { setToast } = useToast();
 
@@ -73,6 +82,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const activateDeleteModal = (integrationName?: string) => {
     setModalLayout(
@@ -118,6 +129,22 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
     return (
       <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
+        {dataSourceEnabled && (
+          <DataSourceMenu
+            setMenuMountPoint={setActionMenu}
+            componentType={'DataSourceView'}
+            componentConfig={{
+              activeOption: [
+                {
+                  id: data?.references?.[0]?.id,
+                  label: data?.references?.[0]?.name,
+                },
+              ],
+              fullWidth: true,
+              dataSourceFilter: dataSourceFilterFn,
+            }}
+          />
+        )}
         <EuiSpacer size="m" />
         <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
           <EuiPageContentHeaderSection>

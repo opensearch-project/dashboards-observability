@@ -6,11 +6,11 @@
 import {
   EuiButton,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
-  EuiFlexItem,
-  EuiPageContentHeaderSection,
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
