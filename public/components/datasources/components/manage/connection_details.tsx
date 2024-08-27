@@ -113,7 +113,7 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
       <EuiPanel>
         <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        {connector === 'S3GLUE' || connector === 'SECURITYLAKE' ? (
+        {connector === 'S3GLUE' ? (
           <S3ConnectionConfigurationView />
         ) : (
           <PrometheusConnectionConfigurationView />

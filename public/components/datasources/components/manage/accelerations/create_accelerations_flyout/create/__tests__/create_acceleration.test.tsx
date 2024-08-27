@@ -36,11 +36,7 @@ describe('Create acceleration flyout components', () => {
     coreStartMock.http.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
 
     const wrapper = mount(
-      <CreateAcceleration
-        selectedDatasource={selectedDatasource}
-        resetFlyout={resetFlyout}
-        selectedDatasourceType="S3GLUE"
-      />
+      <CreateAcceleration selectedDatasource={selectedDatasource} resetFlyout={resetFlyout} />
     );
     wrapper.update();
     await waitFor(() => {

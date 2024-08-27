@@ -5,8 +5,6 @@
 
 import {
   EuiBottomBar,
-  EuiSmallButton,
-  EuiSmallButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,28 +15,27 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { Color } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { IntegrationConnectionType } from '../../../../common/types/integrations';
 import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
 
 export interface IntegrationSetupInputs {
   displayName: string;
-  connectionType: IntegrationConnectionType;
+  connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
   connectionTableName: string;
   enabledWorkflows: string[];
-  connectionDatabaseName?: string;
 }
 
 export interface IntegrationConfigProps {
@@ -112,9 +109,7 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.${config.connectionDatabaseName ?? 'default'}.${
-    config.connectionTableName
-  }`;
+  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -222,9 +217,7 @@ const addIntegration = async ({
       dataSourceMDSId,
       dataSourceMDSLabel,
       name: config.displayName,
-      indexPattern: `flint_${config.connectionDataSource}_${
-        config.connectionDatabaseName ?? 'default'
-      }_${config.connectionTableName}__*`,
+      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
       workflows: config.enabledWorkflows,
       skipRedirect: setIsInstalling ? true : false,
       dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
@@ -379,7 +372,7 @@ export function SetupIntegrationForm({
   unsetIntegration?: () => void;
   forceConnection?: {
     name: string;
-    type: IntegrationConnectionType;
+    type: string;
   };
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
@@ -423,15 +416,12 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
+  const IntegrationInputFormComponent = SetupIntegrationFormInputs;
   const handleSelectedDataSourceChange = (id?: string, label?: string) => {
     setDataSourceMDSId(id);
     setDataSourceMDSLabel(label);
   };
 
-  const IntegrationInputFormComponent =
-    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
-      ? SetupIntegrationInputsForSecurityLake
-      : SetupIntegrationFormInputs;
   const content = (
     <>
       {showLoading ? (
@@ -479,13 +469,33 @@ export function SetupIntegrationForm({
   } else if (renderType === 'flyout') {
     return (
       <>
-        <EuiFlyoutBody>{content}</EuiFlyoutBody>
-        <EuiFlyoutFooter>{bottomBar}</EuiFlyoutFooter>
+        <EuiFlyoutBody>
+          {showLoading ? (
+            <LoadingPage />
+          ) : (
+            <SetupIntegrationFormInputs
+              config={integConfig}
+              updateConfig={updateConfig}
+              integration={template}
+              setupCallout={setupCallout}
+              lockConnectionType={forceConnection !== undefined}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <SetupBottomBar
+            config={integConfig}
+            integration={template}
+            loading={showLoading}
+            setLoading={setShowLoading}
+            setSetupCallout={setSetupCallout}
+            unsetIntegration={unsetIntegration}
+            setIsInstalling={setIsInstalling}
+          />
+        </EuiFlyoutFooter>
       </>
     );
   }
-
-  return null;
 }
 
 export function SetupIntegrationPage({
