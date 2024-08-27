@@ -238,7 +238,7 @@ export function NoteTable({
           <EuiPageContent id="notebookArea">
             {newNavigation ? (
               <HeaderControlledComponentsWrapper
-                badgeContent={notebooks.length}
+                badgeContent={notebooks.length > 0 ? notebooks.length : '0'}
                 description={
                   <>
                     Use Notebooks to interactively and collaboratively develop rich reports backed
