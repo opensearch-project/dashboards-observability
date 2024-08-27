@@ -13,6 +13,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
       >
         <h3
           class="euiTitle euiTitle--large"
+          data-test-subj="notebookTitle"
         >
           sample-notebook-1
         </h3>
@@ -29,7 +30,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--xSmall"
+                  class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--small"
                   data-test-subj="notebook-delete-icon"
                   type="button"
                 >
@@ -53,7 +54,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--xSmall"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
                   data-test-subj="notebook-edit-icon"
                   type="button"
                 >
@@ -77,7 +78,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--xSmall"
+                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
                   data-test-subj="notebook-duplicate-icon"
                   type="button"
                 >
@@ -166,6 +167,9 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
     <div
       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
+      <div
+        class="euiFlexItem"
+      />
       <div
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
@@ -464,6 +468,7 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
       >
         <h3
           class="euiTitle euiTitle--large"
+          data-test-subj="notebookTitle"
         />
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -590,7 +595,18 @@ exports[`<Notebook /> spec Renders the visualization component 1`] = `
     />
     <div
       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-    />
+    >
+      <div
+        class="euiFlexItem"
+      />
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        />
+      </div>
+    </div>
     <div
       style="margin-top: 10px;"
     >

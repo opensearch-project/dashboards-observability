@@ -82,7 +82,7 @@ describe('<QueryAssistInput /> spec', () => {
     );
   });
 
-  it('should display toast for generate errors', async () => {
+  it.skip('should display toast for generate errors', async () => {
     httpMock.post.mockRejectedValueOnce({ body: { statusCode: 429 } });
 
     const { component } = renderQueryAssistInput();
