@@ -8,9 +8,9 @@ import {
   EuiCheckableCard,
   EuiCompressedComboBox,
   EuiCompressedFieldText,
-  EuiForm,
   EuiCompressedFormRow,
   EuiCompressedSelect,
+  EuiForm,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
@@ -59,7 +60,10 @@ const integrationConnectionSelectorItems = [
   },
 ];
 
-const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
+const suggestDataSources = async (
+  type: string,
+  dataSourceMDSId?: string
+): Promise<Array<{ label: string }>> => {
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -68,6 +72,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         query: {
           path: '_data_stream/ss4o_*',
           method: 'GET',
+          dataSourceId: dataSourceMDSId ?? '',
         },
       });
       return (
@@ -76,7 +81,9 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         }) ?? []
       );
     } else if (type === 's3') {
-      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
+      const result = (await http.get(
+        `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`
+      )) as Array<{
         name: string;
         connector: string;
       }>;
@@ -171,6 +178,7 @@ export function IntegrationConnectionInputs({
   notifications,
   savedObjectsMDSClient,
   lockConnectionType,
+  handleSelectedDataSourceChange,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
@@ -179,9 +187,17 @@ export function IntegrationConnectionInputs({
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
   lockConnectionType?: boolean;
 }) {
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    setDataSourceMDSId(dataConnectionId);
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
 
   let DataSourceSelector;
   if (dataSourceEnabled) {
@@ -194,14 +210,14 @@ export function IntegrationConnectionInputs({
 
   useEffect(() => {
     const updateDataSources = async () => {
-      const data = await suggestDataSources(config.connectionType);
+      const data = await suggestDataSources(config.connectionType, dataSourceMDSId);
       setDataSourceSuggestions(data);
       setIsSuggestionsLoading(false);
     };
 
     setIsSuggestionsLoading(true);
     updateDataSources();
-  }, [config.connectionType]);
+  }, [config.connectionType, dataSourceMDSId]);
 
   return (
     <>
@@ -217,6 +233,8 @@ export function IntegrationConnectionInputs({
               disabled={false}
               fullWidth={false}
               removePrepend={true}
+              onSelectedDataSource={onSelectedDataSource}
+              dataSourceFilter={dataSourceFilterFn}
             />
           </EuiCompressedFormRow>
           <EuiSpacer />
@@ -399,6 +417,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
     dataSourceManagement,
     notifications,
     savedObjectsMDSClient,
+    handleSelectedDataSourceChange,
   } = props;
 
   return (
@@ -436,6 +455,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
         notifications={notifications}
         dataSourceEnabled={dataSourceEnabled}
         savedObjectsMDSClient={savedObjectsMDSClient}
+        handleSelectedDataSourceChange={handleSelectedDataSourceChange}
       />
       {config.connectionType === 's3' ? (
         <>
