@@ -60,14 +60,10 @@ const integrationConnectionSelectorItems = [
   },
 ];
 
-<<<<<<< HEAD
 const suggestDataSources = async (
-  type: IntegrationConnectionType,
+  type: string,
   dataSourceMDSId?: string
 ): Promise<Array<{ label: string }>> => {
-=======
-const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
->>>>>>> a371170d (reverted commit 19d68b2)
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -84,15 +80,10 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
           return { label: item.name };
         }) ?? []
       );
-<<<<<<< HEAD
-    } else if (type === 's3' || type === 'securityLake') {
+    } else if (type === 's3') {
       const result = (await http.get(
         `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`
       )) as Array<{
-=======
-    } else if (type === 's3') {
-      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
->>>>>>> a371170d (reverted commit 19d68b2)
         name: string;
         connector: string;
       }>;
@@ -149,7 +140,6 @@ export function SetupWorkflowSelector({
         </EuiCheckableCard>
       );
     });
-
   return <>{cards}</>;
 }
 
@@ -347,7 +337,7 @@ export function IntegrationQueryInputs({
         />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
-        label={`S3 Checkpoint Location`}
+        label="S3 Checkpoint Location"
         helpText={
           'The Checkpoint location must be a unique directory and not the same as the Data ' +
           'location. It will be used for caching intermediary results.'
@@ -504,9 +494,9 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
               </EuiCompressedFormRow>
               <EuiSpacer />
               <IntegrationWorkflowsInputs
-                config={config}
                 updateConfig={updateConfig}
                 integration={integration}
+                config={config}
               />
             </>
           ) : null}
