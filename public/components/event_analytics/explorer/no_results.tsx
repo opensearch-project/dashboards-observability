@@ -21,17 +21,15 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { DATA_SOURCE_TYPES, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { CachedDataSourceStatus, DatasourceType } from '../../../../common/types/data_connections';
+import { CachedDataSourceStatus } from '../../../../common/types/data_connections';
 import { CatalogCacheManager } from '../../../framework/catalog_cache/cache_manager';
 import { coreRefs } from '../../../framework/core_refs';
-import { getRenderLogExplorerTablesFlyout } from '../../../plugin';
 import { selectQueryAssistantSummarization } from '../redux/slices/query_assistant_summarization_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectSearchMetaData } from '../redux/slices/search_meta_data_slice';
 
 export interface NoResultsProps {
   tabId: string;
-  dataSourceConnectionType: DatasourceType;
   eventsLoading: boolean;
 }
 
@@ -84,7 +82,7 @@ const OpenSearchIndexNoResults = () => {
   );
 };
 
-export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: NoResultsProps) => {
+export const NoResults = ({ tabId, eventsLoading }: NoResultsProps) => {
   // get the queries isLoaded, if it exists AND is true = show no res
   const queryInfo = useSelector(selectQueries)[tabId];
   const summaryData = useSelector(selectQueryAssistantSummarization)[tabId];
@@ -113,8 +111,6 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
       }
     }
   }
-
-  const renderTablesFlyout = getRenderLogExplorerTablesFlyout();
 
   const renderS3Callouts = () => {
     return (
@@ -146,7 +142,9 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
               To start exploring this datasource, enter a query or{' '}
               <EuiLink
                 onClick={() => {
-                  renderTablesFlyout(datasourceName, dataSourceConnectionType);
+                  coreRefs?.application!.navigateToApp('datasources', {
+                    path: `#/manage/${datasourceName}`,
+                  });
                 }}
               >
                 view databases and tables.
@@ -174,9 +172,7 @@ export const NoResults = ({ tabId, dataSourceConnectionType, eventsLoading }: No
                     <p>Show a list of tables within a database</p>
                     <EuiSpacer size="s" />
                     <CreatedCodeBlock
-                      code={`SHOW ${
-                        dataSourceConnectionType === 'SECURITYLAKE' ? 'TABLES' : 'TABLE EXTENDED'
-                      } IN ${datasourceName}.<database> LIKE '*'`}
+                      code={`SHOW TABLE EXTENDED IN ${datasourceName}.<database> LIKE '*'`}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
