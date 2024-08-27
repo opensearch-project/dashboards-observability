@@ -877,16 +877,50 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         items: [
           {
             name: 'To top',
+            panel: 1,
+          },
+          {
+            name: 'To bottom',
+            panel: 2,
+          },
+        ],
+      },
+      {
+        id: 1,
+        title: 'Add to top',
+        items: [
+          {
+            name: 'Code block',
             onClick: () => {
               this.setState({ isParaActionsPopoverOpen: false });
               this.addPara(0, '', 'CODE');
             },
           },
           {
-            name: 'To bottom',
+            name: 'Visualization',
+            onClick: () => {
+              this.setState({ isParaActionsPopoverOpen: false });
+              this.addPara(0, '', 'VISUALIZATION');
+            },
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: 'Add to bottom',
+        items: [
+          {
+            name: 'Code block',
             onClick: () => {
               this.setState({ isParaActionsPopoverOpen: false });
               this.addPara(this.state.paragraphs.length, '', 'CODE');
+            },
+          },
+          {
+            name: 'Visualization',
+            onClick: () => {
+              this.setState({ isParaActionsPopoverOpen: false });
+              this.addPara(this.state.paragraphs.length, '', 'VISUALIZATION');
             },
           },
         ],
@@ -973,6 +1007,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                 color="danger"
                 display="base"
                 iconType="trash"
+                size="s"
                 onClick={this.showDeleteNotebookModal}
                 data-test-subj="notebook-delete-icon"
               />
@@ -981,6 +1016,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiButtonIcon
                 display="base"
                 iconType="pencil"
+                size="s"
                 onClick={this.showRenameModal}
                 data-test-subj="notebook-edit-icon"
               />
@@ -989,6 +1025,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               <EuiButtonIcon
                 iconType="copy"
                 display="base"
+                size="s"
                 onClick={this.showCloneModal}
                 data-test-subj="notebook-duplicate-icon"
               />
@@ -1036,7 +1073,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       <div>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiTitle size="l">
-            <h3>{this.state.path}</h3>
+            <h3 data-test-subj="notebookTitle">{this.state.path}</h3>
           </EuiTitle>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -1079,27 +1116,25 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             )}
             {!this.state.savedObjectNotebook && <EuiSpacer size="s" />}
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-              {this.state.parsedPara.length > 0 && (
+              {this.state.parsedPara.length > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonGroup
-                        buttonSize="s"
-                        options={viewOptions}
-                        idSelected={this.state.selectedViewId}
-                        onChange={(id) => {
-                          this.updateView(id);
-                        }}
-                        legend="notebook view buttons"
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiButtonGroup
+                    buttonSize="s"
+                    options={viewOptions}
+                    idSelected={this.state.selectedViewId}
+                    onChange={(id) => {
+                      this.updateView(id);
+                    }}
+                    legend="notebook view buttons"
+                  />
                 </EuiFlexItem>
+              ) : (
+                <EuiFlexItem />
               )}
-              {this.state.savedObjectNotebook && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    {renderParaActionButtons()}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {this.state.savedObjectNotebook && renderParaActionButtons()}
+                  {this.state.savedObjectNotebook && (
                     <EuiFlexItem grow={false}>
                       <EuiPopover
                         panelPaddingSize="none"
@@ -1124,9 +1159,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                         <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             {this.state.parsedPara.length > 0 ? (
               <>
