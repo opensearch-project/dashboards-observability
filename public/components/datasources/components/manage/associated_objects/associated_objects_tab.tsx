@@ -11,7 +11,6 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiText,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
@@ -43,9 +42,7 @@ import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_load
 import {
   ASSC_OBJ_FRESH_MSG,
   ASSC_OBJ_PANEL_DESCRIPTION,
-  ASSC_OBJ_PANEL_DESCRIPTION_FOR_S3_WITH_LAKE_FORMATION,
   ASSC_OBJ_PANEL_TITLE,
-  ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION,
   isCatalogCacheFetching,
 } from './utils/associated_objects_tab_utils';
 
@@ -79,11 +76,14 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     startLoadingAccelerations,
   } = cacheLoadingHooks;
 
-  const lastChecked: boolean = selectedDatabase !== '';
+  let lastChecked: boolean;
+  if (selectedDatabase !== '') {
+    lastChecked = true;
+  } else {
+    lastChecked = false;
+  }
   // Get last selected if there is one, set to first option if not
-  const [databaseSelectorOptions, setDatabaseSelectorOptions] = useState<
-    Array<EuiSelectableOption<any>>
-  >(
+  const [databaseSelectorOptions, setDatabaseSelectorOptions] = useState(
     cachedDatabases.map((database, index) => {
       return {
         label: database.name,
@@ -107,17 +107,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const AssociatedObjectsHeader = () => {
     const panelTitle = i18n.translate('datasources.associatedObjectsTab.panelTitle', {
-      defaultMessage:
-        datasource.connector === 'SECURITYLAKE'
-          ? ASSC_OBJ_PANEL_TITLE_FOR_S3_WITH_LAKE_FORMATION
-          : ASSC_OBJ_PANEL_TITLE,
+      defaultMessage: ASSC_OBJ_PANEL_TITLE,
     });
 
     const panelDescription = i18n.translate('datasources.associatedObjectsTab.panelDescription', {
-      defaultMessage:
-        datasource.connector === 'SECURITYLAKE'
-          ? ASSC_OBJ_PANEL_DESCRIPTION_FOR_S3_WITH_LAKE_FORMATION
-          : ASSC_OBJ_PANEL_DESCRIPTION,
+      defaultMessage: ASSC_OBJ_PANEL_DESCRIPTION,
     });
 
     const LastUpdatedText = () => {
@@ -153,16 +147,13 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
             onClick={onRefreshButtonClick}
           />
         </EuiFlexItem>
-        {datasource.connector !== 'SECURITYLAKE' && (
-          <EuiFlexItem grow={false}>
-            <CreateAccelerationFlyoutButton
-              dataSourceName={datasource.name}
-              dataSourceType={datasource.connector}
-              renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
-              handleRefresh={onRefreshButtonClick}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <CreateAccelerationFlyoutButton
+            dataSourceName={datasource.name}
+            renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+            handleRefresh={onRefreshButtonClick}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -334,31 +325,24 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         columns: table.columns,
       };
     });
-    // For security lake connections we don't want to show accelerations, so we simply assign empty array
-    const accelerationObjects: AssociatedObject[] =
-      datasource.connector === 'SECURITYLAKE'
-        ? []
-        : cachedAccelerations
-            .filter(
-              (acceleration: CachedAcceleration) => acceleration.database === selectedDatabase
-            )
-            .map((acceleration: CachedAcceleration) => ({
-              tableName: acceleration.table,
-              datasource: datasource.name,
-              id: acceleration.indexName,
-              name: getAccelerationName(acceleration),
-              database: acceleration.database,
-              type: ACCELERATION_INDEX_TYPES.find(
-                (accelType) => accelType.value === acceleration.type
-              )!.value as AssociatedObjectIndexType,
-              accelerations:
-                acceleration.type === 'covering' || acceleration.type === 'skipping'
-                  ? tableObjects.find(
-                      (tableObject: AssociatedObject) => tableObject.name === acceleration.table
-                    ) || []
-                  : [],
-              columns: undefined,
-            }));
+    const accelerationObjects: AssociatedObject[] = cachedAccelerations
+      .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
+      .map((acceleration: CachedAcceleration) => ({
+        tableName: acceleration.table,
+        datasource: datasource.name,
+        id: acceleration.indexName,
+        name: getAccelerationName(acceleration),
+        database: acceleration.database,
+        type: ACCELERATION_INDEX_TYPES.find((accelType) => accelType.value === acceleration.type)!
+          .value as AssociatedObjectIndexType,
+        accelerations:
+          acceleration.type === 'covering' || acceleration.type === 'skipping'
+            ? tableObjects.find(
+                (tableObject: AssociatedObject) => tableObject.name === acceleration.table
+              )
+            : [],
+        columns: undefined,
+      }));
     setAssociatedObjects([...tableObjects, ...accelerationObjects]);
   }, [selectedDatabase, cachedTables, cachedAccelerations]);
 
@@ -367,12 +351,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   return (
     <>
       <EuiSpacer />
-      {datasource.connector !== 'SECURITYLAKE' && (
-        <>
-          <AccelerationsRecommendationCallout />
-          <EuiSpacer />
-        </>
-      )}
+      <AccelerationsRecommendationCallout />
+      <EuiSpacer />
       <EuiPanel>
         <AssociatedObjectsHeader />
         <EuiHorizontalRule />
@@ -418,7 +398,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                         ).length > 0 ? (
                           <AssociatedObjectsTable
                             datasourceName={datasource.name}
-                            dataSourceType={datasource.connector}
                             associatedObjects={associatedObjects}
                             cachedAccelerations={cachedAccelerations}
                             handleRefresh={onRefreshButtonClick}

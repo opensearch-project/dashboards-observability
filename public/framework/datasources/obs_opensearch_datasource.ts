@@ -18,7 +18,7 @@ export class ObservabilityDefaultDataSource extends DataSource<any, any, any, an
   }
 
   async getDataSet() {
-    return { dataSets: ['Default data source'] };
+    return ['Default data source'];
   }
 
   async testConnection(): Promise<boolean> {
@@ -26,6 +26,6 @@ export class ObservabilityDefaultDataSource extends DataSource<any, any, any, an
   }
 
   async runQuery() {
-    return { data: {} };
+    return null;
   }
 }
