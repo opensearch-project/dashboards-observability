@@ -69,7 +69,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   const history = useHistory();
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
-  const [_isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -236,7 +235,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                     <EuiSmallButton
                       key="redirect"
                       onClick={() => {
-                        setIsActionsPopoverOpen(false);
                         history.push(`/explorer`);
                       }}
                       data-test-subj="eventHomeAction__explorer"
