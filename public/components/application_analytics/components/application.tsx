@@ -54,7 +54,9 @@ import {
 } from '../../../../public/components/trace_analytics/components/common/helper_functions';
 import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/components/traces/span_detail_flyout';
 import { SpanDetailTable } from '../../../../public/components/trace_analytics/components/traces/span_detail_table';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
 import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
+import { coreRefs } from '../../../framework/core_refs';
 import { Explorer } from '../../event_analytics/explorer/explorer';
 import { ServicesContent } from '../../trace_analytics/components/services/services_content';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
@@ -62,8 +64,6 @@ import { AppAnalyticsComponentDeps } from '../home';
 import { Configuration } from './configuration';
 import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
-import { coreRefs } from '../../../framework/core_refs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -572,6 +572,7 @@ export function Application(props: AppDetailProps) {
             traceId={traceFlyoutId}
             closeTraceFlyout={closeTraceFlyout}
             openSpanFlyout={openSpanFlyout}
+            dataSourceMDSId=""
           />
         )}
       </EuiPage>

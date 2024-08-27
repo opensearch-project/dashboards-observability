@@ -3,27 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, EuiSpacer, EuiHorizontalRule, EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import { HttpStart } from '../../../../../../../src/core/public';
+import { TraceAnalyticsMode } from '../../../../../public/components/trace_analytics/home';
 import { ServiceBreakdownPanel } from '../../../trace_analytics/components/traces/service_breakdown_panel';
 import { SpanDetailPanel } from '../../../trace_analytics/components/traces/span_detail_panel';
 import {
-  handleTraceViewRequest,
-  handleServicesPieChartRequest,
   handlePayloadRequest,
+  handleServicesPieChartRequest,
+  handleTraceViewRequest,
 } from '../../../trace_analytics/requests/traces_request_handler';
-import { HttpStart } from '../../../../../../../src/core/public';
 import { getListItem } from '../../helpers/utils';
-import { TraceAnalyticsMode } from '../../../../../public/components/trace_analytics/home';
 
 interface TraceDetailRenderProps {
   traceId: string;
   http: HttpStart;
   openSpanFlyout: (spanId: string) => void;
-  mode : TraceAnalyticsMode
+  mode: TraceAnalyticsMode;
+  dataSourceMDSId: string;
 }
 
-export const TraceDetailRender = ({ traceId, http, openSpanFlyout, mode }: TraceDetailRenderProps) => {
+export const TraceDetailRender = ({
+  traceId,
+  http,
+  openSpanFlyout,
+  mode,
+  dataSourceMDSId,
+}: TraceDetailRenderProps) => {
   const [fields, setFields] = useState<any>({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
   const [payloadData, setPayloadData] = useState('');
@@ -69,6 +76,7 @@ export const TraceDetailRender = ({ traceId, http, openSpanFlyout, mode }: Trace
           page="app"
           openSpanFlyout={openSpanFlyout}
           mode={mode}
+          dataSourceMDSId={dataSourceMDSId}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
