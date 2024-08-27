@@ -11,6 +11,7 @@ import {
   DataSource,
   DataSourceGroup,
   DataSourceSelectable,
+  DataSourceType,
 } from '../../../../../../../src/plugins/data/public';
 import {
   DATA_SOURCE_NAME_URL_PARAM_KEY,
@@ -113,7 +114,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   const dispatch = useDispatch();
   const routerContext = useContext(LogExplorerRouterContext);
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
-  const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
+  const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [selectedSources, setSelectedSources] = useState<SelectedDataSource[]>(
     getMatchedOption(
@@ -189,7 +190,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
    * Subscribe to data source updates and manage the active data sources state.
    */
   useEffect(() => {
-    const subscription = dataSources?.dataSourceService
+    const subscription = dataSources.dataSourceService
       .getDataSources$()
       .subscribe((currentDataSources: DataSource[]) => {
         // temporary solution for 2.11 to render OpenSearch / default cluster for observability
@@ -298,8 +299,8 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
   }, [dataSourceOptionList]);
 
   const onRefresh = useCallback(() => {
-    dataSources?.dataSourceService.reload();
-  }, [dataSources?.dataSourceService]);
+    dataSources.dataSourceService.reload();
+  }, [dataSources.dataSourceService]);
 
   return (
     <DataSourceSelectable

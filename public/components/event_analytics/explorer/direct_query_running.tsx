@@ -3,15 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiSmallButton,
-  EuiEmptyPrompt,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
@@ -21,19 +13,8 @@ import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../redux/slices/search_meta_data_slice';
-import { AccelerateCallout } from './accelerate_callout';
 
-interface DirectQueryRunningProps {
-  tabId: string;
-  isS3Connection: boolean;
-  onCreateAcceleration: () => void;
-}
-
-export const DirectQueryRunning = ({
-  tabId,
-  isS3Connection,
-  onCreateAcceleration,
-}: DirectQueryRunningProps) => {
+export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
   const sqlService = new SQLService(coreRefs.http);
@@ -58,34 +39,20 @@ export const DirectQueryRunning = ({
   };
 
   return (
-    <>
-      {isS3Connection && <AccelerateCallout onCreateAcceleration={onCreateAcceleration} />}
-      <EuiEmptyPrompt
-        icon={<EuiProgress size="xs" color="accent" />}
-        title={<h2>Query Processing</h2>}
-        body={
-          <>
-            <EuiText>
-              Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiSmallButton color="success" onClick={cancelQuery}>
-                  Cancel
-                </EuiSmallButton>
-              </EuiFlexItem>
-              {isS3Connection && (
-                <EuiFlexItem>
-                  <EuiSmallButton fill onClick={onCreateAcceleration}>
-                    Create acceleration
-                  </EuiSmallButton>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </>
-        }
-      />
-    </>
+    <EuiEmptyPrompt
+      icon={<EuiProgress size="xs" color="accent" />}
+      title={<h2>Query Processing</h2>}
+      body={
+        <>
+          <EuiText>
+            Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiSmallButton color="success" onClick={cancelQuery}>
+            Cancel
+          </EuiSmallButton>
+        </>
+      }
+    />
   );
 };

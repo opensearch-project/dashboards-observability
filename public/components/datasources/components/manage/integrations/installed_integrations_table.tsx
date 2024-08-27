@@ -27,10 +27,8 @@ import { IntegrationHealthBadge } from '../../../../integrations/components/adde
 import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
 import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
-import { isS3Connection } from '../../../utils/helpers';
 
 interface IntegrationInstanceTableEntry {
-  id: string;
   name: string;
   locator: {
     name: string;
@@ -42,8 +40,6 @@ interface IntegrationInstanceTableEntry {
 
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
-    case 'SECURITYLAKE':
-      return 'Amazon Security Lake';
     case 'S3GLUE':
       return 'S3 Glue';
     case 'PROMETHEUS':
@@ -83,7 +79,6 @@ const instanceToTableEntry = (
   instance: IntegrationInstanceResult
 ): IntegrationInstanceTableEntry => {
   return {
-    id: instance.id,
     name: instance.name,
     locator: { name: instance.name, id: instance.id },
     status: instance.status,
@@ -128,19 +123,17 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
   );
 };
 
-export interface InstallIntegrationFlyoutProps {
-  datasourceType: DatasourceType;
-  datasourceName: string;
-  closeFlyout: () => void;
-  refreshInstances?: () => void;
-}
-
 export const InstallIntegrationFlyout = ({
+  closeFlyout,
   datasourceType,
   datasourceName,
-  closeFlyout,
   refreshInstances,
-}: InstallIntegrationFlyoutProps) => {
+}: {
+  closeFlyout: () => void;
+  datasourceType: DatasourceType;
+  datasourceName: string;
+  refreshInstances: () => void;
+}) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
   } as AvailableIntegrationsList);
@@ -156,12 +149,9 @@ export const InstallIntegrationFlyout = ({
     });
   }, []);
 
-  const integrationLabelToCheck =
-    datasourceType === 'SECURITYLAKE' ? 'Security Lake' : labelFromDataSourceType(datasourceType);
-
-  const integrationsFilteredByLabel = {
+  const s3FilteredIntegrations = {
     hits: availableIntegrations.hits.filter((config) =>
-      config.labels?.includes(integrationLabelToCheck ?? '')
+      config.labels?.includes(labelFromDataSourceType(datasourceType) ?? '')
     ),
   };
 
@@ -177,7 +167,7 @@ export const InstallIntegrationFlyout = ({
       {installingIntegration === null ? (
         <AvailableIntegrationsTable
           loading={false}
-          data={integrationsFilteredByLabel}
+          data={s3FilteredIntegrations}
           isCardView={true}
           setInstallingIntegration={setInstallingIntegration}
         />
@@ -187,10 +177,10 @@ export const InstallIntegrationFlyout = ({
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"
           forceConnection={
-            isS3Connection(datasourceType)
+            datasourceType === 'S3GLUE'
               ? {
                   name: datasourceName,
-                  type: datasourceType.toLowerCase() === 'securitylake' ? 'securityLake' : 's3',
+                  type: 's3',
                 }
               : undefined
           }
@@ -198,7 +188,7 @@ export const InstallIntegrationFlyout = ({
             setIsInstalling(installing);
             if (success) {
               closeFlyout();
-              refreshInstances?.();
+              refreshInstances();
             }
           }}
         />
