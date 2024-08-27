@@ -16,16 +16,22 @@ describe('Saved query table component', () => {
   it('Renders saved query table', async () => {
     const handleHistoryClick = jest.fn();
     const handleSelectHistory = jest.fn();
-    
+    const addSampledata = jest.fn();
+    const showDeleteConfirmation = jest.fn();
+    const selectedHistories = [];
+
     const wrapper = mount(
       <SavedQueryTable
         savedHistories={SAVED_HISTORIES}
         handleHistoryClick={handleHistoryClick}
         handleSelectHistory={handleSelectHistory}
         isTableLoading={false}
+        selectedHistories={selectedHistories}
+        addSampledata={addSampledata}
+        showDeleteConfirmation={showDeleteConfirmation}
       />
     );
-    
+
     wrapper.update();
 
     await waitFor(() => {
