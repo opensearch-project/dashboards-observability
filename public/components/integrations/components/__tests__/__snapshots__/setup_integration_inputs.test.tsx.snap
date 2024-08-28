@@ -5,18 +5,24 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
   <EuiText
     size="s"
   >
-    <h1>
+    <h2>
       Set Up Integration
-    </h1>
+    </h2>
   </EuiText>
-  <EuiSpacer />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Details
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationDetailsInputs
     config={
       Object {
@@ -61,13 +67,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Connection
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationConnectionInputs
     config={
       Object {
@@ -112,7 +122,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Query Fields
@@ -135,7 +147,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
       </p>
     </EuiText>
   </EuiCompressedFormRow>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationQueryInputs
     config={
       Object {
@@ -180,7 +194,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Resources
@@ -203,7 +219,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
       </p>
     </EuiText>
   </EuiCompressedFormRow>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationWorkflowsInputs
     config={
       Object {
@@ -258,18 +276,24 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
   <EuiText
     size="s"
   >
-    <h1>
+    <h2>
       Set Up Integration
-    </h1>
+    </h2>
   </EuiText>
-  <EuiSpacer />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Details
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationDetailsInputs
     config={
       Object {
@@ -314,13 +338,17 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Connection
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationConnectionInputs
     config={
       Object {
@@ -365,7 +393,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Query Fields
@@ -388,7 +418,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
       </p>
     </EuiText>
   </EuiCompressedFormRow>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationQueryInputs
     config={
       Object {
@@ -433,7 +465,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Resources
@@ -456,7 +490,9 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
       </p>
     </EuiText>
   </EuiCompressedFormRow>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationWorkflowsInputs
     config={
       Object {
@@ -1793,18 +1829,24 @@ exports[`Integration Setup Inputs Renders the index form as expected 1`] = `
   <EuiText
     size="s"
   >
-    <h1>
+    <h2>
       Set Up Integration
-    </h1>
+    </h2>
   </EuiText>
-  <EuiSpacer />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Details
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationDetailsInputs
     config={
       Object {
@@ -1849,13 +1891,17 @@ exports[`Integration Setup Inputs Renders the index form as expected 1`] = `
     }
     updateConfig={[Function]}
   />
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <EuiText>
     <h3>
       Integration Connection
     </h3>
   </EuiText>
-  <EuiSpacer />
+  <EuiSpacer
+    size="s"
+  />
   <IntegrationConnectionInputs
     config={
       Object {

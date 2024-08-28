@@ -25,7 +25,7 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
       <EuiTitle>
         <h2>Details</h2>
       </EuiTitle>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText>

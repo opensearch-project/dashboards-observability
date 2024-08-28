@@ -60,13 +60,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
         <div
           className="euiPageBody euiPageBody--borderRadiusNone"
         >
-          <EuiSpacer
-            size="xl"
-          >
-            <div
-              className="euiSpacer euiSpacer--xl"
-            />
-          </EuiSpacer>
           <EuiPageHeader
             style={
               Object {
@@ -82,13 +75,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                 }
               }
             >
-              <EuiSpacer
-                size="m"
-              >
-                <div
-                  className="euiSpacer euiSpacer--m"
-                />
-              </EuiSpacer>
               <EuiPageHeaderSection
                 style={
                   Object {
@@ -111,118 +97,122 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                       className="euiPageContentHeaderSection"
                     >
                       <EuiFlexGroup
+                        alignItems="center"
                         gutterSize="xs"
+                        justifyContent="spaceBetween"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <EuiFlexGroup>
+                          <EuiFlexItem
+                            grow={false}
+                          >
                             <div
-                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiFlexItem
-                                grow={false}
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="xs"
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                 >
-                                  <EuiText
-                                    data-test-subj="eventHomePageTitle"
-                                    size="s"
+                                  <EuiFlexItem
+                                    grow={false}
                                   >
                                     <div
-                                      className="euiText euiText--small"
-                                      data-test-subj="eventHomePageTitle"
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
-                                      <h1 />
-                                    </div>
-                                  </EuiText>
-                                </div>
-                              </EuiFlexItem>
-                              <EuiFlexItem
-                                style={
-                                  Object {
-                                    "justifyContent": "center",
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiFlexItem"
-                                  style={
-                                    Object {
-                                      "justifyContent": "center",
-                                    }
-                                  }
-                                >
-                                  <IntegrationHealthBadge>
-                                    <EuiHealth
-                                      color="warning"
-                                    >
-                                      <div
-                                        className="euiHealth euiHealth--textSizeS"
+                                      <EuiText
+                                        data-test-subj="eventHomePageTitle"
+                                        size="s"
                                       >
-                                        <EuiFlexGroup
-                                          alignItems="center"
-                                          gutterSize="xs"
-                                          responsive={false}
+                                        <div
+                                          className="euiText euiText--small"
+                                          data-test-subj="eventHomePageTitle"
+                                        >
+                                          <h1 />
+                                        </div>
+                                      </EuiText>
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <IntegrationHealthBadge>
+                                        <EuiHealth
+                                          color="warning"
                                         >
                                           <div
-                                            className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                            className="euiHealth euiHealth--textSizeS"
                                           >
-                                            <EuiFlexItem
-                                              grow={false}
+                                            <EuiFlexGroup
+                                              alignItems="center"
+                                              gutterSize="xs"
+                                              responsive={false}
                                             >
                                               <div
-                                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                               >
-                                                <EuiIcon
-                                                  color="warning"
-                                                  type="dot"
+                                                <EuiFlexItem
+                                                  grow={false}
                                                 >
-                                                  <EuiIconBeaker
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
-                                                    focusable="false"
-                                                    role="img"
-                                                    style={null}
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
                                                   >
-                                                    <svg
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
-                                                      focusable="false"
-                                                      height={16}
-                                                      role="img"
-                                                      style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width={16}
-                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    <EuiIcon
+                                                      color="warning"
+                                                      type="dot"
                                                     >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
-                                                </EuiIcon>
+                                                      <EuiIconBeaker
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
+                                                    </EuiIcon>
+                                                  </div>
+                                                </EuiFlexItem>
+                                                <EuiFlexItem
+                                                  grow={false}
+                                                >
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                  >
+                                                    Unknown
+                                                  </div>
+                                                </EuiFlexItem>
                                               </div>
-                                            </EuiFlexItem>
-                                            <EuiFlexItem
-                                              grow={false}
-                                            >
-                                              <div
-                                                className="euiFlexItem euiFlexItem--flexGrowZero"
-                                              >
-                                                Unknown
-                                              </div>
-                                            </EuiFlexItem>
+                                            </EuiFlexGroup>
                                           </div>
-                                        </EuiFlexGroup>
-                                      </div>
-                                    </EuiHealth>
-                                  </IntegrationHealthBadge>
+                                        </EuiHealth>
+                                      </IntegrationHealthBadge>
+                                    </div>
+                                  </EuiFlexItem>
                                 </div>
-                              </EuiFlexItem>
+                              </EuiFlexGroup>
                             </div>
-                          </EuiFlexGroup>
+                          </EuiFlexItem>
                           <EuiFlexItem
                             grow={false}
                           >
@@ -292,84 +282,67 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                       </EuiFlexGroup>
                     </div>
                   </EuiPageContentHeaderSection>
-                  <EuiSpacer>
-                    <div
-                      className="euiSpacer euiSpacer--l"
-                    />
-                  </EuiSpacer>
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
-                                Template
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiLink
-                            href="#/available/undefined"
-                          >
-                            <a
-                              className="euiLink euiLink--primary"
-                              href="#/available/undefined"
-                              rel="noreferrer"
-                            />
-                          </EuiLink>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
-                                Date Added
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiText
-                            size="m"
-                          >
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
                 </div>
               </EuiPageHeaderSection>
             </header>
           </EuiPageHeader>
-          <EuiSpacer>
+          <EuiFlexGroup>
             <div
-              className="euiSpacer euiSpacer--l"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <EuiFlexItem>
+                <div
+                  className="euiFlexItem"
+                >
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <h4>
+                        Template
+                      </h4>
+                    </div>
+                  </EuiText>
+                  <EuiLink
+                    href="#/available/undefined"
+                  >
+                    <a
+                      className="euiLink euiLink--primary"
+                      href="#/available/undefined"
+                      rel="noreferrer"
+                    />
+                  </EuiLink>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div
+                  className="euiFlexItem"
+                >
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <h4>
+                        Date Added
+                      </h4>
+                    </div>
+                  </EuiText>
+                  <EuiText
+                    size="m"
+                  >
+                    <div
+                      className="euiText euiText--medium"
+                    />
+                  </EuiText>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
             />
           </EuiSpacer>
           <EuiPanel>
@@ -436,8 +409,10 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                 search={
                   Object {
                     "box": Object {
+                      "compressed": true,
                       "incremental": true,
                     },
+                    "compressed": true,
                     "filters": Array [
                       Object {
                         "field": "assetType",
@@ -481,9 +456,11 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                   <EuiSearchBar
                     box={
                       Object {
+                        "compressed": true,
                         "incremental": true,
                       }
                     }
+                    compressed={true}
                     filters={
                       Array [
                         Object {
@@ -539,6 +516,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                             className="euiFlexItem euiSearchBar__searchHolder"
                           >
                             <EuiSearchBox
+                              compressed={true}
                               incremental={true}
                               isInvalid={false}
                               onSearch={[Function]}
@@ -547,7 +525,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                             >
                               <EuiFieldSearch
                                 aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                compressed={false}
+                                compressed={true}
                                 defaultValue=""
                                 fullWidth={true}
                                 incremental={true}
@@ -559,13 +537,13 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                 placeholder="Search..."
                               >
                                 <EuiFormControlLayout
-                                  compressed={false}
+                                  compressed={true}
                                   fullWidth={true}
                                   icon="search"
                                   isLoading={false}
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                                   >
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
@@ -575,7 +553,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                       >
                                         <input
                                           aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                           defaultValue=""
                                           onKeyUp={[Function]}
                                           placeholder="Search..."
@@ -583,7 +561,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                         />
                                       </EuiValidatableControl>
                                       <EuiFormControlLayoutIcons
-                                        compressed={false}
+                                        compressed={true}
                                         icon="search"
                                         isLoading={false}
                                       >
@@ -591,7 +569,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                           className="euiFormControlLayoutIcons"
                                         >
                                           <EuiFormControlLayoutCustomIcon
-                                            size="m"
+                                            size="s"
                                             type="search"
                                           >
                                             <span
@@ -600,19 +578,19 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                               <EuiIcon
                                                 aria-hidden="true"
                                                 className="euiFormControlLayoutCustomIcon__icon"
-                                                size="m"
+                                                size="s"
                                                 type="search"
                                               >
                                                 <EuiIconBeaker
                                                   aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                   focusable="false"
                                                   role="img"
                                                   style={null}
                                                 >
                                                   <svg
                                                     aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                     focusable="false"
                                                     height={16}
                                                     role="img"
@@ -646,6 +624,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                             className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
                           >
                             <EuiSearchFilters
+                              compressed={true}
                               filters={
                                 Array [
                                   Object {
@@ -711,7 +690,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   <FieldValueSelectionFilter
                                     config={
                                       Object {
-                                        "compressed": undefined,
+                                        "compressed": true,
                                         "field": "assetType",
                                         "multiSelect": false,
                                         "name": "Type",
@@ -776,6 +755,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                           iconSide="right"
                                           iconType="arrowDown"
                                           onClick={[Function]}
+                                          size="s"
                                         >
                                           Type
                                         </EuiFilterButton>
@@ -802,6 +782,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                             iconSide="right"
                                             iconType="arrowDown"
                                             onClick={[Function]}
+                                            size="s"
                                           >
                                             <EuiButtonEmpty
                                               className="euiFilterButton euiFilterButton--hasIcon"
@@ -809,6 +790,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                               iconSide="right"
                                               iconType="arrowDown"
                                               onClick={[Function]}
+                                              size="s"
                                               textProps={
                                                 Object {
                                                   "className": "",
@@ -817,7 +799,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                               type="button"
                                             >
                                               <button
-                                                className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
                                                 disabled={false}
                                                 onClick={[Function]}
                                                 type="button"
@@ -1137,9 +1119,11 @@ exports[`Added Integration View Test Renders added integration view using dummy 
               </EuiInMemoryTable>
             </div>
           </EuiPanel>
-          <EuiSpacer>
+          <EuiSpacer
+            size="s"
+          >
             <div
-              className="euiSpacer euiSpacer--l"
+              className="euiSpacer euiSpacer--s"
             />
           </EuiSpacer>
         </div>
