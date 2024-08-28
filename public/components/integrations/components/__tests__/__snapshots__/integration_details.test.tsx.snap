@@ -15,9 +15,11 @@ exports[`Available Integration Table View Test Renders nginx integration table v
         Details
       </h2>
     </EuiTitle>
-    <EuiSpacer>
+    <EuiSpacer
+      size="s"
+    >
       <div
-        className="euiSpacer euiSpacer--l"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
     <EuiFlexGroup>
