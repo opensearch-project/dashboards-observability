@@ -10,7 +10,7 @@ import { coreRefs } from './framework/core_refs';
 interface HeaderControlledComponentsWrapperProps {
   components?: React.ReactElement[];
   badgeContent?: React.ReactElement | string | number;
-  description?: string;
+  description?: React.ReactNode;
 }
 
 export const HeaderControlledComponentsWrapper = ({
