@@ -6,8 +6,8 @@
 import {
   EuiCompressedComboBox,
   EuiCompressedFieldText,
-  EuiFlexGroup,
   EuiCompressedFormRow,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,

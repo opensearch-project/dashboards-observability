@@ -62,7 +62,6 @@ import {
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
-  DatasourceType,
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
   RenderAssociatedObjectsDetailsFlyoutParams,
@@ -116,6 +115,7 @@ import { TablesFlyout } from './components/event_analytics/explorer/datasources/
 import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
 import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 
+
 interface PublicConfig {
   query_assist: {
     enabled: boolean;
@@ -155,20 +155,12 @@ export const [
 ] = createGetterSetter<
   ({
     dataSource,
-    dataSourceType,
     dataSourceMDSId,
     databaseName,
     tableName,
     handleRefresh,
   }: RenderAccelerationFlyoutParams) => void
 >('renderCreateAccelerationFlyout');
-
-export const [
-  getRenderLogExplorerTablesFlyout,
-  setRenderLogExplorerTablesFlyout,
-] = createGetterSetter<(dataSourceName: string, dataSourceType: DatasourceType) => void>(
-  'renderLogExplorerTablesFlyout'
-);
 
 export class ObservabilityPlugin
   implements
@@ -544,7 +536,6 @@ export class ObservabilityPlugin
       dataSourceName,
       handleRefresh,
       dataSourceMDSId,
-      dataSourceType,
     }: RenderAssociatedObjectsDetailsFlyoutParams) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
@@ -554,7 +545,6 @@ export class ObservabilityPlugin
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
-            dataSourceType={dataSourceType}
           />
         )
       );
@@ -563,7 +553,6 @@ export class ObservabilityPlugin
 
     const renderCreateAccelerationFlyout = ({
       dataSource,
-      dataSourceType,
       databaseName,
       tableName,
       handleRefresh,
@@ -573,7 +562,6 @@ export class ObservabilityPlugin
         toMountPoint(
           <CreateAcceleration
             selectedDatasource={dataSource}
-            selectedDatasourceType={dataSourceType}
             resetFlyout={() => createAccelerationFlyout.close()}
             databaseName={databaseName}
             tableName={tableName}
@@ -584,22 +572,6 @@ export class ObservabilityPlugin
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
-
-    const renderLogExplorerTablesFlyout = (
-      dataSourceName: string,
-      dataSourceType: DatasourceType
-    ) => {
-      const createLogExplorerTablesFlyout = core.overlays.openFlyout(
-        toMountPoint(
-          <TablesFlyout
-            dataSourceName={dataSourceName}
-            dataSourceType={dataSourceType}
-            resetFlyout={() => createLogExplorerTablesFlyout.close()}
-          />
-        )
-      );
-    };
-    setRenderLogExplorerTablesFlyout(renderLogExplorerTablesFlyout);
 
     const CatalogCacheManagerInstance = CatalogCacheManager;
     const useLoadDatabasesToCacheHook = useLoadDatabasesToCache;

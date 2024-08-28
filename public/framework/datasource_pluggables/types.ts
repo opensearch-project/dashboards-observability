@@ -10,7 +10,6 @@ export interface IDataSourceComponentSet {
     QueryEditor: React.ReactNode;
     ConfigEditor: React.ReactNode;
     SidePanel: React.ReactNode;
-    SearchBar: React.ReactNode;
   };
   services: {
     data_fetcher: IDataFetcher;

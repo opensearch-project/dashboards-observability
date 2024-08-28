@@ -222,12 +222,14 @@ export const Search = (props: any) => {
 
   const languagePopOverItems = [
     <EuiContextMenuItem
+      size="s"
       key={QUERY_LANGUAGE.SQL}
       onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
     >
       PPL
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      size="s"
       key={QUERY_LANGUAGE.PPL}
       onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
     >
@@ -323,7 +325,12 @@ export const Search = (props: any) => {
   };
 
   const languagePopOverButton = (
-    <EuiSmallButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
+    <EuiSmallButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onLanguagePopoverClick}
+      color="text"
+    >
       {queryLang}
     </EuiSmallButton>
   );
@@ -357,7 +364,7 @@ export const Search = (props: any) => {
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="m" items={languagePopOverItems} />
+                    <EuiContextMenuPanel size="s" items={languagePopOverItems} />
                   </EuiPopover>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
