@@ -1098,21 +1098,18 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           <EuiPageBody component="div">
             {notebookHeader}
             {!this.state.savedObjectNotebook && (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiCallOut color="primary" iconType="iInCircle">
-                    Upgrade this notebook to take full advantage of the latest features
-                    <EuiSpacer size="s" />
-                    <EuiSmallButton
-                      data-test-subj="upgrade-notebook"
-                      onClick={() => this.showUpgradeModal()}
-                    >
-                      Upgrade Notebook
-                    </EuiSmallButton>
-                  </EuiCallOut>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} />
-              </EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCallOut color="primary" iconType="iInCircle">
+                  Upgrade this notebook to take full advantage of the latest features
+                  <EuiSpacer size="s" />
+                  <EuiSmallButton
+                    data-test-subj="upgrade-notebook"
+                    onClick={() => this.showUpgradeModal()}
+                  >
+                    Upgrade Notebook
+                  </EuiSmallButton>
+                </EuiCallOut>
+              </EuiFlexItem>
             )}
             {!this.state.savedObjectNotebook && <EuiSpacer size="s" />}
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
