@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { coreRefs } from '../../framework/core_refs';
@@ -146,9 +146,11 @@ export const Home = ({ ..._props }: HomeProps) => {
             onClick: () => navigateToApp(card.url, '#/'),
             getFooter: () => {
               return (
-                <EuiText size="s" textAlign="center">
-                  {card.footer}
-                </EuiText>
+                <EuiPanel color="subdued">
+                  <EuiText size="s" textAlign="center">
+                    {card.footer}
+                  </EuiText>
+                </EuiPanel>
               );
             },
           }),

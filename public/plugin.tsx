@@ -32,6 +32,9 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -98,7 +101,6 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
-import { registerAllPluginNavGroups } from './plugin_nav';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -109,7 +111,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { TablesFlyout } from './components/event_analytics/explorer/datasources/tables_flyout';
 import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
 import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 

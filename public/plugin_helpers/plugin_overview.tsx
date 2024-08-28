@@ -47,7 +47,6 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
       {
         id: SECTIONS.GET_STARTED,
         order: 1000,
-        title: 'Get started',
         kind: 'card',
         wrap: false,
         columns: 5,
