@@ -227,7 +227,6 @@ export function Integration(props: AvailableIntegrationProps) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiSpacer size="xl" />
         <IntegrationOverview
           integration={integration}
           showFlyout={() => {
@@ -251,11 +250,10 @@ export function Integration(props: AvailableIntegrationProps) {
           }}
           loading={loading}
         />
-        <EuiSpacer />
         {IntegrationDetails({ integration })}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         {IntegrationScreenshots({ integration, http })}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <EuiTabs display="condensed" size="s">
           {renderTabs()}
         </EuiTabs>
@@ -263,7 +261,7 @@ export function Integration(props: AvailableIntegrationProps) {
         {selectedTabId === 'assets'
           ? IntegrationAssets({ integration, integrationAssets })
           : IntegrationFields({ integration, integrationMapping })}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
       </EuiPageBody>
       {modal}
     </EuiPage>

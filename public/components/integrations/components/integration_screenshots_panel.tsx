@@ -20,7 +20,7 @@ export function IntegrationScreenshots(props: any) {
       <EuiTitle>
         <h2>Screenshots</h2>
       </EuiTitle>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="l" alignItems="flexStart">
         {screenshots?.map((screenshot: { path: string; annotation?: string }) => {
           return (

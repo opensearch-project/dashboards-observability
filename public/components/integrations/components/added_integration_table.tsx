@@ -149,6 +149,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const search = {
     box: {
       incremental: true,
+      compressed: true,
     },
     filters: [
       {
@@ -177,7 +178,10 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
             },
           ]
         : []),
-    ],
+    ].map((filter) => ({
+      ...filter,
+      compressed: true,
+    })),
   };
 
   const entries = props.data.hits.map((integration) => {
