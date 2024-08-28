@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiSmallButton,
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,37 +18,44 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiSmallButton,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
+  EuiTitle
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ChromeBreadcrumb } from '../../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import {
   CREATE_NOTE_MESSAGE,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 import {
   DeleteNotebookModal,
   getCustomModal,
   getSampleNotebooksModal,
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
-import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
-import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface NoteTableProps {
   loading: boolean;
   fetchNotebooks: () => void;
-  addSampleNotebooks: () => void;
+  addSampleNotebooks: (dataSourceMDSId: string | undefined) => void;
   notebooks: NotebookType[];
   createNotebook: (newNoteName: string) => void;
   renameNotebook: (newNoteName: string, noteId: string) => void;
@@ -57,6 +63,11 @@ interface NoteTableProps {
   deleteNotebook: (noteList: string[], toastMessage?: string) => void;
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: SavedObjectsStart;
+  notifications: CoreStart['notifications'];
   // setToast: (title: string, color?: string, text?: string) => void;
 }
 
@@ -69,6 +80,10 @@ export function NoteTable({
   deleteNotebook,
   parentBreadcrumb,
   setBreadcrumbs,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
+  notifications,
 }: NoteTableProps) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
@@ -76,6 +91,7 @@ export function NoteTable({
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
+  const [_dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
 
   useEffect(() => {
     setNavBreadCrumbs(
@@ -154,11 +170,24 @@ export function NoteTable({
   };
 
   const addSampleNotebooksModal = async () => {
+    let selectedDataSourceId: string | undefined;
+    const handleSelectedDataSourceChange = (id?: string) => {
+      selectedDataSourceId = id;
+      setDataSourceMDSId(id);
+    };
     setModalLayout(
-      getSampleNotebooksModal(closeModal, async () => {
-        closeModal();
-        await addSampleNotebooks();
-      })
+      getSampleNotebooksModal(
+        closeModal,
+        async () => {
+          closeModal();
+          await addSampleNotebooks(selectedDataSourceId);
+        },
+        dataSourceEnabled,
+        dataSourceManagement,
+        savedObjectsMDSClient,
+        notifications,
+        handleSelectedDataSourceChange
+      )
     );
     showModal();
   };
