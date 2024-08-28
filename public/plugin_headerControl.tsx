@@ -21,7 +21,7 @@ export const HeaderControlledComponentsWrapper = ({
   const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
   const showActionsInHeader = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
-  const formattedBadgeContent = badgeContent ? `(${badgeContent})` : '';
+  const isBadgeReactElement = React.isValidElement(badgeContent);
 
   if (showActionsInHeader && HeaderControl) {
     return (
@@ -32,7 +32,11 @@ export const HeaderControlledComponentsWrapper = ({
             controls={[
               {
                 key: 'header-badge-control-left',
-                renderComponent: <span key="badge">{formattedBadgeContent}</span>,
+                renderComponent: isBadgeReactElement ? (
+                  <span key="badge">{badgeContent}</span>
+                ) : (
+                  <span key="badge">{`(${badgeContent})`}</span>
+                ), // Render based on type
               },
             ]}
           />

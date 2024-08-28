@@ -423,29 +423,29 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
   return (
     <EuiForm>
       <EuiText size="s">
-        <h1>Set Up Integration</h1>
+        <h2>Set Up Integration</h2>
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {setupCallout.show ? (
         <EuiCallOut title={setupCallout.title} color="danger">
           <p>{setupCallout.text}</p>
         </EuiCallOut>
       ) : null}
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiText>
         <h3>Integration Details</h3>
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <IntegrationDetailsInputs
         config={config}
         updateConfig={updateConfig}
         integration={integration}
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiText>
         <h3>Integration Connection</h3>
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <IntegrationConnectionInputs
         config={config}
         updateConfig={updateConfig}
@@ -459,7 +459,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
       />
       {config.connectionType === 's3' ? (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiText>
             <h3>Query Fields</h3>
           </EuiText>
@@ -471,7 +471,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
               </p>
             </EuiText>
           </EuiCompressedFormRow>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <IntegrationQueryInputs
             config={config}
             updateConfig={updateConfig}
@@ -479,7 +479,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
           />
           {integration.workflows ? (
             <>
-              <EuiSpacer />
+              <EuiSpacer size="s" />
               <EuiText>
                 <h3>Integration Resources</h3>
               </EuiText>
@@ -492,7 +492,7 @@ export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
                   </p>
                 </EuiText>
               </EuiCompressedFormRow>
-              <EuiSpacer />
+              <EuiSpacer size="s" />
               <IntegrationWorkflowsInputs
                 updateConfig={updateConfig}
                 integration={integration}

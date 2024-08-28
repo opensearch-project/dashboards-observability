@@ -28,6 +28,9 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
   coreRefs: {
     chrome: {
       setBreadcrumbs: jest.fn(),
+      navGroup: {
+        getNavGroupEnabled: jest.fn().mockReturnValue(false),
+      },
     },
     http: {
       get: jest.fn(),
