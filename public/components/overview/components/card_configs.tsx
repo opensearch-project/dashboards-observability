@@ -49,7 +49,7 @@ const METRICS_CONFIG: GettingStartedConfig = {
   id: 'metrics',
   order: 3,
   title: i18n.translate('observability.overview.card.metrics.title', {
-    defaultMessage: 'Metrics',
+    defaultMessage: 'Monitor system performance',
   }),
   description: 'Transform logs into actionable visualizations with metrics extraction.',
   footer: 'Metrics',
@@ -60,7 +60,7 @@ const TRACES_CONFIG: GettingStartedConfig = {
   id: 'traces',
   order: 4,
   title: i18n.translate('observability.overview.card.traces.title', {
-    defaultMessage: 'Traces',
+    defaultMessage: 'Facilitate issue diagnosis',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
   footer: 'Traces',
@@ -82,7 +82,7 @@ const ALERTS_CONFIG: GettingStartedConfig = {
   id: 'alerts',
   order: 6,
   title: i18n.translate('observability.overview.card.alerts.title', {
-    defaultMessage: 'Alerts',
+    defaultMessage: 'Get notified',
   }),
   description: 'Unveil performance bottlenecks with event flow visualization.',
   footer: 'Alerts',

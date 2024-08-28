@@ -50,10 +50,12 @@ export function DashboardControls(props: Props) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
-        <EuiText size="s">
-          <EuiLink onClick={() => redirectToDashboards('/view/' + props.dashboardId)}>
-            <h2>{props.dashboardTitle}</h2>
-          </EuiLink>
+        <EuiText size="s" className="obsOverviewDashboardHeader">
+          <p>
+            <EuiLink onClick={() => redirectToDashboards('/view/' + props.dashboardId)}>
+              {props.dashboardTitle}
+            </EuiLink>
+          </p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

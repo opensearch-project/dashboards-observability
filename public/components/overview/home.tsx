@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { coreRefs } from '../../framework/core_refs';
@@ -17,6 +17,7 @@ import { AddDashboardCallout } from './components/add_dashboard_callout';
 import { DashboardControls } from './components/dashboard_controls';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
+import './index.scss';
 
 // Plugin IDs
 const alertsPluginID = 'alerting';
@@ -146,11 +147,11 @@ export const Home = ({ ..._props }: HomeProps) => {
             onClick: () => navigateToApp(card.url, '#/'),
             getFooter: () => {
               return (
-                <EuiPanel color="subdued">
-                  <EuiText size="s" textAlign="center">
-                    {card.footer}
-                  </EuiText>
-                </EuiPanel>
+                // <EuiPanel color="subdued">
+                <EuiText size="s" textAlign="center">
+                  {card.footer}
+                </EuiText>
+                // </EuiPanel>
               );
             },
           }),

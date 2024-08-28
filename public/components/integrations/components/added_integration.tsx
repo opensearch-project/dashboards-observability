@@ -32,7 +32,7 @@ import { useToast } from '../../../../public/components/common/toast';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { AddedIntegrationProps } from './integration_types';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();

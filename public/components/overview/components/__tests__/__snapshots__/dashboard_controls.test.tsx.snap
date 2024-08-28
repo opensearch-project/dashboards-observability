@@ -24,23 +24,24 @@ exports[`Dashboard controls should render 1`] = `
           className="euiFlexItem"
         >
           <EuiText
+            className="obsOverviewDashboardHeader"
             size="s"
           >
             <div
-              className="euiText euiText--small"
+              className="euiText euiText--small obsOverviewDashboardHeader"
             >
-              <EuiLink
-                onClick={[Function]}
-              >
-                <button
-                  className="euiLink euiLink--primary"
-                  disabled={false}
+              <p>
+                <EuiLink
                   onClick={[Function]}
-                  type="button"
                 >
-                  <h2 />
-                </button>
-              </EuiLink>
+                  <button
+                    className="euiLink euiLink--primary"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  />
+                </EuiLink>
+              </p>
             </div>
           </EuiText>
         </div>

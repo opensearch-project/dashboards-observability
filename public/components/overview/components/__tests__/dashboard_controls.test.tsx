@@ -53,7 +53,7 @@ describe('Dashboard controls', () => {
     const mockDashboardTitle = 'my_dashboard';
     const wrapper = mountDashboardControls({ dashboardTitle: mockDashboardTitle });
     const title = wrapper
-      .find('h2')
+      .find('p')
       .filterWhere((node) => node.text() === mockDashboardTitle)
       .first();
     expect(title.exists()).toBe(true);
