@@ -63,12 +63,12 @@ export function Integration(props: AvailableIntegrationProps) {
         href: '#/',
       },
       {
-        text: integrationTemplateId,
+        text: integration.displayName || integration.name || '...',
         href: `#/available/${integrationTemplateId}`,
       },
     ]);
     handleDataRequest();
-  }, [integrationTemplateId]);
+  }, [integrationTemplateId, integration.name]);
 
   async function handleDataRequest() {
     // TODO fill in ID request here
