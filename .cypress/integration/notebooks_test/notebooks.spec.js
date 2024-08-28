@@ -135,7 +135,7 @@ describe('Testing paragraphs', () => {
     cy.get('a[data-test-subj="createNotebookPrimaryBtn"]').click();
     cy.get('input[data-test-subj="custom-input-modal-input"]').focus().type(TEST_NOTEBOOK);
     cy.get('button[data-test-subj="custom-input-modal-confirm-button"]').click();
-    cy.get('h3.euiTitle').contains(TEST_NOTEBOOK).should('exist');
+    cy.get('h3[data-test-subj="notebookTableTitle"]').contains(TEST_NOTEBOOK).should('exist');
   });
 
   beforeEach(() => {
@@ -166,7 +166,7 @@ describe('Testing paragraphs', () => {
 
   it('Has working breadcrumbs', () => {
     cy.get('a[data-test-subj="breadcrumb last"]').contains(TEST_NOTEBOOK).click();
-    cy.get('h3.euiTitle').contains(TEST_NOTEBOOK).should('exist');
+    cy.get('h3[data-test-subj="notebookTableTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('a[data-test-subj="breadcrumb"]').contains('Notebooks').click();
     cy.get('h3[data-test-subj="notebookTableTitle"]').should('exist');
     cy.get('a[data-test-subj="breadcrumb first"]').contains('Observability').click();
