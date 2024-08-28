@@ -13,13 +13,11 @@ exports[`<NoteTable /> spec renders the component 1`] = `
       <div
         class="euiPageHeaderSection"
       >
-        <div
-          class="euiText euiText--small"
+        <h3
+          class="euiTitle euiTitle--large"
         >
-          <h1>
-            Notebooks
-          </h1>
-        </div>
+          Notebooks
+        </h3>
       </div>
     </header>
     <div
@@ -56,7 +54,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks includes creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.
+              Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks include creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.
                
               <a
                 class="euiLink euiLink--primary"
@@ -90,46 +88,23 @@ exports[`<NoteTable /> spec renders the component 1`] = `
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <div
-                class="euiPopover euiPopover--anchorDownCenter"
+              <button
+                class="euiButton euiButton--primary euiButton--small"
+                data-test-subj="notebookEmptyTableAddSamplesBtn"
+                type="button"
               >
-                <div
-                  class="euiPopover__anchor"
+                <span
+                  class="euiButtonContent euiButton__content"
                 >
-                  <button
-                    class="euiButton euiButton--primary euiButton--small"
-                    data-test-subj="notebookTableActionBtn"
-                    type="button"
+                  <span
+                    class="euiButton__text"
                   >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fill-rule="non-zero"
-                        />
-                      </svg>
-                      <span
-                        class="euiButton__text"
-                      >
-                        Actions
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
+                    Add sample notebooks
+                  </span>
+                </span>
+              </button>
             </div>
             <div
               class="euiFlexItem"
@@ -143,6 +118,20 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                 <span
                   class="euiButtonContent euiButton__content"
                 >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8.25 3a.5.5 0 0 1 .5.5v3.75h3.75a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H8.75v3.75a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5V8.75H3.5a.5.5 0 0 1-.5-.5v-.5a.5.5 0 0 1 .5-.5h3.75V3.5a.5.5 0 0 1 .5-.5h.5Z"
+                    />
+                  </svg>
                   <span
                     class="euiButton__text"
                   >
@@ -154,42 +143,88 @@ exports[`<NoteTable /> spec renders the component 1`] = `
           </div>
         </div>
       </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-      />
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFlexItem"
         >
-          <input
-            class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
-            placeholder="Search notebook name"
-            type="search"
-            value=""
-          />
           <div
-            class="euiFormControlLayoutIcons"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
           >
-            <span
-              class="euiFormControlLayoutCustomIcon"
+            <div
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <input
+                class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                placeholder="Search notebook name"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
               >
-                <path
-                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                />
-              </svg>
-            </span>
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              class="euiPopover__anchor"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--small"
+                data-test-subj="notebookTableActionBtn"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                  <span
+                    class="euiButton__text"
+                  >
+                    Actions
+                  </span>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -250,7 +285,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                            class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                             focusable="false"
                             height="16"
                             role="img"
@@ -259,8 +294,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                              fill-rule="non-zero"
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                             />
                           </svg>
                           <span
@@ -805,7 +839,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <svg
                         aria-hidden="true"
-                        class="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                        class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                         focusable="false"
                         height="16"
                         role="img"
@@ -814,8 +848,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                          fill-rule="non-zero"
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                         />
                       </svg>
                       <span
@@ -930,13 +963,11 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
       <div
         class="euiPageHeaderSection"
       >
-        <div
-          class="euiText euiText--small"
+        <h3
+          class="euiTitle euiTitle--large"
         >
-          <h1>
-            Notebooks
-          </h1>
-        </div>
+          Notebooks
+        </h3>
       </div>
     </header>
     <div
@@ -973,7 +1004,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks includes creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.
+              Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks include creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.
                
               <a
                 class="euiLink euiLink--primary"
@@ -1008,45 +1039,23 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <div
-                class="euiPopover euiPopover--anchorDownCenter"
+              <button
+                class="euiButton euiButton--primary euiButton--small"
+                data-test-subj="notebookEmptyTableAddSamplesBtn"
+                type="button"
               >
-                <div
-                  class="euiPopover__anchor"
+                <span
+                  class="euiButtonContent euiButton__content"
                 >
-                  <button
-                    class="euiButton euiButton--primary euiButton--small"
-                    data-test-subj="notebookTableActionBtn"
-                    type="button"
+                  <span
+                    class="euiButton__text"
                   >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                      <span
-                        class="euiButton__text"
-                      >
-                        Actions
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
+                    Add sample notebooks
+                  </span>
+                </span>
+              </button>
             </div>
             <div
               class="euiFlexItem"
@@ -1060,6 +1069,20 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
                 <span
                   class="euiButtonContent euiButton__content"
                 >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
                   <span
                     class="euiButton__text"
                   >
@@ -1071,9 +1094,6 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
           </div>
         </div>
       </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-      />
       <div
         class="euiSpacer euiSpacer--xxl"
       />
@@ -1121,6 +1141,20 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
             <span
               class="euiButtonContent euiButton__content"
             >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
               <span
                 class="euiButton__text"
               >
@@ -1143,7 +1177,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
               <span
                 class="euiButton__text"
               >
-                Add samples
+                Add sample notebooks
               </span>
             </span>
           </button>
