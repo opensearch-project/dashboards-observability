@@ -13,14 +13,14 @@ const labels = new Map([
 ]);
 
 export function DataSourcePicker(props: {
-  modes: {
+  modes: Array<{
     id: string;
     title: string;
-  }[];
+  }>;
   selectedMode: TraceAnalyticsMode;
   setMode: (mode: TraceAnalyticsMode) => void;
 }) {
-  const { modes, selectedMode, setMode } = props;
+  const { modes = [], selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const trigger = {
@@ -70,10 +70,10 @@ export function DataSourcePicker(props: {
               key: x.id,
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
-              "data-test-subj": x.id + '-mode',
+              'data-test-subj': x.id + '-mode',
             }))}
             onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
+              const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
                 label: string;
                 key: TraceAnalyticsMode;

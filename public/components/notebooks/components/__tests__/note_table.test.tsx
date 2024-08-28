@@ -4,7 +4,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
@@ -62,8 +62,7 @@ describe('<NoteTable /> spec', () => {
     const utils = renderNoteTable({ notebooks });
     expect(utils.container.firstChild).toMatchSnapshot();
 
-    fireEvent.click(utils.getByText('Actions'));
-    fireEvent.click(utils.getByText('Add samples'));
+    fireEvent.click(utils.getByText('Add sample notebooks'));
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
     fireEvent.click(utils.getByText('Actions'));
     fireEvent.click(utils.getByText('Delete'));
@@ -155,38 +154,19 @@ describe('<NoteTable /> spec', () => {
   });
 
   it('adds sample notebooks', async () => {
-    const { getByText, getAllByText, getByTestId } = renderNoteTable({ notebooks: [] });
+    const { getAllByText, getByTestId } = renderNoteTable({ notebooks: [] });
 
-    // Open Actions dropdown and click Add samples
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getAllByText('Add samples')[0]);
+    // Add samples
+    fireEvent.click(getAllByText('Add sample notebooks')[0]);
 
     // Ensure the modal is open (you may need to adjust based on your modal implementation)
-    expect(getAllByText('Add sample notebooks')).toHaveLength(1);
+    expect(getAllByText('Add sample notebooks')).toHaveLength(3);
 
     // Mock user confirmation and submit
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
     // Assert that the addSampleNotebooks function is called
     expect(props.addSampleNotebooks).toHaveBeenCalledTimes(1);
-  });
-
-  it('closes the action panel', async () => {
-    const { getByText, queryByTestId } = renderNoteTable({ notebooks: [] });
-    expect(queryByTestId('renameNotebookBtn')).not.toBeInTheDocument();
-
-    // Open Actions dropdown
-    fireEvent.click(getByText('Actions'));
-
-    // Ensure the action panel is open
-    expect(queryByTestId('deleteNotebookBtn')).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(getByText('Actions'));
-    });
-
-    // Ensure the action panel is closed
-    expect(queryByTestId('deleteNotebookBtn')).not.toBeInTheDocument();
   });
 
   it('closes the delete modal', () => {

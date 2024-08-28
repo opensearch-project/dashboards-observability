@@ -71,19 +71,23 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               <div
                                 className="euiText euiText--small"
                               >
-                                <h1>
+                                <h2>
                                   Set Up Integration
-                                </h1>
+                                </h2>
                               </div>
                             </EuiText>
-                            <EuiSpacer>
+                            <EuiSpacer
+                              size="s"
+                            >
                               <div
-                                className="euiSpacer euiSpacer--l"
+                                className="euiSpacer euiSpacer--s"
                               />
                             </EuiSpacer>
-                            <EuiSpacer>
+                            <EuiSpacer
+                              size="s"
+                            >
                               <div
-                                className="euiSpacer euiSpacer--l"
+                                className="euiSpacer euiSpacer--s"
                               />
                             </EuiSpacer>
                             <EuiText>
@@ -95,9 +99,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 </h3>
                               </div>
                             </EuiText>
-                            <EuiSpacer>
+                            <EuiSpacer
+                              size="s"
+                            >
                               <div
-                                className="euiSpacer euiSpacer--l"
+                                className="euiSpacer euiSpacer--s"
                               />
                             </EuiSpacer>
                             <IntegrationDetailsInputs
@@ -225,9 +231,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 </div>
                               </EuiCompressedFormRow>
                             </IntegrationDetailsInputs>
-                            <EuiSpacer>
+                            <EuiSpacer
+                              size="s"
+                            >
                               <div
-                                className="euiSpacer euiSpacer--l"
+                                className="euiSpacer euiSpacer--s"
                               />
                             </EuiSpacer>
                             <EuiText>
@@ -239,9 +247,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 </h3>
                               </div>
                             </EuiText>
-                            <EuiSpacer>
+                            <EuiSpacer
+                              size="s"
+                            >
                               <div
-                                className="euiSpacer euiSpacer--l"
+                                className="euiSpacer euiSpacer--s"
                               />
                             </EuiSpacer>
                             <IntegrationConnectionInputs
