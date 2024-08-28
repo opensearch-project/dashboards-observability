@@ -133,40 +133,45 @@ export const ParaInput = (props: {
     return (
       <>
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={6}>
-            <EuiCompressedFormRow label="Title" fullWidth>
-              <EuiCompressedComboBox
-                placeholder="Find visualization"
-                singleSelection={{ asPlainText: true }}
-                options={props.visOptions}
-                selectedOptions={props.selectedVisOption}
-                onChange={(newOption: EuiComboBoxOptionOption[]) => {
-                  if (newOption.length > 0) props.setVisType(newOption[0].className);
-                  props.setSelectedVisOption(newOption);
-                  props.setIsOutputStale(true);
-                }}
-              />
-            </EuiCompressedFormRow>
+          <EuiFlexItem grow={false} style={{ minWidth: '500px' }}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+              <EuiFlexItem grow={true}>
+                <EuiCompressedFormRow label="Title" fullWidth>
+                  <EuiCompressedComboBox
+                    placeholder="Find visualization"
+                    singleSelection={{ asPlainText: true }}
+                    options={props.visOptions}
+                    selectedOptions={props.selectedVisOption}
+                    onChange={(newOption: EuiComboBoxOptionOption[]) => {
+                      if (newOption.length > 0) props.setVisType(newOption[0].className);
+                      props.setSelectedVisOption(newOption);
+                      props.setIsOutputStale(true);
+                    }}
+                  />
+                </EuiCompressedFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  data-test-subj="para-input-visualization-browse-button"
+                  onClick={() => {
+                    setSelectableOptions([
+                      ...props.visOptions[0].options,
+                      ...props.visOptions[1].options,
+                    ]);
+                    setSelectableError(false);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Browse
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
-              data-test-subj="para-input-visualization-browse-button"
-              onClick={() => {
-                setSelectableOptions([
-                  ...props.visOptions[0].options,
-                  ...props.visOptions[1].options,
-                ]);
-                setSelectableError(false);
-                setIsModalOpen(true);
-              }}
-            >
-              Browse
-            </EuiSmallButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2} />
-          <EuiFlexItem grow={9}>
             <EuiCompressedFormRow label="Date range" fullWidth>
               <EuiSuperDatePicker
+                compressed
                 start={props.startTime}
                 end={props.endTime}
                 showUpdateButton={false}
@@ -179,9 +184,7 @@ export const ParaInput = (props: {
               />
             </EuiCompressedFormRow>
           </EuiFlexItem>
-          <EuiFlexItem />
         </EuiFlexGroup>
-
         {isModalOpen && (
           <EuiOverlayMask>
             <EuiModal onClose={() => setIsModalOpen(false)} style={{ width: 500 }}>
