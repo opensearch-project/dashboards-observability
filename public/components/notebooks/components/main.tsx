@@ -298,7 +298,7 @@ export class Main extends React.Component<MainProps, MainState> {
         console.error(err.body.message);
       });
   };
-  addSampleNotebooks = async (dataSourceMDSId?: string) => {
+  addSampleNotebooks = async (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => {
     try {
       this.setState({ loading: true });
       const flights = await this.props.http
@@ -357,7 +357,7 @@ export class Main extends React.Component<MainProps, MainState> {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Logs] Response Codes Over Time + Annotations',
+            search: `[Logs] Response Codes Over Time + Annotations_${dataSourceMDSLabel}`,
           },
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));
@@ -366,7 +366,7 @@ export class Main extends React.Component<MainProps, MainState> {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Logs] Unique Visitors vs. Average Bytes',
+            search: `[Logs] Unique Visitors vs. Average Bytes_${dataSourceMDSLabel}`,
           },
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));
@@ -375,7 +375,7 @@ export class Main extends React.Component<MainProps, MainState> {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Flights] Flight Count and Average Ticket Price',
+            search: `[Flights] Flight Count and Average Ticket Price_${dataSourceMDSLabel}`,
           },
         })
         .then((resp) => visIds.push(resp.saved_objects[0].id));

@@ -55,7 +55,10 @@ const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 interface NoteTableProps {
   loading: boolean;
   fetchNotebooks: () => void;
-  addSampleNotebooks: (dataSourceMDSId: string | undefined) => void;
+  addSampleNotebooks: (
+    dataSourceMDSId: string | undefined,
+    dataSourceLabel: string | undefined
+  ) => void;
   notebooks: NotebookType[];
   createNotebook: (newNoteName: string) => void;
   renameNotebook: (newNoteName: string, noteId: string) => void;
@@ -92,6 +95,7 @@ export function NoteTable({
   const location = useLocation();
   const history = useHistory();
   const [_dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
+  const [_dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
 
   useEffect(() => {
     setNavBreadCrumbs(
@@ -171,16 +175,20 @@ export function NoteTable({
 
   const addSampleNotebooksModal = async () => {
     let selectedDataSourceId: string | undefined;
-    const handleSelectedDataSourceChange = (id?: string) => {
+    let selectedDataSourceLabel: string | undefined;
+    const handleSelectedDataSourceChange = (id?: string, label?: string) => {
       selectedDataSourceId = id;
+      selectedDataSourceLabel = label;
       setDataSourceMDSId(id);
+      setDataSourceMDSLabel(label);
     };
     setModalLayout(
       getSampleNotebooksModal(
         closeModal,
         async () => {
+          console.log(selectedDataSourceId, selectedDataSourceLabel);
           closeModal();
-          await addSampleNotebooks(selectedDataSourceId);
+          await addSampleNotebooks(selectedDataSourceId, selectedDataSourceLabel);
         },
         dataSourceEnabled,
         dataSourceManagement,
