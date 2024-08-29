@@ -147,11 +147,9 @@ export const Home = ({ ..._props }: HomeProps) => {
             onClick: () => navigateToApp(card.url, '#/'),
             getFooter: () => {
               return (
-                // <EuiPanel color="subdued">
                 <EuiText size="s" textAlign="center">
                   {card.footer}
                 </EuiText>
-                // </EuiPanel>
               );
             },
           }),
