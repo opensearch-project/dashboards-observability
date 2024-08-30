@@ -357,28 +357,70 @@ export class Main extends React.Component<MainProps, MainState> {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: `[Logs] Response Codes Over Time + Annotations_${dataSourceMDSLabel}`,
+            search:
+              `[Logs] Response Codes Over Time + Annotations` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Logs] Response Codes Over Time + Annotations_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: `[Logs] Unique Visitors vs. Average Bytes_${dataSourceMDSLabel}`,
+            search:
+              `[Logs] Unique Visitors vs. Average Bytes` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Logs] Unique Visitors vs. Average Bytes_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: `[Flights] Flight Count and Average Ticket Price_${dataSourceMDSLabel}`,
+            search:
+              `[Flights] Flight Count and Average Ticket Price` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Flights] Flight Count and Average Ticket Price_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`, {
           body: JSON.stringify({ visIds }),
