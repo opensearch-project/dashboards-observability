@@ -81,11 +81,12 @@ export function AppTable(props: AppTableProps) {
           text: 'Applications',
           href: '#/',
         },
-      ]
+      ],
+      applications.length
     );
     clear();
     fetchApplications();
-  }, []);
+  }, [applications.length]);
 
   const clear = () => {
     setFilters([]);
@@ -256,7 +257,6 @@ export function AppTable(props: AppTableProps) {
                         {createButtonText}
                       </EuiSmallButton>,
                     ]}
-                    badgeContent={applications.length}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

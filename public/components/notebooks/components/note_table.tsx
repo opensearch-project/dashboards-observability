@@ -5,8 +5,6 @@
 
 import {
   EuiSmallButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +19,6 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPopover,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -29,7 +26,7 @@ import {
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import moment from 'moment';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 import {
@@ -75,7 +72,6 @@ export function NoteTable({
 }: NoteTableProps) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedNotebooks, setSelectedNotebooks] = useState<NotebookType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
@@ -89,10 +85,11 @@ export function NoteTable({
           text: 'Notebooks',
           href: '#/',
         },
-      ]
+      ],
+      notebooks.length
     );
     fetchNotebooks();
-  }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
+  }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks, notebooks.length]);
 
   useEffect(() => {
     const url = window.location.hash.split('/');
@@ -166,31 +163,6 @@ export function NoteTable({
     showModal();
   };
 
-  const popoverButton = (
-    <EuiSmallButton
-      data-test-subj="notebookTableActionBtn"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
-    >
-      Actions
-    </EuiSmallButton>
-  );
-
-  const popoverItems: ReactElement[] = [
-    <EuiContextMenuItem
-      key="delete"
-      disabled={notebooks.length === 0 || selectedNotebooks.length === 0}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        deleteNote();
-      }}
-      data-test-subj="deleteNotebookBtn"
-    >
-      Delete
-    </EuiContextMenuItem>,
-  ];
-
   const tableColumns = [
     {
       field: 'path',
@@ -238,7 +210,6 @@ export function NoteTable({
           <EuiPageContent id="notebookArea">
             {newNavigation ? (
               <HeaderControlledComponentsWrapper
-                badgeContent={notebooks.length > 0 ? notebooks.length : '0'}
                 description={
                   <>
                     Use Notebooks to interactively and collaboratively develop rich reports backed
@@ -323,6 +294,19 @@ export function NoteTable({
             {notebooks.length > 0 ? (
               <>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    {selectedNotebooks.length > 0 && (
+                      <EuiSmallButton
+                        color="danger"
+                        iconType="trash"
+                        onClick={deleteNote}
+                        data-test-subj="deleteSelectedNotebooks"
+                      >
+                        Delete {selectedNotebooks.length} notebook
+                        {selectedNotebooks.length > 1 ? 's' : ''}
+                      </EuiSmallButton>
+                    )}
+                  </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiCompressedFieldSearch
                       fullWidth
@@ -330,16 +314,6 @@ export function NoteTable({
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems} size="s" />
-                    </EuiPopover>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
