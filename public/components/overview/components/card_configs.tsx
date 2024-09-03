@@ -84,8 +84,8 @@ const ALERTS_CONFIG: GettingStartedConfig = {
   title: i18n.translate('observability.overview.card.alerts.title', {
     defaultMessage: 'Get notified',
   }),
-  description: 'Unveil performance bottlenecks with event flow visualization.',
-  footer: 'Alerts',
+  description: 'Receive timely notifications with customizable alert triggers.',
+  footer: 'Alerting',
   url: alertsURL,
 };
 
@@ -93,9 +93,9 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
   id: 'anomaly',
   order: 7,
   title: i18n.translate('observability.overview.card.anomaly.title', {
-    defaultMessage: 'Anomaly Detection',
+    defaultMessage: 'Detect anomalies in your data',
   }),
-  description: 'Unveil performance bottlenecks with event flow visualization.',
+  description: 'Near real-time detection using the Random Cut Forest (RFC) algorithm.',
   footer: 'Anomaly Detection',
   url: anomalyDetectionURL,
 };

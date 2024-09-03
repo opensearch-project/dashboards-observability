@@ -4,14 +4,13 @@
  */
 
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSelectable,
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiText,
@@ -31,26 +30,36 @@ export interface Props {
 
 export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, reloadPage }: Props) {
   const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
-  const [selectedOptionsState, setSelectedOptionsState] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [buttonIsActive, setButtonIsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setToast } = useToast();
 
-  const onComboBoxChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
-    if (options.length > 0) {
-      setButtonIsActive(options[0].value !== selectedId);
+  const [options, setOptions] = useState(
+    Object.keys(dashboardsSavedObjects).map((key) => ({
+      label: dashboardsSavedObjects[key].label,
+      key,
+      checked: undefined,
+    }))
+  );
+
+  const onSelectionChange = (
+    newOptions: Array<{ label: string; key?: string; checked?: 'on' | undefined }>
+  ) => {
+    setOptions(newOptions);
+    const selectedOption = newOptions.find((option) => option.checked === 'on');
+    if (selectedOption) {
+      setButtonIsActive(selectedOption.key !== selectedId);
     }
-    setSelectedOptionsState(options);
   };
 
   const onClickAdd = async () => {
-    if (selectedOptionsState.length > 0) {
+    const selectedOption = options.find((option) => option.checked === 'on');
+    if (selectedOption && selectedOption.key) {
       setIsLoading(true);
       ObsDashboardStateManager.isDashboardSelected$.next(true);
-      setObservabilityDashboardsId(selectedOptionsState[0].value ?? null).then(reloadPage);
+      await setObservabilityDashboardsId(selectedOption.key);
+      reloadPage();
       setIsLoading(false);
       closeFlyout();
     } else {
@@ -59,28 +68,15 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
   };
 
   useEffect(() => {
-    setSelectedId(getObservabilityDashboardsId());
-  }, []);
-
-  const options: Array<EuiComboBoxOptionOption<string>> = Object.keys(dashboardsSavedObjects).map(
-    (key) => ({
-      value: key,
+    const currentSelectedId = getObservabilityDashboardsId();
+    setSelectedId(currentSelectedId);
+    const optionsArray = Object.keys(dashboardsSavedObjects).map((key) => ({
       label: dashboardsSavedObjects[key].label,
-    })
-  );
-
-  useEffect(() => {
-    if (selectedId) {
-      const currentTitle: EuiComboBoxOptionOption<string> = {
-        value: selectedId,
-        label: dashboardsSavedObjects[selectedId].label,
-      };
-      if (currentTitle) {
-        setSelectedOptionsState([currentTitle]);
-        setButtonIsActive(false);
-      }
-    }
-  }, [selectedId]);
+      key,
+      checked: key === currentSelectedId ? 'on' : undefined,
+    }));
+    setOptions(optionsArray);
+  }, [dashboardsSavedObjects]);
 
   return (
     <EuiFlyout onClose={closeFlyout} size="s">
@@ -89,14 +85,25 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
           <h2>{selectedId ? 'Replace Dashboard' : 'Select Dashboard'}</h2>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiComboBox
-          placeholder="Search"
-          singleSelection={{ asPlainText: true }}
+      <EuiFlyoutBody className="selectable-flyout-body">
+        <EuiSelectable
+          searchable
+          searchProps={{
+            placeholder: 'Search for a dashboard...',
+          }}
+          singleSelection="always"
           options={options}
-          selectedOptions={selectedOptionsState}
-          onChange={onComboBoxChange}
-        />
+          onChange={onSelectionChange}
+          listProps={{ bordered: false }}
+          height="full"
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">

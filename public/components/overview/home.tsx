@@ -34,8 +34,9 @@ export const Home = () => {
     let alertsPluginExists = false;
     let anomalyPluginExists = false;
     try {
-      coreRefs.http?.get('/api/status').then((res) => {
-        for (const status of res!.status.statuses) {
+      const res = await coreRefs.http?.get('/api/status');
+      if (res) {
+        for (const status of res.status.statuses) {
           if (status.id.includes(alertsPluginID)) {
             alertsPluginExists = true;
           }
@@ -43,7 +44,7 @@ export const Home = () => {
             anomalyPluginExists = true;
           }
         }
-      });
+      }
     } catch (error) {
       console.error('Error checking plugin installation status:', error);
     }
