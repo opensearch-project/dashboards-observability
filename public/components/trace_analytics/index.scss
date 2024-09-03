@@ -80,3 +80,8 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
     text-overflow: ellipsis;
   }
 }
+
+.popOverContainer {
+  width: 10vw;
+  min-width: 250px;
+}

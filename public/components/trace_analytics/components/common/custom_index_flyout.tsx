@@ -77,8 +77,11 @@ export const CustomIndexFlyout = ({
       <p>
         This feature is experimental, all indices added here should adhere to data prepper index
         mappings. For more information on mappings, visit{' '}
-        <EuiLink href="https://github.com/opensearch-project/data-prepper/tree/main/docs/schemas/trace-analytics">
-          documentation
+        <EuiLink
+          href="https://github.com/opensearch-project/data-prepper/tree/main/docs/schemas/trace-analytics"
+          target="_blank"
+        >
+          schema documentation
         </EuiLink>
         .
       </p>

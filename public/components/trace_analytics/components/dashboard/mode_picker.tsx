@@ -4,11 +4,16 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSmallButton,
   EuiSmallButtonEmpty,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
@@ -102,14 +107,25 @@ export function DataSourcePicker(props: {
               </>
             )}
           </EuiSelectable>
-          <EuiSmallButton
-            onClick={() => {
-              setIsFlyoutVisible(true);
-              setPopoverIsOpen(false);
-            }}
-          >
-            Manage custom trace indices
-          </EuiSmallButton>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSmallButton
+                onClick={() => {
+                  setIsFlyoutVisible(true);
+                  setPopoverIsOpen(false);
+                }}
+              >
+                Manage custom trace indices
+              </EuiSmallButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiToolTip content="Custom trace indices is an experimental feature">
+                  <EuiIcon type="iInCircle" />
+                </EuiToolTip>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       </EuiPopover>
       <CustomIndexFlyout
