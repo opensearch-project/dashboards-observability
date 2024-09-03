@@ -9,9 +9,9 @@ import {
   observabilityMetricsID,
   observabilityTracesNewNavURL,
   observabilityServicesNewNavURL,
-  alertsID,
-  anomalyDetectionID,
-  discoverID,
+  alertingPluginID,
+  anomalyDetectionPluginID,
+  discoverPluginID,
 } from '../../../../common/constants/shared';
 
 export interface GettingStartedConfig {
@@ -42,7 +42,7 @@ const DISCOVER_CONFIG: GettingStartedConfig = {
   }),
   description: 'Uncover insights with raw data exploration.',
   footer: 'Discover',
-  url: discoverID,
+  url: discoverPluginID,
 };
 
 const METRICS_CONFIG: GettingStartedConfig = {
@@ -86,7 +86,7 @@ const ALERTS_CONFIG: GettingStartedConfig = {
   }),
   description: 'Receive timely notifications by configuring alert triggers.',
   footer: 'Alerting',
-  url: alertsID,
+  url: alertingPluginID,
 };
 
 const ANOMALY_CONFIG: GettingStartedConfig = {
@@ -97,7 +97,7 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
   }),
   description: 'Gain near real-time anomaly detection using the Random Cut Forest (RCF) algorithm.',
   footer: 'Anomaly Detection',
-  url: anomalyDetectionID,
+  url: anomalyDetectionPluginID,
 };
 
 export const cardConfigs = [

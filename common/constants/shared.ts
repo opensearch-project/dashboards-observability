@@ -88,9 +88,9 @@ export const observabilityDataConnectionsPluginOrder = 9030;
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
 export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 
-export const alertsID = 'alerting';
-export const anomalyDetectionID = 'anomaly-detection-dashboards';
-export const discoverID = 'data-explorer/discover';
+export const alertingPluginID = 'alerting';
+export const anomalyDetectionPluginID = 'anomaly-detection-dashboards';
+export const discoverPluginID = 'data-explorer/discover';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
