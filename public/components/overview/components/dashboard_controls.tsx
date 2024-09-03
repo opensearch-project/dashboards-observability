@@ -13,67 +13,22 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/date_picker/super_date_picker/super_date_picker';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useObservable } from 'react-use';
 import { coreRefs } from '../../../framework/core_refs';
 import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
 import { redirectToDashboards } from '../../getting_started/components/utils';
 import { AddDashboardCallout } from './add_dashboard_callout';
-import { ObservabilityDashboardManager } from './register_dashboards_controls';
+import { ObsDashboardStateManager } from './register_dashboards_controls';
 
-export interface Props {
-  // isDashboardSelected: boolean;
-  // dashboardState: DashboardState;
-  // setDashboardState: React.Dispatch<React.SetStateAction<DashboardState>>;
-  // showFlyout: () => void;
-}
-
-export function DashboardControls({}: // isDashboardSelected,
-// dashboardState,
-// setDashboardState,
-// showFlyout,
-Props) {
-  // const isDashboardSelected = ObservabilityDashboardManager.getIsDashboardSelected();
-  // const dashboardState = ObservabilityDashboardManager.getDashboardState();
-  // const setDashboardState = ObservabilityDashboardManager.setDashboardState;
-  // const showFlyout = ObservabilityDashboardManager.getShowFlyout();
-
-  // const [isDashboardSelected, setIsDashboardSelected] = useState(false);
-  // const [dashboardState, setDashboardState] = useState<DashboardState>({} as DashboardState);
-  // const [showFlyout, setShowFlyout] = useState(() => () => {});
-
-  // useEffect(() => {
-  //   const subscription1 = ObservabilityDashboardManager.isDashboardSelected$.subscribe(
-  //     setIsDashboardSelected
-  //   );
-
-  //   const subscription2 = ObservabilityDashboardManager.dashboardState$.subscribe(
-  //     setDashboardState
-  //   );
-
-  //   const subscription3 = ObservabilityDashboardManager.showFlyout$.subscribe(setShowFlyout);
-  //   return () => {
-  //     subscription1.unsubscribe();
-  //     subscription2.unsubscribe();
-  //     subscription3.unsubscribe();
-  //   };
-  // }, []);
-
-  const isDashboardSelected = useObservable(ObservabilityDashboardManager.isDashboardSelected$);
-  const dashboardState = useObservable(ObservabilityDashboardManager.dashboardState$);
-  const showFlyout = useObservable(ObservabilityDashboardManager.showFlyout$);
-
-  useEffect(() => {
-    console.log('rendered controls ');
-  }, []);
-
-  useEffect(() => {
-    console.log('Props changed:', { dashboardState, isDashboardSelected });
-  }, [dashboardState, isDashboardSelected]);
+export function DashboardControls() {
+  const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
+  const dashboardState = useObservable(ObsDashboardStateManager.dashboardState$);
+  const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);
 
   const onTimeChange = (onTimeChangeProps: OnTimeChangeProps) => {
-    ObservabilityDashboardManager.dashboardState$.next({
-      ...dashboardState,
+    ObsDashboardStateManager.dashboardState$.next({
+      ...dashboardState!,
       startDate: onTimeChangeProps.start,
       endDate: onTimeChangeProps.end,
     });
@@ -97,8 +52,8 @@ Props) {
       <EuiFlexItem grow={true}>
         <EuiText size="s" className="obsOverviewDashboardHeader">
           <p>
-            <EuiLink onClick={() => redirectToDashboards('/view/' + dashboardState.dashboardId)}>
-              {dashboardState.dashboardTitle}
+            <EuiLink onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}>
+              {dashboardState?.dashboardTitle}
             </EuiLink>
           </p>
         </EuiText>
@@ -107,8 +62,8 @@ Props) {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={dashboardState.startDate}
-              end={dashboardState.endDate}
+              start={dashboardState?.startDate}
+              end={dashboardState?.endDate}
               onTimeChange={onTimeChange}
               compressed
             />

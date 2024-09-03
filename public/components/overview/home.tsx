@@ -7,65 +7,24 @@ import { EuiText } from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
+import { DashboardSavedObjectsType } from '../../../common/types/overview';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../framework/core_refs';
 import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
 import { cardConfigs, GettingStartedConfig } from './components/card_configs';
 import { DashboardControls } from './components/dashboard_controls';
-import { ObservabilityDashboardManager } from './components/register_dashboards_controls';
+import { ObsDashboardStateManager } from './components/register_dashboards_controls';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './components/utils';
 import './index.scss';
 
-export interface DashboardDictionary {
-  [key: string]: {
-    value: string;
-    label: string;
-    startDate: string;
-    endDate: string;
-  };
-}
-
 export const Home = () => {
   const [homePage, setHomePage] = useState<ReactNode>(<></>);
-  const [dashboardsSavedObjects, setDashboardsSavedObjects] = useState<DashboardDictionary>({});
+  const [dashboardsSavedObjects, setDashboardsSavedObjects] = useState<DashboardSavedObjectsType>(
+    {}
+  );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  // const [isDashboardSelected, setIsDashboardSelected] = useState(
-  //   getObservabilityDashboardsId() ? true : false
-  // );
-  // const [dashboardState, setDashboardState] = useState<DashboardState>({
-  //   startDate: '',
-  //   endDate: '',
-  //   dashboardTitle: '',
-  //   dashboardId: '',
-  // });
-  // const showFlyout = () => setIsFlyoutVisible(true);
-  // const setDashboardState = ObservabilityDashboardManager.setDashboardState;
-  // const setIsDashboardSelected = ObservabilityDashboardManager.setIsDashboardSelected;
-  // ObservabilityDashboardManager.setShowFlyout(() => setIsFlyoutVisible(true));
-
-  // const [isDashboardSelected, setIsDashboardSelected] = useState(false);
-  // const [dashboardState, setDashboardState] = useState<DashboardState>({} as DashboardState);
-  // const [showFlyout, setShowFlyout] = useState(() => () => {});
-
-  // useEffect(() => {
-  //   const subscription1 = ObservabilityDashboardManager.isDashboardSelected$.subscribe(
-  //     setIsDashboardSelected
-  //   );
-
-  //   const subscription2 = ObservabilityDashboardManager.dashboardState$.subscribe(
-  //     setDashboardState
-  //   );
-
-  //   const subscription3 = ObservabilityDashboardManager.showFlyout$.subscribe(setShowFlyout);
-  //   return () => {
-  //     subscription1.unsubscribe();
-  //     subscription2.unsubscribe();
-  //     subscription3.unsubscribe();
-  //   };
-  // }, []);
-
-  ObservabilityDashboardManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
+  ObsDashboardStateManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
 
   const loadHomePage = () => {
     setHomePage(coreRefs.contentManagement?.renderPage(HOME_PAGE_ID));
@@ -144,53 +103,11 @@ export const Home = () => {
         id: 'dashboards_controls',
         kind: 'custom',
         order: 1000,
-        render: () => (
-          <DashboardControls
-          // isDashboardSelected={isDashboardSelected}
-          // dashboardState={dashboardState}
-          // setDashboardState={setDashboardState}
-          // showFlyout={showFlyout}
-          />
-        ),
+        render: () => <DashboardControls />,
       }),
       getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
     });
   };
-  // const registerDashboard = () => {
-  //   coreRefs.contentManagement?.registerContentProvider({
-  //     id: 'dashboard_content',
-  //     getContent: () => ({
-  //       id: 'dashboard_content',
-  //       kind: 'dashboard',
-  //       order: 1000,
-  //       input: {
-  //         kind: 'dynamic',
-  //         get: () => Promise.resolve(getObservabilityDashboardsId()),
-  //       },
-  //     }),
-  //     getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
-  //   });
-
-  //   const defaultDashboard = getObservabilityDashboardsId();
-  //   console.log('defaultDashboard: ', defaultDashboard);
-  //   console.log('dashboardsSavedObjects: ', dashboardsSavedObjects);
-  //   console.log(
-  //     'dashboardsSavedObjects[defaultDashboard]: ',
-  //     dashboardsSavedObjects[defaultDashboard]
-  //   );
-  //   if (dashboardsSavedObjects && defaultDashboard && dashboardsSavedObjects[defaultDashboard]) {
-  //     setDashboardState({
-  //       dashboardTitle: dashboardsSavedObjects[defaultDashboard].label,
-  //       dashboardId: defaultDashboard,
-  //       startDate: dashboardsSavedObjects[defaultDashboard].startDate,
-  //       endDate: dashboardsSavedObjects[defaultDashboard].endDate,
-  //     });
-  //     setIsDashboardSelected(true);
-  //   } else {
-  //     console.log('register dashboard false');
-  //     setIsDashboardSelected(false);
-  //   }
-  // };
 
   const loadDashboardsState = () => {
     coreRefs.savedObjectsClient
@@ -212,96 +129,48 @@ export const Home = () => {
             endDate: dashboardAttributes.timeTo,
           };
           return acc;
-        }, {} as DashboardDictionary);
+        }, {} as DashboardSavedObjectsType);
 
         setDashboardsSavedObjects(savedDashboards);
         const defaultDashboard = getObservabilityDashboardsId();
 
         if (defaultDashboard in savedDashboards) {
-          // setDashboardState({
-          //   dashboardTitle: savedDashboards[defaultDashboard].label,
-          //   dashboardId: defaultDashboard,
-          //   startDate: savedDashboards[defaultDashboard].startDate ?? 'now-7d',
-          //   endDate: savedDashboards[defaultDashboard].endDate ?? 'now',
-          // });
-          // setIsDashboardSelected(true);
-          ObservabilityDashboardManager.dashboardState$.next({
+          ObsDashboardStateManager.dashboardState$.next({
             dashboardTitle: savedDashboards[defaultDashboard].label,
             dashboardId: defaultDashboard,
             startDate: savedDashboards[defaultDashboard].startDate ?? 'now-7d',
             endDate: savedDashboards[defaultDashboard].endDate ?? 'now',
           });
-          ObservabilityDashboardManager.isDashboardSelected$.next(true);
-          console.log('updated dashboard state');
+          ObsDashboardStateManager.isDashboardSelected$.next(true);
         } else {
           setObservabilityDashboardsId(null);
-          // setDashboardState({
-          //   startDate: '',
-          //   endDate: '',
-          //   dashboardTitle: '',
-          //   dashboardId: '',
-          // });
-          // console.log('load dashboards false');
-          // setIsDashboardSelected(false);
-          ObservabilityDashboardManager.dashboardState$.next({
+          ObsDashboardStateManager.dashboardState$.next({
             startDate: '',
             endDate: '',
             dashboardTitle: '',
             dashboardId: '',
           });
-          console.log('load dashboards false');
-          ObservabilityDashboardManager.isDashboardSelected$.next(false);
+          ObsDashboardStateManager.isDashboardSelected$.next(false);
         }
       })
       .catch((error) => {
         console.error('Error fetching dashboards:', error);
       });
-    // registerDashboard();
-    // registerDashboardsControl();
-    // registerCards();
-    // loadHomePage();
-  };
-
-  const reloadDashboardComponents = () => {
-    registerDashboard();
-    registerDashboardsControl();
   };
 
   const flyout = isFlyoutVisible && (
     <SelectDashboardFlyout
       closeFlyout={() => setIsFlyoutVisible(false)}
-      // isDashboardSelected={isDashboardSelected}
-      // setIsDashboardSelected={setIsDashboardSelected}
       dashboardsSavedObjects={dashboardsSavedObjects}
-      registerDashboard={loadDashboardsState}
+      reloadPage={loadDashboardsState}
     />
   );
 
-  // const dashboardControls = () => {
-  //   return isDashboardSelected ? (
-  //     <DashboardControls
-  //       dashboardState={dashboardState}
-  //       setDashboardState={setDashboardState}
-  //       showFlyout={showFlyout}
-  //     />
-  //   ) : (
-  //     <AddDashboardCallout showFlyout={showFlyout} />
-  //   );
-  // };
-
-  // useEffect(() => {
-  //   setDashboardControls(dashboardControls);
-  // }, [isDashboardSelected]);
-
   useEffect(() => {
     registerCards();
-    reloadDashboardComponents();
+    registerDashboard();
+    registerDashboardsControl();
     loadHomePage();
-    // const defaultDashboard = getObservabilityDashboardsId();
-    // if (defaultDashboard) {
-    //   setIsDashboardSelected(true);
-    //   registerDashboard();
-    // }
   }, [dashboardsSavedObjects]);
 
   useEffect(() => {
@@ -315,18 +184,7 @@ export const Home = () => {
       ]
     );
     loadDashboardsState();
-    // registerCards();
-    // const defaultDashboard = getObservabilityDashboardsId();
-    // if (defaultDashboard) {
-    //   setIsDashboardSelected(true);
-    //   registerDashboard();
-    // }
-    // setDashboardControls(dashboardControls);
   }, []);
-
-  // useEffect(() => {
-  //   console.log('re-registered content', isDashboardSelected, dashboardState);
-  // }, [isDashboardSelected, dashboardState]);
 
   return (
     <div>

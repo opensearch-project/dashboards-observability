@@ -9,3 +9,12 @@ export interface DashboardState {
   dashboardTitle: string;
   dashboardId: string;
 }
+
+export interface DashboardSavedObjectsType {
+  [key: string]: {
+    value: string;
+    label: string;
+    startDate: string;
+    endDate: string;
+  };
+}

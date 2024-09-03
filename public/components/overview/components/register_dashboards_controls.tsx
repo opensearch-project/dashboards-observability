@@ -6,7 +6,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { DashboardState } from '../../../../common/types/overview';
 
-export class ObservabilityDashboardManager {
+export class ObsDashboardStateManager {
   static isDashboardSelected$ = new BehaviorSubject<boolean>(false);
   static dashboardState$ = new BehaviorSubject<DashboardState>({
     startDate: '',

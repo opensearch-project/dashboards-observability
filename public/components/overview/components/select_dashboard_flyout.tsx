@@ -17,46 +17,26 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { useObservable } from 'react-use';
+import { DashboardSavedObjectsType } from '../../../../common/types/overview';
 import { useToast } from '../../common/toast';
-import { DashboardDictionary } from '../home';
-import { ObservabilityDashboardManager } from './register_dashboards_controls';
+import { ObsDashboardStateManager } from './register_dashboards_controls';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './utils';
 
 export interface Props {
   closeFlyout: () => void;
-  // isDashboardSelected: boolean;
-  // setIsDashboardSelected: React.Dispatch<React.SetStateAction<boolean>>;
-  dashboardsSavedObjects: DashboardDictionary;
-  registerDashboard: () => void;
+  dashboardsSavedObjects: DashboardSavedObjectsType;
+  reloadPage: () => void;
 }
 
-export function SelectDashboardFlyout({
-  closeFlyout,
-  // isDashboardSelected,
-  // setIsDashboardSelected,
-  dashboardsSavedObjects,
-  registerDashboard,
-}: Props) {
-  // const isDashboardSelected = ObservabilityDashboardManager.getIsDashboardSelected();
-  // const setIsDashboardSelected = ObservabilityDashboardManager.setIsDashboardSelected;
-  const [isDashboardSelected, setIsDashboardSelected] = useState(false);
-
-  useEffect(() => {
-    const subscription1 = ObservabilityDashboardManager.isDashboardSelected$.subscribe(
-      setIsDashboardSelected
-    );
-
-    return () => {
-      subscription1.unsubscribe();
-    };
-  }, []);
+export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, reloadPage }: Props) {
+  const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
   const [selectedOptionsState, setSelectedOptionsState] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [buttonIsActive, setButtonIsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   const { setToast } = useToast();
 
   const onComboBoxChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
@@ -69,10 +49,8 @@ export function SelectDashboardFlyout({
   const onClickAdd = async () => {
     if (selectedOptionsState.length > 0) {
       setIsLoading(true);
-      // setIsDashboardSelected(true);
-      ObservabilityDashboardManager.isDashboardSelected$.next(true);
-      setObservabilityDashboardsId(selectedOptionsState[0].value ?? null).then(registerDashboard);
-      // await setObservabilityDashboardsId(selectedOptionsState[0].value ?? null);
+      ObsDashboardStateManager.isDashboardSelected$.next(true);
+      setObservabilityDashboardsId(selectedOptionsState[0].value ?? null).then(reloadPage);
       setIsLoading(false);
       closeFlyout();
     } else {

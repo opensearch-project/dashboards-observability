@@ -123,10 +123,6 @@ interface PublicConfig {
   };
 }
 
-export const [getDashboardControls, setDashboardControls] = createGetterSetter<
-  () => React.JSX.Element
->('dashboardControls');
-
 export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,

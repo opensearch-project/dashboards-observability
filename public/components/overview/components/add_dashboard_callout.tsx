@@ -4,25 +4,15 @@
  */
 
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useObservable } from 'react-use';
 import { coreRefs } from '../../../framework/core_refs';
 import { gettingStartedURL } from './card_configs';
-import { ObservabilityDashboardManager } from './register_dashboards_controls';
-
-interface Props {
-  // showFlyout: () => void;
-}
+import { ObsDashboardStateManager } from './register_dashboards_controls';
 
 export function AddDashboardCallout() {
-  // const showFlyout = ObservabilityDashboardManager.getShowFlyout();
-  const [showFlyout, setShowFlyout] = useState(() => () => {});
+  const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);
 
-  useEffect(() => {
-    const subscription3 = ObservabilityDashboardManager.showFlyout$.subscribe(setShowFlyout);
-    return () => {
-      subscription3.unsubscribe();
-    };
-  }, []);
   return (
     <>
       <EuiCallOut color="primary" iconType="gear" title="Select your dashboard">
