@@ -23,7 +23,7 @@ import round from 'lodash/round';
 import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
   NoMatchMessage,
@@ -54,7 +54,7 @@ export function TracesTable(props: TracesTableProps) {
   };
 
   const columns = useMemo(() => {
-    if (mode === 'data_prepper') {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       return [
         {
           field: 'trace_id',
@@ -263,6 +263,7 @@ export function TracesTable(props: TracesTableProps) {
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
         {!(
+          mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
           (mode === 'jaeger' && props.jaegerIndicesExist)
         ) ? (

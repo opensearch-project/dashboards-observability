@@ -10,10 +10,9 @@ import moment from 'moment';
 import DSLService from 'public/services/requests/dsl';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
-import { ServiceTrends } from '../../../../common/types/trace_analytics';
+import { ServiceTrends, TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 import { fixedIntervalToMilli } from '../components/common/helper_functions';
 import { ServiceObject } from '../components/common/plots/service_map';
-import { TraceAnalyticsMode } from '../home';
 import {
   getRelatedServicesQuery,
   getServiceEdgesQuery,

@@ -6,7 +6,6 @@
 
 import {
   EuiBadge,
-  EuiSmallButton,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -21,6 +20,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -88,7 +88,7 @@ export function ServiceView(props: ServiceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     );
-    if (mode === 'data_prepper') {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       handleServiceMapRequest(
         props.http,
         DSL,
@@ -137,7 +137,10 @@ export function ServiceView(props: ServiceViewProps) {
   const redirectToServiceTraces = () => {
     if (setCurrentSelectedService) setCurrentSelectedService('');
     setRedirect(true);
-    const filterField = mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
+    const filterField =
+      mode === 'data_prepper' || mode === 'custom_data_prepper'
+        ? 'serviceName'
+        : 'process.serviceName';
     props.addFilter({
       field: filterField,
       operator: 'is',
@@ -167,7 +170,7 @@ export function ServiceView(props: ServiceViewProps) {
     {
       id: 0,
       items: [
-        ...(mode === 'data_prepper'
+        ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? [
               {
                 name: 'View logs',
@@ -278,7 +281,7 @@ export function ServiceView(props: ServiceViewProps) {
                     {props.serviceName || '-'}
                   </EuiText>
                 </EuiFlexItem>
-                {mode === 'data_prepper' ? (
+                {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Number of connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -290,7 +293,7 @@ export function ServiceView(props: ServiceViewProps) {
                 ) : (
                   <EuiFlexItem />
                 )}
-                {mode === 'data_prepper' ? (
+                {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -403,7 +406,7 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    if (mode === 'data_prepper') {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       spanDSL.query.bool.filter.push({
         term: {
           serviceName: props.serviceName,
@@ -489,7 +492,7 @@ export function ServiceView(props: ServiceViewProps) {
       <EuiSpacer size="xl" />
       {overview}
 
-      {mode === 'data_prepper' ? (
+      {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
         <>
           <EuiSpacer />
           <ServiceMetrics

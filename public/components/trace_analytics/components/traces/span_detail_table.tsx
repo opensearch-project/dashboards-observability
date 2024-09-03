@@ -10,7 +10,7 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { handleSpansRequest } from '../../requests/traces_request_handler';
 import { NoMatchMessage, microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 

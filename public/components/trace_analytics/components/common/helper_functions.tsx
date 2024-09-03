@@ -5,7 +5,7 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import { EuiSmallButtonEmpty, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSmallButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
@@ -15,10 +15,15 @@ import {
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
   TRACE_ANALYTICS_DOCUMENTATION_LINK,
+  TRACE_CUSTOM_SERVICE_INDEX_SETTING,
+  TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../../../../common/constants/trace_analytics';
-import { GraphVisEdge, GraphVisNode } from '../../../../../common/types/trace_analytics';
+import {
+  GraphVisEdge,
+  GraphVisNode,
+  TraceAnalyticsMode,
+} from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
-import { TraceAnalyticsMode } from '../../home';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
@@ -429,13 +434,13 @@ export const filtersToDsl = (
       let filterQuery = {};
       let field = filter.field;
       if (field === 'latency') {
-        if (mode === 'data_prepper') {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
           field = 'duration';
         }
       } else if (field === 'error') {
-        if (mode === 'data_prepper') {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
           field = 'tag.error';
@@ -568,4 +573,44 @@ export const getAttributes = (jsonMapping: JsonMapping): string[] => {
     return [...spanAttributes, ...resourceAttributes];
   }
   return [];
+};
+
+export const getTraceCustomSpanIndex = () => {
+  return uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
+};
+
+export const getTraceCustomServiceIndex = () => {
+  return uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
+};
+
+export const setTraceCustomSpanIndex = (value: string) => {
+  return uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value);
+};
+
+export const setTraceCustomServiceIndex = (value: string) => {
+  return uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, value);
+};
+
+export const getSpanIndices = (mode: TraceAnalyticsMode) => {
+  switch (mode) {
+    case 'custom_data_prepper':
+      return getTraceCustomSpanIndex();
+    case 'data_prepper':
+      return DATA_PREPPER_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_INDEX_NAME;
+  }
+};
+
+export const getServiceIndices = (mode: TraceAnalyticsMode) => {
+  switch (mode) {
+    case 'custom_data_prepper':
+      return getTraceCustomServiceIndex();
+    case 'data_prepper':
+      return DATA_PREPPER_SERVICE_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_SERVICE_INDEX_NAME;
+  }
 };

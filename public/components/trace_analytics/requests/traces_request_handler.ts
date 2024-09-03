@@ -11,9 +11,9 @@ import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
-import { TraceAnalyticsMode } from '../home';
 import {
   getPayloadQuery,
   getServiceBreakdownQuery,
@@ -58,7 +58,7 @@ export const handleTracesRequest = async (
 
   // percentile should only be affected by timefilter
   const percentileRangesPromise =
-    mode === 'data_prepper'
+    mode === 'data_prepper' || mode === 'custom_data_prepper'
       ? handleDslRequest(
           http,
           timeFilterDSL,
@@ -83,7 +83,7 @@ export const handleTracesRequest = async (
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
       return response.aggregations.traces.buckets.map((bucket: any) => {
-        if (mode === 'data_prepper') {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           return {
             trace_id: bucket.key,
             trace_group: bucket.trace_group.buckets[0]?.key,

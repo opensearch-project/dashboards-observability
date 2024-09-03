@@ -21,3 +21,6 @@ export const TRACE_ANALYTICS_JAEGER_INDICES_ROUTE =
 export const TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE =
   '/api/observability/trace_analytics/data_prepper_indices';
 export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/query';
+
+export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
+export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServiceIndices';

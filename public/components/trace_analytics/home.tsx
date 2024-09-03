@@ -19,11 +19,11 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../common/types/trace_analytics';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
-import { getAttributes } from './components/common/helper_functions';
+import { getAttributes, getSpanIndices } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
@@ -48,8 +48,6 @@ export interface TraceAnalyticsCoreDeps {
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
-
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -169,11 +167,16 @@ export const Home = (props: HomeProps) => {
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+    {
+      id: 'custom_data_prepper',
+      title: 'Custom Data Prepper Indices',
+      'data-test-subj': 'custom-data-prepper-mode',
+    },
   ];
 
   const fetchAttributesFields = () => {
     coreRefs.dslService
-      ?.fetchFields(DATA_PREPPER_INDEX_NAME)
+      ?.fetchFields(getSpanIndices(mode))
       .then((res) => {
         const attributes = getAttributes(res);
         setAttributesFilterFields(attributes);
@@ -192,7 +195,7 @@ export const Home = (props: HomeProps) => {
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
   useEffect(() => {
-    if (mode === 'data_prepper') fetchAttributesFields();
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
   }, [mode]);
 
   const serviceBreadcrumbs = [
