@@ -57,10 +57,14 @@ export const observabilityMetricsID = 'observability-metrics';
 export const observabilityMetricsTitle = 'Metrics';
 export const observabilityMetricsPluginOrder = 5092;
 
+export const observabilityTracesNewNavID = 'observability-traces-nav';
+export const observabilityTracesNewNavURL = observabilityTracesNewNavID + '#/traces';
 export const observabilityTracesID = 'observability-traces';
 export const observabilityTracesTitle = 'Traces';
 export const observabilityTracesPluginOrder = 5093;
 
+export const observabilityServicesNewNavID = 'observability-services-nav';
+export const observabilityServicesNewNavURL = observabilityServicesNewNavID + '#/services';
 export const observabilityServicesID = 'observability-services';
 export const observabilityServicesTitle = 'Services';
 export const observabilityServicesPluginOrder = 5092;
@@ -83,6 +87,10 @@ export const observabilityDataConnectionsPluginOrder = 9030;
 
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
 export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
+
+export const alertingPluginID = 'alerting';
+export const anomalyDetectionPluginID = 'anomaly-detection-dashboards';
+export const discoverPluginID = 'data-explorer/discover';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

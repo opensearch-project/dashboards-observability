@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
-import { fetchDashboardIds, fetchIndexPatternIds } from './utils';
+import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
 
 interface Pattern {
   id: string;
@@ -80,7 +80,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
     });
   };
 
-  const redirectToDashboards = (dashboardId: string) => {
+  const redirectToDashboardsMDS = (dashboardId: string) => {
     const finalDashboardId = selectedDataSourceId
       ? `mds-${selectedDataSourceId}-objectId-${dashboardId}`
       : dashboardId;
@@ -137,7 +137,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
                   title={dashboard.title}
                   description={`Explore the ${dashboard.title} dashboard`}
                   onClick={() => {
-                    redirectToDashboards(dashboard.id);
+                    redirectToDashboardsMDS(dashboard.id);
                   }}
                 />
               </EuiFlexItem>

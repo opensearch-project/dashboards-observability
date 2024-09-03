@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { coreRefs } from './framework/core_refs';
+import { coreRefs } from '../framework/core_refs';
 
 interface HeaderControlledComponentsWrapperProps {
   components?: React.ReactElement[];

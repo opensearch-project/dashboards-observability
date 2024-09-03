@@ -17,6 +17,7 @@ import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DataSourceStart } from '../../../../src/plugins/data/public/data_sources/datasource_services/types';
 import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { ContentManagementPluginStart } from '../../../../src/plugins/content_management/public';
 import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
@@ -38,6 +39,7 @@ class CoreRefs {
   public dataSource?: DataSourcePluginStart;
   public dataSources?: DataSourceStart;
   public navigation?: NavigationPublicPluginStart;
+  public contentManagement?: ContentManagementPluginStart;
   private constructor() {
     // ...
   }
