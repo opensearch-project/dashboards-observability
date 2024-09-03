@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
 import { DashboardSavedObjectsType } from '../../../../common/types/overview';
 import { useToast } from '../../common/toast';
-import { ObsDashboardStateManager } from './register_dashboards_controls';
+import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './utils';
 
 export interface Props {

@@ -19,7 +19,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
 import { redirectToDashboards } from '../../getting_started/components/utils';
 import { AddDashboardCallout } from './add_dashboard_callout';
-import { ObsDashboardStateManager } from './register_dashboards_controls';
+import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 
 export function DashboardControls() {
   const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);

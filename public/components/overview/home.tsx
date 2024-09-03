@@ -13,7 +13,7 @@ import { coreRefs } from '../../framework/core_refs';
 import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
 import { cardConfigs, GettingStartedConfig } from './components/card_configs';
 import { DashboardControls } from './components/dashboard_controls';
-import { ObsDashboardStateManager } from './components/register_dashboards_controls';
+import { ObsDashboardStateManager } from './components/obs_dashboard_state_manager';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './components/utils';
 import './index.scss';

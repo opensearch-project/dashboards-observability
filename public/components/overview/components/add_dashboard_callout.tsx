@@ -8,7 +8,7 @@ import React from 'react';
 import { useObservable } from 'react-use';
 import { coreRefs } from '../../../framework/core_refs';
 import { gettingStartedURL } from './card_configs';
-import { ObsDashboardStateManager } from './register_dashboards_controls';
+import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 
 export function AddDashboardCallout() {
   const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);

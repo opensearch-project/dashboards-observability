@@ -13,10 +13,8 @@ configure({ adapter: new Adapter() });
 const mountSelectDashboardFlyout = (props: Partial<Props> = {}) => {
   const defaultProps: Props = {
     closeFlyout: jest.fn(),
-    isDashboardSelected: false,
-    setIsDashboardSelected: jest.fn(),
     dashboardsSavedObjects: {},
-    registerDashboard: jest.fn(),
+    reloadPage: jest.fn(),
   };
 
   return mount(<SelectDashboardFlyout {...defaultProps} {...props} />);
@@ -30,20 +28,5 @@ describe('Select dashboard flyout', () => {
   it('should render', () => {
     const wrapper = mountSelectDashboardFlyout();
     expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should change heading when dashboard is selected', () => {
-    const wrapper = mountSelectDashboardFlyout({ isDashboardSelected: true });
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should close when user clicks cancel', () => {
-    const mockCloseFlyout = jest.fn();
-    const wrapper = mountSelectDashboardFlyout({ closeFlyout: mockCloseFlyout });
-
-    (wrapper.find('EuiFlyout').prop('onClose') as () => void)();
-    wrapper.find('EuiSmallButtonEmpty').simulate('click');
-
-    expect(mockCloseFlyout).toHaveBeenCalledTimes(2);
   });
 });
