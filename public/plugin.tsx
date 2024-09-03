@@ -54,9 +54,11 @@ import {
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesNewNavID,
   observabilityServicesPluginOrder,
   observabilityServicesTitle,
   observabilityTracesID,
+  observabilityTracesNewNavID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
 } from '../common/constants/shared';
@@ -336,7 +338,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-traces-nav',
+        id: observabilityTracesNewNavID,
         title: observabilityTracesTitle,
         order: observabilityTracesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -344,7 +346,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-services-nav',
+        id: observabilityServicesNewNavID,
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,

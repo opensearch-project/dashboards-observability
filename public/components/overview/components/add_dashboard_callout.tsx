@@ -7,8 +7,8 @@ import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui
 import React from 'react';
 import { useObservable } from 'react-use';
 import { coreRefs } from '../../../framework/core_refs';
-import { gettingStartedURL } from './card_configs';
 import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
+import { observabilityGettingStartedID } from '../../../../common/constants/shared';
 
 export function AddDashboardCallout() {
   const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);
@@ -21,7 +21,7 @@ export function AddDashboardCallout() {
             Select a dashboard to be displayed on this Overview page, or complete the steps
             described in{' '}
             <EuiLink
-              onClick={() => coreRefs.application?.navigateToApp(gettingStartedURL, { path: '#/' })}
+              onClick={() => coreRefs.application?.navigateToApp(observabilityGettingStartedID)}
             >
               Getting Started Guide
             </EuiLink>{' '}

@@ -4,15 +4,15 @@
  */
 
 import { i18n } from '@osd/i18n';
-
-// Plugin URLs
-export const gettingStartedURL = 'observability-gettingStarted';
-export const discoverURL = 'data-explorer/discover';
-export const metricsURL = 'observability-metrics';
-export const tracesURL = 'observability-traces-nav#/traces';
-export const servicesURL = 'observability-services-nav#/services';
-export const alertsURL = 'alerting';
-export const anomalyDetectionURL = 'anomaly-detection-dashboards';
+import {
+  observabilityGettingStartedID,
+  observabilityMetricsID,
+  observabilityTracesNewNavURL,
+  observabilityServicesNewNavURL,
+  alertsID,
+  anomalyDetectionID,
+  discoverID,
+} from '../../../../common/constants/shared';
 
 export interface GettingStartedConfig {
   id: string;
@@ -31,7 +31,7 @@ const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   }),
   description: 'Get started collecting and analyzing data.',
   footer: 'Getting Started Guide',
-  url: gettingStartedURL,
+  url: observabilityGettingStartedID,
 };
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
@@ -42,7 +42,7 @@ const DISCOVER_CONFIG: GettingStartedConfig = {
   }),
   description: 'Uncover insights with raw data exploration.',
   footer: 'Discover',
-  url: discoverURL,
+  url: discoverID,
 };
 
 const METRICS_CONFIG: GettingStartedConfig = {
@@ -51,31 +51,31 @@ const METRICS_CONFIG: GettingStartedConfig = {
   title: i18n.translate('observability.overview.card.metrics.title', {
     defaultMessage: 'Monitor system performance',
   }),
-  description: 'Transform logs into actionable visualizations with metrics extraction.',
+  description: 'Transform logs into actionable visualizations by extracting metrics.',
   footer: 'Metrics',
-  url: metricsURL,
+  url: observabilityMetricsID,
 };
 
 const TRACES_CONFIG: GettingStartedConfig = {
   id: 'traces',
   order: 4,
   title: i18n.translate('observability.overview.card.traces.title', {
-    defaultMessage: 'Facilitate issue diagnosis',
+    defaultMessage: 'Identify performance issues',
   }),
-  description: 'Unveil performance bottlenecks with event flow visualization.',
+  description: 'Analyze performance bottlenecks using event flow visualizations.',
   footer: 'Traces',
-  url: tracesURL,
+  url: observabilityTracesNewNavURL,
 };
 
 const SERVICES_CONFIG: GettingStartedConfig = {
   id: 'services',
   order: 5,
   title: i18n.translate('observability.overview.card.services.title', {
-    defaultMessage: 'Services',
+    defaultMessage: 'Monitor service health',
   }),
-  description: 'Unveil performance bottlenecks with event flow visualization.',
+  description: 'Identify service performance issues with comprehensive monitoring and analysis.',
   footer: 'Services',
-  url: servicesURL,
+  url: observabilityServicesNewNavURL,
 };
 
 const ALERTS_CONFIG: GettingStartedConfig = {
@@ -84,9 +84,9 @@ const ALERTS_CONFIG: GettingStartedConfig = {
   title: i18n.translate('observability.overview.card.alerts.title', {
     defaultMessage: 'Get notified',
   }),
-  description: 'Receive timely notifications with customizable alert triggers.',
+  description: 'Receive timely notifications by configuring alert triggers.',
   footer: 'Alerting',
-  url: alertsURL,
+  url: alertsID,
 };
 
 const ANOMALY_CONFIG: GettingStartedConfig = {
@@ -95,9 +95,9 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
   title: i18n.translate('observability.overview.card.anomaly.title', {
     defaultMessage: 'Detect anomalies in your data',
   }),
-  description: 'Near real-time detection using the Random Cut Forest (RFC) algorithm.',
+  description: 'Gain near real-time anomaly detection using the Random Cut Forest (RCF) algorithm.',
   footer: 'Anomaly Detection',
-  url: anomalyDetectionURL,
+  url: anomalyDetectionID,
 };
 
 export const cardConfigs = [
