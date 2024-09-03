@@ -39,7 +39,7 @@ import { ApplicationType, AvailabilityType } from '../../../../common/types/appl
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
 import { DeleteModal } from '../../common/helpers/delete_modal';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();

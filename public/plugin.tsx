@@ -33,8 +33,8 @@ import {
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
   observabilityGettingStartedID,
-  observabilityGettingStartedTitle,
   observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -54,9 +54,11 @@ import {
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesNewNavID,
   observabilityServicesPluginOrder,
   observabilityServicesTitle,
   observabilityTracesID,
+  observabilityTracesNewNavID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
 } from '../common/constants/shared';
@@ -101,7 +103,8 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
-import { registerAllPluginNavGroups } from './plugin_nav';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -179,6 +182,8 @@ export class ObservabilityPlugin
     core.getStartServices().then(([coreStart]) => {
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
+
+    setupOverviewPage(setupDeps.contentManagement!);
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -333,7 +338,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-traces-nav',
+        id: observabilityTracesNewNavID,
         title: observabilityTracesTitle,
         order: observabilityTracesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -341,7 +346,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-services-nav',
+        id: observabilityServicesNewNavID,
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -443,6 +448,7 @@ export class ObservabilityPlugin
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;
+    coreRefs.contentManagement = startDeps.contentManagement;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);

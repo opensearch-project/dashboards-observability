@@ -6,7 +6,6 @@
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
-import { GettingStartedConnectionsHeader } from './getting_started_header';
 import { CollectAndShipData } from './getting_started_collectData';
 import { QueryAndAnalyze } from './getting_started_queryAndAnalyze';
 
@@ -58,8 +57,6 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        <GettingStartedConnectionsHeader />
-        <EuiSpacer size="l" />
         <CollectAndShipData
           isOpen={isPickYourSourceOpen}
           onToggle={togglePickYourSource}
@@ -70,7 +67,7 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
           selectedDataSourceId={selectedDataSourceId}
           selectedDataSourceLabel={selectedDataSourceLabel}
         />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         {!isSampleDataset && (
           <QueryAndAnalyze
             isOpen={isQueryDataOpen}

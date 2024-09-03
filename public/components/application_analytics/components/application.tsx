@@ -63,7 +63,7 @@ import { Configuration } from './configuration';
 import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { coreRefs } from '../../../framework/core_refs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
