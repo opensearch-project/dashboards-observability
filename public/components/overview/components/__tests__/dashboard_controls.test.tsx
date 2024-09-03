@@ -3,25 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import { DashboardControls, Props } from '../dashboard_controls';
-import React from 'react';
-import Adapter from 'enzyme-adapter-react-16';
 import { OnTimeChangeProps } from '@elastic/eui';
-import { redirectToDashboards } from '../../../getting_started/components/utils';
+import { configure, mount } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import React from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
+import { redirectToDashboards } from '../../../getting_started/components/utils';
+import { DashboardControls, Props } from '../dashboard_controls';
 
 configure({ adapter: new Adapter() });
 
 const mountDashboardControls = (props: Partial<Props> = {}) => {
   const defaultProps: Props = {
-    dashboardTitle: '',
-    dashboardId: '',
-    startDate: '',
-    endDate: '',
-    setStartDate: (_: string) => {},
-    setEndDate: (_: string) => {},
-    showFlyout: () => {},
+    dashboardState: { startDate: '', endDate: '', dashboardId: '', dashboardTitle: '' },
+    setDashboardState: jest.fn(),
+    showFlyout: jest.fn(),
   };
 
   return mount(<DashboardControls {...defaultProps} {...props} />);
@@ -51,7 +47,14 @@ describe('Dashboard controls', () => {
 
   it('should render with dashboard title', () => {
     const mockDashboardTitle = 'my_dashboard';
-    const wrapper = mountDashboardControls({ dashboardTitle: mockDashboardTitle });
+    const wrapper = mountDashboardControls({
+      dashboardState: {
+        startDate: '',
+        endDate: '',
+        dashboardId: 'sampleId',
+        dashboardTitle: mockDashboardTitle,
+      },
+    });
     const title = wrapper
       .find('p')
       .filterWhere((node) => node.text() === mockDashboardTitle)
@@ -61,7 +64,14 @@ describe('Dashboard controls', () => {
 
   it('title should redirect to dashboard', () => {
     const mockDashboardId = '12345678';
-    const wrapper = mountDashboardControls({ dashboardId: mockDashboardId });
+    const wrapper = mountDashboardControls({
+      dashboardState: {
+        startDate: '',
+        endDate: '',
+        dashboardId: mockDashboardId,
+        dashboardTitle: 'sampleTitle',
+      },
+    });
 
     wrapper.find('EuiLink').simulate('click');
     expect(redirectToDashboards).toHaveBeenCalledWith('/view/' + mockDashboardId);
@@ -71,7 +81,14 @@ describe('Dashboard controls', () => {
     const mockStartDate = '01/01/2000';
     const mockEndDate = '12/12/2024';
 
-    const wrapper = mountDashboardControls({ startDate: mockStartDate, endDate: mockEndDate });
+    const wrapper = mountDashboardControls({
+      dashboardState: {
+        startDate: mockStartDate,
+        endDate: mockEndDate,
+        dashboardId: 'sampleId',
+        dashboardTitle: 'sampleTitle',
+      },
+    });
 
     const datePicker = wrapper.find('EuiSuperDatePicker');
     expect(datePicker.props().start).toBe(mockStartDate);
@@ -80,15 +97,11 @@ describe('Dashboard controls', () => {
 
   describe('Date Picker', () => {
     it('should update date when selected', () => {
-      const mockSetStartDate = jest.fn();
-      const mockSetEndDate = jest.fn();
+      const setDashboardStateFn = jest.fn();
       const newStartDate = '02/05/2000';
       const newEndDate = '12/05/2024';
 
-      const wrapper = mountDashboardControls({
-        setStartDate: mockSetStartDate,
-        setEndDate: mockSetEndDate,
-      });
+      const wrapper = mountDashboardControls({ setDashboardState: setDashboardStateFn });
       const onTimeChange = wrapper.find('EuiSuperDatePicker').prop('onTimeChange') as (
         props: OnTimeChangeProps
       ) => void;
@@ -100,8 +113,8 @@ describe('Dashboard controls', () => {
         isQuickSelection: false,
       });
 
-      expect(mockSetStartDate).toHaveBeenCalledWith(newStartDate);
-      expect(mockSetEndDate).toHaveBeenCalledWith(newEndDate);
+      expect(setDashboardStateFn).toHaveBeenCalledWith(newStartDate);
+      expect(setDashboardStateFn).toHaveBeenCalledWith(newEndDate);
     });
 
     it('should update coreRefs when selected', () => {

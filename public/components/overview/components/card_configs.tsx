@@ -7,12 +7,12 @@ import { i18n } from '@osd/i18n';
 
 // Plugin URLs
 export const gettingStartedURL = 'observability-gettingStarted';
-const discoverURL = 'data-explorer/discover';
-const metricsURL = 'observability-metrics';
-const tracesURL = 'observability-traces-nav#/traces';
-const servicesURL = 'observability-services-nav#/services';
-const alertsURL = 'alerting';
-const anomalyDetectionURL = 'anomaly-detection-dashboards';
+export const discoverURL = 'data-explorer/discover';
+export const metricsURL = 'observability-metrics';
+export const tracesURL = 'observability-traces-nav#/traces';
+export const servicesURL = 'observability-services-nav#/services';
+export const alertsURL = 'alerting';
+export const anomalyDetectionURL = 'anomaly-detection-dashboards';
 
 export interface GettingStartedConfig {
   id: string;
@@ -23,7 +23,7 @@ export interface GettingStartedConfig {
   url: string;
 }
 
-export const GETTING_STARTED_CONFIG: GettingStartedConfig = {
+const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   id: 'getting_started',
   order: 1,
   title: i18n.translate('observability.overview.card.gettingStarted.title', {

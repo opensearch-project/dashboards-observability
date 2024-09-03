@@ -33,8 +33,8 @@ import {
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
   observabilityGettingStartedID,
-  observabilityGettingStartedTitle,
   observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -101,6 +101,8 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -111,8 +113,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
-import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 
 interface PublicConfig {
   query_assist: {
@@ -122,6 +122,10 @@ interface PublicConfig {
     enabled: boolean;
   };
 }
+
+export const [getDashboardControls, setDashboardControls] = createGetterSetter<
+  () => React.JSX.Element
+>('dashboardControls');
 
 export const [
   getRenderAccelerationDetailsFlyout,

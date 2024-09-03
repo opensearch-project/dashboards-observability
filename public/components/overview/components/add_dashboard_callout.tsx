@@ -4,15 +4,25 @@
  */
 
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { coreRefs } from '../../../framework/core_refs';
 import { gettingStartedURL } from './card_configs';
+import { ObservabilityDashboardManager } from './register_dashboards_controls';
 
 interface Props {
-  showFlyout: () => void;
-  navigateToApp: (appId: string, path: string) => void;
+  // showFlyout: () => void;
 }
 
-export function AddDashboardCallout({ showFlyout, navigateToApp }: Props) {
+export function AddDashboardCallout() {
+  // const showFlyout = ObservabilityDashboardManager.getShowFlyout();
+  const [showFlyout, setShowFlyout] = useState(() => () => {});
+
+  useEffect(() => {
+    const subscription3 = ObservabilityDashboardManager.showFlyout$.subscribe(setShowFlyout);
+    return () => {
+      subscription3.unsubscribe();
+    };
+  }, []);
   return (
     <>
       <EuiCallOut color="primary" iconType="gear" title="Select your dashboard">
@@ -20,7 +30,9 @@ export function AddDashboardCallout({ showFlyout, navigateToApp }: Props) {
           <p>
             Select a dashboard to be displayed on this Overview page, or complete the steps
             described in{' '}
-            <EuiLink onClick={() => navigateToApp(gettingStartedURL, '#/')}>
+            <EuiLink
+              onClick={() => coreRefs.application?.navigateToApp(gettingStartedURL, { path: '#/' })}
+            >
               Getting Started Guide
             </EuiLink>{' '}
             to re-populate the dashboard with your log data. This dashboard can later be changed in
@@ -28,7 +40,7 @@ export function AddDashboardCallout({ showFlyout, navigateToApp }: Props) {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiButton onClick={showFlyout}>Add</EuiButton>
+        <EuiButton onClick={showFlyout}>Select</EuiButton>
       </EuiCallOut>
     </>
   );

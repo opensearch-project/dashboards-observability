@@ -5,18 +5,18 @@
 
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { Props } from '../select_dashboard_flyout';
 import React from 'react';
-import { SelectDashboardFlyout } from '../select_dashboard_flyout';
+import { Props, SelectDashboardFlyout } from '../select_dashboard_flyout';
 
 configure({ adapter: new Adapter() });
 
 const mountSelectDashboardFlyout = (props: Partial<Props> = {}) => {
   const defaultProps: Props = {
-    closeFlyout: () => {},
-    wrapper: { dashboardSelected: false },
-    dashboards: {},
-    registerDashboard: () => {},
+    closeFlyout: jest.fn(),
+    isDashboardSelected: false,
+    setIsDashboardSelected: jest.fn(),
+    dashboardsSavedObjects: {},
+    registerDashboard: jest.fn(),
   };
 
   return mount(<SelectDashboardFlyout {...defaultProps} {...props} />);
@@ -33,7 +33,7 @@ describe('Select dashboard flyout', () => {
   });
 
   it('should change heading when dashboard is selected', () => {
-    const wrapper = mountSelectDashboardFlyout({ wrapper: { dashboardSelected: true } });
+    const wrapper = mountSelectDashboardFlyout({ isDashboardSelected: true });
     expect(wrapper).toMatchSnapshot();
   });
 

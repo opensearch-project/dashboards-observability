@@ -7,6 +7,7 @@ import React from 'react';
 import { ContentManagementPluginSetup } from '../../../../src/plugins/content_management/public';
 
 export const HOME_PAGE_ID = 'observabilityOverviewPage';
+
 export enum SECTIONS {
   GET_STARTED = 'get_started',
   SELECTOR = 'selector',
@@ -25,31 +26,23 @@ export const setupOverviewPage = (contentManagement: ContentManagementPluginSetu
     title: 'Home',
     sections: [
       {
-        id: SECTIONS.SELECTOR,
-        order: 2000,
-        title: 'Selector Section',
-        kind: 'custom',
-        render: (contents) => (
-          <>
-            {contents.map((content, index) =>
-              content.kind === 'custom' ? (
-                <React.Fragment key={index}>{content.render()}</React.Fragment>
-              ) : null
-            )}
-          </>
-        ),
-      },
-      {
-        id: SECTIONS.DASHBOARD,
-        order: 3000,
-        kind: 'dashboard',
-      },
-      {
         id: SECTIONS.GET_STARTED,
         order: 1000,
         kind: 'card',
         wrap: false,
         columns: 5,
+      },
+      {
+        id: SECTIONS.SELECTOR,
+        order: 2000,
+        title: 'Dashboards controls',
+        kind: 'custom',
+        render: (contents) => <div key={contents[0].id}>{contents[0].render()}</div>,
+      },
+      {
+        id: SECTIONS.DASHBOARD,
+        order: 3000,
+        kind: 'dashboard',
       },
     ],
   });

@@ -17,27 +17,47 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { uiSettingsService } from '../../../../common/utils';
+import { useToast } from '../../common/toast';
 import { DashboardDictionary } from '../home';
+import { ObservabilityDashboardManager } from './register_dashboards_controls';
+import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './utils';
 
 export interface Props {
   closeFlyout: () => void;
-  wrapper: { dashboardSelected: boolean };
-  dashboards: DashboardDictionary;
+  // isDashboardSelected: boolean;
+  // setIsDashboardSelected: React.Dispatch<React.SetStateAction<boolean>>;
+  dashboardsSavedObjects: DashboardDictionary;
   registerDashboard: () => void;
 }
 
 export function SelectDashboardFlyout({
   closeFlyout,
-  wrapper,
-  dashboards,
+  // isDashboardSelected,
+  // setIsDashboardSelected,
+  dashboardsSavedObjects,
   registerDashboard,
 }: Props) {
+  // const isDashboardSelected = ObservabilityDashboardManager.getIsDashboardSelected();
+  // const setIsDashboardSelected = ObservabilityDashboardManager.setIsDashboardSelected;
+  const [isDashboardSelected, setIsDashboardSelected] = useState(false);
+
+  useEffect(() => {
+    const subscription1 = ObservabilityDashboardManager.isDashboardSelected$.subscribe(
+      setIsDashboardSelected
+    );
+
+    return () => {
+      subscription1.unsubscribe();
+    };
+  }, []);
   const [selectedOptionsState, setSelectedOptionsState] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [buttonIsActive, setButtonIsActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { setToast } = useToast();
 
   const onComboBoxChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
     if (options.length > 0) {
@@ -46,30 +66,36 @@ export function SelectDashboardFlyout({
     setSelectedOptionsState(options);
   };
 
-  const onClickAdd = () => {
+  const onClickAdd = async () => {
     if (selectedOptionsState.length > 0) {
-      wrapper.dashboardSelected = true;
-      uiSettingsService
-        .set('observability:defaultDashboard', selectedOptionsState[0].value)
-        .then(registerDashboard);
+      setIsLoading(true);
+      // setIsDashboardSelected(true);
+      ObservabilityDashboardManager.isDashboardSelected$.next(true);
+      setObservabilityDashboardsId(selectedOptionsState[0].value ?? null).then(registerDashboard);
+      // await setObservabilityDashboardsId(selectedOptionsState[0].value ?? null);
+      setIsLoading(false);
+      closeFlyout();
+    } else {
+      setToast('Select a dashboard to be added', 'danger');
     }
-    closeFlyout();
   };
 
   useEffect(() => {
-    setSelectedId(uiSettingsService.get('observability:defaultDashboard'));
+    setSelectedId(getObservabilityDashboardsId());
   }, []);
 
-  const options: Array<EuiComboBoxOptionOption<string>> = Object.keys(dashboards).map((key) => ({
-    value: key,
-    label: dashboards[key].label,
-  }));
+  const options: Array<EuiComboBoxOptionOption<string>> = Object.keys(dashboardsSavedObjects).map(
+    (key) => ({
+      value: key,
+      label: dashboardsSavedObjects[key].label,
+    })
+  );
 
   useEffect(() => {
     if (selectedId) {
       const currentTitle: EuiComboBoxOptionOption<string> = {
         value: selectedId,
-        label: dashboards[selectedId].label,
+        label: dashboardsSavedObjects[selectedId].label,
       };
       if (currentTitle) {
         setSelectedOptionsState([currentTitle]);
@@ -102,8 +128,13 @@ export function SelectDashboardFlyout({
             </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton onClick={onClickAdd} fill disabled={!buttonIsActive}>
-              {wrapper.dashboardSelected ? 'Replace' : 'Add'}
+            <EuiSmallButton
+              onClick={onClickAdd}
+              fill
+              disabled={!buttonIsActive}
+              isLoading={isLoading}
+            >
+              {isDashboardSelected ? 'Replace' : 'Select'}
             </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>

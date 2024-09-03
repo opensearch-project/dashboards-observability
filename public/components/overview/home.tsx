@@ -3,73 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import { HashRouter, RouteComponentProps, Switch, Route } from 'react-router-dom';
 import { EuiText } from '@elastic/eui';
-import moment from 'moment';
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { HashRouter, Route, Switch } from 'react-router-dom';
+import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
+import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../framework/core_refs';
-import { ContentManagementPluginStart } from '../../../../../src/plugins/content_management/public';
 import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
 import { cardConfigs, GettingStartedConfig } from './components/card_configs';
-import { uiSettingsService } from '../../../common/utils';
-import { AddDashboardCallout } from './components/add_dashboard_callout';
 import { DashboardControls } from './components/dashboard_controls';
+import { ObservabilityDashboardManager } from './components/register_dashboards_controls';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
-import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
+import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './components/utils';
 import './index.scss';
-
-// Plugin IDs
-const alertsPluginID = 'alerting';
-const anomalyPluginID = 'anomalyDetection';
-
-const uiSettingsKey = 'observability:defaultDashboard';
-
-interface HomeProps extends RouteComponentProps {
-  parentBreadcrumbs: ChromeBreadcrumb[];
-  contentManagement: ContentManagementPluginStart;
-}
-
-let showFlyout: { (): void; (): void; (): void };
-const wrapper = { dashboardSelected: false };
-let startDate: string;
-let setStartDate: (start: string) => void;
-let endDate: string;
-let setEndDate: (end: string) => void;
-let dashboardTitle: string;
-let setDashboardTitle: (title: string) => void;
-let dashboardId: string;
-let setDashboardId: (id: string) => void;
-
-export const navigateToApp = (appId: string, path: string) => {
-  coreRefs?.application!.navigateToApp(appId, {
-    path: `${path}`,
-  });
-};
-
-coreRefs.contentManagement?.registerContentProvider({
-  id: 'custom_content',
-  getContent: () => ({
-    id: 'custom_content',
-    kind: 'custom',
-    order: 1500,
-    render: () =>
-      wrapper.dashboardSelected ? (
-        <DashboardControls
-          dashboardTitle={dashboardTitle}
-          dashboardId={dashboardId}
-          startDate={startDate}
-          setStartDate={setStartDate}
-          endDate={endDate}
-          setEndDate={setEndDate}
-          showFlyout={showFlyout}
-        />
-      ) : (
-        <AddDashboardCallout showFlyout={showFlyout} navigateToApp={navigateToApp} />
-      ),
-  }),
-  getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
-});
 
 export interface DashboardDictionary {
   [key: string]: {
@@ -80,48 +26,65 @@ export interface DashboardDictionary {
   };
 }
 
-export const Home = ({ ..._props }: HomeProps) => {
-  const homepage = coreRefs.contentManagement?.renderPage(HOME_PAGE_ID);
-  const [_, setIsRegistered] = useState(false);
-  const [dashboards, setDashboards] = useState<DashboardDictionary>({});
+export const Home = () => {
+  const [homePage, setHomePage] = useState<ReactNode>(<></>);
+  const [dashboardsSavedObjects, setDashboardsSavedObjects] = useState<DashboardDictionary>({});
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  [startDate, setStartDate] = useState(moment().toISOString());
-  [endDate, setEndDate] = useState(moment().toISOString());
-  [dashboardTitle, setDashboardTitle] = useState('');
-  [dashboardId, setDashboardId] = useState('');
+  // const [isDashboardSelected, setIsDashboardSelected] = useState(
+  //   getObservabilityDashboardsId() ? true : false
+  // );
+  // const [dashboardState, setDashboardState] = useState<DashboardState>({
+  //   startDate: '',
+  //   endDate: '',
+  //   dashboardTitle: '',
+  //   dashboardId: '',
+  // });
+  // const showFlyout = () => setIsFlyoutVisible(true);
+  // const setDashboardState = ObservabilityDashboardManager.setDashboardState;
+  // const setIsDashboardSelected = ObservabilityDashboardManager.setIsDashboardSelected;
+  // ObservabilityDashboardManager.setShowFlyout(() => setIsFlyoutVisible(true));
 
-  showFlyout = () => setIsFlyoutVisible(true);
+  // const [isDashboardSelected, setIsDashboardSelected] = useState(false);
+  // const [dashboardState, setDashboardState] = useState<DashboardState>({} as DashboardState);
+  // const [showFlyout, setShowFlyout] = useState(() => () => {});
+
+  // useEffect(() => {
+  //   const subscription1 = ObservabilityDashboardManager.isDashboardSelected$.subscribe(
+  //     setIsDashboardSelected
+  //   );
+
+  //   const subscription2 = ObservabilityDashboardManager.dashboardState$.subscribe(
+  //     setDashboardState
+  //   );
+
+  //   const subscription3 = ObservabilityDashboardManager.showFlyout$.subscribe(setShowFlyout);
+  //   return () => {
+  //     subscription1.unsubscribe();
+  //     subscription2.unsubscribe();
+  //     subscription3.unsubscribe();
+  //   };
+  // }, []);
+
+  ObservabilityDashboardManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
+
+  const loadHomePage = () => {
+    setHomePage(coreRefs.contentManagement?.renderPage(HOME_PAGE_ID));
+  };
 
   const registerCards = async () => {
     let alertsPluginExists = false;
     let anomalyPluginExists = false;
-
     try {
-      const response = await fetch('../api/status', {
-        headers: {
-          'Content-Type': 'application/json',
-          'osd-xsrf': 'true',
-          'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-          pragma: 'no-cache',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-origin',
-        },
-        method: 'GET',
-        referrerPolicy: 'strict-origin-when-cross-origin',
-        mode: 'cors',
-        credentials: 'include',
+      coreRefs.http?.get('/api/status').then((res) => {
+        for (const status of res!.status.statuses) {
+          if (status.id.includes(alertsPluginID)) {
+            alertsPluginExists = true;
+          }
+          if (status.id.includes(anomalyPluginID)) {
+            anomalyPluginExists = true;
+          }
+        }
       });
-      const data = await response.json();
-
-      for (const status of data.status.statuses) {
-        if (status.id.includes(alertsPluginID)) {
-          alertsPluginExists = true;
-        }
-        if (status.id.includes(anomalyPluginID)) {
-          anomalyPluginExists = true;
-        }
-      }
     } catch (error) {
       console.error('Error checking plugin installation status:', error);
     }
@@ -144,7 +107,7 @@ export const Home = ({ ..._props }: HomeProps) => {
             order: card.order,
             description: card.description,
             title: card.title,
-            onClick: () => navigateToApp(card.url, '#/'),
+            onClick: () => coreRefs.application?.navigateToApp(card.url, { path: '#/' }),
             getFooter: () => {
               return (
                 <EuiText size="s" textAlign="center">
@@ -167,25 +130,69 @@ export const Home = ({ ..._props }: HomeProps) => {
         order: 1000,
         input: {
           kind: 'dynamic',
-          get: () => Promise.resolve(uiSettingsService.get(uiSettingsKey)),
+          get: () => Promise.resolve(getObservabilityDashboardsId()),
         },
       }),
       getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
     });
-    setIsRegistered(true);
-    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
-    if (dashboards && defaultDashboard && dashboards[defaultDashboard]) {
-      setDashboardTitle(dashboards[defaultDashboard].label);
-      setDashboardId(defaultDashboard);
-      setStartDate(dashboards[defaultDashboard].startDate);
-      setEndDate(dashboards[defaultDashboard].endDate);
-      wrapper.dashboardSelected = true;
-    } else {
-      wrapper.dashboardSelected = false;
-    }
   };
 
-  useEffect(() => {
+  const registerDashboardsControl = () => {
+    coreRefs.contentManagement?.registerContentProvider({
+      id: 'dashboards_controls',
+      getContent: () => ({
+        id: 'dashboards_controls',
+        kind: 'custom',
+        order: 1000,
+        render: () => (
+          <DashboardControls
+          // isDashboardSelected={isDashboardSelected}
+          // dashboardState={dashboardState}
+          // setDashboardState={setDashboardState}
+          // showFlyout={showFlyout}
+          />
+        ),
+      }),
+      getTargetArea: () => HOME_CONTENT_AREAS.SELECTOR,
+    });
+  };
+  // const registerDashboard = () => {
+  //   coreRefs.contentManagement?.registerContentProvider({
+  //     id: 'dashboard_content',
+  //     getContent: () => ({
+  //       id: 'dashboard_content',
+  //       kind: 'dashboard',
+  //       order: 1000,
+  //       input: {
+  //         kind: 'dynamic',
+  //         get: () => Promise.resolve(getObservabilityDashboardsId()),
+  //       },
+  //     }),
+  //     getTargetArea: () => HOME_CONTENT_AREAS.DASHBOARD,
+  //   });
+
+  //   const defaultDashboard = getObservabilityDashboardsId();
+  //   console.log('defaultDashboard: ', defaultDashboard);
+  //   console.log('dashboardsSavedObjects: ', dashboardsSavedObjects);
+  //   console.log(
+  //     'dashboardsSavedObjects[defaultDashboard]: ',
+  //     dashboardsSavedObjects[defaultDashboard]
+  //   );
+  //   if (dashboardsSavedObjects && defaultDashboard && dashboardsSavedObjects[defaultDashboard]) {
+  //     setDashboardState({
+  //       dashboardTitle: dashboardsSavedObjects[defaultDashboard].label,
+  //       dashboardId: defaultDashboard,
+  //       startDate: dashboardsSavedObjects[defaultDashboard].startDate,
+  //       endDate: dashboardsSavedObjects[defaultDashboard].endDate,
+  //     });
+  //     setIsDashboardSelected(true);
+  //   } else {
+  //     console.log('register dashboard false');
+  //     setIsDashboardSelected(false);
+  //   }
+  // };
+
+  const loadDashboardsState = () => {
     coreRefs.savedObjectsClient
       ?.find({
         type: 'dashboard',
@@ -207,36 +214,95 @@ export const Home = ({ ..._props }: HomeProps) => {
           return acc;
         }, {} as DashboardDictionary);
 
-        setDashboards(savedDashboards);
+        setDashboardsSavedObjects(savedDashboards);
+        const defaultDashboard = getObservabilityDashboardsId();
 
-        const defaultDashboard = uiSettingsService.get(uiSettingsKey);
-
-        if (defaultDashboard && savedDashboards[defaultDashboard]) {
-          setDashboardTitle(savedDashboards[defaultDashboard].label);
-          setDashboardId(defaultDashboard);
-          setStartDate(savedDashboards[defaultDashboard].startDate);
-          setEndDate(savedDashboards[defaultDashboard].endDate);
-          wrapper.dashboardSelected = true;
+        if (defaultDashboard in savedDashboards) {
+          // setDashboardState({
+          //   dashboardTitle: savedDashboards[defaultDashboard].label,
+          //   dashboardId: defaultDashboard,
+          //   startDate: savedDashboards[defaultDashboard].startDate ?? 'now-7d',
+          //   endDate: savedDashboards[defaultDashboard].endDate ?? 'now',
+          // });
+          // setIsDashboardSelected(true);
+          ObservabilityDashboardManager.dashboardState$.next({
+            dashboardTitle: savedDashboards[defaultDashboard].label,
+            dashboardId: defaultDashboard,
+            startDate: savedDashboards[defaultDashboard].startDate ?? 'now-7d',
+            endDate: savedDashboards[defaultDashboard].endDate ?? 'now',
+          });
+          ObservabilityDashboardManager.isDashboardSelected$.next(true);
+          console.log('updated dashboard state');
         } else {
-          uiSettingsService.set('observability:defaultDashboard', null);
-          setDashboardTitle('');
-          setDashboardId('');
-          wrapper.dashboardSelected = false;
+          setObservabilityDashboardsId(null);
+          // setDashboardState({
+          //   startDate: '',
+          //   endDate: '',
+          //   dashboardTitle: '',
+          //   dashboardId: '',
+          // });
+          // console.log('load dashboards false');
+          // setIsDashboardSelected(false);
+          ObservabilityDashboardManager.dashboardState$.next({
+            startDate: '',
+            endDate: '',
+            dashboardTitle: '',
+            dashboardId: '',
+          });
+          console.log('load dashboards false');
+          ObservabilityDashboardManager.isDashboardSelected$.next(false);
         }
       })
       .catch((error) => {
         console.error('Error fetching dashboards:', error);
       });
-  }, []);
+    // registerDashboard();
+    // registerDashboardsControl();
+    // registerCards();
+    // loadHomePage();
+  };
+
+  const reloadDashboardComponents = () => {
+    registerDashboard();
+    registerDashboardsControl();
+  };
+
+  const flyout = isFlyoutVisible && (
+    <SelectDashboardFlyout
+      closeFlyout={() => setIsFlyoutVisible(false)}
+      // isDashboardSelected={isDashboardSelected}
+      // setIsDashboardSelected={setIsDashboardSelected}
+      dashboardsSavedObjects={dashboardsSavedObjects}
+      registerDashboard={loadDashboardsState}
+    />
+  );
+
+  // const dashboardControls = () => {
+  //   return isDashboardSelected ? (
+  //     <DashboardControls
+  //       dashboardState={dashboardState}
+  //       setDashboardState={setDashboardState}
+  //       showFlyout={showFlyout}
+  //     />
+  //   ) : (
+  //     <AddDashboardCallout showFlyout={showFlyout} />
+  //   );
+  // };
+
+  // useEffect(() => {
+  //   setDashboardControls(dashboardControls);
+  // }, [isDashboardSelected]);
 
   useEffect(() => {
     registerCards();
-    const defaultDashboard = uiSettingsService.get(uiSettingsKey);
-    if (defaultDashboard) {
-      wrapper.dashboardSelected = true;
-      registerDashboard();
-    }
-  }, [dashboards]);
+    reloadDashboardComponents();
+    loadHomePage();
+    // const defaultDashboard = getObservabilityDashboardsId();
+    // if (defaultDashboard) {
+    //   setIsDashboardSelected(true);
+    //   registerDashboard();
+    // }
+  }, [dashboardsSavedObjects]);
 
   useEffect(() => {
     setNavBreadCrumbs(
@@ -248,16 +314,19 @@ export const Home = ({ ..._props }: HomeProps) => {
         },
       ]
     );
+    loadDashboardsState();
+    // registerCards();
+    // const defaultDashboard = getObservabilityDashboardsId();
+    // if (defaultDashboard) {
+    //   setIsDashboardSelected(true);
+    //   registerDashboard();
+    // }
+    // setDashboardControls(dashboardControls);
   }, []);
 
-  const flyout = isFlyoutVisible && (
-    <SelectDashboardFlyout
-      closeFlyout={() => setIsFlyoutVisible(false)}
-      wrapper={wrapper}
-      dashboards={dashboards}
-      registerDashboard={registerDashboard}
-    />
-  );
+  // useEffect(() => {
+  //   console.log('re-registered content', isDashboardSelected, dashboardState);
+  // }, [isDashboardSelected, dashboardState]);
 
   return (
     <div>
@@ -265,7 +334,7 @@ export const Home = ({ ..._props }: HomeProps) => {
         <Switch>
           <Route exact path="/">
             <div>
-              {homepage}
+              {homePage}
               {flyout}
             </div>
           </Route>

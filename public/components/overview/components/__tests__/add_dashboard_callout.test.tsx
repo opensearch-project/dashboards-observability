@@ -3,20 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { configure, mount } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { AddDashboardCallout } from '../add_dashboard_callout';
-import { configure, mount } from 'enzyme';
 import { gettingStartedURL } from '../card_configs';
-import Adapter from 'enzyme-adapter-react-16';
 
 describe('Add dashboard callout', () => {
   configure({ adapter: new Adapter() });
 
   const mockShowFlyout = jest.fn();
   const mockNavigateToApp = jest.fn();
-  const wrapper = mount(
-    <AddDashboardCallout showFlyout={mockShowFlyout} navigateToApp={mockNavigateToApp} />
-  );
+  const wrapper = mount(<AddDashboardCallout showFlyout={mockShowFlyout} />);
 
   it('renders add dashboard callout', async () => {
     expect(wrapper).toMatchSnapshot();
