@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { schema } from '@osd/config-schema';
 import {
   CoreSetup,
   CoreStart,
@@ -227,6 +228,15 @@ export class ObservabilityPlugin
     }));
 
     assistantDashboards?.registerMessageParser(PPLParsers);
+
+    core.uiSettings.register({
+      'observability:defaultDashboard': {
+        name: 'Observability default dashboard',
+        value: '',
+        description: 'The default dashboard to display in Observability overview page',
+        schema: schema.string(),
+      },
+    });
 
     return {};
   }

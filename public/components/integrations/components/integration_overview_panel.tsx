@@ -13,7 +13,7 @@ import {
   EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();

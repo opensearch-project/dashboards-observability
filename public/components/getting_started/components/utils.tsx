@@ -59,3 +59,9 @@ export const fetchIndexPatternIds = async (tutorialId: string) => {
     console.error(err.message);
   }
 };
+
+export const redirectToDashboards = (path: string) => {
+  coreRefs?.application!.navigateToApp('dashboards', {
+    path: `#/${path}`,
+  });
+};
