@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+ .obsOverviewDashboardHeader
+ {
+     line-height: 32px;
+     white-space: nowrap;
+ }
+ 
+ .selectable-flyout-body
+ {
+     .euiFlyoutBody__overflowContent{
+         height: calc(100vh - 250px);
+     }
+ }

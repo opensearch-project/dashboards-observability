@@ -41,7 +41,7 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
