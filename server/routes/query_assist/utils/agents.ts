@@ -35,7 +35,8 @@ export const getAgentIdByConfig = async (
       method: 'GET',
       path: `${ML_COMMONS_API_PREFIX}/config/${configName}`,
     })) as ApiResponse<{
-      type: string;
+      type?: string;
+      config_type?: string;
       ml_configuration?: { agent_id?: string };
       configuration?: { agent_id?: string };
     }>;
