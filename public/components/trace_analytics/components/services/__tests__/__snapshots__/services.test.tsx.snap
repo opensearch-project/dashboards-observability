@@ -29,7 +29,6 @@ exports[`Services component renders empty services page 1`] = `
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -168,7 +167,6 @@ exports[`Services component renders empty services page 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
-      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -257,7 +255,6 @@ exports[`Services component renders empty services page 1`] = `
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
-        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
@@ -396,7 +393,6 @@ exports[`Services component renders empty services page 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
-        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -558,7 +554,6 @@ exports[`Services component renders empty services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -990,7 +985,6 @@ exports[`Services component renders empty services page 1`] = `
                                       >
                                         <EuiFormControlLayout
                                           className="euiSuperDatePicker"
-                                          compressed={true}
                                           isDisabled={false}
                                           prepend={
                                             <EuiQuickSelectPopover
@@ -1051,7 +1045,7 @@ exports[`Services component renders empty services page 1`] = `
                                           }
                                         >
                                           <div
-                                            className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
+                                            className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
                                           >
                                             <EuiQuickSelectPopover
                                               applyTime={[Function]}
@@ -1172,7 +1166,6 @@ exports[`Services component renders empty services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
-                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -1268,7 +1261,7 @@ exports[`Services component renders empty services page 1`] = `
                                                   className="euiDatePickerRange euiDatePickerRange--inGroup"
                                                 >
                                                   <button
-                                                    className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
+                                                    className="euiSuperDatePicker__prettyFormat"
                                                     data-test-subj="superDatePickerShowDatesButton"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -1287,9 +1280,7 @@ exports[`Services component renders empty services page 1`] = `
                                                   </button>
                                                 </div>
                                               </EuiDatePickerRange>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={true}
-                                              />
+                                              <EuiFormControlLayoutIcons />
                                             </div>
                                           </div>
                                         </EuiFormControlLayout>
@@ -1442,7 +1433,6 @@ exports[`Services component renders empty services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -1577,7 +1567,6 @@ exports[`Services component renders empty services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
-                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -1618,7 +1607,6 @@ exports[`Services component renders empty services page 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
-                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="s"
                                         textProps={
@@ -1862,7 +1850,6 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -1943,7 +1930,6 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -2024,7 +2010,6 @@ exports[`Services component renders empty services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -2322,7 +2307,6 @@ exports[`Services component renders jaeger services page 1`] = `
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -2458,7 +2442,6 @@ exports[`Services component renders jaeger services page 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
-      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -2550,7 +2533,6 @@ exports[`Services component renders jaeger services page 1`] = `
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
-        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
@@ -2686,7 +2668,6 @@ exports[`Services component renders jaeger services page 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
-        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -2851,7 +2832,6 @@ exports[`Services component renders jaeger services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -3285,7 +3265,6 @@ exports[`Services component renders jaeger services page 1`] = `
                                       >
                                         <EuiFormControlLayout
                                           className="euiSuperDatePicker"
-                                          compressed={true}
                                           isDisabled={false}
                                           prepend={
                                             <EuiQuickSelectPopover
@@ -3346,7 +3325,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                           }
                                         >
                                           <div
-                                            className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
+                                            className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
                                           >
                                             <EuiQuickSelectPopover
                                               applyTime={[Function]}
@@ -3467,7 +3446,6 @@ exports[`Services component renders jaeger services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
-                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -3565,7 +3543,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                                   className="euiDatePickerRange euiDatePickerRange--inGroup"
                                                 >
                                                   <button
-                                                    className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
+                                                    className="euiSuperDatePicker__prettyFormat"
                                                     data-test-subj="superDatePickerShowDatesButton"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -3584,9 +3562,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                                   </button>
                                                 </div>
                                               </EuiDatePickerRange>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={true}
-                                              />
+                                              <EuiFormControlLayoutIcons />
                                             </div>
                                           </div>
                                         </EuiFormControlLayout>
@@ -3739,7 +3715,6 @@ exports[`Services component renders jaeger services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -3875,7 +3850,6 @@ exports[`Services component renders jaeger services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
-                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -4044,7 +4018,6 @@ exports[`Services component renders services page 1`] = `
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -4180,7 +4153,6 @@ exports[`Services component renders services page 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
-      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -4271,7 +4243,6 @@ exports[`Services component renders services page 1`] = `
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
-        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
@@ -4407,7 +4378,6 @@ exports[`Services component renders services page 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
-        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -4571,7 +4541,6 @@ exports[`Services component renders services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="right"
                                     iconSize="m"
                                     iconType="arrowDown"
@@ -5005,7 +4974,6 @@ exports[`Services component renders services page 1`] = `
                                       >
                                         <EuiFormControlLayout
                                           className="euiSuperDatePicker"
-                                          compressed={true}
                                           isDisabled={false}
                                           prepend={
                                             <EuiQuickSelectPopover
@@ -5066,7 +5034,7 @@ exports[`Services component renders services page 1`] = `
                                           }
                                         >
                                           <div
-                                            className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
+                                            className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
                                           >
                                             <EuiQuickSelectPopover
                                               applyTime={[Function]}
@@ -5187,7 +5155,6 @@ exports[`Services component renders services page 1`] = `
                                                       >
                                                         <EuiButtonContent
                                                           className="euiButtonEmpty__content"
-                                                          iconGap="m"
                                                           iconSide="right"
                                                           iconSize="s"
                                                           iconType="arrowDown"
@@ -5285,7 +5252,7 @@ exports[`Services component renders services page 1`] = `
                                                   className="euiDatePickerRange euiDatePickerRange--inGroup"
                                                 >
                                                   <button
-                                                    className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
+                                                    className="euiSuperDatePicker__prettyFormat"
                                                     data-test-subj="superDatePickerShowDatesButton"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -5304,9 +5271,7 @@ exports[`Services component renders services page 1`] = `
                                                   </button>
                                                 </div>
                                               </EuiDatePickerRange>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={true}
-                                              />
+                                              <EuiFormControlLayoutIcons />
                                             </div>
                                           </div>
                                         </EuiFormControlLayout>
@@ -5459,7 +5424,6 @@ exports[`Services component renders services page 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButtonEmpty__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     iconSize="s"
                                     textProps={
@@ -5594,7 +5558,6 @@ exports[`Services component renders services page 1`] = `
                                         >
                                           <EuiButtonContent
                                             className="euiButtonEmpty__content"
-                                            iconGap="m"
                                             iconSide="left"
                                             iconSize="s"
                                             textProps={
@@ -5635,7 +5598,6 @@ exports[`Services component renders services page 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
-                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="s"
                                         textProps={
@@ -5879,7 +5841,6 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -5960,7 +5921,6 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -6041,7 +6001,6 @@ exports[`Services component renders services page 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
-                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {

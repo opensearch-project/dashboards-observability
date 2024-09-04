@@ -16,7 +16,6 @@ exports[`Service Config component renders empty service config 1`] = `
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -120,7 +119,6 @@ exports[`Service Config component renders empty service config 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
-      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -371,7 +369,6 @@ exports[`Service Config component renders empty service config 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
-                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -777,7 +774,6 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -858,7 +854,6 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -939,7 +934,6 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -1226,7 +1220,6 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -1330,7 +1323,6 @@ exports[`Service Config component renders with one service selected 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
-      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -1596,7 +1588,6 @@ exports[`Service Config component renders with one service selected 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
-                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -2003,7 +1994,6 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2084,7 +2074,6 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2165,7 +2154,6 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
-                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
