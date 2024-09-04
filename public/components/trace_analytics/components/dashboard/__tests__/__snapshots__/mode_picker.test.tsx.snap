@@ -79,6 +79,7 @@ exports[`Mode picker component renders mode picker 1`] = `
             >
               <EuiButtonContent
                 className="euiButtonEmpty__content"
+                iconGap="m"
                 iconSide="right"
                 iconSize="m"
                 iconType="arrowDown"
@@ -222,6 +223,7 @@ exports[`Mode picker component renders mode picker 2`] = `
             >
               <EuiButtonContent
                 className="euiButtonEmpty__content"
+                iconGap="m"
                 iconSide="right"
                 iconSize="m"
                 iconType="arrowDown"
@@ -922,6 +924,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButton__content"
+                                                      iconGap="m"
                                                       iconSide="left"
                                                       textProps={
                                                         Object {

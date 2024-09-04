@@ -46,6 +46,7 @@ exports[`Search bar components renders date picker 1`] = `
       },
     ]
   }
+  compressed={false}
   dateFormat=""
   end="now"
   isAutoRefreshOnly={false}
@@ -72,6 +73,7 @@ exports[`Search bar components renders date picker 1`] = `
         >
           <EuiFormControlLayout
             className="euiSuperDatePicker"
+            compressed={false}
             isDisabled={false}
             prepend={
               <EuiQuickSelectPopover
@@ -253,6 +255,7 @@ exports[`Search bar components renders date picker 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="s"
                             iconType="arrowDown"
@@ -367,7 +370,9 @@ exports[`Search bar components renders date picker 1`] = `
                     </button>
                   </div>
                 </EuiDatePickerRange>
-                <EuiFormControlLayoutIcons />
+                <EuiFormControlLayoutIcons
+                  compressed={false}
+                />
               </div>
             </div>
           </EuiFormControlLayout>
@@ -685,6 +690,7 @@ exports[`Search bar components renders search bar 1`] = `
                   >
                     <EuiFormControlLayout
                       className="euiSuperDatePicker"
+                      compressed={true}
                       isDisabled={false}
                       prepend={
                         <EuiQuickSelectPopover
@@ -745,7 +751,7 @@ exports[`Search bar components renders search bar 1`] = `
                       }
                     >
                       <div
-                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                       >
                         <EuiQuickSelectPopover
                           applyTime={[Function]}
@@ -866,6 +872,7 @@ exports[`Search bar components renders search bar 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -963,7 +970,7 @@ exports[`Search bar components renders search bar 1`] = `
                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                             >
                               <button
-                                className="euiSuperDatePicker__prettyFormat"
+                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                 data-test-subj="superDatePickerShowDatesButton"
                                 disabled={false}
                                 onClick={[Function]}
@@ -982,7 +989,9 @@ exports[`Search bar components renders search bar 1`] = `
                               </button>
                             </div>
                           </EuiDatePickerRange>
-                          <EuiFormControlLayoutIcons />
+                          <EuiFormControlLayoutIcons
+                            compressed={true}
+                          />
                         </div>
                       </div>
                     </EuiFormControlLayout>
