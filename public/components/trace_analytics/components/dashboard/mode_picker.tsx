@@ -23,7 +23,7 @@ import { CustomIndexFlyout } from '../common/custom_index_flyout';
 const labels = new Map([
   ['jaeger', 'Jaeger'],
   ['data_prepper', 'Data Prepper'],
-  ['custom_data_prepper', 'Custom trace source'],
+  ['custom_data_prepper', 'Custom source'],
 ]);
 
 export function DataSourcePicker(props: {
@@ -117,12 +117,12 @@ export function DataSourcePicker(props: {
                     setPopoverIsOpen(false);
                   }}
                 >
-                  Manage custom trace source
+                  Manage custom source
                 </EuiSmallButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText>
-                  <EuiToolTip content="Custom trace indices is an experimental feature">
+                  <EuiToolTip content="Custom trace and service indices is an experimental feature">
                     <EuiIcon type="iInCircle" />
                   </EuiToolTip>
                 </EuiText>

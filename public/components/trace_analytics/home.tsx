@@ -169,7 +169,7 @@ export const Home = (props: HomeProps) => {
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
     {
       id: 'custom_data_prepper',
-      title: 'Custom trace source',
+      title: 'Custom source',
       'data-test-subj': 'custom-data-prepper-mode',
     },
   ];

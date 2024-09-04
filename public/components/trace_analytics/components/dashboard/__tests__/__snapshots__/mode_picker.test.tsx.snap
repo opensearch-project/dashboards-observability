@@ -408,7 +408,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                                 <span
                                   class="euiButton__text"
                                 >
-                                  Manage custom trace source
+                                  Manage custom source
                                 </span>
                               </span>
                             </button>
@@ -938,7 +938,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                                                         <span
                                                           className="euiButton__text"
                                                         >
-                                                          Manage custom trace source
+                                                          Manage custom source
                                                         </span>
                                                       </span>
                                                     </EuiButtonContent>
@@ -959,7 +959,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                                                 className="euiText euiText--medium"
                                               >
                                                 <EuiToolTip
-                                                  content="Custom trace indices is an experimental feature"
+                                                  content="Custom trace and service indices is an experimental feature"
                                                   delay="regular"
                                                   position="top"
                                                 >

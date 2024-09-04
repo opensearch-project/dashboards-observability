@@ -70,7 +70,7 @@ export const CustomIndexFlyout = ({
 
   const callout = (
     <EuiCallOut
-      title="Custom indices in trace analytics is an experimental feature"
+      title="Custom source in trace analytics is an experimental feature"
       color="warning"
       iconType="help"
     >
@@ -94,7 +94,7 @@ export const CustomIndexFlyout = ({
       <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h3 id="flyoutTitle">Manage custom trace source</h3>
+            <h3 id="flyoutTitle">Manage custom source</h3>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody banner={callout}>
