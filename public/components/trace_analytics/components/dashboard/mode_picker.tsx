@@ -8,6 +8,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSmallButton,
@@ -22,7 +23,7 @@ import { CustomIndexFlyout } from '../common/custom_index_flyout';
 const labels = new Map([
   ['jaeger', 'Jaeger'],
   ['data_prepper', 'Data Prepper'],
-  ['custom_data_prepper', 'Custom Data Prepper Indices'],
+  ['custom_data_prepper', 'Custom trace source'],
 ]);
 
 export function DataSourcePicker(props: {
@@ -107,25 +108,27 @@ export function DataSourcePicker(props: {
               </>
             )}
           </EuiSelectable>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSmallButton
-                onClick={() => {
-                  setIsFlyoutVisible(true);
-                  setPopoverIsOpen(false);
-                }}
-              >
-                Manage custom trace indices
-              </EuiSmallButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <EuiToolTip content="Custom trace indices is an experimental feature">
-                  <EuiIcon type="iInCircle" />
-                </EuiToolTip>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  onClick={() => {
+                    setIsFlyoutVisible(true);
+                    setPopoverIsOpen(false);
+                  }}
+                >
+                  Manage custom trace source
+                </EuiSmallButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <EuiToolTip content="Custom trace indices is an experimental feature">
+                    <EuiIcon type="iInCircle" />
+                  </EuiToolTip>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </div>
       </EuiPopover>
       <CustomIndexFlyout

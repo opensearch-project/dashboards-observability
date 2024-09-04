@@ -194,14 +194,11 @@ export function getServiceMapGraph(
       };
     } else {
       styleOptions = {
-        borderWidth: 1.5,
+        borderWidth: 1.0,
         chosen: false,
         color: {
           border: '#DADADC',
           background: '#FFFFFF',
-        },
-        shapeProperties: {
-          borderDashes: [2, 2],
         },
       };
     }

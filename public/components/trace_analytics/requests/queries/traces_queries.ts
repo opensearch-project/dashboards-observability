@@ -467,3 +467,121 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
   };
   return query;
 };
+
+export const getCustomIndicesTracesQuery = (
+  mode: TraceAnalyticsMode,
+  traceId: string = '',
+  sort?: PropertySort
+) => {
+  const jaegerQuery: any = {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      traces: {
+        terms: {
+          field: 'traceID',
+          size: TRACES_MAX_NUM,
+          order: {
+            [sort?.field || '_key']: sort?.direction || 'asc',
+          },
+          execution_hint: 'map',
+        },
+        aggs: {
+          latency: {
+            max: {
+              script: {
+                source: `
+                if (doc.containsKey('duration') && !doc['duration'].empty) {
+                  return Math.round(doc['duration'].value) / 1000.0
+                }
+
+                return 0
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          trace_group: {
+            terms: {
+              field: 'traceGroup',
+              size: 1,
+            },
+          },
+          error_count: {
+            filter: {
+              term: {
+                'tag.error': true,
+              },
+            },
+          },
+          last_updated: {
+            max: {
+              script: {
+                source: `
+                if (doc.containsKey('startTime') && !doc['startTime'].empty && doc.containsKey('duration') && !doc['duration'].empty) {
+                  return (Math.round(doc['duration'].value) + Math.round(doc['startTime'].value)) / 1000.0
+                }
+
+                return 0
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+        },
+      },
+    },
+    track_total_hits: false,
+  };
+
+  const dataPrepperQuery: any = {
+    size: TRACES_MAX_NUM,
+    _source: {
+      includes: [
+        'traceId',
+        'traceGroup',
+        'durationInNanos',
+        'status.code',
+        'endTime',
+        '*attributes*',
+        '*instrumentation*',
+      ],
+    },
+    query: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            term: {
+              parentSpanId: '', // Data prepper root span doesn't have any parent.
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+    ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
+    track_total_hits: false,
+  };
+  if (traceId) {
+    jaegerQuery.query.bool.filter.push({
+      term: {
+        traceID: traceId,
+      },
+    });
+    dataPrepperQuery.query.bool.filter.push({
+      term: {
+        traceId,
+      },
+    });
+  }
+  return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
+};

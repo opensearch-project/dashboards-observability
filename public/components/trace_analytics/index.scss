@@ -85,3 +85,24 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   width: 10vw;
   min-width: 250px;
 }
+
+.traces-scrollable-table {
+  > div:first-of-type {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+  }
+}
+
+.attributes-column-header,
+.attributes-column {
+  max-width: 200px;
+}
+
+.trace-group-column {
+  min-width: 200px;
+}
+
+.attributes-column-header {
+  display: table-cell;
+}

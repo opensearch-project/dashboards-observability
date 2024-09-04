@@ -5,13 +5,15 @@
 
 import {
   EuiButtonGroup,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
   EuiText,
-  EuiCompressedFieldSearch,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -53,6 +55,7 @@ export function ServiceMap({
   page,
   setCurrentSelectedService,
   filterByCurrService,
+  includeMetricsCallback,
 }: {
   serviceMap: ServiceObject;
   idSelected: 'latency' | 'error_rate' | 'throughput';
@@ -70,6 +73,7 @@ export function ServiceMap({
     | 'traceView';
   setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
   filterByCurrService?: boolean;
+  includeMetricsCallback?: () => void;
 }) {
   const [invalid, setInvalid] = useState(false);
   const [network, setNetwork] = useState(null);
@@ -92,6 +96,35 @@ export function ServiceMap({
   ];
 
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<ServiceNodeDetails | null>(null);
+
+  const [selectableValue, setSelectableValue] = useState<Array<EuiSuperSelectOption<any>>>([]);
+
+  const onChangeSelectable = (value: React.SetStateAction<Array<EuiSuperSelectOption<any>>>) => {
+    // if the change is changing for the first time then callback servicemap with metrics
+    if (selectableValue.length === 0 && value.length !== 0) {
+      if (includeMetricsCallback) {
+        includeMetricsCallback();
+      }
+    }
+    // console.log('value[0].id', value);
+    setIdSelected(value);
+    setSelectableValue(value);
+  };
+
+  const metricOptions: Array<EuiSuperSelectOption<any>> = [
+    {
+      value: 'latency',
+      inputDisplay: 'Duration',
+    },
+    {
+      value: 'error_rate',
+      inputDisplay: 'Errors',
+    },
+    {
+      value: 'throughput',
+      inputDisplay: 'Request Rate',
+    },
+  ];
 
   const options = {
     layout: {
@@ -209,27 +242,51 @@ export function ServiceMap({
           <PanelTitle title="Service map" />
         )}
         <EuiSpacer size="m" />
-        <EuiButtonGroup
-          options={toggleButtons}
-          idSelected={idSelected}
-          onChange={(id) => setIdSelected(id as 'latency' | 'error_rate' | 'throughput')}
-          buttonSize="s"
-          color="text"
-        />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiText>Focus on</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCompressedFieldSearch
-              placeholder="Service name"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onSearch={(service) => onFocus(service)}
-              isInvalid={query.length > 0 && invalid}
+        {page !== 'traces' && (
+          <>
+            <EuiButtonGroup
+              options={toggleButtons}
+              idSelected={idSelected}
+              onChange={(id) => setIdSelected(id as 'latency' | 'error_rate' | 'throughput')}
+              buttonSize="s"
+              color="text"
             />
+            <EuiHorizontalRule margin="m" />
+          </>
+        )}
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText>Focus on</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  placeholder="Service name"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onSearch={(service) => onFocus(service)}
+                  isInvalid={query.length > 0 && invalid}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
+          {page === 'traces' && (
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText>Select metrics</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSuperSelect
+                    options={metricOptions}
+                    valueOfSelected={selectableValue}
+                    onChange={(value) => onChangeSelectable(value)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer />
 
@@ -267,9 +324,11 @@ export function ServiceMap({
                 )}
               </div>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
-            </EuiFlexItem>
+            {(page !== 'traces' || idSelected) && (
+              <EuiFlexItem grow={false}>
+                <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ) : (
           <div style={{ minHeight: 434 }}>
@@ -277,7 +336,7 @@ export function ServiceMap({
           </div>
         )}
       </EuiPanel>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       {filterByCurrService && items?.graph && (
         <ServiceDependenciesTable serviceMap={serviceMap} graph={items?.graph} />
       )}

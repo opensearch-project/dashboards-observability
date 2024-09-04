@@ -80,7 +80,8 @@ export const handleServiceMapRequest = async (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
   setItems?: any,
-  currService?: string
+  currService?: string,
+  includeMetrics = true
 ) => {
   let minutesInDateRange: number;
   const startTime = DSL.custom?.timeFilter?.[0]?.range?.startTime;
@@ -147,21 +148,23 @@ export const handleServiceMapRequest = async (
     )
     .catch((error) => console.error(error));
 
-  // service map handles DSL differently
-  const latencies = await handleDslRequest(
-    http,
-    DSL,
-    getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
-    mode,
-    dataSourceMDSId
-  );
-  latencies.aggregations.service_name.buckets.map((bucket: any) => {
-    map[bucket.key].latency = bucket.average_latency.value;
-    map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
-    map[bucket.key].throughput = bucket.doc_count;
-    if (minutesInDateRange != null)
-      map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
-  });
+  if (includeMetrics) {
+    // service map handles DSL differently
+    const latencies = await handleDslRequest(
+      http,
+      DSL,
+      getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
+      mode,
+      dataSourceMDSId
+    );
+    latencies.aggregations.service_name.buckets.map((bucket: any) => {
+      map[bucket.key].latency = bucket.average_latency.value;
+      map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
+      map[bucket.key].throughput = bucket.doc_count;
+      if (minutesInDateRange != null)
+        map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
+    });
+  }
 
   if (currService) {
     await handleDslRequest(http, DSL, getRelatedServicesQuery(currService), mode, dataSourceMDSId)

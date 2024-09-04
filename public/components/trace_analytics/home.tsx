@@ -169,7 +169,7 @@ export const Home = (props: HomeProps) => {
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
     {
       id: 'custom_data_prepper',
-      title: 'Custom Data Prepper Indices',
+      title: 'Custom trace source',
       'data-test-subj': 'custom-data-prepper-mode',
     },
   ];
@@ -324,6 +324,7 @@ export const Home = (props: HomeProps) => {
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
                   getTraceViewUri={getTraceViewUri}
+                  setCurrentSelectedService={setCurrentSelectedService}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
                   {...commonProps}
@@ -337,6 +338,7 @@ export const Home = (props: HomeProps) => {
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
                   getTraceViewUri={getTraceViewUri}
+                  setCurrentSelectedService={setCurrentSelectedService}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
                   {...commonProps}

@@ -4,7 +4,9 @@
  */
 
 import { PropertySort } from '@elastic/eui';
+import { isArray, isObject } from 'lodash';
 import get from 'lodash/get';
+import omitBy from 'lodash/omitBy';
 import round from 'lodash/round';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
@@ -15,6 +17,7 @@ import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
+  getCustomIndicesTracesQuery,
   getPayloadQuery,
   getServiceBreakdownQuery,
   getSpanDetailQuery,
@@ -24,6 +27,59 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+
+export const handleCustomIndicesTracesRequest = async (
+  http: HttpSetup,
+  DSL: any,
+  items: any,
+  setItems: (items: any) => void,
+  setColumns: (items: any) => void,
+  mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
+  sort?: PropertySort
+) => {
+  const responsePromise = handleDslRequest(
+    http,
+    DSL,
+    getCustomIndicesTracesQuery(mode, undefined, sort),
+    mode,
+    dataSourceMDSId
+  );
+
+  return Promise.allSettled([responsePromise])
+    .then(([responseResult]) => {
+      if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+
+      if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+        const keys = new Set();
+        const response = responseResult.value.hits.hits.map((val) => {
+          const source = omitBy(val._source, isArray || isObject);
+          Object.keys(source).forEach((key) => keys.add(key));
+          return { ...source };
+        });
+
+        return [keys, response];
+      } else {
+        return [
+          [undefined],
+          responseResult.value.aggregations.traces.buckets.map((bucket: any) => {
+            return {
+              trace_id: bucket.key,
+              latency: bucket.latency.value,
+              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+              error_count: bucket.error_count.doc_count,
+              actions: '#',
+            };
+          }),
+        ];
+      }
+    })
+    .then((newItems) => {
+      setColumns([...newItems[0]]);
+      setItems(newItems[1]);
+    })
+    .catch((error) => console.error(error));
+};
 
 export const handleTracesRequest = async (
   http: HttpSetup,
