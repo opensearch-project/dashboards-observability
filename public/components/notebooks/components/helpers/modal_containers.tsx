@@ -3,23 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
 import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EuiSmallButton,
-  EuiSmallButtonEmpty,
   EuiCompressedFieldText,
-  EuiForm,
   EuiCompressedFormRow,
+  EuiConfirmModal,
+  EuiForm,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
+  EuiOverlayMask,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+import { CoreStart, SavedObjectsStart } from '../../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public/plugin';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { CustomInputModal } from './custom_modals/custom_input_modal';
 
 /* The file contains helper functions for modal layouts
@@ -80,8 +84,26 @@ export const getSampleNotebooksModal = (
   onCancel: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void,
-  onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+  onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
+  dataSourceEnabled: boolean,
+  dataSourceManagement: DataSourceManagementPluginSetup,
+  savedObjectsMDSClient: SavedObjectsStart,
+  notifications: CoreStart['notifications'],
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void
 ) => {
+  let DataSourceSelector;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
+
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
@@ -92,12 +114,27 @@ export const getSampleNotebooksModal = (
         confirmButtonText="Yes"
         defaultFocusedButton="confirm"
       >
-        <EuiText size="s">
-          <p>
-            Do you want to add sample notebooks? This will also add Dashboards sample flights and
-            logs data if they have not been added.
-          </p>
-        </EuiText>
+        {dataSourceEnabled && (
+          <>
+            <EuiTitle size="s">
+              <h4>Select a Data source</h4>
+            </EuiTitle>
+            <DataSourceSelector
+              savedObjectsClient={savedObjectsMDSClient.client}
+              notifications={notifications}
+              onSelectedDataSource={onSelectedDataSource}
+              disabled={false}
+              fullWidth={false}
+              removePrepend={false}
+              dataSourceFilter={dataSourceFilterFn}
+            />
+          </>
+        )}
+        <EuiSpacer />
+        <p>
+          Do you want to add sample notebooks? This will also add Dashboards sample flights and logs
+          data if they have not been added.
+        </p>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
