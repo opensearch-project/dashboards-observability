@@ -21,6 +21,7 @@ interface TraceDetailRenderProps {
   http: HttpStart;
   openSpanFlyout: (spanId: string) => void;
   mode: TraceAnalyticsMode;
+  dataSourceMDSId: string;
 }
 
 export const TraceDetailRender = ({
@@ -28,6 +29,8 @@ export const TraceDetailRender = ({
   http,
   openSpanFlyout,
   mode,
+  dataSourceMDSId,
+
 }: TraceDetailRenderProps) => {
   const [fields, setFields] = useState<any>({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
@@ -74,6 +77,7 @@ export const TraceDetailRender = ({
           page="app"
           openSpanFlyout={openSpanFlyout}
           mode={mode}
+          dataSourceMDSId={dataSourceMDSId}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
