@@ -138,16 +138,16 @@ describe('Helper functions', () => {
       );
     const existsDSL = getTestDslFromFilters();
     expect(JSON.stringify(existsDSL)).toEqual(
-      '{"query":{"bool":{"must":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}},{"exists":{"field":"traceGroup"}}],"filter":[],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}'
+      '{"query":{"bool":{"must":[{"exists":{"field":"traceGroup"}}],"filter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}'
     );
 
     const isDSL = getTestDslFromFilters('traceGroup', 'is');
     expect(JSON.stringify(isDSL)).toEqual(
-      '{"query":{"bool":{"must":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}},{"term":{"traceGroup":{"from":"100","to":"∞"}}}],"filter":[],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}'
+      '{"query":{"bool":{"must":[{"term":{"traceGroup":{"from":"100","to":"∞"}}}],"filter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}'
     );
     const isBetweenDSL = getTestDslFromFilters('durationInNanos', 'is between');
     expect(JSON.stringify(isBetweenDSL)).toEqual(
-      `{"query":{"bool":{"must":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}},{"range":{"durationInNanos":{"gte":"100"}}}],"filter":[],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}`
+      '{"query":{"bool":{"must":[{"range":{"durationInNanos":{"gte":"100"}}}],"filter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"should":[],"must_not":[]}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":[]}}}}}'
     );
 
     const customDSL = filtersToDsl(
@@ -167,7 +167,7 @@ describe('Helper functions', () => {
       'now'
     );
     expect(JSON.stringify(customDSL)).toEqual(
-      `{"query":{"bool":{"must":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"filter":[],"should":["test"],"must_not":[],"minimum_should_match":1}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":["test"],"minimum_should_match":1}}}}}`
+      '{"query":{"bool":{"must":[],"filter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"should":["test"],"must_not":[],"minimum_should_match":1}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":["test"],"minimum_should_match":1}}}}}'
     );
   });
 });
