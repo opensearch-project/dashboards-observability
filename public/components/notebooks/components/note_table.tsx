@@ -22,7 +22,7 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import moment from 'moment';
@@ -41,7 +41,7 @@ import {
 } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 import {
   DeleteNotebookModal,
@@ -186,7 +186,6 @@ export function NoteTable({
       getSampleNotebooksModal(
         closeModal,
         async () => {
-          console.log(selectedDataSourceId, selectedDataSourceLabel);
           closeModal();
           await addSampleNotebooks(selectedDataSourceId, selectedDataSourceLabel);
         },

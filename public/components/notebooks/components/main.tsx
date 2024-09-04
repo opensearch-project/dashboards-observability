@@ -106,7 +106,7 @@ export class Main extends React.Component<MainProps, MainState> {
           console.error('Issue in fetching the notebooks', err.body.message);
         });
     } else {
-      // If `MDS` is not enabled, fetch from both endpoints and combine the data.
+      // If `MDS` is not enabled /savedNotebook/ API returns notebooks stored as saved objects, and the other one returns notebooks stored as observability objects.
       return Promise.all([
         this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`),
         this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
