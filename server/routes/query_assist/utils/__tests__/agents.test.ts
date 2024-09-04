@@ -40,6 +40,25 @@ describe('Agents helper functions', () => {
     `);
   });
 
+  it('acccepts ml_configuration key in get agent response', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      body: {
+        config_type: 'agent',
+        ml_configuration: { agent_id: 'agentId' },
+      },
+    });
+    const id = await getAgentIdByConfig(client, 'test_agent');
+    expect(id).toEqual('agentId');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "GET",
+          "path": "/_plugins/_ml/config/test_agent",
+        },
+      ]
+    `);
+  });
+
   it('handles not found errors', async () => {
     mockedTransport.mockRejectedValueOnce(
       new ResponseError(({
