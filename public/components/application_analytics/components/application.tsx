@@ -54,7 +54,7 @@ import {
 } from '../../../../public/components/trace_analytics/components/common/helper_functions';
 import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/components/traces/span_detail_flyout';
 import { SpanDetailTable } from '../../../../public/components/trace_analytics/components/traces/span_detail_table';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_headerControl';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { TracesContent } from '../../../components/trace_analytics/components/traces/traces_content';
 import { coreRefs } from '../../../framework/core_refs';
 import { Explorer } from '../../event_analytics/explorer/explorer';
