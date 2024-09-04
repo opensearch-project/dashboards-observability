@@ -118,9 +118,11 @@ export const Home = (props: HomeProps) => {
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
-  let defaultRoute = props.defaultRoute ?? '/services';
-  const currentHash = window.location.hash.split('#')[1] || '';
 
+  // Navigate a valid routes when suffixed with '/traces' and '/services'
+  // Route defaults to traces page
+  let defaultRoute = props.defaultRoute ?? '/traces';
+  const currentHash = window.location.hash.split('#')[1] || '';
   if (currentHash.startsWith('/traces') || currentHash.startsWith('/services')) {
     defaultRoute = currentHash;
   }
@@ -203,7 +205,7 @@ export const Home = (props: HomeProps) => {
       ? [
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ]
       : []),
@@ -218,7 +220,7 @@ export const Home = (props: HomeProps) => {
       ? [
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ]
       : []),
