@@ -5,7 +5,7 @@
 
 import {
   EuiButtonGroup,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
-  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -106,7 +105,6 @@ export function ServiceMap({
         includeMetricsCallback();
       }
     }
-    // console.log('value[0].id', value);
     setIdSelected(value);
     setSelectableValue(value);
   };
@@ -255,36 +253,25 @@ export function ServiceMap({
           </>
         )}
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText>Focus on</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  placeholder="Service name"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onSearch={(service) => onFocus(service)}
-                  isInvalid={query.length > 0 && invalid}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={7}>
+            <EuiCompressedFieldSearch
+              prepend="Focus on"
+              placeholder="Service name"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onSearch={(service) => onFocus(service)}
+              isInvalid={query.length > 0 && invalid}
+            />
           </EuiFlexItem>
           {page === 'traces' && (
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiText>Select metrics</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiSuperSelect
-                    options={metricOptions}
-                    valueOfSelected={selectableValue}
-                    onChange={(value) => onChangeSelectable(value)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            <EuiFlexItem grow={3}>
+              <EuiSuperSelect
+                prepend="Select metrics"
+                compressed
+                options={metricOptions}
+                valueOfSelected={selectableValue}
+                onChange={(value) => onChangeSelectable(value)}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
