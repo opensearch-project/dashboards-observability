@@ -83,7 +83,7 @@ exports[`Service view component renders service view 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
-        size="xl"
+        size="m"
       />
       <EuiPanel>
         <PanelTitle

@@ -39,6 +39,7 @@ import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
+import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
@@ -107,7 +108,7 @@ export function ServiceView(props: ServiceViewProps) {
           props.parentBreadcrumb,
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ],
         [
@@ -207,6 +208,12 @@ export function ServiceView(props: ServiceViewProps) {
     },
   ];
 
+  const serviceHeader = (
+    <EuiText size="s">
+      <h1 className="overview-content">{props.serviceName}</h1>
+    </EuiText>
+  );
+
   const renderTitle = (
     serviceName: string,
     startTime: SearchBarProps['startTime'],
@@ -221,11 +228,7 @@ export function ServiceView(props: ServiceViewProps) {
         {_page === 'serviceFlyout' ? (
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <h2 className="overview-content">{serviceName}</h2>
-                </EuiText>
-              </EuiFlexItem>
+              <EuiFlexItem>{serviceHeader}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
@@ -239,13 +242,13 @@ export function ServiceView(props: ServiceViewProps) {
             </EuiFlexGroup>
             {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
+        ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
+          <HeaderControlledComponentsWrapper
+            components={[renderDatePicker(startTime, setStartTime, endTime, setEndTime)]}
+          />
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="s">
-                <h1 className="overview-content">{serviceName}</h1>
-              </EuiText>
-            </EuiFlexItem>
+            <EuiFlexItem>{serviceHeader}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
@@ -489,7 +492,7 @@ export function ServiceView(props: ServiceViewProps) {
           results are filtered by {activeFilters.map((filter) => filter.field).join(', ')}
         </EuiText>
       )}
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       {overview}
 
       {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
