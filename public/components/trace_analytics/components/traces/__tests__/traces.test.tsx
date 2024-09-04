@@ -22,8 +22,7 @@ describe('Traces component', () => {
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -40,7 +39,7 @@ describe('Traces component', () => {
         chrome={chrome!}
         parentBreadcrumb={{ text: 'test', href: 'test#/' }}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
@@ -68,8 +67,7 @@ describe('Traces component', () => {
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -86,7 +84,7 @@ describe('Traces component', () => {
         chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
@@ -114,8 +112,7 @@ describe('Traces component', () => {
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -132,7 +129,7 @@ describe('Traces component', () => {
         chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
