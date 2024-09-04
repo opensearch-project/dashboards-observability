@@ -34,12 +34,20 @@ export const getAgentIdByConfig = async (
     const response = (await opensearchClient.transport.request({
       method: 'GET',
       path: `${ML_COMMONS_API_PREFIX}/config/${configName}`,
-    })) as ApiResponse<{ type: string; configuration: { agent_id?: string } }>;
+    })) as ApiResponse<{
+      type?: string;
+      config_type?: string;
+      ml_configuration?: { agent_id?: string };
+      configuration?: { agent_id?: string };
+    }>;
 
-    if (!response || response.body.configuration.agent_id === undefined) {
+    if (
+      !response ||
+      !(response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)
+    ) {
       throw new Error('cannot find any agent by configuration: ' + configName);
     }
-    return response.body.configuration.agent_id;
+    return (response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)!;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
     throw new Error(`Get agent '${configName}' failed, reason: ` + errorMessage);
