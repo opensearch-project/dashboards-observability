@@ -94,8 +94,6 @@ export function NoteTable({
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
-  const [_dataSourceMDSId, setDataSourceMDSId] = useState<string | undefined>('');
-  const [_dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string | undefined>('');
 
   useEffect(() => {
     setNavBreadCrumbs(
@@ -179,8 +177,6 @@ export function NoteTable({
     const handleSelectedDataSourceChange = (id?: string, label?: string) => {
       selectedDataSourceId = id;
       selectedDataSourceLabel = label;
-      setDataSourceMDSId(id);
-      setDataSourceMDSLabel(label);
     };
     setModalLayout(
       getSampleNotebooksModal(
