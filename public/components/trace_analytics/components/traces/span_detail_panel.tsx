@@ -17,8 +17,8 @@ import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { Plt } from '../../../visualizations/plotly/plot';
-import { TraceAnalyticsMode } from '../../home';
 import { handleSpansGanttRequest } from '../../requests/traces_request_handler';
 import { PanelTitle } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
@@ -132,7 +132,7 @@ export function SpanDetailPanel(props: {
           };
     spanFilters.map(({ field, value }) => {
       if (value != null) {
-        spanDSL.query.bool.must.push({
+        spanDSL.query.bool.filter.push({
           term: {
             [field]: value,
           },

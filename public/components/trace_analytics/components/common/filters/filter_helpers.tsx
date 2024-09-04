@@ -6,20 +6,20 @@
 import {
   EuiCompressedComboBox,
   EuiCompressedFieldText,
-  EuiFormControlLayoutDelimited,
   EuiCompressedFormRow,
+  EuiFormControlLayoutDelimited,
   EuiSpacer,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
+import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
   mode: TraceAnalyticsMode,
   page: 'dashboard' | 'traces' | 'services' | 'app',
   attributesFilterFields: string[]
 ) =>
-  mode === 'data_prepper'
+  mode === 'data_prepper' || mode === 'custom_data_prepper'
     ? {
         dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
         traces: [

@@ -6,7 +6,7 @@
 import { EuiCodeBlock, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { TraceAnalyticsMode } from '../../../../../public/components/trace_analytics/home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { ServiceBreakdownPanel } from '../../../trace_analytics/components/traces/service_breakdown_panel';
 import { SpanDetailPanel } from '../../../trace_analytics/components/traces/span_detail_panel';
 import {
@@ -30,6 +30,7 @@ export const TraceDetailRender = ({
   openSpanFlyout,
   mode,
   dataSourceMDSId,
+
 }: TraceDetailRenderProps) => {
   const [fields, setFields] = useState<any>({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);

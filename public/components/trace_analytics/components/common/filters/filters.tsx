@@ -6,7 +6,6 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiSmallButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -14,10 +13,11 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSmallButtonIcon,
   EuiTextColor,
 } from '@elastic/eui';
-import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React, { useMemo, useState } from 'react';
+import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 import { FilterEditPopover } from './filter_edit_popover';
 import { getFilterFields, getValidFilterFields } from './filter_helpers';
 

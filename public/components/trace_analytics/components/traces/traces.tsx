@@ -13,7 +13,9 @@ import { TracesContent } from './traces_content';
 export interface TracesProps extends TraceAnalyticsComponentDeps {
   page: 'traces' | 'app';
   childBreadcrumbs: EuiBreadcrumb[];
-  traceIdColumnAction: any;
+  setCurrentSelectedService: React.Dispatch<React.SetStateAction<string>>;
+  getTraceViewUri?: (traceId: string) => string;
+  openTraceFlyout?: (traceId: string) => void;
   toasts: Toast[];
   dataSourceMDSId: DataSourceOption[];
 }
