@@ -3,12 +3,12 @@
 exports[`Traces table component renders empty traces table message 1`] = `
 <TracesTable
   dataPrepperIndicesExist={false}
+  getTraceViewUri={[Function]}
   items={Array []}
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -229,12 +229,12 @@ exports[`Traces table component renders empty traces table message 1`] = `
 exports[`Traces table component renders empty traces table message 2`] = `
 <TracesTable
   dataPrepperIndicesExist={true}
+  getTraceViewUri={[Function]}
   items={Array []}
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -378,6 +378,7 @@ exports[`Traces table component renders empty traces table message 2`] = `
 exports[`Traces table component renders jaeger traces table 1`] = `
 <TracesTable
   dataPrepperIndicesExist={false}
+  getTraceViewUri={[Function]}
   items={
     Array [
       Object {
@@ -394,7 +395,6 @@ exports[`Traces table component renders jaeger traces table 1`] = `
   loading={false}
   mode="jaeger"
   refresh={[MockFunction]}
-  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -455,6 +455,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
         />
       </EuiHorizontalRule>
       <EuiInMemoryTable
+        allowNeutralSort={false}
         columns={
           Array [
             Object {
@@ -588,7 +589,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
           responsive={true}
           sorting={
             Object {
-              "allowNeutralSort": true,
+              "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
                 "field": "Trace ID",
@@ -1113,25 +1114,32 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
-                                      grow={10}
+                                      grow={false}
                                     >
                                       <div
-                                        className="euiFlexItem euiFlexItem--flexGrow10"
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiLink
-                                          onClick={[Function]}
+                                          data-test-subj="trace-link"
                                         >
                                           <button
                                             className="euiLink euiLink--primary"
+                                            data-test-subj="trace-link"
                                             disabled={false}
-                                            onClick={[Function]}
                                             type="button"
                                           >
-                                            <div
+                                            <EuiText
+                                              className="traces-table traces-table-trace-id"
+                                              size="s"
                                               title="00079a615e31e61766fcb20b557051c1"
                                             >
-                                              00079a615e31e61766fcb...
-                                            </div>
+                                              <div
+                                                className="euiText euiText--small traces-table traces-table-trace-id"
+                                                title="00079a615e31e61766fcb20b557051c1"
+                                              >
+                                                00079a615e31e61766fcb20b557051c1
+                                              </div>
+                                            </EuiText>
                                           </button>
                                         </EuiLink>
                                       </div>
@@ -1413,7 +1421,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                   default="Rows per page"
                                   token="euiTablePagination.rowsPerPage"
                                 />
-                                :
+                                : 
                                 10
                               </EuiButtonEmpty>
                             }
@@ -1500,7 +1508,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                           >
                                             Rows per page
                                           </EuiI18n>
-                                          :
+                                          : 
                                           10
                                         </span>
                                       </span>
@@ -1765,6 +1773,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
 exports[`Traces table component renders traces table 1`] = `
 <TracesTable
   dataPrepperIndicesExist={true}
+  getTraceViewUri={[Function]}
   items={
     Array [
       Object {
@@ -1782,7 +1791,6 @@ exports[`Traces table component renders traces table 1`] = `
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  getTraceViewUri={[Function]}
 >
   <EuiPanel>
     <div
@@ -1843,6 +1851,7 @@ exports[`Traces table component renders traces table 1`] = `
         />
       </EuiHorizontalRule>
       <EuiInMemoryTable
+        allowNeutralSort={false}
         columns={
           Array [
             Object {
@@ -1851,7 +1860,7 @@ exports[`Traces table component renders traces table 1`] = `
               "name": "Trace ID",
               "render": [Function],
               "sortable": true,
-              "truncateText": true,
+              "truncateText": false,
             },
             Object {
               "align": "left",
@@ -1871,11 +1880,9 @@ exports[`Traces table component renders traces table 1`] = `
             Object {
               "align": "right",
               "field": "percentile_in_trace_group",
-              "name": <React.Fragment>
-                <div>
-                  Percentile in trace group
-                </div>
-              </React.Fragment>,
+              "name": <div>
+                Percentile in trace group
+              </div>,
               "render": [Function],
               "sortable": true,
             },
@@ -1940,7 +1947,7 @@ exports[`Traces table component renders traces table 1`] = `
                 "name": "Trace ID",
                 "render": [Function],
                 "sortable": true,
-                "truncateText": true,
+                "truncateText": false,
               },
               Object {
                 "align": "left",
@@ -1960,11 +1967,9 @@ exports[`Traces table component renders traces table 1`] = `
               Object {
                 "align": "right",
                 "field": "percentile_in_trace_group",
-                "name": <React.Fragment>
-                  <div>
-                    Percentile in trace group
-                  </div>
-                </React.Fragment>,
+                "name": <div>
+                  Percentile in trace group
+                </div>,
                 "render": [Function],
                 "sortable": true,
               },
@@ -2016,7 +2021,7 @@ exports[`Traces table component renders traces table 1`] = `
           responsive={true}
           sorting={
             Object {
-              "allowNeutralSort": true,
+              "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
                 "field": "Trace ID",
@@ -2082,11 +2087,9 @@ exports[`Traces table component renders traces table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_percentile_in_trace_group_3",
-                                  "name": <React.Fragment>
-                                    <div>
-                                      Percentile in trace group
-                                    </div>
-                                  </React.Fragment>,
+                                  "name": <div>
+                                    Percentile in trace group
+                                  </div>,
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2648,7 +2651,7 @@ exports[`Traces table component renders traces table 1`] = `
                             }
                             setScopeRow={false}
                             textOnly={false}
-                            truncateText={true}
+                            truncateText={false}
                           >
                             <td
                               className="euiTableRowCell"
@@ -2664,7 +2667,7 @@ exports[`Traces table component renders traces table 1`] = `
                                 Trace ID
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
@@ -2676,27 +2679,32 @@ exports[`Traces table component renders traces table 1`] = `
                                     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
-                                      grow={10}
+                                      grow={false}
                                     >
                                       <div
-                                        className="euiFlexItem euiFlexItem--flexGrow10"
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiLink
                                           data-test-subj="trace-link"
-                                          onClick={[Function]}
                                         >
                                           <button
                                             className="euiLink euiLink--primary"
                                             data-test-subj="trace-link"
                                             disabled={false}
-                                            onClick={[Function]}
                                             type="button"
                                           >
-                                            <div
+                                            <EuiText
+                                              className="traces-table traces-table-trace-id"
+                                              size="s"
                                               title="00079a615e31e61766fcb20b557051c1"
                                             >
-                                              00079a615e31e61766fcb...
-                                            </div>
+                                              <div
+                                                className="euiText euiText--small traces-table traces-table-trace-id"
+                                                title="00079a615e31e61766fcb20b557051c1"
+                                              >
+                                                00079a615e31e61766fcb20b557051c1
+                                              </div>
+                                            </EuiText>
                                           </button>
                                         </EuiLink>
                                       </div>
@@ -2784,13 +2792,6 @@ exports[`Traces table component renders traces table 1`] = `
                                           </EuiToolTip>
                                         </EuiCopy>
                                       </div>
-                                    </EuiFlexItem>
-                                    <EuiFlexItem
-                                      grow={3}
-                                    >
-                                      <div
-                                        className="euiFlexItem euiFlexItem--flexGrow3"
-                                      />
                                     </EuiFlexItem>
                                   </div>
                                 </EuiFlexGroup>
@@ -2882,11 +2883,9 @@ exports[`Traces table component renders traces table 1`] = `
                             key="_data_column_percentile_in_trace_group_0_3"
                             mobileOptions={
                               Object {
-                                "header": <React.Fragment>
-                                  <div>
-                                    Percentile in trace group
-                                  </div>
-                                </React.Fragment>,
+                                "header": <div>
+                                  Percentile in trace group
+                                </div>,
                                 "render": undefined,
                               }
                             }
@@ -3066,7 +3065,7 @@ exports[`Traces table component renders traces table 1`] = `
                                   default="Rows per page"
                                   token="euiTablePagination.rowsPerPage"
                                 />
-                                :
+                                : 
                                 10
                               </EuiButtonEmpty>
                             }
@@ -3152,7 +3151,7 @@ exports[`Traces table component renders traces table 1`] = `
                                           >
                                             Rows per page
                                           </EuiI18n>
-                                          :
+                                          : 
                                           10
                                         </span>
                                       </span>

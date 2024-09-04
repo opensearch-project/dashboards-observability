@@ -135,6 +135,12 @@ exports[`Mode picker component renders mode picker 1`] = `
       </div>
     </div>
   </EuiPopover>
+  <CustomIndexFlyout
+    isFlyoutVisible={false}
+    setIsFlyoutVisible={[Function]}
+  >
+    <div />
+  </CustomIndexFlyout>
 </DataSourcePicker>
 `;
 
@@ -310,7 +316,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                       <div
                         class="euiPopoverTitle"
                       >
-                        Choose data type
+                        Choose data schema
                       </div>
                       <div
                         class="euiSelectable"
@@ -380,6 +386,58 @@ exports[`Mode picker component renders mode picker 2`] = `
                             <div
                               class="contract-trigger"
                             />
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiPopoverFooter"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButton euiButton--primary euiButton--small"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Manage custom trace source
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <div
+                              class="euiText euiText--medium"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon-isLoading"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -568,7 +626,7 @@ exports[`Mode picker component renders mode picker 2`] = `
                                   <div
                                     className="euiPopoverTitle"
                                   >
-                                    Choose data type
+                                    Choose data schema
                                   </div>
                                 </EuiPopoverTitle>
                                 <EuiSelectable
@@ -821,6 +879,139 @@ exports[`Mode picker component renders mode picker 2`] = `
                                     </EuiI18n>
                                   </div>
                                 </EuiSelectable>
+                                <EuiPopoverFooter>
+                                  <div
+                                    className="euiPopoverFooter"
+                                  >
+                                    <EuiFlexGroup
+                                      gutterSize="s"
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      >
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiSmallButton
+                                              onClick={[Function]}
+                                            >
+                                              <EuiButton
+                                                onClick={[Function]}
+                                                size="s"
+                                              >
+                                                <EuiButtonDisplay
+                                                  baseClassName="euiButton"
+                                                  disabled={false}
+                                                  element="button"
+                                                  isDisabled={false}
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                  type="button"
+                                                >
+                                                  <button
+                                                    className="euiButton euiButton--primary euiButton--small"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    style={
+                                                      Object {
+                                                        "minWidth": undefined,
+                                                      }
+                                                    }
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButton__content"
+                                                      iconGap="m"
+                                                      iconSide="left"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButton__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButton__content"
+                                                      >
+                                                        <span
+                                                          className="euiButton__text"
+                                                        >
+                                                          Manage custom trace source
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonDisplay>
+                                              </EuiButton>
+                                            </EuiSmallButton>
+                                          </div>
+                                        </EuiFlexItem>
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiText>
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                <EuiToolTip
+                                                  content="Custom trace indices is an experimental feature"
+                                                  delay="regular"
+                                                  position="top"
+                                                >
+                                                  <span
+                                                    className="euiToolTipAnchor"
+                                                    onKeyUp={[Function]}
+                                                    onMouseOut={[Function]}
+                                                    onMouseOver={[Function]}
+                                                  >
+                                                    <EuiIcon
+                                                      onBlur={[Function]}
+                                                      onFocus={[Function]}
+                                                      type="iInCircle"
+                                                    >
+                                                      <EuiIconBeaker
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                        focusable="false"
+                                                        onBlur={[Function]}
+                                                        onFocus={[Function]}
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                          focusable="false"
+                                                          height={16}
+                                                          onBlur={[Function]}
+                                                          onFocus={[Function]}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
+                                                    </EuiIcon>
+                                                  </span>
+                                                </EuiToolTip>
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
+                                  </div>
+                                </EuiPopoverFooter>
                               </div>
                             </div>
                           </EuiMutationObserver>
@@ -851,5 +1042,11 @@ exports[`Mode picker component renders mode picker 2`] = `
       </EuiPortal>
     </div>
   </EuiPopover>
+  <CustomIndexFlyout
+    isFlyoutVisible={false}
+    setIsFlyoutVisible={[Function]}
+  >
+    <div />
+  </CustomIndexFlyout>
 </DataSourcePicker>
 `;

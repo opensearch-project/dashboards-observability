@@ -384,6 +384,12 @@ exports[`Dashboard component renders dashboard 1`] = `
         </div>
       </div>
     </EuiPopover>
+    <CustomIndexFlyout
+      isFlyoutVisible={false}
+      setIsFlyoutVisible={[Function]}
+    >
+      <div />
+    </CustomIndexFlyout>
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
@@ -1629,6 +1635,12 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         </div>
       </div>
     </EuiPopover>
+    <CustomIndexFlyout
+      isFlyoutVisible={false}
+      setIsFlyoutVisible={[Function]}
+    >
+      <div />
+    </CustomIndexFlyout>
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
@@ -2876,6 +2888,12 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         </div>
       </div>
     </EuiPopover>
+    <CustomIndexFlyout
+      isFlyoutVisible={false}
+      setIsFlyoutVisible={[Function]}
+    >
+      <div />
+    </CustomIndexFlyout>
   </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}

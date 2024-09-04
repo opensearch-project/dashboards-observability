@@ -35,29 +35,35 @@ exports[`Service map component renders service map 1`] = `
       margin="m"
     />
     <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
+      justifyContent="spaceBetween"
     >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText>
-          Focus on
-        </EuiText>
-      </EuiFlexItem>
       <EuiFlexItem>
-        <EuiCompressedFieldSearch
-          compressed={true}
-          fullWidth={false}
-          incremental={false}
-          isClearable={true}
-          isInvalid={false}
-          isLoading={false}
-          onChange={[Function]}
-          onSearch={[Function]}
-          placeholder="Service name"
-          value=""
-        />
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiText>
+              Focus on
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              compressed={false}
+              fullWidth={false}
+              incremental={false}
+              isClearable={true}
+              isInvalid={false}
+              isLoading={false}
+              onChange={[Function]}
+              onSearch={[Function]}
+              placeholder="Service name"
+              value=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer />
@@ -366,7 +372,7 @@ exports[`Service map component renders service map 1`] = `
     </EuiFlexGroup>
   </EuiPanel>
   <EuiSpacer
-    size="xl"
+    size="m"
   />
 </Fragment>
 `;
