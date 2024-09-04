@@ -13,7 +13,7 @@ describe('Traces table component', () => {
 
   it('renders empty traces table message', () => {
     const refresh = jest.fn();
-    const traceIdColumnAction = (item: any) =>
+    const getTraceViewUri = (item: any) =>
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const noIndicesTable = mount(
       <TracesTable
@@ -21,9 +21,9 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
       />
     );
     expect(noIndicesTable).toMatchSnapshot();
@@ -34,9 +34,9 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
       />
     );
     expect(emptyTable).toMatchSnapshot();
@@ -55,7 +55,7 @@ describe('Traces table component', () => {
         actions: '#',
       },
     ];
-    const traceIdColumnAction = (item: any) =>
+    const getTraceViewUri = (item: any) =>
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const refresh = jest.fn();
     const wrapper = mount(
@@ -64,9 +64,9 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -86,7 +86,7 @@ describe('Traces table component', () => {
         actions: '#',
       },
     ];
-    const traceIdColumnAction = (item: any) =>
+    const getTraceViewUri = (item: any) =>
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const refresh = jest.fn();
     const wrapper = mount(
@@ -95,9 +95,9 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
-        mode='jaeger'
+        mode="jaeger"
         loading={false}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
       />
     );
     expect(wrapper).toMatchSnapshot();

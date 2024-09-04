@@ -52,3 +52,5 @@ export interface GraphVisEdge {
   to: number;
   color: string;
 }
+
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'custom_data_prepper';

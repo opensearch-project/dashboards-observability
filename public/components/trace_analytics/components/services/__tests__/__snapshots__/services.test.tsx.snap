@@ -614,6 +614,12 @@ exports[`Services component renders empty services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -2065,30 +2071,16 @@ exports[`Services component renders empty services page 1`] = `
                     />
                   </EuiHorizontalRule>
                   <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
+                    justifyContent="spaceBetween"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiFlexItem
-                        grow={false}
+                        grow={7}
                       >
                         <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              Focus on
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
+                          className="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <EuiCompressedFieldSearch
                             compressed={true}
@@ -2100,6 +2092,7 @@ exports[`Services component renders empty services page 1`] = `
                             onChange={[Function]}
                             onSearch={[Function]}
                             placeholder="Service name"
+                            prepend="Focus on"
                             value=""
                           >
                             <EuiFormControlLayout
@@ -2107,10 +2100,20 @@ exports[`Services component renders empty services page 1`] = `
                               fullWidth={false}
                               icon="search"
                               isLoading={false}
+                              prepend="Focus on"
                             >
                               <div
-                                className="euiFormControlLayout euiFormControlLayout--compressed"
+                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
+                                <EuiFormLabel
+                                  className="euiFormControlLayout__prepend"
+                                >
+                                  <label
+                                    className="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                </EuiFormLabel>
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
@@ -2118,7 +2121,7 @@ exports[`Services component renders empty services page 1`] = `
                                     isInvalid={false}
                                   >
                                     <input
-                                      className="euiFieldSearch euiFieldSearch--compressed"
+                                      className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                       onChange={[Function]}
                                       onKeyUp={[Function]}
                                       placeholder="Service name"
@@ -2275,10 +2278,10 @@ exports[`Services component renders empty services page 1`] = `
                 </div>
               </EuiPanel>
               <EuiSpacer
-                size="xl"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--xl"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
             </ServiceMap>
@@ -2905,6 +2908,12 @@ exports[`Services component renders jaeger services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -4619,6 +4628,12 @@ exports[`Services component renders services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -6073,30 +6088,16 @@ exports[`Services component renders services page 1`] = `
                     />
                   </EuiHorizontalRule>
                   <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
+                    justifyContent="spaceBetween"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiFlexItem
-                        grow={false}
+                        grow={7}
                       >
                         <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              Focus on
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
+                          className="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <EuiCompressedFieldSearch
                             compressed={true}
@@ -6108,6 +6109,7 @@ exports[`Services component renders services page 1`] = `
                             onChange={[Function]}
                             onSearch={[Function]}
                             placeholder="Service name"
+                            prepend="Focus on"
                             value=""
                           >
                             <EuiFormControlLayout
@@ -6115,10 +6117,20 @@ exports[`Services component renders services page 1`] = `
                               fullWidth={false}
                               icon="search"
                               isLoading={false}
+                              prepend="Focus on"
                             >
                               <div
-                                className="euiFormControlLayout euiFormControlLayout--compressed"
+                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
+                                <EuiFormLabel
+                                  className="euiFormControlLayout__prepend"
+                                >
+                                  <label
+                                    className="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                </EuiFormLabel>
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
@@ -6126,7 +6138,7 @@ exports[`Services component renders services page 1`] = `
                                     isInvalid={false}
                                   >
                                     <input
-                                      className="euiFieldSearch euiFieldSearch--compressed"
+                                      className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                       onChange={[Function]}
                                       onKeyUp={[Function]}
                                       placeholder="Service name"
@@ -6283,10 +6295,10 @@ exports[`Services component renders services page 1`] = `
                 </div>
               </EuiPanel>
               <EuiSpacer
-                size="xl"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--xl"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
             </ServiceMap>

@@ -6,20 +6,20 @@
 import {
   EuiCompressedComboBox,
   EuiCompressedFieldText,
-  EuiFormControlLayoutDelimited,
   EuiCompressedFormRow,
+  EuiFormControlLayoutDelimited,
   EuiSpacer,
 } from '@elastic/eui';
-import _ from 'lodash';
-import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
+import get from 'lodash/get';
 import React from 'react';
+import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
   mode: TraceAnalyticsMode,
   page: 'dashboard' | 'traces' | 'services' | 'app',
   attributesFilterFields: string[]
 ) =>
-  mode === 'data_prepper'
+  mode === 'data_prepper' || mode === 'custom_data_prepper'
     ? {
         dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
         traces: [
@@ -93,7 +93,7 @@ const getType = (field: string): string | null => {
     endTime: 'date_nanos',
     startTime: 'date_nanos',
   };
-  const type = _.get(typeMapping, field, 'keyword');
+  const type = get(typeMapping, field, 'keyword');
   return typeof type === 'string' ? type : null;
 };
 
@@ -142,7 +142,7 @@ export const getOperatorOptions = (field: string) => {
   };
   const operators = [
     ...operatorMapping.default_first,
-    ..._.get(operatorMapping, type),
+    ...get(operatorMapping, type),
     ...operatorMapping.default_last,
   ];
   return operators;

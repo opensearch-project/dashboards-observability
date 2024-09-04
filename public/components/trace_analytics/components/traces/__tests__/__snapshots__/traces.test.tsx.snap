@@ -195,6 +195,7 @@ exports[`Traces component renders empty traces page 1`] = `
   }
   endTime="now"
   filters={Array []}
+  getTraceViewUri={[MockFunction]}
   http={[MockFunction]}
   mode="data_prepper"
   modes={
@@ -236,7 +237,6 @@ exports[`Traces component renders empty traces page 1`] = `
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
-  traceIdColumnAction={[Function]}
 >
   <TracesContent
     appConfigs={Array []}
@@ -432,6 +432,7 @@ exports[`Traces component renders empty traces page 1`] = `
     }
     endTime="now"
     filters={Array []}
+    getTraceViewUri={[MockFunction]}
     http={[MockFunction]}
     mode="data_prepper"
     modes={
@@ -473,7 +474,6 @@ exports[`Traces component renders empty traces page 1`] = `
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
-    traceIdColumnAction={[Function]}
   >
     <EuiPage
       paddingSize="m"
@@ -632,6 +632,12 @@ exports[`Traces component renders empty traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -1492,6 +1498,879 @@ exports[`Traces component renders empty traces page 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
+            <TracesTable
+              dataPrepperIndicesExist={true}
+              getTraceViewUri={[MockFunction]}
+              items={Array []}
+              loading={true}
+              mode="data_prepper"
+              refresh={[Function]}
+            >
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem
+                        grow={10}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrow10"
+                        >
+                          <PanelTitle
+                            title="Traces"
+                            totalItems={0}
+                          >
+                            <EuiText
+                              size="m"
+                            >
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <span
+                                  className="panel-title"
+                                >
+                                  Traces
+                                </span>
+                                <span
+                                  className="panel-title-count"
+                                >
+                                   (0)
+                                </span>
+                              </div>
+                            </EuiText>
+                          </PanelTitle>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiHorizontalRule
+                    margin="none"
+                  >
+                    <hr
+                      className="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                  </EuiHorizontalRule>
+                  <EuiInMemoryTable
+                    allowNeutralSort={false}
+                    columns={
+                      Array [
+                        Object {
+                          "align": "left",
+                          "field": "trace_id",
+                          "name": "Trace ID",
+                          "render": [Function],
+                          "sortable": true,
+                          "truncateText": false,
+                        },
+                        Object {
+                          "align": "left",
+                          "field": "trace_group",
+                          "name": "Trace group",
+                          "render": [Function],
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "latency",
+                          "name": "Duration (ms)",
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "percentile_in_trace_group",
+                          "name": <div>
+                            Percentile in trace group
+                          </div>,
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "error_count",
+                          "name": "Errors",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                        Object {
+                          "align": "left",
+                          "field": "last_updated",
+                          "name": "Last updated",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                      ]
+                    }
+                    items={Array []}
+                    loading={true}
+                    onTableChange={[Function]}
+                    pagination={
+                      Object {
+                        "initialPageSize": 10,
+                        "pageSizeOptions": Array [
+                          5,
+                          10,
+                          15,
+                        ],
+                      }
+                    }
+                    responsive={true}
+                    sorting={
+                      Object {
+                        "sort": Object {
+                          "direction": "asc",
+                          "field": "trace_id",
+                        },
+                      }
+                    }
+                    tableLayout="auto"
+                  >
+                    <EuiBasicTable
+                      columns={
+                        Array [
+                          Object {
+                            "align": "left",
+                            "field": "trace_id",
+                            "name": "Trace ID",
+                            "render": [Function],
+                            "sortable": true,
+                            "truncateText": false,
+                          },
+                          Object {
+                            "align": "left",
+                            "field": "trace_group",
+                            "name": "Trace group",
+                            "render": [Function],
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "latency",
+                            "name": "Duration (ms)",
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "percentile_in_trace_group",
+                            "name": <div>
+                              Percentile in trace group
+                            </div>,
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "error_count",
+                            "name": "Errors",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                          Object {
+                            "align": "left",
+                            "field": "last_updated",
+                            "name": "Last updated",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                        ]
+                      }
+                      items={Array []}
+                      loading={true}
+                      noItemsMessage="No items found"
+                      onChange={[Function]}
+                      pagination={
+                        Object {
+                          "hidePerPageOptions": undefined,
+                          "pageIndex": 0,
+                          "pageSize": 10,
+                          "pageSizeOptions": Array [
+                            5,
+                            10,
+                            15,
+                          ],
+                          "totalItemCount": 0,
+                        }
+                      }
+                      responsive={true}
+                      sorting={
+                        Object {
+                          "allowNeutralSort": false,
+                          "sort": Object {
+                            "direction": "asc",
+                            "field": "Trace ID",
+                          },
+                        }
+                      }
+                      tableLayout="auto"
+                    >
+                      <div
+                        className="euiBasicTable euiBasicTable-loading"
+                      >
+                        <div>
+                          <EuiTableHeaderMobile>
+                            <div
+                              className="euiTableHeaderMobile"
+                            >
+                              <EuiFlexGroup
+                                alignItems="baseline"
+                                justifyContent="spaceBetween"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <EuiTableSortMobile
+                                        items={
+                                          Array [
+                                            Object {
+                                              "isSortAscending": true,
+                                              "isSorted": true,
+                                              "key": "_data_s_trace_id_0",
+                                              "name": "Trace ID",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_trace_group_1",
+                                              "name": "Trace group",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_latency_2",
+                                              "name": "Duration (ms)",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_percentile_in_trace_group_3",
+                                              "name": <div>
+                                                Percentile in trace group
+                                              </div>,
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_error_count_4",
+                                              "name": "Errors",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_last_updated_5",
+                                              "name": "Last updated",
+                                              "onSort": [Function],
+                                            },
+                                          ]
+                                        }
+                                      >
+                                        <div
+                                          className="euiTableSortMobile"
+                                        >
+                                          <EuiPopover
+                                            anchorPosition="downRight"
+                                            button={
+                                              <EuiButtonEmpty
+                                                flush="right"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                onClick={[Function]}
+                                                size="xs"
+                                              >
+                                                <EuiI18n
+                                                  default="Sorting"
+                                                  token="euiTableSortMobile.sorting"
+                                                />
+                                              </EuiButtonEmpty>
+                                            }
+                                            closePopover={[Function]}
+                                            display="inlineBlock"
+                                            hasArrow={true}
+                                            isOpen={false}
+                                            ownFocus={true}
+                                            panelPaddingSize="none"
+                                          >
+                                            <div
+                                              className="euiPopover euiPopover--anchorDownRight"
+                                            >
+                                              <div
+                                                className="euiPopover__anchor"
+                                              >
+                                                <EuiButtonEmpty
+                                                  flush="right"
+                                                  iconSide="right"
+                                                  iconType="arrowDown"
+                                                  onClick={[Function]}
+                                                  size="xs"
+                                                >
+                                                  <button
+                                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButtonEmpty__content"
+                                                      iconGap="m"
+                                                      iconSide="right"
+                                                      iconSize="s"
+                                                      iconType="arrowDown"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButtonEmpty__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                                      >
+                                                        <EuiIcon
+                                                          className="euiButtonContent__icon"
+                                                          color="inherit"
+                                                          size="s"
+                                                          type="arrowDown"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                        <span
+                                                          className="euiButtonEmpty__text"
+                                                        >
+                                                          <EuiI18n
+                                                            default="Sorting"
+                                                            token="euiTableSortMobile.sorting"
+                                                          >
+                                                            Sorting
+                                                          </EuiI18n>
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonEmpty>
+                                              </div>
+                                            </div>
+                                          </EuiPopover>
+                                        </div>
+                                      </EuiTableSortMobile>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiTableHeaderMobile>
+                          <EuiTable
+                            id="random_html_id"
+                            responsive={true}
+                            tableLayout="auto"
+                          >
+                            <table
+                              className="euiTable euiTable--responsive euiTable--auto"
+                              id="random_html_id"
+                              tabIndex={-1}
+                            >
+                              <EuiScreenReaderOnly>
+                                <caption
+                                  className="euiScreenReaderOnly euiTableCaption"
+                                >
+                                  <EuiDelayRender
+                                    delay={500}
+                                  />
+                                </caption>
+                              </EuiScreenReaderOnly>
+                              <EuiTableHeader>
+                                <thead>
+                                  <tr>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_trace_id_0"
+                                      isSortAscending={true}
+                                      isSorted={true}
+                                      key="_data_h_trace_id_0"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="ascending"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_trace_id_0"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSortAscending={true}
+                                            isSorted={true}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Trace ID",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Trace ID"
+                                                  >
+                                                    Trace ID
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                              <EuiIcon
+                                                className="euiTableSortIcon"
+                                                size="m"
+                                                type="sortUp"
+                                              >
+                                                <EuiIconBeaker
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <path
+                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                    />
+                                                  </svg>
+                                                </EuiIconBeaker>
+                                              </EuiIcon>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_trace_group_1"
+                                      isSorted={false}
+                                      key="_data_h_trace_group_1"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_trace_group_1"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Trace group",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Trace group"
+                                                  >
+                                                    Trace group
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_latency_2"
+                                      isSorted={false}
+                                      key="_data_h_latency_2"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_latency_2"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Duration (ms)",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Duration (ms)"
+                                                  >
+                                                    Duration (ms)
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_percentile_in_trace_group_3"
+                                      isSorted={false}
+                                      key="_data_h_percentile_in_trace_group_3"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_percentile_in_trace_group_3"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Percentile in trace group",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Percentile in trace group"
+                                                  >
+                                                    <div>
+                                                      Percentile in trace group
+                                                    </div>
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_error_count_4"
+                                      isSorted={false}
+                                      key="_data_h_error_count_4"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_error_count_4"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Errors",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Errors"
+                                                  >
+                                                    Errors
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_last_updated_5"
+                                      isSorted={false}
+                                      key="_data_h_last_updated_5"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_last_updated_5"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Last updated",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Last updated"
+                                                  >
+                                                    Last updated
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                  </tr>
+                                </thead>
+                              </EuiTableHeader>
+                              <EuiTableBody>
+                                <tbody>
+                                  <EuiTableRow>
+                                    <tr
+                                      className="euiTableRow"
+                                    >
+                                      <EuiTableRowCell
+                                        align="center"
+                                        colSpan={6}
+                                        isMobileFullWidth={true}
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                          colSpan={6}
+                                          style={
+                                            Object {
+                                              "width": undefined,
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--alignCenter"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            >
+                                              No items found
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                    </tr>
+                                  </EuiTableRow>
+                                </tbody>
+                              </EuiTableBody>
+                            </table>
+                          </EuiTable>
+                        </div>
+                      </div>
+                    </EuiBasicTable>
+                  </EuiInMemoryTable>
+                </div>
+              </EuiPanel>
+            </TracesTable>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
             <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -1593,158 +2472,6 @@ exports[`Traces component renders empty traces page 1`] = `
                 </EuiAccordion>
               </div>
             </EuiPanel>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <TracesTable
-              dataPrepperIndicesExist={true}
-              items={Array []}
-              loading={true}
-              mode="data_prepper"
-              refresh={[Function]}
-              traceIdColumnAction={[Function]}
-            >
-              <EuiPanel>
-                <div
-                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                  >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem
-                        grow={10}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow10"
-                        >
-                          <PanelTitle
-                            title="Traces"
-                            totalItems={0}
-                          >
-                            <EuiText
-                              size="m"
-                            >
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <span
-                                  className="panel-title"
-                                >
-                                  Traces
-                                </span>
-                                <span
-                                  className="panel-title-count"
-                                >
-                                   (0)
-                                </span>
-                              </div>
-                            </EuiText>
-                          </PanelTitle>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                  <EuiSpacer
-                    size="m"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                  </EuiSpacer>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
-                  <NoMatchMessage
-                    size="xl"
-                  >
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                    <EuiEmptyPrompt
-                      body={
-                        <EuiText
-                          size="s"
-                        >
-                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                        </EuiText>
-                      }
-                      title={
-                        <h2>
-                          No matches
-                        </h2>
-                      }
-                    >
-                      <div
-                        className="euiEmptyPrompt"
-                      >
-                        <EuiTitle
-                          size="m"
-                        >
-                          <h2
-                            className="euiTitle euiTitle--medium"
-                          >
-                            No matches
-                          </h2>
-                        </EuiTitle>
-                        <EuiTextColor
-                          color="subdued"
-                        >
-                          <span
-                            className="euiTextColor euiTextColor--subdued"
-                          >
-                            <EuiSpacer
-                              size="m"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--m"
-                              />
-                            </EuiSpacer>
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <EuiText
-                                  size="s"
-                                >
-                                  <div
-                                    className="euiText euiText--small"
-                                  >
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiText>
-                          </span>
-                        </EuiTextColor>
-                      </div>
-                    </EuiEmptyPrompt>
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                  </NoMatchMessage>
-                </div>
-              </EuiPanel>
-            </TracesTable>
           </div>
         </EuiPageBody>
       </div>
@@ -1945,6 +2672,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
   }
   endTime="now"
   filters={Array []}
+  getTraceViewUri={[MockFunction]}
   http={[MockFunction]}
   jaegerIndicesExist={true}
   mode="jaeger"
@@ -1989,7 +2717,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
-  traceIdColumnAction={[Function]}
 >
   <TracesContent
     appConfigs={Array []}
@@ -2182,6 +2909,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
     }
     endTime="now"
     filters={Array []}
+    getTraceViewUri={[MockFunction]}
     http={[MockFunction]}
     jaegerIndicesExist={true}
     mode="jaeger"
@@ -2226,7 +2954,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
-    traceIdColumnAction={[Function]}
   >
     <EuiPage
       paddingSize="m"
@@ -2386,6 +3113,12 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -3249,6 +3982,713 @@ exports[`Traces component renders jaeger traces page 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
+            <TracesTable
+              dataPrepperIndicesExist={false}
+              getTraceViewUri={[MockFunction]}
+              items={Array []}
+              jaegerIndicesExist={true}
+              loading={true}
+              mode="jaeger"
+              refresh={[Function]}
+            >
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem
+                        grow={10}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrow10"
+                        >
+                          <PanelTitle
+                            title="Traces"
+                            totalItems={0}
+                          >
+                            <EuiText
+                              size="m"
+                            >
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <span
+                                  className="panel-title"
+                                >
+                                  Traces
+                                </span>
+                                <span
+                                  className="panel-title-count"
+                                >
+                                   (0)
+                                </span>
+                              </div>
+                            </EuiText>
+                          </PanelTitle>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiHorizontalRule
+                    margin="none"
+                  >
+                    <hr
+                      className="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                  </EuiHorizontalRule>
+                  <EuiInMemoryTable
+                    allowNeutralSort={false}
+                    columns={
+                      Array [
+                        Object {
+                          "align": "left",
+                          "field": "trace_id",
+                          "name": "Trace ID",
+                          "render": [Function],
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "latency",
+                          "name": "Latency (ms)",
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "error_count",
+                          "name": "Errors",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                        Object {
+                          "align": "left",
+                          "field": "last_updated",
+                          "name": "Last updated",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                      ]
+                    }
+                    items={Array []}
+                    loading={true}
+                    onTableChange={[Function]}
+                    pagination={
+                      Object {
+                        "initialPageSize": 10,
+                        "pageSizeOptions": Array [
+                          5,
+                          10,
+                          15,
+                        ],
+                      }
+                    }
+                    responsive={true}
+                    sorting={
+                      Object {
+                        "sort": Object {
+                          "direction": "asc",
+                          "field": "trace_id",
+                        },
+                      }
+                    }
+                    tableLayout="auto"
+                  >
+                    <EuiBasicTable
+                      columns={
+                        Array [
+                          Object {
+                            "align": "left",
+                            "field": "trace_id",
+                            "name": "Trace ID",
+                            "render": [Function],
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "latency",
+                            "name": "Latency (ms)",
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "error_count",
+                            "name": "Errors",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                          Object {
+                            "align": "left",
+                            "field": "last_updated",
+                            "name": "Last updated",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                        ]
+                      }
+                      items={Array []}
+                      loading={true}
+                      noItemsMessage="No items found"
+                      onChange={[Function]}
+                      pagination={
+                        Object {
+                          "hidePerPageOptions": undefined,
+                          "pageIndex": 0,
+                          "pageSize": 10,
+                          "pageSizeOptions": Array [
+                            5,
+                            10,
+                            15,
+                          ],
+                          "totalItemCount": 0,
+                        }
+                      }
+                      responsive={true}
+                      sorting={
+                        Object {
+                          "allowNeutralSort": false,
+                          "sort": Object {
+                            "direction": "asc",
+                            "field": "Trace ID",
+                          },
+                        }
+                      }
+                      tableLayout="auto"
+                    >
+                      <div
+                        className="euiBasicTable euiBasicTable-loading"
+                      >
+                        <div>
+                          <EuiTableHeaderMobile>
+                            <div
+                              className="euiTableHeaderMobile"
+                            >
+                              <EuiFlexGroup
+                                alignItems="baseline"
+                                justifyContent="spaceBetween"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <EuiTableSortMobile
+                                        items={
+                                          Array [
+                                            Object {
+                                              "isSortAscending": true,
+                                              "isSorted": true,
+                                              "key": "_data_s_trace_id_0",
+                                              "name": "Trace ID",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_latency_1",
+                                              "name": "Latency (ms)",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_error_count_2",
+                                              "name": "Errors",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_last_updated_3",
+                                              "name": "Last updated",
+                                              "onSort": [Function],
+                                            },
+                                          ]
+                                        }
+                                      >
+                                        <div
+                                          className="euiTableSortMobile"
+                                        >
+                                          <EuiPopover
+                                            anchorPosition="downRight"
+                                            button={
+                                              <EuiButtonEmpty
+                                                flush="right"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                onClick={[Function]}
+                                                size="xs"
+                                              >
+                                                <EuiI18n
+                                                  default="Sorting"
+                                                  token="euiTableSortMobile.sorting"
+                                                />
+                                              </EuiButtonEmpty>
+                                            }
+                                            closePopover={[Function]}
+                                            display="inlineBlock"
+                                            hasArrow={true}
+                                            isOpen={false}
+                                            ownFocus={true}
+                                            panelPaddingSize="none"
+                                          >
+                                            <div
+                                              className="euiPopover euiPopover--anchorDownRight"
+                                            >
+                                              <div
+                                                className="euiPopover__anchor"
+                                              >
+                                                <EuiButtonEmpty
+                                                  flush="right"
+                                                  iconSide="right"
+                                                  iconType="arrowDown"
+                                                  onClick={[Function]}
+                                                  size="xs"
+                                                >
+                                                  <button
+                                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButtonEmpty__content"
+                                                      iconGap="m"
+                                                      iconSide="right"
+                                                      iconSize="s"
+                                                      iconType="arrowDown"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButtonEmpty__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                                      >
+                                                        <EuiIcon
+                                                          className="euiButtonContent__icon"
+                                                          color="inherit"
+                                                          size="s"
+                                                          type="arrowDown"
+                                                        >
+                                                          <EuiIconArrowDown
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                                fillRule="non-zero"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconArrowDown>
+                                                        </EuiIcon>
+                                                        <span
+                                                          className="euiButtonEmpty__text"
+                                                        >
+                                                          <EuiI18n
+                                                            default="Sorting"
+                                                            token="euiTableSortMobile.sorting"
+                                                          >
+                                                            Sorting
+                                                          </EuiI18n>
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonEmpty>
+                                              </div>
+                                            </div>
+                                          </EuiPopover>
+                                        </div>
+                                      </EuiTableSortMobile>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiTableHeaderMobile>
+                          <EuiTable
+                            id="random_html_id"
+                            responsive={true}
+                            tableLayout="auto"
+                          >
+                            <table
+                              className="euiTable euiTable--responsive euiTable--auto"
+                              id="random_html_id"
+                              tabIndex={-1}
+                            >
+                              <EuiScreenReaderOnly>
+                                <caption
+                                  className="euiScreenReaderOnly euiTableCaption"
+                                >
+                                  <EuiDelayRender
+                                    delay={500}
+                                  />
+                                </caption>
+                              </EuiScreenReaderOnly>
+                              <EuiTableHeader>
+                                <thead>
+                                  <tr>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_trace_id_0"
+                                      isSortAscending={true}
+                                      isSorted={true}
+                                      key="_data_h_trace_id_0"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="ascending"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_trace_id_0"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSortAscending={true}
+                                            isSorted={true}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Trace ID",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Trace ID"
+                                                  >
+                                                    Trace ID
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                              <EuiIcon
+                                                className="euiTableSortIcon"
+                                                size="m"
+                                                type="sortUp"
+                                              >
+                                                <EuiIconSortUp
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiTableSortIcon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <path
+                                                      d="M8 4.207v8.237c0 .307-.224.556-.5.556s-.5-.249-.5-.556V4.207L2.904 8.303a.5.5 0 0 1-.707-.707l4.242-4.242a1.5 1.5 0 0 1 2.122 0l4.242 4.242a.5.5 0 1 1-.707.707L8 4.207Z"
+                                                    />
+                                                  </svg>
+                                                </EuiIconSortUp>
+                                              </EuiIcon>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_latency_1"
+                                      isSorted={false}
+                                      key="_data_h_latency_1"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_latency_1"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Latency (ms)",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Latency (ms)"
+                                                  >
+                                                    Latency (ms)
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_error_count_2"
+                                      isSorted={false}
+                                      key="_data_h_error_count_2"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_error_count_2"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Errors",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Errors"
+                                                  >
+                                                    Errors
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_last_updated_3"
+                                      isSorted={false}
+                                      key="_data_h_last_updated_3"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_last_updated_3"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Last updated",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Last updated"
+                                                  >
+                                                    Last updated
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                  </tr>
+                                </thead>
+                              </EuiTableHeader>
+                              <EuiTableBody>
+                                <tbody>
+                                  <EuiTableRow>
+                                    <tr
+                                      className="euiTableRow"
+                                    >
+                                      <EuiTableRowCell
+                                        align="center"
+                                        colSpan={4}
+                                        isMobileFullWidth={true}
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                          colSpan={4}
+                                          style={
+                                            Object {
+                                              "width": undefined,
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--alignCenter"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            >
+                                              No items found
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                    </tr>
+                                  </EuiTableRow>
+                                </tbody>
+                              </EuiTableBody>
+                            </table>
+                          </EuiTable>
+                        </div>
+                      </div>
+                    </EuiBasicTable>
+                  </EuiInMemoryTable>
+                </div>
+              </EuiPanel>
+            </TracesTable>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
             <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -3351,159 +4791,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
                 </EuiAccordion>
               </div>
             </EuiPanel>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <TracesTable
-              dataPrepperIndicesExist={false}
-              items={Array []}
-              jaegerIndicesExist={true}
-              loading={true}
-              mode="jaeger"
-              refresh={[Function]}
-              traceIdColumnAction={[Function]}
-            >
-              <EuiPanel>
-                <div
-                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                  >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem
-                        grow={10}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow10"
-                        >
-                          <PanelTitle
-                            title="Traces"
-                            totalItems={0}
-                          >
-                            <EuiText
-                              size="m"
-                            >
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <span
-                                  className="panel-title"
-                                >
-                                  Traces
-                                </span>
-                                <span
-                                  className="panel-title-count"
-                                >
-                                   (0)
-                                </span>
-                              </div>
-                            </EuiText>
-                          </PanelTitle>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                  <EuiSpacer
-                    size="m"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                  </EuiSpacer>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
-                  <NoMatchMessage
-                    size="xl"
-                  >
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                    <EuiEmptyPrompt
-                      body={
-                        <EuiText
-                          size="s"
-                        >
-                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                        </EuiText>
-                      }
-                      title={
-                        <h2>
-                          No matches
-                        </h2>
-                      }
-                    >
-                      <div
-                        className="euiEmptyPrompt"
-                      >
-                        <EuiTitle
-                          size="m"
-                        >
-                          <h2
-                            className="euiTitle euiTitle--medium"
-                          >
-                            No matches
-                          </h2>
-                        </EuiTitle>
-                        <EuiTextColor
-                          color="subdued"
-                        >
-                          <span
-                            className="euiTextColor euiTextColor--subdued"
-                          >
-                            <EuiSpacer
-                              size="m"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--m"
-                              />
-                            </EuiSpacer>
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <EuiText
-                                  size="s"
-                                >
-                                  <div
-                                    className="euiText euiText--small"
-                                  >
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiText>
-                          </span>
-                        </EuiTextColor>
-                      </div>
-                    </EuiEmptyPrompt>
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                  </NoMatchMessage>
-                </div>
-              </EuiPanel>
-            </TracesTable>
           </div>
         </EuiPageBody>
       </div>
@@ -3704,6 +4991,7 @@ exports[`Traces component renders traces page 1`] = `
   }
   endTime="now"
   filters={Array []}
+  getTraceViewUri={[MockFunction]}
   http={[MockFunction]}
   mode="data_prepper"
   modes={
@@ -3747,7 +5035,6 @@ exports[`Traces component renders traces page 1`] = `
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
-  traceIdColumnAction={[Function]}
 >
   <TracesContent
     appConfigs={Array []}
@@ -3940,6 +5227,7 @@ exports[`Traces component renders traces page 1`] = `
     }
     endTime="now"
     filters={Array []}
+    getTraceViewUri={[MockFunction]}
     http={[MockFunction]}
     mode="data_prepper"
     modes={
@@ -3983,7 +5271,6 @@ exports[`Traces component renders traces page 1`] = `
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
-    traceIdColumnAction={[Function]}
   >
     <EuiPage
       paddingSize="m"
@@ -4143,6 +5430,12 @@ exports[`Traces component renders traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
+                      <CustomIndexFlyout
+                        isFlyoutVisible={false}
+                        setIsFlyoutVisible={[Function]}
+                      >
+                        <div />
+                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -5006,6 +6299,880 @@ exports[`Traces component renders traces page 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
+            <TracesTable
+              dataPrepperIndicesExist={true}
+              getTraceViewUri={[MockFunction]}
+              items={Array []}
+              loading={true}
+              mode="data_prepper"
+              refresh={[Function]}
+            >
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem
+                        grow={10}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrow10"
+                        >
+                          <PanelTitle
+                            title="Traces"
+                            totalItems={0}
+                          >
+                            <EuiText
+                              size="m"
+                            >
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <span
+                                  className="panel-title"
+                                >
+                                  Traces
+                                </span>
+                                <span
+                                  className="panel-title-count"
+                                >
+                                   (0)
+                                </span>
+                              </div>
+                            </EuiText>
+                          </PanelTitle>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiHorizontalRule
+                    margin="none"
+                  >
+                    <hr
+                      className="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                  </EuiHorizontalRule>
+                  <EuiInMemoryTable
+                    allowNeutralSort={false}
+                    columns={
+                      Array [
+                        Object {
+                          "align": "left",
+                          "field": "trace_id",
+                          "name": "Trace ID",
+                          "render": [Function],
+                          "sortable": true,
+                          "truncateText": false,
+                        },
+                        Object {
+                          "align": "left",
+                          "field": "trace_group",
+                          "name": "Trace group",
+                          "render": [Function],
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "latency",
+                          "name": "Duration (ms)",
+                          "sortable": true,
+                          "truncateText": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "percentile_in_trace_group",
+                          "name": <div>
+                            Percentile in trace group
+                          </div>,
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                        Object {
+                          "align": "right",
+                          "field": "error_count",
+                          "name": "Errors",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                        Object {
+                          "align": "left",
+                          "field": "last_updated",
+                          "name": "Last updated",
+                          "render": [Function],
+                          "sortable": true,
+                        },
+                      ]
+                    }
+                    items={Array []}
+                    loading={true}
+                    onTableChange={[Function]}
+                    pagination={
+                      Object {
+                        "initialPageSize": 10,
+                        "pageSizeOptions": Array [
+                          5,
+                          10,
+                          15,
+                        ],
+                      }
+                    }
+                    responsive={true}
+                    sorting={
+                      Object {
+                        "sort": Object {
+                          "direction": "asc",
+                          "field": "trace_id",
+                        },
+                      }
+                    }
+                    tableLayout="auto"
+                  >
+                    <EuiBasicTable
+                      columns={
+                        Array [
+                          Object {
+                            "align": "left",
+                            "field": "trace_id",
+                            "name": "Trace ID",
+                            "render": [Function],
+                            "sortable": true,
+                            "truncateText": false,
+                          },
+                          Object {
+                            "align": "left",
+                            "field": "trace_group",
+                            "name": "Trace group",
+                            "render": [Function],
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "latency",
+                            "name": "Duration (ms)",
+                            "sortable": true,
+                            "truncateText": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "percentile_in_trace_group",
+                            "name": <div>
+                              Percentile in trace group
+                            </div>,
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                          Object {
+                            "align": "right",
+                            "field": "error_count",
+                            "name": "Errors",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                          Object {
+                            "align": "left",
+                            "field": "last_updated",
+                            "name": "Last updated",
+                            "render": [Function],
+                            "sortable": true,
+                          },
+                        ]
+                      }
+                      items={Array []}
+                      loading={true}
+                      noItemsMessage="No items found"
+                      onChange={[Function]}
+                      pagination={
+                        Object {
+                          "hidePerPageOptions": undefined,
+                          "pageIndex": 0,
+                          "pageSize": 10,
+                          "pageSizeOptions": Array [
+                            5,
+                            10,
+                            15,
+                          ],
+                          "totalItemCount": 0,
+                        }
+                      }
+                      responsive={true}
+                      sorting={
+                        Object {
+                          "allowNeutralSort": false,
+                          "sort": Object {
+                            "direction": "asc",
+                            "field": "Trace ID",
+                          },
+                        }
+                      }
+                      tableLayout="auto"
+                    >
+                      <div
+                        className="euiBasicTable euiBasicTable-loading"
+                      >
+                        <div>
+                          <EuiTableHeaderMobile>
+                            <div
+                              className="euiTableHeaderMobile"
+                            >
+                              <EuiFlexGroup
+                                alignItems="baseline"
+                                justifyContent="spaceBetween"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <EuiTableSortMobile
+                                        items={
+                                          Array [
+                                            Object {
+                                              "isSortAscending": true,
+                                              "isSorted": true,
+                                              "key": "_data_s_trace_id_0",
+                                              "name": "Trace ID",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_trace_group_1",
+                                              "name": "Trace group",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_latency_2",
+                                              "name": "Duration (ms)",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_percentile_in_trace_group_3",
+                                              "name": <div>
+                                                Percentile in trace group
+                                              </div>,
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_error_count_4",
+                                              "name": "Errors",
+                                              "onSort": [Function],
+                                            },
+                                            Object {
+                                              "isSortAscending": undefined,
+                                              "isSorted": false,
+                                              "key": "_data_s_last_updated_5",
+                                              "name": "Last updated",
+                                              "onSort": [Function],
+                                            },
+                                          ]
+                                        }
+                                      >
+                                        <div
+                                          className="euiTableSortMobile"
+                                        >
+                                          <EuiPopover
+                                            anchorPosition="downRight"
+                                            button={
+                                              <EuiButtonEmpty
+                                                flush="right"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                onClick={[Function]}
+                                                size="xs"
+                                              >
+                                                <EuiI18n
+                                                  default="Sorting"
+                                                  token="euiTableSortMobile.sorting"
+                                                />
+                                              </EuiButtonEmpty>
+                                            }
+                                            closePopover={[Function]}
+                                            display="inlineBlock"
+                                            hasArrow={true}
+                                            isOpen={false}
+                                            ownFocus={true}
+                                            panelPaddingSize="none"
+                                          >
+                                            <div
+                                              className="euiPopover euiPopover--anchorDownRight"
+                                            >
+                                              <div
+                                                className="euiPopover__anchor"
+                                              >
+                                                <EuiButtonEmpty
+                                                  flush="right"
+                                                  iconSide="right"
+                                                  iconType="arrowDown"
+                                                  onClick={[Function]}
+                                                  size="xs"
+                                                >
+                                                  <button
+                                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButtonEmpty__content"
+                                                      iconGap="m"
+                                                      iconSide="right"
+                                                      iconSize="s"
+                                                      iconType="arrowDown"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButtonEmpty__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                                      >
+                                                        <EuiIcon
+                                                          className="euiButtonContent__icon"
+                                                          color="inherit"
+                                                          size="s"
+                                                          type="arrowDown"
+                                                        >
+                                                          <EuiIconArrowDown
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                                fillRule="non-zero"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconArrowDown>
+                                                        </EuiIcon>
+                                                        <span
+                                                          className="euiButtonEmpty__text"
+                                                        >
+                                                          <EuiI18n
+                                                            default="Sorting"
+                                                            token="euiTableSortMobile.sorting"
+                                                          >
+                                                            Sorting
+                                                          </EuiI18n>
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonEmpty>
+                                              </div>
+                                            </div>
+                                          </EuiPopover>
+                                        </div>
+                                      </EuiTableSortMobile>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiTableHeaderMobile>
+                          <EuiTable
+                            id="random_html_id"
+                            responsive={true}
+                            tableLayout="auto"
+                          >
+                            <table
+                              className="euiTable euiTable--responsive euiTable--auto"
+                              id="random_html_id"
+                              tabIndex={-1}
+                            >
+                              <EuiScreenReaderOnly>
+                                <caption
+                                  className="euiScreenReaderOnly euiTableCaption"
+                                >
+                                  <EuiDelayRender
+                                    delay={500}
+                                  />
+                                </caption>
+                              </EuiScreenReaderOnly>
+                              <EuiTableHeader>
+                                <thead>
+                                  <tr>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_trace_id_0"
+                                      isSortAscending={true}
+                                      isSorted={true}
+                                      key="_data_h_trace_id_0"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="ascending"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_trace_id_0"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSortAscending={true}
+                                            isSorted={true}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Trace ID",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Trace ID"
+                                                  >
+                                                    Trace ID
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                              <EuiIcon
+                                                className="euiTableSortIcon"
+                                                size="m"
+                                                type="sortUp"
+                                              >
+                                                <EuiIconSortUp
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiTableSortIcon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <path
+                                                      d="M8 4.207v8.237c0 .307-.224.556-.5.556s-.5-.249-.5-.556V4.207L2.904 8.303a.5.5 0 0 1-.707-.707l4.242-4.242a1.5 1.5 0 0 1 2.122 0l4.242 4.242a.5.5 0 1 1-.707.707L8 4.207Z"
+                                                    />
+                                                  </svg>
+                                                </EuiIconSortUp>
+                                              </EuiIcon>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_trace_group_1"
+                                      isSorted={false}
+                                      key="_data_h_trace_group_1"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_trace_group_1"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Trace group",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Trace group"
+                                                  >
+                                                    Trace group
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_latency_2"
+                                      isSorted={false}
+                                      key="_data_h_latency_2"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_latency_2"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Duration (ms)",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Duration (ms)"
+                                                  >
+                                                    Duration (ms)
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_percentile_in_trace_group_3"
+                                      isSorted={false}
+                                      key="_data_h_percentile_in_trace_group_3"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_percentile_in_trace_group_3"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Percentile in trace group",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Percentile in trace group"
+                                                  >
+                                                    <div>
+                                                      Percentile in trace group
+                                                    </div>
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="right"
+                                      data-test-subj="tableHeaderCell_error_count_4"
+                                      isSorted={false}
+                                      key="_data_h_error_count_4"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_error_count_4"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent euiTableCellContent--alignRight"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent euiTableCellContent--alignRight"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Errors",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Errors"
+                                                  >
+                                                    Errors
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                    <EuiTableHeaderCell
+                                      align="left"
+                                      data-test-subj="tableHeaderCell_last_updated_5"
+                                      isSorted={false}
+                                      key="_data_h_last_updated_5"
+                                      onSort={[Function]}
+                                    >
+                                      <th
+                                        aria-live="polite"
+                                        aria-sort="none"
+                                        className="euiTableHeaderCell"
+                                        data-test-subj="tableHeaderCell_last_updated_5"
+                                        role="columnheader"
+                                        scope="col"
+                                        style={
+                                          Object {
+                                            "width": undefined,
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          className="euiTableHeaderButton"
+                                          data-test-subj="tableHeaderSortButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <CellContents
+                                            className="euiTableCellContent"
+                                            isSorted={false}
+                                            showSortMsg={true}
+                                          >
+                                            <span
+                                              className="euiTableCellContent"
+                                            >
+                                              <EuiInnerText>
+                                                <EuiI18n
+                                                  default="{innerText}; {description}"
+                                                  token="euiTableHeaderCell.titleTextWithDesc"
+                                                  values={
+                                                    Object {
+                                                      "description": undefined,
+                                                      "innerText": "Last updated",
+                                                    }
+                                                  }
+                                                >
+                                                  <span
+                                                    className="euiTableCellContent__text"
+                                                    title="Last updated"
+                                                  >
+                                                    Last updated
+                                                  </span>
+                                                </EuiI18n>
+                                              </EuiInnerText>
+                                            </span>
+                                          </CellContents>
+                                        </button>
+                                      </th>
+                                    </EuiTableHeaderCell>
+                                  </tr>
+                                </thead>
+                              </EuiTableHeader>
+                              <EuiTableBody>
+                                <tbody>
+                                  <EuiTableRow>
+                                    <tr
+                                      className="euiTableRow"
+                                    >
+                                      <EuiTableRowCell
+                                        align="center"
+                                        colSpan={6}
+                                        isMobileFullWidth={true}
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                          colSpan={6}
+                                          style={
+                                            Object {
+                                              "width": undefined,
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--alignCenter"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            >
+                                              No items found
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                    </tr>
+                                  </EuiTableRow>
+                                </tbody>
+                              </EuiTableBody>
+                            </table>
+                          </EuiTable>
+                        </div>
+                      </div>
+                    </EuiBasicTable>
+                  </EuiInMemoryTable>
+                </div>
+              </EuiPanel>
+            </TracesTable>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
             <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
@@ -5108,158 +7275,6 @@ exports[`Traces component renders traces page 1`] = `
                 </EuiAccordion>
               </div>
             </EuiPanel>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <TracesTable
-              dataPrepperIndicesExist={true}
-              items={Array []}
-              loading={true}
-              mode="data_prepper"
-              refresh={[Function]}
-              traceIdColumnAction={[Function]}
-            >
-              <EuiPanel>
-                <div
-                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                  >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem
-                        grow={10}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow10"
-                        >
-                          <PanelTitle
-                            title="Traces"
-                            totalItems={0}
-                          >
-                            <EuiText
-                              size="m"
-                            >
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <span
-                                  className="panel-title"
-                                >
-                                  Traces
-                                </span>
-                                <span
-                                  className="panel-title-count"
-                                >
-                                   (0)
-                                </span>
-                              </div>
-                            </EuiText>
-                          </PanelTitle>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                  <EuiSpacer
-                    size="m"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                  </EuiSpacer>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
-                  <NoMatchMessage
-                    size="xl"
-                  >
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                    <EuiEmptyPrompt
-                      body={
-                        <EuiText
-                          size="s"
-                        >
-                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                        </EuiText>
-                      }
-                      title={
-                        <h2>
-                          No matches
-                        </h2>
-                      }
-                    >
-                      <div
-                        className="euiEmptyPrompt"
-                      >
-                        <EuiTitle
-                          size="m"
-                        >
-                          <h2
-                            className="euiTitle euiTitle--medium"
-                          >
-                            No matches
-                          </h2>
-                        </EuiTitle>
-                        <EuiTextColor
-                          color="subdued"
-                        >
-                          <span
-                            className="euiTextColor euiTextColor--subdued"
-                          >
-                            <EuiSpacer
-                              size="m"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--m"
-                              />
-                            </EuiSpacer>
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <EuiText
-                                  size="s"
-                                >
-                                  <div
-                                    className="euiText euiText--small"
-                                  >
-                                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiText>
-                          </span>
-                        </EuiTextColor>
-                      </div>
-                    </EuiEmptyPrompt>
-                    <EuiSpacer
-                      size="xl"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--xl"
-                      />
-                    </EuiSpacer>
-                  </NoMatchMessage>
-                </div>
-              </EuiPanel>
-            </TracesTable>
           </div>
         </EuiPageBody>
       </div>

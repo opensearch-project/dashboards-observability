@@ -986,30 +986,16 @@ exports[`Service Config component renders empty service config 1`] = `
                         />
                       </EuiHorizontalRule>
                       <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
+                        justifyContent="spaceBetween"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            grow={false}
+                            grow={7}
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
+                              className="euiFlexItem euiFlexItem--flexGrow7"
                             >
                               <EuiCompressedFieldSearch
                                 compressed={true}
@@ -1021,6 +1007,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 onChange={[Function]}
                                 onSearch={[Function]}
                                 placeholder="Service name"
+                                prepend="Focus on"
                                 value=""
                               >
                                 <EuiFormControlLayout
@@ -1028,10 +1015,20 @@ exports[`Service Config component renders empty service config 1`] = `
                                   fullWidth={false}
                                   icon="search"
                                   isLoading={false}
+                                  prepend="Focus on"
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
+                                    <EuiFormLabel
+                                      className="euiFormControlLayout__prepend"
+                                    >
+                                      <label
+                                        className="euiFormLabel euiFormControlLayout__prepend"
+                                      >
+                                        Focus on
+                                      </label>
+                                    </EuiFormLabel>
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
                                     >
@@ -1039,7 +1036,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                         isInvalid={false}
                                       >
                                         <input
-                                          className="euiFieldSearch euiFieldSearch--compressed"
+                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
                                           placeholder="Service name"
@@ -1196,10 +1193,10 @@ exports[`Service Config component renders empty service config 1`] = `
                     </div>
                   </EuiPanel>
                   <EuiSpacer
-                    size="xl"
+                    size="m"
                   >
                     <div
-                      className="euiSpacer euiSpacer--xl"
+                      className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
                 </ServiceMap>
@@ -2215,30 +2212,16 @@ exports[`Service Config component renders with one service selected 1`] = `
                         />
                       </EuiHorizontalRule>
                       <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
+                        justifyContent="spaceBetween"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            grow={false}
+                            grow={7}
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
+                              className="euiFlexItem euiFlexItem--flexGrow7"
                             >
                               <EuiCompressedFieldSearch
                                 compressed={true}
@@ -2250,6 +2233,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 onChange={[Function]}
                                 onSearch={[Function]}
                                 placeholder="Service name"
+                                prepend="Focus on"
                                 value=""
                               >
                                 <EuiFormControlLayout
@@ -2257,10 +2241,20 @@ exports[`Service Config component renders with one service selected 1`] = `
                                   fullWidth={false}
                                   icon="search"
                                   isLoading={false}
+                                  prepend="Focus on"
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
+                                    <EuiFormLabel
+                                      className="euiFormControlLayout__prepend"
+                                    >
+                                      <label
+                                        className="euiFormLabel euiFormControlLayout__prepend"
+                                      >
+                                        Focus on
+                                      </label>
+                                    </EuiFormLabel>
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
                                     >
@@ -2268,7 +2262,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                         isInvalid={false}
                                       >
                                         <input
-                                          className="euiFieldSearch euiFieldSearch--compressed"
+                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
                                           placeholder="Service name"
@@ -2425,10 +2419,10 @@ exports[`Service Config component renders with one service selected 1`] = `
                     </div>
                   </EuiPanel>
                   <EuiSpacer
-                    size="xl"
+                    size="m"
                   >
                     <div
-                      className="euiSpacer euiSpacer--xl"
+                      className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
                 </ServiceMap>
