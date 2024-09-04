@@ -81,7 +81,6 @@ export const ServicesList = ({
           onChange={(newOptions) => {
             setOptions(newOptions);
             nameColumnAction(newOptions.filter((option) => option.checked === 'on')[0].label);
-            console.log('newoptions', newOptions);
           }}
           singleSelection={true}
         >
