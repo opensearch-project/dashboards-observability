@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { truncate } from 'lodash';
 import React, { useMemo } from 'react';
-import { ServiceTrends } from '../../../../../common/types/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { FilterType } from '../common/filters/filters';
 import {
   MissingConfigurationMessage,
@@ -101,7 +100,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
-            {mode === 'data_prepper' && (
+            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   size="xs"
@@ -177,7 +176,7 @@ export function ServicesTable(props: ServicesTableProps) {
             />
           ),
         },
-        ...(mode === 'data_prepper'
+        ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? [
               {
                 field: 'number_of_connected_services',
@@ -190,7 +189,7 @@ export function ServicesTable(props: ServicesTableProps) {
               },
             ]
           : []),
-        ...(mode === 'data_prepper'
+        ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? [
               {
                 field: 'connected_services',
@@ -269,6 +268,7 @@ export function ServicesTable(props: ServicesTableProps) {
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
         {!(
+          mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && dataPrepperIndicesExist) ||
           (mode === 'jaeger' && jaegerIndicesExist)
         ) ? (

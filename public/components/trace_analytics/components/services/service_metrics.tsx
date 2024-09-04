@@ -6,9 +6,8 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public';
-import { ServiceTrends } from '../../../../../common/types/trace_analytics';
+import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
-import { TraceAnalyticsMode } from '../../home';
 import { handleServiceTrendsRequest } from '../../requests/services_request_handler';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
 import { LatencyPltPanel } from '../common/plots/latency_trend_plt';

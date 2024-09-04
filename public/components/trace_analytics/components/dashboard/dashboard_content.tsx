@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../../public/components/common/toast';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 import {
   handleDashboardErrorRatePltRequest,
   handleDashboardRequest,
@@ -31,7 +32,6 @@ import { ThroughputPlt } from '../common/plots/throughput_plt';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
-import { coreRefs } from '../../../../../public/framework/core_refs';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -100,7 +100,8 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'custom_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh();
@@ -184,7 +185,7 @@ export function DashboardContent(props: DashboardProps) {
         dataSourceMDSId[0].id,
         setPercentileMap
       ).finally(() => setLoading(false));
-    } else if (mode === 'data_prepper') {
+    } else if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       handleDashboardRequest(
         http,
         DSL,
@@ -285,10 +286,11 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      {mode === 'custom_data_prepper' ||
+      (mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
-          {mode === 'data_prepper' ? (
+          {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
             <>
               <DashboardTable
                 items={tableItems}

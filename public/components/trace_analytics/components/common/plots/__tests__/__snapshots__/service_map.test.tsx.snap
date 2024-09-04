@@ -35,17 +35,11 @@ exports[`Service map component renders service map 1`] = `
       margin="m"
     />
     <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
+      justifyContent="spaceBetween"
     >
       <EuiFlexItem
-        grow={false}
+        grow={7}
       >
-        <EuiText>
-          Focus on
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
         <EuiCompressedFieldSearch
           compressed={true}
           fullWidth={false}
@@ -56,6 +50,7 @@ exports[`Service map component renders service map 1`] = `
           onChange={[Function]}
           onSearch={[Function]}
           placeholder="Service name"
+          prepend="Focus on"
           value=""
         />
       </EuiFlexItem>
@@ -366,7 +361,7 @@ exports[`Service map component renders service map 1`] = `
     </EuiFlexGroup>
   </EuiPanel>
   <EuiSpacer
-    size="xl"
+    size="m"
   />
 </Fragment>
 `;

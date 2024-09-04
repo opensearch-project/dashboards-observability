@@ -8,20 +8,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer } from '@ela
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
   handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
-import { FilterType, Filters } from '../common/filters/filters';
+import { Filters, FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
+import { DataSourcePicker } from '../dashboard/mode_picker';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
-import { coreRefs } from '../../../../framework/core_refs';
-import { DataSourcePicker } from '../dashboard/mode_picker';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -86,7 +86,8 @@ export function ServicesContent(props: ServicesProps) {
     setFilteredService(newFilteredService);
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'custom_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh(newFilteredService);
@@ -230,7 +231,8 @@ export function ServicesContent(props: ServicesProps) {
             serviceTrends={serviceTrends}
           />
           <EuiSpacer size="s" />
-          {mode === 'data_prepper' && dataPrepperIndicesExist ? (
+          {mode === 'custom_data_prepper' ||
+          (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
             <ServiceMap
               addFilter={addFilter}
               serviceMap={serviceMap}
