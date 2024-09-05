@@ -75,7 +75,7 @@ jobs:
                                  yarn build && mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: dashboards-observability-ubuntu-latest
           path: ./OpenSearch-Dashboards/plugins/dashboards-observability/build
@@ -145,7 +145,7 @@ jobs:
           mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: dashboards-observability-${{ matrix.os }}
           path: ./OpenSearch-Dashboards/plugins/dashboards-observability/build
