@@ -56,6 +56,11 @@ export function setupRoutes({
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
-  registerQueryAssistRoutes(router);
+
+  // query assist is part of log explorer, which will be disabled if datasource is enabled
+  if (!dataSourceEnabled) {
+    registerQueryAssistRoutes(router);
+  }
+
   registerGettingStartedRoutes(router);
 }
