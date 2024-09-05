@@ -40,3 +40,4 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * Update getting-started links to match recent catalog PR merges ([#2012](https://github.com/opensearch-project/dashboards-observability/pull/2006))
 * Fix Observability CI workflow checks ([#2046](https://github.com/opensearch-project/dashboards-observability/pull/2046))
 * Bump org.json:json ([#1966](https://github.com/opensearch-project/dashboards-observability/pull/1966))
+* Update the actions/upload-artifact from v1 to v4 ([#2133](https://github.com/opensearch-project/dashboards-observability/pull/2133))
