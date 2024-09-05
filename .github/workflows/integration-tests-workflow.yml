@@ -189,14 +189,14 @@ jobs:
           yarn cypress:run --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
 
       - name: Capture failure screenshots
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-${{ matrix.os }}
           path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/screenshots
 
       - name: Capture test video
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-${{ matrix.os }}
