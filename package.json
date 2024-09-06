@@ -50,7 +50,7 @@
     "eslint": "^6.8.0",
     "husky": "6.0.0",
     "jest-dom": "^4.0.0",
-    "lint-staged": "^13.1.0"
+    "lint-staged": "^15.2.10"
   },
   "resolutions": {
     "react-syntax-highlighter": "^15.4.3",

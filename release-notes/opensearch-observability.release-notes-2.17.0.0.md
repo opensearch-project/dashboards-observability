@@ -41,3 +41,4 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * Fix Observability CI workflow checks ([#2046](https://github.com/opensearch-project/dashboards-observability/pull/2046))
 * Bump org.json:json ([#1966](https://github.com/opensearch-project/dashboards-observability/pull/1966))
 * Update the actions/upload-artifact from v1 to v4 ([#2133](https://github.com/opensearch-project/dashboards-observability/pull/2133))
+* [CVE] Bump the lint-staged from 13.1.0 to 15.2.10 ([#2138](https://github.com/opensearch-project/dashboards-observability/pull/2138))
