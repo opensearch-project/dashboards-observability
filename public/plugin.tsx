@@ -186,7 +186,6 @@ export class ObservabilityPlugin
 
     setupOverviewPage(setupDeps.contentManagement!);
     this.featureFlagStatus = !!setupDeps.dataSource;
-    console.log('Feature Flag Status:', this.featureFlagStatus);
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
