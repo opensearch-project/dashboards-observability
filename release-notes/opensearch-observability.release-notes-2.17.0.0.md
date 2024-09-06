@@ -12,7 +12,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * [FEATURE] MDS support in Integrations for observability plugin ([#2051](https://github.com/opensearch-project/dashboards-observability/pull/2051))
 * [Feature] Logs UI update ([#2092](https://github.com/opensearch-project/dashboards-observability/pull/2092))
 * feat: make createAssets API compatible with workspace ([#2101](https://github.com/opensearch-project/dashboards-observability/pull/2101))
-* [Page Header] New page header for notebooks and UI updates ([#2099](https://github.com/opensearch-project/dashboards-observability/pull/2099), [#2103](https://github.com/opensearch-project/dashboards-observability/pull/2203))
+* [Page Header] New page header for notebooks and UI updates ([#2099](https://github.com/opensearch-project/dashboards-observability/pull/2099), [#2103](https://github.com/opensearch-project/dashboards-observability/pull/2099))
 * [Feature] OverviewPage made with Content Management ([#2077](https://github.com/opensearch-project/dashboards-observability/pull/2077))
 
 ### Enhancement
