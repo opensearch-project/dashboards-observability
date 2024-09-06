@@ -12,7 +12,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * [FEATURE] MDS support in Integrations for observability plugin ([#2051](https://github.com/opensearch-project/dashboards-observability/pull/2051))
 * [Feature] Logs UI update ([#2092](https://github.com/opensearch-project/dashboards-observability/pull/2092))
 * feat: make createAssets API compatible with workspace ([#2101](https://github.com/opensearch-project/dashboards-observability/pull/2101))
-* [Page Header] New page header for notebooks and UI updates ([#2099](https://github.com/opensearch-project/dashboards-observability/pull/2099), [#2103](https://github.com/opensearch-project/dashboards-observability/pull/2203))
+* [Page Header] New page header for notebooks and UI updates ([#2099](https://github.com/opensearch-project/dashboards-observability/pull/2099), [#2103](https://github.com/opensearch-project/dashboards-observability/pull/2099))
 * [Feature] OverviewPage made with Content Management ([#2077](https://github.com/opensearch-project/dashboards-observability/pull/2077))
 
 ### Enhancement
@@ -24,6 +24,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * [query assist] update api handler to accommodate new ml-commons config response ([#2111](https://github.com/opensearch-project/dashboards-observability/pull/2111))
 * Update trace analytics landing page ([#2125](https://github.com/opensearch-project/dashboards-observability/pull/2125))
 * [query assist] update ml-commons response schema ([#2124](https://github.com/opensearch-project/dashboards-observability/pull/2124))
+* [MDS] Add support for register data sources during the absence of local cluster ([#2140](https://github.com/opensearch-project/dashboards-observability/pull/2140))
 
 ### Bug Fixes
 * [Bug] Trace Analytics bug fix for local cluster being rendered ([#2006](https://github.com/opensearch-project/dashboards-observability/pull/2006))

@@ -169,6 +169,7 @@ export class ObservabilityPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
   }
+  private featureFlagStatus: boolean = false;
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -184,6 +185,7 @@ export class ObservabilityPlugin
     });
 
     setupOverviewPage(setupDeps.contentManagement!);
+    this.featureFlagStatus = !!setupDeps.dataSource;
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -459,55 +461,57 @@ export class ObservabilityPlugin
       return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
     };
 
-    // register all s3 datasources
-    const registerDataSources = () => {
-      try {
-        core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
-          s3DataSources.map((s3ds) => {
-            dataSourceService.registerDataSource(
-              dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
-                id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
-                name: s3ds.name,
-                type: s3ds.connector.toLowerCase(),
-                metadata: {
-                  ...s3ds.properties,
-                  ui: {
-                    label: s3ds.name,
-                    typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
-                    groupType: s3ds.connector.toLowerCase(),
-                    selector: {
-                      displayDatasetsAsSource: false,
+    // register all s3 datasources only if mds feature flag is disabled
+    if (!this.featureFlagStatus) {
+      const registerDataSources = () => {
+        try {
+          core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+            s3DataSources.map((s3ds) => {
+              dataSourceService.registerDataSource(
+                dataSourceFactory.getDataSourceInstance(S3_DATA_SOURCE_TYPE, {
+                  id: htmlIdGenerator(OBS_S3_DATA_SOURCE)(),
+                  name: s3ds.name,
+                  type: s3ds.connector.toLowerCase(),
+                  metadata: {
+                    ...s3ds.properties,
+                    ui: {
+                      label: s3ds.name,
+                      typeLabel: getDataSourceTypeLabel(s3ds.connector.toLowerCase()),
+                      groupType: s3ds.connector.toLowerCase(),
+                      selector: {
+                        displayDatasetsAsSource: false,
+                      },
                     },
                   },
-                },
-              })
-            );
+                })
+              );
+            });
           });
-        });
-      } catch (error) {
-        console.error('Error registering S3 datasources', error);
-      }
-    };
+        } catch (error) {
+          console.error('Error registering S3 datasources', error);
+        }
+      };
 
-    dataSourceService.registerDataSourceFetchers([
-      { type: S3_DATA_SOURCE_TYPE, registerDataSources },
-    ]);
+      dataSourceService.registerDataSourceFetchers([
+        { type: S3_DATA_SOURCE_TYPE, registerDataSources },
+      ]);
 
-    if (startDeps.securityDashboards) {
-      core.http
-        .get(SECURITY_PLUGIN_ACCOUNT_API)
-        .then(() => {
-          registerDataSources();
-        })
-        .catch((e) => {
-          if (e?.response?.status !== 401) {
-            // accounts api should not return any error status other than 401 if security installed,
-            // this datasource register is included just in case
+      if (startDeps.securityDashboards) {
+        core.http
+          .get(SECURITY_PLUGIN_ACCOUNT_API)
+          .then(() => {
             registerDataSources();
-          }
-        });
-    } else {
-      registerDataSources();
+          })
+          .catch((e) => {
+            if (e?.response?.status !== 401) {
+              // accounts api should not return any error status other than 401 if security installed,
+              // this datasource register is included just in case
+              registerDataSources();
+            }
+          });
+      } else {
+        registerDataSources();
+      }
     }
 
     core.http.intercept({
