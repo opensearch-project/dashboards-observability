@@ -103,7 +103,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     setSelectedWorkflow('');
     setGettingStarted(null);
     setWorkflows([]);
-    onCardSelectionChange(value === 'Use a sample dataset');
+    onCardSelectionChange(value === 'Configure use-case based content');
 
     if (value === 'Configure collectors') {
       setCollectorOptions([
@@ -349,12 +349,12 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           <EuiFlexItem>
             <EuiCheckableCard
               id="use_sample_dataset"
-              label="Use a sample dataset"
+              label="Configure use-case based content"
               checkableType="radio"
-              checked={selectedCard === 'Use a sample dataset'}
+              checked={selectedCard === 'Configure use-case based content'}
               onChange={() => {
-                handleCollectionMethodChange('Use a sample dataset');
-                setSelectedCard('Use a sample dataset');
+                handleCollectionMethodChange('Configure use-case based content');
+                setSelectedCard('Configure use-case based content');
               }}
             >
               Explore with a log dataset
@@ -362,7 +362,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {collectionMethod === 'Use a sample dataset' ? (
+        {collectionMethod === 'Configure use-case based content' ? (
           <IntegrationCards />
         ) : (
           <>

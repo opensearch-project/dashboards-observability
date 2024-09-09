@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
+import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils/index';
 
 interface Pattern {
   id: string;
@@ -75,8 +76,15 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
       ? `mds-${selectedDataSourceId}-objectId-${patternId}`
       : patternId;
 
+    const currentUrl = window.location.href;
+    const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+
+    const workspacePatternId = workspaceId
+      ? `workspaceId-${workspaceId}-${finalPatternId}`
+      : finalPatternId;
+
     coreRefs?.application!.navigateToApp('data-explorer', {
-      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${finalPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${workspacePatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
     });
   };
 
@@ -85,8 +93,16 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
       ? `mds-${selectedDataSourceId}-objectId-${dashboardId}`
       : dashboardId;
 
+    const currentUrl = window.location.href;
+    const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+
+    const workspaceDashboardId = workspaceId
+      ? `workspaceId-${workspaceId}-${finalDashboardId}`
+      : finalDashboardId;
+    const dashboardUrl = `#/view/${workspaceDashboardId}`;
+
     coreRefs?.application!.navigateToApp('dashboards', {
-      path: `#/view/${finalDashboardId}`,
+      path: dashboardUrl,
     });
   };
 

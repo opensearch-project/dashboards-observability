@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiI18n } from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
@@ -67,13 +67,17 @@ export const Home = () => {
             order: card.order,
             description: card.description,
             title: card.title,
-            onClick: () => coreRefs.application?.navigateToApp(card.url, { path: '#/' }),
-            getFooter: () => {
-              return (
-                <EuiText size="s" textAlign="center">
-                  {card.footer}
-                </EuiText>
-              );
+            cardProps: {
+              selectable: {
+                children: (
+                  <EuiI18n
+                    token="home.sampleData.card.footer"
+                    default={card.footer || 'Documentation'}
+                  />
+                ),
+                onClick: () => coreRefs.application?.navigateToApp(card.url, { path: '#/' }),
+                isSelected: false,
+              },
             },
           }),
           getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,

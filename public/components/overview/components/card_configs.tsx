@@ -12,6 +12,7 @@ import {
   alertingPluginID,
   anomalyDetectionPluginID,
   discoverPluginID,
+  IMPORT_SAMPLE_DATA_APP_ID,
 } from '../../../../common/constants/shared';
 
 export interface GettingStartedConfig {
@@ -23,9 +24,22 @@ export interface GettingStartedConfig {
   url: string;
 }
 
+const SAMPLEDATA_CONFIG: GettingStartedConfig = {
+  id: 'sample_data',
+  order: 1,
+  description: i18n.translate('home.sampleData.card.description', {
+    defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
+  }),
+  title: i18n.translate('home.sampleData.card.title', {
+    defaultMessage: 'Try OpenSearch',
+  }),
+  url: IMPORT_SAMPLE_DATA_APP_ID,
+  footer: 'Sample Datasets',
+};
+
 const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   id: 'getting_started',
-  order: 1,
+  order: 2,
   title: i18n.translate('observability.overview.card.gettingStarted.title', {
     defaultMessage: 'Add your data',
   }),
@@ -36,7 +50,7 @@ const GETTING_STARTED_CONFIG: GettingStartedConfig = {
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
   id: 'discover',
-  order: 2,
+  order: 3,
   title: i18n.translate('observability.overview.card.discover.title', {
     defaultMessage: 'Discover insights',
   }),
@@ -47,7 +61,7 @@ const DISCOVER_CONFIG: GettingStartedConfig = {
 
 const METRICS_CONFIG: GettingStartedConfig = {
   id: 'metrics',
-  order: 3,
+  order: 4,
   title: i18n.translate('observability.overview.card.metrics.title', {
     defaultMessage: 'Monitor system performance',
   }),
@@ -58,7 +72,7 @@ const METRICS_CONFIG: GettingStartedConfig = {
 
 const TRACES_CONFIG: GettingStartedConfig = {
   id: 'traces',
-  order: 4,
+  order: 5,
   title: i18n.translate('observability.overview.card.traces.title', {
     defaultMessage: 'Identify performance issues',
   }),
@@ -69,7 +83,7 @@ const TRACES_CONFIG: GettingStartedConfig = {
 
 const SERVICES_CONFIG: GettingStartedConfig = {
   id: 'services',
-  order: 5,
+  order: 6,
   title: i18n.translate('observability.overview.card.services.title', {
     defaultMessage: 'Monitor service health',
   }),
@@ -80,7 +94,7 @@ const SERVICES_CONFIG: GettingStartedConfig = {
 
 const ALERTS_CONFIG: GettingStartedConfig = {
   id: 'alerts',
-  order: 6,
+  order: 7,
   title: i18n.translate('observability.overview.card.alerts.title', {
     defaultMessage: 'Get notified',
   }),
@@ -91,7 +105,7 @@ const ALERTS_CONFIG: GettingStartedConfig = {
 
 const ANOMALY_CONFIG: GettingStartedConfig = {
   id: 'anomaly',
-  order: 7,
+  order: 8,
   title: i18n.translate('observability.overview.card.anomaly.title', {
     defaultMessage: 'Detect anomalies in your data',
   }),
@@ -101,6 +115,7 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
 };
 
 export const cardConfigs = [
+  SAMPLEDATA_CONFIG,
   GETTING_STARTED_CONFIG,
   DISCOVER_CONFIG,
   METRICS_CONFIG,
