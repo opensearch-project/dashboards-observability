@@ -16,12 +16,12 @@ import React from 'react';
 
 export function TraceSideBar(props: { children: React.ReactNode }) {
   function setIsSelected(items: Array<EuiSideNavItemType<React.ReactNode>>, hash: string): boolean {
-    if (hash === '#/traces') {
-      items[0].items[1].isSelected = true;
+    if (hash === '#/traces' || hash === '#/') {
+      items[0].items[0].isSelected = true;
       return true;
     }
-    if (hash === '#/services' || hash === '#/') {
-      items[0].items[0].isSelected = true;
+    if (hash === '#/services') {
+      items[0].items[1].isSelected = true;
       return true;
     }
   }
@@ -30,17 +30,17 @@ export function TraceSideBar(props: { children: React.ReactNode }) {
     {
       name: 'Trace analytics',
       id: 1,
-      href: '#/',
+      href: '#/traces',
       items: [
         {
-          name: 'Services',
+          name: 'Traces',
           id: 1.1,
-          href: '#/services',
+          href: '#/traces',
         },
         {
-          name: 'Traces',
+          name: 'Services',
           id: 1.2,
-          href: '#/traces',
+          href: '#/services',
         },
       ],
     },

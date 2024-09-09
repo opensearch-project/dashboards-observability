@@ -4,14 +4,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { IntegrationReader } from './repository/integration_reader';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
   indexPattern: string;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   workflows?: string[];
   dataSource?: string;
   tableName?: string;
@@ -194,15 +196,23 @@ export class IntegrationInstanceBuilder {
         new Error('Attempted to create instance with invalid template', config.error)
       );
     }
-    return Promise.resolve({
+    const instance: IntegrationInstance = {
       name: options.name,
       templateName: config.value.name,
-      // Before data sources existed we called the index pattern a data source. Now we need the old
-      // name for BWC but still use the new data sources in building, so we map the variable only
-      // for returned output here
       dataSource: options.indexPattern,
       creationDate: new Date().toISOString(),
       assets: refs,
-    });
+    };
+    if (options.dataSourceMDSId) {
+      instance.references = [
+        {
+          id: options.dataSourceMDSId,
+          name: options.dataSourceMDSLabel,
+          type: 'data-source',
+        },
+      ];
+    }
+
+    return Promise.resolve(instance);
   }
 }

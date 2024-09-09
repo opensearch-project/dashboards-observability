@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -21,16 +21,21 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import truncate from 'lodash/truncate';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+import React, { useEffect, useState } from 'react';
+import { DataSourceViewConfig } from '../../../../../../src/plugins/data_source_management/public';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { DeleteModal } from '../../common/helpers/delete_modal';
-import { AddedIntegrationProps } from './integration_types';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
+import { DeleteModal } from '../../common/helpers/delete_modal';
+import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+import { AddedIntegrationProps } from './integration_types';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 export const IntegrationHealthBadge = ({ status }: { status?: string }) => {
   switch (status) {
@@ -46,7 +51,14 @@ export const IntegrationHealthBadge = ({ status }: { status?: string }) => {
 };
 
 export function AddedIntegration(props: AddedIntegrationProps) {
-  const { http, integrationInstanceId, chrome } = props;
+  const {
+    http,
+    integrationInstanceId,
+    chrome,
+    dataSourceEnabled,
+    dataSourceManagement,
+    setActionMenu,
+  } = props;
 
   const { setToast } = useToast();
 
@@ -74,6 +86,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const activateDeleteModal = (integrationName?: string) => {
     setModalLayout(
@@ -117,55 +131,108 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   function AddedOverview(overviewProps: { data: { data?: IntegrationInstanceResult } }) {
     const { data } = overviewProps.data;
 
-    return (
-      <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
-        <EuiSpacer size="m" />
-        <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
-          <EuiPageContentHeaderSection>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                    <h1>{data?.name}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem style={{ justifyContent: 'center' }}>
-                  <IntegrationHealthBadge status={data?.status} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+    const badgeContent = <IntegrationHealthBadge status={data?.status} />;
 
+    const deleteButton = (
+      <EuiSmallButtonIcon
+        iconType="trash"
+        aria-label="Delete"
+        color="danger"
+        onClick={() => {
+          activateDeleteModal(data?.name);
+        }}
+        data-test-subj="deleteInstanceButton"
+      />
+    );
+
+    const headerContent = (
+      <EuiPageContentHeaderSection>
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  aria-label="Delete"
-                  color="danger"
-                  onClick={() => {
-                    activateDeleteModal(data?.name);
-                  }}
-                  data-test-subj="deleteInstanceButton"
-                />
+                <EuiText data-test-subj="eventHomePageTitle" size="s">
+                  <h1>{data?.name}</h1>
+                </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>{badgeContent}</EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPageContentHeaderSection>
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText>
-                <h4>Template</h4>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiLink href={`#/available/${data?.templateName}`}>{data?.templateName}</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <h4>Date Added</h4>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageContentHeaderSection>
+    );
+
+    const additionalInfo = (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>Template</h4>
+          </EuiText>
+          <EuiLink href={`#/available/${data?.templateName}`}>{data?.templateName}</EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>Date Added</h4>
+          </EuiText>
+          <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+    return newNavigation ? (
+      <>
+        <HeaderControlledComponentsWrapper
+          badgeContent={<IntegrationHealthBadge status={data?.status} />}
+          components={[
+            ...(dataSourceEnabled
+              ? [
+                  <DataSourceMenu
+                    setMenuMountPoint={setActionMenu}
+                    componentType={'DataSourceView'}
+                    componentConfig={{
+                      activeOption: [
+                        {
+                          id: data?.references?.[0]?.id,
+                          label: data?.references?.[0]?.name,
+                        },
+                      ],
+                      fullWidth: true,
+                      dataSourceFilter: dataSourceFilterFn,
+                    }}
+                  />,
+                ]
+              : []),
+            deleteButton,
+          ]}
+        />
+        {additionalInfo}
+      </>
+    ) : (
+      <>
+        <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
+          {dataSourceEnabled && (
+            <DataSourceMenu
+              setMenuMountPoint={setActionMenu}
+              componentType={'DataSourceView'}
+              componentConfig={{
+                activeOption: [
+                  {
+                    id: data?.references?.[0]?.id,
+                    label: data?.references?.[0]?.name,
+                  },
+                ],
+                fullWidth: true,
+                dataSourceFilter: dataSourceFilterFn,
+              }}
+            />
+          )}
+          <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
+            {headerContent}
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+        {additionalInfo}
+      </>
     );
   }
 
@@ -246,6 +313,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const search = {
       box: {
         incremental: true,
+        compressed: true,
       },
       filters: [
         {
@@ -260,6 +328,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           })),
         },
       ],
+      compressed: true,
     };
 
     const tableColumns = [
@@ -307,11 +376,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiSpacer size="xl" />
         {AddedOverview({ data: stateData })}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         {AddedAssets({ data: stateData })}
-        <EuiSpacer />
+        <EuiSpacer size="s" />
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>

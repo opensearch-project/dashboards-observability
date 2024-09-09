@@ -4,10 +4,7 @@
  */
 
 import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -21,7 +18,7 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -29,14 +26,23 @@ import {
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import moment from 'moment';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ChromeBreadcrumb } from '../../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  MountPoint,
+  SavedObjectsStart,
+} from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import {
   CREATE_NOTE_MESSAGE,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
-import { UI_DATE_FORMAT, pageStyles } from '../../../../common/constants/shared';
+import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 import {
   DeleteNotebookModal,
   getCustomModal,
@@ -44,10 +50,15 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
+
 interface NoteTableProps {
   loading: boolean;
   fetchNotebooks: () => void;
-  addSampleNotebooks: () => void;
+  addSampleNotebooks: (
+    dataSourceMDSId: string | undefined,
+    dataSourceLabel: string | undefined
+  ) => void;
   notebooks: NotebookType[];
   createNotebook: (newNoteName: string) => void;
   renameNotebook: (newNoteName: string, noteId: string) => void;
@@ -55,6 +66,11 @@ interface NoteTableProps {
   deleteNotebook: (noteList: string[], toastMessage?: string) => void;
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  savedObjectsMDSClient: SavedObjectsStart;
+  notifications: CoreStart['notifications'];
   // setToast: (title: string, color?: string, text?: string) => void;
 }
 
@@ -64,30 +80,34 @@ export function NoteTable({
   addSampleNotebooks,
   notebooks,
   createNotebook,
-  renameNotebook,
-  cloneNotebook,
   deleteNotebook,
   parentBreadcrumb,
   setBreadcrumbs,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
+  notifications,
 }: NoteTableProps) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedNotebooks, setSelectedNotebooks] = useState<NotebookType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
 
   useEffect(() => {
-    setBreadcrumbs([
-      parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/',
-      },
-    ]);
+    setNavBreadCrumbs(
+      [parentBreadcrumb],
+      [
+        {
+          text: 'Notebooks',
+          href: '#/',
+        },
+      ],
+      notebooks.length
+    );
     fetchNotebooks();
-  }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
+  }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks, notebooks.length]);
 
   useEffect(() => {
     const url = window.location.hash.split('/');
@@ -105,16 +125,6 @@ export function NoteTable({
 
   const onCreate = async (newNoteName: string) => {
     createNotebook(newNoteName);
-    closeModal();
-  };
-
-  const onRename = async (newNoteName: string) => {
-    renameNotebook(newNoteName, selectedNotebooks[0].id);
-    closeModal();
-  };
-
-  const onClone = async (newName: string) => {
-    cloneNotebook(newName, selectedNotebooks[0].id);
     closeModal();
   };
 
@@ -148,38 +158,6 @@ export function NoteTable({
     showModal();
   };
 
-  const renameNote = () => {
-    setModalLayout(
-      getCustomModal(
-        onRename,
-        closeModal,
-        'Name',
-        'Rename notebook',
-        'Cancel',
-        'Rename',
-        selectedNotebooks[0].path,
-        CREATE_NOTE_MESSAGE
-      )
-    );
-    showModal();
-  };
-
-  const cloneNote = () => {
-    setModalLayout(
-      getCustomModal(
-        onClone,
-        closeModal,
-        'Name',
-        'Duplicate notebook',
-        'Cancel',
-        'Duplicate',
-        selectedNotebooks[0].path + ' (copy)',
-        CREATE_NOTE_MESSAGE
-      )
-    );
-    showModal();
-  };
-
   const deleteNote = () => {
     const notebookString = `notebook${selectedNotebooks.length > 1 ? 's' : ''}`;
     setModalLayout(
@@ -194,71 +172,28 @@ export function NoteTable({
   };
 
   const addSampleNotebooksModal = async () => {
+    let selectedDataSourceId: string | undefined;
+    let selectedDataSourceLabel: string | undefined;
+    const handleSelectedDataSourceChange = (id?: string, label?: string) => {
+      selectedDataSourceId = id;
+      selectedDataSourceLabel = label;
+    };
     setModalLayout(
-      getSampleNotebooksModal(closeModal, async () => {
-        closeModal();
-        await addSampleNotebooks();
-      })
+      getSampleNotebooksModal(
+        closeModal,
+        async () => {
+          closeModal();
+          await addSampleNotebooks(selectedDataSourceId, selectedDataSourceLabel);
+        },
+        dataSourceEnabled,
+        dataSourceManagement,
+        savedObjectsMDSClient,
+        notifications,
+        handleSelectedDataSourceChange
+      )
     );
     showModal();
   };
-
-  const popoverButton = (
-    <EuiButton
-      data-test-subj="notebookTableActionBtn"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
-    >
-      Actions
-    </EuiButton>
-  );
-
-  const popoverItems: ReactElement[] = [
-    <EuiContextMenuItem
-      key="rename"
-      disabled={notebooks.length === 0 || selectedNotebooks.length !== 1}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        renameNote();
-      }}
-      data-test-subj="renameNotebookBtn"
-    >
-      Rename
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="duplicate"
-      disabled={notebooks.length === 0 || selectedNotebooks.length !== 1}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        cloneNote();
-      }}
-      data-test-subj="duplicateNotebookBtn"
-    >
-      Duplicate
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      disabled={notebooks.length === 0 || selectedNotebooks.length === 0}
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        deleteNote();
-      }}
-      data-test-subj="deleteNotebookBtn"
-    >
-      Delete
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="addSample"
-      onClick={() => {
-        setIsActionsPopoverOpen(false);
-        addSampleNotebooksModal();
-      }}
-      data-test-subj="add-samples-btn"
-    >
-      Add samples
-    </EuiContextMenuItem>,
-  ];
 
   const tableColumns = [
     {
@@ -292,63 +227,127 @@ export function NoteTable({
   >;
 
   return (
-    <div style={pageStyles}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1>Notebooks</h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <EuiPageContent id="notebookArea">
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle size="s" data-test-subj="notebookTableTitle">
-                  <h3>
-                    Notebooks<span className="panel-header-count"> ({notebooks.length})</span>
-                  </h3>
+          {!newNavigation && (
+            <EuiPageHeader>
+              <EuiPageHeaderSection>
+                <EuiTitle size="l">
+                  <h3>Notebooks</h3>
                 </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued" data-test-subj="notebookTableDescription">
-                  Use Notebooks to interactively and collaboratively develop rich reports backed by
-                  live data. Common use cases for notebooks includes creating postmortem reports,
-                  designing run books, building live infrastructure reports, or even documentation.{' '}
-                  <EuiLink external={true} href={NOTEBOOKS_DOCUMENTATION_URL} target="blank">
-                    Learn more
-                  </EuiLink>
-                </EuiText>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton fill href="#/create" data-test-subj="createNotebookPrimaryBtn">
-                      Create notebook
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiHorizontalRule margin="m" />
+              </EuiPageHeaderSection>
+            </EuiPageHeader>
+          )}
+          <EuiPageContent id="notebookArea">
+            {newNavigation ? (
+              <HeaderControlledComponentsWrapper
+                description={
+                  <>
+                    Use Notebooks to interactively and collaboratively develop rich reports backed
+                    by live data. Common use cases for notebooks include creating postmortem
+                    reports, designing run books, building live infrastructure reports, or even
+                    documentation.{' '}
+                    <EuiLink external={true} href={NOTEBOOKS_DOCUMENTATION_URL} target="_blank">
+                      Learn more
+                    </EuiLink>
+                  </>
+                }
+                components={[
+                  <EuiFlexGroup gutterSize="s" key="controls">
+                    <EuiFlexItem grow={false}>
+                      <EuiSmallButton
+                        data-test-subj="notebookEmptyTableAddSamplesBtn"
+                        fullWidth={false}
+                        onClick={() => addSampleNotebooksModal()}
+                      >
+                        Add sample notebooks
+                      </EuiSmallButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiSmallButton
+                        fill
+                        href="#/create"
+                        data-test-subj="createNotebookPrimaryBtn"
+                        iconType="plus"
+                        iconSide="left"
+                      >
+                        Create notebook
+                      </EuiSmallButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>,
+                ]}
+              />
+            ) : (
+              <EuiPageContentHeader>
+                <EuiPageContentHeaderSection>
+                  <EuiTitle size="s" data-test-subj="notebookTableTitle">
+                    <h3>
+                      Notebooks<span className="panel-header-count"> ({notebooks.length})</span>
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s" color="subdued" data-test-subj="notebookTableDescription">
+                    Use Notebooks to interactively and collaboratively develop rich reports backed
+                    by live data. Common use cases for notebooks include creating postmortem
+                    reports, designing run books, building live infrastructure reports, or even
+                    documentation.{' '}
+                    <EuiLink external={true} href={NOTEBOOKS_DOCUMENTATION_URL} target="blank">
+                      Learn more
+                    </EuiLink>
+                  </EuiText>
+                </EuiPageContentHeaderSection>
+                <EuiPageContentHeaderSection>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiSmallButton
+                        data-test-subj="notebookEmptyTableAddSamplesBtn"
+                        fullWidth={false}
+                        onClick={() => addSampleNotebooksModal()}
+                      >
+                        Add sample notebooks
+                      </EuiSmallButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiSmallButton
+                        fill
+                        href="#/create"
+                        data-test-subj="createNotebookPrimaryBtn"
+                        iconType="plus"
+                        iconSide="left"
+                      >
+                        Create notebook
+                      </EuiSmallButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPageContentHeaderSection>
+              </EuiPageContentHeader>
+            )}
             {notebooks.length > 0 ? (
               <>
-                <EuiFieldSearch
-                  fullWidth
-                  placeholder="Search notebook name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    {selectedNotebooks.length > 0 && (
+                      <EuiSmallButton
+                        color="danger"
+                        iconType="trash"
+                        onClick={deleteNote}
+                        data-test-subj="deleteSelectedNotebooks"
+                      >
+                        Delete {selectedNotebooks.length} notebook
+                        {selectedNotebooks.length > 1 ? 's' : ''}
+                      </EuiSmallButton>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiCompressedFieldSearch
+                      fullWidth
+                      placeholder="Search notebook name"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
                   loading={loading}
@@ -385,7 +384,7 @@ export function NoteTable({
                 <EuiText textAlign="center" data-test-subj="notebookEmptyTableText">
                   <h2>No notebooks</h2>
                   <EuiSpacer size="m" />
-                  <EuiText color="subdued">
+                  <EuiText color="subdued" size="s">
                     Use notebooks to create post-mortem reports, build live infrastructure
                     <br />
                     reports, or foster explorative collaborations with data.
@@ -394,22 +393,24 @@ export function NoteTable({
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       href="#/create"
                       data-test-subj="notebookEmptyTableCreateBtn"
                       fullWidth={false}
+                      iconType="plus"
+                      iconSide="left"
                     >
                       Create notebook
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="notebookEmptyTableAddSamplesBtn"
                       fullWidth={false}
                       onClick={() => addSampleNotebooksModal()}
                     >
-                      Add samples
-                    </EuiButton>
+                      Add sample notebooks
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="xxl" />
@@ -419,6 +420,6 @@ export function NoteTable({
         </EuiPageBody>
       </EuiPage>
       {isModalVisible && modalLayout}
-    </div>
+    </>
   );
 }

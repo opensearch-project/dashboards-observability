@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../../public/components/common/toast';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 import {
   handleDashboardErrorRatePltRequest,
   handleDashboardRequest,
@@ -64,6 +65,7 @@ export function DashboardContent(props: DashboardProps) {
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
   const { setToast } = useToast();
+  const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
@@ -77,7 +79,12 @@ export function DashboardContent(props: DashboardProps) {
   }, [showTimeoutToast]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    if (isNavGroupEnabled) {
+      chrome.setBreadcrumbs([...childBreadcrumbs]);
+    } else {
+      chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    }
+
     const validFilters = getValidFilterFields(mode, page, attributesFilterFields);
     setFilters([
       ...filters.map((filter) => ({
@@ -91,7 +98,8 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'custom_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh();
@@ -175,7 +183,7 @@ export function DashboardContent(props: DashboardProps) {
         dataSourceMDSId[0].id,
         setPercentileMap
       ).finally(() => setLoading(false));
-    } else if (mode === 'data_prepper') {
+    } else if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       handleDashboardRequest(
         http,
         DSL,
@@ -276,10 +284,11 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      {mode === 'custom_data_prepper' ||
+      (mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
-          {mode === 'data_prepper' ? (
+          {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
             <>
               <DashboardTable
                 items={tableItems}

@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -37,7 +37,7 @@ export const ServiceMapNodeDetails = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             aria-label="Close node details"
             iconType="cross"
             color="text"
@@ -46,13 +46,13 @@ export const ServiceMapNodeDetails = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiText>{selectedNodeDetails?.average_latency}</EuiText>
-      <EuiText>{selectedNodeDetails?.error_rate}</EuiText>
-      <EuiText>{selectedNodeDetails?.throughput}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.average_latency}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.error_rate}</EuiText>
+      <EuiText size="s">{selectedNodeDetails?.throughput}</EuiText>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiButton
+          <EuiSmallButton
             fill
             onClick={() =>
               setCurrentSelectedService &&
@@ -61,14 +61,14 @@ export const ServiceMapNodeDetails = ({
             }
           >
             View service details
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
+          <EuiSmallButton
             onClick={() => selectedNodeDetails && addServiceFilter(selectedNodeDetails?.label)}
           >
             Filter map
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { schema } from '@osd/config-schema';
 import {
   CoreSetup,
   CoreStart,
@@ -19,8 +20,10 @@ import { migrateV1IntegrationToV2Integration } from './adaptors/integrations/mig
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { PPLParsers } from './parsers/ppl_parser';
+import { registerObservabilityUISettings } from './plugin_helper/register_settings';
 import { setupRoutes } from './routes/index';
 import {
+  notebookSavedObject,
   searchSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
@@ -218,6 +221,7 @@ export class ObservabilityPlugin
 
     core.savedObjects.registerType(visualizationSavedObject);
     core.savedObjects.registerType(searchSavedObject);
+    core.savedObjects.registerType(notebookSavedObject);
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
@@ -225,6 +229,16 @@ export class ObservabilityPlugin
     }));
 
     assistantDashboards?.registerMessageParser(PPLParsers);
+    registerObservabilityUISettings(core.uiSettings);
+
+    core.uiSettings.register({
+      'observability:defaultDashboard': {
+        name: 'Observability default dashboard',
+        value: '',
+        description: 'The default dashboard to display in Observability overview page',
+        schema: schema.string(),
+      },
+    });
 
     return {};
   }

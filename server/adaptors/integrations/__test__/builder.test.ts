@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { TEST_INTEGRATION_CONFIG } from '../../../../test/constants';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { IntegrationReader } from '../repository/integration_reader';
 import * as mockUtils from '../repository/utils';

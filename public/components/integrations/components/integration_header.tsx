@@ -4,18 +4,17 @@
  */
 
 import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiSmallButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -23,45 +22,25 @@ import {
   OPENSEARCH_DOCUMENTATION_URL,
 } from '../../../../common/constants/integrations';
 import { IntegrationUploadFlyout } from './upload_flyout';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () => void }) => {
-  const [isPopoverOpen, setPopover] = useState(false);
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
-  const onButtonClick = () => {
-    setPopover((isOpen) => !isOpen);
-  };
-
-  const items = [
-    <EuiContextMenuItem
-      onClick={() => {
-        closePopover(); // If the popover isn't closed, it overlays over the flyout
-        onShowUpload();
-      }}
-    >
-      Upload Integrations
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem href={OPENSEARCH_CATALOG_URL}>View Catalog</EuiContextMenuItem>,
-  ];
-  const button = (
-    <EuiButton iconType="arrowDown" fill={true} onClick={onButtonClick}>
-      Catalog
-    </EuiButton>
-  );
   return (
-    <EuiPopover
-      id="integHeaderActionsPanel"
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLink href={OPENSEARCH_CATALOG_URL} external={true}>
+          View Catalog
+        </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSmallButton onClick={onShowUpload} fill>
+          Upload Integration
+        </EuiSmallButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -104,25 +83,42 @@ export const IntegrationHeader = () => {
 
   return (
     <div>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="integrations-header">
-            <h1>Integrations</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
-        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
-          Learn more
-        </EuiLink>
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+      {newNavigation ? (
+        <HeaderControlledComponentsWrapper
+          description={
+            <>
+              View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
+              <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
+                Learn more
+              </EuiLink>
+            </>
+          }
+          components={[<IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />]}
+        />
+      ) : (
+        <>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="l" data-test-subj="integrations-header">
+                <h3>Integrations</h3>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiText size="s" color="subdued">
+            View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
+            <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+              Learn more
+            </EuiLink>
+          </EuiText>
+        </>
+      )}
+      {!newNavigation && <EuiSpacer size="s" />}
+      <EuiTabs display="condensed" size="s">
+        {renderTabs()}
+      </EuiTabs>
       <EuiSpacer size="s" />
       {showUploadFlyout ? (
         <IntegrationUploadFlyout onClose={() => setShowUploadFlyout(false)} />

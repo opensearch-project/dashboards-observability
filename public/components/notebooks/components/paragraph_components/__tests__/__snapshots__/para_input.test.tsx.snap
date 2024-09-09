@@ -66,143 +66,152 @@ exports[`<para_input /> spec renders the visualization component 1`] = `
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrow6"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      style="min-width: 500px;"
     >
       <div
-        class="euiFormRow euiFormRow--fullWidth"
-        id="random_html_id-row"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            class="euiFormLabel euiFormRow__label"
-            for="random_html_id"
-          >
-            Title
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFlexItem"
         >
           <div
-            aria-expanded="false"
-            aria-haspopup="listbox"
-            class="euiComboBox"
-            role="combobox"
+            class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+            id="random_html_id-row"
           >
             <div
-              class="euiFormControlLayout"
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                class="euiFormLabel euiFormRow__label"
+                for="random_html_id"
+              >
+                Title
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFormControlLayout__childrenWrapper"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                class="euiComboBox euiComboBox--compressed"
+                role="combobox"
               >
                 <div
-                  class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
-                  data-test-subj="comboBoxInput"
-                  tabindex="-1"
+                  class="euiFormControlLayout euiFormControlLayout--compressed"
                 >
-                  <span
-                    class="euiComboBoxPill euiComboBoxPill--plainText"
-                  >
-                    visualization-0
-                  </span>
                   <div
-                    class="euiComboBox__input"
-                    style="font-size: 14px; display: inline-block;"
+                    class="euiFormControlLayout__childrenWrapper"
                   >
-                    <input
-                      aria-controls=""
-                      data-test-subj="comboBoxSearchInput"
-                      id="random_html_id"
-                      role="textbox"
-                      style="box-sizing: content-box; width: 2px;"
-                      value=""
-                    />
                     <div
-                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                    />
+                      class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                      data-test-subj="comboBoxInput"
+                      tabindex="-1"
+                    >
+                      <span
+                        class="euiComboBoxPill euiComboBoxPill--plainText"
+                      >
+                        visualization-0
+                      </span>
+                      <div
+                        class="euiComboBox__input"
+                        style="font-size: 14px; display: inline-block;"
+                      >
+                        <input
+                          aria-controls=""
+                          data-test-subj="comboBoxSearchInput"
+                          id="random_html_id"
+                          role="textbox"
+                          style="box-sizing: content-box; width: 2px;"
+                          value=""
+                        />
+                        <div
+                          style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <button
+                        aria-label="Clear input"
+                        class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
+                        data-test-subj="comboBoxClearButton"
+                        type="button"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        aria-label="Open list of options"
+                        class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                        data-test-subj="comboBoxToggleListButton"
+                        type="button"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div
-                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                >
-                  <button
-                    aria-label="Clear input"
-                    class="euiFormControlLayoutClearButton"
-                    data-test-subj="comboBoxClearButton"
-                    type="button"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    aria-label="Open list of options"
-                    class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                    data-test-subj="comboBoxToggleListButton"
-                    type="button"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                      />
-                    </svg>
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--small"
+            data-test-subj="para-input-visualization-browse-button"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Browse
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <button
-        class="euiButton euiButton--primary"
-        data-test-subj="para-input-visualization-browse-button"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButton__content"
-        >
-          <span
-            class="euiButton__text"
-          >
-            Browse
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrow2"
+      class="euiFlexItem"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrow9"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFormRow euiFormRow--fullWidth"
+        class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
         id="random_html_id-row"
       >
         <div
@@ -225,7 +234,7 @@ exports[`<para_input /> spec renders the visualization component 1`] = `
               class="euiFlexItem"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
               >
                 <div
                   class="euiPopover euiPopover--anchorDownLeft"
@@ -285,13 +294,13 @@ exports[`<para_input /> spec renders the visualization component 1`] = `
                     class="euiDatePickerRange euiDatePickerRange--inGroup"
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiSuperDatePicker__startPopoverButton"
+                      class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiSuperDatePicker__startPopoverButton euiSuperDatePicker__startPopoverButton--compressed"
                     >
                       <div
                         class="euiPopover__anchor"
                       >
                         <button
-                          class="euiDatePopoverButton euiDatePopoverButton--start"
+                          class="euiDatePopoverButton euiDatePopoverButton--start euiDatePopoverButton-compressed"
                           data-test-subj="superDatePickerstartDatePopoverButton"
                           title="2020-07-21T18:37:44.710Z"
                         >
@@ -315,7 +324,7 @@ exports[`<para_input /> spec renders the visualization component 1`] = `
                         class="euiPopover__anchor"
                       >
                         <button
-                          class="euiDatePopoverButton euiDatePopoverButton--end"
+                          class="euiDatePopoverButton euiDatePopoverButton--end euiDatePopoverButton-compressed"
                           data-test-subj="superDatePickerendDatePopoverButton"
                           title="2020-08-20T18:37:44.710Z"
                         >
@@ -331,9 +340,6 @@ exports[`<para_input /> spec renders the visualization component 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="euiFlexItem"
-    />
   </div>
 </div>
 `;

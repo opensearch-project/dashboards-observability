@@ -34,7 +34,6 @@ import { useToast } from '../../../common/toast';
 import { HomeProps } from '../../home';
 import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import S3Logo from '../../icons/s3-logo.svg';
-import SecurityLakeLogo from '../../icons/security-lake-logo.svg';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { InstallIntegrationFlyout } from './integrations/installed_integrations_table';
@@ -77,17 +76,13 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     http!
       .get(`${DATACONNECTIONS_BASE}`)
       .then((res: DatasourceDetails[]) => {
-        const dataConnections: DataConnection[] = res.map(
-          (dataSourceDetails: DatasourceDetails): DataConnection => {
-            const { name, status, connector } = dataSourceDetails;
-
-            return {
-              name,
-              connectionType: connector,
-              dsStatus: status,
-            };
-          }
-        );
+        const dataConnections = res.map((dataConnection: DatasourceDetails) => {
+          return {
+            name: dataConnection.name,
+            connectionType: dataConnection.connector,
+            dsStatus: dataConnection.status,
+          };
+        });
         setData(dataConnections);
       })
       .catch((err) => {
@@ -139,7 +134,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       onClick: (datasource: DataConnection) => {
         if (datasource.connectionType === 'PROMETHEUS') {
           application!.navigateToApp(observabilityMetricsID);
-        } else if (['S3GLUE', 'SECURITYLAKE'].includes(datasource.connectionType)) {
+        } else if (datasource.connectionType === 'S3GLUE') {
           redirectToExplorerS3(datasource.name);
         }
       },
@@ -152,10 +147,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
       onClick: (datasource: DataConnection) => {
-        renderCreateAccelerationFlyout({
-          dataSource: datasource.name,
-          dataSourceType: datasource.connectionType,
-        });
+        renderCreateAccelerationFlyout({ dataSource: datasource.name });
       },
       'data-test-subj': 'action-accelerate',
     },
@@ -191,8 +183,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
 
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
-      case 'SECURITYLAKE':
-        return <EuiIcon type={SecurityLakeLogo} />;
       case 'S3GLUE':
         return <EuiIcon type={S3Logo} />;
       case 'PROMETHEUS':
@@ -223,23 +213,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
-      name: 'Type',
-      render: (connection: DataConnection) => {
-        switch (connection.connectionType) {
-          case 'PROMETHEUS':
-            return 'Prometheus';
-          case 'S3GLUE':
-            return 'Amazon S3 with AWS Glue Data Catalog';
-          case 'SECURITYLAKE':
-            return 'Amazon Security Lake';
-          default:
-            return '-';
-        }
-      },
-    },
-    {
       field: 'status',
-      name: 'Connection status',
+      name: 'Status',
       sortable: true,
       truncateText: true,
       render: (value, record: DataConnection) =>
@@ -262,13 +237,11 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     },
   };
 
-  const entries = data.map(({ name, connectionType, dsStatus }: DataConnection) => {
-    return {
-      connectionType,
-      name,
-      dsStatus,
-      data: { name, connectionType },
-    };
+  const entries = data.map((dataconnection: DataConnection) => {
+    const name = dataconnection.name;
+    const connectionType = dataconnection.connectionType;
+    const dsStatus = dataconnection.dsStatus;
+    return { connectionType, name, dsStatus, data: { name, connectionType } };
   });
 
   const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();

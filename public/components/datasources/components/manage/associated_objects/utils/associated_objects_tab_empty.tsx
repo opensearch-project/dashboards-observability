@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 import { LoadCacheType } from '../../../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../../framework/core_refs';
@@ -17,13 +17,13 @@ export const AssociatedObjectsTabEmpty: React.FC<AssociatedObjectsTabEmptyProps>
   const { application } = coreRefs;
 
   const QueryWorkbenchButton = (
-    <EuiButton
+    <EuiSmallButton
       iconSide="right"
       onClick={() => application!.navigateToApp('opensearch-query-workbench')}
       iconType="popout"
     >
       Query Workbench
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   let titleText;

@@ -5,8 +5,6 @@
 
 import {
   EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,25 +15,27 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { Color } from '../../../../common/constants/integrations';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { SetupIntegrationInputsForSecurityLake } from './setup_integration_inputs_security_lake';
-import { IntegrationConnectionType } from '../../../../common/types/integrations';
 
 export interface IntegrationSetupInputs {
   displayName: string;
-  connectionType: IntegrationConnectionType;
+  connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
   connectionTableName: string;
   enabledWorkflows: string[];
-  connectionDatabaseName?: string;
 }
 
 export interface IntegrationConfigProps {
@@ -44,14 +44,22 @@ export interface IntegrationConfigProps {
   integration: IntegrationConfig;
   setupCallout: SetupCallout;
   lockConnectionType?: boolean;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
 
+const sqlService = new SQLService(coreRefs.http!);
+
 const runQuery = async (
   query: string,
   datasource: string,
-  sessionId: string | null
+  sessionId: string | undefined,
+  dataSourceMDSId?: string
 ): Promise<Result<{ poll: object; sessionId: string }>> => {
   // Used for polling
   const sleep = (ms: number) => {
@@ -59,24 +67,22 @@ const runQuery = async (
   };
 
   try {
-    const http = coreRefs.http!;
-    const queryResponse: { queryId: string; sessionId: string } = await http.post(CONSOLE_PROXY, {
-      body: JSON.stringify({ query, datasource, lang: 'sql', sessionId }),
-      query: {
-        path: '_plugins/_async_query',
-        method: 'POST',
+    const queryResponse: { queryId: string; sessionId: string } = await sqlService.fetch(
+      {
+        query,
+        datasource,
+        lang: 'sql',
+        sessionId,
       },
-    });
+      dataSourceMDSId
+    );
+
     let poll: { status: string; error?: string } = { status: 'undefined' };
-    const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
+    const { queryId, sessionId: newSessionId } = queryResponse;
+
     while (!poll.error) {
-      poll = await http.post(CONSOLE_PROXY, {
-        body: '{}',
-        query: {
-          path: '_plugins/_async_query/' + queryId,
-          method: 'GET',
-        },
-      });
+      poll = await sqlService.fetchWithJobId({ queryId }, dataSourceMDSId);
+
       if (poll.status.toLowerCase() === 'success') {
         return {
           ok: true,
@@ -94,6 +100,7 @@ const runQuery = async (
       }
       await sleep(3000);
     }
+
     return { ok: false, error: new Error(poll.error) };
   } catch (err) {
     console.error(err);
@@ -102,9 +109,7 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.${config.connectionDatabaseName ?? 'default'}.${
-    config.connectionTableName
-  }`;
+  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -132,16 +137,20 @@ const addIntegration = async ({
   integration,
   setLoading,
   setCalloutLikeToast,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
   setIsInstalling,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationConfig;
   setLoading: (loading: boolean) => void;
   setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) => {
   setLoading(true);
-  let sessionId: string | null = null;
+  let sessionId: string | undefined;
 
   if (config.connectionType === 'index') {
     let enabledWorkflows: string[] | undefined;
@@ -157,6 +166,8 @@ const addIntegration = async ({
       templateName: integration.name,
       integration,
       setToast: setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
       name: config.displayName,
       indexPattern: config.connectionDataSource,
       skipRedirect: setIsInstalling ? true : false,
@@ -174,7 +185,6 @@ const addIntegration = async ({
     const assets: { data: ParsedIntegrationAsset[] } = await http.get(
       `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
     );
-
     for (const query of assets.data.filter(
       (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
         a.type === 'query'
@@ -185,7 +195,12 @@ const addIntegration = async ({
       }
 
       const queryStr = prepareQuery(query.query, config);
-      const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
+      const result = await runQuery(
+        queryStr,
+        config.connectionDataSource,
+        sessionId,
+        dataSourceMDSId
+      );
       if (!result.ok) {
         setLoading(false);
         setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
@@ -199,10 +214,10 @@ const addIntegration = async ({
       templateName: integration.name,
       integration,
       setToast: setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
       name: config.displayName,
-      indexPattern: `flint_${config.connectionDataSource}_${
-        config.connectionDatabaseName ?? 'default'
-      }_${config.connectionTableName}__*`,
+      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
       workflows: config.enabledWorkflows,
       skipRedirect: setIsInstalling ? true : false,
       dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
@@ -239,6 +254,8 @@ export function SetupBottomBar({
   loading,
   setLoading,
   setSetupCallout,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
   unsetIntegration,
   setIsInstalling,
 }: {
@@ -247,6 +264,8 @@ export function SetupBottomBar({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   unsetIntegration?: () => void;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
@@ -262,7 +281,7 @@ export function SetupBottomBar({
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           color="text"
           iconType="cross"
           onClick={() => {
@@ -280,10 +299,10 @@ export function SetupBottomBar({
           disabled={loading}
         >
           Discard
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           fill
           iconType="arrowRight"
           iconSide="right"
@@ -300,6 +319,8 @@ export function SetupBottomBar({
                   setIsInstalling(newLoading);
                 },
                 setCalloutLikeToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
                 setIsInstalling,
               });
             } else {
@@ -308,6 +329,8 @@ export function SetupBottomBar({
                 config,
                 setLoading,
                 setCalloutLikeToast,
+                dataSourceMDSId,
+                dataSourceMDSLabel,
                 setIsInstalling,
               });
             }
@@ -315,7 +338,7 @@ export function SetupBottomBar({
           data-test-subj="create-instance-button"
         >
           Add Integration
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -338,6 +361,10 @@ export function SetupIntegrationForm({
   renderType = 'page',
   unsetIntegration,
   forceConnection,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
   setIsInstalling,
 }: {
   integration: string;
@@ -345,8 +372,12 @@ export function SetupIntegrationForm({
   unsetIntegration?: () => void;
   forceConnection?: {
     name: string;
-    type: IntegrationConnectionType;
+    type: string;
   };
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
 }) {
   const [integConfig, setConfig] = useState({
@@ -370,6 +401,8 @@ export function SetupIntegrationForm({
 
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
   const [showLoading, setShowLoading] = useState(false);
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
+  const [dataSourceMDSLabel, setDataSourceMDSLabel] = useState<string>('');
 
   useEffect(() => {
     const getTemplate = async () => {
@@ -383,10 +416,11 @@ export function SetupIntegrationForm({
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
-  const IntegrationInputFormComponent =
-    forceConnection?.type === 'securityLake' || integConfig.connectionType === 'securityLake'
-      ? SetupIntegrationInputsForSecurityLake
-      : SetupIntegrationFormInputs;
+  const IntegrationInputFormComponent = SetupIntegrationFormInputs;
+  const handleSelectedDataSourceChange = (id?: string, label?: string) => {
+    setDataSourceMDSId(id);
+    setDataSourceMDSLabel(label);
+  };
 
   const content = (
     <>
@@ -399,6 +433,11 @@ export function SetupIntegrationForm({
           integration={template}
           setupCallout={setupCallout}
           lockConnectionType={forceConnection !== undefined}
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
+          handleSelectedDataSourceChange={handleSelectedDataSourceChange}
         />
       )}
     </>
@@ -411,6 +450,8 @@ export function SetupIntegrationForm({
       loading={showLoading}
       setLoading={setShowLoading}
       setSetupCallout={setSetupCallout}
+      dataSourceMDSId={dataSourceMDSId}
+      dataSourceMDSLabel={dataSourceMDSLabel}
       unsetIntegration={unsetIntegration}
       setIsInstalling={setIsInstalling}
     />
@@ -428,21 +469,49 @@ export function SetupIntegrationForm({
   } else if (renderType === 'flyout') {
     return (
       <>
-        <EuiFlyoutBody>{content}</EuiFlyoutBody>
-        <EuiFlyoutFooter>{bottomBar}</EuiFlyoutFooter>
+        <EuiFlyoutBody>
+          {showLoading ? (
+            <LoadingPage />
+          ) : (
+            <SetupIntegrationFormInputs
+              config={integConfig}
+              updateConfig={updateConfig}
+              integration={template}
+              setupCallout={setupCallout}
+              lockConnectionType={forceConnection !== undefined}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <SetupBottomBar
+            config={integConfig}
+            integration={template}
+            loading={showLoading}
+            setLoading={setShowLoading}
+            setSetupCallout={setSetupCallout}
+            unsetIntegration={unsetIntegration}
+            setIsInstalling={setIsInstalling}
+          />
+        </EuiFlyoutFooter>
       </>
     );
   }
-
-  return null;
 }
 
 export function SetupIntegrationPage({
   integration,
   unsetIntegration,
+  notifications,
+  dataSourceEnabled,
+  dataSourceManagement,
+  savedObjectsMDSClient,
 }: {
   integration: string;
   unsetIntegration?: () => void;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
 }) {
   return (
     <EuiPage>
@@ -451,6 +520,10 @@ export function SetupIntegrationPage({
           integration={integration}
           unsetIntegration={unsetIntegration}
           renderType="page"
+          dataSourceManagement={dataSourceManagement}
+          notifications={notifications}
+          dataSourceEnabled={dataSourceEnabled}
+          savedObjectsMDSClient={savedObjectsMDSClient}
         />
       </EuiPageBody>
     </EuiPage>

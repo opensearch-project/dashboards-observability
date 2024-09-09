@@ -7,11 +7,11 @@ import { schema } from '@osd/config-schema';
 import * as mime from 'mime';
 import sanitize from 'sanitize-filename';
 import { IRouter } from '../../../../../src/core/server';
-import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import {
   OpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
+import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsManager } from '../../adaptors/integrations/integrations_manager';
 
 /**
@@ -71,6 +71,8 @@ export function registerIntegrationsRoute(router: IRouter) {
           templateName: schema.string(),
         }),
         body: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+          dataSourceMDSLabel: schema.maybe(schema.string({ defaultValue: '' })),
           name: schema.string(),
           indexPattern: schema.string(),
           workflows: schema.maybe(schema.arrayOf(schema.string())),
@@ -86,6 +88,8 @@ export function registerIntegrationsRoute(router: IRouter) {
           request.params.templateName,
           request.body.name,
           request.body.indexPattern,
+          request.body.dataSourceMDSId,
+          request.body.dataSourceMDSLabel,
           request.body.workflows,
           request.body.dataSource,
           request.body.tableName

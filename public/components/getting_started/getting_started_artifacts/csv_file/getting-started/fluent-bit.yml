@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  fluent-bit:
+    container_name: fluent-bit
+    image: fluent/fluent-bit:latest
+    volumes:
+      - ./logs:/logs
+      - ./fluent-bit:/fluent-bit/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-data:
+
+networks:
+  opensearch-net:
+    driver: bridge

@@ -6,11 +6,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-// ag-data-grid
-import { AgGridReact } from 'ag-grid-react';
-import '@ag-grid-community/styles/ag-grid.css';
-import '@ag-grid-community/styles/ag-theme-alpine.css';
-
 // grid elements
 import { CustomOverlay, RowConfigType, GridHeader } from './data_table_header';
 import { GridFooter } from './data_table_footer';
@@ -196,22 +191,6 @@ export const DataTable = ({ visualizations, layout, config }: any) => {
           columnVisibility={columnVisibility}
         />
       )}
-      <AgGridReact
-        ref={gridRef}
-        rowData={rawData}
-        columnDefs={columns}
-        defaultColDef={defaultColDef}
-        domLayout={'autoHeight'}
-        animateRows
-        pagination={enablePagination}
-        paginationPageSize={pageSize}
-        suppressPaginationPanel
-        rowHeight={selectedRowDensity.height}
-        onGridReady={() => {
-          gridRef?.current?.api.setHeaderHeight(HEADER_HEIGHT);
-        }}
-        suppressFieldDotNotation // added for key contains dot operator
-      />
       {enablePagination && (
         <GridFooter
           onPageSizeChanged={onPageSizeChanged}
@@ -225,23 +204,6 @@ export const DataTable = ({ visualizations, layout, config }: any) => {
         <CustomOverlay>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <AgGridReact
-                ref={gridRefFullScreen}
-                rowData={rawData}
-                columnDefs={columns}
-                defaultColDef={defaultColDef}
-                domLayout="autoHeight"
-                animateRows
-                pagination
-                paginationPageSize={pageSize}
-                suppressPaginationPanel
-                rowHeight={selectedRowDensity.height}
-                onGridReady={() => {
-                  gridRefFullScreen?.current?.api.setHeaderHeight(HEADER_HEIGHT);
-                }}
-                // added for key contains dot operator
-                suppressFieldDotNotation
-              />
             </EuiFlexItem>
             <EuiFlexItem>
               <GridFooter

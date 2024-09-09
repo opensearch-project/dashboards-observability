@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { EuiCompressedSwitch, EuiSpacer } from '@elastic/eui';
 
 interface SwitchButtonProps {
   currentValue: boolean;
@@ -15,7 +15,7 @@ export const SwitchButton = ({ currentValue, onToggle, title }: SwitchButtonProp
   return (
     <>
       <EuiSpacer />
-      <EuiSwitch
+      <EuiCompressedSwitch
         label={title}
         checked={currentValue}
         onChange={(e) => onToggle(e.target.checked)}

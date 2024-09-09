@@ -5,7 +5,7 @@
 
 // Define pop over interval options for live tail button in your plugin
 
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { LiveTailProps } from 'common/types/explorer';
 
@@ -19,14 +19,14 @@ export const LiveTailButton = ({
 }: LiveTailProps) => {
   const liveButton = useMemo(() => {
     return (
-      <EuiButton
+      <EuiSmallButton
         iconType={isLiveTailOn ? 'stop' : 'clock'}
         iconSide="left"
         onClick={() => setIsLiveTailPopoverOpen(!isLiveTailPopoverOpen)}
         data-test-subj={dataTestSubj}
       >
         {liveTailName}
-      </EuiButton>
+      </EuiSmallButton>
     );
   }, [isLiveTailPopoverOpen, isLiveTailOn]);
   return liveButton;
@@ -37,14 +37,14 @@ export const StopLiveButton = (props: any) => {
 
   const stopButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         iconType="stop"
         onClick={() => StopLive()}
         color="danger"
         data-test-subj={dataTestSubj}
       >
         Stop
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
   return stopButton();

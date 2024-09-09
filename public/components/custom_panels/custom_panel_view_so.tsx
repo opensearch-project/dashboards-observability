@@ -7,7 +7,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -21,15 +21,15 @@ import {
   EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiSuperDatePicker,
-  EuiTitle,
+  EuiCompressedSuperDatePicker,
+  EuiText,
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import last from 'lodash/last';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../src/core/public';
 import { CREATE_PANEL_MESSAGE } from '../../../common/constants/custom_panels';
@@ -119,7 +119,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    cloneCustomPanel,
     onEditClick,
     onAddClick,
   } = props;
@@ -131,7 +130,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [loading, setLoading] = useState(true);
 
   const [pplFilterValue, setPPLFilterValue] = useState('');
-  const [baseQuery, setBaseQuery] = useState('');
+  const [baseQuery, _] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
 
   const [inputDisabled, setInputDisabled] = useState(true);
@@ -364,47 +363,51 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const cancelButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
       onClick={() => editPanel('cancel')}
     >
       Cancel
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiSmallButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
+    >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const editButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="editPanelButton"
       iconType="pencil"
       onClick={() => editPanel('edit')}
       disabled={editDisabled}
     >
       Edit
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const addButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="addVisualizationButton"
       iconType="plusInCircle"
       onClick={onAddClick}
       isDisabled={addVizDisabled}
     >
       Add
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   // Panel Actions Button
   const panelActionsButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="panelActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
@@ -412,7 +415,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       disabled={addVizDisabled}
     >
       Dashboard Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const addVisualizationToCurrentPanel = async ({
@@ -562,9 +565,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
             {appPanel || (
               <>
                 <EuiPageHeaderSection>
-                  <EuiTitle size="l">
+                  <EuiText size="s">
                     <h1 data-test-subj="panelNameHeader">{panel?.title}</h1>
-                  </EuiTitle>
+                  </EuiText>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
@@ -587,7 +590,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -634,7 +637,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={panel.timeRange.from}
                   end={panel.timeRange.to}

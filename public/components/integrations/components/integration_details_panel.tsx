@@ -25,7 +25,7 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
       <EuiTitle>
         <h2>Details</h2>
       </EuiTitle>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText>
@@ -71,22 +71,24 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           <EuiText>
             <h4>Contributer</h4>
           </EuiText>
-          <EuiLink href={config.sourceUrl} external={true} target="blank">
-            {config.author}
-          </EuiLink>
+          <EuiText size="s">
+            <EuiLink href={config.sourceUrl} external={true} target="blank">
+              {config.author}
+            </EuiLink>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
             <h4>License</h4>
           </EuiText>
-          <EuiText size="m">{config.license}</EuiText>
+          <EuiText size="s">{config.license}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
         <EuiText>
           <h4>Description</h4>
         </EuiText>
-        <EuiText size="m">{config.description}</EuiText>
+        <EuiText size="s">{config.description}</EuiText>
       </EuiFlexItem>
     </EuiPanel>
   );

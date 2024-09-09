@@ -36,6 +36,22 @@ export const codeBlockNotebook = {
   ],
 };
 
+export const migrateBlockNotebook = {
+  path: 'sample-notebook-1',
+  dateCreated: '2023-12-14T18:49:43.375Z',
+  dateModified: '2023-12-18T23:40:59.500Z',
+  name: 'sample-notebook-1',
+  paragraphs: [
+    {
+      output: [{ result: 'hello', outputType: 'MARKDOWN', execution_time: '0.018 ms' }],
+      input: { inputText: '%md\nhello', inputType: 'MARKDOWN' },
+      dateCreated: '2023-12-18T23:38:50.848Z',
+      dateModified: '2023-12-18T23:39:12.265Z',
+      id: 'paragraph_de00ea2d-a8fb-45d1-8085-698f51c6b6be',
+    },
+  ],
+};
+
 export const clearOutputNotebook = {
   paragraphs: [
     {

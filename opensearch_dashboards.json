@@ -16,8 +16,20 @@
     "savedObjects",
     "uiActions",
     "urlForwarding",
-    "visualizations"
+    "visualizations",
+    "contentManagement"
   ],
-  "optionalPlugins": ["managementOverview", "assistantDashboards", "securityDashboards", "dataSource", "dataSourceManagement"],
-  "configPath": ["observability"]
+  "optionalPlugins": [
+    "managementOverview",
+    "assistantDashboards",
+    "securityDashboards",
+    "dataSource",
+    "dataSourceManagement"
+  ],
+  "configPath": [
+    "observability"
+  ],
+  "supportedOSDataSourceVersions": ">=2.9.0",
+  "requiredOSDataSourcePlugins": ["opensearch-sql","opensearch-observability"]
+
 }

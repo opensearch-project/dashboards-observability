@@ -184,7 +184,9 @@ exports[`Latency Table component renders empty top error rates table 1`] = `
         </EuiSpacer>
         <EuiEmptyPrompt
           body={
-            <EuiText>
+            <EuiText
+              size="s"
+            >
               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
             </EuiText>
           }
@@ -223,9 +225,11 @@ exports[`Latency Table component renders empty top error rates table 1`] = `
                   <div
                     className="euiText euiText--medium"
                   >
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       <div
-                        className="euiText euiText--medium"
+                        className="euiText euiText--small"
                       >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                       </div>
@@ -1146,6 +1150,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -2924,6 +2929,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -3127,6 +3133,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={

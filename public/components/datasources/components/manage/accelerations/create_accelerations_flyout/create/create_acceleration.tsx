@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,7 +24,6 @@ import {
 import {
   CachedTable,
   CreateAccelerationForm,
-  DatasourceType,
 } from '../../../../../../../../common/types/data_connections';
 import { DirectQueryLoadingStatus } from '../../../../../../../../common/types/explorer';
 import { useLoadTableColumnsToCache } from '../../../../../../../framework/catalog_cache/cache_loader';
@@ -35,7 +34,7 @@ import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
 import { IndexTypeSelector } from '../selectors/index_type_selector';
 import { PreviewSQLDefinition } from '../selectors/preview_sql_defintion';
-import { DataSourceSelector } from '../selectors/source_selector';
+import { AccelerationDataSourceSelector } from '../selectors/source_selector';
 import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationButton } from './create_acceleration_button';
 import { CreateAccelerationHeader } from './create_acceleration_header';
@@ -43,7 +42,6 @@ import { hasError } from './utils';
 
 export interface CreateAccelerationProps {
   selectedDatasource: string;
-  selectedDatasourceType: DatasourceType;
   resetFlyout: () => void;
   databaseName?: string;
   tableName?: string;
@@ -53,7 +51,6 @@ export interface CreateAccelerationProps {
 
 export const CreateAcceleration = ({
   selectedDatasource,
-  selectedDatasourceType,
   resetFlyout,
   databaseName,
   tableName,
@@ -67,7 +64,7 @@ export const CreateAcceleration = ({
     database: databaseName ?? '',
     dataTable: tableName ?? '',
     dataTableFields: [],
-    accelerationIndexType: selectedDatasourceType === 'SECURITYLAKE' ? 'materialized' : 'skipping',
+    accelerationIndexType: 'skipping',
     skippingIndexQueryData: [],
     coveringIndexQueryData: [],
     materializedViewQueryData: {
@@ -227,15 +224,11 @@ export const CreateAcceleration = ({
             component="div"
             id="acceleration-form"
           >
-            <DataSourceSelector
+            <AccelerationDataSourceSelector
               http={http!}
-              dataSourceFormProps={{
-                formType: 'CreateAcceleration',
-                dataSourceFormData: accelerationFormData,
-                setDataSourceFormData: setAccelerationFormData,
-              }}
+              accelerationFormData={accelerationFormData}
+              setAccelerationFormData={setAccelerationFormData}
               selectedDatasource={selectedDatasource}
-              selectedDataSourceType={selectedDatasourceType}
               dataSourcesPreselected={dataSourcesPreselected}
               tableFieldsLoading={tableFieldsLoading}
               dataSourceMDSId={dataSourceMDSId}
@@ -243,7 +236,6 @@ export const CreateAcceleration = ({
             <EuiSpacer size="xxl" />
             <IndexTypeSelector
               accelerationFormData={accelerationFormData}
-              dataSourceType={selectedDatasourceType}
               setAccelerationFormData={setAccelerationFormData}
               initiateColumnLoad={initiateColumnLoad}
             />
@@ -275,9 +267,9 @@ export const CreateAcceleration = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={resetFlyout} flush="left">
+              <EuiSmallButtonEmpty iconType="cross" onClick={resetFlyout} flush="left">
                 Cancel
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CreateAccelerationButton

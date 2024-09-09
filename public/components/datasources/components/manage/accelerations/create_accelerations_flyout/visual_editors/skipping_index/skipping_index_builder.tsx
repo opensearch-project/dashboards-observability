@@ -5,11 +5,11 @@
 
 import {
   EuiBasicTable,
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -103,7 +103,7 @@ export const SkippingIndexBuilder = ({
     {
       name: 'Acceleration method',
       render: (item: SkippingIndexRowType) => (
-        <EuiSelect
+        <EuiCompressedSelect
           id="selectDocExample"
           options={
             item.dataType === SPARK_STRING_DATATYPE
@@ -122,7 +122,7 @@ export const SkippingIndexBuilder = ({
       readOnly: isSkippingtableLoading,
       render: (item: SkippingIndexRowType) => {
         return (
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => {
               setAccelerationFormData({
                 ...accelerationFormData,
@@ -178,21 +178,21 @@ export const SkippingIndexBuilder = ({
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 onClick={() => setIsAddModalVisible(true)}
                 isDisabled={isSkippingtableLoading}
               >
                 Add fields
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 onClick={() => setIsDeleteModalVisible(true)}
                 isDisabled={isSkippingtableLoading}
                 color="danger"
               >
                 Bulk delete
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

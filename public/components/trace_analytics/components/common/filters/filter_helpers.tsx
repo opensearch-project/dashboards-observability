@@ -4,22 +4,22 @@
  */
 
 import {
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiFormControlLayoutDelimited,
-  EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
+import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
   mode: TraceAnalyticsMode,
   page: 'dashboard' | 'traces' | 'services' | 'app',
   attributesFilterFields: string[]
 ) =>
-  mode === 'data_prepper'
+  mode === 'data_prepper' || mode === 'custom_data_prepper'
     ? {
         dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
         traces: [
@@ -157,13 +157,13 @@ export const getValueComponent = (
   const textField = (
     <>
       <EuiSpacer size="s" />
-      <EuiFormRow label={'Value'}>
-        <EuiFieldText
+      <EuiCompressedFormRow label={'Value'}>
+        <EuiCompressedFieldText
           placeholder="Enter a value"
           value={value}
           onChange={(e) => setValue(e.target.value)}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 
@@ -189,7 +189,7 @@ export const getValueComponent = (
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiFormRow label={'Value'}>
+        <EuiCompressedFormRow label={'Value'}>
           <EuiFormControlLayoutDelimited
             startControl={
               <input
@@ -210,7 +210,7 @@ export const getValueComponent = (
               />
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     );
   };
@@ -219,8 +219,8 @@ export const getValueComponent = (
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiFormRow label={'Value'}>
-          <EuiComboBox
+        <EuiCompressedFormRow label={'Value'}>
+          <EuiCompressedComboBox
             placeholder="Select a value"
             options={[
               {
@@ -234,7 +234,7 @@ export const getValueComponent = (
             selectedOptions={value || []}
             singleSelection={true}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     );
   };

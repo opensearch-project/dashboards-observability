@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiComboBoxOptionOption,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -24,11 +24,12 @@ import {
 import filter from 'lodash/filter';
 import moment from 'moment';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
+import { CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
   DashboardStart,
 } from '../../../../../../../src/plugins/dashboard/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { ViewMode } from '../../../../../../../src/plugins/embeddable/public';
 import { NOTEBOOKS_API_PREFIX } from '../../../../../common/constants/notebooks';
 import {
@@ -38,6 +39,7 @@ import {
 } from '../../../../../common/constants/shared';
 import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -77,7 +79,12 @@ interface ParagraphProps {
   paraCount: number;
   paragraphSelector: (index: number) => void;
   textValueEditor: (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
-  handleKeyPress: (evt: React.KeyboardEvent<Element>, para: ParaType, index: number) => void;
+  handleKeyPress: (
+    evt: React.KeyboardEvent<Element>,
+    para: ParaType,
+    index: number,
+    dataSourceMDSID: string
+  ) => void;
   addPara: (index: number, newParaContent: string, inputType: string) => void;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   deleteVizualization: (uniqueId: string) => void;
@@ -85,11 +92,28 @@ interface ParagraphProps {
   selectedViewId: string;
   setSelectedViewId: (viewId: string, scrollToIndex?: number) => void;
   deletePara: (para: ParaType, index: number) => void;
-  runPara: (para: ParaType, index: number, vizObjectInput?: string, paraType?: string) => void;
+  runPara: (
+    para: ParaType,
+    index: number,
+    vizObjectInput?: string,
+    paraType?: string,
+    dataSourceMDSId?: string
+  ) => void;
   clonePara: (para: ParaType, index: number) => void;
   movePara: (index: number, targetIndex: number) => void;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
+  notifications: CoreStart['notifications'];
+  dataSourceEnabled: boolean;
+  savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void;
+  paradataSourceMDSId: string;
+  dataSourceMDSLabel: string;
 }
 
 export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
@@ -104,6 +128,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     showQueryParagraphError,
     queryParagraphErrorMessage,
     http,
+    dataSourceEnabled,
+    dataSourceManagement,
+    notifications,
+    savedObjectsMDSClient,
+    handleSelectedDataSourceChange,
+    paradataSourceMDSId,
+    dataSourceMDSLabel,
   } = props;
 
   const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([
@@ -115,6 +146,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const [selectedVisOption, setSelectedVisOption] = useState<EuiComboBoxOptionOption[]>([]);
   const [visInput, setVisInput] = useState(undefined);
   const [visType, setVisType] = useState('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState('');
 
   // output is available if it's not cleared and vis paragraph has a selected visualization
   const isOutputAvailable =
@@ -131,7 +163,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     let opt1: EuiComboBoxOptionOption[] = [];
     let opt2: EuiComboBoxOptionOption[] = [];
     await http
-      .get(`${NOTEBOOKS_API_PREFIX}/visualizations`)
+      .get(`${NOTEBOOKS_API_PREFIX}/visualizations/${dataSourceMDSId ?? ''}`)
       .then((res) => {
         opt1 = res.savedVisualizations.map((vizObject) => ({
           label: vizObject.label,
@@ -175,7 +207,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
       fetchVisualizations();
     }
-  }, []);
+  }, [dataSourceMDSId]);
 
   const createDashboardVizObject = (objectId: string) => {
     const vizUniqueId = htmlIdGenerator()();
@@ -235,7 +267,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       newVisObjectInput = JSON.stringify(inputTemp);
     }
     setRunParaError(false);
-    return props.runPara(para, index, newVisObjectInput, visType);
+    return props.runPara(para, index, newVisObjectInput, visType, dataSourceMDSId);
   };
 
   const setStartTime = (time: string) => {
@@ -390,7 +422,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           <EuiFlexItem>
             <EuiText style={{ fontSize: 17 }}>
               {`[${idx + 1}] ${type} `}
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 data-test-subj="paragraphToggleInputBtn"
                 aria-label="Toggle show input"
                 iconType={para.isInputExpanded ? 'arrowUp' : 'arrowDown'}
@@ -406,7 +438,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             <EuiPopover
               panelPaddingSize="none"
               button={
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   aria-label="Open paragraph menu"
                   iconType="boxesHorizontal"
                   onClick={() => setIsPopoverOpen(true)}
@@ -415,7 +447,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
             >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
+              <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
             </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -437,7 +469,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText color="subdued" data-test-subj="lastRunText">
+            <EuiText color="subdued" data-test-subj="lastRunText" size="s">
               {`Last successful run ${moment(props.dateModified).format(UI_DATE_FORMAT)}.`}
             </EuiText>
           </EuiFlexItem>
@@ -452,12 +484,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             <EuiIcon type="questionInCircle" color="primary" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               {`Output available from ${moment(props.dateModified).format(UI_DATE_FORMAT)}`}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
+            <EuiText size="s">
               <EuiLink
                 data-test-subj="viewBothLink"
                 onClick={() => props.setSelectedViewId('view_both', index)}
@@ -511,17 +543,44 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const paraClass = `notebooks-paragraph notebooks-paragraph-${
     uiSettingsService.get('theme:darkMode') ? 'dark' : 'light'
   }`;
+  let DataSourceSelector;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    setDataSourceMDSId(dataConnectionId);
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
 
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   return (
     <>
       <EuiPanel>
         {renderParaHeader(!para.isVizualisation ? 'Code block' : 'Visualization', index)}
+        {dataSourceEnabled && !para.isVizualisation && (
+          <DataSourceSelector
+            savedObjectsClient={savedObjectsMDSClient.client}
+            notifications={notifications}
+            onSelectedDataSource={onSelectedDataSource}
+            disabled={false}
+            fullWidth={false}
+            removePrepend={false}
+            defaultOption={
+              paradataSourceMDSId !== undefined && [
+                { id: paradataSourceMDSId, label: dataSourceMDSLabel },
+              ]
+            }
+            dataSourceFilter={dataSourceFilterFn}
+          />
+        )}
+        <EuiSpacer size="s" />
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div key={index} className={paraClass} onClick={() => paragraphSelector(index)}>
           {para.isInputExpanded && (
             <>
               <EuiSpacer size="s" />
-              <EuiFormRow
+              <EuiCompressedFormRow
                 fullWidth={true}
                 helpText={paragraphLabel}
                 isInvalid={showQueryParagraphError}
@@ -542,8 +601,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   selectedVisOption={selectedVisOption}
                   setSelectedVisOption={setSelectedVisOption}
                   setVisType={setVisType}
+                  dataSourceManagement={dataSourceManagement}
+                  notifications={notifications}
+                  dataSourceEnabled={dataSourceEnabled}
+                  savedObjectsMDSClient={savedObjectsMDSClient}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
               {runParaError && (
                 <EuiText color="danger" size="s" data-test-subj="paragraphInputErrorText">{`${
                   para.isVizualisation ? 'Visualization' : 'Input'
@@ -552,13 +615,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj={`runRefreshBtn-${index}`}
                     onClick={() => onRunPara()}
-                    fill
                   >
                     {isOutputAvailable ? 'Refresh' : 'Run'}
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
                 {isOutputAvailable && renderOutputTimestampMessage()}
               </EuiFlexGroup>

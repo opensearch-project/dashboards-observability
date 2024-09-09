@@ -67,7 +67,7 @@ exports[`Preview SQL acceleration components renders Preview SQL settings with d
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              className="euiButton euiButton--success"
+              className="euiButton euiButton--success euiButton--small"
               disabled={false}
               onClick={[Function]}
               style={
@@ -181,7 +181,7 @@ exports[`Preview SQL acceleration components renders Preview SQL settings with d
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              className="euiButton euiButton--success"
+              className="euiButton euiButton--success euiButton--small"
               disabled={false}
               onClick={[Function]}
               style={
@@ -296,7 +296,7 @@ exports[`Preview SQL acceleration components renders Preview SQL settings with e
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              className="euiButton euiButton--success"
+              className="euiButton euiButton--success euiButton--small"
               disabled={false}
               onClick={[Function]}
               style={
@@ -411,7 +411,7 @@ exports[`Preview SQL acceleration components renders Preview SQL settings with m
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              className="euiButton euiButton--success"
+              className="euiButton euiButton--success euiButton--small"
               disabled={false}
               onClick={[Function]}
               style={

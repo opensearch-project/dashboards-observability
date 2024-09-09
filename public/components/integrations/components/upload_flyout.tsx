@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
 import {
-  EuiButton,
-  EuiFilePicker,
+  EuiSmallButton,
+  EuiCompressedFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -14,13 +13,14 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
+  EuiText,
 } from '@elastic/eui';
-import { useEffect } from 'react';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import React, { useEffect, useState } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
-const uploadBundle = async (bundle: File | null): Promise<Error | null> => {
+export const uploadBundle = async (bundle: File | null): Promise<Error | null> => {
   if (!bundle) {
     return new Error('No bundle selected');
   }
@@ -113,19 +113,19 @@ export const IntegrationUploadPicker = ({
 
   return (
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Select file"
         isInvalid={checkCompleted && isInvalid}
         error={['Must be an ndjson bundle of integration templates']}
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           id="integrationBundlePicker"
           initialPromptText="Select or drag and drop integration bundles"
           onChange={handleFileChange}
           isInvalid={checkCompleted && isInvalid}
           onBlur={() => setBlurred(true)}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   );
 };
@@ -137,7 +137,11 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
 
   return (
     <EuiFlyout onClose={onClose} size="s">
-      <EuiFlyoutHeader>Upload Integrations</EuiFlyoutHeader>
+      <EuiFlyoutHeader>
+        <EuiText size="s">
+          <h2>Upload Integrations</h2>
+        </EuiText>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <IntegrationUploadPicker
           onFileSelected={setBundle}
@@ -148,10 +152,10 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose}>Cancel</EuiButton>
+            <EuiSmallButton onClick={onClose}>Cancel</EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               fill
               disabled={isInvalid}
               onClick={async () => {
@@ -165,7 +169,7 @@ export const IntegrationUploadFlyout = ({ onClose }: { onClose: () => void }) =>
               }}
             >
               Upload
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

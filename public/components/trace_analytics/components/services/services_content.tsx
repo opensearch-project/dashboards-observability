@@ -4,20 +4,22 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
   handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
-import { FilterType } from '../common/filters/filters';
+import { Filters, FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
+import { DataSourcePicker } from '../dashboard/mode_picker';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
 
@@ -60,7 +62,8 @@ export function ServicesContent(props: ServicesProps) {
   const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
+    chrome.setBreadcrumbs([...(isNavGroupEnabled ? [] : [parentBreadcrumb]), ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
     setFilters([
@@ -83,7 +86,8 @@ export function ServicesContent(props: ServicesProps) {
     setFilteredService(newFilteredService);
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'custom_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh(newFilteredService);
@@ -172,54 +176,77 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
-      <SearchBar
-        ref={searchBarRef}
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
-        page={page}
-        mode={mode}
-        attributesFilterFields={attributesFilterFields}
-      />
-      <EuiSpacer size="m" />
-      <ServicesTable
-        items={tableItems}
-        selectedItems={selectedItems}
-        setSelectedItems={setSelectedItems}
-        addServicesGroupFilter={addServicesGroupFilter}
-        addFilter={addFilter}
-        setRedirect={setRedirect}
-        mode={mode}
-        loading={loading}
-        traceColumnAction={traceColumnAction}
-        setCurrentSelectedService={setCurrentSelectedService}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-        isServiceTrendEnabled={isServiceTrendEnabled}
-        setIsServiceTrendEnabled={setIsServiceTrendEnabled}
-        serviceTrends={serviceTrends}
-      />
-      <EuiSpacer size="m" />
-      {mode === 'data_prepper' && dataPrepperIndicesExist ? (
-        <ServiceMap
-          addFilter={addFilter}
-          serviceMap={serviceMap}
-          idSelected={serviceMapIdSelected}
-          setIdSelected={setServiceMapIdSelected}
-          currService={filteredService}
-          page={page}
-          setCurrentSelectedService={setCurrentSelectedService}
-        />
-      ) : (
-        <div />
-      )}
+      <EuiPage paddingSize="m">
+        <EuiPageBody>
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <DataSourcePicker
+                modes={props.modes}
+                selectedMode={props.mode}
+                setMode={props.setMode!}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <SearchBar
+                ref={searchBarRef}
+                filters={filters}
+                setFilters={setFilters}
+                query={query}
+                setQuery={setQuery}
+                startTime={startTime}
+                setStartTime={setStartTime}
+                endTime={endTime}
+                setEndTime={setEndTime}
+                refresh={refresh}
+                page={page}
+                mode={mode}
+                attributesFilterFields={attributesFilterFields}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <Filters
+            page={page}
+            filters={filters}
+            setFilters={setFilters}
+            appConfigs={appConfigs}
+            mode={mode}
+            attributesFilterFields={attributesFilterFields}
+          />
+          <EuiSpacer size="s" />
+          <ServicesTable
+            items={tableItems}
+            selectedItems={selectedItems}
+            setSelectedItems={setSelectedItems}
+            addServicesGroupFilter={addServicesGroupFilter}
+            addFilter={addFilter}
+            setRedirect={setRedirect}
+            mode={mode}
+            loading={loading}
+            traceColumnAction={traceColumnAction}
+            setCurrentSelectedService={setCurrentSelectedService}
+            jaegerIndicesExist={jaegerIndicesExist}
+            dataPrepperIndicesExist={dataPrepperIndicesExist}
+            isServiceTrendEnabled={isServiceTrendEnabled}
+            setIsServiceTrendEnabled={setIsServiceTrendEnabled}
+            serviceTrends={serviceTrends}
+          />
+          <EuiSpacer size="s" />
+          {mode === 'custom_data_prepper' ||
+          (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
+            <ServiceMap
+              addFilter={addFilter}
+              serviceMap={serviceMap}
+              idSelected={serviceMapIdSelected}
+              setIdSelected={setServiceMapIdSelected}
+              currService={filteredService}
+              page={page}
+              setCurrentSelectedService={setCurrentSelectedService}
+            />
+          ) : (
+            <div />
+          )}
+        </EuiPageBody>
+      </EuiPage>
     </>
   );
 }

@@ -4,9 +4,9 @@ on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  OPENSEARCH_VERSION: '3.0.0'
-  OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
+  OPENSEARCH_DASHBOARDS_VERSION: "main"
+  OPENSEARCH_VERSION: "3.0.0"
+  OPENSEARCH_PLUGIN_VERSION: "3.0.0.0"
 
 jobs:
   tests:
@@ -22,15 +22,22 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        java: [11]
+        java: [21]
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set up Java 11
+      - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
-          java-version: '11'
+          distribution: "corretto"
+          java-version: "21"
+
+      - name: Download Job Scheduler artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-job-scheduler&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          target: plugin-artifacts/
+          filename: opensearch-job-scheduler.zip
 
       - name: Download observability artifact
         uses: suisei-cn/actions-download-file@v1.4.0
@@ -55,6 +62,11 @@ jobs:
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Install job scheduler plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/opensearch-job-scheduler.zip"
         shell: bash
 
       - name: Install observability plugin
@@ -94,7 +106,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ steps.versions_step.outputs.node_version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install correct yarn version for OpenSearch Dashboards
         run: |
@@ -112,7 +124,7 @@ jobs:
           cd OpenSearch-Dashboards
           nohup yarn start --no-base-path --no-watch | tee dashboard.log &
 
-      - name : Check If OpenSearch Dashboards Is Ready
+      - name: Check If OpenSearch Dashboards Is Ready
         if: ${{ runner.os == 'Linux' }}
         run: |
           cd ./OpenSearch-Dashboards
@@ -130,7 +142,7 @@ jobs:
           repository: opensearch-project/opensearch-dashboards-functional-test
           ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
           fetch-depth: 0
-  
+
       - name: Install Cypress
         run: |
           npm install cypress --save-dev
@@ -149,14 +161,14 @@ jobs:
         working-directory: opensearch-dashboards-functional-test
 
       - name: Capture failure screenshots
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-${{ matrix.os }}
           path: opensearch-dashboards-functional-test/cypress/screenshots
 
       - name: Capture failure test video
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-videos-${{ matrix.os }}

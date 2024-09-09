@@ -5,7 +5,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -14,9 +13,9 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -30,9 +29,8 @@ import {
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
-import { SpanField } from '../../../../../common/types/trace_analytics';
+import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
-import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
@@ -57,6 +55,16 @@ const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | unde
     START_TIME: 'startTime',
     END_TIME: undefined,
     ERRORS: 'tag.error',
+  },
+  custom_data_prepper: {
+    SPAN_ID: 'spanId',
+    PARENT_SPAN_ID: 'parentSpanId',
+    SERVICE: 'serviceName',
+    OPERATION: 'name',
+    DURATION: 'durationInNanos',
+    START_TIME: 'startTime',
+    END_TIME: 'endTime',
+    ERRORS: 'status.code',
   },
 };
 
@@ -125,7 +133,11 @@ export function SpanDetailFlyout(props: {
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(span, mode, 'SPAN_ID')}>
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
@@ -142,15 +154,25 @@ export function SpanDetailFlyout(props: {
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy
-                textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+                textToCopy={
+                  mode === 'data_prepper' || mode === 'custom_data_prepper'
+                    ? span.parentSpanId
+                    : span.references[0].spanID
+                }
               >
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="parentSpanId">
-              {mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+              {mode === 'data_prepper' || mode === 'custom_data_prepper'
+                ? span.parentSpanId
+                : span.references[0].spanID}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -171,7 +193,7 @@ export function SpanDetailFlyout(props: {
         getSpanFieldKey(mode, 'DURATION'),
         'Duration',
         `${
-          mode === 'data_prepper'
+          mode === 'data_prepper' || mode === 'custom_data_prepper'
             ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
             : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
@@ -179,7 +201,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'START_TIME'),
         'Start time',
-        mode === 'data_prepper'
+        mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -188,7 +210,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'END_TIME'),
         'End time',
-        mode === 'data_prepper'
+        mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -197,7 +219,11 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'ERRORS'),
         'Errors',
-        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag?.error) ? (
+        (
+          mode === 'data_prepper' || mode === 'custom_data_prepper'
+            ? span['status.code'] === 2
+            : span.tag?.error
+        ) ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
@@ -306,11 +332,11 @@ export function SpanDetailFlyout(props: {
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
-              <EuiTitle>
+              <EuiText size="s">
                 <h2>Span detail</h2>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
-            {mode === 'data_prepper' && (
+            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
               <EuiFlexItem>
                 <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
                   View associated logs
