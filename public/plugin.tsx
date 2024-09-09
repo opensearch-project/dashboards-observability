@@ -169,6 +169,7 @@ export class ObservabilityPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
   }
+  private mdsFlagStatus: boolean = false;
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -184,6 +185,7 @@ export class ObservabilityPlugin
     });
 
     setupOverviewPage(setupDeps.contentManagement!);
+    this.mdsFlagStatus = !!setupDeps.dataSource;
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -459,7 +461,8 @@ export class ObservabilityPlugin
       return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
     };
 
-    // register all s3 datasources
+    // register all s3 datasources only if mds feature flag is disabled
+    if (!this.mdsFlagStatus) {
     const registerDataSources = () => {
       try {
         core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
@@ -509,6 +512,7 @@ export class ObservabilityPlugin
     } else {
       registerDataSources();
     }
+  }
 
     core.http.intercept({
       request: catalogRequestIntercept(),
