@@ -24,7 +24,7 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Getting Started',
+        text: 'Get started',
         href: '#/',
       },
     ]);

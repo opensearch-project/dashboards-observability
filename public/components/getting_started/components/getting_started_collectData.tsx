@@ -33,6 +33,10 @@ import javaJson from '../getting_started_artifacts/java_client/java_client-1.0.0
 import { IntegrationCards } from './getting_started_integrationCards';
 import { UploadAssets } from './utils';
 
+const cardOne = 'Collector';
+const cardTwo = 'File Upload';
+const cardThree = 'Configure use-case based content';
+
 interface CollectAndShipDataProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
@@ -103,9 +107,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     setSelectedWorkflow('');
     setGettingStarted(null);
     setWorkflows([]);
-    onCardSelectionChange(value === 'Configure use-case based content');
+    onCardSelectionChange(value === cardThree);
 
-    if (value === 'Configure collectors') {
+    if (value === cardOne) {
       setCollectorOptions([
         { label: 'Open Telemetry (structured)', value: 'otel' },
         { label: 'Nginx (structured)', value: 'nginx' },
@@ -113,7 +117,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         { label: 'Python (unstructured)', value: 'python' },
         { label: 'Golang (unstructured)', value: 'golang' },
       ]);
-    } else if (value === 'Upload a file CSV or JSON') {
+    } else if (value === cardTwo) {
       setCollectorOptions([{ label: 'Fluent Bit', value: 'csv' }]);
     }
   };
@@ -148,7 +152,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     return (
       <>
         <EuiText>
-          <strong>Select a collector</strong>
+          <h3>Collector</h3>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSelectable
@@ -301,68 +305,64 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   }));
 
   return (
-    <EuiAccordion
-      id="collect-and-ship-data"
-      buttonContent="Collect and ship data"
-      paddingSize="m"
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={onToggle}
-    >
-      <EuiPanel>
+    <EuiPanel paddingSize="m">
+      <EuiAccordion
+        id="collect-and-ingest-data"
+        buttonContent="Collect and ingest data"
+        paddingSize="m"
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={onToggle}
+      >
         <EuiText>
-          <h3>Collect your data</h3>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <strong>Select a collection method</strong>
+          <h2>Collection method</h2>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCheckableCard
               id="configure_collectors"
-              label="Configure collectors"
+              label={cardOne}
               checkableType="radio"
-              checked={selectedCard === 'Configure collectors'}
+              checked={selectedCard === cardOne}
               onChange={() => {
-                handleCollectionMethodChange('Configure collectors');
-                setSelectedCard('Configure collectors');
+                handleCollectionMethodChange(cardOne);
+                setSelectedCard(cardOne);
               }}
             >
-              Configure agents and ingestion pipeline
+              <EuiText size="s">Configure agents and ingestion pipeline</EuiText>
             </EuiCheckableCard>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCheckableCard
               id="upload_file"
-              label="Upload a file CSV"
+              label={cardTwo}
               checkableType="radio"
-              checked={selectedCard === 'Upload a file CSV or JSON'}
+              checked={selectedCard === cardTwo}
               onChange={() => {
-                handleCollectionMethodChange('Upload a file CSV or JSON');
-                setSelectedCard('Upload a file CSV or JSON');
+                handleCollectionMethodChange(cardTwo);
+                setSelectedCard(cardTwo);
               }}
             >
-              Upload your data
+              <EuiText size="s">Upload your data</EuiText>
             </EuiCheckableCard>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCheckableCard
               id="use_sample_dataset"
-              label="Configure use-case based content"
+              label={cardThree}
               checkableType="radio"
-              checked={selectedCard === 'Configure use-case based content'}
+              checked={selectedCard === cardThree}
               onChange={() => {
-                handleCollectionMethodChange('Configure use-case based content');
-                setSelectedCard('Configure use-case based content');
+                handleCollectionMethodChange(cardThree);
+                setSelectedCard(cardThree);
               }}
             >
-              Explore with a log dataset
+              <EuiText size="s">Explore with a log dataset</EuiText>
             </EuiCheckableCard>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {collectionMethod === 'Configure use-case based content' ? (
+        {collectionMethod === cardThree ? (
           <IntegrationCards />
         ) : (
           <>
@@ -382,7 +382,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             )}
           </>
         )}
-      </EuiPanel>
-    </EuiAccordion>
+      </EuiAccordion>
+    </EuiPanel>
   );
 };

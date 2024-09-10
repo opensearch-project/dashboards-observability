@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
@@ -107,20 +106,17 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
   };
 
   return (
-    <EuiAccordion
-      id="query-and-analyze"
-      buttonContent={`Query and analyze data: ${selectedTechnology}`}
-      paddingSize="m"
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={onToggle}
-    >
-      <EuiPanel>
-        <EuiTitle size="m">
-          <h3>Query data</h3>
-        </EuiTitle>
+    <EuiPanel paddingSize="m">
+      <EuiAccordion
+        id="query-and-analyze"
+        buttonContent={`Query and analyze data: ${selectedTechnology}`}
+        paddingSize="m"
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={onToggle}
+      >
         <EuiText>
           <p>
-            <strong>Explore your data</strong>
+            <h2>Explore your data</h2>
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -135,12 +131,9 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             ))}
         </EuiFlexGroup>
         <EuiHorizontalRule />
-        <EuiTitle size="m">
-          <h3>Analyze data</h3>
-        </EuiTitle>
         <EuiText>
           <p>
-            <strong>Visualize your data</strong>
+            <h2>Visualize your data</h2>
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -170,7 +163,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
-    </EuiAccordion>
+      </EuiAccordion>
+    </EuiPanel>
   );
 };

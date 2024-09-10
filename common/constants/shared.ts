@@ -44,7 +44,7 @@ export const observabilityOverviewTitle = 'Observability overview';
 export const observabilityOverviewPluginOrder = 5088;
 
 export const observabilityGettingStartedID = 'observability-gettingStarted';
-export const observabilityGettingStartedTitle = 'Getting Started';
+export const observabilityGettingStartedTitle = 'Get started';
 export const observabilityGettingStartedPluginOrder = 5089;
 
 export const observabilityApplicationsID = 'observability-applications';

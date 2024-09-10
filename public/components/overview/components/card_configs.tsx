@@ -11,7 +11,6 @@ import {
   observabilityServicesNewNavURL,
   alertingPluginID,
   anomalyDetectionPluginID,
-  discoverPluginID,
   tutorialSampleDataPluginId,
 } from '../../../../common/constants/shared';
 
@@ -22,17 +21,19 @@ export interface GettingStartedConfig {
   description: string;
   footer: string;
   url: string;
+  path: string;
 }
 
 const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   id: 'getting_started',
   order: 1,
   title: i18n.translate('observability.overview.card.gettingStarted.title', {
-    defaultMessage: 'Add your data',
+    defaultMessage: 'Set up your Observability workspace',
   }),
-  description: 'Get started collecting and analyzing data.',
+  description: 'Get started by collecting and analyzing your metrics, logs, and traces.',
   footer: 'Getting Started Guide',
   url: observabilityGettingStartedID,
+  path: '#/',
 };
 
 const SAMPLEDATA_CONFIG: GettingStartedConfig = {
@@ -46,6 +47,7 @@ const SAMPLEDATA_CONFIG: GettingStartedConfig = {
   }),
   url: tutorialSampleDataPluginId,
   footer: 'Sample Datasets',
+  path: '#/',
 };
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
@@ -54,9 +56,10 @@ const DISCOVER_CONFIG: GettingStartedConfig = {
   title: i18n.translate('observability.overview.card.discover.title', {
     defaultMessage: 'Discover insights',
   }),
-  description: 'Uncover insights with raw data exploration.',
+  description: 'Uncover logs with raw data exploration.',
   footer: 'Discover',
-  url: discoverPluginID,
+  url: 'data-explorer',
+  path: '/discover',
 };
 
 const METRICS_CONFIG: GettingStartedConfig = {
@@ -68,6 +71,7 @@ const METRICS_CONFIG: GettingStartedConfig = {
   description: 'Transform logs into actionable visualizations by extracting metrics.',
   footer: 'Metrics',
   url: observabilityMetricsID,
+  path: '#/',
 };
 
 const TRACES_CONFIG: GettingStartedConfig = {
@@ -79,6 +83,7 @@ const TRACES_CONFIG: GettingStartedConfig = {
   description: 'Analyze performance bottlenecks using event flow visualizations.',
   footer: 'Traces',
   url: observabilityTracesNewNavURL,
+  path: '#/',
 };
 
 const SERVICES_CONFIG: GettingStartedConfig = {
@@ -90,6 +95,7 @@ const SERVICES_CONFIG: GettingStartedConfig = {
   description: 'Identify service performance issues with comprehensive monitoring and analysis.',
   footer: 'Services',
   url: observabilityServicesNewNavURL,
+  path: '#/',
 };
 
 const ALERTS_CONFIG: GettingStartedConfig = {
@@ -101,6 +107,7 @@ const ALERTS_CONFIG: GettingStartedConfig = {
   description: 'Receive timely notifications by configuring alert triggers.',
   footer: 'Alerting',
   url: alertingPluginID,
+  path: '#/',
 };
 
 const ANOMALY_CONFIG: GettingStartedConfig = {
@@ -112,6 +119,7 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
   description: 'Gain near real-time anomaly detection using the Random Cut Forest (RCF) algorithm.',
   footer: 'Anomaly Detection',
   url: anomalyDetectionPluginID,
+  path: '#/',
 };
 
 export const cardConfigs = [

@@ -75,7 +75,7 @@ export const Home = () => {
                     default={card.footer || 'Documentation'}
                   />
                 ),
-                onClick: () => coreRefs.application?.navigateToApp(card.url, { path: '#/' }),
+                onClick: () => coreRefs.application?.navigateToApp(card.url, { path: card.path }),
                 isSelected: false,
               },
             },
