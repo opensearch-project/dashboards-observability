@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
-import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils/index';
+import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 
 interface Pattern {
   id: string;

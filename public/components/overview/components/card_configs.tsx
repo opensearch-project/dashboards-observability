@@ -12,7 +12,7 @@ import {
   alertingPluginID,
   anomalyDetectionPluginID,
   discoverPluginID,
-  IMPORT_SAMPLE_DATA_APP_ID,
+  tutorialSampleDataPluginId,
 } from '../../../../common/constants/shared';
 
 export interface GettingStartedConfig {
@@ -24,28 +24,28 @@ export interface GettingStartedConfig {
   url: string;
 }
 
-const SAMPLEDATA_CONFIG: GettingStartedConfig = {
-  id: 'sample_data',
-  order: 1,
-  description: i18n.translate('home.sampleData.card.description', {
-    defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
-  }),
-  title: i18n.translate('home.sampleData.card.title', {
-    defaultMessage: 'Try OpenSearch',
-  }),
-  url: IMPORT_SAMPLE_DATA_APP_ID,
-  footer: 'Sample Datasets',
-};
-
 const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   id: 'getting_started',
-  order: 2,
+  order: 1,
   title: i18n.translate('observability.overview.card.gettingStarted.title', {
     defaultMessage: 'Add your data',
   }),
   description: 'Get started collecting and analyzing data.',
   footer: 'Getting Started Guide',
   url: observabilityGettingStartedID,
+};
+
+const SAMPLEDATA_CONFIG: GettingStartedConfig = {
+  id: 'sample_data',
+  order: 2,
+  description: i18n.translate('home.sampleData.card.description', {
+    defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
+  }),
+  title: i18n.translate('home.sampleData.card.title', {
+    defaultMessage: 'Try OpenSearch',
+  }),
+  url: tutorialSampleDataPluginId,
+  footer: 'Sample Datasets',
 };
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
@@ -115,8 +115,8 @@ const ANOMALY_CONFIG: GettingStartedConfig = {
 };
 
 export const cardConfigs = [
-  SAMPLEDATA_CONFIG,
   GETTING_STARTED_CONFIG,
+  SAMPLEDATA_CONFIG,
   DISCOVER_CONFIG,
   METRICS_CONFIG,
   TRACES_CONFIG,
