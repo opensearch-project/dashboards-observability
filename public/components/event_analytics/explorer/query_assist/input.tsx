@@ -7,8 +7,6 @@ import {
   EuiSmallButton,
   EuiComboBoxOptionOption,
   EuiCompressedFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInputPopover,
   EuiListGroup,
@@ -325,62 +323,58 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
 
   return (
     <>
-      <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            className="euiFieldText"
-            style={{ padding: 8 }}
-            size="original"
-            type={chatLogo}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiInputPopover
-            input={
-              <EuiCompressedFieldText
-                inputRef={inputRef}
-                placeholder="Ask me a question"
-                disabled={loading}
-                value={props.nlqInput}
-                onChange={(e) => {
-                  props.setNlqInput(e.target.value);
-                  dismissCallOut();
-                }}
-                onKeyDown={(e) => {
-                  // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
-                  if (e.key === 'Enter') runAndSummarize();
-                }}
-                fullWidth
-                onFocus={() => {
-                  props.setNeedsUpdate(false);
-                  props.setLastFocusedInput('nlq_input');
-                  if (props.nlqInput.length === 0) setIsPopoverOpen(true);
-                }}
+      <EuiInputPopover
+        input={
+          <EuiCompressedFieldText
+            inputRef={inputRef}
+            placeholder="Ask me a question"
+            disabled={loading}
+            value={props.nlqInput}
+            onChange={(e) => {
+              props.setNlqInput(e.target.value);
+              dismissCallOut();
+            }}
+            prepend={
+              <EuiIcon
+                className="euiFieldText"
+                style={{ padding: 8 }}
+                size="original"
+                type={chatLogo}
               />
             }
-            disableFocusTrap
-            fullWidth={true}
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setIsPopoverOpen(false);
+            onKeyDown={(e) => {
+              // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
+              if (e.key === 'Enter') runAndSummarize();
             }}
-          >
-            <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-              {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question, i) => (
-                <EuiListGroupItem
-                  key={i}
-                  onClick={() => {
-                    props.setNlqInput(question);
-                    inputRef.current?.focus();
-                    setIsPopoverOpen(false);
-                  }}
-                  label={question}
-                />
-              ))}
-            </EuiListGroup>
-          </EuiInputPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            fullWidth
+            onFocus={() => {
+              props.setNeedsUpdate(false);
+              props.setLastFocusedInput('nlq_input');
+              if (props.nlqInput.length === 0) setIsPopoverOpen(true);
+            }}
+          />
+        }
+        disableFocusTrap
+        fullWidth={true}
+        isOpen={isPopoverOpen}
+        closePopover={() => {
+          setIsPopoverOpen(false);
+        }}
+      >
+        <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+          {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question, i) => (
+            <EuiListGroupItem
+              key={i}
+              onClick={() => {
+                props.setNlqInput(question);
+                inputRef.current?.focus();
+                setIsPopoverOpen(false);
+              }}
+              label={question}
+            />
+          ))}
+        </EuiListGroup>
+      </EuiInputPopover>
       {props.callOut}
       <EuiSpacer size="s" />
       {props.children}
