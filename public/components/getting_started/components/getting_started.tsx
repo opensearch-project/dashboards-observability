@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
 import { CollectAndShipData } from './getting_started_collectData';
 import { QueryAndAnalyze } from './getting_started_queryAndAnalyze';
+import { observabilityGettingStartedTitle } from '../../../../common/constants/shared';
 
 interface ExtendedHomeProps extends HomeProps {
   selectedDataSourceId: string;
@@ -24,7 +25,7 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Get started',
+        text: observabilityGettingStartedTitle,
         href: '#/',
       },
     ]);

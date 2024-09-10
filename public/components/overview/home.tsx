@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiI18n } from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
+import { FormattedMessage } from '@osd/i18n/react';
 import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
 import { DashboardSavedObjectsType } from '../../../common/types/overview';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
@@ -70,9 +70,9 @@ export const Home = () => {
             cardProps: {
               selectable: {
                 children: (
-                  <EuiI18n
-                    token="home.sampleData.card.footer"
-                    default={card.footer || 'Documentation'}
+                  <FormattedMessage
+                    id="home.sampleData.card.footer"
+                    defaultMessage={card.footer || 'Documentation'}
                   />
                 ),
                 onClick: () => coreRefs.application?.navigateToApp(card.url, { path: card.path }),
