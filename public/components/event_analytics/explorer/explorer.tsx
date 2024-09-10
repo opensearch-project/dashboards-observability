@@ -811,8 +811,9 @@ export const Explorer = ({
     if (availability !== true) {
       await updateQueryInStore(searchedQuery);
     }
-    await fetchData(undefined, undefined, setSummaryStatus);
-    setEventsLoading(false);
+    await fetchData(undefined, undefined, setSummaryStatus).finally(() => {
+      setEventsLoading(false);
+    });
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
