@@ -26,7 +26,7 @@ SELECT
 
    awsRegion AS `aws.cloudtrail.awsRegion`,
    sourceIPAddress AS `aws.cloudtrail.sourceIPAddress`,
-   userAgent AS `aws.cloudtrail.userAgent`,
+   userAgent AS `userAgent`,
    errorCode AS `errorCode`,
    errorMessage AS `errorMessage`,
    requestParameters AS `aws.cloudtrail.requestParameter`,
