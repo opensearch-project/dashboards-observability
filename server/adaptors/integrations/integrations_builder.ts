@@ -46,7 +46,13 @@ export class IntegrationInstanceBuilder {
       return Promise.reject(assets.error);
     }
     const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value, options.workflows));
-    const withDataSource = this.remapDataSource(remapped, options.indexPattern);
+    const assets1 = this.addMDSReference(
+      remapped,
+      options.dataSource,
+      options.dataSourceMDSId,
+      options.dataSourceMDSLabel
+    );
+    const withDataSource = this.remapDataSource(assets1, options.indexPattern);
     const withSubstitutedQueries = this.substituteQueries(
       withDataSource,
       options.dataSource,
@@ -55,6 +61,47 @@ export class IntegrationInstanceBuilder {
     const refs = await this.postAssets(withSubstitutedQueries as SavedObjectsBulkCreateObject[]);
     const builtInstance = await this.buildInstance(integration, refs, options);
     return builtInstance;
+  }
+
+  substituteSavedSearch(
+    assets: SavedObject[],
+    dataSource?: string,
+    tableName?: string
+  ): SavedObject[] {
+    if (!dataSource || !tableName) {
+      return assets;
+    }
+
+    assets = assets.map((asset) => {
+      if (asset.type === 'search') {
+        // Extract searchSourceJSON
+        const searchSourceMeta = asset.attributes.kibanaSavedObjectMeta.searchSourceJSON;
+        let searchSource;
+
+        try {
+          searchSource = JSON.parse(searchSourceMeta);
+        } catch (error) {
+          console.error('Invalid JSON in searchSourceJSON:', error);
+          return asset;
+        }
+
+        // Replace {table_name} in query
+        if (searchSource.query?.query && searchSource.query.language === 'SQL') {
+          searchSource.query.query = searchSource.query.query.replaceAll('{table_name}', tableName);
+        }
+        // Update the title with dataSource and tableName
+        if (searchSourceMeta.dataset.type === 's3glue') {
+          asset.attributes.title = `${dataSource}.default.${tableName}`;
+        }
+
+        // Update the modified searchSourceJSON
+        asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+      }
+
+      return asset;
+    });
+
+    return assets;
   }
 
   // If we have a data source or table specified, hunt for saved queries and update them with the
@@ -157,6 +204,77 @@ export class IntegrationInstanceBuilder {
     });
   }
 
+  addMDSReference(
+    assets: SavedObject[],
+    dataSource?: string,
+    dataSourceMDSId?: string,
+    dataSourceMDSLabel?: string
+  ): SavedObject[] {
+    if (!dataSource) {
+      return assets;
+    }
+    return assets.map((asset) => {
+      // Check if the asset type is 'index-pattern' or if the title contains 'Timeline'
+      if (
+        asset?.type &&
+        asset?.attributes?.title &&
+        (asset.type === 'index-pattern' ||
+          (asset.type === 'visualization' && asset.attributes.title.includes('Timeline')))
+      ) {
+        // Find if a reference with type 'data-source' already exists
+        const dataSourceIndex = asset.references.findIndex((ref) => ref.type === 'data-source');
+
+        if (dataSourceIndex !== -1) {
+          // If a data-source reference exists, update it
+          asset.references[dataSourceIndex] = {
+            id: dataSourceMDSId || '',
+            name: dataSourceMDSLabel || 'Local cluster',
+            type: 'data-source',
+          };
+        } else {
+          // If no data-source reference exists, add a new one
+          asset.references.push({
+            id: dataSourceMDSId || '',
+            name: dataSourceMDSLabel || 'Local cluster',
+            type: 'data-source',
+          });
+        }
+      }
+
+      // Check if the asset type is 'search'
+      if (asset.type === 'search') {
+        // Ensure attributes and searchSourceJSON exist
+        if (
+          asset.attributes &&
+          asset.attributes.kibanaSavedObjectMeta &&
+          asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ) {
+          // Parse searchSourceJSON
+          const searchSourceJSON = JSON.parse(
+            asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
+          );
+
+          // Check if dataSource exists and modify it
+          if (
+            searchSourceJSON.query &&
+            searchSourceJSON.query.dataset &&
+            searchSourceJSON.query.dataset.dataSource
+          ) {
+            searchSourceJSON.query.dataset.dataSource.id = dataSourceMDSId || '';
+            searchSourceJSON.query.dataset.dataSource.name = dataSourceMDSLabel || 'Local cluster';
+            searchSourceJSON.query.dataset.dataSource.type = 'data-source';
+          }
+
+          // Update the attributes with the modified searchSourceJSON
+          asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+            searchSourceJSON
+          );
+        }
+      }
+
+      return asset;
+    });
+  }
   async postAssets(assets: SavedObjectsBulkCreateObject[]): Promise<AssetReference[]> {
     try {
       const response = await this.client.bulkCreate(assets);
@@ -198,8 +316,8 @@ export class IntegrationInstanceBuilder {
     if (options.dataSourceMDSId) {
       instance.references = [
         {
-          id: options.dataSourceMDSId,
-          name: options.dataSourceMDSLabel,
+          id: options.dataSourceMDSId || '',
+          name: options.dataSourceMDSLabel || 'Local cluster',
           type: 'data-source',
         },
       ];

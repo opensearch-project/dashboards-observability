@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -18,6 +17,7 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -29,11 +29,11 @@ import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations'
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { AddedIntegrationProps } from './integration_types';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
-import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -193,8 +193,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                     componentConfig={{
                       activeOption: [
                         {
-                          id: data?.references?.[0]?.id,
-                          label: data?.references?.[0]?.name,
+                          id: data?.references?.[0]?.id || '',
+                          label: data?.references?.[0]?.name || '',
                         },
                       ],
                       fullWidth: true,
