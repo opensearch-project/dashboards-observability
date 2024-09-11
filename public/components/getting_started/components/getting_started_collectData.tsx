@@ -152,7 +152,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     return (
       <>
         <EuiText>
-          <h3>Collector</h3>
+          <h3>Select a collector</h3>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSelectable
