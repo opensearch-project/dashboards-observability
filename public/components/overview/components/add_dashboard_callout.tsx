@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useObservable } from 'react-use';
 import { coreRefs } from '../../../framework/core_refs';
@@ -30,7 +30,7 @@ export function AddDashboardCallout() {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiButton onClick={showFlyout}>Select</EuiButton>
+        <EuiSmallButton onClick={showFlyout}>Select</EuiSmallButton>
       </EuiCallOut>
     </>
   );

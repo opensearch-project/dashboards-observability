@@ -33,6 +33,8 @@ export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
 export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
+export const tutorialSampleDataPluginId = 'import_sample_data';
+
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 1500;
@@ -42,7 +44,7 @@ export const observabilityOverviewTitle = 'Observability overview';
 export const observabilityOverviewPluginOrder = 5088;
 
 export const observabilityGettingStartedID = 'observability-gettingStarted';
-export const observabilityGettingStartedTitle = 'Getting Started';
+export const observabilityGettingStartedTitle = 'Get started';
 export const observabilityGettingStartedPluginOrder = 5089;
 
 export const observabilityApplicationsID = 'observability-applications';
