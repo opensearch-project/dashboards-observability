@@ -190,6 +190,11 @@ export function ServiceMap({
           throughput: selectedNode.throughput,
         };
 
+        // On traces page with custom sources
+        // When user clicks on empty graph, load metrics
+        if (selectableValue.length === 0) {
+          onChangeSelectable('latency');
+        }
         // Update the state to display node details
         setSelectedNodeDetails(details);
       }
@@ -210,6 +215,21 @@ export function ServiceMap({
   };
 
   useEffect(() => {
+    if (selectedNodeDetails) {
+      const selectedNode = items?.graph.nodes.find(
+        (node) => node.label === selectedNodeDetails.label
+      );
+      const details = {
+        label: selectedNode.label,
+        average_latency: selectedNode.average_latency,
+        error_rate: selectedNode.error_rate,
+        throughput: selectedNode.throughput,
+      };
+      setSelectedNodeDetails(details);
+    }
+  }, [items]);
+
+  useEffect(() => {
     if (Object.keys(serviceMap).length === 0) return;
     const values = Object.keys(serviceMap)
       .filter((service) => serviceMap[service][idSelected])
@@ -228,7 +248,6 @@ export function ServiceMap({
         filterByCurrService
       )
     );
-    setSelectedNodeDetails(null);
   }, [serviceMap, idSelected]);
 
   return (

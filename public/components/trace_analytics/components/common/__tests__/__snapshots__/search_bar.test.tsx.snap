@@ -418,7 +418,7 @@ exports[`Search bar components renders search bar 1`] = `
             isClearable={false}
             isLoading={false}
             onChange={[Function]}
-            onSearch={[MockFunction]}
+            onSearch={[Function]}
             placeholder="Trace ID, trace group name, service name"
             prepend={
               <GlobalFilterButton
