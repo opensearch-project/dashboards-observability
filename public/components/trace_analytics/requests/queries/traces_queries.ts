@@ -568,7 +568,7 @@ export const getCustomIndicesTracesQuery = (
         must_not: [],
       },
     },
-    ...(sort ? { sort: [{ [sort.field]: { order: sort.direction } }] } : {}),
+    ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
     track_total_hits: false,
   };
   if (traceId) {
