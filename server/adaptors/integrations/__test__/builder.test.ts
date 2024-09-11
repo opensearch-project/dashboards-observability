@@ -65,10 +65,12 @@ describe('IntegrationInstanceBuilder', () => {
       const remappedAssets = [
         {
           id: 'remapped-asset1',
+          override: false,
           references: [{ id: 'remapped-ref1' }],
         },
         {
           id: 'remapped-asset2',
+          override: false,
           references: [{ id: 'remapped-ref2' }],
         },
       ];
@@ -111,7 +113,7 @@ describe('IntegrationInstanceBuilder', () => {
       // sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
       sampleIntegration.getAssets = jest.fn().mockResolvedValue({
         ok: true,
-        value: [{ type: 'savedObjectBundle', data: remappedAssets }],
+        value: [{ type: 'savedObjectBundle', override: false, data: remappedAssets }],
       });
       sampleIntegration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
 
