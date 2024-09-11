@@ -90,6 +90,7 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
           searchable
           searchProps={{
             placeholder: 'Search for a dashboard...',
+            compressed: true,
           }}
           singleSelection="always"
           options={options}
