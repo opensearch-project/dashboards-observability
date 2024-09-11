@@ -14,10 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { fetchDashboardIds, fetchIndexPatternIds, redirectToDashboards } from './utils';
+import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 
 interface Pattern {
   id: string;
@@ -75,8 +75,15 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
       ? `mds-${selectedDataSourceId}-objectId-${patternId}`
       : patternId;
 
+    const currentUrl = window.location.href;
+    const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+
+    const workspacePatternId = workspaceId
+      ? `workspaceId-${workspaceId}-${finalPatternId}`
+      : finalPatternId;
+
     coreRefs?.application!.navigateToApp('data-explorer', {
-      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${finalPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${workspacePatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
     });
   };
 
@@ -85,26 +92,31 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
       ? `mds-${selectedDataSourceId}-objectId-${dashboardId}`
       : dashboardId;
 
+    const currentUrl = window.location.href;
+    const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+
+    const workspaceDashboardId = workspaceId
+      ? `workspaceId-${workspaceId}-${finalDashboardId}`
+      : finalDashboardId;
+    const dashboardUrl = `#/view/${workspaceDashboardId}`;
+
     coreRefs?.application!.navigateToApp('dashboards', {
-      path: `#/view/${finalDashboardId}`,
+      path: dashboardUrl,
     });
   };
 
   return (
-    <EuiAccordion
-      id="query-and-analyze"
-      buttonContent={`Query and analyze data: ${selectedTechnology}`}
-      paddingSize="m"
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={onToggle}
-    >
-      <EuiPanel>
-        <EuiTitle size="m">
-          <h3>Query data</h3>
-        </EuiTitle>
+    <EuiPanel paddingSize="m">
+      <EuiAccordion
+        id="query-and-analyze"
+        buttonContent={`Query and analyze data: ${selectedTechnology}`}
+        paddingSize="m"
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={onToggle}
+      >
         <EuiText>
           <p>
-            <strong>Explore your data</strong>
+            <h2>Explore your data</h2>
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -119,12 +131,9 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             ))}
         </EuiFlexGroup>
         <EuiHorizontalRule />
-        <EuiTitle size="m">
-          <h3>Analyze data</h3>
-        </EuiTitle>
         <EuiText>
           <p>
-            <strong>Visualize your data</strong>
+            <h2>Visualize your data</h2>
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -154,7 +163,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
-    </EuiAccordion>
+      </EuiAccordion>
+    </EuiPanel>
   );
 };

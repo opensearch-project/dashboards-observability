@@ -36,7 +36,7 @@ export function IntegrationOverview(props: any) {
           data-test-subj="try-it-button"
           data-click-metric-element="integrations.create_from_try_it"
         >
-          Try It
+          Try with sample data
         </EuiSmallButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
