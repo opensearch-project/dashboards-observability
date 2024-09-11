@@ -4,18 +4,17 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiButtonIcon,
-  EuiCompressedFieldSearch,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import debounce from 'lodash/debounce';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { i18n } from '@osd/i18n';
 import { uiSettingsService } from '../../../../../common/utils';
-import { FiltersProps } from './filters/filters';
-import { GlobalFilterButton } from './filters/filters';
+import { FiltersProps, GlobalFilterButton } from './filters/filters';
 
 export const renderDatePicker = (
   startTime: string,
@@ -87,7 +86,7 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
                 setQuery(e.target.value);
                 setGlobalQuery(e.target.value);
               }}
-              onSearch={props.refresh}
+              onSearch={(searchQuery) => props.refresh(undefined, searchQuery)}
             />
           </EuiFlexItem>
         )}
