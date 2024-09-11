@@ -204,15 +204,16 @@ export function getServiceMapGraph(
     }
 
     const averageLatency = `Average duration: ${
-      map[service].latency! >= 0 ? map[service].latency + 'ms' : 'N/A'
+      map[service].latency! >= 0 ? map[service].latency + 'ms' : '-'
     }`;
 
     const errorRate = `Error rate: ${
-      map[service].error_rate! >= 0 ? map[service].error_rate + '%' : 'N/A'
+      map[service].error_rate! >= 0 ? map[service].error_rate + '%' : '-'
     }`;
 
     const throughput =
-      (map[service].throughput! >= 0 ? `Request rate: ${map[service].throughput}` : 'N/A') +
+      'Request rate: ' +
+      (map[service].throughput! >= 0 ? `${map[service].throughput}` : '-') +
       (map[service].throughputPerMinute ? ` (${map[service].throughputPerMinute} per minute)` : '');
 
     const hover = `${service}\n\n ${averageLatency} \n ${errorRate} \n ${throughput}`;

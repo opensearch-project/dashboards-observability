@@ -32,17 +32,18 @@ export const ServicesList = ({
   const [options, setOptions] = useState<Array<{ label: string }>>([]);
 
   const nameColumnAction = (serviceName: string) => {
-    if (addFilter) {
-      addFilter({
-        field: 'serviceName',
-        operator: 'is',
-        value: serviceName,
-        inverted: false,
-        disabled: false,
-      });
-      setFilteredService(serviceName);
+    if (!addFilter) return;
+    addFilter({
+      field: 'serviceName',
+      operator: 'is',
+      value: serviceName,
+      inverted: false,
+      disabled: false,
+    });
+    setFilteredService(serviceName);
+    setTimeout(function () {
       window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
-    }
+    }, 500);
   };
 
   const titleBar = useMemo(
