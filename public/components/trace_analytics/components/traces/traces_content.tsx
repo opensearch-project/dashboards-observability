@@ -41,7 +41,7 @@ export function TracesContent(props: TracesProps) {
     chrome,
     query,
     filters,
-    appConfigs,
+    appConfigs = [],
     startTime,
     endTime,
     childBreadcrumbs,
@@ -131,12 +131,13 @@ export function TracesContent(props: TracesProps) {
     setFilters(newFilters);
   };
 
-  const refresh = async (sort?: PropertySort) => {
+  const refresh = async (sort?: PropertySort, overrideQuery?: string) => {
+    const filterQuery = overrideQuery ?? query;
     setLoading(true);
     const DSL = filtersToDsl(
       mode,
       filters,
-      query,
+      filterQuery,
       processTimeStamp(startTime, mode),
       processTimeStamp(endTime, mode),
       page,
