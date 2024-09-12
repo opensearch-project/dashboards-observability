@@ -74,7 +74,6 @@ export class IntegrationInstanceBuilder {
 
     assets = assets.map((asset) => {
       if (asset.type === 'search') {
-        // Extract searchSourceJSON
         const searchSourceMeta = asset.attributes.kibanaSavedObjectMeta.searchSourceJSON;
         let searchSource;
 
@@ -85,16 +84,14 @@ export class IntegrationInstanceBuilder {
           return asset;
         }
 
-        // Replace {table_name} in query
         if (searchSource.query?.query && searchSource.query.language === 'SQL') {
           searchSource.query.query = searchSource.query.query.replaceAll('{table_name}', tableName);
         }
-        // Update the title with dataSource and tableName
+
         if (searchSourceMeta.dataset.type === 's3glue') {
           asset.attributes.title = `${dataSource}.default.${tableName}`;
         }
 
-        // Update the modified searchSourceJSON
         asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
       }
 
@@ -214,14 +211,13 @@ export class IntegrationInstanceBuilder {
       return assets;
     }
     return assets.map((asset) => {
-      // Check if the asset type is 'index-pattern' or if the title contains 'Timeline'
+      // Check if the asset type is 'index-pattern' or if the title contains 'Timeline' visualization
       if (
         asset?.type &&
         asset?.attributes?.title &&
         (asset.type === 'index-pattern' ||
           (asset.type === 'visualization' && asset.attributes.title.includes('Timeline')))
       ) {
-        // Find if a reference with type 'data-source' already exists
         const dataSourceIndex = asset.references.findIndex((ref) => ref.type === 'data-source');
 
         if (dataSourceIndex !== -1) {
@@ -241,20 +237,16 @@ export class IntegrationInstanceBuilder {
         }
       }
 
-      // Check if the asset type is 'search'
       if (asset.type === 'search') {
-        // Ensure attributes and searchSourceJSON exist
         if (
           asset.attributes &&
           asset.attributes.kibanaSavedObjectMeta &&
           asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
         ) {
-          // Parse searchSourceJSON
           const searchSourceJSON = JSON.parse(
             asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
           );
 
-          // Check if dataSource exists and modify it
           if (
             searchSourceJSON.query &&
             searchSourceJSON.query.dataset &&
@@ -265,7 +257,6 @@ export class IntegrationInstanceBuilder {
             searchSourceJSON.query.dataset.dataSource.type = 'data-source';
           }
 
-          // Update the attributes with the modified searchSourceJSON
           asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
             searchSourceJSON
           );

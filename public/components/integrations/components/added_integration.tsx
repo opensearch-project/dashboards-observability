@@ -193,8 +193,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                     componentConfig={{
                       activeOption: [
                         {
-                          id: data?.references?.[0]?.id || '',
-                          label: data?.references?.[0]?.name || '',
+                          id: data?.references?.[0]?.id ?? '',
+                          label: data?.references?.[0]?.name ?? '',
                         },
                       ],
                       fullWidth: true,
