@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiText,
 } from '@elastic/eui';
 import React, { ComponentType, useEffect, useState } from 'react';
 import { DataSourceSelectorProps } from '../../../../../../src/plugins/data_source_management/public/components/data_source_selector/data_source_selector';
@@ -174,6 +175,7 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <h1>Select Data Source</h1>
+            <EuiText color="subdued">Select which data source to install sample data to</EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
