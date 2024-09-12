@@ -216,44 +216,36 @@ export class IntegrationInstanceBuilder {
         asset?.type &&
         asset?.attributes?.title &&
         (asset.type === 'index-pattern' ||
-          (asset.type === 'visualization' && asset.attributes.title.includes('Timeline')))
+          (asset.type === 'visualization' && asset.attributes.visState.type === 'timelion'))
       ) {
         const dataSourceIndex = asset.references.findIndex((ref) => ref.type === 'data-source');
 
         if (dataSourceIndex !== -1) {
           // If a data-source reference exists, update it
           asset.references[dataSourceIndex] = {
-            id: dataSourceMDSId || '',
-            name: dataSourceMDSLabel || 'Local cluster',
+            id: dataSourceMDSId ?? '',
+            name: dataSourceMDSLabel ?? 'Local cluster',
             type: 'data-source',
           };
         } else {
           // If no data-source reference exists, add a new one
           asset.references.push({
-            id: dataSourceMDSId || '',
-            name: dataSourceMDSLabel || 'Local cluster',
+            id: dataSourceMDSId ?? '',
+            name: dataSourceMDSLabel ?? 'Local cluster',
             type: 'data-source',
           });
         }
       }
 
       if (asset.type === 'search') {
-        if (
-          asset.attributes &&
-          asset.attributes.kibanaSavedObjectMeta &&
-          asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
-        ) {
+        if (asset?.attributes?.kibanaSavedObjectMeta?.searchSourceJSON) {
           const searchSourceJSON = JSON.parse(
             asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
           );
 
-          if (
-            searchSourceJSON.query &&
-            searchSourceJSON.query.dataset &&
-            searchSourceJSON.query.dataset.dataSource
-          ) {
-            searchSourceJSON.query.dataset.dataSource.id = dataSourceMDSId || '';
-            searchSourceJSON.query.dataset.dataSource.name = dataSourceMDSLabel || 'Local cluster';
+          if (searchSourceJSON?.query?.dataset?.dataSource) {
+            searchSourceJSON.query.dataset.dataSource.id = dataSourceMDSId ?? '';
+            searchSourceJSON.query.dataset.dataSource.name = dataSourceMDSLabel ?? 'Local cluster';
             searchSourceJSON.query.dataset.dataSource.type = 'data-source';
           }
 
