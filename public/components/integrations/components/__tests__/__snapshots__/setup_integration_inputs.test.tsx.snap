@@ -772,7 +772,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText="Select a data source to pull the data from."
-    label="Data Source"
+    label="Direct query connections"
     labelType="label"
   >
     <div
@@ -792,7 +792,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
             className="euiFormLabel euiFormRow__label"
             htmlFor="random_html_id"
           >
-            Data Source
+            Direct query connections
           </label>
         </EuiFormLabel>
       </div>
@@ -1368,7 +1368,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText="Select a data source to pull the data from."
-    label="Data Source"
+    label="Direct query connections"
     labelType="label"
   >
     <div
@@ -1388,7 +1388,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
             className="euiFormLabel euiFormRow__label"
             htmlFor="random_html_id"
           >
-            Data Source
+            Direct query connections
           </label>
         </EuiFormLabel>
       </div>
