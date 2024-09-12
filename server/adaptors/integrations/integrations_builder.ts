@@ -214,7 +214,6 @@ export class IntegrationInstanceBuilder {
       // Check if the asset type is 'index-pattern' or if the title contains 'Timeline' visualization
       if (
         asset?.type &&
-        asset?.attributes?.title &&
         (asset.type === 'index-pattern' ||
           (asset.type === 'visualization' && asset.attributes.visState.type === 'timelion'))
       ) {
