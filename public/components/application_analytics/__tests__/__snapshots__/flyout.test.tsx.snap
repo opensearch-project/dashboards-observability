@@ -874,6 +874,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {
@@ -954,6 +955,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {
@@ -1022,6 +1024,8 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                   "r": 5,
                   "t": 30,
                 },
+                "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                "plot_bgcolor": "rgba(0, 0, 0, 0)",
                 "width": 800,
                 "xaxis": Object {
                   "color": "#91989c",
@@ -1069,6 +1073,8 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                     "r": 5,
                     "t": 30,
                   },
+                  "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                  "plot_bgcolor": "rgba(0, 0, 0, 0)",
                   "showlegend": false,
                   "width": 800,
                   "xaxis": Object {

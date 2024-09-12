@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFieldText, EuiTitle, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiTitle, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 
 interface InputFieldProps {
   name: string;
@@ -33,7 +33,7 @@ export const TextInputFieldItem: React.FC<InputFieldProps> = ({
         <h3>{title}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFieldText
+      <EuiCompressedFieldText
         id={htmlIdGenerator('input-text')()}
         name={name}
         fullWidth

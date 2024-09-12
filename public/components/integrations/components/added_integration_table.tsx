@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { useToast } from '../../../../public/components/common/toast';
 import {
   AddedIntegrationType,
   AddedIntegrationsTableProps,
 } from './added_integration_overview_page';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const { http } = props;
+  const { http, dataSourceEnabled } = props;
 
   const { setToast } = useToast();
 
@@ -86,6 +86,20 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     },
   ] as Array<EuiTableFieldDataColumnType<AddedIntegrationType>>;
 
+  if (dataSourceEnabled) {
+    tableColumns.splice(1, 0, {
+      field: 'dataSourceName',
+      name: 'Data Source Name',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {_.truncate(record.dataSourceMDSLabel || 'Local cluster', { length: 100 })}
+        </EuiText>
+      ),
+    });
+  }
+
   async function deleteAddedIntegration(integrationInstance: string, name: string) {
     http
       .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
@@ -120,12 +134,22 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     );
     setIsModalVisible(true);
   };
-
   const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
+  let mdsLabels;
+  if (dataSourceEnabled) {
+    mdsLabels = [
+      ...new Set(
+        props.data.hits.flatMap((hit) =>
+          hit.references?.length > 0 ? hit.references.map((ref) => ref.name || 'Local cluster') : []
+        )
+      ),
+    ].sort();
+  }
 
   const search = {
     box: {
       incremental: true,
+      compressed: true,
     },
     filters: [
       {
@@ -139,7 +163,25 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           view: name,
         })),
       },
-    ],
+      ...(dataSourceEnabled
+        ? [
+            {
+              type: 'field_value_selection' as const,
+              field: 'dataSourceMDSLabel',
+              name: 'Data Source Name',
+              multiSelect: false,
+              options: mdsLabels?.map((name) => ({
+                name,
+                value: name,
+                view: name,
+              })),
+            },
+          ]
+        : []),
+    ].map((filter) => ({
+      ...filter,
+      compressed: true,
+    })),
   };
 
   const entries = props.data.hits.map((integration) => {
@@ -147,7 +189,17 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;
     const name = integration.name;
-    return { id, templateName, creationDate, name, data: { templateName, name } };
+    const dataSourceMDSLabel = integration.references
+      ? integration.references[0].name
+      : 'Local cluster';
+    return {
+      id,
+      templateName,
+      creationDate,
+      name,
+      data: { templateName, name },
+      dataSourceMDSLabel,
+    };
   });
 
   return (

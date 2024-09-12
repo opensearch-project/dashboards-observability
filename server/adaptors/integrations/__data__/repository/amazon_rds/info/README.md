@@ -24,6 +24,6 @@ AWS RDS integration includes dashboards, visualizations, queries, and index mapp
 
 The Dashboard uses the index alias `logs-aws-rds` for shortening the index name - be advised.
 
-![](../static/dashboard_rds1.png)
+![](../static/dashboard.png)
 
 This integration provides you with a comprehensive view of your RDS instances, enabling you to monitor performance and resources effectively, troubleshoot problems quickly, and make data-driven decisions.

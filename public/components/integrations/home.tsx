@@ -5,22 +5,41 @@
 
 import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import {
+  ChromeBreadcrumb,
+  MountPoint,
+  NotificationsStart,
+  SavedObjectsStart,
+} from '../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../src/plugins/data_source_management/public';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
-import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
-import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 import { AddedIntegration } from './components/added_integration';
-import { SetupIntegrationPage } from './components/setup_integration';
+import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
+import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { Integration } from './components/integration';
+import { SetupIntegrationPage } from './components/setup_integration';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
 interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
+  setActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 export const Home = (props: HomeProps) => {
-  const { http, chrome } = props;
+  const {
+    http,
+    chrome,
+    dataSourceEnabled,
+    dataSourceManagement,
+    savedObjectsMDSClient,
+    notifications,
+    setActionMenu,
+  } = props;
 
   const commonProps = {
     http,
@@ -39,7 +58,12 @@ export const Home = (props: HomeProps) => {
           <Route
             exact
             path={['/', '/installed']}
-            render={() => <AddedIntegrationOverviewPage {...commonProps} />}
+            render={() => (
+              <AddedIntegrationOverviewPage
+                {...commonProps}
+                dataSourceEnabled={dataSourceEnabled}
+              />
+            )}
           />
           <Route
             exact
@@ -48,6 +72,11 @@ export const Home = (props: HomeProps) => {
               <AddedIntegration
                 integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
                 {...commonProps}
+                dataSourceManagement={dataSourceManagement}
+                notifications={notifications}
+                dataSourceEnabled={dataSourceEnabled}
+                savedObjectsMDSClient={savedObjectsMDSClient}
+                setActionMenu={setActionMenu}
               />
             )}
           />
@@ -58,6 +87,10 @@ export const Home = (props: HomeProps) => {
               <Integration
                 integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
                 {...commonProps}
+                dataSourceManagement={dataSourceManagement}
+                notifications={notifications}
+                dataSourceEnabled={dataSourceEnabled}
+                savedObjectsMDSClient={savedObjectsMDSClient}
               />
             )}
           />
@@ -65,7 +98,13 @@ export const Home = (props: HomeProps) => {
             exact
             path={'/available/:id/setup'}
             render={(routerProps) => (
-              <SetupIntegrationPage integration={decodeURIComponent(routerProps.match.params.id)} />
+              <SetupIntegrationPage
+                integration={decodeURIComponent(routerProps.match.params.id)}
+                dataSourceManagement={dataSourceManagement}
+                notifications={notifications}
+                dataSourceEnabled={dataSourceEnabled}
+                savedObjectsMDSClient={savedObjectsMDSClient}
+              />
             )}
           />
         </Switch>

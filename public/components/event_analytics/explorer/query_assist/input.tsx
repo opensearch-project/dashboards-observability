@@ -4,11 +4,9 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiCompressedFieldText,
   EuiIcon,
   EuiInputPopover,
   EuiListGroup,
@@ -22,7 +20,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { ERROR_DETAILS, QUERY_ASSIST_API } from '../../../../../common/constants/query_assist';
-import { QUERY_ASSIST_START_TIME } from '../../../../../common/constants/shared';
+import {
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -35,7 +36,12 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from './callouts';
+import {
+  EmptyIndexCallOut,
+  EmptyQueryCallOut,
+  PPLGeneratedCallOut,
+  ProhibitedQueryCallOut,
+} from './callouts';
 
 class ProhibitedQueryError extends Error {
   constructor(message?: string) {
@@ -114,8 +120,14 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const explorerData = useSelector(selectQueryResult)[props.tabId];
   // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
-  const loading = summaryData.loading;
+  const [generatingPPL, setGeneratingPPL] = useState(false);
+  const loading = summaryData.loading || generatingPPL;
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedIndex = props.selectedIndex[0]?.label || '';
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
 
   useEffect(() => {
     if (
@@ -162,7 +174,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     const generatedPPL = await getOSDHttp().post(QUERY_ASSIST_API.GENERATE_PPL, {
       body: JSON.stringify({
         question: props.nlqInput,
-        index: props.selectedIndex[0].label,
+        index: selectedIndex,
       }),
     });
     await props.handleQueryChange(generatedPPL);
@@ -182,13 +194,16 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const generatePPL = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
-    if (!props.selectedIndex.length) return;
+    if (!selectedIndex) {
+      props.setCallOut(<EmptyIndexCallOut onDismiss={dismissCallOut} />);
+      return;
+    }
     if (props.nlqInput.trim().length === 0) {
       props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
     }
     try {
-      dispatch(setLoading({ tabId: props.tabId, loading: true }));
+      setGeneratingPPL(true);
       dismissCallOut();
       await request();
     } catch (err) {
@@ -199,7 +214,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       }
       coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
     } finally {
-      dispatch(setLoading({ tabId: props.tabId, loading: false }));
+      setGeneratingPPL(false);
     }
   };
   const generateSummary = async (context?: Partial<SummarizationContext>) => {
@@ -208,7 +223,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
       const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
         question: props.nlqInput,
-        index: props.selectedIndex[0].label,
+        index: selectedIndex,
         isError,
         query: queryRedux.rawQuery,
         response: isError
@@ -273,7 +288,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
   const runAndSummarize = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
-    if (!props.selectedIndex.length) return;
+    if (!selectedIndex) {
+      props.setCallOut(<EmptyIndexCallOut onDismiss={dismissCallOut} />);
+      return;
+    }
     if (props.nlqInput.trim().length === 0) {
       props.setCallOut(<EmptyQueryCallOut onDismiss={dismissCallOut} />);
       return;
@@ -281,8 +299,10 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
     try {
       dispatch(setLoading({ tabId: props.tabId, loading: true }));
       dismissCallOut();
+      setGeneratingPPL(true);
       await request();
-      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, 'now']);
+      setGeneratingPPL(false);
+      await props.handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (err) {
       const error = formatError(err);
@@ -296,70 +316,71 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
         coreRefs.toasts?.addError(error, { title: 'Failed to generate results' });
       }
     } finally {
+      setGeneratingPPL(false);
       dispatch(setLoading({ tabId: props.tabId, loading: false }));
     }
   };
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiInputPopover
-            input={
-              <EuiFieldText
-                inputRef={inputRef}
-                placeholder={
-                  props.selectedIndex[0]?.label
-                    ? `Ask a natural language question about ${props.selectedIndex[0].label} to generate a query`
-                    : 'Select a data source or index to ask a question.'
-                }
-                disabled={loading}
-                value={props.nlqInput}
-                onChange={(e) => {
-                  props.setNlqInput(e.target.value);
-                  dismissCallOut();
-                }}
-                onKeyDown={(e) => {
-                  // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
-                  if (e.key === 'Enter') runAndSummarize();
-                }}
-                prepend={<EuiIcon type={chatLogo} />}
-                fullWidth
-                onFocus={() => {
-                  props.setNeedsUpdate(false);
-                  props.setLastFocusedInput('nlq_input');
-                  if (props.nlqInput.length === 0) setIsPopoverOpen(true);
-                }}
+      <EuiInputPopover
+        input={
+          <EuiCompressedFieldText
+            inputRef={inputRef}
+            placeholder="Ask me a question"
+            disabled={loading}
+            value={props.nlqInput}
+            onChange={(e) => {
+              props.setNlqInput(e.target.value);
+              dismissCallOut();
+            }}
+            prepend={
+              <EuiIcon
+                className="euiFieldText"
+                style={{ padding: 8 }}
+                size="original"
+                type={chatLogo}
               />
             }
-            disableFocusTrap
-            fullWidth={true}
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setIsPopoverOpen(false);
+            onKeyDown={(e) => {
+              // listen to enter key manually. the cursor jumps to CodeEditor with EuiForm's onSubmit
+              if (e.key === 'Enter') runAndSummarize();
             }}
-          >
-            <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-              {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
-                <EuiListGroupItem
-                  onClick={() => {
-                    props.setNlqInput(question);
-                    inputRef.current?.focus();
-                    setIsPopoverOpen(false);
-                  }}
-                  label={question}
-                />
-              ))}
-            </EuiListGroup>
-          </EuiInputPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            fullWidth
+            onFocus={() => {
+              props.setNeedsUpdate(false);
+              props.setLastFocusedInput('nlq_input');
+              if (props.nlqInput.length === 0) setIsPopoverOpen(true);
+            }}
+          />
+        }
+        disableFocusTrap
+        fullWidth={true}
+        isOpen={isPopoverOpen}
+        closePopover={() => {
+          setIsPopoverOpen(false);
+        }}
+      >
+        <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+          {HARDCODED_SUGGESTIONS[selectedIndex]?.map((question, i) => (
+            <EuiListGroupItem
+              key={i}
+              onClick={() => {
+                props.setNlqInput(question);
+                inputRef.current?.focus();
+                setIsPopoverOpen(false);
+              }}
+              label={question}
+            />
+          ))}
+        </EuiListGroup>
+      </EuiInputPopover>
       {props.callOut}
       <EuiSpacer size="s" />
       {props.children}
       <EuiSpacer size="m" />
       {props.lastFocusedInput === 'query_area' ? (
-        <EuiButton
+        <EuiSmallButton
           fill
           isLoading={loading}
           onClick={props.runChanges}
@@ -367,7 +388,7 @@ export const QueryAssistInput: React.FC<React.PropsWithChildren<Props>> = (props
           style={{ height: 44 }}
         >
           Run
-        </EuiButton>
+        </EuiSmallButton>
       ) : (
         <EuiSplitButton
           disabled={loading}

@@ -9,8 +9,15 @@ import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
-import { CoreStart, SavedObjectAttributes } from '../../../../../../src/core/public';
-import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
+import { SavedObjectAttributes } from '../../../../../../src/core/public';
+import { INDEX_DOCUMENT_NAME_PATTERN } from '../../../../common/constants/metrics';
+import {
+  OBSERVABILITY_BASE,
+  OTEL_METRIC_SUBTYPE,
+  PPL_INDEX_REGEX,
+  PPL_METRIC_SUBTYPE,
+  PPL_WHERE_CLAUSE_REGEX,
+} from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
   SavedVisualizationType,
@@ -18,15 +25,15 @@ import {
   VizContainerError,
 } from '../../../../common/types/custom_panels';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { removeBacktick } from '../../../../common/utils';
+import { MetricType } from '../../../../common/types/metrics';
+import { getOSDHttp, removeBacktick } from '../../../../common/utils';
 import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
 import PPLService from '../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
+import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
-import { MetricType } from '../../../../common/types/metrics';
-import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -130,7 +137,6 @@ const queryAccumulator = (
 
 // Fetched Saved Visualization By Id
 export const fetchVisualizationById = async (
-  http: CoreStart['http'],
   savedVisualizationId: string,
   setIsError: (error: VizContainerError) => void
 ) => {
@@ -164,13 +170,14 @@ export const getQueryResponse = async (
   endTime: string,
   filterQuery = '',
   timestampField = 'timestamp',
-  metricVisualization = false
+  metricVisualization = false,
+  dataSourceMDSId?: string
 ) => {
   const finalQuery = metricVisualization
     ? query
     : queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
 
-  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' });
+  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' }, dataSourceMDSId);
 
   if (res === undefined) throw new Error('Please check the validity of PPL Filter');
 
@@ -192,6 +199,7 @@ export const renderSavedVisualization = async ({
   setIsLoading,
   setIsError,
   visualization,
+  dataSourceMDSId,
 }: {
   pplService: PPLService;
   startTime: string;
@@ -206,6 +214,7 @@ export const renderSavedVisualization = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   visualization: SavedVisualizationType;
+  dataSourceMDSId?: string;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -238,7 +247,9 @@ export const renderSavedVisualization = async ({
       startTime,
       endTime,
       filterQuery,
-      visualization.timeField
+      visualization.timeField,
+      false,
+      dataSourceMDSId
     );
     setVisualizationData(queryData);
   } catch (error) {
@@ -270,6 +281,7 @@ const createCatalogVisualizationMetaData = ({
   query,
   type,
   subType,
+  metricType,
   timeField,
   queryData,
 }: {
@@ -277,6 +289,7 @@ const createCatalogVisualizationMetaData = ({
   query: string;
   type: string;
   subType: string;
+  metricType: string;
   timeField: string;
   queryData: object;
 }) => {
@@ -286,6 +299,7 @@ const createCatalogVisualizationMetaData = ({
     query,
     type,
     subType,
+    metricType,
     selected_date_range: {
       start: 'now/y',
       end: 'now',
@@ -307,7 +321,6 @@ const createCatalogVisualizationMetaData = ({
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
-  http,
   pplService,
   catalogSource,
   startTime,
@@ -321,10 +334,9 @@ export const renderCatalogVisualization = async ({
   setVisualizationMetaData,
   setIsLoading,
   setIsError,
-  spanResolution,
   visualization,
+  dataSourceMDSId,
 }: {
-  http: CoreStart['http'];
   pplService: PPLService;
   catalogSource: string;
   startTime: string;
@@ -338,16 +350,15 @@ export const renderCatalogVisualization = async ({
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
-  spanResolution?: string;
   queryMetaData?: MetricType;
   visualization: SavedVisualizationType;
+  dataSourceMDSId?: string;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
-  const visualizationSubType = visualization.subType;
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...visualization.queryMetaData,
@@ -369,7 +380,8 @@ export const renderCatalogVisualization = async ({
       endTime,
       filterQuery,
       visualizationTimeField,
-      true
+      true,
+      dataSourceMDSId
     );
     setVisualizationData(queryData);
 
@@ -378,6 +390,7 @@ export const renderCatalogVisualization = async ({
       query: visualizationQuery,
       type: visualizationType,
       subType: visualization.subType,
+      metricType: visualization.metricType,
       timeField: visualizationTimeField,
       queryData,
     });
@@ -388,6 +401,193 @@ export const renderCatalogVisualization = async ({
   }
 
   setIsLoading(false);
+};
+
+const createOtelVisualizationMetaData = (
+  documentName: string,
+  visualizationType: string,
+  startTime: string,
+  endTime: string,
+  queryData: object
+) => {
+  return {
+    name: documentName,
+    description: '',
+    query: '',
+    type: visualizationType,
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: OTEL_METRIC_SUBTYPE,
+    selected_date_range: {
+      start: startTime,
+      end: endTime,
+      text: '',
+    },
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+    userConfigs: {
+      layout: dynamicLayoutFromQueryData(queryData),
+    },
+  };
+};
+
+export const fetchAggregatedBinCount = async (
+  minimumBound: string,
+  maximumBound: string,
+  startTime: string,
+  endTime: string,
+  documentName: string,
+  selectedOtelIndex: string,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  dataSourceMDSId: string
+) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
+      body: JSON.stringify({
+        min: minimumBound,
+        max: maximumBound,
+        startTime,
+        endTime,
+        documentName,
+        index: selectedOtelIndex,
+        dataSourceMDSId,
+      }),
+    });
+    return response;
+  } catch (error) {
+    const errorMessage = JSON.parse(error.body.message);
+    setIsError({
+      errorMessage: errorMessage.error.reason || 'Issue in fetching bucket count',
+      errorDetails: errorMessage.error.details,
+    });
+    console.error(error.body);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+export const fetchSampleOTDocument = async (
+  selectedOtelIndex: string,
+  documentName: string,
+  dataSourceMDSId: string
+) => {
+  const http = getOSDHttp();
+  try {
+    const response = await http.get(
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/${documentName}/${
+        dataSourceMDSId ?? ''
+      }`
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
+  const match = metricString.match(INDEX_DOCUMENT_NAME_PATTERN);
+
+  if (match) {
+    const index = match[1];
+    const documentName = match[2];
+    return [index, documentName];
+  } else {
+    return null;
+  }
+};
+
+export const renderOpenTelemetryVisualization = async ({
+  startTime,
+  endTime,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+  setToast,
+  dataSourceMDSId,
+}: {
+  startTime: string;
+  endTime: string;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: any;
+  setToast: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
+  dataSourceMDSId?: string;
+}) => {
+  setIsLoading(true);
+  setIsError({} as VizContainerError);
+
+  const visualizationType = 'bar';
+  let index = visualization?.index;
+  let documentName = visualization?.name;
+
+  if (index === undefined) {
+    const indexAndDocumentName = extractIndexAndDocumentName(visualization.name);
+    index = indexAndDocumentName[0];
+    documentName = indexAndDocumentName[1];
+    if (documentName === undefined)
+      setToast('Document name is undefined', 'danger', undefined, 'right');
+  }
+
+  const fetchSampleDocument = await fetchSampleOTDocument(index, documentName, dataSourceMDSId);
+  const source = fetchSampleDocument.hits[0]._source;
+
+  setVisualizationType(visualizationType);
+  setVisualizationTitle(source.name);
+
+  const dataBinsPromises = source.buckets.map(async (bucket: any) => {
+    try {
+      const formattedStartTime = convertDateTime(startTime, false, false, OTEL_METRIC_SUBTYPE);
+      const formattedEndTime = convertDateTime(endTime, false, false, OTEL_METRIC_SUBTYPE);
+      const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+        bucket.min.toString(),
+        bucket.max.toString(),
+        formattedStartTime,
+        formattedEndTime,
+        documentName,
+        index,
+        setIsError,
+        setIsLoading,
+        dataSourceMDSId
+      );
+
+      return {
+        xAxis: bucket.min + ' - ' + bucket.max,
+        'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+      };
+    } catch (error) {
+      console.error('Error processing bucket:', error);
+      return null;
+    }
+  });
+  const jsonData = await Promise.all(dataBinsPromises);
+  const formatedJsonData = { jsonData };
+
+  const visualizationMetaData = createOtelVisualizationMetaData(
+    documentName,
+    visualizationType,
+    startTime,
+    endTime,
+    formatedJsonData
+  );
+  setVisualizationData(formatedJsonData);
+  setVisualizationMetaData(visualizationMetaData);
 };
 
 // Function to store recently used time filters and set start and end time.
@@ -422,6 +622,9 @@ export const parseSavedVisualizations = (
     userConfigs: visualization.savedVisualization.userConfigs || {},
     subType: visualization.savedVisualization.hasOwnProperty('subType')
       ? visualization.savedVisualization.subType
+      : '',
+    metricType: visualization.savedVisualization.hasOwnProperty('metricType')
+      ? visualization.savedVisualization.metricType
       : '',
     units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
       ? visualization.savedVisualization.units_of_measure
@@ -482,18 +685,18 @@ export const isPPLFilterValid = (
   return true;
 };
 
-export const processMetricsData = (schema: any, dataConfig: any) => {
+export const processMetricsData = (schema: any) => {
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
     schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
-    return prepareMetricsData(schema, dataConfig);
+    return prepareMetricsData(schema);
   }
   return {};
 };
 
-export const prepareMetricsData = (schema: any, dataConfig: any) => {
+export const prepareMetricsData = (schema: any) => {
   const metricBreakdown: any[] = [];
   const metricSeries: any[] = [];
   const metricDimension: any[] = [];
@@ -569,7 +772,12 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   };
 
   // add metric specific overriding
-  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
+  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema) };
+
+  // add otel metric specific overriding
+  if (metaData?.metricType === OTEL_METRIC_SUBTYPE) {
+    finalDataConfig = { ...finalDataConfig, ...constructOtelMetricsMetaData() };
+  }
 
   const mixedUserConfigs = {
     availabilityConfig: {

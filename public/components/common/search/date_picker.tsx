@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiCompressedSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import { uiSettingsService } from '../../../../common/utils';
 import { IDatePickerProps } from './search';
@@ -14,7 +14,7 @@ export function DatePicker(props: IDatePickerProps) {
   const handleTimeChange = (e: any) => handleTimePickerChange([e.start, e.end]);
 
   return (
-    <EuiSuperDatePicker
+    <EuiCompressedSuperDatePicker
       data-test-subj="pplSearchDatePicker"
       start={startTime}
       end={endTime}
@@ -22,6 +22,7 @@ export function DatePicker(props: IDatePickerProps) {
       onTimeChange={handleTimeChange}
       onRefresh={handleTimeRangePickerRefresh}
       className="osdQueryBar__datePicker"
+      showUpdateButton={false}
     />
   );
 }

@@ -5,7 +5,8 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -24,23 +25,26 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
 import { useSelector } from 'react-redux';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
+import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { coreRefs } from '../../../../framework/core_refs';
+import { useToast } from '../../../common/toast';
+import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import {
   displayVisualization,
   fetchVisualizationById,
   renderCatalogVisualization,
+  renderOpenTelemetryVisualization,
   renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
-import { VizContainerError } from '../../../../../common/types/custom_panels';
-import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
-import { coreRefs } from '../../../../framework/core_refs';
-import {
-  observabilityMetricsID,
-  PROMQL_METRIC_SUBTYPE,
-} from '../../../../../common/constants/shared';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -82,6 +86,7 @@ interface Props {
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
   actionMenuType?: string;
+  dataSourceMDSId?: string;
 }
 
 export const VisualizationContainer = ({
@@ -103,6 +108,7 @@ export const VisualizationContainer = ({
   catalogVisualization,
   inlineEditor,
   actionMenuType,
+  dataSourceMDSId,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -114,6 +120,7 @@ export const VisualizationContainer = ({
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
   const { http, pplService } = coreRefs;
+  const { setToast } = useToast();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
@@ -126,12 +133,16 @@ export const VisualizationContainer = ({
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <h1>{visualizationMetaData.name}</h1>
+              <EuiText size="s">
+                <h2>{visualizationMetaData.name}</h2>
+              </EuiText>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            This PPL Query is generated in runtime from selected data source
+            <EuiText size="s">
+              This PPL Query is generated in runtime from selected data source
+            </EuiText>
             <EuiSpacer />
             <EuiCodeBlock language="html" isCopyable>
               {visualizationMetaData.query}
@@ -139,9 +150,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -150,12 +161,14 @@ export const VisualizationContainer = ({
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <h1>{isError.errorMessage}</h1>
+              <EuiText size="s">
+                <h2>{isError.errorMessage}</h2>
+              </EuiText>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            Error Details
+            <EuiText size="s">Error Details</EuiText>
             <EuiSpacer />
             <EuiCodeBlock language="html" isCopyable>
               {isError.errorDetails}
@@ -163,9 +176,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -180,7 +193,7 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+        if (visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE) {
           window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
         } else {
           onEditClick(savedVisualizationId);
@@ -227,7 +240,7 @@ export const VisualizationContainer = ({
   ];
 
   if (
-    visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE &&
+    visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE &&
     actionMenuType === 'metricsGrid'
   ) {
     popoverPanel = [showPPLQueryPanel];
@@ -237,7 +250,7 @@ export const VisualizationContainer = ({
 
   const fetchVisualization = async () => {
     return savedVisualizationId
-      ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+      ? await fetchVisualizationById(savedVisualizationId, setIsError)
       : inputMetaData;
   };
 
@@ -247,10 +260,23 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
-    if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
+    if (visualization.metricType === OTEL_METRIC_SUBTYPE)
+      await renderOpenTelemetryVisualization({
+        visualization,
+        startTime: fromTime,
+        endTime: toTime,
+        setVisualizationTitle,
+        setVisualizationType,
+        setVisualizationData,
+        setVisualizationMetaData,
+        setIsLoading,
+        setIsError,
+        setToast,
+        dataSourceMDSId,
+      });
+    else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
       renderCatalogVisualization({
         visualization,
-        http,
         pplService,
         catalogSource: visualizationId,
         startTime: fromTime,
@@ -265,8 +291,9 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError,
         queryMetaData,
+        dataSourceMDSId,
       });
-    } else
+    else
       await renderSavedVisualization({
         visualization,
         http,
@@ -283,6 +310,7 @@ export const VisualizationContainer = ({
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
+        dataSourceMDSId,
       });
   };
 
@@ -358,7 +386,7 @@ export const VisualizationContainer = ({
               ) : (
                 <EuiPopover
                   button={
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="actionMenuButton"
                       iconType="boxesHorizontal"
                       onClick={onActionsMenuClick}
@@ -367,10 +395,12 @@ export const VisualizationContainer = ({
                   isOpen={isPopoverOpen}
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
+                  panelPaddingSize="none"
                 >
                   <EuiContextMenuPanel
                     items={popoverPanel}
                     data-test-subj="panelViz__popoverPanel"
+                    size="s"
                   />
                 </EuiPopover>
               )}

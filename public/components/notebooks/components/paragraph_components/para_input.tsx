@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiCodeBlock,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHighlight,
   EuiLink,
   EuiModal,
@@ -25,7 +25,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { Input, Prompt } from '@nteract/presentational-components';
 import React, { useState } from 'react';
@@ -72,7 +72,7 @@ export const ParaInput = (props: {
       <div style={{ width: '100%' }}>
         {/* If the para is selected show the editor else display the code in the paragraph */}
         {para.isSelected ? (
-          <EuiTextArea
+          <EuiCompressedTextArea
             data-test-subj={`editorArea-${index}`}
             placeholder={inputPlaceholderString}
             id="editorArea"
@@ -133,40 +133,45 @@ export const ParaInput = (props: {
     return (
       <>
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={6}>
-            <EuiFormRow label="Title" fullWidth>
-              <EuiComboBox
-                placeholder="Find visualization"
-                singleSelection={{ asPlainText: true }}
-                options={props.visOptions}
-                selectedOptions={props.selectedVisOption}
-                onChange={(newOption: EuiComboBoxOptionOption[]) => {
-                  if (newOption.length > 0) props.setVisType(newOption[0].className);
-                  props.setSelectedVisOption(newOption);
-                  props.setIsOutputStale(true);
-                }}
-              />
-            </EuiFormRow>
+          <EuiFlexItem grow={false} style={{ minWidth: '500px' }}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+              <EuiFlexItem grow={true}>
+                <EuiCompressedFormRow label="Title" fullWidth>
+                  <EuiCompressedComboBox
+                    placeholder="Find visualization"
+                    singleSelection={{ asPlainText: true }}
+                    options={props.visOptions}
+                    selectedOptions={props.selectedVisOption}
+                    onChange={(newOption: EuiComboBoxOptionOption[]) => {
+                      if (newOption.length > 0) props.setVisType(newOption[0].className);
+                      props.setSelectedVisOption(newOption);
+                      props.setIsOutputStale(true);
+                    }}
+                  />
+                </EuiCompressedFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  data-test-subj="para-input-visualization-browse-button"
+                  onClick={() => {
+                    setSelectableOptions([
+                      ...props.visOptions[0].options,
+                      ...props.visOptions[1].options,
+                    ]);
+                    setSelectableError(false);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Browse
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="para-input-visualization-browse-button"
-              onClick={() => {
-                setSelectableOptions([
-                  ...props.visOptions[0].options,
-                  ...props.visOptions[1].options,
-                ]);
-                setSelectableError(false);
-                setIsModalOpen(true);
-              }}
-            >
-              Browse
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2} />
-          <EuiFlexItem grow={9}>
-            <EuiFormRow label="Date range" fullWidth>
+            <EuiCompressedFormRow label="Date range" fullWidth>
               <EuiSuperDatePicker
+                compressed
                 start={props.startTime}
                 end={props.endTime}
                 showUpdateButton={false}
@@ -177,16 +182,18 @@ export const ParaInput = (props: {
                   props.setIsOutputStale(true);
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
-          <EuiFlexItem />
         </EuiFlexGroup>
-
         {isModalOpen && (
           <EuiOverlayMask>
             <EuiModal onClose={() => setIsModalOpen(false)} style={{ width: 500 }}>
               <EuiModalHeader>
-                <EuiModalHeaderTitle>Browse visualizations</EuiModalHeaderTitle>
+                <EuiModalHeaderTitle>
+                  <EuiText size="s">
+                    <h2>Browse visualizations</h2>
+                  </EuiText>
+                </EuiModalHeaderTitle>
               </EuiModalHeader>
 
               <EuiModalBody>
@@ -219,14 +226,16 @@ export const ParaInput = (props: {
               </EuiModalBody>
 
               <EuiModalFooter>
-                <EuiButtonEmpty onClick={() => setIsModalOpen(false)}>Cancel</EuiButtonEmpty>
-                <EuiButton
+                <EuiSmallButtonEmpty onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </EuiSmallButtonEmpty>
+                <EuiSmallButton
                   data-test-subj="para-input-select-button"
                   onClick={() => onSelect()}
                   fill
                 >
                   Select
-                </EuiButton>
+                </EuiSmallButton>
               </EuiModalFooter>
             </EuiModal>
           </EuiOverlayMask>

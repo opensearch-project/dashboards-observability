@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -18,17 +18,23 @@ import {
 } from '../../../src/core/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import {
+  DATA_SOURCE_TYPES,
+  OBS_S3_DATA_SOURCE,
+  S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
+  S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
+} from '../common/constants/data_sources';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   DATACONNECTIONS_BASE,
-  S3_DATASOURCE_TYPE,
+  S3_DATA_SOURCE_TYPE,
   SECURITY_PLUGIN_ACCOUNT_API,
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityDataConnectionsID,
-  observabilityDataConnectionsPluginOrder,
-  observabilityDataConnectionsTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -41,16 +47,27 @@ import {
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityOverviewID,
+  observabilityOverviewPluginOrder,
+  observabilityOverviewTitle,
   observabilityPanelsID,
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesNewNavID,
+  observabilityServicesPluginOrder,
+  observabilityServicesTitle,
   observabilityTracesID,
+  observabilityTracesNewNavID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
-import { AssociatedObject, CachedAcceleration } from '../common/types/data_connections';
+import {
+  RenderAccelerationDetailsFlyoutParams,
+  RenderAccelerationFlyoutParams,
+  RenderAssociatedObjectsDetailsFlyoutParams,
+} from '../common/types/data_connections';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
 import {
   setOSDHttp,
@@ -86,6 +103,8 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -96,12 +115,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import {
-  DATA_SOURCE_TYPES,
-  OBS_S3_DATA_SOURCE,
-  S3_DATA_SOURCE_GROUP_DISPLAY_NAME,
-  S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME,
-} from '../common/constants/data_sources';
 
 interface PublicConfig {
   query_assist: {
@@ -116,37 +129,37 @@ export const [
   getRenderAccelerationDetailsFlyout,
   setRenderAccelerationDetailsFlyout,
 ] = createGetterSetter<
-  (
-    acceleration: CachedAcceleration,
-    dataSourceName: string,
-    handleRefresh?: () => void,
-    dataSourceMDSId?: string
-  ) => void
+  ({
+    acceleration,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationDetailsFlyoutParams) => void
 >('renderAccelerationDetailsFlyout');
 
 export const [
   getRenderAssociatedObjectsDetailsFlyout,
   setRenderAssociatedObjectsDetailsFlyout,
 ] = createGetterSetter<
-  (
-    tableDetail: AssociatedObject,
-    datasourceName: string,
-    handleRefresh?: () => void,
-    dataSourceMDSId?: string
-  ) => void
+  ({
+    tableDetail,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAssociatedObjectsDetailsFlyoutParams) => void
 >('renderAssociatedObjectsDetailsFlyout');
 
 export const [
   getRenderCreateAccelerationFlyout,
   setRenderCreateAccelerationFlyout,
 ] = createGetterSetter<
-  (
-    dataSource: string,
-    dataSourceMDSId?: string,
-    databaseName?: string,
-    tableName?: string,
-    handleRefresh?: () => void
-  ) => void
+  ({
+    dataSource,
+    dataSourceMDSId,
+    databaseName,
+    tableName,
+    handleRefresh,
+  }: RenderAccelerationFlyoutParams) => void
 >('renderCreateAccelerationFlyout');
 
 export class ObservabilityPlugin
@@ -156,6 +169,7 @@ export class ObservabilityPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
   }
+  private mdsFlagStatus: boolean = false;
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -169,6 +183,9 @@ export class ObservabilityPlugin
     core.getStartServices().then(([coreStart]) => {
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
+
+    setupOverviewPage(setupDeps.contentManagement!);
+    this.mdsFlagStatus = !!setupDeps.dataSource;
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -253,7 +270,9 @@ export class ObservabilityPlugin
       // prometheus: openSearchLocalDataSourcePluggable
     };
 
-    const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
+    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
+      params: AppMountParameters
+    ) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
@@ -272,25 +291,10 @@ export class ObservabilityPlugin
         startPage,
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
-        coreStart.savedObjects
+        coreStart.savedObjects,
+        defaultRoute
       );
     };
-
-    core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
-
-    core.application.register({
-      id: observabilityLogsID,
-      title: observabilityLogsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityLogsPluginOrder,
-      mount: appMountWithStartPage('logs'),
-    });
 
     core.application.register({
       id: observabilityMetricsID,
@@ -300,29 +304,15 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('metrics'),
     });
 
-    core.application.register({
-      id: observabilityTracesID,
-      title: observabilityTracesTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityTracesPluginOrder,
-      mount: appMountWithStartPage('traces'),
-    });
-
-    core.application.register({
-      id: observabilityNotebookID,
-      title: observabilityNotebookTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityNotebookPluginOrder,
-      mount: appMountWithStartPage('notebooks'),
-    });
-
-    core.application.register({
-      id: observabilityPanelsID,
-      title: observabilityPanelsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('dashboards'),
-    });
+    if (!setupDeps.dataSource) {
+      core.application.register({
+        id: observabilityApplicationsID,
+        title: observabilityApplicationsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityApplicationsPluginOrder,
+        mount: appMountWithStartPage('applications'),
+      });
+    }
 
     core.application.register({
       id: observabilityIntegrationsID,
@@ -332,22 +322,74 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: observabilityOverviewID,
+        title: observabilityOverviewTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityOverviewPluginOrder,
+        mount: appMountWithStartPage('overview'),
+      });
+
+      core.application.register({
+        id: observabilityGettingStartedID,
+        title: observabilityGettingStartedTitle,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: observabilityGettingStartedPluginOrder,
+        mount: appMountWithStartPage('gettingStarted'),
+      });
+
+      core.application.register({
+        id: observabilityTracesNewNavID,
+        title: observabilityTracesTitle,
+        order: observabilityTracesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/traces'),
+      });
+
+      core.application.register({
+        id: observabilityServicesNewNavID,
+        title: observabilityServicesTitle,
+        order: observabilityServicesPluginOrder,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        mount: appMountWithStartPage('traces', '/services'),
+      });
+    } else {
+      core.application.register({
+        id: observabilityTracesID,
+        title: observabilityTracesTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityTracesPluginOrder,
+        mount: appMountWithStartPage('traces'),
+      });
+      // deprecated in new Nav Groups and when MDS is enabled.
+      if (!setupDeps.dataSource) {
+        core.application.register({
+          id: observabilityPanelsID,
+          title: observabilityPanelsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityPanelsPluginOrder,
+          mount: appMountWithStartPage('dashboards'),
+        });
+        core.application.register({
+          id: observabilityLogsID,
+          title: observabilityLogsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityLogsPluginOrder,
+          mount: appMountWithStartPage('logs'),
+        });
+      }
+    }
+
     core.application.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDataConnectionsPluginOrder,
-      mount: appMountWithStartPage('dataconnections'),
+      id: observabilityNotebookID,
+      title: observabilityNotebookTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityNotebookPluginOrder,
+      mount: appMountWithStartPage('notebooks'),
     });
 
-    setupDeps.managementOverview?.register({
-      id: observabilityDataConnectionsID,
-      title: observabilityDataConnectionsTitle,
-      order: 9070,
-      description: i18n.translate('observability.dataconnectionsDescription', {
-        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
-      }),
-    });
+    registerAllPluginNavGroups(core);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
@@ -407,6 +449,8 @@ export class ObservabilityPlugin
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
+    coreRefs.navigation = startDeps.navigation;
+    coreRefs.contentManagement = startDeps.contentManagement;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
@@ -417,7 +461,8 @@ export class ObservabilityPlugin
       return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
     };
 
-    // register all s3 datasources
+    // register all s3 datasources only if mds feature flag is disabled
+    if (!this.mdsFlagStatus) {
     const registerDataSources = () => {
       try {
         core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
@@ -467,18 +512,19 @@ export class ObservabilityPlugin
     } else {
       registerDataSources();
     }
+  }
 
     core.http.intercept({
       request: catalogRequestIntercept(),
     });
 
     // Use overlay service to render flyouts
-    const renderAccelerationDetailsFlyout = (
-      acceleration: CachedAcceleration,
-      dataSourceName: string,
-      handleRefresh?: () => void,
-      dataSourceMDSId?: string
-    ) => {
+    const renderAccelerationDetailsFlyout = ({
+      acceleration,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAccelerationDetailsFlyoutParams) => {
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AccelerationDetailsFlyout
@@ -493,17 +539,17 @@ export class ObservabilityPlugin
     };
     setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
-    const renderAssociatedObjectsDetailsFlyout = (
-      tableDetail: AssociatedObject,
-      datasourceName: string,
-      handleRefresh?: () => void,
-      dataSourceMDSId?: string
-    ) => {
+    const renderAssociatedObjectsDetailsFlyout = ({
+      tableDetail,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAssociatedObjectsDetailsFlyoutParams) => {
       const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           <AssociatedObjectsDetailsFlyout
             tableDetail={tableDetail}
-            datasourceName={datasourceName}
+            datasourceName={dataSourceName}
             resetFlyout={() => associatedObjectsDetailsFlyout.close()}
             handleRefresh={handleRefresh}
             dataSourceMDSId={dataSourceMDSId}
@@ -513,17 +559,17 @@ export class ObservabilityPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    const renderCreateAccelerationFlyout = (
-      selectedDatasource: string,
-      dataSourceMDSId?: string,
-      databaseName?: string,
-      tableName?: string,
-      handleRefresh?: () => void
-    ) => {
+    const renderCreateAccelerationFlyout = ({
+      dataSource,
+      databaseName,
+      tableName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAccelerationFlyoutParams) => {
       const createAccelerationFlyout = core.overlays.openFlyout(
         toMountPoint(
           <CreateAcceleration
-            selectedDatasource={selectedDatasource}
+            selectedDatasource={dataSource}
             resetFlyout={() => createAccelerationFlyout.close()}
             databaseName={databaseName}
             tableName={tableName}

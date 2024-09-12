@@ -1,0 +1,129 @@
+{
+  "name": "aws_cloudtrail",
+  "version": "1.1.0",
+  "displayName": "AWS CloudTrail",
+  "description": "Analyze CloudTrail events.",
+  "license": "Apache-2.0",
+  "type": "logs-aws_cloudtrail",
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/aws_cloudtrail-1.1.0",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    },
+    {
+      "name": "dashboards-flint",
+      "label": "Dashboards & Visualizations & sample queries adapted to S3 Glue",
+      "description": "Dashboards and visualizations adapted to S3 Glue datasource that enable you to easily visualize data residing on S3",
+      "enabled_by_default": false
+    },
+    {
+      "name": "dashboards-flint-records",
+      "label": "Dashboards & Visualizations & sample queries adapted to S3 Glue (Multi-Records Protocol)",
+      "description": "Dashboards and visualizations adapted to S3 Glue datasource that enable you to easily visualize data residing on S3 (Multi-Records Protocol)",
+      "enabled_by_default": true
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "CloudTrail Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS CloudTrail Log Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_cloudtrail",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs-aws_cloudtrail",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "create_table_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_table_cloud-trail-records",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint-records"]
+    },
+    {
+      "name": "create_skipping_index",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_mv_cloud-trail",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "create_mv_cloud-trail-records",
+      "version": "1.0.0",
+      "extension": "sql",
+      "type": "query",
+      "workflows": ["dashboards-flint-records"]
+    },
+    {
+      "name": "aws_cloudtrail",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards"]
+    },
+    {
+      "name": "aws_cloudtrail-flint",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards-flint","dashboards-flint-records"]
+    },
+    {
+      "name": "example_queries",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards-flint"]
+    },
+    {
+      "name": "example_queries-records",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": ["dashboards-flint-records"]
+    }
+  ],
+  "sampleData": {
+    "path": "samples.json"
+  }
+}

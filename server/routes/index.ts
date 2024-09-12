@@ -15,6 +15,7 @@ import { registerDataConnectionsRoute } from './data_connections/data_connection
 import { registerDatasourcesRoute } from './datasources/datasources_router';
 import { registerDslRoute } from './dsl';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
+import { registerGettingStartedRoutes } from './getting_started/getting_started_router';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
 import { registerNoteRoute } from './notebooks/noteRouter';
@@ -37,7 +38,7 @@ export function setupRoutes({
   PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
-  registerDslRoute({ router, facet: new DSLFacet(client) });
+  registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
   registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
   registerAppAnalyticsRouter(router);
 
@@ -47,13 +48,19 @@ export function setupRoutes({
   // notebooks routes
   registerParaRoute(router);
   registerNoteRoute(router);
-  registerVizRoute(router);
+  registerVizRoute(router, dataSourceEnabled);
   const queryService = new QueryService(client);
-  registerSqlRoute(router, queryService);
+  registerSqlRoute(router, queryService, dataSourceEnabled);
 
-  registerMetricsRoute(router);
+  registerMetricsRoute(router, dataSourceEnabled);
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
-  registerQueryAssistRoutes(router);
+
+  // query assist is part of log explorer, which will be disabled if datasource is enabled
+  if (!dataSourceEnabled) {
+    registerQueryAssistRoutes(router);
+  }
+
+  registerGettingStartedRoutes(router);
 }

@@ -66,6 +66,7 @@ interface IntegrationWorkflow {
   label: string;
   description: string;
   enabled_by_default: boolean;
+  applicable_data_sources?: string[];
 }
 
 type ParsedIntegrationAsset =
@@ -112,6 +113,7 @@ interface IntegrationInstance {
   dataSource: string;
   creationDate: string;
   assets: AssetReference[];
+  references?: [];
 }
 
 interface IntegrationInstanceResult extends IntegrationInstance {

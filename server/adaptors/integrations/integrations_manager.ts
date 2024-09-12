@@ -4,15 +4,14 @@
  */
 
 import path from 'path';
-import { addRequestToMetric } from '../../common/metrics/metrics_helper';
-import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
+import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { IntegrationInstanceBuilder } from './integrations_builder';
-import { TemplateManager } from './repository/repository';
 import { FileSystemDataAdaptor } from './repository/fs_data_adaptor';
 import { IndexDataAdaptor } from './repository/index_data_adaptor';
+import { TemplateManager } from './repository/repository';
 
-export class IntegrationsManager implements IntegrationsAdaptor {
+export class IntegrationsManager {
   client: SavedObjectsClientContract;
   instanceBuilder: IntegrationInstanceBuilder;
   repository: TemplateManager;
@@ -158,6 +157,8 @@ export class IntegrationsManager implements IntegrationsAdaptor {
     templateName: string,
     name: string,
     indexPattern: string,
+    dataSourceMDSId?: string,
+    dataSourceMDSLabel?: string,
     workflows?: string[],
     dataSource?: string,
     tableName?: string
@@ -174,6 +175,8 @@ export class IntegrationsManager implements IntegrationsAdaptor {
       const result = await this.instanceBuilder.build(template, {
         name,
         indexPattern,
+        dataSourceMDSId,
+        dataSourceMDSLabel,
         workflows,
         dataSource,
         tableName,

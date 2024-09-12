@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,15 +12,18 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
   PropertySort,
 } from '@elastic/eui';
-import _ from 'lodash';
+import { CriteriaWithPagination } from '@opensearch-project/oui/src/eui_components/basic_table';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
   NoMatchMessage,
@@ -30,16 +32,17 @@ import {
 
 interface TracesTableProps {
   items: any[];
-  refresh: (sort?: PropertySort) => void;
+  refresh: (sort?: PropertySort) => Promise<void>;
   mode: TraceAnalyticsMode;
   loading: boolean;
-  traceIdColumnAction: any;
+  getTraceViewUri?: (traceId: string) => string;
+  openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
 }
 
 export function TracesTable(props: TracesTableProps) {
-  const { items, refresh, mode, loading, traceIdColumnAction } = props;
+  const { items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
   const renderTitleBar = (totalItems?: number) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -50,42 +53,41 @@ export function TracesTable(props: TracesTableProps) {
     );
   };
 
-  const columns = useMemo(
-    () => {
-      if (mode === 'data_prepper') {
-        return(
-      [
+  const columns = useMemo(() => {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+      return [
         {
           field: 'trace_id',
           name: 'Trace ID',
           align: 'left',
           sortable: true,
-          truncateText: true,
+          truncateText: false,
           render: (item) => (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={10}>
-                <EuiLink data-test-subj='trace-link' onClick={() => traceIdColumnAction(item)}>
-                  {item.length < 24 ? (
-                    item
-                  ) : (
-                    <div title={item}>{_.truncate(item, { length: 24 })}</div>
-                  )}
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="trace-link"
+                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
+                >
+                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+                    {item}
+                  </EuiText>
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={item}>
                   {(copy) => (
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="Copy trace id"
                       iconType="copyClipboard"
                       onClick={copy}
                     >
                       Click to copy
-                    </EuiButtonIcon>
+                    </EuiSmallButtonIcon>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
-              <EuiFlexItem grow={3} />
             </EuiFlexGroup>
           ),
         },
@@ -98,11 +100,7 @@ export function TracesTable(props: TracesTableProps) {
           render: (item) =>
             item ? (
               <EuiText size="s">
-                {item.length < 36 ? (
-                  item
-                ) : (
-                  <div title={item}>{_.truncate(item, { length: 36 })}</div>
-                )}
+                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
               </EuiText>
             ) : (
               '-'
@@ -117,16 +115,11 @@ export function TracesTable(props: TracesTableProps) {
         },
         {
           field: 'percentile_in_trace_group',
-          name: (
-            <>
-              <div>Percentile in trace group</div>
-              {/* <div style={{ marginRight: 5 }}>trace group</div> */}
-            </>
-          ),
+          name: <div>Percentile in trace group</div>,
           align: 'right',
           sortable: true,
           render: (item) =>
-            item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}th`}</EuiText> : '-',
+            item === 0 || item ? <EuiText size="s">{`${round(item, 2)}th`}</EuiText> : '-',
         },
         {
           field: 'error_count',
@@ -151,79 +144,78 @@ export function TracesTable(props: TracesTableProps) {
           sortable: true,
           render: (item) => (item === 0 || item ? item : '-'),
         },
-      ] as Array<EuiTableFieldDataColumnType<any>>)
+      ] as Array<EuiTableFieldDataColumnType<any>>;
     } else {
-      return (
-        [
-          {
-            field: 'trace_id',
-            name: 'Trace ID',
-            align: 'left',
-            sortable: true,
-            truncateText: true,
-            render: (item) => (
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={10}>
-                  <EuiLink onClick={() => traceIdColumnAction(item)}>
-                    {item.length < 24 ? (
-                      item
-                    ) : (
-                      <div title={item}>{_.truncate(item, { length: 24 })}</div>
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={item}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        aria-label="Copy trace id"
-                        iconType="copyClipboard"
-                        onClick={copy}
-                      >
-                        Click to copy
-                      </EuiButtonIcon>
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-                <EuiFlexItem grow={3} />
-              </EuiFlexGroup>
+      return [
+        {
+          field: 'trace_id',
+          name: 'Trace ID',
+          align: 'left',
+          sortable: true,
+          truncateText: true,
+          render: (item) => (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="trace-link"
+                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
+                >
+                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+                    {item}
+                  </EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={item}>
+                  {(copy) => (
+                    <EuiSmallButtonIcon
+                      aria-label="Copy trace id"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                    >
+                      Click to copy
+                    </EuiSmallButtonIcon>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+              <EuiFlexItem grow={3} />
+            </EuiFlexGroup>
+          ),
+        },
+        {
+          field: 'latency',
+          name: 'Latency (ms)',
+          align: 'right',
+          sortable: true,
+          truncateText: true,
+        },
+        {
+          field: 'error_count',
+          name: 'Errors',
+          align: 'right',
+          sortable: true,
+          render: (item) =>
+            item == null ? (
+              '-'
+            ) : item > 0 ? (
+              <EuiText color="danger" size="s">
+                Yes
+              </EuiText>
+            ) : (
+              'No'
             ),
-          },
-          {
-            field: 'latency',
-            name: 'Latency (ms)',
-            align: 'right',
-            sortable: true,
-            truncateText: true,
-          },
-          {
-            field: 'error_count',
-            name: 'Errors',
-            align: 'right',
-            sortable: true,
-            render: (item) =>
-              item == null ? (
-                '-'
-              ) : item > 0 ? (
-                <EuiText color="danger" size="s">
-                  Yes
-                </EuiText>
-              ) : (
-                'No'
-              ),
-          },
-          {
-            field: 'last_updated',
-            name: 'Last updated',
-            align: 'left',
-            sortable: true,
-            render: (item) => (item === 0 || item ? item : '-'),
-          },
-        ] as Array<EuiTableFieldDataColumnType<any>>)
+        },
+        {
+          field: 'last_updated',
+          name: 'Last updated',
+          align: 'left',
+          sortable: true,
+          render: (item) => (item === 0 || item ? item : '-'),
+        },
+      ] as Array<EuiTableFieldDataColumnType<any>>;
     }
-    },
-    [items]
-  );
+  }, [items]);
 
   const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
 
@@ -234,7 +226,7 @@ export function TracesTable(props: TracesTableProps) {
     },
   });
 
-  const onTableChange = async ({ currPage, sort }: { currPage: any; sort: any }) => {
+  const onTableChange = async ({ sort }: CriteriaWithPagination<unknown>) => {
     if (typeof sort?.field !== 'string') return;
 
     // maps table column key to DSL aggregation name
@@ -252,7 +244,8 @@ export function TracesTable(props: TracesTableProps) {
       return;
     }
 
-    // using await when sorting the default sorted field leads to a bug in UI
+    // using await when sorting the default sorted field leads to a bug in UI,
+    // user needs to click one time more to change sort back to ascending
     if (sort.field === 'trace_id') {
       refresh({ ...sort, field });
       setSorting({ sort });
@@ -269,11 +262,16 @@ export function TracesTable(props: TracesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!((mode === 'data_prepper' && props.dataPrepperIndicesExist) || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
-          <MissingConfigurationMessage mode={mode}/>
-        ) : items?.length > 0 ? (
+        {!(
+          mode === 'custom_data_prepper' ||
+          (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
+          (mode === 'jaeger' && props.jaegerIndicesExist)
+        ) ? (
+          <MissingConfigurationMessage mode={mode} />
+        ) : items?.length > 0 || loading ? (
           <EuiInMemoryTable
             tableLayout="auto"
+            allowNeutralSort={false}
             items={items}
             columns={columns}
             pagination={{

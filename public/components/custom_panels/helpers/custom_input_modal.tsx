@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiForm,
   EuiModal,
   EuiModalBody,
@@ -13,9 +13,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 /*
@@ -33,7 +34,7 @@ import {
  * optionalArgs - Arguments needed to pass them to runModal function
  */
 
-type CustomInputModalProps = {
+interface CustomInputModalProps {
   runModal:
     | ((value: string, value2: string, value3: string, value4: string) => void)
     | ((value: string) => void);
@@ -47,7 +48,7 @@ type CustomInputModalProps = {
   openPanelName?: string;
   helpText?: string;
   optionalArgs?: string[];
-};
+}
 
 export const CustomInputModal = (props: CustomInputModalProps) => {
   const {
@@ -71,36 +72,40 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{titletxt}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{titletxt}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label={labelTxt} helpText={helpText}>
-              <EuiFieldText
+            <EuiCompressedFormRow label={labelTxt} helpText={helpText}>
+              <EuiCompressedFieldText
                 data-test-subj="customModalFieldText"
                 name="input"
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>{btn1txt}</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={closeModal}>{btn1txt}</EuiSmallButtonEmpty>
           {optionalArgs === undefined ? (
-            <EuiButton data-test-subj="runModalButton" onClick={() => runModal(value)} fill>
+            <EuiSmallButton data-test-subj="runModalButton" onClick={() => runModal(value)} fill>
               {btn2txt}
-            </EuiButton>
+            </EuiSmallButton>
           ) : (
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="runModalButton"
               onClick={() => runModal(value, ...optionalArgs)}
               fill
             >
               {btn2txt}
-            </EuiButton>
+            </EuiSmallButton>
           )}
         </EuiModalFooter>
       </EuiModal>

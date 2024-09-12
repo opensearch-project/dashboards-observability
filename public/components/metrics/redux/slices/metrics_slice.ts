@@ -12,9 +12,13 @@ import {
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
-import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import {
+  OBSERVABILITY_BASE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../../common/constants/shared';
 import { MetricType } from '../../../../../common/types/metrics';
-import { getPPLService } from '../../../../../common/utils';
+import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -50,8 +54,8 @@ export interface DateSpanFilter {
 
 const initialState = {
   metrics: {},
-  selectedIds: [],
-  sortedIds: [],
+  selectedIds: [], // selected IDs
+  sortedIds: [], // all avaliable metrics
   search: '',
   metricsLayout: [],
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
@@ -65,6 +69,10 @@ const initialState = {
     recentlyUsedRanges: [],
   },
   refresh: 0, // set to new Date() to trigger
+  selectedDataSource: '',
+  otelIndices: [],
+  otelDocumentNames: [],
+  dataSourceMDSId: '',
 };
 
 const mergeMetricCustomizer = function (objValue, srcValue) {
@@ -84,27 +92,36 @@ export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
   dispatch(setMetrics(mergedMetrics));
 };
 
-export const loadMetrics = () => async (dispatch) => {
+export const loadMetrics = (dataSourceMDSId: string) => async (dispatch) => {
   const pplService = getPPLService();
   const customDataRequest = fetchCustomMetrics();
-  const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
+  const remoteDataSourcesResponse = await pplServiceRequestor(
+    pplService!,
+    PPL_DATASOURCES_REQUEST,
+    dataSourceMDSId
+  );
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
-
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
   dispatch(
-    setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]))
+    setDataSourceIcons(
+      coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources, 'OpenTelemetry'])
+    )
   );
 
-  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
+  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources, dataSourceMDSId);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
-
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
   dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  dispatch(setSortedIds(sortedIds));
+  await dispatch(setSortedIds(sortedIds));
+};
+
+export const loadOTIndices = (dataSourceMDSId: string) => async (dispatch) => {
+  const fetchOTindices = await fetchOpenTelemetryIndices(dataSourceMDSId);
+  dispatch(setOtelIndices(fetchOTindices));
 };
 
 const fetchCustomMetrics = async () => {
@@ -114,7 +131,6 @@ const fetchCustomMetrics = async () => {
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
     [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.subType)
   );
-
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     savedVisualizationId: obj.objectId,
@@ -123,6 +139,7 @@ const fetchCustomMetrics = async () => {
     catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
     subType: obj.savedVisualization.subType,
+    metricType: 'customMetric',
     aggregation: obj.savedVisualization.queryMetaData?.aggregation ?? 'avg',
     availableAttributes: [],
     attributesGroupBy: obj.savedVisualization.queryMetaData?.attributesGroupBy ?? [],
@@ -131,18 +148,19 @@ const fetchCustomMetrics = async () => {
   }));
 };
 
-const fetchRemoteDataSource = async (dataSource) => {
+const fetchRemoteDataSource = async (dataSource, dataSourceMDSId: string) => {
   const pplService = getPPLService();
   const response = await pplServiceRequestor(
     pplService,
-    `source = ${dataSource}.information_schema.tables`
+    `source = ${dataSource}.information_schema.tables`,
+    dataSourceMDSId
   );
   return { jsonData: response.jsonData, dataSource };
 };
 
-const fetchRemoteMetrics = (remoteDataSources: string[]) =>
+const fetchRemoteMetrics = (remoteDataSources: string[], dataSourceMDSId: string) =>
   remoteDataSources.map((dataSource) =>
-    fetchRemoteDataSource(dataSource).then(({ jsonData }) =>
+    fetchRemoteDataSource(dataSource, dataSourceMDSId).then(({ jsonData }) =>
       jsonData.map((obj: any) => ({
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
@@ -155,11 +173,37 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
         attributesGroupBy: [],
         availableAttributes: [],
         type: 'line',
-        subType: PROMQL_METRIC_SUBTYPE,
+        subType: PPL_METRIC_SUBTYPE,
+        metricType: PROMQL_METRIC_SUBTYPE,
         recentlyCreated: false,
       }))
     )
   );
+
+export const fetchOpenTelemetryIndices = async (dataSourceMDSId: string) => {
+  const http = getOSDHttp();
+  return http
+    .get(`${OBSERVABILITY_BASE}/search/indices/${dataSourceMDSId ?? ''}`, {
+      query: {
+        format: 'json',
+      },
+    })
+    .catch((error) => console.error(error));
+};
+
+export const fetchOpenTelemetryDocumentNames = (
+  selectedOtelIndex: string,
+  dataSourceMDSId: string
+) => async () => {
+  const http = getOSDHttp();
+  return http
+    .get(
+      `${OBSERVABILITY_BASE}/metrics/otel/${selectedOtelIndex}/documentNames/${
+        dataSourceMDSId ?? ''
+      }`
+    )
+    .catch((error) => console.error(error));
+};
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
@@ -215,6 +259,18 @@ export const metricSlice = createSlice({
     setRefresh: (state) => {
       state.refresh = Date.now();
     },
+    setSelectedDataSource: (state, { payload }) => {
+      state.selectedDataSource = payload;
+    },
+    setOtelIndices: (state, { payload }) => {
+      state.otelIndices = payload;
+    },
+    setOtelDocumentNames: (state, { payload }) => {
+      state.otelDocumentNames = payload;
+    },
+    setSelectedDataSourceMDSId: (state, { payload }) => {
+      state.dataSourceMDSId = payload;
+    },
   },
 });
 
@@ -229,21 +285,27 @@ export const {
   setDataSourceTitles,
   setDataSourceIcons,
   updateMetric,
+  setSelectedDataSource,
+  setOtelIndices,
+  setOtelDocumentNames,
+  setSelectedDataSourceMDSId,
 } = metricSlice.actions;
 
 /** private actions */
 
-const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
+export const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
-const getAvailableAttributes = (id, metricIndex) => async (dispatch, _getState) => {
+const getAvailableAttributes = (id, metricIndex, dataSourceMDSId: string) => async (dispatch) => {
   const { toasts } = coreRefs;
   const pplService = getPPLService();
-
   try {
-    const columnSchema = await pplService.fetch({
-      query: 'describe ' + metricIndex + ' | fields COLUMN_NAME',
-      format: 'jdbc',
-    });
+    const columnSchema = await pplService.fetch(
+      {
+        query: 'describe ' + metricIndex + ' | fields COLUMN_NAME',
+        format: 'jdbc',
+      },
+      dataSourceMDSId
+    );
     const availableAttributes = columnSchema.jsonData
       .map((sch) => sch.COLUMN_NAME)
       .filter((col) => col[0] !== '@');
@@ -255,17 +317,20 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch, _getState) 
   }
 };
 
-export const addSelectedMetric = (metric: MetricType) => async (dispatch, getState) => {
+export const addSelectedMetric = (metric: MetricType, dataSourceMDSId: string) => async (
+  dispatch,
+  getState
+) => {
   const currentSelectedIds = getState().metrics.selectedIds;
   if (currentSelectedIds.includes(metric.id)) return;
 
-  if (metric.subType === PROMQL_METRIC_SUBTYPE) {
-    await dispatch(getAvailableAttributes(metric.id, metric.index));
+  if (metric.metricType === PROMQL_METRIC_SUBTYPE) {
+    await dispatch(getAvailableAttributes(metric.id, metric.index, dataSourceMDSId));
   }
   await dispatch(selectMetric(metric));
 };
 
-export const removeSelectedMetric = ({ id }) => async (dispatch, _getState) => {
+export const removeSelectedMetric = ({ id }) => async (dispatch) => {
   dispatch(deSelectMetric(id));
 };
 
@@ -322,4 +387,12 @@ export const metricQuerySelector = (id) => (state) =>
     availableAttributes: [],
   };
 
+export const selectedDataSourcesSelector = (state) => state.metrics.selectedDataSource;
+
+export const otelIndexSelector = (state) => state.metrics.otelIndices;
+
+export const otelDocumentNamesSelector = (state) => state.metrics.otelDocumentNames;
+
 export const metricsReducers = metricSlice.reducer;
+
+export const selectedDataSourceMDSId = (state) => state.metrics.dataSourceMDSId;

@@ -5,19 +5,25 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSmallButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
-  TRACE_ANALYTICS_DOCUMENTATION_LINK,
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
+  TRACE_ANALYTICS_DOCUMENTATION_LINK,
+  TRACE_CUSTOM_SERVICE_INDEX_SETTING,
+  TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../../../../common/constants/trace_analytics';
+import {
+  GraphVisEdge,
+  GraphVisNode,
+  TraceAnalyticsMode,
+} from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
-import { TraceAnalyticsMode } from '../../home';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
@@ -44,7 +50,7 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
       <EuiEmptyPrompt
         title={<h2>No matches</h2>}
         body={
-          <EuiText>
+          <EuiText size="s">
             No data matches the selected filter. Clear the filter and/or increase the time range to
             see more results.
           </EuiText>
@@ -64,16 +70,16 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
-        body={<EuiText>{missingConfigurationBody}</EuiText>}
+        body={<EuiText size="s">{missingConfigurationBody}</EuiText>}
         actions={
-          <EuiButton
+          <EuiSmallButtonEmpty
             color="primary"
             iconSide="right"
             iconType="popout"
             onClick={() => window.open(TRACE_ANALYTICS_DOCUMENTATION_LINK, '_blank')}
           >
             Learn more
-          </EuiButton>
+          </EuiSmallButtonEmpty>
         }
       />
     </>
@@ -127,13 +133,46 @@ export function getServiceMapScaleColor(
   return serviceMapColorPalette[idSelected][Math.min(99, Math.max(0, Math.floor(percent * 100)))];
 }
 
+function filterGraphBySelectedNode(
+  nodes: GraphVisNode[],
+  edges: GraphVisEdge[],
+  selectedNodeLabel: string
+): { graph: { nodes: GraphVisNode[]; edges: GraphVisEdge[] } } {
+  // Find the selected node's id
+  const selectedNode = nodes.find((node) => node.label === selectedNodeLabel);
+  if (!selectedNode) {
+    return { graph: { nodes, edges } };
+  }
+
+  const selectedNodeId = selectedNode.id;
+
+  // Filter edges to include only those that are connected to the selected node
+  const connectedEdges = edges.filter(
+    (edge) => edge.from === selectedNodeId || edge.to === selectedNodeId
+  );
+
+  // Get the set of connected node ids
+  const connectedNodeIds = new Set<number>();
+  connectedNodeIds.add(selectedNodeId);
+  connectedEdges.forEach((edge) => {
+    connectedNodeIds.add(edge.from);
+    connectedNodeIds.add(edge.to);
+  });
+
+  // Filter nodes to include only those that are connected
+  const connectedNodes = nodes.filter((node) => connectedNodeIds.has(node.id));
+
+  return { graph: { nodes: connectedNodes, edges: connectedEdges } };
+}
+
 // construct vis-js graph from ServiceObject
 export function getServiceMapGraph(
   map: ServiceObject,
   idSelected: 'latency' | 'error_rate' | 'throughput',
   ticks: number[],
   currService?: string,
-  relatedServices?: string[]
+  relatedServices?: string[],
+  filterByCurrService?: boolean
 ) {
   if (!relatedServices) relatedServices = Object.keys(map);
 
@@ -154,36 +193,39 @@ export function getServiceMapGraph(
         },
       };
     } else {
-      // service nodes that are not matched under traceGroup filter
       styleOptions = {
-        borderWidth: 1.5,
+        borderWidth: 1.0,
         chosen: false,
         color: {
           border: '#DADADC',
           background: '#FFFFFF',
         },
-        shapeProperties: {
-          borderDashes: [2, 2],
-        },
       };
     }
 
-    let hover = service;
-    hover += `\n\nAverage duration: ${
-      map[service].latency! >= 0 ? map[service].latency + 'ms' : 'N/A'
+    const averageLatency = `Average duration: ${
+      map[service].latency! >= 0 ? map[service].latency + 'ms' : '-'
     }`;
-    hover += `\nError rate: ${
-      map[service].error_rate! >= 0 ? map[service].error_rate + '%' : 'N/A'
+
+    const errorRate = `Error rate: ${
+      map[service].error_rate! >= 0 ? map[service].error_rate + '%' : '-'
     }`;
-    hover += `\nRequest rate: ${map[service].throughput! >= 0 ? map[service].throughput : 'N/A'}`;
-    if (map[service].throughputPerMinute != null)
-      hover += ` (${map[service].throughputPerMinute} per minute)`;
+
+    const throughput =
+      'Request rate: ' +
+      (map[service].throughput! >= 0 ? `${map[service].throughput}` : '-') +
+      (map[service].throughputPerMinute ? ` (${map[service].throughputPerMinute} per minute)` : '');
+
+    const hover = `${service}\n\n ${averageLatency} \n ${errorRate} \n ${throughput}`;
 
     return {
       id: map[service].id,
       label: service,
       size: service === currService ? 30 : 15,
       title: hover,
+      average_latency: averageLatency,
+      error_rate: errorRate,
+      throughput,
       ...styleOptions,
     };
   });
@@ -203,6 +245,10 @@ export function getServiceMapGraph(
         });
       });
   });
+
+  if (filterByCurrService && currService) {
+    return filterGraphBySelectedNode(nodes, edges, currService);
+  }
   return { graph: { nodes, edges } };
 }
 
@@ -360,10 +406,10 @@ export const filtersToDsl = (
       },
     },
   };
-  DSL.query.bool.must.push(timeFilter);
+  DSL.query.bool.filter.push(timeFilter);
   DSL.custom.timeFilter.push(timeFilter);
   if (query.length > 0) {
-    DSL.query.bool.must.push({
+    DSL.query.bool.filter.push({
       query_string: {
         query,
       },
@@ -386,13 +432,13 @@ export const filtersToDsl = (
       let filterQuery = {};
       let field = filter.field;
       if (field === 'latency') {
-        if (mode === 'data_prepper') {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
           field = 'duration';
         }
       } else if (field === 'error') {
-        if (mode === 'data_prepper') {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
           field = 'tag.error';
@@ -474,4 +520,95 @@ export const filtersToDsl = (
   }
 
   return DSL;
+};
+
+interface AttributeMapping {
+  properties: {
+    [key: string]: {
+      type?: string;
+      properties?: AttributeMapping['properties'];
+    };
+  };
+}
+
+interface JsonMapping {
+  [key: string]: {
+    mappings: {
+      properties: AttributeMapping['properties'];
+    };
+  };
+}
+
+export const extractAttributes = (
+  mapping: AttributeMapping['properties'],
+  prefix: string
+): string[] => {
+  let attributes: string[] = [];
+
+  for (const [key, value] of Object.entries(mapping)) {
+    if (value.properties) {
+      attributes = attributes.concat(extractAttributes(value.properties, `${prefix}.${key}`));
+    } else {
+      attributes.push(`${prefix}.${key}`);
+    }
+  }
+
+  return attributes;
+};
+
+export const getAttributes = (jsonMapping: JsonMapping): string[] => {
+  if (Object.keys(jsonMapping)[0] !== undefined) {
+    const spanMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.span?.properties?.attributes
+        ?.properties;
+    const resourceMapping =
+      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.resource?.properties
+        ?.attributes?.properties;
+
+    const spanAttributes = extractAttributes(spanMapping!, 'span.attributes');
+    const resourceAttributes = extractAttributes(resourceMapping!, 'resource.attributes');
+
+    return [...spanAttributes, ...resourceAttributes];
+  }
+  return [];
+};
+
+export const getTraceCustomSpanIndex = () => {
+  return uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
+};
+
+export const getTraceCustomServiceIndex = () => {
+  return uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
+};
+
+export const setTraceCustomSpanIndex = (value: string) => {
+  return uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value);
+};
+
+export const setTraceCustomServiceIndex = (value: string) => {
+  return uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, value);
+};
+
+export const getSpanIndices = (mode: TraceAnalyticsMode) => {
+  switch (mode) {
+    case 'custom_data_prepper':
+      return getTraceCustomSpanIndex();
+    case 'data_prepper':
+      return DATA_PREPPER_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_INDEX_NAME;
+  }
+};
+
+export const getServiceIndices = (mode: TraceAnalyticsMode) => {
+  switch (mode) {
+    case 'custom_data_prepper':
+      return getTraceCustomServiceIndex();
+    case 'data_prepper':
+      return DATA_PREPPER_SERVICE_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_SERVICE_INDEX_NAME;
+  }
 };

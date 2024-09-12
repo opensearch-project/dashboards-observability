@@ -1,0 +1,42 @@
+[
+  {
+      "serviceName": "paymentservice",
+      "kind": null,
+      "destination": null,
+      "target": null,
+      "traceGroupName": null,
+      "hashId": "OkDNbapfTw4QmauJcJatsg=="
+    },
+  {
+      "serviceName": "accountingservice",
+      "kind": null,
+      "destination": null,
+      "target": null,
+      "traceGroupName": null,
+      "hashId": "eez0Mh4WGMOsZmRuPU68/w=="
+  },
+  {
+      "serviceName": "featureflagservice",
+      "kind": null,
+      "destination": null,
+      "target": null,
+      "traceGroupName": null,
+      "hashId": "XEzn1vexdHve88XQ0npP7Q=="
+  },
+  {
+      "serviceName": "adservice",
+      "kind": null,
+      "destination": null,
+      "target": null,
+      "traceGroupName": null,
+      "hashId": "H4oc3jsbHSvc4zO42nUF/A=="
+  },
+  {
+      "serviceName": "productcatalogservice",
+      "kind": null,
+      "destination": null,
+      "target": null,
+      "traceGroupName": null,
+      "hashId": "cy5ZP/FXUXR7Lu+vfE6w5Q=="
+    }
+]

@@ -7,7 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Traces } from '..';
-import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
+import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('Traces component', () => {
   configure({ adapter: new Adapter() });
@@ -17,13 +17,12 @@ describe('Traces component', () => {
   ];
 
   it('renders empty traces page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -36,11 +35,11 @@ describe('Traces component', () => {
     ];
     const wrapper = mount(
       <Traces
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumb={{ text: 'test', href: 'test#/' }}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
@@ -55,6 +54,7 @@ describe('Traces component', () => {
         dataPrepperIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -62,13 +62,12 @@ describe('Traces component', () => {
   });
 
   it('renders traces page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -81,11 +80,11 @@ describe('Traces component', () => {
     ];
     const wrapper = mount(
       <Traces
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
@@ -100,6 +99,7 @@ describe('Traces component', () => {
         modes={modes}
         dataPrepperIndicesExist={true}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -107,13 +107,12 @@ describe('Traces component', () => {
   });
 
   it('renders jaeger traces page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const traceIdColumnAction = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = jest.fn();
     const childBreadcrumbs = [
       {
         text: 'Trace analytics',
@@ -126,11 +125,11 @@ describe('Traces component', () => {
     ];
     const wrapper = mount(
       <Traces
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={childBreadcrumbs}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
         query=""
         setQuery={setQuery}
         filters={[]}
@@ -146,6 +145,7 @@ describe('Traces component', () => {
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 

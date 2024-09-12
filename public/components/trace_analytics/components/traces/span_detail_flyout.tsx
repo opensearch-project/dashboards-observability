@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -13,17 +13,23 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
+import get from 'lodash/get';
+import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
-import { SpanField } from '../../../../../common/types/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
@@ -49,6 +55,16 @@ const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | unde
     END_TIME: undefined,
     ERRORS: 'tag.error',
   },
+  custom_data_prepper: {
+    SPAN_ID: 'spanId',
+    PARENT_SPAN_ID: 'parentSpanId',
+    SERVICE: 'serviceName',
+    OPERATION: 'name',
+    DURATION: 'durationInNanos',
+    START_TIME: 'startTime',
+    END_TIME: 'endTime',
+    ERRORS: 'status.code',
+  },
 };
 
 const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_FIELDS[mode][field];
@@ -56,7 +72,7 @@ const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_
 const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) => {
   const fieldKey = getSpanFieldKey(mode, field);
   if (fieldKey === undefined) return undefined;
-  return _.get(span, fieldKey);
+  return get(span, fieldKey);
 };
 
 export function SpanDetailFlyout(props: {
@@ -67,6 +83,11 @@ export function SpanDetailFlyout(props: {
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  serviceName?: string;
+  setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
+  startTime?: string;
+  endTime?: string;
+  setCurrentSpan?: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
@@ -86,7 +107,7 @@ export function SpanDetailFlyout(props: {
         description={description}
         key={`list-item-${title}`}
         addSpanFilter={
-          fieldKey ? () => props.addSpanFilter(fieldKey, _.get(span, fieldKey)) : undefined
+          fieldKey ? () => props.addSpanFilter(fieldKey, get(span, fieldKey)) : undefined
         }
       />
     );
@@ -101,7 +122,7 @@ export function SpanDetailFlyout(props: {
   };
 
   const renderContent = () => {
-    if (!span || _.isEmpty(span)) return '-';
+    if (!span || isEmpty(span)) return '-';
     const overviewList = [
       getListItem(
         getSpanFieldKey(mode, 'SPAN_ID'),
@@ -111,7 +132,11 @@ export function SpanDetailFlyout(props: {
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(span, mode, 'SPAN_ID')}>
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
@@ -128,15 +153,25 @@ export function SpanDetailFlyout(props: {
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy
-                textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+                textToCopy={
+                  mode === 'data_prepper' || mode === 'custom_data_prepper'
+                    ? span.parentSpanId
+                    : span.references[0].spanID
+                }
               >
                 {(copy) => (
-                  <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
+                  <EuiSmallButtonIcon
+                    aria-label="copy-button"
+                    onClick={copy}
+                    iconType="copyClipboard"
+                  />
                 )}
               </EuiCopy>
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="parentSpanId">
-              {mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+              {mode === 'data_prepper' || mode === 'custom_data_prepper'
+                ? span.parentSpanId
+                : span.references[0].spanID}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -157,33 +192,37 @@ export function SpanDetailFlyout(props: {
         getSpanFieldKey(mode, 'DURATION'),
         'Duration',
         `${
-          mode === 'data_prepper'
-            ? _.round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
-            : _.round(microToMilliSec(Math.max(0, span.duration)), 2)
+          mode === 'data_prepper' || mode === 'custom_data_prepper'
+            ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
+            : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
       ),
       getListItem(
         getSpanFieldKey(mode, 'START_TIME'),
         'Start time',
-        mode === 'data_prepper'
+        mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
       getListItem(
         getSpanFieldKey(mode, 'END_TIME'),
         'End time',
-        mode === 'data_prepper'
+        mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
-          : moment(_.round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
+          : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
             )
       ),
       getListItem(
         getSpanFieldKey(mode, 'ERRORS'),
         'Errors',
-        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag?.error) ? (
+        (
+          mode === 'data_prepper' || mode === 'custom_data_prepper'
+            ? span['status.code'] === 2
+            : span.tag?.error
+        ) ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
@@ -229,7 +268,7 @@ export function SpanDetailFlyout(props: {
         return getListItem(key, key, value);
       });
 
-    const eventsComponent = _.isEmpty(span.events) ? null : (
+    const eventsComponent = isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
           <span className="panel-title">Event</span>
@@ -264,13 +303,60 @@ export function SpanDetailFlyout(props: {
     );
   };
 
+  const redirectToExplorer = () => {
+    const spanId = getSpanValue(span, mode, 'SPAN_ID');
+    const spanField = getSpanFieldKey(mode, 'SPAN_ID');
+    coreRefs?.application!.navigateToApp(observabilityLogsID, {
+      path: `#/explorer`,
+      state: {
+        DEFAULT_DATA_SOURCE_NAME,
+        DEFAULT_DATA_SOURCE_TYPE,
+        queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
+        startTimeRange: props.startTime,
+        endTimeRange: props.endTime,
+      },
+    });
+  };
+
   return (
     <>
-      <EuiFlyout data-test-subj="spanDetailFlyout" onClose={props.closeFlyout} size="s">
+      <EuiFlyout
+        data-test-subj="spanDetailFlyout"
+        onClose={() => {
+          props.closeFlyout();
+        }}
+        size="s"
+      >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle>
-            <h2>Span detail</h2>
-          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiText size="s">
+                <h2>Span detail</h2>
+              </EuiText>
+            </EuiFlexItem>
+            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+              <EuiFlexItem>
+                <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                  View associated logs
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {props.serviceName && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  style={{ position: 'absolute', left: '0px', top: '8px', zIndex: 3 }}
+                  color="primary"
+                  onClick={() => props.setCurrentSpan && props.setCurrentSpan('')}
+                  iconType="arrowLeft"
+                  iconSide="left"
+                  size="xs"
+                >
+                  Back
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{renderContent()}</EuiFlyoutBody>
       </EuiFlyout>

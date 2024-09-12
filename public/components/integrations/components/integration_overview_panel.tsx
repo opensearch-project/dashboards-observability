@@ -4,65 +4,76 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiTitle,
   EuiFlexItem,
   EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 
-const pageStyles: CSS.Properties = {
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
+
+const pageStyles = {
   width: '100%',
-  justifyContent: 'spaceBetween',
 };
 
 export function IntegrationOverview(props: any) {
   const config = props.integration;
-  return (
-    <EuiPageHeader
-      style={{ justifyContent: 'spaceBetween' }}
-      data-test-subj={`${config.name}-overview`}
-    >
-      <EuiSpacer size="m" />
+
+  const buttons = (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiSmallButton
+          onClick={() => {
+            props.setUpSample();
+          }}
+          disabled={props.loading}
+          data-test-subj="try-it-button"
+          data-click-metric-element="integrations.create_from_try_it"
+        >
+          Try with sample data
+        </EuiSmallButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSmallButton
+          onClick={() => {
+            props.showFlyout(config.name);
+          }}
+          fill
+          disabled={props.loading}
+          data-test-subj="add-integration-button"
+          data-click-metric-element="integrations.set_up"
+        >
+          Set up integration
+        </EuiSmallButton>
+      </EuiFlexItem>
+    </>
+  );
+
+  return newNavigation ? (
+    <HeaderControlledComponentsWrapper
+      components={[
+        <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false}>
+          {buttons}
+        </EuiFlexGroup>,
+      ]}
+    />
+  ) : (
+    <EuiPageHeader data-test-subj={`${config.name}-overview`}>
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <h1>{config.displayName || config.name}</h1>
+                <h3>{config.displayName || config.name}</h3>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="m"
-                onClick={() => {
-                  props.setUpSample();
-                }}
-                disabled={props.loading}
-                data-test-subj="try-it-button"
-                data-click-metric-element="integrations.create_from_try_it"
-              >
-                Try It
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="m"
-                onClick={() => {
-                  props.showFlyout(config.name);
-                }}
-                fill
-                disabled={props.loading}
-                data-test-subj="add-integration-button"
-                data-click-metric-element="integrations.set_up"
-              >
-                Set Up
-              </EuiButton>
-            </EuiFlexItem>
+            {buttons}
           </EuiFlexGroup>
         </EuiPageContentHeaderSection>
       </EuiPageHeaderSection>

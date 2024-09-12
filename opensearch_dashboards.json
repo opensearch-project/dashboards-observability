@@ -1,7 +1,7 @@
 {
   "id": "observabilityDashboards",
-  "version": "2.14.0.0",
-  "opensearchDashboardsVersion": "2.14.0",
+  "version": "2.17.0.0",
+  "opensearchDashboardsVersion": "2.17.0",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -16,8 +16,22 @@
     "savedObjects",
     "uiActions",
     "urlForwarding",
-    "visualizations"
+    "visualizations",
+    "contentManagement"
   ],
-  "optionalPlugins": ["managementOverview", "assistantDashboards", "securityDashboards", "dataSource", "dataSourceManagement"],
-  "configPath": ["observability"]
+  "optionalPlugins": [
+    "managementOverview",
+    "assistantDashboards",
+    "securityDashboards",
+    "dataSource",
+    "dataSourceManagement"
+  ],
+  "configPath": [
+    "observability"
+  ],
+  "supportedOSDataSourceVersions": ">=2.9.0",
+  "requiredOSDataSourcePlugins": [
+    "opensearch-sql",
+    "opensearch-observability"
+  ]
 }

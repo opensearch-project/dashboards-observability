@@ -46,16 +46,19 @@ export class SavedObjectsActions {
   static async getBulk<T extends ObservabilitySavedObject>(
     params: ISavedObjectRequestParams
   ): Promise<SavedObjectsGetResponse<T>> {
-    const objects = await PPLSavedQueryClient.getInstance().getBulk(params);
+    let objects = await PPLSavedQueryClient.getInstance().getBulk(params);
     if (params.objectType?.includes('savedVisualization')) {
       const osdVisualizationObjects = await OSDSavedVisualizationClient.getInstance().getBulk();
       if (objects.totalHits && osdVisualizationObjects.totalHits) {
         objects.totalHits += osdVisualizationObjects.totalHits;
       }
-      objects.observabilityObjectList = [
-        ...objects.observabilityObjectList,
-        ...osdVisualizationObjects.observabilityObjectList,
-      ];
+      objects = {
+        ...objects,
+        observabilityObjectList: [
+          ...objects.observabilityObjectList,
+          ...osdVisualizationObjects.observabilityObjectList,
+        ],
+      };
     }
 
     if (params.objectType?.includes('savedQuery')) {
@@ -63,10 +66,13 @@ export class SavedObjectsActions {
       if (objects.totalHits && osdSearchObjects.totalHits) {
         objects.totalHits += osdSearchObjects.totalHits;
       }
-      objects.observabilityObjectList = [
-        ...objects.observabilityObjectList,
-        ...osdSearchObjects.observabilityObjectList,
-      ];
+      objects = {
+        ...objects,
+        observabilityObjectList: [
+          ...objects.observabilityObjectList,
+          ...osdSearchObjects.observabilityObjectList,
+        ],
+      };
     }
 
     if (params.sortOrder === 'asc') {

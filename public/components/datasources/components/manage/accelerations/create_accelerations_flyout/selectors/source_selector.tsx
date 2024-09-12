@@ -4,14 +4,14 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -74,7 +74,7 @@ export const AccelerationDataSourceSelector = ({
   const loadDataSource = () => {
     setLoadingComboBoxes({ ...loadingComboBoxes, dataSource: true });
     http
-      .get(DATACONNECTIONS_BASE + `/dataSourceMDSId=${dataSourceMDSId}`)
+      .get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`)
       .then((res) => {
         const isValidDataSource = res.some(
           (connection: any) =>
@@ -192,7 +192,7 @@ export const AccelerationDataSourceSelector = ({
         <>
           {dataSourceDescription}
           <EuiSpacer size="m" />
-          <EuiFormRow
+          <EuiCompressedFormRow
             label="Database"
             helpText="Select the database that contains the tables you'd like to use."
             isInvalid={hasError(accelerationFormData.formErrors, 'databaseError')}
@@ -200,7 +200,7 @@ export const AccelerationDataSourceSelector = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a database"
                   singleSelection={{ asPlainText: true }}
                   options={databases}
@@ -232,11 +232,12 @@ export const AccelerationDataSourceSelector = ({
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             label="Table"
             helpText={
               tableFieldsLoading
@@ -248,7 +249,7 @@ export const AccelerationDataSourceSelector = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   placeholder="Select a table"
                   singleSelection={{ asPlainText: true }}
                   options={tables}
@@ -281,10 +282,11 @@ export const AccelerationDataSourceSelector = ({
                   loadingComboBoxes={loadingComboBoxes}
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
+                  dataSourceMDSId={dataSourceMDSId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       )}
     </>

@@ -7,7 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Services } from '..';
-import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
+import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('Services component', () => {
   configure({ adapter: new Adapter() });
@@ -17,7 +17,7 @@ describe('Services component', () => {
   ];
 
   it('renders empty services page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
@@ -37,8 +37,8 @@ describe('Services component', () => {
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
       <Services
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumb={{ text: 'test', href: 'test#/' }}
         childBreadcrumbs={serviceBreadcrumbs}
         nameColumnAction={nameColumnAction}
@@ -57,6 +57,7 @@ describe('Services component', () => {
         dataPrepperIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -64,7 +65,7 @@ describe('Services component', () => {
   });
 
   it('renders services page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
@@ -84,8 +85,8 @@ describe('Services component', () => {
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
       <Services
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={serviceBreadcrumbs}
         nameColumnAction={nameColumnAction}
@@ -104,6 +105,7 @@ describe('Services component', () => {
         dataPrepperIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 
@@ -111,7 +113,7 @@ describe('Services component', () => {
   });
 
   it('renders jaeger services page', () => {
-    const core = coreStartMock;
+    const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
@@ -131,8 +133,8 @@ describe('Services component', () => {
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
       <Services
-        http={core.http}
-        chrome={core.chrome}
+        http={http!}
+        chrome={chrome!}
         parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
         childBreadcrumbs={serviceBreadcrumbs}
         nameColumnAction={nameColumnAction}
@@ -152,6 +154,7 @@ describe('Services component', () => {
         jaegerIndicesExist={true}
         modes={modes}
         dataSourceMDSId={[{ id: '', label: '' }]}
+        attributesFilterFields={[]}
       />
     );
 

@@ -35,13 +35,13 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../../public/framework/catalog_cache/cache_loader';
-import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { getRenderCreateAccelerationFlyout } from '../../../../plugin';
 import { NoAccess } from '../no_access';
 import { AccelerationTable } from './accelerations/acceleration_table';
 import { AccessControlTab } from './access_control_tab';
 import { AssociatedObjectsTab } from './associated_objects/associated_objects_tab';
+import { redirectToExplorerS3 } from './associated_objects/utils/associated_objects_tab_utils';
 import { InactiveDataConnectionCallout } from './inactive_data_connection';
 import {
   InstallIntegrationFlyout,
@@ -123,7 +123,7 @@ export const DataConnection = (props: { dataSource: string }) => {
   ) : null;
 
   const onclickAccelerationsCard = () => {
-    renderCreateAccelerationFlyout(dataSource);
+    renderCreateAccelerationFlyout({ dataSource });
   };
 
   const onclickDiscoverCard = () => {

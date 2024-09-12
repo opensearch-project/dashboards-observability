@@ -73,7 +73,9 @@ exports[`Helper functions renders no match and missing configuration messages 1`
   />
   <EuiEmptyPrompt
     body={
-      <EuiText>
+      <EuiText
+        size="s"
+      >
         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
       </EuiText>
     }
@@ -93,17 +95,19 @@ exports[`Helper functions renders no match and missing configuration messages 2`
 <Fragment>
   <EuiEmptyPrompt
     actions={
-      <EuiButton
+      <EuiSmallButtonEmpty
         color="primary"
         iconSide="right"
         iconType="popout"
         onClick={[Function]}
       >
         Learn more
-      </EuiButton>
+      </EuiSmallButtonEmpty>
     }
     body={
-      <EuiText>
+      <EuiText
+        size="s"
+      >
         The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them.
       </EuiText>
     }

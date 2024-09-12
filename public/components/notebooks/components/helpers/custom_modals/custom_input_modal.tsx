@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiForm,
   EuiModal,
   EuiModalBody,
@@ -13,9 +13,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 /*
@@ -30,7 +31,7 @@ import {
  * btn2txt - string as content to fill "confirm button"
  * openNoteName - Default input value for the field
  */
-type CustomInputModalProps = {
+interface CustomInputModalProps {
   runModal: (value: string) => void;
   closeModal: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -41,10 +42,19 @@ type CustomInputModalProps = {
   btn2txt: string;
   openNoteName: string;
   helpText: string;
-};
+}
 
 export const CustomInputModal = (props: CustomInputModalProps) => {
-  const { runModal, closeModal, labelTxt, titletxt, btn1txt, btn2txt, openNoteName, helpText } = props;
+  const {
+    runModal,
+    closeModal,
+    labelTxt,
+    titletxt,
+    btn1txt,
+    btn2txt,
+    openNoteName,
+    helpText,
+  } = props;
   const [value, setValue] = useState(openNoteName || ''); // sets input value
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,27 +65,35 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{titletxt}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{titletxt}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label={labelTxt} helpText={helpText}>
-              <EuiFieldText
+            <EuiCompressedFormRow label={labelTxt} helpText={helpText}>
+              <EuiCompressedFieldText
                 data-test-subj="custom-input-modal-input"
                 name="input"
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>{btn1txt}</EuiButtonEmpty>
-          <EuiButton data-test-subj="custom-input-modal-confirm-button" onClick={() => runModal(value)} fill>
+          <EuiSmallButtonEmpty onClick={closeModal}>{btn1txt}</EuiSmallButtonEmpty>
+          <EuiSmallButton
+            data-test-subj="custom-input-modal-confirm-button"
+            onClick={() => runModal(value)}
+            fill
+          >
             {btn2txt}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>

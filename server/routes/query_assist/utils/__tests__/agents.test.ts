@@ -7,7 +7,7 @@ import { ApiResponse } from '@opensearch-project/opensearch';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { CoreRouteHandlerContext } from '../../../../../../../src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { agentIdMap, getAgentIdByConfig, requestWithRetryAgentSearch } from '../agents';
+import { getAgentIdByConfig, getAgentIdAndRequest } from '../agents';
 
 describe('Agents helper functions', () => {
   const coreContext = new CoreRouteHandlerContext(
@@ -26,6 +26,25 @@ describe('Agents helper functions', () => {
       body: {
         type: 'agent',
         configuration: { agent_id: 'agentId' },
+      },
+    });
+    const id = await getAgentIdByConfig(client, 'test_agent');
+    expect(id).toEqual('agentId');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "GET",
+          "path": "/_plugins/_ml/config/test_agent",
+        },
+      ]
+    `);
+  });
+
+  it('acccepts ml_configuration key in get agent response', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      body: {
+        config_type: 'agent',
+        ml_configuration: { agent_id: 'agentId' },
       },
     });
     const id = await getAgentIdByConfig(client, 'test_agent');
@@ -75,27 +94,7 @@ describe('Agents helper functions', () => {
     );
   });
 
-  it('requests with valid agent id', async () => {
-    agentIdMap.test_agent = 'test-id';
-    mockedTransport.mockResolvedValueOnce({
-      body: { inference_results: [{ output: [{ result: 'test response' }] }] },
-    });
-    const response = await requestWithRetryAgentSearch({
-      client,
-      configName: 'test_agent',
-      shouldRetryAgentSearch: true,
-      body: { parameters: { param1: 'value1' } },
-    });
-    expect(mockedTransport).toBeCalledWith(
-      expect.objectContaining({
-        path: '/_plugins/_ml/agents/test-id/_execute',
-      }),
-      expect.anything()
-    );
-    expect(response.body.inference_results[0].output[0].result).toEqual('test response');
-  });
-
-  it('searches for agent id if id is undefined', async () => {
+  it('searches for agent id and sends request', async () => {
     mockedTransport
       .mockResolvedValueOnce({
         body: {
@@ -106,36 +105,9 @@ describe('Agents helper functions', () => {
       .mockResolvedValueOnce({
         body: { inference_results: [{ output: [{ result: 'test response' }] }] },
       });
-    const response = await requestWithRetryAgentSearch({
+    const response = await getAgentIdAndRequest({
       client,
       configName: 'new_agent',
-      shouldRetryAgentSearch: true,
-      body: { parameters: { param1: 'value1' } },
-    });
-    expect(mockedTransport).toBeCalledWith(
-      expect.objectContaining({ path: '/_plugins/_ml/agents/new-id/_execute' }),
-      expect.anything()
-    );
-    expect(response.body.inference_results[0].output[0].result).toEqual('test response');
-  });
-
-  it('searches for agent id if id is not found', async () => {
-    agentIdMap.test_agent = 'non-exist-agent';
-    mockedTransport
-      .mockRejectedValueOnce({ statusCode: 404, body: {}, headers: {} })
-      .mockResolvedValueOnce({
-        body: {
-          type: 'agent',
-          configuration: { agent_id: 'new-id' },
-        },
-      })
-      .mockResolvedValueOnce({
-        body: { inference_results: [{ output: [{ result: 'test response' }] }] },
-      });
-    const response = await requestWithRetryAgentSearch({
-      client,
-      configName: 'test_agent',
-      shouldRetryAgentSearch: true,
       body: { parameters: { param1: 'value1' } },
     });
     expect(mockedTransport).toBeCalledWith(

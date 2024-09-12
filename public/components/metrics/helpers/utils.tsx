@@ -8,10 +8,14 @@ import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { VISUALIZATION } from '../../../../common/constants/metrics';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
-import PPLService from '../../../services/requests/ppl';
-import { MetricType } from '../../../../common/types/metrics';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
 import { VisualizationType } from '../../../../common/types/custom_panels';
+import { MetricType } from '../../../../common/types/metrics';
+import PPLService from '../../../services/requests/ppl';
 
 export const onTimeChange = (
   start: ShortDate,
@@ -32,9 +36,13 @@ export const onTimeChange = (
 };
 
 // PPL Service requestor
-export const pplServiceRequestor = (pplService: PPLService, finalQuery: string) => {
+export const pplServiceRequestor = (
+  pplService: PPLService,
+  finalQuery: string,
+  dataSourceMDSId?: string
+) => {
   return pplService
-    .fetch({ query: finalQuery, format: VISUALIZATION })
+    .fetch({ query: finalQuery, format: VISUALIZATION }, dataSourceMDSId)
     .then((res) => {
       return res;
     })
@@ -52,7 +60,7 @@ export const mergeLayoutAndMetrics = (
 
   for (let i = 0; i < newVisualizationList.length; i++) {
     for (let j = 0; j < layout.length; j++) {
-      if (newVisualizationList[i].id == layout[j].i) {
+      if (newVisualizationList[i].id === layout[j].i) {
         newPanelVisualizations.push({
           ...newVisualizationList[i],
           x: layout[j].x,
@@ -74,7 +82,11 @@ export const sortMetricLayout = (metricsLayout: MetricType[]) => {
   });
 };
 
-export const visualizationFromMetric = (metric, span, resolution): SavedVisualizationType => {
+export const visualizationFromPrometheusMetric = (
+  metric,
+  span,
+  resolution
+): SavedVisualizationType => {
   const userConfigs = JSON.stringify({
     dataConfig: {
       chartStyles: {
@@ -95,7 +107,41 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
       resolution,
     },
     type: 'line',
-    subType: PROMQL_METRIC_SUBTYPE,
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: PROMQL_METRIC_SUBTYPE,
     userConfigs: JSON.stringify(userConfigs),
+  };
+};
+
+export const createOtelMetric = (metric: any) => {
+  return {
+    name: '[Otel Metric] ' + metric.index + '.' + metric.name,
+    index: metric.index,
+    documentName: metric.name,
+    description: '',
+    query: '',
+    type: 'bar',
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+    sub_type: 'metric',
+    metric_type: OTEL_METRIC_SUBTYPE,
+    user_configs: {},
+  };
+};
+
+export const visualizationFromOtelMetric = (metric: any) => {
+  return {
+    query: '',
+    index: metric.index,
+    documentName: metric.documentName,
+    dateRange: ['now-1d', 'now'],
+    name: '[Otel Metric] ' + metric.index + '.' + metric.name,
+    description: metric.description,
+    type: 'bar',
+    subType: PPL_METRIC_SUBTYPE,
+    metricType: OTEL_METRIC_SUBTYPE,
+    userConfigs: JSON.stringify(metric.user_configs),
   };
 };

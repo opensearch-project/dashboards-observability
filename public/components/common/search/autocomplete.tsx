@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { AutocompleteState, createAutocomplete } from '@algolia/autocomplete-core';
-import { EuiFieldText, EuiTextArea } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiCompressedTextArea } from '@elastic/eui';
 import $ from 'jquery';
 import DSLService from 'public/services/requests/dsl';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -134,7 +134,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
     });
   }, depArray);
 
-  const TextArea = panelsFilter ? EuiFieldText : EuiTextArea;
+  const TextArea = panelsFilter ? EuiCompressedFieldText : EuiCompressedTextArea;
 
   return (
     <div className="aa-Autocomplete" {...autocomplete.getRootProps({ id: 'autocomplete-root' })}>

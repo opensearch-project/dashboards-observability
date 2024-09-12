@@ -6,7 +6,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -20,8 +20,8 @@ import {
   EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiSuperDatePicker,
-  EuiTitle,
+  EuiCompressedSuperDatePicker,
+  EuiText,
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
@@ -388,7 +388,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       const visualizationId = panelVisualizations[i].savedVisualizationId;
       // TODO: create route to get list of visualizations in one call
       const visData: SavedVisualizationType = await fetchVisualizationById(
-        http,
         visualizationId,
         (error: VizContainerError) => setToast(error.errorMessage, 'danger')
       );
@@ -455,47 +454,51 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const cancelButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
       onClick={() => editPanel('cancel')}
     >
       Cancel
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiSmallButton
+      data-test-subj="savePanelButton"
+      iconType="save"
+      onClick={() => editPanel('save')}
+    >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const editButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="editPanelButton"
       iconType="pencil"
       onClick={() => editPanel('edit')}
       disabled={editDisabled}
     >
       Edit
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const addButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="addVisualizationButton"
       iconType="plusInCircle"
       onClick={onAddClick}
       isDisabled={addVizDisabled}
     >
       Add
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   // Panel Actions Button
   const panelActionsButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="panelActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
@@ -503,7 +506,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       disabled={addVizDisabled}
     >
       Dashboard Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   let flyout;
@@ -613,9 +616,9 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
             {appPanel || (
               <>
                 <EuiPageHeaderSection>
-                  <EuiTitle size="l">
+                  <EuiText size="s">
                     <h1 data-test-subj="panelNameHeader">{openPanelName}</h1>
-                  </EuiTitle>
+                  </EuiText>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
@@ -639,7 +642,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} />
+                        <EuiContextMenu initialPanelId={0} panels={panelActionsMenu} size="s" />
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -684,7 +687,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
+                <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={startTime}
                   end={endTime}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import { EuiSmallButton, EuiConfirmModal } from '@elastic/eui';
 import producer from 'immer';
 import React, { useEffect, useState } from 'react';
 import {
@@ -118,9 +118,9 @@ export const GenerateFields = ({
 
   return (
     <>
-      <EuiButton onClick={onClickGenerate} isDisabled={isSkippingtableLoading}>
+      <EuiSmallButton onClick={onClickGenerate} isDisabled={isSkippingtableLoading}>
         {isGenerateRun ? 'Regenerate' : 'Generate'}
-      </EuiButton>
+      </EuiSmallButton>
       {replaceDefinitionModal}
     </>
   );

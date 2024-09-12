@@ -15,10 +15,13 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -39,7 +42,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -79,7 +82,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -122,7 +125,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -175,7 +178,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -186,7 +189,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -220,7 +223,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -282,7 +285,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 30 minutes
@@ -303,7 +306,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -384,7 +387,7 @@ exports[`Panels View Component render panel view container and refresh panel 1`]
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -446,10 +449,13 @@ exports[`Panels View Component render panel view so container and reload dashboa
         <div
           class="euiPageHeaderSection"
         >
-          <h1
-            class="euiTitle euiTitle--large"
-            data-test-subj="panelNameHeader"
-          />
+          <div
+            class="euiText euiText--small"
+          >
+            <h1
+              data-test-subj="panelNameHeader"
+            />
+          </div>
           <div
             class="euiFlexItem"
           >
@@ -470,7 +476,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
               class="euiFlexItem"
             >
               <button
-                class="euiButton euiButton--primary euiButton-isDisabled"
+                class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
                 data-test-subj="editPanelButton"
                 disabled=""
                 type="button"
@@ -510,7 +516,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="panelActionContextMenu"
                     type="button"
                   >
@@ -553,7 +559,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -606,7 +612,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
               role="combobox"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <div
                   class="euiFormControlLayout__childrenWrapper"
@@ -617,7 +623,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                     autocapitalize="off"
                     autocomplete="off"
                     autocorrect="off"
-                    class="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                    class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
                     data-test-subj="searchAutocompleteTextArea"
                     disabled=""
                     enterkeyhint="search"
@@ -651,7 +657,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                 class="euiFlexItem"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                 >
                   <div
                     class="euiPopover euiPopover--anchorDownLeft"
@@ -713,7 +719,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                       class="euiDatePickerRange euiDatePickerRange--inGroup"
                     >
                       <button
-                        class="euiSuperDatePicker__prettyFormat"
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                         data-test-subj="superDatePickerShowDatesButton"
                       >
                         Last 30 minutes
@@ -734,7 +740,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiToolTipAnchor"
                 >
                   <button
-                    class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                    class="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                     data-test-subj="superDatePickerApplyTimeButton"
                     type="button"
                   >
@@ -815,7 +821,7 @@ exports[`Panels View Component render panel view so container and reload dashboa
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButton euiButton--primary"
+                    class="euiButton euiButton--primary euiButton--small"
                     data-test-subj="addVisualizationButton"
                     type="button"
                   >
@@ -885,8 +891,10 @@ exports[`Panels View Component renders panel view container with visualizations 
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
+        "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -1225,10 +1233,18 @@ exports[`Panels View Component renders panel view container with visualizations 
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1274,7 +1290,9 @@ exports[`Panels View Component renders panel view container with visualizations 
             },
           ],
         },
+        "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -1342,14 +1360,17 @@ exports[`Panels View Component renders panel view container with visualizations 
                     <div
                       className="euiPageHeaderSection"
                     >
-                      <EuiTitle
-                        size="l"
+                      <EuiText
+                        size="s"
                       >
-                        <h1
-                          className="euiTitle euiTitle--large"
-                          data-test-subj="panelNameHeader"
-                        />
-                      </EuiTitle>
+                        <div
+                          className="euiText euiText--small"
+                        >
+                          <h1
+                            data-test-subj="panelNameHeader"
+                          />
+                        </div>
+                      </EuiText>
                       <EuiFlexItem>
                         <div
                           className="euiFlexItem"
@@ -1381,87 +1402,97 @@ exports[`Panels View Component renders panel view container with visualizations 
                             <div
                               className="euiFlexItem"
                             >
-                              <EuiButton
+                              <EuiSmallButton
                                 data-test-subj="editPanelButton"
                                 disabled={true}
                                 iconType="pencil"
                                 onClick={[Function]}
                               >
-                                <EuiButtonDisplay
-                                  baseClassName="euiButton"
+                                <EuiButton
                                   data-test-subj="editPanelButton"
                                   disabled={true}
-                                  element="button"
                                   iconType="pencil"
-                                  isDisabled={true}
                                   onClick={[Function]}
-                                  type="button"
+                                  size="s"
                                 >
-                                  <button
-                                    className="euiButton euiButton--primary euiButton-isDisabled"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButton"
                                     data-test-subj="editPanelButton"
                                     disabled={true}
+                                    element="button"
+                                    iconType="pencil"
+                                    isDisabled={true}
                                     onClick={[Function]}
-                                    style={
-                                      Object {
-                                        "minWidth": undefined,
-                                      }
-                                    }
+                                    size="s"
                                     type="button"
                                   >
-                                    <EuiButtonContent
-                                      className="euiButton__content"
-                                      iconSide="left"
-                                      iconType="pencil"
-                                      textProps={
+                                    <button
+                                      className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                                      data-test-subj="editPanelButton"
+                                      disabled={true}
+                                      onClick={[Function]}
+                                      style={
                                         Object {
-                                          "className": "euiButton__text",
+                                          "minWidth": undefined,
                                         }
                                       }
+                                      type="button"
                                     >
-                                      <span
-                                        className="euiButtonContent euiButton__content"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconGap="m"
+                                        iconSide="left"
+                                        iconType="pencil"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text",
+                                          }
+                                        }
                                       >
-                                        <EuiIcon
-                                          className="euiButtonContent__icon"
-                                          color="inherit"
-                                          size="m"
-                                          type="pencil"
+                                        <span
+                                          className="euiButtonContent euiButton__content"
                                         >
-                                          <EuiIconPencil
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                                            focusable="false"
-                                            role="img"
-                                            style={null}
+                                          <EuiIcon
+                                            className="euiButtonContent__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="pencil"
                                           >
-                                            <svg
+                                            <EuiIconPencil
                                               aria-hidden={true}
                                               className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                                               focusable="false"
-                                              height={16}
                                               role="img"
                                               style={null}
-                                              viewBox="0 0 16 16"
-                                              width={16}
-                                              xmlns="http://www.w3.org/2000/svg"
                                             >
-                                              <path
-                                                d="M12.148 3.148 11 2l-9 9v3h3l9-9-1.144-1.144-8.002 7.998a.502.502 0 0 1-.708 0 .502.502 0 0 1 0-.708l8.002-7.998ZM11 1c.256 0 .512.098.707.293l3 3a.999.999 0 0 1 0 1.414l-9 9A.997.997 0 0 1 5 15H2a1 1 0 0 1-1-1v-3c0-.265.105-.52.293-.707l9-9A.997.997 0 0 1 11 1ZM5 14H2v-3l3 3Z"
-                                              />
-                                            </svg>
-                                          </EuiIconPencil>
-                                        </EuiIcon>
-                                        <span
-                                          className="euiButton__text"
-                                        >
-                                          Edit
+                                              <svg
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                focusable="false"
+                                                height={16}
+                                                role="img"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <path
+                                                  d="M12.148 3.148 11 2l-9 9v3h3l9-9-1.144-1.144-8.002 7.998a.502.502 0 0 1-.708 0 .502.502 0 0 1 0-.708l8.002-7.998ZM11 1c.256 0 .512.098.707.293l3 3a.999.999 0 0 1 0 1.414l-9 9A.997.997 0 0 1 5 15H2a1 1 0 0 1-1-1v-3c0-.265.105-.52.293-.707l9-9A.997.997 0 0 1 11 1ZM5 14H2v-3l3 3Z"
+                                                />
+                                              </svg>
+                                            </EuiIconPencil>
+                                          </EuiIcon>
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Edit
+                                          </span>
                                         </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </button>
-                                </EuiButtonDisplay>
-                              </EuiButton>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonDisplay>
+                                </EuiButton>
+                              </EuiSmallButton>
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
@@ -1473,7 +1504,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                               <EuiPopover
                                 anchorPosition="downCenter"
                                 button={
-                                  <EuiButton
+                                  <EuiSmallButton
                                     data-test-subj="panelActionContextMenu"
                                     disabled={false}
                                     iconSide="right"
@@ -1481,7 +1512,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     onClick={[Function]}
                                   >
                                     Dashboard Actions
-                                  </EuiButton>
+                                  </EuiSmallButton>
                                 }
                                 closePopover={[Function]}
                                 display="inlineBlock"
@@ -1498,154 +1529,36 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   <div
                                     className="euiPopover__anchor"
                                   >
-                                    <EuiButton
+                                    <EuiSmallButton
                                       data-test-subj="panelActionContextMenu"
                                       disabled={false}
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
                                     >
-                                      <EuiButtonDisplay
-                                        baseClassName="euiButton"
+                                      <EuiButton
                                         data-test-subj="panelActionContextMenu"
                                         disabled={false}
-                                        element="button"
-                                        iconSide="right"
-                                        iconType="arrowDown"
-                                        isDisabled={false}
-                                        onClick={[Function]}
-                                        type="button"
-                                      >
-                                        <button
-                                          className="euiButton euiButton--primary"
-                                          data-test-subj="panelActionContextMenu"
-                                          disabled={false}
-                                          onClick={[Function]}
-                                          style={
-                                            Object {
-                                              "minWidth": undefined,
-                                            }
-                                          }
-                                          type="button"
-                                        >
-                                          <EuiButtonContent
-                                            className="euiButton__content"
-                                            iconSide="right"
-                                            iconType="arrowDown"
-                                            textProps={
-                                              Object {
-                                                "className": "euiButton__text",
-                                              }
-                                            }
-                                          >
-                                            <span
-                                              className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                            >
-                                              <EuiIcon
-                                                className="euiButtonContent__icon"
-                                                color="inherit"
-                                                size="m"
-                                                type="arrowDown"
-                                              >
-                                                <EuiIconArrowDown
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  >
-                                                    <path
-                                                      d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                                                      fillRule="non-zero"
-                                                    />
-                                                  </svg>
-                                                </EuiIconArrowDown>
-                                              </EuiIcon>
-                                              <span
-                                                className="euiButton__text"
-                                              >
-                                                Dashboard Actions
-                                              </span>
-                                            </span>
-                                          </EuiButtonContent>
-                                        </button>
-                                      </EuiButtonDisplay>
-                                    </EuiButton>
-                                  </div>
-                                </div>
-                              </EuiPopover>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <AddVisualizationPopover
-                                addVizDisabled={false}
-                                showFlyout={[Function]}
-                              >
-                                <EuiPopover
-                                  anchorPosition="downLeft"
-                                  button={
-                                    <EuiButton
-                                      data-test-subj="addVisualizationButton"
-                                      disabled={false}
-                                      iconSide="right"
-                                      iconType="arrowDown"
-                                      onClick={[Function]}
-                                    >
-                                      Add visualization
-                                    </EuiButton>
-                                  }
-                                  closePopover={[Function]}
-                                  display="inlineBlock"
-                                  hasArrow={true}
-                                  id="addVisualizationContextMenu"
-                                  isOpen={false}
-                                  ownFocus={true}
-                                  panelPaddingSize="none"
-                                >
-                                  <div
-                                    className="euiPopover euiPopover--anchorDownLeft"
-                                    id="addVisualizationContextMenu"
-                                  >
-                                    <div
-                                      className="euiPopover__anchor"
-                                    >
-                                      <EuiButton
-                                        data-test-subj="addVisualizationButton"
-                                        disabled={false}
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
-                                          data-test-subj="addVisualizationButton"
+                                          data-test-subj="panelActionContextMenu"
                                           disabled={false}
                                           element="button"
                                           iconSide="right"
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
-                                            data-test-subj="addVisualizationButton"
+                                            className="euiButton euiButton--primary euiButton--small"
+                                            data-test-subj="panelActionContextMenu"
                                             disabled={false}
                                             onClick={[Function]}
                                             style={
@@ -1657,6 +1570,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="right"
                                               iconType="arrowDown"
                                               textProps={
@@ -1702,13 +1616,152 @@ exports[`Panels View Component renders panel view container with visualizations 
                                                 <span
                                                   className="euiButton__text"
                                                 >
-                                                  Add visualization
+                                                  Dashboard Actions
                                                 </span>
                                               </span>
                                             </EuiButtonContent>
                                           </button>
                                         </EuiButtonDisplay>
                                       </EuiButton>
+                                    </EuiSmallButton>
+                                  </div>
+                                </div>
+                              </EuiPopover>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <AddVisualizationPopover
+                                addVizDisabled={false}
+                                showFlyout={[Function]}
+                              >
+                                <EuiPopover
+                                  anchorPosition="downLeft"
+                                  button={
+                                    <EuiSmallButton
+                                      data-test-subj="addVisualizationButton"
+                                      disabled={false}
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      onClick={[Function]}
+                                    >
+                                      Add visualization
+                                    </EuiSmallButton>
+                                  }
+                                  closePopover={[Function]}
+                                  display="inlineBlock"
+                                  hasArrow={true}
+                                  id="addVisualizationContextMenu"
+                                  isOpen={false}
+                                  ownFocus={true}
+                                  panelPaddingSize="none"
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownLeft"
+                                    id="addVisualizationContextMenu"
+                                  >
+                                    <div
+                                      className="euiPopover__anchor"
+                                    >
+                                      <EuiSmallButton
+                                        data-test-subj="addVisualizationButton"
+                                        disabled={false}
+                                        iconSide="right"
+                                        iconType="arrowDown"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiButton
+                                          data-test-subj="addVisualizationButton"
+                                          disabled={false}
+                                          iconSide="right"
+                                          iconType="arrowDown"
+                                          onClick={[Function]}
+                                          size="s"
+                                        >
+                                          <EuiButtonDisplay
+                                            baseClassName="euiButton"
+                                            data-test-subj="addVisualizationButton"
+                                            disabled={false}
+                                            element="button"
+                                            iconSide="right"
+                                            iconType="arrowDown"
+                                            isDisabled={false}
+                                            onClick={[Function]}
+                                            size="s"
+                                            type="button"
+                                          >
+                                            <button
+                                              className="euiButton euiButton--primary euiButton--small"
+                                              data-test-subj="addVisualizationButton"
+                                              disabled={false}
+                                              onClick={[Function]}
+                                              style={
+                                                Object {
+                                                  "minWidth": undefined,
+                                                }
+                                              }
+                                              type="button"
+                                            >
+                                              <EuiButtonContent
+                                                className="euiButton__content"
+                                                iconGap="m"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                textProps={
+                                                  Object {
+                                                    "className": "euiButton__text",
+                                                  }
+                                                }
+                                              >
+                                                <span
+                                                  className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                                >
+                                                  <EuiIcon
+                                                    className="euiButtonContent__icon"
+                                                    color="inherit"
+                                                    size="m"
+                                                    type="arrowDown"
+                                                  >
+                                                    <EuiIconArrowDown
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                      focusable="false"
+                                                      role="img"
+                                                      style={null}
+                                                    >
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                          fillRule="non-zero"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconArrowDown>
+                                                  </EuiIcon>
+                                                  <span
+                                                    className="euiButton__text"
+                                                  >
+                                                    Add visualization
+                                                  </span>
+                                                </span>
+                                              </EuiButtonContent>
+                                            </button>
+                                          </EuiButtonDisplay>
+                                        </EuiButton>
+                                      </EuiSmallButton>
                                     </div>
                                   </div>
                                 </EuiPopover>
@@ -1785,7 +1838,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                               id="autocomplete-root"
                               role="combobox"
                             >
-                              <EuiFieldText
+                              <EuiCompressedFieldText
                                 append={
                                   <EuiLink
                                     aria-label="ppl-info"
@@ -1828,7 +1881,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 type="search"
                                 value=""
                               >
-                                <EuiFormControlLayout
+                                <EuiFieldText
                                   append={
                                     <EuiLink
                                       aria-label="ppl-info"
@@ -1842,78 +1895,126 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       PPL
                                     </EuiLink>
                                   }
+                                  aria-autocomplete="both"
+                                  aria-labelledby="autocomplete-4-label"
+                                  autoCapitalize="off"
+                                  autoComplete="off"
+                                  autoCorrect="off"
+                                  autoFocus={false}
+                                  compressed={true}
+                                  data-test-subj="searchAutocompleteTextArea"
+                                  disabled={true}
+                                  enterKeyHint="search"
                                   fullWidth={true}
-                                  inputId="autocomplete-textarea"
+                                  id="autocomplete-textarea"
+                                  maxLength={16384}
+                                  onBlur={[Function]}
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
+                                  onKeyDown={[Function]}
+                                  placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
+                                  spellCheck="false"
+                                  style={
+                                    Object {
+                                      "height": "18px",
+                                      "marginTop": "0px",
+                                      "padding": "8px",
+                                    }
+                                  }
+                                  type="search"
+                                  value=""
                                 >
-                                  <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout__childrenWrapper"
-                                    >
-                                      <EuiValidatableControl>
-                                        <input
-                                          aria-autocomplete="both"
-                                          aria-labelledby="autocomplete-4-label"
-                                          autoCapitalize="off"
-                                          autoComplete="off"
-                                          autoCorrect="off"
-                                          autoFocus={false}
-                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                                          data-test-subj="searchAutocompleteTextArea"
-                                          disabled={true}
-                                          enterKeyHint="search"
-                                          id="autocomplete-textarea"
-                                          maxLength={16384}
-                                          onBlur={[Function]}
-                                          onChange={[Function]}
-                                          onClick={[Function]}
-                                          onFocus={[Function]}
-                                          onKeyDown={[Function]}
-                                          placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
-                                          spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons />
-                                    </div>
-                                    <EuiLink
-                                      aria-label="ppl-info"
-                                      className="euiFormControlLayout__append"
-                                      key="0/.0"
-                                      onClick={[Function]}
-                                      style={
-                                        Object {
-                                          "padding": "10px",
-                                        }
-                                      }
-                                    >
-                                      <button
+                                  <EuiFormControlLayout
+                                    append={
+                                      <EuiLink
                                         aria-label="ppl-info"
-                                        className="euiLink euiLink--primary euiFormControlLayout__append"
-                                        disabled={false}
                                         onClick={[Function]}
                                         style={
                                           Object {
                                             "padding": "10px",
                                           }
                                         }
-                                        type="button"
                                       >
                                         PPL
-                                      </button>
-                                    </EuiLink>
-                                  </div>
-                                </EuiFormControlLayout>
-                              </EuiFieldText>
+                                      </EuiLink>
+                                    }
+                                    compressed={true}
+                                    fullWidth={true}
+                                    inputId="autocomplete-textarea"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
+                                    >
+                                      <div
+                                        className="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <EuiValidatableControl>
+                                          <input
+                                            aria-autocomplete="both"
+                                            aria-labelledby="autocomplete-4-label"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            autoFocus={false}
+                                            className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
+                                            data-test-subj="searchAutocompleteTextArea"
+                                            disabled={true}
+                                            enterKeyHint="search"
+                                            id="autocomplete-textarea"
+                                            maxLength={16384}
+                                            onBlur={[Function]}
+                                            onChange={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onKeyDown={[Function]}
+                                            placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
+                                            spellCheck="false"
+                                            style={
+                                              Object {
+                                                "height": "18px",
+                                                "marginTop": "0px",
+                                                "padding": "8px",
+                                              }
+                                            }
+                                            type="search"
+                                            value=""
+                                          />
+                                        </EuiValidatableControl>
+                                        <EuiFormControlLayoutIcons
+                                          compressed={true}
+                                        />
+                                      </div>
+                                      <EuiLink
+                                        aria-label="ppl-info"
+                                        className="euiFormControlLayout__append"
+                                        key="0/.0"
+                                        onClick={[Function]}
+                                        style={
+                                          Object {
+                                            "padding": "10px",
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          aria-label="ppl-info"
+                                          className="euiLink euiLink--primary euiFormControlLayout__append"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          style={
+                                            Object {
+                                              "padding": "10px",
+                                            }
+                                          }
+                                          type="button"
+                                        >
+                                          PPL
+                                        </button>
+                                      </EuiLink>
+                                    </div>
+                                  </EuiFormControlLayout>
+                                </EuiFieldText>
+                              </EuiCompressedFieldText>
                             </div>
                           </Autocomplete>
                         </div>
@@ -1924,7 +2025,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         <div
                           className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <EuiSuperDatePicker
+                          <EuiCompressedSuperDatePicker
                             commonlyUsedRanges={
                               Array [
                                 Object {
@@ -1969,6 +2070,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 },
                               ]
                             }
+                            compressed={true}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -1995,6 +2097,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
+                                      compressed={true}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -2055,7 +2158,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       }
                                     >
                                       <div
-                                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                                       >
                                         <EuiQuickSelectPopover
                                           applyTime={[Function]}
@@ -2143,7 +2246,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="m"
+                                            panelPaddingSize="s"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
@@ -2176,6 +2279,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -2273,7 +2377,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                                             >
                                               <button
-                                                className="euiSuperDatePicker__prettyFormat"
+                                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                                 data-test-subj="superDatePickerShowDatesButton"
                                                 disabled={false}
                                                 onClick={[Function]}
@@ -2292,7 +2396,9 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               </button>
                                             </div>
                                           </EuiDatePickerRange>
-                                          <EuiFormControlLayoutIcons />
+                                          <EuiFormControlLayoutIcons
+                                            compressed={true}
+                                          />
                                         </div>
                                       </div>
                                     </EuiFormControlLayout>
@@ -2305,6 +2411,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
+                                      compressed={true}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -2326,13 +2433,13 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             className="euiSuperUpdateButton"
                                             color="primary"
                                             data-test-subj="superDatePickerApplyTimeButton"
-                                            fill={true}
                                             iconType="refresh"
                                             isDisabled={false}
                                             isLoading={false}
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
+                                            size="s"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -2346,13 +2453,13 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               data-test-subj="superDatePickerApplyTimeButton"
                                               disabled={false}
                                               element="button"
-                                              fill={true}
                                               iconType="refresh"
                                               isDisabled={false}
                                               isLoading={false}
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
+                                              size="s"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
@@ -2361,7 +2468,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}
@@ -2376,6 +2483,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   iconType="refresh"
                                                   isLoading={false}
@@ -2440,7 +2548,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 </EuiFlexItem>
                               </div>
                             </EuiFlexGroup>
-                          </EuiSuperDatePicker>
+                          </EuiCompressedSuperDatePicker>
                         </div>
                       </EuiFlexItem>
                     </div>
@@ -2537,7 +2645,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 <EuiPopover
                                   anchorPosition="downLeft"
                                   button={
-                                    <EuiButton
+                                    <EuiSmallButton
                                       data-test-subj="addVisualizationButton"
                                       disabled={false}
                                       iconSide="right"
@@ -2545,7 +2653,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                       onClick={[Function]}
                                     >
                                       Add visualization
-                                    </EuiButton>
+                                    </EuiSmallButton>
                                   }
                                   closePopover={[Function]}
                                   display="inlineBlock"
@@ -2562,90 +2670,101 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     <div
                                       className="euiPopover__anchor"
                                     >
-                                      <EuiButton
+                                      <EuiSmallButton
                                         data-test-subj="addVisualizationButton"
                                         disabled={false}
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
                                       >
-                                        <EuiButtonDisplay
-                                          baseClassName="euiButton"
+                                        <EuiButton
                                           data-test-subj="addVisualizationButton"
                                           disabled={false}
-                                          element="button"
                                           iconSide="right"
                                           iconType="arrowDown"
-                                          isDisabled={false}
                                           onClick={[Function]}
-                                          type="button"
+                                          size="s"
                                         >
-                                          <button
-                                            className="euiButton euiButton--primary"
+                                          <EuiButtonDisplay
+                                            baseClassName="euiButton"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
+                                            element="button"
+                                            iconSide="right"
+                                            iconType="arrowDown"
+                                            isDisabled={false}
                                             onClick={[Function]}
-                                            style={
-                                              Object {
-                                                "minWidth": undefined,
-                                              }
-                                            }
+                                            size="s"
                                             type="button"
                                           >
-                                            <EuiButtonContent
-                                              className="euiButton__content"
-                                              iconSide="right"
-                                              iconType="arrowDown"
-                                              textProps={
+                                            <button
+                                              className="euiButton euiButton--primary euiButton--small"
+                                              data-test-subj="addVisualizationButton"
+                                              disabled={false}
+                                              onClick={[Function]}
+                                              style={
                                                 Object {
-                                                  "className": "euiButton__text",
+                                                  "minWidth": undefined,
                                                 }
                                               }
+                                              type="button"
                                             >
-                                              <span
-                                                className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                              <EuiButtonContent
+                                                className="euiButton__content"
+                                                iconGap="m"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                textProps={
+                                                  Object {
+                                                    "className": "euiButton__text",
+                                                  }
+                                                }
                                               >
-                                                <EuiIcon
-                                                  className="euiButtonContent__icon"
-                                                  color="inherit"
-                                                  size="m"
-                                                  type="arrowDown"
+                                                <span
+                                                  className="euiButtonContent euiButtonContent--iconRight euiButton__content"
                                                 >
-                                                  <EuiIconArrowDown
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                                                    focusable="false"
-                                                    role="img"
-                                                    style={null}
+                                                  <EuiIcon
+                                                    className="euiButtonContent__icon"
+                                                    color="inherit"
+                                                    size="m"
+                                                    type="arrowDown"
                                                   >
-                                                    <svg
+                                                    <EuiIconArrowDown
                                                       aria-hidden={true}
                                                       className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                                                       focusable="false"
-                                                      height={16}
                                                       role="img"
                                                       style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width={16}
-                                                      xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                      <path
-                                                        d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
-                                                        fillRule="non-zero"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconArrowDown>
-                                                </EuiIcon>
-                                                <span
-                                                  className="euiButton__text"
-                                                >
-                                                  Add visualization
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                          fillRule="non-zero"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconArrowDown>
+                                                  </EuiIcon>
+                                                  <span
+                                                    className="euiButton__text"
+                                                  >
+                                                    Add visualization
+                                                  </span>
                                                 </span>
-                                              </span>
-                                            </EuiButtonContent>
-                                          </button>
-                                        </EuiButtonDisplay>
-                                      </EuiButton>
+                                              </EuiButtonContent>
+                                            </button>
+                                          </EuiButtonDisplay>
+                                        </EuiButton>
+                                      </EuiSmallButton>
                                     </div>
                                   </div>
                                 </EuiPopover>
@@ -2674,8 +2793,10 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "getApplicationClasses$": [MockFunction],
                         "getBadge$": [MockFunction],
                         "getBreadcrumbs$": [MockFunction],
+                        "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -3014,10 +3135,18 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "navControls": Object {
                           "getCenter$": [MockFunction],
                           "getLeft$": [MockFunction],
+                          "getLeftBottom$": [MockFunction],
                           "getRight$": [MockFunction],
                           "registerCenter": [MockFunction],
                           "registerLeft": [MockFunction],
+                          "registerLeftBottom": [MockFunction],
                           "registerRight": [MockFunction],
+                        },
+                        "navGroup": Object {
+                          "getCurrentNavGroup$": [MockFunction],
+                          "getNavGroupEnabled": [MockFunction],
+                          "getNavGroupsMap$": [MockFunction],
+                          "setCurrentNavGroup": [MockFunction],
                         },
                         "navLinks": Object {
                           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3063,7 +3192,9 @@ exports[`Panels View Component renders panel view container with visualizations 
                             },
                           ],
                         },
+                        "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
@@ -3231,8 +3362,10 @@ exports[`Panels View Component renders panel view container without visualizatio
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
+        "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
+        "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
@@ -3460,10 +3593,18 @@ exports[`Panels View Component renders panel view container without visualizatio
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
+          "getLeftBottom$": [MockFunction],
           "getRight$": [MockFunction],
           "registerCenter": [MockFunction],
           "registerLeft": [MockFunction],
+          "registerLeftBottom": [MockFunction],
           "registerRight": [MockFunction],
+        },
+        "navGroup": Object {
+          "getCurrentNavGroup$": [MockFunction],
+          "getNavGroupEnabled": [MockFunction],
+          "getNavGroupsMap$": [MockFunction],
+          "setCurrentNavGroup": [MockFunction],
         },
         "navLinks": Object {
           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3509,7 +3650,9 @@ exports[`Panels View Component renders panel view container without visualizatio
             },
           ],
         },
+        "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
@@ -3577,14 +3720,17 @@ exports[`Panels View Component renders panel view container without visualizatio
                     <div
                       className="euiPageHeaderSection"
                     >
-                      <EuiTitle
-                        size="l"
+                      <EuiText
+                        size="s"
                       >
-                        <h1
-                          className="euiTitle euiTitle--large"
-                          data-test-subj="panelNameHeader"
-                        />
-                      </EuiTitle>
+                        <div
+                          className="euiText euiText--small"
+                        >
+                          <h1
+                            data-test-subj="panelNameHeader"
+                          />
+                        </div>
+                      </EuiText>
                       <EuiFlexItem>
                         <div
                           className="euiFlexItem"
@@ -3616,87 +3762,97 @@ exports[`Panels View Component renders panel view container without visualizatio
                             <div
                               className="euiFlexItem"
                             >
-                              <EuiButton
+                              <EuiSmallButton
                                 data-test-subj="editPanelButton"
                                 disabled={true}
                                 iconType="pencil"
                                 onClick={[Function]}
                               >
-                                <EuiButtonDisplay
-                                  baseClassName="euiButton"
+                                <EuiButton
                                   data-test-subj="editPanelButton"
                                   disabled={true}
-                                  element="button"
                                   iconType="pencil"
-                                  isDisabled={true}
                                   onClick={[Function]}
-                                  type="button"
+                                  size="s"
                                 >
-                                  <button
-                                    className="euiButton euiButton--primary euiButton-isDisabled"
+                                  <EuiButtonDisplay
+                                    baseClassName="euiButton"
                                     data-test-subj="editPanelButton"
                                     disabled={true}
+                                    element="button"
+                                    iconType="pencil"
+                                    isDisabled={true}
                                     onClick={[Function]}
-                                    style={
-                                      Object {
-                                        "minWidth": undefined,
-                                      }
-                                    }
+                                    size="s"
                                     type="button"
                                   >
-                                    <EuiButtonContent
-                                      className="euiButton__content"
-                                      iconSide="left"
-                                      iconType="pencil"
-                                      textProps={
+                                    <button
+                                      className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                                      data-test-subj="editPanelButton"
+                                      disabled={true}
+                                      onClick={[Function]}
+                                      style={
                                         Object {
-                                          "className": "euiButton__text",
+                                          "minWidth": undefined,
                                         }
                                       }
+                                      type="button"
                                     >
-                                      <span
-                                        className="euiButtonContent euiButton__content"
+                                      <EuiButtonContent
+                                        className="euiButton__content"
+                                        iconGap="m"
+                                        iconSide="left"
+                                        iconType="pencil"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButton__text",
+                                          }
+                                        }
                                       >
-                                        <EuiIcon
-                                          className="euiButtonContent__icon"
-                                          color="inherit"
-                                          size="m"
-                                          type="pencil"
+                                        <span
+                                          className="euiButtonContent euiButton__content"
                                         >
-                                          <EuiIconBeaker
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                            focusable="false"
-                                            role="img"
-                                            style={null}
+                                          <EuiIcon
+                                            className="euiButtonContent__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="pencil"
                                           >
-                                            <svg
+                                            <EuiIconBeaker
                                               aria-hidden={true}
                                               className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                               focusable="false"
-                                              height={16}
                                               role="img"
                                               style={null}
-                                              viewBox="0 0 16 16"
-                                              width={16}
-                                              xmlns="http://www.w3.org/2000/svg"
                                             >
-                                              <path
-                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                              />
-                                            </svg>
-                                          </EuiIconBeaker>
-                                        </EuiIcon>
-                                        <span
-                                          className="euiButton__text"
-                                        >
-                                          Edit
+                                              <svg
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                focusable="false"
+                                                height={16}
+                                                role="img"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <path
+                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                />
+                                              </svg>
+                                            </EuiIconBeaker>
+                                          </EuiIcon>
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Edit
+                                          </span>
                                         </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </button>
-                                </EuiButtonDisplay>
-                              </EuiButton>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonDisplay>
+                                </EuiButton>
+                              </EuiSmallButton>
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
@@ -3708,7 +3864,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                               <EuiPopover
                                 anchorPosition="downCenter"
                                 button={
-                                  <EuiButton
+                                  <EuiSmallButton
                                     data-test-subj="panelActionContextMenu"
                                     disabled={false}
                                     iconSide="right"
@@ -3716,7 +3872,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     onClick={[Function]}
                                   >
                                     Dashboard Actions
-                                  </EuiButton>
+                                  </EuiSmallButton>
                                 }
                                 closePopover={[Function]}
                                 display="inlineBlock"
@@ -3733,153 +3889,36 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   <div
                                     className="euiPopover__anchor"
                                   >
-                                    <EuiButton
+                                    <EuiSmallButton
                                       data-test-subj="panelActionContextMenu"
                                       disabled={false}
                                       iconSide="right"
                                       iconType="arrowDown"
                                       onClick={[Function]}
                                     >
-                                      <EuiButtonDisplay
-                                        baseClassName="euiButton"
+                                      <EuiButton
                                         data-test-subj="panelActionContextMenu"
                                         disabled={false}
-                                        element="button"
-                                        iconSide="right"
-                                        iconType="arrowDown"
-                                        isDisabled={false}
-                                        onClick={[Function]}
-                                        type="button"
-                                      >
-                                        <button
-                                          className="euiButton euiButton--primary"
-                                          data-test-subj="panelActionContextMenu"
-                                          disabled={false}
-                                          onClick={[Function]}
-                                          style={
-                                            Object {
-                                              "minWidth": undefined,
-                                            }
-                                          }
-                                          type="button"
-                                        >
-                                          <EuiButtonContent
-                                            className="euiButton__content"
-                                            iconSide="right"
-                                            iconType="arrowDown"
-                                            textProps={
-                                              Object {
-                                                "className": "euiButton__text",
-                                              }
-                                            }
-                                          >
-                                            <span
-                                              className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                            >
-                                              <EuiIcon
-                                                className="euiButtonContent__icon"
-                                                color="inherit"
-                                                size="m"
-                                                type="arrowDown"
-                                              >
-                                                <EuiIconBeaker
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  >
-                                                    <path
-                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                    />
-                                                  </svg>
-                                                </EuiIconBeaker>
-                                              </EuiIcon>
-                                              <span
-                                                className="euiButton__text"
-                                              >
-                                                Dashboard Actions
-                                              </span>
-                                            </span>
-                                          </EuiButtonContent>
-                                        </button>
-                                      </EuiButtonDisplay>
-                                    </EuiButton>
-                                  </div>
-                                </div>
-                              </EuiPopover>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <AddVisualizationPopover
-                                addVizDisabled={false}
-                                showFlyout={[Function]}
-                              >
-                                <EuiPopover
-                                  anchorPosition="downLeft"
-                                  button={
-                                    <EuiButton
-                                      data-test-subj="addVisualizationButton"
-                                      disabled={false}
-                                      iconSide="right"
-                                      iconType="arrowDown"
-                                      onClick={[Function]}
-                                    >
-                                      Add visualization
-                                    </EuiButton>
-                                  }
-                                  closePopover={[Function]}
-                                  display="inlineBlock"
-                                  hasArrow={true}
-                                  id="addVisualizationContextMenu"
-                                  isOpen={false}
-                                  ownFocus={true}
-                                  panelPaddingSize="none"
-                                >
-                                  <div
-                                    className="euiPopover euiPopover--anchorDownLeft"
-                                    id="addVisualizationContextMenu"
-                                  >
-                                    <div
-                                      className="euiPopover__anchor"
-                                    >
-                                      <EuiButton
-                                        data-test-subj="addVisualizationButton"
-                                        disabled={false}
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
+                                        size="s"
                                       >
                                         <EuiButtonDisplay
                                           baseClassName="euiButton"
-                                          data-test-subj="addVisualizationButton"
+                                          data-test-subj="panelActionContextMenu"
                                           disabled={false}
                                           element="button"
                                           iconSide="right"
                                           iconType="arrowDown"
                                           isDisabled={false}
                                           onClick={[Function]}
+                                          size="s"
                                           type="button"
                                         >
                                           <button
-                                            className="euiButton euiButton--primary"
-                                            data-test-subj="addVisualizationButton"
+                                            className="euiButton euiButton--primary euiButton--small"
+                                            data-test-subj="panelActionContextMenu"
                                             disabled={false}
                                             onClick={[Function]}
                                             style={
@@ -3891,6 +3930,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
+                                              iconGap="m"
                                               iconSide="right"
                                               iconType="arrowDown"
                                               textProps={
@@ -3935,13 +3975,151 @@ exports[`Panels View Component renders panel view container without visualizatio
                                                 <span
                                                   className="euiButton__text"
                                                 >
-                                                  Add visualization
+                                                  Dashboard Actions
                                                 </span>
                                               </span>
                                             </EuiButtonContent>
                                           </button>
                                         </EuiButtonDisplay>
                                       </EuiButton>
+                                    </EuiSmallButton>
+                                  </div>
+                                </div>
+                              </EuiPopover>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <AddVisualizationPopover
+                                addVizDisabled={false}
+                                showFlyout={[Function]}
+                              >
+                                <EuiPopover
+                                  anchorPosition="downLeft"
+                                  button={
+                                    <EuiSmallButton
+                                      data-test-subj="addVisualizationButton"
+                                      disabled={false}
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      onClick={[Function]}
+                                    >
+                                      Add visualization
+                                    </EuiSmallButton>
+                                  }
+                                  closePopover={[Function]}
+                                  display="inlineBlock"
+                                  hasArrow={true}
+                                  id="addVisualizationContextMenu"
+                                  isOpen={false}
+                                  ownFocus={true}
+                                  panelPaddingSize="none"
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownLeft"
+                                    id="addVisualizationContextMenu"
+                                  >
+                                    <div
+                                      className="euiPopover__anchor"
+                                    >
+                                      <EuiSmallButton
+                                        data-test-subj="addVisualizationButton"
+                                        disabled={false}
+                                        iconSide="right"
+                                        iconType="arrowDown"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiButton
+                                          data-test-subj="addVisualizationButton"
+                                          disabled={false}
+                                          iconSide="right"
+                                          iconType="arrowDown"
+                                          onClick={[Function]}
+                                          size="s"
+                                        >
+                                          <EuiButtonDisplay
+                                            baseClassName="euiButton"
+                                            data-test-subj="addVisualizationButton"
+                                            disabled={false}
+                                            element="button"
+                                            iconSide="right"
+                                            iconType="arrowDown"
+                                            isDisabled={false}
+                                            onClick={[Function]}
+                                            size="s"
+                                            type="button"
+                                          >
+                                            <button
+                                              className="euiButton euiButton--primary euiButton--small"
+                                              data-test-subj="addVisualizationButton"
+                                              disabled={false}
+                                              onClick={[Function]}
+                                              style={
+                                                Object {
+                                                  "minWidth": undefined,
+                                                }
+                                              }
+                                              type="button"
+                                            >
+                                              <EuiButtonContent
+                                                className="euiButton__content"
+                                                iconGap="m"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                textProps={
+                                                  Object {
+                                                    "className": "euiButton__text",
+                                                  }
+                                                }
+                                              >
+                                                <span
+                                                  className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                                >
+                                                  <EuiIcon
+                                                    className="euiButtonContent__icon"
+                                                    color="inherit"
+                                                    size="m"
+                                                    type="arrowDown"
+                                                  >
+                                                    <EuiIconBeaker
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                      focusable="false"
+                                                      role="img"
+                                                      style={null}
+                                                    >
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconBeaker>
+                                                  </EuiIcon>
+                                                  <span
+                                                    className="euiButton__text"
+                                                  >
+                                                    Add visualization
+                                                  </span>
+                                                </span>
+                                              </EuiButtonContent>
+                                            </button>
+                                          </EuiButtonDisplay>
+                                        </EuiButton>
+                                      </EuiSmallButton>
                                     </div>
                                   </div>
                                 </EuiPopover>
@@ -4018,7 +4196,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                               id="autocomplete-root"
                               role="combobox"
                             >
-                              <EuiFieldText
+                              <EuiCompressedFieldText
                                 append={
                                   <EuiLink
                                     aria-label="ppl-info"
@@ -4061,7 +4239,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 type="search"
                                 value=""
                               >
-                                <EuiFormControlLayout
+                                <EuiFieldText
                                   append={
                                     <EuiLink
                                       aria-label="ppl-info"
@@ -4075,78 +4253,126 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       PPL
                                     </EuiLink>
                                   }
+                                  aria-autocomplete="both"
+                                  aria-labelledby="autocomplete-1-label"
+                                  autoCapitalize="off"
+                                  autoComplete="off"
+                                  autoCorrect="off"
+                                  autoFocus={false}
+                                  compressed={true}
+                                  data-test-subj="searchAutocompleteTextArea"
+                                  disabled={true}
+                                  enterKeyHint="search"
                                   fullWidth={true}
-                                  inputId="autocomplete-textarea"
+                                  id="autocomplete-textarea"
+                                  maxLength={16384}
+                                  onBlur={[Function]}
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
+                                  onKeyDown={[Function]}
+                                  placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
+                                  spellCheck="false"
+                                  style={
+                                    Object {
+                                      "height": "18px",
+                                      "marginTop": "0px",
+                                      "padding": "8px",
+                                    }
+                                  }
+                                  type="search"
+                                  value=""
                                 >
-                                  <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout__childrenWrapper"
-                                    >
-                                      <EuiValidatableControl>
-                                        <input
-                                          aria-autocomplete="both"
-                                          aria-labelledby="autocomplete-1-label"
-                                          autoCapitalize="off"
-                                          autoComplete="off"
-                                          autoCorrect="off"
-                                          autoFocus={false}
-                                          className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                                          data-test-subj="searchAutocompleteTextArea"
-                                          disabled={true}
-                                          enterKeyHint="search"
-                                          id="autocomplete-textarea"
-                                          maxLength={16384}
-                                          onBlur={[Function]}
-                                          onChange={[Function]}
-                                          onClick={[Function]}
-                                          onFocus={[Function]}
-                                          onKeyDown={[Function]}
-                                          placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
-                                          spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons />
-                                    </div>
-                                    <EuiLink
-                                      aria-label="ppl-info"
-                                      className="euiFormControlLayout__append"
-                                      key="0/.0"
-                                      onClick={[Function]}
-                                      style={
-                                        Object {
-                                          "padding": "10px",
-                                        }
-                                      }
-                                    >
-                                      <button
+                                  <EuiFormControlLayout
+                                    append={
+                                      <EuiLink
                                         aria-label="ppl-info"
-                                        className="euiLink euiLink--primary euiFormControlLayout__append"
-                                        disabled={false}
                                         onClick={[Function]}
                                         style={
                                           Object {
                                             "padding": "10px",
                                           }
                                         }
-                                        type="button"
                                       >
                                         PPL
-                                      </button>
-                                    </EuiLink>
-                                  </div>
-                                </EuiFormControlLayout>
-                              </EuiFieldText>
+                                      </EuiLink>
+                                    }
+                                    compressed={true}
+                                    fullWidth={true}
+                                    inputId="autocomplete-textarea"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
+                                    >
+                                      <div
+                                        className="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <EuiValidatableControl>
+                                          <input
+                                            aria-autocomplete="both"
+                                            aria-labelledby="autocomplete-1-label"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            autoFocus={false}
+                                            className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed euiFieldText--inGroup"
+                                            data-test-subj="searchAutocompleteTextArea"
+                                            disabled={true}
+                                            enterKeyHint="search"
+                                            id="autocomplete-textarea"
+                                            maxLength={16384}
+                                            onBlur={[Function]}
+                                            onChange={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onKeyDown={[Function]}
+                                            placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
+                                            spellCheck="false"
+                                            style={
+                                              Object {
+                                                "height": "18px",
+                                                "marginTop": "0px",
+                                                "padding": "8px",
+                                              }
+                                            }
+                                            type="search"
+                                            value=""
+                                          />
+                                        </EuiValidatableControl>
+                                        <EuiFormControlLayoutIcons
+                                          compressed={true}
+                                        />
+                                      </div>
+                                      <EuiLink
+                                        aria-label="ppl-info"
+                                        className="euiFormControlLayout__append"
+                                        key="0/.0"
+                                        onClick={[Function]}
+                                        style={
+                                          Object {
+                                            "padding": "10px",
+                                          }
+                                        }
+                                      >
+                                        <button
+                                          aria-label="ppl-info"
+                                          className="euiLink euiLink--primary euiFormControlLayout__append"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          style={
+                                            Object {
+                                              "padding": "10px",
+                                            }
+                                          }
+                                          type="button"
+                                        >
+                                          PPL
+                                        </button>
+                                      </EuiLink>
+                                    </div>
+                                  </EuiFormControlLayout>
+                                </EuiFieldText>
+                              </EuiCompressedFieldText>
                             </div>
                           </Autocomplete>
                         </div>
@@ -4157,7 +4383,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         <div
                           className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <EuiSuperDatePicker
+                          <EuiCompressedSuperDatePicker
                             commonlyUsedRanges={
                               Array [
                                 Object {
@@ -4202,6 +4428,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 },
                               ]
                             }
+                            compressed={true}
                             dateFormat=""
                             end="now"
                             isAutoRefreshOnly={false}
@@ -4228,6 +4455,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   >
                                     <EuiFormControlLayout
                                       className="euiSuperDatePicker"
+                                      compressed={true}
                                       isDisabled={false}
                                       prepend={
                                         <EuiQuickSelectPopover
@@ -4288,7 +4516,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       }
                                     >
                                       <div
-                                        className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                                        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
                                       >
                                         <EuiQuickSelectPopover
                                           applyTime={[Function]}
@@ -4376,7 +4604,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             hasArrow={true}
                                             isOpen={false}
                                             ownFocus={true}
-                                            panelPaddingSize="m"
+                                            panelPaddingSize="s"
                                           >
                                             <div
                                               className="euiPopover euiPopover--anchorDownLeft"
@@ -4409,6 +4637,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                                   >
                                                     <EuiButtonContent
                                                       className="euiButtonEmpty__content"
+                                                      iconGap="m"
                                                       iconSide="right"
                                                       iconSize="s"
                                                       iconType="arrowDown"
@@ -4504,7 +4733,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               className="euiDatePickerRange euiDatePickerRange--inGroup"
                                             >
                                               <button
-                                                className="euiSuperDatePicker__prettyFormat"
+                                                className="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
                                                 data-test-subj="superDatePickerShowDatesButton"
                                                 disabled={false}
                                                 onClick={[Function]}
@@ -4523,7 +4752,9 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               </button>
                                             </div>
                                           </EuiDatePickerRange>
-                                          <EuiFormControlLayoutIcons />
+                                          <EuiFormControlLayoutIcons
+                                            compressed={true}
+                                          />
                                         </div>
                                       </div>
                                     </EuiFormControlLayout>
@@ -4536,6 +4767,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     className="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
                                     <EuiSuperUpdateButton
+                                      compressed={true}
                                       data-test-subj="superDatePickerApplyTimeButton"
                                       isDisabled={false}
                                       isLoading={false}
@@ -4557,13 +4789,13 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             className="euiSuperUpdateButton"
                                             color="primary"
                                             data-test-subj="superDatePickerApplyTimeButton"
-                                            fill={true}
                                             iconType="refresh"
                                             isDisabled={false}
                                             isLoading={false}
                                             onBlur={[Function]}
                                             onClick={[Function]}
                                             onFocus={[Function]}
+                                            size="s"
                                             textProps={
                                               Object {
                                                 "className": "euiSuperUpdateButton__text",
@@ -4577,13 +4809,13 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               data-test-subj="superDatePickerApplyTimeButton"
                                               disabled={false}
                                               element="button"
-                                              fill={true}
                                               iconType="refresh"
                                               isDisabled={false}
                                               isLoading={false}
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
+                                              size="s"
                                               textProps={
                                                 Object {
                                                   "className": "euiSuperUpdateButton__text",
@@ -4592,7 +4824,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               type="button"
                                             >
                                               <button
-                                                className="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+                                                className="euiButton euiButton--primary euiButton--small euiSuperUpdateButton"
                                                 data-test-subj="superDatePickerApplyTimeButton"
                                                 disabled={false}
                                                 onBlur={[Function]}
@@ -4607,6 +4839,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                               >
                                                 <EuiButtonContent
                                                   className="euiButton__content"
+                                                  iconGap="m"
                                                   iconSide="left"
                                                   iconType="refresh"
                                                   isLoading={false}
@@ -4671,7 +4904,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 </EuiFlexItem>
                               </div>
                             </EuiFlexGroup>
-                          </EuiSuperDatePicker>
+                          </EuiCompressedSuperDatePicker>
                         </div>
                       </EuiFlexItem>
                     </div>
@@ -4768,7 +5001,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 <EuiPopover
                                   anchorPosition="downLeft"
                                   button={
-                                    <EuiButton
+                                    <EuiSmallButton
                                       data-test-subj="addVisualizationButton"
                                       disabled={false}
                                       iconSide="right"
@@ -4776,7 +5009,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                       onClick={[Function]}
                                     >
                                       Add visualization
-                                    </EuiButton>
+                                    </EuiSmallButton>
                                   }
                                   closePopover={[Function]}
                                   display="inlineBlock"
@@ -4793,89 +5026,100 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     <div
                                       className="euiPopover__anchor"
                                     >
-                                      <EuiButton
+                                      <EuiSmallButton
                                         data-test-subj="addVisualizationButton"
                                         disabled={false}
                                         iconSide="right"
                                         iconType="arrowDown"
                                         onClick={[Function]}
                                       >
-                                        <EuiButtonDisplay
-                                          baseClassName="euiButton"
+                                        <EuiButton
                                           data-test-subj="addVisualizationButton"
                                           disabled={false}
-                                          element="button"
                                           iconSide="right"
                                           iconType="arrowDown"
-                                          isDisabled={false}
                                           onClick={[Function]}
-                                          type="button"
+                                          size="s"
                                         >
-                                          <button
-                                            className="euiButton euiButton--primary"
+                                          <EuiButtonDisplay
+                                            baseClassName="euiButton"
                                             data-test-subj="addVisualizationButton"
                                             disabled={false}
+                                            element="button"
+                                            iconSide="right"
+                                            iconType="arrowDown"
+                                            isDisabled={false}
                                             onClick={[Function]}
-                                            style={
-                                              Object {
-                                                "minWidth": undefined,
-                                              }
-                                            }
+                                            size="s"
                                             type="button"
                                           >
-                                            <EuiButtonContent
-                                              className="euiButton__content"
-                                              iconSide="right"
-                                              iconType="arrowDown"
-                                              textProps={
+                                            <button
+                                              className="euiButton euiButton--primary euiButton--small"
+                                              data-test-subj="addVisualizationButton"
+                                              disabled={false}
+                                              onClick={[Function]}
+                                              style={
                                                 Object {
-                                                  "className": "euiButton__text",
+                                                  "minWidth": undefined,
                                                 }
                                               }
+                                              type="button"
                                             >
-                                              <span
-                                                className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                              <EuiButtonContent
+                                                className="euiButton__content"
+                                                iconGap="m"
+                                                iconSide="right"
+                                                iconType="arrowDown"
+                                                textProps={
+                                                  Object {
+                                                    "className": "euiButton__text",
+                                                  }
+                                                }
                                               >
-                                                <EuiIcon
-                                                  className="euiButtonContent__icon"
-                                                  color="inherit"
-                                                  size="m"
-                                                  type="arrowDown"
+                                                <span
+                                                  className="euiButtonContent euiButtonContent--iconRight euiButton__content"
                                                 >
-                                                  <EuiIconBeaker
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                    focusable="false"
-                                                    role="img"
-                                                    style={null}
+                                                  <EuiIcon
+                                                    className="euiButtonContent__icon"
+                                                    color="inherit"
+                                                    size="m"
+                                                    type="arrowDown"
                                                   >
-                                                    <svg
+                                                    <EuiIconBeaker
                                                       aria-hidden={true}
                                                       className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                       focusable="false"
-                                                      height={16}
                                                       role="img"
                                                       style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width={16}
-                                                      xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                      <path
-                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                      />
-                                                    </svg>
-                                                  </EuiIconBeaker>
-                                                </EuiIcon>
-                                                <span
-                                                  className="euiButton__text"
-                                                >
-                                                  Add visualization
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={null}
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      >
+                                                        <path
+                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                        />
+                                                      </svg>
+                                                    </EuiIconBeaker>
+                                                  </EuiIcon>
+                                                  <span
+                                                    className="euiButton__text"
+                                                  >
+                                                    Add visualization
+                                                  </span>
                                                 </span>
-                                              </span>
-                                            </EuiButtonContent>
-                                          </button>
-                                        </EuiButtonDisplay>
-                                      </EuiButton>
+                                              </EuiButtonContent>
+                                            </button>
+                                          </EuiButtonDisplay>
+                                        </EuiButton>
+                                      </EuiSmallButton>
                                     </div>
                                   </div>
                                 </EuiPopover>
@@ -4904,8 +5148,10 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "getApplicationClasses$": [MockFunction],
                         "getBadge$": [MockFunction],
                         "getBreadcrumbs$": [MockFunction],
+                        "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
+                        "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
                         "getIsNavDrawerLocked$": [MockFunction] {
                           "calls": Array [
@@ -5133,10 +5379,18 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "navControls": Object {
                           "getCenter$": [MockFunction],
                           "getLeft$": [MockFunction],
+                          "getLeftBottom$": [MockFunction],
                           "getRight$": [MockFunction],
                           "registerCenter": [MockFunction],
                           "registerLeft": [MockFunction],
+                          "registerLeftBottom": [MockFunction],
                           "registerRight": [MockFunction],
+                        },
+                        "navGroup": Object {
+                          "getCurrentNavGroup$": [MockFunction],
+                          "getNavGroupEnabled": [MockFunction],
+                          "getNavGroupsMap$": [MockFunction],
+                          "setCurrentNavGroup": [MockFunction],
                         },
                         "navLinks": Object {
                           "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5182,7 +5436,9 @@ exports[`Panels View Component renders panel view container without visualizatio
                             },
                           ],
                         },
+                        "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],

@@ -5,12 +5,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButton,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
@@ -26,7 +26,6 @@ import {
 import DSLService from 'public/services/requests/dsl';
 import React, { ReactChild, useEffect, useState } from 'react';
 import PPLService from 'public/services/requests/ppl';
-import { last } from 'lodash';
 import { AppAnalyticsComponentDeps } from '../home';
 import { TraceConfig } from './config_components/trace_config';
 import { ServiceConfig } from './config_components/service_config';
@@ -38,11 +37,11 @@ import {
   OptionType,
 } from '../../../../common/types/application_analytics';
 import { fetchAppById } from '../helpers/utils';
-import {
-  observabilityApplicationsID,
-  observabilityID,
-  observabilityTitle,
-} from '../../../../common/constants/shared';
+import { observabilityApplicationsID } from '../../../../common/constants/shared';
+import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { coreRefs } from '../../../framework/core_refs';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -57,7 +56,6 @@ interface CreateAppProps extends AppAnalyticsComponentDeps {
 export const CreateApp = (props: CreateAppProps) => {
   const {
     parentBreadcrumbs,
-    chrome,
     http,
     query,
     name,
@@ -92,17 +90,20 @@ export const CreateApp = (props: CreateAppProps) => {
   });
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Applications',
-        href: '#/',
-      },
-      {
-        text: editMode ? 'Edit' : 'Create',
-        href: `#/${editMode ? 'edit' : 'create'}`,
-      },
-    ]);
+    setNavBreadCrumbs(
+      [...parentBreadcrumbs],
+      [
+        ...parentBreadcrumbs,
+        {
+          text: 'Applications',
+          href: '#/',
+        },
+        {
+          text: editMode ? 'Edit' : 'Create',
+          href: `#/${editMode ? 'edit' : 'create'}`,
+        },
+      ]
+    );
   }, []);
 
   useEffect(() => {
@@ -181,14 +182,16 @@ export const CreateApp = (props: CreateAppProps) => {
   };
 
   return (
-    <div style={{ maxWidth: '1130px' }}>
+    <>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiPageHeader>
             <EuiPageHeaderSection>
-              <EuiTitle data-test-subj="createPageTitle" size="l">
-                <h1>{editMode ? 'Edit' : 'Create'} application</h1>
-              </EuiTitle>
+              {!newNavigation && (
+                <EuiTitle data-test-subj="createPageTitle" size="l">
+                  <h1>{editMode ? 'Edit' : 'Create'} application</h1>
+                </EuiTitle>
+              )}
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContent id="appInfo">
@@ -201,20 +204,20 @@ export const CreateApp = (props: CreateAppProps) => {
             </EuiPageContentHeader>
             <EuiHorizontalRule />
             <EuiForm component="form">
-              <EuiFormRow label="Name" data-test-subj="nameFormRow">
-                <EuiFieldText
+              <EuiCompressedFormRow label="Name" data-test-subj="nameFormRow">
+                <EuiCompressedFieldText
                   name="name"
                   value={name}
                   onChange={(e) => setNameWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
-              <EuiFormRow label="Description" data-test-subj="descriptionFormRow">
-                <EuiFieldText
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow label="Description" data-test-subj="descriptionFormRow">
+                <EuiCompressedFieldText
                   name="description"
                   value={description}
                   onChange={(e) => setDescriptionWithStorage(e.target.value)}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiForm>
           </EuiPageContent>
           <EuiSpacer />
@@ -244,33 +247,33 @@ export const CreateApp = (props: CreateAppProps) => {
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="cancelCreateButton" onClick={onCancel}>
+              <EuiSmallButton data-test-subj="cancelCreateButton" onClick={onCancel}>
                 Cancel
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip position="top" content={missingField(false)}>
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="createButton"
                   isDisabled={isDisabled}
                   onClick={editMode ? onUpdate : () => onCreate('create')}
                   fill={editMode ? true : false}
                 >
                   {editMode ? 'Save' : 'Create'}
-                </EuiButton>
+                </EuiSmallButton>
               </EuiToolTip>
             </EuiFlexItem>
             {editMode || (
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={missingField(true)}>
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createAndSetButton"
                     fill
                     isDisabled={isDisabled || !query}
                     onClick={() => onCreate('createSetAvailability')}
                   >
                     Create and Set Availability
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiToolTip>
               </EuiFlexItem>
             )}
@@ -278,6 +281,6 @@ export const CreateApp = (props: CreateAppProps) => {
         </EuiPageBody>
       </EuiPage>
       {flyout}
-    </div>
+    </>
   );
 };

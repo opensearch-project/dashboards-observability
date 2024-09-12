@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  nginx-node:
+    image: kscarlett/nginx-log-generator:latest
+    networks:
+      - opensearch-net
+    links:
+      - fluentbit
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: nginx.access
+        fluentd-async: "true"
+  apache:
+    image: mingrammer/flog
+    command: "--loop -d 1s"
+    networks:
+      - opensearch-net
+    links:
+      - fluentbit
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: apache.access
+        fluentd-async: "true"
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit:latest
+    volumes:
+      - ./fluent-bit:/fluent-bit/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - opensearch-net
+
+networks:
+  opensearch-net:
+    external: true

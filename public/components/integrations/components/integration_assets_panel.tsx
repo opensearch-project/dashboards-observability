@@ -25,6 +25,7 @@ export function IntegrationAssets(props: {
   const search = {
     box: {
       incremental: true,
+      compressed: true,
     },
     filters: [
       {
@@ -39,6 +40,7 @@ export function IntegrationAssets(props: {
         })),
       },
     ],
+    compressed: true,
   };
 
   const tableColumns = [
@@ -86,7 +88,7 @@ export function IntegrationAssets(props: {
       <EuiTitle>
         <h2>Assets</h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       <EuiInMemoryTable
         itemId="id"
         loading={false}

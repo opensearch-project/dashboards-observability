@@ -9,21 +9,21 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
-  EuiComboBox,
-  EuiFormRow,
+  EuiCompressedComboBox,
+  EuiCompressedFormRow,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import DSLService from 'public/services/requests/dsl';
 import React, { useEffect, useState } from 'react';
-import { FilterType } from '../../../../../public/components/trace_analytics/components/common/filters/filters';
 import { OptionType } from '../../../../../common/types/application_analytics';
+import { FilterType } from '../../../../../public/components/trace_analytics/components/common/filters/filters';
 import { filtersToDsl } from '../../../trace_analytics/components/common/helper_functions';
-import { handleDashboardRequest } from '../../../trace_analytics/requests/dashboard_request_handler';
-import { AppAnalyticsComponentDeps } from '../../home';
 import { DashboardTable } from '../../../trace_analytics/components/dashboard/dashboard_table';
+import { handleDashboardRequest } from '../../../trace_analytics/requests/dashboard_request_handler';
 import { getClearModal } from '../../helpers/modal_containers';
+import { AppAnalyticsComponentDeps } from '../../home';
 
 interface TraceConfigProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -42,7 +42,7 @@ export const TraceConfig = (props: TraceConfigProps) => {
     endTime,
     selectedTraces,
     setSelectedTraces,
-    mode
+    mode,
   } = props;
   const [traceOpen, setTraceOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,10 @@ export const TraceConfig = (props: TraceConfigProps) => {
   useEffect(() => {
     setLoading(true);
     const timeFilterDSL = filtersToDsl(mode, [], '', startTime, endTime);
-    const latencyTrendStartTime = dateMath.parse(endTime, { roundUp: true })?.subtract(24, 'hours').toISOString()!;
+    const latencyTrendStartTime = dateMath
+      .parse(endTime, { roundUp: true })
+      ?.subtract(24, 'hours')
+      .toISOString()!;
     const latencyTrendDSL = filtersToDsl(mode, filters, query, latencyTrendStartTime, endTime);
     handleDashboardRequest(
       http,
@@ -243,11 +246,11 @@ export const TraceConfig = (props: TraceConfigProps) => {
         }}
         paddingSize="l"
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Trace Groups"
           helpText="Select one or multiple trace groups, or type a custom one"
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             aria-label="Select trace groups"
             placeholder="Select or add trace groups"
             options={traceOptions}
@@ -257,7 +260,7 @@ export const TraceConfig = (props: TraceConfigProps) => {
             isClearable={false}
             data-test-subj="traceGroupsComboBox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
         <DashboardTable
           items={traceItems}

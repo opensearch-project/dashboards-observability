@@ -7,14 +7,14 @@ import React, { Fragment, useCallback } from 'react';
 import {
   EuiButton,
   EuiAccordion,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiColorPicker,
   EuiSpacer,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { ADD_BUTTON_TEXT, AGGREGATIONS } from '../../../../../../../../common/constants/explorer';
@@ -92,20 +92,20 @@ export const ConfigColorTheme = ({
         vizState.map((ct) => {
           return (
             <Fragment key={ct.ctid}>
-              <EuiFormRow fullWidth label="">
+              <EuiCompressedFormRow fullWidth label="">
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={3}>
-                    <EuiFormRow helpText="Color">
+                    <EuiCompressedFormRow helpText="Color">
                       <EuiColorPicker
                         fullWidth
                         onChange={handleColorThemeChange(ct.ctid, 'color')}
                         color={ct.color}
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={4}>
-                    <EuiFormRow helpText="Field">
-                      <EuiComboBox
+                    <EuiCompressedFormRow helpText="Field">
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select a field"
                         options={getUpdatedOptions()}
@@ -114,15 +114,15 @@ export const ConfigColorTheme = ({
                         onChange={handleColorThemeChange(ct.ctid, 'name')}
                         aria-label="Use aria labels when no actual label is in use"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={1}>
-                    <EuiFormRow>
+                    <EuiCompressedFormRow>
                       <EuiIcon type="trash" onClick={handleColorThemeDelete(ct.ctid)} />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </Fragment>
           );
         })}

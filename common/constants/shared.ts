@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import CSS from 'csstype';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -34,9 +33,19 @@ export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
 export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
+export const tutorialSampleDataPluginId = 'import_sample_data';
+
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 1500;
+
+export const observabilityOverviewID = 'observability-overview';
+export const observabilityOverviewTitle = 'Observability overview';
+export const observabilityOverviewPluginOrder = 5088;
+
+export const observabilityGettingStartedID = 'observability-gettingStarted';
+export const observabilityGettingStartedTitle = 'Get started';
+export const observabilityGettingStartedPluginOrder = 5089;
 
 export const observabilityApplicationsID = 'observability-applications';
 export const observabilityApplicationsTitle = 'Applications';
@@ -50,9 +59,17 @@ export const observabilityMetricsID = 'observability-metrics';
 export const observabilityMetricsTitle = 'Metrics';
 export const observabilityMetricsPluginOrder = 5092;
 
+export const observabilityTracesNewNavID = 'observability-traces-nav';
+export const observabilityTracesNewNavURL = observabilityTracesNewNavID + '#/traces';
 export const observabilityTracesID = 'observability-traces';
 export const observabilityTracesTitle = 'Traces';
 export const observabilityTracesPluginOrder = 5093;
+
+export const observabilityServicesNewNavID = 'observability-services-nav';
+export const observabilityServicesNewNavURL = observabilityServicesNewNavID + '#/services';
+export const observabilityServicesID = 'observability-services';
+export const observabilityServicesTitle = 'Services';
+export const observabilityServicesPluginOrder = 5092;
 
 export const observabilityNotebookID = 'observability-notebooks';
 export const observabilityNotebookTitle = 'Notebooks';
@@ -73,6 +90,10 @@ export const observabilityDataConnectionsPluginOrder = 9030;
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
 export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 
+export const alertingPluginID = 'alerting';
+export const anomalyDetectionPluginID = 'anomaly-detection-dashboards';
+export const discoverPluginID = 'data-explorer/discover';
+
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
@@ -81,9 +102,11 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
+export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export const SPAN_REGEX = /span/;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const OTEL_METRIC_SUBTYPE = 'openTelemetryMetric';
 export const PPL_METRIC_SUBTYPE = 'metric';
 
 export const PPL_SPAN_REGEX = /by\s*span/i;
@@ -126,7 +149,6 @@ export const LONG_CHART_COLOR = PLOTLY_COLOR[1];
 export const pageStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
-  maxWidth: '1130px',
 };
 
 export enum VIS_CHART_TYPES {
@@ -136,6 +158,7 @@ export enum VIS_CHART_TYPES {
   Pie = 'pie',
   HeatMap = 'heatmap',
   Text = 'text',
+  Histogram = 'histogram',
 }
 
 export const NUMERICAL_FIELDS = ['short', 'integer', 'long', 'float', 'double'];

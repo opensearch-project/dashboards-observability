@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integration Upload Flyout Renders integration upload flyout as expected 1`] = `
+<EuiFlyout
+  onClose={[Function]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiText
+      size="s"
+    >
+      <h2>
+        Upload Integrations
+      </h2>
+    </EuiText>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <IntegrationUploadPicker
+      isInvalid={true}
+      onFileSelected={[Function]}
+      setIsInvalid={[Function]}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSmallButton
+          onClick={[Function]}
+        >
+          Cancel
+        </EuiSmallButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSmallButton
+          disabled={true}
+          fill={true}
+          onClick={[Function]}
+        >
+          Upload
+        </EuiSmallButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Integration Upload Flyout Renders the clean integration picker as expected 1`] = `
+<EuiForm>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    error={
+      Array [
+        "Must be an ndjson bundle of integration templates",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Select file"
+    labelType="label"
+  >
+    <EuiCompressedFilePicker
+      compressed={true}
+      display="large"
+      id="integrationBundlePicker"
+      initialPromptText="Select or drag and drop integration bundles"
+      isInvalid={false}
+      onBlur={[Function]}
+      onChange={[Function]}
+    />
+  </EuiCompressedFormRow>
+</EuiForm>
+`;

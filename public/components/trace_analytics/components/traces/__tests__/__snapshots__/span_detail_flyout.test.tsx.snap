@@ -13,7 +13,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
 >
   <EuiFlyout
     data-test-subj="spanDetailFlyout"
-    onClose={[MockFunction]}
+    onClose={[Function]}
     size="s"
   >
     <OuiWindowEvent
@@ -22,7 +22,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
     />
     <EuiOverlayMask
       headerZindexLocation="below"
-      onClick={[MockFunction]}
+      onClick={[Function]}
     >
       <Portal
         containerInfo={
@@ -69,11 +69,42 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                 <div
                   class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                 >
-                  <h2
-                    class="euiTitle euiTitle--medium"
+                  <div
+                    class="euiSpacer euiSpacer--s"
+                  />
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
-                    Span detail
-                  </h2>
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h2>
+                          Span detail
+                        </h2>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <button
+                        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonEmpty__content"
+                        >
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            View associated logs
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div
                   class="euiFlyoutBody"
@@ -217,11 +248,42 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                         <div
                           class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                         >
-                          <h2
-                            class="euiTitle euiTitle--medium"
+                          <div
+                            class="euiSpacer euiSpacer--s"
+                          />
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
-                            Span detail
-                          </h2>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                <h2>
+                                  Span detail
+                                </h2>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <button
+                                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    View associated logs
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                         <div
                           class="euiFlyoutBody"
@@ -297,11 +359,42 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                           <div
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
-                            <h2
-                              class="euiTitle euiTitle--medium"
+                            <div
+                              class="euiSpacer euiSpacer--s"
+                            />
+                            <div
+                              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
-                              Span detail
-                            </h2>
+                              <div
+                                class="euiFlexItem"
+                              >
+                                <div
+                                  class="euiText euiText--small"
+                                >
+                                  <h2>
+                                    Span detail
+                                  </h2>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem"
+                              >
+                                <button
+                                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      class="euiButtonEmpty__text"
+                                    >
+                                      View associated logs
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
                           </div>
                           <div
                             class="euiFlyoutBody"
@@ -377,11 +470,42 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                             <div
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
-                              <h2
-                                class="euiTitle euiTitle--medium"
+                              <div
+                                class="euiSpacer euiSpacer--s"
+                              />
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                Span detail
-                              </h2>
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <div
+                                    class="euiText euiText--small"
+                                  >
+                                    <h2>
+                                      Span detail
+                                    </h2>
+                                  </div>
+                                </div>
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <button
+                                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        View associated logs
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                             <div
                               class="euiFlyoutBody"
@@ -445,11 +569,42 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               <div
                                 class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                               >
-                                <h2
-                                  class="euiTitle euiTitle--medium"
+                                <div
+                                  class="euiSpacer euiSpacer--s"
+                                />
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                                 >
-                                  Span detail
-                                </h2>
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <div
+                                      class="euiText euiText--small"
+                                    >
+                                      <h2>
+                                        Span detail
+                                      </h2>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <button
+                                      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButtonEmpty__content"
+                                      >
+                                        <span
+                                          class="euiButtonEmpty__text"
+                                        >
+                                          View associated logs
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                               <div
                                 class="euiFlyoutBody"
@@ -573,13 +728,78 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                           <div
                             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
-                            <EuiTitle>
-                              <h2
-                                className="euiTitle euiTitle--medium"
+                            <EuiSpacer
+                              size="s"
+                            >
+                              <div
+                                className="euiSpacer euiSpacer--s"
+                              />
+                            </EuiSpacer>
+                            <EuiFlexGroup
+                              alignItems="center"
+                              justifyContent="spaceBetween"
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                Span detail
-                              </h2>
-                            </EuiTitle>
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiText
+                                      size="s"
+                                    >
+                                      <div
+                                        className="euiText euiText--small"
+                                      >
+                                        <h2>
+                                          Span detail
+                                        </h2>
+                                      </div>
+                                    </EuiText>
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiButtonEmpty
+                                      onClick={[Function]}
+                                      size="xs"
+                                    >
+                                      <button
+                                        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                        disabled={false}
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <EuiButtonContent
+                                          className="euiButtonEmpty__content"
+                                          iconGap="m"
+                                          iconSide="left"
+                                          iconSize="s"
+                                          textProps={
+                                            Object {
+                                              "className": "euiButtonEmpty__text",
+                                            }
+                                          }
+                                        >
+                                          <span
+                                            className="euiButtonContent euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              View associated logs
+                                            </span>
+                                          </span>
+                                        </EuiButtonContent>
+                                      </button>
+                                    </EuiButtonEmpty>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
                           </div>
                         </EuiFlyoutHeader>
                         <EuiFlyoutBody>

@@ -13,8 +13,10 @@ exports[`Service Config component renders empty service config 1`] = `
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
+      "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
+      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -84,10 +86,18 @@ exports[`Service Config component renders empty service config 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
+      },
+      "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -108,7 +118,9 @@ exports[`Service Config component renders empty service config 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -359,6 +371,7 @@ exports[`Service Config component renders empty service config 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -395,9 +408,9 @@ exports[`Service Config component renders empty service config 1`] = `
               <div
                 className="euiAccordion__padding--l"
               >
-                <EuiFormRow
+                <EuiCompressedFormRow
                   describedByIds={Array []}
-                  display="row"
+                  display="rowCompressed"
                   fullWidth={false}
                   hasChildLabel={true}
                   hasEmptyLabelSpace={false}
@@ -405,7 +418,7 @@ exports[`Service Config component renders empty service config 1`] = `
                   labelType="label"
                 >
                   <div
-                    className="euiFormRow"
+                    className="euiFormRow euiFormRow--compressed"
                     id="random_html_id-row"
                   >
                     <div
@@ -428,10 +441,10 @@ exports[`Service Config component renders empty service config 1`] = `
                     <div
                       className="euiFormRow__fieldWrapper"
                     >
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         aria-label="Select services and entities"
                         async={false}
-                        compressed={false}
+                        compressed={true}
                         data-test-subj="servicesEntitiesComboBox"
                         fullWidth={false}
                         id="random_html_id"
@@ -449,14 +462,14 @@ exports[`Service Config component renders empty service config 1`] = `
                           aria-expanded={false}
                           aria-haspopup="listbox"
                           aria-label="Select services and entities"
-                          className="euiComboBox"
+                          className="euiComboBox euiComboBox--compressed"
                           data-test-subj="servicesEntitiesComboBox"
                           onKeyDown={[Function]}
                           role="combobox"
                         >
                           <EuiComboBoxInput
                             autoSizeInputRef={[Function]}
-                            compressed={false}
+                            compressed={true}
                             fullWidth={false}
                             hasSelectedOptions={false}
                             id="random_html_id"
@@ -479,7 +492,7 @@ exports[`Service Config component renders empty service config 1`] = `
                             value=""
                           >
                             <EuiFormControlLayout
-                              compressed={false}
+                              compressed={true}
                               fullWidth={false}
                               icon={
                                 Object {
@@ -494,13 +507,13 @@ exports[`Service Config component renders empty service config 1`] = `
                               }
                             >
                               <div
-                                className="euiFormControlLayout"
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    className="euiComboBox__inputWrap"
+                                    className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     onClick={[Function]}
                                     tabIndex={-1}
@@ -571,7 +584,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                     </AutosizeInput>
                                   </div>
                                   <EuiFormControlLayoutIcons
-                                    compressed={false}
+                                    compressed={true}
                                     icon={
                                       Object {
                                         "aria-label": "Open list of options",
@@ -592,7 +605,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                         data-test-subj="comboBoxToggleListButton"
                                         iconRef={[Function]}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                         type="arrowDown"
                                       >
                                         <button
@@ -605,19 +618,19 @@ exports[`Service Config component renders empty service config 1`] = `
                                           <EuiIcon
                                             aria-hidden="true"
                                             className="euiFormControlLayoutCustomIcon__icon"
-                                            size="m"
+                                            size="s"
                                             type="arrowDown"
                                           >
                                             <EuiIconBeaker
                                               aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               role="img"
                                               style={null}
                                             >
                                               <svg
                                                 aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
                                                 height={16}
                                                 role="img"
@@ -641,10 +654,10 @@ exports[`Service Config component renders empty service config 1`] = `
                             </EuiFormControlLayout>
                           </EuiComboBoxInput>
                         </div>
-                      </EuiComboBox>
+                      </EuiCompressedComboBox>
                     </div>
                   </div>
-                </EuiFormRow>
+                </EuiCompressedFormRow>
                 <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
@@ -764,6 +777,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -844,6 +858,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -924,6 +939,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -970,33 +986,19 @@ exports[`Service Config component renders empty service config 1`] = `
                         />
                       </EuiHorizontalRule>
                       <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
+                        justifyContent="spaceBetween"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            grow={false}
+                            grow={7}
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFlexItem euiFlexItem--flexGrow7"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiFieldSearch
-                                compressed={false}
+                              <EuiCompressedFieldSearch
+                                compressed={true}
                                 fullWidth={false}
                                 incremental={false}
                                 isClearable={true}
@@ -1005,17 +1007,28 @@ exports[`Service Config component renders empty service config 1`] = `
                                 onChange={[Function]}
                                 onSearch={[Function]}
                                 placeholder="Service name"
+                                prepend="Focus on"
                                 value=""
                               >
                                 <EuiFormControlLayout
-                                  compressed={false}
+                                  compressed={true}
                                   fullWidth={false}
                                   icon="search"
                                   isLoading={false}
+                                  prepend="Focus on"
                                 >
                                   <div
-                                    className="euiFormControlLayout"
+                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
+                                    <EuiFormLabel
+                                      className="euiFormControlLayout__prepend"
+                                    >
+                                      <label
+                                        className="euiFormLabel euiFormControlLayout__prepend"
+                                      >
+                                        Focus on
+                                      </label>
+                                    </EuiFormLabel>
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
                                     >
@@ -1023,7 +1036,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                         isInvalid={false}
                                       >
                                         <input
-                                          className="euiFieldSearch"
+                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
                                           placeholder="Service name"
@@ -1032,7 +1045,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                         />
                                       </EuiValidatableControl>
                                       <EuiFormControlLayoutIcons
-                                        compressed={false}
+                                        compressed={true}
                                         icon="search"
                                         isLoading={false}
                                       >
@@ -1040,7 +1053,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                           className="euiFormControlLayoutIcons"
                                         >
                                           <EuiFormControlLayoutCustomIcon
-                                            size="m"
+                                            size="s"
                                             type="search"
                                           >
                                             <span
@@ -1049,19 +1062,19 @@ exports[`Service Config component renders empty service config 1`] = `
                                               <EuiIcon
                                                 aria-hidden="true"
                                                 className="euiFormControlLayoutCustomIcon__icon"
-                                                size="m"
+                                                size="s"
                                                 type="search"
                                               >
                                                 <EuiIconBeaker
                                                   aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                   focusable="false"
                                                   role="img"
                                                   style={null}
                                                 >
                                                   <svg
                                                     aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                     focusable="false"
                                                     height={16}
                                                     role="img"
@@ -1083,7 +1096,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                     </div>
                                   </div>
                                 </EuiFormControlLayout>
-                              </EuiFieldSearch>
+                              </EuiCompressedFieldSearch>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -1112,7 +1125,9 @@ exports[`Service Config component renders empty service config 1`] = `
                           </EuiSpacer>
                           <EuiEmptyPrompt
                             body={
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                               </EuiText>
                             }
@@ -1151,9 +1166,11 @@ exports[`Service Config component renders empty service config 1`] = `
                                     <div
                                       className="euiText euiText--medium"
                                     >
-                                      <EuiText>
+                                      <EuiText
+                                        size="s"
+                                      >
                                         <div
-                                          className="euiText euiText--medium"
+                                          className="euiText euiText--small"
                                         >
                                           No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                         </div>
@@ -1175,6 +1192,13 @@ exports[`Service Config component renders empty service config 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
                 </ServiceMap>
               </div>
             </div>
@@ -1199,8 +1223,10 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
+      "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
+      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -1270,10 +1296,18 @@ exports[`Service Config component renders with one service selected 1`] = `
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
+        "getLeftBottom$": [MockFunction],
         "getRight$": [MockFunction],
         "registerCenter": [MockFunction],
         "registerLeft": [MockFunction],
+        "registerLeftBottom": [MockFunction],
         "registerRight": [MockFunction],
+      },
+      "navGroup": Object {
+        "getCurrentNavGroup$": [MockFunction],
+        "getNavGroupEnabled": [MockFunction],
+        "getNavGroupsMap$": [MockFunction],
+        "setCurrentNavGroup": [MockFunction],
       },
       "navLinks": Object {
         "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1294,7 +1328,9 @@ exports[`Service Config component renders with one service selected 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -1560,6 +1596,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -1596,9 +1633,9 @@ exports[`Service Config component renders with one service selected 1`] = `
               <div
                 className="euiAccordion__padding--l"
               >
-                <EuiFormRow
+                <EuiCompressedFormRow
                   describedByIds={Array []}
-                  display="row"
+                  display="rowCompressed"
                   fullWidth={false}
                   hasChildLabel={true}
                   hasEmptyLabelSpace={false}
@@ -1606,7 +1643,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                   labelType="label"
                 >
                   <div
-                    className="euiFormRow"
+                    className="euiFormRow euiFormRow--compressed"
                     id="random_html_id-row"
                   >
                     <div
@@ -1629,10 +1666,10 @@ exports[`Service Config component renders with one service selected 1`] = `
                     <div
                       className="euiFormRow__fieldWrapper"
                     >
-                      <EuiComboBox
+                      <EuiCompressedComboBox
                         aria-label="Select services and entities"
                         async={false}
-                        compressed={false}
+                        compressed={true}
                         data-test-subj="servicesEntitiesComboBox"
                         fullWidth={false}
                         id="random_html_id"
@@ -1650,14 +1687,14 @@ exports[`Service Config component renders with one service selected 1`] = `
                           aria-expanded={false}
                           aria-haspopup="listbox"
                           aria-label="Select services and entities"
-                          className="euiComboBox"
+                          className="euiComboBox euiComboBox--compressed"
                           data-test-subj="servicesEntitiesComboBox"
                           onKeyDown={[Function]}
                           role="combobox"
                         >
                           <EuiComboBoxInput
                             autoSizeInputRef={[Function]}
-                            compressed={false}
+                            compressed={true}
                             fullWidth={false}
                             hasSelectedOptions={false}
                             id="random_html_id"
@@ -1680,7 +1717,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                             value=""
                           >
                             <EuiFormControlLayout
-                              compressed={false}
+                              compressed={true}
                               fullWidth={false}
                               icon={
                                 Object {
@@ -1695,13 +1732,13 @@ exports[`Service Config component renders with one service selected 1`] = `
                               }
                             >
                               <div
-                                className="euiFormControlLayout"
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   className="euiFormControlLayout__childrenWrapper"
                                 >
                                   <div
-                                    className="euiComboBox__inputWrap"
+                                    className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed"
                                     data-test-subj="comboBoxInput"
                                     onClick={[Function]}
                                     tabIndex={-1}
@@ -1772,7 +1809,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     </AutosizeInput>
                                   </div>
                                   <EuiFormControlLayoutIcons
-                                    compressed={false}
+                                    compressed={true}
                                     icon={
                                       Object {
                                         "aria-label": "Open list of options",
@@ -1793,7 +1830,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                         data-test-subj="comboBoxToggleListButton"
                                         iconRef={[Function]}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                         type="arrowDown"
                                       >
                                         <button
@@ -1806,19 +1843,19 @@ exports[`Service Config component renders with one service selected 1`] = `
                                           <EuiIcon
                                             aria-hidden="true"
                                             className="euiFormControlLayoutCustomIcon__icon"
-                                            size="m"
+                                            size="s"
                                             type="arrowDown"
                                           >
                                             <EuiIconArrowDown
                                               aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                              className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               role="img"
                                               style={null}
                                             >
                                               <svg
                                                 aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
                                                 height={16}
                                                 role="img"
@@ -1843,10 +1880,10 @@ exports[`Service Config component renders with one service selected 1`] = `
                             </EuiFormControlLayout>
                           </EuiComboBoxInput>
                         </div>
-                      </EuiComboBox>
+                      </EuiCompressedComboBox>
                     </div>
                   </div>
-                </EuiFormRow>
+                </EuiCompressedFormRow>
                 <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
@@ -1966,6 +2003,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2046,6 +2084,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2126,6 +2165,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 >
                                   <EuiButtonContent
                                     className="euiButton__content"
+                                    iconGap="m"
                                     iconSide="left"
                                     textProps={
                                       Object {
@@ -2172,33 +2212,19 @@ exports[`Service Config component renders with one service selected 1`] = `
                         />
                       </EuiHorizontalRule>
                       <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="s"
+                        justifyContent="spaceBetween"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            grow={false}
+                            grow={7}
                           >
                             <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                              className="euiFlexItem euiFlexItem--flexGrow7"
                             >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  Focus on
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiFieldSearch
-                                compressed={false}
+                              <EuiCompressedFieldSearch
+                                compressed={true}
                                 fullWidth={false}
                                 incremental={false}
                                 isClearable={true}
@@ -2207,17 +2233,28 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 onChange={[Function]}
                                 onSearch={[Function]}
                                 placeholder="Service name"
+                                prepend="Focus on"
                                 value=""
                               >
                                 <EuiFormControlLayout
-                                  compressed={false}
+                                  compressed={true}
                                   fullWidth={false}
                                   icon="search"
                                   isLoading={false}
+                                  prepend="Focus on"
                                 >
                                   <div
-                                    className="euiFormControlLayout"
+                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
+                                    <EuiFormLabel
+                                      className="euiFormControlLayout__prepend"
+                                    >
+                                      <label
+                                        className="euiFormLabel euiFormControlLayout__prepend"
+                                      >
+                                        Focus on
+                                      </label>
+                                    </EuiFormLabel>
                                     <div
                                       className="euiFormControlLayout__childrenWrapper"
                                     >
@@ -2225,7 +2262,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                         isInvalid={false}
                                       >
                                         <input
-                                          className="euiFieldSearch"
+                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
                                           placeholder="Service name"
@@ -2234,7 +2271,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                         />
                                       </EuiValidatableControl>
                                       <EuiFormControlLayoutIcons
-                                        compressed={false}
+                                        compressed={true}
                                         icon="search"
                                         isLoading={false}
                                       >
@@ -2242,7 +2279,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                           className="euiFormControlLayoutIcons"
                                         >
                                           <EuiFormControlLayoutCustomIcon
-                                            size="m"
+                                            size="s"
                                             type="search"
                                           >
                                             <span
@@ -2251,19 +2288,19 @@ exports[`Service Config component renders with one service selected 1`] = `
                                               <EuiIcon
                                                 aria-hidden="true"
                                                 className="euiFormControlLayoutCustomIcon__icon"
-                                                size="m"
+                                                size="s"
                                                 type="search"
                                               >
                                                 <EuiIconSearch
                                                   aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                                   focusable="false"
                                                   role="img"
                                                   style={null}
                                                 >
                                                   <svg
                                                     aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                    className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
                                                     focusable="false"
                                                     height={16}
                                                     role="img"
@@ -2285,7 +2322,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     </div>
                                   </div>
                                 </EuiFormControlLayout>
-                              </EuiFieldSearch>
+                              </EuiCompressedFieldSearch>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -2314,7 +2351,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                           </EuiSpacer>
                           <EuiEmptyPrompt
                             body={
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                               </EuiText>
                             }
@@ -2353,9 +2392,11 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     <div
                                       className="euiText euiText--medium"
                                     >
-                                      <EuiText>
+                                      <EuiText
+                                        size="s"
+                                      >
                                         <div
-                                          className="euiText euiText--medium"
+                                          className="euiText euiText--small"
                                         >
                                           No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                                         </div>
@@ -2377,6 +2418,13 @@ exports[`Service Config component renders with one service selected 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
                 </ServiceMap>
               </div>
             </div>

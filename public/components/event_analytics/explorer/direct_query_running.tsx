@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
@@ -48,9 +48,9 @@ export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
             Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiButton color="success" onClick={cancelQuery}>
+          <EuiSmallButton color="success" onClick={cancelQuery}>
             Cancel
-          </EuiButton>
+          </EuiSmallButton>
         </>
       }
     />

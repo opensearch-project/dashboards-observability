@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiSmallButton, EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import {
   DATACONNECTIONS_BASE,
@@ -45,9 +45,9 @@ export const InactiveDataConnectionCallout = ({
       <p>
         Associated objects and accelerations are not available while this connection is inactive.
       </p>
-      <EuiButton onClick={enableDataSource} color="warning">
+      <EuiSmallButton onClick={enableDataSource} color="warning">
         Enable connection
-      </EuiButton>
+      </EuiSmallButton>
     </EuiCallOut>
   );
 };

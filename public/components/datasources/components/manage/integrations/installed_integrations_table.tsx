@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties, useEffect } from 'react';
 import {
-  EuiSpacer,
-  EuiPanel,
-  EuiInMemoryTable,
-  EuiTitle,
-  EuiLink,
+  EuiSmallButton,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
-  EuiButton,
-  EuiIcon,
-  EuiText,
   EuiFlyout,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
-import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
-import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
-import { coreRefs } from '../../../../../framework/core_refs';
-import { basePathLink } from '../../../../../../common/utils/shared';
-import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { INTEGRATIONS_BASE } from '../../../../../../common/constants/shared';
-import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
 import { DatasourceType } from '../../../../../../common/types/data_connections';
+import { basePathLink } from '../../../../../../common/utils/shared';
+import { coreRefs } from '../../../../../framework/core_refs';
+import { IntegrationHealthBadge } from '../../../../integrations/components/added_integration';
+import { AvailableIntegrationsList } from '../../../../integrations/components/available_integration_overview_page';
+import { AvailableIntegrationsTable } from '../../../../integrations/components/available_integration_table';
+import { SetupIntegrationForm } from '../../../../integrations/components/setup_integration';
+import _ from 'lodash';
 
 interface IntegrationInstanceTableEntry {
   name: string;
@@ -41,7 +41,7 @@ interface IntegrationInstanceTableEntry {
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
     case 'S3GLUE':
-      return 'Flint S3';
+      return 'S3 Glue';
     case 'PROMETHEUS':
       return null; // TODO Prometheus integrations not supported so no label available
     default:
@@ -94,9 +94,9 @@ const AddIntegrationButton = ({
   toggleFlyout: () => void;
 }) => {
   return (
-    <EuiButton fill={fill} onClick={toggleFlyout}>
+    <EuiSmallButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
@@ -224,7 +224,7 @@ export const InstalledIntegrationsTable = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             fullWidth
             placeholder="Search..."
             onChange={(queryEvent) => {

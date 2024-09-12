@@ -12,30 +12,37 @@ import {
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { max } from 'lodash';
-import semver from 'semver';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { MetricsExportPanel } from './metrics_export_panel';
-import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
-import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
-import { addMultipleVizToPanels, isUuid } from '../../custom_panels/redux/panel_slice';
+import max from 'lodash/max';
+import React, { useEffect, useState } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { useSelector } from 'react-redux';
+import semver from 'semver';
+import { MountPoint } from '../../../../../../src/core/public';
+import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
+import {
+  OTEL_METRIC_SUBTYPE,
+  PPL_METRIC_SUBTYPE,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../common/constants/shared';
+import { SavedVisualization } from '../../../../common/types/explorer';
 import { MetricType } from '../../../../common/types/metrics';
+import { coreRefs } from '../../../framework/core_refs';
+import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
+import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
+import { updateCatalogVisualizationQuery } from '../../common/query_utils';
+import {
+  addMultipleVizToPanels,
+  isUuid,
+  selectPanelList,
+} from '../../custom_panels/redux/panel_slice';
+import { visualizationFromOtelMetric, visualizationFromPrometheusMetric } from '../helpers/utils';
 import {
   dateSpanFilterSelector,
   selectedMetricsIdsSelector,
   selectedMetricsSelector,
 } from '../redux/slices/metrics_slice';
-import { coreRefs } from '../../../framework/core_refs';
-import { selectPanelList } from '../../../../public/components/custom_panels/redux/panel_slice';
-import { SavedVisualization } from '../../../../common/types/explorer';
-import { visualizationFromMetric } from '../helpers/utils';
-import { updateCatalogVisualizationQuery } from '../../common/query_utils';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
-import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
-import { MountPoint } from '../../../../../../src/core/public';
+import { MetricsExportPanel } from './metrics_export_panel';
 
 const Savebutton = ({
   setIsPanelOpen,
@@ -44,6 +51,8 @@ const Savebutton = ({
 }) => {
   return (
     <EuiButton
+      size="s"
+      fill={true}
       iconSide="right"
       onClick={() => {
         setIsPanelOpen((staleState) => !staleState);
@@ -51,25 +60,41 @@ const Savebutton = ({
       data-test-subj="metrics__saveManagementPopover"
       iconType="arrowDown"
     >
-      Save
+      Save as visualization
     </EuiButton>
   );
 };
 
+const HeaderControlledPopoverWrapper = ({ children }: { children: React.ReactElement }) => {
+  const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
+  const showActionsInHeader = coreRefs.chrome?.navGroup.getNavGroupEnabled();
+
+  if (showActionsInHeader && HeaderControl) {
+    return (
+      <HeaderControl
+        setMountPoint={coreRefs.application?.setAppRightControls}
+        controls={[{ renderComponent: children }]}
+      />
+    );
+  }
+
+  return <>{children}</>;
+};
+
 const MetricsExportPopOver = () => {
   const availableObservabilityDashboards = useSelector(selectPanelList);
-  const [availableDashboards, setAvailableDashboards] = React.useState([]);
-  const [osdCoreDashboards, setOsdCoreDashboards] = React.useState([]);
+  const [availableDashboards, setAvailableDashboards] = useState([]);
+  const [osdCoreDashboards, setOsdCoreDashboards] = useState([]);
 
-  const [isPanelOpen, setIsPanelOpen] = React.useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   const dateSpanFilter = useSelector(dateSpanFilterSelector);
-  const [metricsToExport, setMetricsToExport] = React.useState<MetricType[]>([]);
+  const [metricsToExport, setMetricsToExport] = useState<MetricType[]>([]);
 
-  const [selectedPanelOptions, setSelectedPanelOptions] = React.useState<any[]>([]);
+  const [selectedPanelOptions, setSelectedPanelOptions] = useState<any[]>([]);
 
   const { toasts } = coreRefs;
 
@@ -140,30 +165,43 @@ const MetricsExportPopOver = () => {
     ]);
 
   const createSavedVisualization = async (metric): Promise<any> => {
-    const [ds, index] = metric.index.split('.');
-    const queryMetaData = {
-      catalogSourceName: ds,
-      catalogTableName: index,
-      aggregation: metric.aggregation,
-      attributesGroupBy: metric.attributesGroupBy,
-    };
-    const visMetaData = visualizationFromMetric(
-      {
+    let visMetaData;
+    if (metric.metricType === OTEL_METRIC_SUBTYPE) {
+      visMetaData = visualizationFromOtelMetric({
         ...metric,
-        dataSources: datasourceMetaFrom(metric.catalog),
-        query: updateCatalogVisualizationQuery({
-          ...queryMetaData,
-          ...dateSpanFilter,
-        }),
-        queryMetaData,
-        subType: PROMQL_METRIC_SUBTYPE,
+        query: '',
+        subType: PPL_METRIC_SUBTYPE,
+        metricType: OTEL_METRIC_SUBTYPE,
         dateRange: ['now-1d', 'now'],
-        fields: ['@value'],
         timestamp: '@timestamp',
-      },
-      dateSpanFilter.span,
-      dateSpanFilter.reoslution
-    );
+      });
+    } else {
+      const [ds, index] = metric.index.split('.');
+      const queryMetaData = {
+        catalogSourceName: ds,
+        catalogTableName: index,
+        aggregation: metric.aggregation,
+        attributesGroupBy: metric.attributesGroupBy,
+      };
+      visMetaData = visualizationFromPrometheusMetric(
+        {
+          ...metric,
+          dataSources: datasourceMetaFrom(metric.catalog),
+          query: updateCatalogVisualizationQuery({
+            ...queryMetaData,
+            ...dateSpanFilter,
+          }),
+          queryMetaData,
+          subType: PPL_METRIC_SUBTYPE,
+          metricType: PROMQL_METRIC_SUBTYPE,
+          dateRange: ['now-1d', 'now'],
+          fields: ['@value'],
+          timestamp: '@timestamp',
+        },
+        dateSpanFilter.span,
+        dateSpanFilter.reoslution
+      );
+    }
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
     return savedObject;
@@ -225,7 +263,7 @@ const MetricsExportPopOver = () => {
     const client = dashboardsLoader.savedObjectsClient;
 
     Promise.all(
-      osdCoreSelectedDashboards.map(async ({ panel: dashboard }, index) => {
+      osdCoreSelectedDashboards.map(async ({ panel: dashboard }) => {
         const referenceCount = dashboard.references.length;
         const maxPanelY = dashboard.panelConfig.reduce(panelXYorGreaterThanValue, 0);
         const maxPanelVersion = dashboard.panelConfig.reduce(
@@ -247,6 +285,7 @@ const MetricsExportPopOver = () => {
 
         const panelsJSON = JSON.stringify(dashboard.panelConfig);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const updateRes = await client.update(
           dashboard.type,
           dashboard.id,
@@ -301,7 +340,7 @@ const MetricsExportPopOver = () => {
 
     try {
       savedMetrics = await Promise.all(
-        metricsToExport.map(async (metric, index) => {
+        metricsToExport.map(async (metric) => {
           if (metric.savedVisualizationId === undefined) {
             return createSavedVisualization(metric);
           } else {
@@ -348,44 +387,47 @@ const MetricsExportPopOver = () => {
   };
 
   return (
-    <EuiPopover
-      button={<Savebutton setIsPanelOpen={setIsPanelOpen} />}
-      isOpen={isPanelOpen}
-      closePopover={() => setIsPanelOpen(false)}
-    >
-      <MetricsExportPanel
-        availableDashboards={availableDashboards ?? []}
-        metricsToExport={metricsToExport ?? []}
-        setMetricsToExport={setMetricsToExport}
-        selectedPanelOptions={selectedPanelOptions}
-        setSelectedPanelOptions={setSelectedPanelOptions}
-      />
-      <EuiPopoverFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              onClick={() => setIsPanelOpen(false)}
-              data-test-subj="metrics__SaveCancel"
-            >
-              Cancel
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={() => {
-                handleSavingObjects().then(() => setIsPanelOpen(false));
-              }}
-              data-test-subj="metrics__SaveConfirm"
-            >
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
-    </EuiPopover>
+    <HeaderControlledPopoverWrapper>
+      <EuiPopover
+        button={<Savebutton setIsPanelOpen={setIsPanelOpen} />}
+        isOpen={isPanelOpen}
+        closePopover={() => setIsPanelOpen(false)}
+        panelPaddingSize="s"
+      >
+        <MetricsExportPanel
+          availableDashboards={availableDashboards ?? []}
+          metricsToExport={metricsToExport ?? []}
+          setMetricsToExport={setMetricsToExport}
+          selectedPanelOptions={selectedPanelOptions}
+          setSelectedPanelOptions={setSelectedPanelOptions}
+        />
+        <EuiPopoverFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => setIsPanelOpen(false)}
+                data-test-subj="metrics__SaveCancel"
+              >
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                fill
+                onClick={() => {
+                  handleSavingObjects().then(() => setIsPanelOpen(false));
+                }}
+                data-test-subj="metrics__SaveConfirm"
+              >
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      </EuiPopover>
+    </HeaderControlledPopoverWrapper>
   );
 };
 

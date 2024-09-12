@@ -133,7 +133,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
     handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap, serviceName);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
-    spanDSL.query.bool.must.push({
+    spanDSL.query.bool.filter.push({
       term: {
         serviceName,
       },

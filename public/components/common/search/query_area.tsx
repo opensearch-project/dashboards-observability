@@ -37,7 +37,7 @@ export function QueryArea({
   const memoizedGetAvailableFields = useMemo(() => getAvailableFields, []);
   const memoizedHandleQueryChange = useMemo(() => handleQueryChange, []);
   useEffect(() => {
-    const indexQuery = `source = ${selectedIndex[0].label}`;
+    const indexQuery = `source = ${selectedIndex[0]?.label || ''}`;
     memoizedHandleQueryChange(indexQuery);
     memoizedGetAvailableFields(indexQuery);
   }, [selectedIndex, memoizedGetAvailableFields, memoizedHandleQueryChange]);
@@ -74,7 +74,7 @@ export function QueryArea({
     <EuiPanel paddingSize="none">
       <EuiAccordion
         id="ppl-query-accordion"
-        buttonContent="PPL Query"
+        buttonContent="Query Assist"
         initialIsOpen
         className="ppl-query-accordion"
         // this paddingSize is for accordion children

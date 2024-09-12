@@ -1,0 +1,212 @@
+{
+  "name": "java-client",
+  "version": "1.0.0",
+  "displayName": "java client",
+  "description": "java applicative logs",
+  "license": "Apache-2.0",
+  "type": "logs",
+  "labels": ["Observability", "Logs", "java"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "java Logo",
+      "path": "logo.svg"
+    },
+    "gallery": [
+      {
+        "annotation": "java Client Tutorial Dashboard",
+        "path": "dashboard.png",
+        "tags": ["dashboard","getting-started"],
+        "savedObject-id": "java_client_getting-started-dashboard"
+      }
+    ]
+  },
+  "components": [],
+  "assets": [
+    { "name": "tutorial", "version": "1.0.0", "extension": "ndjson", "type": "savedObjectBundle", "workflows": ["dashboards"] }
+  ],
+  "getting-started": {
+    "ingestion": ["java-client"],
+    "structured": "false",
+    "technology": "java",
+    "protocol": [],
+    "live-sample": "true",
+    "workflows": [
+      {
+        "name": "Quick Start",
+        "description": "This is a java-client fluent-bit based docker quick starting instructions tutorial with a live example",
+        "steps": [
+          {
+            "name": "Create docker-network",
+            "label": "Environment setting",
+            "phase": "docker",
+            "type": "console-cmd",
+            "content": "docker network create opensearch-net",
+            "description": "Before running any docker-compose files, create the opensearch-net network"
+          },
+          {
+            "name": "Setup docker .env file",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "input-params": [
+              {
+                "name": "OPENSEARCH_HOST",
+                "description": "Opensearch host",
+                "type": "host-name"
+              },
+              {
+                "name": "OPENSEARCH_DASHBOARD_HOST",
+                "description": "Opensearch Dashboard host",
+                "type": "host-name"
+              }
+            ],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/.env",
+            "description": "Setup docker-compose env variables "
+          },
+          {
+            "name": "Setup fluent-bit folder",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf"
+            ],
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf \\\n  https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf \n",
+            "description": "Setup docker-compose fluent-bit's service configuration "
+          },
+          {
+            "name": "Setup java app folder",
+            "label": "Environment Parameters",
+            "phase": "docker",
+            "type": "file-url",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/Dockerfile",
+              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java",
+              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/pom.xml"
+            ],
+            "content": "mkdir -p java-app/src/main/java\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml\n\nwget -P java-app/src/main/java \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java\n",
+            "description": "Setup docker-compose java-app service configuration "
+          },
+          {
+            "name": "Run docker-compose",
+            "label": "live container",
+            "type": "file-url",
+            "phase": "docker",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/docker-compose.yml"],
+            "description": "Run docker-compose for the java-client live example and see the generated index",
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/docker-compose.yml && docker-compose up --build -d java-app fluent-bit \n"
+          }
+        ]
+      },
+      {
+        "name": "java-client",
+        "description": "This is a fluent-bit based getting started instructions tutorial",
+        "steps": [
+          {
+            "name": "Import OpenSearch Java Client",
+            "type": "code",
+            "phase": "setup",
+            "label": "Client Import",
+            "description": "Import the OpenSearch module from the opensearchpy package",
+            "content": "from opensearchpy import OpenSearch"
+          },
+          {
+            "name": "Create Connection to OpenSearch",
+            "type": "code",
+            "phase": "setup",
+            "label": "Connection Establishment",
+            "description": "Establish a connection to your OpenSearch cluster by creating an instance of the OpenSearch class. Provide the necessary connection details, such as the host and port.",
+            "input-params": [
+              {
+                "name": "opensearch_host",
+                "description": "Hostname or IP address of your OpenSearch server",
+                "type": "host-name",
+                "default": "localhost"
+              },
+              {
+                "name": "opensearch_port",
+                "description": "Port of your OpenSearch server (default is 9200)",
+                "type": "port",
+                "default": 9200
+              }
+            ],
+            "content": "System.setProperty(\"javax.net.ssl.trustStore\", \"/full/path/to/keystore\");\n    System.setProperty(\"javax.net.ssl.trustStorePassword\", \"password-to-keystore\");\n\n    final HttpHost host = new HttpHost(\"https\", \"localhost\", 9200);\n    final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();\n    credentialsProvider.setCredentials(new AuthScope(host), new UsernamePasswordCredentials(\"admin\", \"admin\".toCharArray()));\n\n    final RestClient restClient = RestClient.builder(host).setHttpClientConfigCallback(httpClientBuilder -> {\n      return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);\n    }).build();\n\n    final OpenSearchClient client = new OpenSearchClient(new RestClientTransport(restClient, new JacksonJsonpMapper()));\n"
+          },
+          {
+            "name": "Indexing Logs",
+            "type": "code",
+            "phase": "logging",
+            "label": "Log Indexing",
+            "description": "Start indexing logs into OpenSearch. Indexing involves adding documents representing your log entries to OpenSearch.",
+            "input-params": [
+              {
+                "name": "index_name",
+                "description": "Desired index name in OpenSearch",
+                "type": "index-name"
+              },
+              {
+                "name": "timestamp",
+                "description": "Timestamp of the log entry",
+                "type": "timestamp"
+              },
+              {
+                "name": "level",
+                "description": "Log level (e.g., info, error)",
+                "type": "log-level"
+              },
+              {
+                "name": "message",
+                "description": "Log message",
+                "type": "log-message"
+              },
+              {
+                "name": "source",
+                "description": "Source of the log entry",
+                "type": "source"
+              }
+            ],
+            "content": "String index = \"sample-index\";\nCreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder().index(index).build();\nclient.indices().create(createIndexRequest);\n\nIndexSettings indexSettings = new IndexSettings.Builder().autoExpandReplicas(\"0-all\").build();\nPutIndicesSettingsRequest putIndicesSettingsRequest = new PutIndicesSettingsRequest.Builder().index(index).value(indexSettings).build();\nclient.indices().putSettings(putIndicesSettingsRequest);"
+          }
+        ]
+      }
+    ],
+    "schema": [
+      {
+        "type": "logs",
+        "info": [
+          "https://opensearch.org/docs/latest/im-plugin/index-templates"
+        ],
+        "content": "PUT _index_template/application_logs_template",
+        "description": "Setup applicative logs index template in the dev console",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/schemas/applicative-logs-1.0.0.mapping.json",
+        "index-pattern-name": "applicative_logs-*"
+      }
+    ],
+    "index-patterns": {
+      "type": [
+        "logs"
+      ],
+      "info": [
+        "https://opensearch.org/docs/latest/dashboards/management/index-patterns/"
+      ],
+      "description": "Import index patterns `.ndjson` file to the saved objects",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/assets/tutorial-1.0.0.ndjson",
+      "index-patterns-name": [
+        "applicative_logs-*"
+      ]
+    }
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

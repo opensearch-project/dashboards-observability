@@ -6,7 +6,7 @@
 
 import {
   EuiFieldSearch,
-  EuiFilterButton,
+  EuiSmallFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
   EuiPage,
@@ -72,7 +72,7 @@ export const CategoryFilters = ({ items, setItems }: CategoryFiltersProps) => {
   };
 
   const button = (
-    <EuiFilterButton
+    <EuiSmallFilterButton
       iconType="arrowDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -81,7 +81,7 @@ export const CategoryFilters = ({ items, setItems }: CategoryFiltersProps) => {
       numActiveFilters={items.filter((item) => item.checked).length}
     >
       Categories
-    </EuiFilterButton>
+    </EuiSmallFilterButton>
   );
 
   return (

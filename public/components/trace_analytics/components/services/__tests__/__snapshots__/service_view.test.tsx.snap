@@ -9,15 +9,15 @@ exports[`Service view component renders service view 1`] = `
         gutterSize="s"
       >
         <EuiFlexItem>
-          <EuiTitle
-            size="l"
+          <EuiText
+            size="s"
           >
-            <h2
+            <h1
               className="overview-content"
             >
               order
-            </h2>
-          </EuiTitle>
+            </h1>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
@@ -67,6 +67,7 @@ exports[`Service view component renders service view 1`] = `
                 },
               ]
             }
+            compressed={false}
             dateFormat=""
             end="now"
             isAutoRefreshOnly={false}
@@ -80,12 +81,9 @@ exports[`Service view component renders service view 1`] = `
             timeFormat="HH:mm"
           />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        />
       </EuiFlexGroup>
       <EuiSpacer
-        size="xl"
+        size="m"
       />
       <EuiPanel>
         <PanelTitle
@@ -216,8 +214,24 @@ exports[`Service view component renders service view 1`] = `
         <EuiSpacer />
       </EuiPanel>
       <EuiSpacer />
+      <ServiceMetrics
+        dataSourceMDSId={
+          Array [
+            Object {
+              "id": "",
+              "label": "",
+            },
+          ]
+        }
+        mode="data_prepper"
+        serviceName="order"
+        setEndTime={[MockFunction]}
+        setStartTime={[MockFunction]}
+      />
+      <EuiSpacer />
       <ServiceMap
         currService="order"
+        filterByCurrService={true}
         idSelected="latency"
         page="serviceView"
         serviceMap={Object {}}

@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Add dashboard callout renders add dashboard callout 1`] = `
+<AddDashboardCallout>
+  <EuiCallOut
+    color="primary"
+    iconType="gear"
+    title="Select your dashboard"
+  >
+    <div
+      className="euiCallOut euiCallOut--primary"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          color="inherit"
+          size="m"
+          type="gear"
+        >
+          <EuiIconBeaker
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            role="img"
+            style={null}
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+          </EuiIconBeaker>
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          Select your dashboard
+        </span>
+      </div>
+      <EuiText
+        color="default"
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
+            >
+              <EuiText
+                size="s"
+              >
+                <div
+                  className="euiText euiText--small"
+                >
+                  <p>
+                    Select a dashboard to be displayed on this Overview page, or complete the steps described in
+                     
+                    <EuiLink
+                      onClick={[Function]}
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        Getting Started Guide
+                      </button>
+                    </EuiLink>
+                     
+                    to re-populate the dashboard with your log data. This dashboard can later be changed in advanced settings.
+                  </p>
+                </div>
+              </EuiText>
+              <EuiSpacer>
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSmallButton>
+                <EuiButton
+                  size="s"
+                >
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
+                    disabled={false}
+                    element="button"
+                    isDisabled={false}
+                    size="s"
+                    type="button"
+                  >
+                    <button
+                      className="euiButton euiButton--primary euiButton--small"
+                      disabled={false}
+                      style={
+                        Object {
+                          "minWidth": undefined,
+                        }
+                      }
+                      type="button"
+                    >
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconGap="m"
+                        iconSide="left"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
+                      >
+                        <span
+                          className="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            className="euiButton__text"
+                          >
+                            Select
+                          </span>
+                        </span>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </EuiSmallButton>
+            </div>
+          </EuiTextColor>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
+</AddDashboardCallout>
+`;

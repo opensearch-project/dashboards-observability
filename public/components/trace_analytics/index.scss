@@ -40,13 +40,13 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'],
 th[data-test-subj^='tableHeaderCell_dashboard_average_latency'],
 th[data-test-subj^='tableHeaderCell_dashboard_error_rate'],
 th[data-test-subj^='tableHeaderCell_dashboard_traces'] {
-  svg[aria-label^="Sorted in"] {
+  svg[aria-label^='Sorted in'] {
     margin-top: -20px;
   }
 }
 
 th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
-  svg[aria-label^="Sorted in"] {
+  svg[aria-label^='Sorted in'] {
     margin-left: -16px;
     position: relative;
     left: 10px;
@@ -56,4 +56,53 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
 .database-selector {
   padding-right: 24px;
   border-right: 1px solid $euiBorderColor;
+}
+
+.span-flyout-back-btn {
+  position: absolute;
+  right: 38px;
+  top: 8px;
+  z-index: 3;
+}
+
+.service-map-node-details {
+  position: 'absolute';
+  top: 20;
+  right: 20;
+  z-index: 1000;
+}
+
+.traces-table {
+  &.traces-table-trace-id {
+    width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.popOverContainer {
+  width: 10vw;
+  min-width: 200px;
+}
+
+.traces-scrollable-table {
+  > div:first-of-type {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+  }
+}
+
+.attributes-column-header,
+.attributes-column {
+  max-width: 200px;
+}
+
+.trace-group-column {
+  min-width: 200px;
+}
+
+.attributes-column-header {
+  display: table-cell;
 }

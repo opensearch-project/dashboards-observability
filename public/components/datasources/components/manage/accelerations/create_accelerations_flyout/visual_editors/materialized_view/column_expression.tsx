@@ -4,13 +4,13 @@
  */
 
 import {
-  EuiButtonIcon,
-  EuiComboBox,
+  EuiSmallButtonIcon,
+  EuiCompressedComboBox,
   EuiExpression,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopover,
 } from '@elastic/eui';
 import producer from 'immer';
@@ -93,8 +93,8 @@ export const ColumnExpression = ({
             <>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Aggregate function">
-                    <EuiComboBox
+                  <EuiCompressedFormRow label="Aggregate function">
+                    <EuiCompressedComboBox
                       singleSelection={{ asPlainText: true }}
                       options={ACCELERATION_AGGREGRATION_FUNCTIONS}
                       selectedOptions={[
@@ -113,36 +113,41 @@ export const ColumnExpression = ({
                       }
                       isClearable={false}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Aggregation field">
-                    <EuiComboBox
-                      singleSelection={{ asPlainText: true }}
-                      options={[
-                        {
-                          label: '*',
-                          disabled: currentColumnExpressionValue.functionName !== 'count',
-                        },
-                        ...accelerationFormData.dataTableFields.map((x) => ({
-                          label: x.fieldName,
-                        })),
-                      ]}
-                      selectedOptions={[
-                        {
-                          label: currentColumnExpressionValue.functionParam,
-                        },
-                      ]}
-                      onChange={(fieldOption) =>
-                        updateColumnExpressionValue(
-                          { ...currentColumnExpressionValue, functionParam: fieldOption[0].label },
-                          index
-                        )
-                      }
-                      isClearable={false}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+                {currentColumnExpressionValue.functionName !== 'window.start' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCompressedFormRow label="Aggregation field">
+                      <EuiCompressedComboBox
+                        singleSelection={{ asPlainText: true }}
+                        options={[
+                          {
+                            label: '*',
+                            disabled: currentColumnExpressionValue.functionName !== 'count',
+                          },
+                          ...accelerationFormData.dataTableFields.map((x) => ({
+                            label: x.fieldName,
+                          })),
+                        ]}
+                        selectedOptions={[
+                          {
+                            label: currentColumnExpressionValue.functionParam,
+                          },
+                        ]}
+                        onChange={(fieldOption) =>
+                          updateColumnExpressionValue(
+                            {
+                              ...currentColumnExpressionValue,
+                              functionParam: fieldOption[0].label,
+                            },
+                            index
+                          )
+                        }
+                        isClearable={false}
+                      />
+                    </EuiCompressedFormRow>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </>
           </EuiPopover>
@@ -168,8 +173,8 @@ export const ColumnExpression = ({
               panelPaddingSize="s"
               anchorPosition="downLeft"
             >
-              <EuiFormRow label="Column alias">
-                <EuiFieldText
+              <EuiCompressedFormRow label="Column alias">
+                <EuiCompressedFieldText
                   name="aliasField"
                   value={currentColumnExpressionValue.fieldAlias}
                   onChange={(e) =>
@@ -179,12 +184,12 @@ export const ColumnExpression = ({
                     )
                   }
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiPopover>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             color="danger"
             onClick={onDeleteColumnExpression}
             iconType="trash"

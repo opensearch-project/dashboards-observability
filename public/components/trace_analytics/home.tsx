@@ -5,8 +5,8 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
+import React, { ReactChild, useEffect, useMemo, useState } from 'react';
+import { HashRouter, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -19,11 +19,16 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { TraceAnalyticsMode } from '../../../common/types/trace_analytics';
+import { dataSourceFilterFn } from '../../../common/utils/shared';
+import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
+import { getAttributes, getSpanIndices } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
+import { ServiceFlyout } from './components/services/service_flyout';
 import { TraceView, Traces } from './components/traces';
+import { SpanDetailFlyout } from './components/traces/span_detail_flyout';
 import {
   handleDataPrepperIndicesExistRequest,
   handleJaegerIndicesExistRequest,
@@ -39,11 +44,10 @@ export interface TraceAnalyticsCoreDeps {
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
   savedObjectsMDSClient: SavedObjectsStart;
+  defaultRoute?: string;
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
-
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -54,11 +58,26 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  attributesFilterFields: string[];
+  setSpanFlyout: ({
+    spanId,
+    isFlyoutVisible,
+    addSpanFilter,
+    spanMode,
+    spanDataSourceMDSId,
+  }: {
+    spanId: string;
+    isFlyoutVisible: boolean;
+    addSpanFilter: (field: string, value: any) => void;
+    spanMode: TraceAnalyticsMode;
+    spanDataSourceMDSId: string;
+  }) => void;
 }
 
 export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
+  const [attributesFilterFields, setAttributesFilterFields] = useState<string[]>([]);
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
@@ -98,6 +117,45 @@ export const Home = (props: HomeProps) => {
   };
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
+  const [currentSelectedService, setCurrentSelectedService] = useState('');
+
+  // Navigate a valid routes when suffixed with '/traces' and '/services'
+  // Route defaults to traces page
+  let defaultRoute = props.defaultRoute ?? '/traces';
+  const currentHash = window.location.hash.split('#')[1] || '';
+  if (currentHash.startsWith('/traces') || currentHash.startsWith('/services')) {
+    defaultRoute = currentHash;
+  }
+
+  const { chrome } = props;
+  const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
+
+  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
+    DataSourceSelectableConfig
+  >();
+
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+
+    setDataSourceMDSId([{ id: dataConnectionId, label: dataConnectionLabel }]);
+  };
+
+  const dataSourceMenuComponent = useMemo(() => {
+    return (
+      <DataSourceMenu
+        setMenuMountPoint={props.setActionMenu}
+        componentType={'DataSourceSelectable'}
+        componentConfig={{
+          savedObjects: props.savedObjectsMDSClient.client,
+          notifications: props.notifications,
+          fullWidth: true,
+          onSelectedDataSources: onSelectedDataSource,
+          dataSourceFilter: dataSourceFilterFn,
+        }}
+      />
+    );
+  }, [props.setActionMenu, props.savedObjectsMDSClient.client, props.notifications]);
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -111,7 +169,22 @@ export const Home = (props: HomeProps) => {
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+    {
+      id: 'custom_data_prepper',
+      title: 'Custom source',
+      'data-test-subj': 'custom-data-prepper-mode',
+    },
   ];
+
+  const fetchAttributesFields = () => {
+    coreRefs.dslService
+      ?.fetchFields(getSpanIndices(mode))
+      .then((res) => {
+        const attributes = getAttributes(res);
+        setAttributesFilterFields(attributes);
+      })
+      .catch((error) => console.error('fetching attributes field failed', error));
+  };
 
   useEffect(() => {
     if (!sessionStorage.getItem('TraceAnalyticsMode')) {
@@ -123,11 +196,19 @@ export const Home = (props: HomeProps) => {
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
+  useEffect(() => {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
+  }, [mode]);
+
   const serviceBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/',
-    },
+    ...(!isNavGroupEnabled
+      ? [
+          {
+            text: 'Trace analytics',
+            href: '#/traces',
+          },
+        ]
+      : []),
     {
       text: 'Services',
       href: '#/services',
@@ -135,22 +216,51 @@ export const Home = (props: HomeProps) => {
   ];
 
   const traceBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/',
-    },
+    ...(!isNavGroupEnabled
+      ? [
+          {
+            text: 'Trace analytics',
+            href: '#/traces',
+          },
+        ]
+      : []),
     {
       text: 'Traces',
       href: '#/traces',
     },
   ];
 
-  const nameColumnAction = (item: any) => location.assign(`#/services/${encodeURIComponent(item)}`);
-
   const traceColumnAction = () => location.assign('#/traces');
 
-  const traceIdColumnAction = (item: any) =>
-    location.assign(`#/traces/${encodeURIComponent(item)}`);
+  const getTraceViewUri = (traceId: string) => `#/traces/${encodeURIComponent(traceId)}`;
+
+  const [spanFlyoutComponent, setSpanFlyoutComponent] = useState(<></>);
+
+  const setSpanFlyout = ({
+    spanId,
+    isFlyoutVisible,
+    addSpanFilter,
+    spanMode,
+    spanDataSourceMDSId,
+  }: {
+    spanId: string;
+    isFlyoutVisible: boolean;
+    addSpanFilter: (field: string, value: any) => void;
+    spanMode: TraceAnalyticsMode;
+    spanDataSourceMDSId: string;
+  }) => {
+    setSpanFlyoutComponent(
+      <SpanDetailFlyout
+        http={props.http}
+        spanId={spanId}
+        isFlyoutVisible={isFlyoutVisible}
+        closeFlyout={() => setSpanFlyoutComponent(<></>)}
+        addSpanFilter={addSpanFilter}
+        mode={spanMode}
+        dataSourceMDSId={spanDataSourceMDSId}
+      />
+    );
+  };
 
   const [appConfigs, _] = useState([]);
   const commonProps: TraceAnalyticsComponentDeps = {
@@ -178,32 +288,25 @@ export const Home = (props: HomeProps) => {
     dataSourceManagement: props.dataSourceManagement,
     setActionMenu: props.setActionMenu,
     savedObjectsMDSClient: props.savedObjectsMDSClient,
-  };
-  const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
-    const { id = '', label = '' } = dataSources[0] || {};
-    if (dataSourceMDSId[0].id !== id || dataSourceMDSId[0].label !== label) {
-      setDataSourceMDSId([{ id, label }]);
-    }
+    attributesFilterFields,
+    setSpanFlyout,
   };
 
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
-    DataSourceSelectableConfig
-  >();
+  let flyout;
+
+  if (currentSelectedService !== '') {
+    flyout = (
+      <ServiceFlyout
+        serviceName={currentSelectedService}
+        setCurrentSelectedService={setCurrentSelectedService}
+        dataSourceMDSId={dataSourceMDSId}
+        commonProps={commonProps}
+      />
+    );
+  }
+
   return (
     <>
-      {props.dataSourceEnabled && (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            savedObjects: props.savedObjectsMDSClient.client,
-            notifications: props.notifications,
-            fullWidth: true,
-            activeOption: dataSourceMDSId,
-            onSelectedDataSources: onSelectedDataSource,
-          }}
-        />
-      )}
       <EuiGlobalToastList
         toasts={toasts}
         dismissToast={(removedToast) => {
@@ -215,17 +318,36 @@ export const Home = (props: HomeProps) => {
         <Route
           exact
           path="/traces"
-          render={(_routerProps) => (
-            <TraceSideBar>
-              <Traces
-                page="traces"
-                childBreadcrumbs={traceBreadcrumbs}
-                traceIdColumnAction={traceIdColumnAction}
-                dataSourceMDSId={dataSourceMDSId}
-                {...commonProps}
-              />
-            </TraceSideBar>
-          )}
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+                <Traces
+                  page="traces"
+                  childBreadcrumbs={traceBreadcrumbs}
+                  getTraceViewUri={getTraceViewUri}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
+              <>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+
+                <Traces
+                  page="traces"
+                  childBreadcrumbs={traceBreadcrumbs}
+                  getTraceViewUri={getTraceViewUri}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </>
+            )
+          }
         />
         <Route
           path="/traces/:id+"
@@ -247,20 +369,36 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path={['/services', '/']}
-          render={(_routerProps) => (
-            <TraceSideBar>
-              <Services
-                page="services"
-                childBreadcrumbs={serviceBreadcrumbs}
-                nameColumnAction={nameColumnAction}
-                traceColumnAction={traceColumnAction}
-                toasts={toasts}
-                dataSourceMDSId={dataSourceMDSId}
-                {...commonProps}
-              />
-            </TraceSideBar>
-          )}
+          path={['/services']}
+          render={(_routerProps) =>
+            !isNavGroupEnabled ? (
+              <TraceSideBar>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  traceColumnAction={traceColumnAction}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </TraceSideBar>
+            ) : (
+              <>
+                {props.dataSourceEnabled && dataSourceMenuComponent}
+                <Services
+                  page="services"
+                  childBreadcrumbs={serviceBreadcrumbs}
+                  traceColumnAction={traceColumnAction}
+                  setCurrentSelectedService={setCurrentSelectedService}
+                  toasts={toasts}
+                  dataSourceMDSId={dataSourceMDSId}
+                  {...commonProps}
+                />
+              </>
+            )
+          }
         />
         <Route
           path="/services/:id+"
@@ -285,7 +423,10 @@ export const Home = (props: HomeProps) => {
             />
           )}
         />
+        <Route path="/" render={() => <Redirect to={defaultRoute} />} />
       </HashRouter>
+      {flyout}
+      {spanFlyoutComponent}
     </>
   );
 };

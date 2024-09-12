@@ -6,18 +6,20 @@
 import {
   EuiCallOut,
   EuiCheckableCard,
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedSelect,
   EuiForm,
-  EuiFormRow,
-  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
-import { coreRefs } from '../../../framework/core_refs';
+import React, { useEffect, useState } from 'react';
+import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { dataSourceFilterFn } from '../../../../common/utils/shared';
+import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
 
 // TODO support localization
@@ -32,7 +34,7 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   [
     's3',
     {
-      title: 'Data Source',
+      title: 'Direct query connections',
       lower: 'data_source',
       help: 'Select a data source to pull the data from.',
     },
@@ -58,7 +60,10 @@ const integrationConnectionSelectorItems = [
   },
 ];
 
-const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
+const suggestDataSources = async (
+  type: string,
+  dataSourceMDSId?: string
+): Promise<Array<{ label: string }>> => {
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -67,6 +72,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         query: {
           path: '_data_stream/ss4o_*',
           method: 'GET',
+          dataSourceId: dataSourceMDSId ?? '',
         },
       });
       return (
@@ -75,7 +81,9 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         }) ?? []
       );
     } else if (type === 's3') {
-      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
+      const result = (await http.get(
+        `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceMDSId ?? ''}`
+      )) as Array<{
         name: string;
         connector: string;
       }>;
@@ -100,32 +108,39 @@ export function SetupWorkflowSelector({
   integration,
   useWorkflows,
   toggleWorkflow,
+  config,
 }: {
   integration: IntegrationConfig;
   useWorkflows: Map<string, boolean>;
   toggleWorkflow: (name: string) => void;
+  config: IntegrationSetupInputs;
 }) {
   if (!integration.workflows) {
     return null;
   }
 
-  const cards = integration.workflows.map((workflow) => {
-    return (
-      <EuiCheckableCard
-        id={`workflow-checkbox-${workflow.name}`}
-        key={workflow.name}
-        label={workflow.label}
-        checkableType="checkbox"
-        value={workflow.name}
-        checked={useWorkflows.get(workflow.name)}
-        onChange={() => toggleWorkflow(workflow.name)}
-      >
-        {workflow.description}
-      </EuiCheckableCard>
-    );
-  });
-
-  return cards;
+  const cards = integration.workflows
+    .filter((workflow) =>
+      workflow.applicable_data_sources
+        ? workflow.applicable_data_sources.includes(config.connectionType)
+        : true
+    )
+    .map((workflow) => {
+      return (
+        <EuiCheckableCard
+          id={`workflow-checkbox-${workflow.name}`}
+          key={workflow.name}
+          label={workflow.label}
+          checkableType="checkbox"
+          value={workflow.name}
+          checked={useWorkflows.get(workflow.name)}
+          onChange={() => toggleWorkflow(workflow.name)}
+        >
+          {workflow.description}
+        </EuiCheckableCard>
+      );
+    });
+  return <>{cards}</>;
 }
 
 export function IntegrationDetailsInputs({
@@ -138,19 +153,19 @@ export function IntegrationDetailsInputs({
   integration: IntegrationConfig;
 }) {
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label="Display Name"
       error={['Must be at least 1 character.']}
       isInvalid={config.displayName.length === 0}
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         value={config.displayName}
         onChange={(event) => updateConfig({ displayName: event.target.value })}
         placeholder={`${integration.name} Integration`}
         isInvalid={config.displayName.length === 0}
         data-test-subj="new-instance-name"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 
@@ -158,15 +173,36 @@ export function IntegrationConnectionInputs({
   config,
   updateConfig,
   integration,
+  dataSourceEnabled,
+  dataSourceManagement,
+  notifications,
+  savedObjectsMDSClient,
   lockConnectionType,
+  handleSelectedDataSourceChange,
 }: {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
+  dataSourceManagement: DataSourceManagementPluginSetup;
+  savedObjectsMDSClient: SavedObjectsStart;
+  handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
   lockConnectionType?: boolean;
 }) {
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    setDataSourceMDSId(dataConnectionId);
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
 
+  let DataSourceSelector;
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
     [] as Array<{ label: string }>
   );
@@ -174,22 +210,41 @@ export function IntegrationConnectionInputs({
 
   useEffect(() => {
     const updateDataSources = async () => {
-      const data = await suggestDataSources(config.connectionType);
+      const data = await suggestDataSources(config.connectionType, dataSourceMDSId);
       setDataSourceSuggestions(data);
       setIsSuggestionsLoading(false);
     };
 
     setIsSuggestionsLoading(true);
     updateDataSources();
-  }, [config.connectionType]);
+  }, [config.connectionType, dataSourceMDSId]);
 
   return (
     <>
-      <EuiFormRow
+      {dataSourceEnabled && (
+        <>
+          <EuiCompressedFormRow
+            label="Open Source Connections"
+            helpText="Select the type of remote data source to query from."
+          >
+            <DataSourceSelector
+              savedObjectsClient={savedObjectsMDSClient.client}
+              notifications={notifications}
+              disabled={false}
+              fullWidth={false}
+              removePrepend={true}
+              onSelectedDataSource={onSelectedDataSource}
+              dataSourceFilter={dataSourceFilterFn}
+            />
+          </EuiCompressedFormRow>
+          <EuiSpacer />
+        </>
+      )}
+      <EuiCompressedFormRow
         label="Connection Type"
         helpText="Select the type of connection to use for queries."
       >
-        <EuiSelect
+        <EuiCompressedSelect
           options={integrationConnectionSelectorItems.filter((item) => {
             if (item.value === 's3') {
               return integration.assets.some((asset) => asset.type === 'query');
@@ -205,9 +260,9 @@ export function IntegrationConnectionInputs({
           }
           disabled={lockConnectionType}
         />
-      </EuiFormRow>
-      <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
-        <EuiComboBox
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow label={connectionType.title} helpText={connectionType.help}>
+        <EuiCompressedComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
           onChange={(selected) => {
@@ -232,7 +287,7 @@ export function IntegrationConnectionInputs({
           data-test-subj="data-source-name"
           isDisabled={lockConnectionType}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 }
@@ -251,13 +306,13 @@ export function IntegrationQueryInputs({
 
   return (
     <>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Spark Table Name"
         helpText="Select a table name to associate with your data."
         error={['Must be at least 1 character.']}
         isInvalid={config.connectionTableName.length === 0}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           placeholder={integration.name}
           value={config.connectionTableName}
           onChange={(evt) => {
@@ -265,13 +320,13 @@ export function IntegrationQueryInputs({
           }}
           isInvalid={config.connectionTableName.length === 0}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label="S3 Data Location"
         isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={config.connectionLocation}
           onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
           placeholder="s3://"
@@ -280,8 +335,8 @@ export function IntegrationQueryInputs({
             setIsBucketBlurred(true);
           }}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label="S3 Checkpoint Location"
         helpText={
           'The Checkpoint location must be a unique directory and not the same as the Data ' +
@@ -290,7 +345,7 @@ export function IntegrationQueryInputs({
         isInvalid={isCheckpointBlurred && !config.checkpointLocation.startsWith('s3://')}
         error={["Must be a URL starting with 's3://'."]}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={config.checkpointLocation}
           onChange={(event) => updateConfig({ checkpointLocation: event.target.value })}
           placeholder="s3://"
@@ -299,15 +354,17 @@ export function IntegrationQueryInputs({
             setIsCheckpointBlurred(true);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 }
 
 export function IntegrationWorkflowsInputs({
+  config,
   updateConfig,
   integration,
 }: {
+  config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationConfig;
 }) {
@@ -335,73 +392,86 @@ export function IntegrationWorkflowsInputs({
   }, [useWorkflows]);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       isInvalid={![...useWorkflows.values()].includes(true)}
       error={['Must select at least one workflow.']}
     >
       <SetupWorkflowSelector
         integration={integration}
+        config={config}
         useWorkflows={useWorkflows}
         toggleWorkflow={toggleWorkflow}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 
-export function SetupIntegrationFormInputs({
-  config,
-  updateConfig,
-  integration,
-  setupCallout,
-  lockConnectionType,
-}: IntegrationConfigProps) {
+export function SetupIntegrationFormInputs(props: IntegrationConfigProps) {
+  const {
+    config,
+    updateConfig,
+    integration,
+    setupCallout,
+    lockConnectionType,
+    dataSourceEnabled,
+    dataSourceManagement,
+    notifications,
+    savedObjectsMDSClient,
+    handleSelectedDataSourceChange,
+  } = props;
+
   return (
     <EuiForm>
-      <EuiTitle>
-        <h1>Set Up Integration</h1>
-      </EuiTitle>
-      <EuiSpacer />
+      <EuiText size="s">
+        <h2>Set Up Integration</h2>
+      </EuiText>
+      <EuiSpacer size="s" />
       {setupCallout.show ? (
         <EuiCallOut title={setupCallout.title} color="danger">
           <p>{setupCallout.text}</p>
         </EuiCallOut>
       ) : null}
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiText>
         <h3>Integration Details</h3>
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <IntegrationDetailsInputs
         config={config}
         updateConfig={updateConfig}
         integration={integration}
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiText>
         <h3>Integration Connection</h3>
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <IntegrationConnectionInputs
         config={config}
         updateConfig={updateConfig}
         integration={integration}
         lockConnectionType={lockConnectionType}
+        dataSourceManagement={dataSourceManagement}
+        notifications={notifications}
+        dataSourceEnabled={dataSourceEnabled}
+        savedObjectsMDSClient={savedObjectsMDSClient}
+        handleSelectedDataSourceChange={handleSelectedDataSourceChange}
       />
       {config.connectionType === 's3' ? (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiText>
             <h3>Query Fields</h3>
           </EuiText>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText grow={false} size="xs">
               <p>
                 To set up the integration, we need to know some information about how to process
                 your data.
               </p>
             </EuiText>
-          </EuiFormRow>
-          <EuiSpacer />
+          </EuiCompressedFormRow>
+          <EuiSpacer size="s" />
           <IntegrationQueryInputs
             config={config}
             updateConfig={updateConfig}
@@ -409,11 +479,11 @@ export function SetupIntegrationFormInputs({
           />
           {integration.workflows ? (
             <>
-              <EuiSpacer />
+              <EuiSpacer size="s" />
               <EuiText>
                 <h3>Integration Resources</h3>
               </EuiText>
-              <EuiFormRow>
+              <EuiCompressedFormRow>
                 <EuiText grow={false} size="xs">
                   <p>
                     This integration offers different kinds of resources compatible with your data
@@ -421,9 +491,13 @@ export function SetupIntegrationFormInputs({
                     Select at least one of the following options.
                   </p>
                 </EuiText>
-              </EuiFormRow>
-              <EuiSpacer />
-              <IntegrationWorkflowsInputs updateConfig={updateConfig} integration={integration} />
+              </EuiCompressedFormRow>
+              <EuiSpacer size="s" />
+              <IntegrationWorkflowsInputs
+                updateConfig={updateConfig}
+                integration={integration}
+                config={config}
+              />
             </>
           ) : null}
           {/* Bottom bar will overlap content if there isn't some space at the end */}

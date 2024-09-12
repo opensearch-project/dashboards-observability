@@ -3,23 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
 import {
-  EuiOverlayMask,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiConfirmModal,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
   EuiForm,
-  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiOverlayMask,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiSpacer,
   EuiText,
-  EuiSpacer
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+import { CoreStart, SavedObjectsStart } from '../../../../../../../src/core/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public/plugin';
+import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { CustomInputModal } from './custom_modals/custom_input_modal';
 
 /* The file contains helper functions for modal layouts
@@ -38,7 +42,7 @@ export const getCustomModal = (
   btn1txt: string,
   btn2txt: string,
   openNoteName?: string,
-  helpText?: string,
+  helpText?: string
 ) => {
   return (
     <CustomInputModal
@@ -80,8 +84,26 @@ export const getSampleNotebooksModal = (
   onCancel: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void,
-  onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+  onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
+  dataSourceEnabled: boolean,
+  dataSourceManagement: DataSourceManagementPluginSetup,
+  savedObjectsMDSClient: SavedObjectsStart,
+  notifications: CoreStart['notifications'],
+  handleSelectedDataSourceChange: (
+    dataSourceMDSId: string | undefined,
+    dataSourceMDSLabel: string | undefined
+  ) => void
 ) => {
+  let DataSourceSelector;
+  const onSelectedDataSource = (e) => {
+    const dataConnectionId = e[0] ? e[0].id : undefined;
+    const dataConnectionLabel = e[0] ? e[0].label : undefined;
+    handleSelectedDataSourceChange(dataConnectionId, dataConnectionLabel);
+  };
+
+  if (dataSourceEnabled) {
+    DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+  }
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
@@ -92,7 +114,27 @@ export const getSampleNotebooksModal = (
         confirmButtonText="Yes"
         defaultFocusedButton="confirm"
       >
-        <p>Do you want to add sample notebooks? This will also add Dashboards sample flights and logs data if they have not been added.</p>
+        {dataSourceEnabled && (
+          <>
+            <EuiTitle size="s">
+              <h4>Select a Data source</h4>
+            </EuiTitle>
+            <DataSourceSelector
+              savedObjectsClient={savedObjectsMDSClient.client}
+              notifications={notifications}
+              onSelectedDataSource={onSelectedDataSource}
+              disabled={false}
+              fullWidth={false}
+              removePrepend={false}
+              dataSourceFilter={dataSourceFilterFn}
+            />
+          </>
+        )}
+        <EuiSpacer />
+        <p>
+          Do you want to add sample notebooks? This will also add Dashboards sample flights and logs
+          data if they have not been added.
+        </p>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
@@ -105,7 +147,7 @@ export const getDeleteModal = (
   onConfirm: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
   title: string,
   message: string,
-  confirmMessage?: string,
+  confirmMessage?: string
 ) => {
   return (
     <EuiOverlayMask>
@@ -114,11 +156,11 @@ export const getDeleteModal = (
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelButtonText="Cancel"
-        confirmButtonText={confirmMessage || "Delete"}
+        confirmButtonText={confirmMessage || 'Delete'}
         buttonColor="danger"
         defaultFocusedButton="confirm"
       >
-        {message}
+        <EuiText size="s">{message}</EuiText>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
@@ -145,29 +187,33 @@ export const DeleteNotebookModal = ({
     <EuiOverlayMask>
       <EuiModal onClose={onCancel} initialFocus="[name=input]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <EuiText size="s">
+              <h2>{title}</h2>
+            </EuiText>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText>{message}</EuiText>
-          <EuiText>The action cannot be undone.</EuiText>
+          <EuiText size="s">{message}</EuiText>
+          <EuiText size="s">The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiFormRow label={'To confirm deletion, enter "delete" in the text field'}>
-              <EuiFieldText
+            <EuiCompressedFormRow label={'To confirm deletion, enter "delete" in the text field'}>
+              <EuiCompressedFieldText
                 data-test-subj="delete-notebook-modal-input"
                 name="input"
                 placeholder="delete"
                 value={value}
                 onChange={(e) => onChange(e)}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-          <EuiButton
+          <EuiSmallButtonEmpty onClick={onCancel}>Cancel</EuiSmallButtonEmpty>
+          <EuiSmallButton
             data-test-subj="delete-notebook-modal-delete-button"
             onClick={() => onConfirm()}
             color="danger"
@@ -175,7 +221,7 @@ export const DeleteNotebookModal = ({
             disabled={value !== 'delete'}
           >
             Delete
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>

@@ -5,7 +5,7 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiIcon,
   EuiTabbedContent,
@@ -188,7 +188,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
   return (
     <div className="cp__rightContainer">
       <div className="cp__rightHeader">
-        <EuiComboBox
+        <EuiCompressedComboBox
           aria-label="config chart selector"
           placeholder="Select a chart"
           options={memorizedVisualizationTypes}

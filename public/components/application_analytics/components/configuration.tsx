@@ -5,7 +5,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
   EuiSpacer,
   EuiText,
@@ -68,7 +68,7 @@ export const Configuration = (props: ConfigProps) => {
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <EuiButton
+                    <EuiSmallButton
                       fill
                       data-test-subj="editApplicationButton"
                       onClick={() => {
@@ -76,7 +76,7 @@ export const Configuration = (props: ConfigProps) => {
                       }}
                     >
                       Edit
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>
@@ -125,7 +125,7 @@ export const Configuration = (props: ConfigProps) => {
                   </EuiText>
                   <EuiSpacer size="m" />
                   {visWithAvailability.length > 0 ? (
-                    <EuiSelect
+                    <EuiCompressedSelect
                       options={visWithAvailability}
                       value={availabilityVisId}
                       onChange={onAvailabilityVisChange}

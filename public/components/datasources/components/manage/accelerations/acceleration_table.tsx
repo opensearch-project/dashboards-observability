@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -134,13 +134,13 @@ export const AccelerationTable = ({
   const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
-      startLoadingAccelerations(dataSourceName);
+      startLoadingAccelerations({ dataSourceName });
     }
   }, [accelerationsLoadStatus]);
 
   const RefreshButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         onClick={handleRefresh}
         isLoading={
           isRefreshing ||
@@ -148,7 +148,7 @@ export const AccelerationTable = ({
         }
       >
         Refresh
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
@@ -246,7 +246,11 @@ export const AccelerationTable = ({
         return (
           <EuiLink
             onClick={() => {
-              renderAccelerationDetailsFlyout(acceleration, dataSourceName, handleRefresh);
+              renderAccelerationDetailsFlyout({
+                acceleration,
+                dataSourceName,
+                handleRefresh,
+              });
             }}
           >
             {displayName}

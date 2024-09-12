@@ -28,4 +28,4 @@ AWS ELB access logs integration includes dashboards, visualisations, queries and
 
 ### Dashboard
 
-<img width="1267" alt="dashboard1" src="https://github.com/danieldong51/dashboards-observability/assets/58446449/aaae3758-80c8-410e-b542-6ad78284425e">
+![ELB Dashboard](../static/dashboard1.png)

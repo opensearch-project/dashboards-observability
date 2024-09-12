@@ -6,9 +6,10 @@
 import '@algolia/autocomplete-theme-classic';
 import {
   EuiBadge,
+  EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -30,7 +31,11 @@ import {
   OLLY_QUERY_ASSISTANT,
   RAW_QUERY,
 } from '../../../../common/constants/explorer';
-import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_SPAN_REGEX,
+  QUERY_ASSIST_END_TIME,
+  QUERY_ASSIST_START_TIME,
+} from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
@@ -172,7 +177,7 @@ export const Search = (props: any) => {
   }
 
   const Savebutton = (
-    <EuiButton
+    <EuiSmallButton
       iconSide="right"
       onClick={() => {
         setIsSavePanelOpen((staleState) => {
@@ -183,7 +188,7 @@ export const Search = (props: any) => {
       iconType="arrowDown"
     >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const liveButton = (
@@ -217,12 +222,14 @@ export const Search = (props: any) => {
 
   const languagePopOverItems = [
     <EuiContextMenuItem
+      size="s"
       key={QUERY_LANGUAGE.SQL}
       onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
     >
       PPL
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      size="s"
       key={QUERY_LANGUAGE.PPL}
       onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
     >
@@ -277,14 +284,16 @@ export const Search = (props: any) => {
       dispatch(changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery } }));
     });
     onQuerySearch(queryLang);
-    handleTimePickerChange([startTime, endTime]);
+    if (coreRefs.queryAssistEnabled) {
+      handleTimePickerChange([QUERY_ASSIST_START_TIME, QUERY_ASSIST_END_TIME]);
+    } else {
+      handleTimePickerChange([startTime, endTime]);
+    }
     setNeedsUpdate(false);
   };
 
   //  STATE FOR LANG PICKER AND INDEX PICKER
-  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: 'opensearch_dashboards_sample_data_logs' },
-  ]);
+  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([]);
   const { data: indices, loading: indicesLoading } = useCatIndices();
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const indicesAndIndexPatterns =
@@ -292,17 +301,38 @@ export const Search = (props: any) => {
       ? [...indexPatterns, ...indices].filter(
           (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
         )
-      : undefined;
+      : [];
   const loading = indicesLoading || indexPatternsLoading;
+
+  useEffect(() => {
+    if (selectedIndex.length || !indicesAndIndexPatterns.length) return;
+    // pre-fill selected index with sample logs or other sample data index
+    const sampleLogOption = indicesAndIndexPatterns.find(
+      (option) => option.label === 'opensearch_dashboards_sample_data_logs'
+    );
+    if (sampleLogOption) {
+      setSelectedIndex([sampleLogOption]);
+      return;
+    }
+    const sampleDataOption = indicesAndIndexPatterns.find((option) =>
+      option.label.startsWith('opensearch_dashboards_sample_data_')
+    );
+    if (sampleDataOption) setSelectedIndex([sampleDataOption]);
+  }, [indicesAndIndexPatterns]);
 
   const onLanguagePopoverClick = () => {
     setLanguagePopoverOpen(!_isLanguagePopoverOpen);
   };
 
   const languagePopOverButton = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
+    <EuiSmallButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onLanguagePopoverClick}
+      color="text"
+    >
       {queryLang}
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const redirectToDiscover = () => {
@@ -334,7 +364,7 @@ export const Search = (props: any) => {
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="m" items={languagePopOverItems} />
+                    <EuiContextMenuPanel size="s" items={languagePopOverItems} />
                   </EuiPopover>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -350,9 +380,9 @@ export const Search = (props: any) => {
                 </EuiFlexItem>
                 {coreRefs.queryAssistEnabled && (
                   <EuiFlexItem>
-                    <EuiComboBox
+                    <EuiCompressedComboBox
                       placeholder="Select an index"
-                      isClearable={true}
+                      isClearable={false}
                       prepend={<EuiText>Index</EuiText>}
                       singleSelection={{ asPlainText: true }}
                       isLoading={loading}
@@ -440,7 +470,7 @@ export const Search = (props: any) => {
             {!showQueryArea && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
-                  <EuiButton
+                  <EuiSmallButton
                     color={needsUpdate ? 'success' : 'primary'}
                     iconType={needsUpdate ? 'kqlFunction' : 'play'}
                     fill
@@ -448,7 +478,7 @@ export const Search = (props: any) => {
                     data-test-subj="superDatePickerApplyTimeButton" // mimic actual timepicker button
                   >
                     {needsUpdate ? 'Update' : 'Run'}
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiToolTip>
               </EuiFlexItem>
             )}

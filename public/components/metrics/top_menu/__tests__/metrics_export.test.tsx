@@ -44,6 +44,7 @@ const defaultInitialState = {
   refresh: 0, // set to new Date() to trigger
 };
 
+// eslint-disable-next-line jest/no-export
 export function renderWithMetricsProviders(
   ui: React.ReactElement,
   {
@@ -56,6 +57,7 @@ export function renderWithMetricsProviders(
     ...renderOptions
   }: ExtendedRenderOptions = {}
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function Wrapper({ children }: PropsWithChildren<{}>): JSX.Element {
     return <Provider store={store}>{children}</Provider>;
   }
@@ -147,7 +149,8 @@ describe('Export Metrics Panel Component', () => {
     expect(saveButton).toBeInTheDocument();
     fireEvent.click(saveButton);
 
-    expect(await screen.findByText('Custom operational dashboards/application'));
+    // eslint-disable-next-line jest/valid-expect
+    expect(await screen.findByText('Dashboards and applications - optional'));
 
     userEvent.keyboard('{ESCAPE}');
 

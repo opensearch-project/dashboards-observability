@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import semver from 'semver';
+import { SavedObject } from '../../../../src/core/public';
+import { DataSourceAttributes } from '../../../../src/plugins/data_source/common/data_sources';
+import * as pluginManifest from '../../opensearch_dashboards.json';
 import { coreRefs } from '../../public/framework/core_refs';
 
 /**
@@ -61,4 +65,13 @@ export const basePathLink = (link: string): string => {
   } else {
     return link;
   }
+};
+
+export const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>) => {
+  const dataSourceVersion = dataSource?.attributes?.dataSourceVersion || '';
+  const installedPlugins = dataSource?.attributes?.installedPlugins || [];
+  return (
+    semver.satisfies(dataSourceVersion, pluginManifest.supportedOSDataSourceVersions) &&
+    pluginManifest.requiredOSDataSourcePlugins.every((plugin) => installedPlugins.includes(plugin))
+  );
 };

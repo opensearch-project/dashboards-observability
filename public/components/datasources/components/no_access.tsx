@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiPage, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiText } from '@elastic/eui';
 import React from 'react';
 
 export const NoAccess = () => {
@@ -20,9 +20,9 @@ export const NoAccess = () => {
           </EuiText>
         }
         actions={
-          <EuiButton color="primary" fill onClick={() => (window.location.hash = '')}>
+          <EuiSmallButton color="primary" fill onClick={() => (window.location.hash = '')}>
             Return to data connections
-          </EuiButton>
+          </EuiSmallButton>
         }
       />
     </EuiPage>

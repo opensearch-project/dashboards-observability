@@ -8,7 +8,7 @@ exports[`Services table component renders empty jaeger services table message 1`
   jaegerIndicesExist={true}
   loading={false}
   mode="jaeger"
-  nameColumnAction={[Function]}
+  selectedItems={Array []}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
 >
@@ -17,17 +17,16 @@ exports[`Services table component renders empty jaeger services table message 1`
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
+        justifyContent="spaceBetween"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
-            grow={10}
+            grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrow10"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <PanelTitle
                 title="Services"
@@ -52,6 +51,75 @@ exports[`Services table component renders empty jaeger services table message 1`
                   </div>
                 </EuiText>
               </PanelTitle>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiToolTip
+                        content="Select services to filter"
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onKeyUp={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            isDisabled={true}
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                              disabled={true}
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconGap="m"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Filter services
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
             </div>
           </EuiFlexItem>
         </div>
@@ -82,7 +150,9 @@ exports[`Services table component renders empty jaeger services table message 1`
         </EuiSpacer>
         <EuiEmptyPrompt
           body={
-            <EuiText>
+            <EuiText
+              size="s"
+            >
               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
             </EuiText>
           }
@@ -121,9 +191,11 @@ exports[`Services table component renders empty jaeger services table message 1`
                   <div
                     className="euiText euiText--medium"
                   >
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       <div
-                        className="euiText euiText--medium"
+                        className="euiText euiText--small"
                       >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                       </div>
@@ -155,7 +227,7 @@ exports[`Services table component renders empty services table message 1`] = `
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
-  nameColumnAction={[Function]}
+  selectedItems={Array []}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
 >
@@ -164,17 +236,16 @@ exports[`Services table component renders empty services table message 1`] = `
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
+        justifyContent="spaceBetween"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
-            grow={10}
+            grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrow10"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <PanelTitle
                 title="Services"
@@ -199,6 +270,114 @@ exports[`Services table component renders empty services table message 1`] = `
                   </div>
                 </EuiText>
               </PanelTitle>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiToolTip
+                        content="Select services to filter"
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onKeyUp={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            isDisabled={true}
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                              disabled={true}
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconGap="m"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Filter services
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiButtonEmpty
+                        onClick={[Function]}
+                        size="xs"
+                      >
+                        <button
+                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconSize="s"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                Show 24 hour trends
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
             </div>
           </EuiFlexItem>
         </div>
@@ -229,7 +408,9 @@ exports[`Services table component renders empty services table message 1`] = `
         </EuiSpacer>
         <EuiEmptyPrompt
           body={
-            <EuiText>
+            <EuiText
+              size="s"
+            >
               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
             </EuiText>
           }
@@ -268,9 +449,11 @@ exports[`Services table component renders empty services table message 1`] = `
                   <div
                     className="euiText euiText--medium"
                   >
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       <div
-                        className="euiText euiText--medium"
+                        className="euiText euiText--small"
                       >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                       </div>
@@ -312,7 +495,7 @@ exports[`Services table component renders jaeger services table 1`] = `
   jaegerIndicesExist={true}
   loading={false}
   mode="jaeger"
-  nameColumnAction={[Function]}
+  selectedItems={Array []}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
 >
@@ -321,17 +504,16 @@ exports[`Services table component renders jaeger services table 1`] = `
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
+        justifyContent="spaceBetween"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
-            grow={10}
+            grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrow10"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <PanelTitle
                 title="Services"
@@ -356,6 +538,75 @@ exports[`Services table component renders jaeger services table 1`] = `
                   </div>
                 </EuiText>
               </PanelTitle>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiToolTip
+                        content="Select services to filter"
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onKeyUp={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            isDisabled={true}
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                              disabled={true}
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconGap="m"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Filter services
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
             </div>
           </EuiFlexItem>
         </div>
@@ -414,8 +665,16 @@ exports[`Services table component renders jaeger services table 1`] = `
               "sortable": true,
               "truncateText": true,
             },
+            Object {
+              "align": "center",
+              "field": "actions",
+              "name": "Actions",
+              "render": [Function],
+            },
           ]
         }
+        isSelectable={true}
+        itemId="itemId"
         items={
           Array [
             Object {
@@ -439,6 +698,11 @@ exports[`Services table component renders jaeger services table 1`] = `
           }
         }
         responsive={true}
+        selection={
+          Object {
+            "onSelectionChange": [Function],
+          }
+        }
         sorting={
           Object {
             "sort": Object {
@@ -489,8 +753,16 @@ exports[`Services table component renders jaeger services table 1`] = `
                 "sortable": true,
                 "truncateText": true,
               },
+              Object {
+                "align": "center",
+                "field": "actions",
+                "name": "Actions",
+                "render": [Function],
+              },
             ]
           }
+          isSelectable={true}
+          itemId="itemId"
           items={
             Array [
               Object {
@@ -519,6 +791,11 @@ exports[`Services table component renders jaeger services table 1`] = `
             }
           }
           responsive={true}
+          selection={
+            Object {
+              "onSelectionChange": [Function],
+            }
+          }
           sorting={
             Object {
               "allowNeutralSort": true,
@@ -551,7 +828,46 @@ exports[`Services table component renders jaeger services table 1`] = `
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrowZero"
-                        />
+                        >
+                          <EuiI18n
+                            default="Select all rows"
+                            token="euiBasicTable.selectAllRows"
+                          >
+                            <EuiCheckbox
+                              aria-label="Select all rows"
+                              checked={false}
+                              compressed={false}
+                              disabled={false}
+                              id="_selection_column-checkbox_random_html_id"
+                              indeterminate={false}
+                              label="Select all rows"
+                              onChange={[Function]}
+                            >
+                              <div
+                                className="euiCheckbox"
+                              >
+                                <input
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  className="euiCheckbox__input"
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  onChange={[Function]}
+                                  type="checkbox"
+                                />
+                                <div
+                                  className="euiCheckbox__square"
+                                />
+                                <label
+                                  className="euiCheckbox__label"
+                                  htmlFor="_selection_column-checkbox_random_html_id"
+                                >
+                                  Select all rows
+                                </label>
+                              </div>
+                            </EuiCheckbox>
+                          </EuiI18n>
+                        </div>
                       </EuiFlexItem>
                       <EuiFlexItem
                         grow={false}
@@ -647,6 +963,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -737,6 +1054,59 @@ exports[`Services table component renders jaeger services table 1`] = `
                   <EuiTableHeader>
                     <thead>
                       <tr>
+                        <EuiTableHeaderCellCheckbox
+                          key="_selection_column_h"
+                        >
+                          <th
+                            className="euiTableHeaderCellCheckbox"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <div
+                              className="euiTableCellContent"
+                            >
+                              <EuiI18n
+                                default="Select all rows"
+                                token="euiBasicTable.selectAllRows"
+                              >
+                                <EuiCheckbox
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  compressed={false}
+                                  data-test-subj="checkboxSelectAll"
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  indeterminate={false}
+                                  label={null}
+                                  onChange={[Function]}
+                                  type="inList"
+                                >
+                                  <div
+                                    className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                  >
+                                    <input
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      className="euiCheckbox__input"
+                                      data-test-subj="checkboxSelectAll"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      onChange={[Function]}
+                                      type="checkbox"
+                                    />
+                                    <div
+                                      className="euiCheckbox__square"
+                                    />
+                                  </div>
+                                </EuiCheckbox>
+                              </EuiI18n>
+                            </div>
+                          </th>
+                        </EuiTableHeaderCellCheckbox>
                         <EuiTableHeaderCell
                           align="left"
                           data-test-subj="tableHeaderCell_name_0"
@@ -1058,6 +1428,52 @@ exports[`Services table component renders jaeger services table 1`] = `
                             </button>
                           </th>
                         </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="center"
+                          data-test-subj="tableHeaderCell_actions_5"
+                          key="_data_h_actions_5"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_actions_5"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent euiTableCellContent--alignCenter"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent euiTableCellContent--alignCenter"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Actions",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Actions"
+                                    >
+                                      Actions
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
                       </tr>
                     </thead>
                   </EuiTableHeader>
@@ -1066,11 +1482,60 @@ exports[`Services table component renders jaeger services table 1`] = `
                   >
                     <tbody>
                       <EuiTableRow
+                        isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow"
+                          className="euiTableRow euiTableRow-isSelectable"
                         >
+                          <EuiTableRowCellCheckbox
+                            key="_selection_column_0"
+                          >
+                            <td
+                              className="euiTableRowCellCheckbox"
+                            >
+                              <div
+                                className="euiTableCellContent"
+                              >
+                                <EuiI18n
+                                  default="Select this row"
+                                  token="euiBasicTable.selectThisRow"
+                                >
+                                  <EuiCheckbox
+                                    aria-label="Select this row"
+                                    checked={false}
+                                    compressed={false}
+                                    data-test-subj="checkboxSelectRow-0"
+                                    disabled={false}
+                                    id="_selection_column_0-checkbox"
+                                    indeterminate={false}
+                                    onChange={[Function]}
+                                    title="Select this row"
+                                    type="inList"
+                                  >
+                                    <div
+                                      className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                    >
+                                      <input
+                                        aria-label="Select this row"
+                                        checked={false}
+                                        className="euiCheckbox__input"
+                                        data-test-subj="checkboxSelectRow-0"
+                                        disabled={false}
+                                        id="_selection_column_0-checkbox"
+                                        onChange={[Function]}
+                                        title="Select this row"
+                                        type="checkbox"
+                                      />
+                                      <div
+                                        className="euiCheckbox__square"
+                                      />
+                                    </div>
+                                  </EuiCheckbox>
+                                </EuiI18n>
+                              </div>
+                            </td>
+                          </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
                             key="_data_column_name_0_0"
@@ -1146,7 +1611,61 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
                               >
-                                49.54
+                                <ServiceTrendsPlots
+                                  className=""
+                                  fieldType="average_latency"
+                                  item={49.54}
+                                  key=".0"
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
+                                >
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
+                                  >
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  49.54
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1178,17 +1697,69 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
                               >
-                                <EuiText
+                                <ServiceTrendsPlots
                                   className=""
+                                  fieldType="error_rate"
+                                  item={3.77}
                                   key=".0"
-                                  size="s"
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
                                 >
-                                  <div
-                                    className="euiText euiText--small"
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
                                   >
-                                    3.77%
-                                  </div>
-                                </EuiText>
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  <EuiText
+                                                    size="s"
+                                                  >
+                                                    <div
+                                                      className="euiText euiText--small"
+                                                    >
+                                                      3.77%
+                                                    </div>
+                                                  </EuiText>
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1221,13 +1792,65 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <EuiI18nNumber
+                                <ServiceTrendsPlots
                                   className=""
+                                  fieldType="throughput"
+                                  item={53}
                                   key=".0"
-                                  value={53}
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
                                 >
-                                  53
-                                </EuiI18nNumber>
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
+                                  >
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  <EuiI18nNumber
+                                                    value={53}
+                                                  >
+                                                    53
+                                                  </EuiI18nNumber>
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1276,6 +1899,96 @@ exports[`Services table component renders jaeger services table 1`] = `
                                     </EuiI18nNumber>
                                   </button>
                                 </EuiLink>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="center"
+                            key="_data_column_actions_0_5"
+                            mobileOptions={
+                              Object {
+                                "header": "Actions",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Actions
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                              >
+                                <EuiFlexGroup
+                                  className=""
+                                  justifyContent="center"
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  >
+                                    <EuiFlexItem
+                                      grow={false}
+                                      onClick={[Function]}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiLink
+                                          data-test-subj="service-flyout-action-btnundefined"
+                                        >
+                                          <button
+                                            className="euiLink euiLink--primary"
+                                            data-test-subj="service-flyout-action-btnundefined"
+                                            disabled={false}
+                                            type="button"
+                                          >
+                                            <EuiIcon
+                                              color="primary"
+                                              type="inspect"
+                                            >
+                                              <EuiIconInspect
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--primary"
+                                                focusable="false"
+                                                role="img"
+                                                style={null}
+                                              >
+                                                <svg
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--primary"
+                                                  focusable="false"
+                                                  height={16}
+                                                  role="img"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width={16}
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M15.363 14.658a.5.5 0 1 1-.713.7l-2.97-3.023a.5.5 0 0 1 .001-.7A3.9 3.9 0 1 0 8.9 12.8a.5.5 0 1 1 0 .999 4.9 4.9 0 1 1 3.821-1.833l2.642 2.691ZM3.094 13a.5.5 0 1 1 0 1H2.5A2.5 2.5 0 0 1 0 11.5v-9A2.5 2.5 0 0 1 2.5 0h9A2.5 2.5 0 0 1 14 2.5v.599a.5.5 0 1 1-1 0V2.5A1.5 1.5 0 0 0 11.5 1h-9A1.5 1.5 0 0 0 1 2.5v9A1.5 1.5 0 0 0 2.5 13h.594ZM2.5 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-4 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-2 1a.5.5 0 1 1 0 1 .5.5 0 0 1 0-1Zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm6-6a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-8 8a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z"
+                                                  />
+                                                </svg>
+                                              </EuiIconInspect>
+                                            </EuiIcon>
+                                          </button>
+                                        </EuiLink>
+                                      </div>
+                                    </EuiFlexItem>
+                                  </div>
+                                </EuiFlexGroup>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1390,6 +2103,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -1595,6 +2309,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
@@ -1726,7 +2441,7 @@ exports[`Services table component renders services table 1`] = `
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
-  nameColumnAction={[Function]}
+  selectedItems={Array []}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
 >
@@ -1735,17 +2450,16 @@ exports[`Services table component renders services table 1`] = `
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
+        justifyContent="spaceBetween"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
-            grow={10}
+            grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrow10"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <PanelTitle
                 title="Services"
@@ -1770,6 +2484,114 @@ exports[`Services table component renders services table 1`] = `
                   </div>
                 </EuiText>
               </PanelTitle>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiToolTip
+                        content="Select services to filter"
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onKeyUp={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            isDisabled={true}
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="xs"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty-isDisabled"
+                              disabled={true}
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconGap="m"
+                                iconSide="left"
+                                iconSize="s"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Filter services
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonEmpty>
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiButtonEmpty
+                        onClick={[Function]}
+                        size="xs"
+                      >
+                        <button
+                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconSize="s"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                Show 24 hour trends
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
             </div>
           </EuiFlexItem>
         </div>
@@ -1845,8 +2667,16 @@ exports[`Services table component renders services table 1`] = `
               "sortable": true,
               "truncateText": true,
             },
+            Object {
+              "align": "center",
+              "field": "actions",
+              "name": "Actions",
+              "render": [Function],
+            },
           ]
         }
+        isSelectable={true}
+        itemId="itemId"
         items={
           Array [
             Object {
@@ -1875,6 +2705,11 @@ exports[`Services table component renders services table 1`] = `
           }
         }
         responsive={true}
+        selection={
+          Object {
+            "onSelectionChange": [Function],
+          }
+        }
         sorting={
           Object {
             "sort": Object {
@@ -1942,8 +2777,16 @@ exports[`Services table component renders services table 1`] = `
                 "sortable": true,
                 "truncateText": true,
               },
+              Object {
+                "align": "center",
+                "field": "actions",
+                "name": "Actions",
+                "render": [Function],
+              },
             ]
           }
+          isSelectable={true}
+          itemId="itemId"
           items={
             Array [
               Object {
@@ -1977,6 +2820,11 @@ exports[`Services table component renders services table 1`] = `
             }
           }
           responsive={true}
+          selection={
+            Object {
+              "onSelectionChange": [Function],
+            }
+          }
           sorting={
             Object {
               "allowNeutralSort": true,
@@ -2009,7 +2857,46 @@ exports[`Services table component renders services table 1`] = `
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrowZero"
-                        />
+                        >
+                          <EuiI18n
+                            default="Select all rows"
+                            token="euiBasicTable.selectAllRows"
+                          >
+                            <EuiCheckbox
+                              aria-label="Select all rows"
+                              checked={false}
+                              compressed={false}
+                              disabled={false}
+                              id="_selection_column-checkbox_random_html_id"
+                              indeterminate={false}
+                              label="Select all rows"
+                              onChange={[Function]}
+                            >
+                              <div
+                                className="euiCheckbox"
+                              >
+                                <input
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  className="euiCheckbox__input"
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  onChange={[Function]}
+                                  type="checkbox"
+                                />
+                                <div
+                                  className="euiCheckbox__square"
+                                />
+                                <label
+                                  className="euiCheckbox__label"
+                                  htmlFor="_selection_column-checkbox_random_html_id"
+                                >
+                                  Select all rows
+                                </label>
+                              </div>
+                            </EuiCheckbox>
+                          </EuiI18n>
+                        </div>
                       </EuiFlexItem>
                       <EuiFlexItem
                         grow={false}
@@ -2119,6 +3006,7 @@ exports[`Services table component renders services table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -2208,6 +3096,59 @@ exports[`Services table component renders services table 1`] = `
                   <EuiTableHeader>
                     <thead>
                       <tr>
+                        <EuiTableHeaderCellCheckbox
+                          key="_selection_column_h"
+                        >
+                          <th
+                            className="euiTableHeaderCellCheckbox"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <div
+                              className="euiTableCellContent"
+                            >
+                              <EuiI18n
+                                default="Select all rows"
+                                token="euiBasicTable.selectAllRows"
+                              >
+                                <EuiCheckbox
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  compressed={false}
+                                  data-test-subj="checkboxSelectAll"
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  indeterminate={false}
+                                  label={null}
+                                  onChange={[Function]}
+                                  type="inList"
+                                >
+                                  <div
+                                    className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                  >
+                                    <input
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      className="euiCheckbox__input"
+                                      data-test-subj="checkboxSelectAll"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      onChange={[Function]}
+                                      type="checkbox"
+                                    />
+                                    <div
+                                      className="euiCheckbox__square"
+                                    />
+                                  </div>
+                                </EuiCheckbox>
+                              </EuiI18n>
+                            </div>
+                          </th>
+                        </EuiTableHeaderCellCheckbox>
                         <EuiTableHeaderCell
                           align="left"
                           data-test-subj="tableHeaderCell_name_0"
@@ -2646,6 +3587,52 @@ exports[`Services table component renders services table 1`] = `
                             </button>
                           </th>
                         </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="center"
+                          data-test-subj="tableHeaderCell_actions_7"
+                          key="_data_h_actions_7"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_actions_7"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent euiTableCellContent--alignCenter"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent euiTableCellContent--alignCenter"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Actions",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Actions"
+                                    >
+                                      Actions
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
                       </tr>
                     </thead>
                   </EuiTableHeader>
@@ -2654,11 +3641,60 @@ exports[`Services table component renders services table 1`] = `
                   >
                     <tbody>
                       <EuiTableRow
+                        isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow"
+                          className="euiTableRow euiTableRow-isSelectable"
                         >
+                          <EuiTableRowCellCheckbox
+                            key="_selection_column_0"
+                          >
+                            <td
+                              className="euiTableRowCellCheckbox"
+                            >
+                              <div
+                                className="euiTableCellContent"
+                              >
+                                <EuiI18n
+                                  default="Select this row"
+                                  token="euiBasicTable.selectThisRow"
+                                >
+                                  <EuiCheckbox
+                                    aria-label="Select this row"
+                                    checked={false}
+                                    compressed={false}
+                                    data-test-subj="checkboxSelectRow-0"
+                                    disabled={false}
+                                    id="_selection_column_0-checkbox"
+                                    indeterminate={false}
+                                    onChange={[Function]}
+                                    title="Select this row"
+                                    type="inList"
+                                  >
+                                    <div
+                                      className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                    >
+                                      <input
+                                        aria-label="Select this row"
+                                        checked={false}
+                                        className="euiCheckbox__input"
+                                        data-test-subj="checkboxSelectRow-0"
+                                        disabled={false}
+                                        id="_selection_column_0-checkbox"
+                                        onChange={[Function]}
+                                        title="Select this row"
+                                        type="checkbox"
+                                      />
+                                      <div
+                                        className="euiCheckbox__square"
+                                      />
+                                    </div>
+                                  </EuiCheckbox>
+                                </EuiI18n>
+                              </div>
+                            </td>
+                          </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
                             key="_data_column_name_0_0"
@@ -2734,7 +3770,66 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
                               >
-                                49.54
+                                <ServiceTrendsPlots
+                                  className=""
+                                  fieldType="average_latency"
+                                  item={49.54}
+                                  key=".0"
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "connected_services": Array [
+                                        "order",
+                                        "inventory",
+                                      ],
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "number_of_connected_services": 2,
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
+                                >
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
+                                  >
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  49.54
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2766,17 +3861,74 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
                               >
-                                <EuiText
+                                <ServiceTrendsPlots
                                   className=""
+                                  fieldType="error_rate"
+                                  item={3.77}
                                   key=".0"
-                                  size="s"
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "connected_services": Array [
+                                        "order",
+                                        "inventory",
+                                      ],
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "number_of_connected_services": 2,
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
                                 >
-                                  <div
-                                    className="euiText euiText--small"
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
                                   >
-                                    3.77%
-                                  </div>
-                                </EuiText>
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  <EuiText
+                                                    size="s"
+                                                  >
+                                                    <div
+                                                      className="euiText euiText--small"
+                                                    >
+                                                      3.77%
+                                                    </div>
+                                                  </EuiText>
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2809,13 +3961,70 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <EuiI18nNumber
+                                <ServiceTrendsPlots
                                   className=""
+                                  fieldType="throughput"
+                                  item={53}
                                   key=".0"
-                                  value={53}
+                                  row={
+                                    Object {
+                                      "average_latency": 49.54,
+                                      "connected_services": Array [
+                                        "order",
+                                        "inventory",
+                                      ],
+                                      "error_rate": 3.77,
+                                      "name": "database",
+                                      "number_of_connected_services": 2,
+                                      "throughput": 53,
+                                      "traces": 31,
+                                    }
+                                  }
                                 >
-                                  53
-                                </EuiI18nNumber>
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    justifyContent="flexEnd"
+                                  >
+                                    <div
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiText
+                                            color="default"
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <div
+                                              className="euiText euiText--medium"
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                            >
+                                              <EuiTextColor
+                                                color="default"
+                                                component="div"
+                                              >
+                                                <div
+                                                  className="euiTextColor euiTextColor--default"
+                                                >
+                                                  <EuiI18nNumber
+                                                    value={53}
+                                                  >
+                                                    53
+                                                  </EuiI18nNumber>
+                                                </div>
+                                              </EuiTextColor>
+                                            </div>
+                                          </EuiText>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </div>
+                                  </EuiFlexGroup>
+                                </ServiceTrendsPlots>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2944,6 +4153,96 @@ exports[`Services table component renders services table 1`] = `
                               </div>
                             </td>
                           </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="center"
+                            key="_data_column_actions_0_7"
+                            mobileOptions={
+                              Object {
+                                "header": "Actions",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Actions
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                              >
+                                <EuiFlexGroup
+                                  className=""
+                                  justifyContent="center"
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  >
+                                    <EuiFlexItem
+                                      grow={false}
+                                      onClick={[Function]}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiLink
+                                          data-test-subj="service-flyout-action-btnundefined"
+                                        >
+                                          <button
+                                            className="euiLink euiLink--primary"
+                                            data-test-subj="service-flyout-action-btnundefined"
+                                            disabled={false}
+                                            type="button"
+                                          >
+                                            <EuiIcon
+                                              color="primary"
+                                              type="inspect"
+                                            >
+                                              <EuiIconBeaker
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                focusable="false"
+                                                role="img"
+                                                style={null}
+                                              >
+                                                <svg
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                  focusable="false"
+                                                  height={16}
+                                                  role="img"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width={16}
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                  />
+                                                </svg>
+                                              </EuiIconBeaker>
+                                            </EuiIcon>
+                                          </button>
+                                        </EuiLink>
+                                      </div>
+                                    </EuiFlexItem>
+                                  </div>
+                                </EuiFlexGroup>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
                         </tr>
                       </EuiTableRow>
                     </tbody>
@@ -3055,6 +4354,7 @@ exports[`Services table component renders services table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -3258,6 +4558,7 @@ exports[`Services table component renders services table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
