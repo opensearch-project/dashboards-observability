@@ -36,14 +36,7 @@ interface ConfigProps {
 }
 
 export const Configuration = (props: ConfigProps) => {
-  const {
-    appId,
-    application,
-    parentBreadcrumbs,
-    visWithAvailability,
-    updateApp,
-    switchToAvailability,
-  } = props;
+  const { appId, application, visWithAvailability, updateApp, switchToAvailability } = props;
   const [availabilityVisId, setAvailabilityVisId] = useState(
     application.availability.availabilityVisId || ''
   );
@@ -57,11 +50,11 @@ export const Configuration = (props: ConfigProps) => {
     <div>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageContent>
+          <EuiPageContent paddingSize="m">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h3 style={{ paddingTop: '10px' }}>Configuration details</h3>
+                <EuiTitle size="s">
+                  <h2>Configuration details</h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>

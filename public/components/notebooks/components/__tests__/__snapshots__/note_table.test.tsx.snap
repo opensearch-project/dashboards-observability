@@ -21,7 +21,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
       </div>
     </header>
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
       id="notebookArea"
       role="main"
     >
@@ -190,8 +190,8 @@ exports[`<NoteTable /> spec renders the component 1`] = `
           </div>
         </div>
       </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      <div
+        class="euiSpacer euiSpacer--m"
       />
       <div
         class="euiBasicTable"
@@ -933,7 +933,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
       </div>
     </header>
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
       id="notebookArea"
       role="main"
     >
