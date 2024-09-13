@@ -34,7 +34,7 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   [
     's3',
     {
-      title: 'Data Source',
+      title: 'Direct query connections',
       lower: 'data_source',
       help: 'Select a data source to pull the data from.',
     },
@@ -224,7 +224,7 @@ export function IntegrationConnectionInputs({
       {dataSourceEnabled && (
         <>
           <EuiCompressedFormRow
-            label="Data Source"
+            label="Open Source Connections"
             helpText="Select the type of remote data source to query from."
           >
             <DataSourceSelector
