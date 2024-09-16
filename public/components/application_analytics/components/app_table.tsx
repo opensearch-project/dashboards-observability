@@ -10,7 +10,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
@@ -236,7 +235,7 @@ export function AppTable(props: AppTableProps) {
               </EuiTitle>
             )}
           </EuiPageHeader>
-          <EuiPageContent id="applicationArea">
+          <EuiPageContent id="applicationArea" paddingSize="m">
             <EuiPageContentHeader>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
@@ -261,7 +260,6 @@ export function AppTable(props: AppTableProps) {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeader>
-            <EuiHorizontalRule />
             {filteredApplications.length > 0 ? (
               <EuiInMemoryTable
                 loading={props.loading}

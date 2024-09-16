@@ -7,7 +7,6 @@ import {
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
@@ -239,7 +238,7 @@ export function NoteTable({
               </EuiPageHeaderSection>
             </EuiPageHeader>
           )}
-          <EuiPageContent id="notebookArea">
+          <EuiPageContent id="notebookArea" paddingSize="m">
             {newNavigation ? (
               <HeaderControlledComponentsWrapper
                 description={
@@ -348,7 +347,7 @@ export function NoteTable({
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiHorizontalRule margin="m" />
+                <EuiSpacer size="m" />
                 <EuiInMemoryTable
                   loading={loading}
                   items={
