@@ -11,7 +11,6 @@ import {
   EuiPageHeaderSection,
   EuiPanel,
   EuiSelectOption,
-  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
@@ -292,7 +291,6 @@ export function Application(props: AppDetailProps) {
   const getService = () => {
     return (
       <>
-        <EuiSpacer size="m" />
         <ServicesContent
           {...props}
           page="app"
@@ -317,7 +315,6 @@ export function Application(props: AppDetailProps) {
   const getTrace = () => {
     return (
       <>
-        <EuiSpacer size="m" />
         <TracesContent
           {...props}
           page="app"
@@ -330,7 +327,6 @@ export function Application(props: AppDetailProps) {
           setEndTime={setEndTimeForApp}
           dataSourceMDSId={[{ id: '', label: '' }]}
         />
-        <EuiSpacer size="m" />
         <EuiPanel>
           <PanelTitle title="Spans" totalItems={totalSpans} />
           <EuiHorizontalRule margin="m" />
