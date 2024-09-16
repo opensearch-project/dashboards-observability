@@ -23,12 +23,14 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import CSS from 'csstype';
 import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   ChromeBreadcrumb,
   CoreStart,
@@ -1003,45 +1005,72 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         {this.state.savedObjectNotebook ? (
           <>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                display="base"
-                iconType="trash"
-                size="s"
-                onClick={this.showDeleteNotebookModal}
-                data-test-subj="notebook-delete-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.deleteButton.tooltip" defaultMessage="Delete" />
+                }
+              >
+                <EuiButtonIcon
+                  color="danger"
+                  display="base"
+                  iconType="trash"
+                  size="s"
+                  onClick={this.showDeleteNotebookModal}
+                  data-test-subj="notebook-delete-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="pencil"
-                size="s"
-                onClick={this.showRenameModal}
-                data-test-subj="notebook-edit-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.editButton.tooltip" defaultMessage="Edit name" />
+                }
+              >
+                <EuiButtonIcon
+                  display="base"
+                  iconType="pencil"
+                  size="s"
+                  onClick={this.showRenameModal}
+                  data-test-subj="notebook-edit-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="copy"
-                display="base"
-                size="s"
-                onClick={this.showCloneModal}
-                data-test-subj="notebook-duplicate-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="notebook.duplicateButton.tooltip"
+                    defaultMessage="Duplicate"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  iconType="copy"
+                  display="base"
+                  size="s"
+                  onClick={this.showCloneModal}
+                  data-test-subj="notebook-duplicate-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </>
         ) : (
           <>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                display="base"
-                iconType="trash"
-                size="s"
-                onClick={this.showDeleteNotebookModal}
-                data-test-subj="notebook-delete-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.deleteButton.tooltip" defaultMessage="Delete" />
+                }
+              >
+                <EuiButtonIcon
+                  color="danger"
+                  display="base"
+                  iconType="trash"
+                  size="s"
+                  onClick={this.showDeleteNotebookModal}
+                  data-test-subj="notebook-delete-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </>
         )}

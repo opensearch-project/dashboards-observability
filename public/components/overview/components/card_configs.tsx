@@ -31,7 +31,7 @@ const GETTING_STARTED_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Set up your Observability workspace',
   }),
   description: 'Get started by collecting and analyzing your metrics, logs, and traces.',
-  footer: 'Getting Started Guide',
+  footer: 'Getting started guide',
   url: observabilityGettingStartedID,
   path: '#/',
 };
@@ -46,7 +46,7 @@ const SAMPLEDATA_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Try OpenSearch',
   }),
   url: tutorialSampleDataPluginId,
-  footer: 'Sample Datasets',
+  footer: 'Sample datasets',
   path: '#/',
 };
 
