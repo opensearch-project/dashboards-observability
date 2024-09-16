@@ -31,7 +31,7 @@ const GETTING_STARTED_CONFIG: GettingStartedConfig = {
     defaultMessage: 'Set up your Observability workspace',
   }),
   description: 'Get started by collecting and analyzing your metrics, logs, and traces.',
-  footer: 'Get started',
+  footer: 'Getting started guide',
   url: observabilityGettingStartedID,
   path: '#/',
 };
