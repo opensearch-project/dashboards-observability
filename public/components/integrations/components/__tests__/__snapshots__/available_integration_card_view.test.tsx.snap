@@ -512,12 +512,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                     alt=""
                     className="synopsisIcon"
                     src="/api/integrations/repository/nginx/static/logo.svg"
-                    style={
-                      Object {
-                        "height": 60,
-                        "width": 60,
-                      }
-                    }
                   />
                 }
                 title="NginX Dashboard"
@@ -542,12 +536,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         alt=""
                         className="synopsisIcon euiCard__icon"
                         src="/api/integrations/repository/nginx/static/logo.svg"
-                        style={
-                          Object {
-                            "height": 60,
-                            "width": 60,
-                          }
-                        }
                       />
                     </div>
                     <div

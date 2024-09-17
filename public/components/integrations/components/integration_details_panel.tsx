@@ -12,7 +12,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { OPENSEARCH_CATALOG_URL } from '../../../../common/constants/integrations';
@@ -25,9 +24,9 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>Version</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>Version</h4>
+          </EuiText>
           <EuiFlexGroup direction="row" alignItems="center" responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiText size="m">{config.version}</EuiText>
@@ -40,9 +39,9 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>Category</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>Category</h4>
+          </EuiText>
           <EuiBadgeGroup>
             {config.labels?.map((label: string) => {
               return <EuiBadge>{label}</EuiBadge>;
@@ -50,9 +49,9 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>Contributor</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>Contributor</h4>
+          </EuiText>
           <EuiText size="s">
             <EuiLink href={config.sourceUrl} external={true} target="blank">
               {config.author}
@@ -60,16 +59,16 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>License</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>License</h4>
+          </EuiText>
           <EuiText size="s">{config.license}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>Description</h3>
-        </EuiTitle>
+        <EuiText size="m">
+          <h4>Description</h4>
+        </EuiText>
         <EuiText size="s">{config.description}</EuiText>
       </EuiFlexItem>
     </EuiPanel>

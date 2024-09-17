@@ -27,9 +27,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
-      optionalImg = (
-        <img style={{ height: 60, width: 60 }} alt="" className="synopsisIcon" src={url} />
-      );
+      optionalImg = <img alt="" className="synopsisIcon" src={url} />;
     }
     return optionalImg;
   };

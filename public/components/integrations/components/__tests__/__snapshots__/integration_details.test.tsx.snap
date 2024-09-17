@@ -23,15 +23,17 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           <div
             className="euiFlexItem"
           >
-            <EuiTitle
-              size="s"
+            <EuiText
+              size="m"
             >
-              <h3
-                className="euiTitle euiTitle--small"
+              <div
+                className="euiText euiText--medium"
               >
-                Version
-              </h3>
-            </EuiTitle>
+                <h4>
+                  Version
+                </h4>
+              </div>
+            </EuiText>
             <EuiFlexGroup
               alignItems="center"
               direction="row"
@@ -93,15 +95,17 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           <div
             className="euiFlexItem"
           >
-            <EuiTitle
-              size="s"
+            <EuiText
+              size="m"
             >
-              <h3
-                className="euiTitle euiTitle--small"
+              <div
+                className="euiText euiText--medium"
               >
-                Category
-              </h3>
-            </EuiTitle>
+                <h4>
+                  Category
+                </h4>
+              </div>
+            </EuiText>
             <EuiBadgeGroup>
               <div
                 className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
@@ -113,15 +117,17 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           <div
             className="euiFlexItem"
           >
-            <EuiTitle
-              size="s"
+            <EuiText
+              size="m"
             >
-              <h3
-                className="euiTitle euiTitle--small"
+              <div
+                className="euiText euiText--medium"
               >
-                Contributor
-              </h3>
-            </EuiTitle>
+                <h4>
+                  Contributor
+                </h4>
+              </div>
+            </EuiText>
             <EuiText
               size="s"
             >
@@ -182,15 +188,17 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           <div
             className="euiFlexItem"
           >
-            <EuiTitle
-              size="s"
+            <EuiText
+              size="m"
             >
-              <h3
-                className="euiTitle euiTitle--small"
+              <div
+                className="euiText euiText--medium"
               >
-                License
-              </h3>
-            </EuiTitle>
+                <h4>
+                  License
+                </h4>
+              </div>
+            </EuiText>
             <EuiText
               size="s"
             >
@@ -208,15 +216,17 @@ exports[`Available Integration Table View Test Renders nginx integration table v
       <div
         className="euiFlexItem"
       >
-        <EuiTitle
-          size="s"
+        <EuiText
+          size="m"
         >
-          <h3
-            className="euiTitle euiTitle--small"
+          <div
+            className="euiText euiText--medium"
           >
-            Description
-          </h3>
-        </EuiTitle>
+            <h4>
+              Description
+            </h4>
+          </div>
+        </EuiText>
         <EuiText
           size="s"
         >

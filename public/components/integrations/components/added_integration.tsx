@@ -177,15 +177,15 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const additionalInfo = (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>Template</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>Template</h4>
+          </EuiText>
           <EuiLink href={`#/available/${data?.templateName}`}>{data?.templateName}</EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>Date Added</h3>
-          </EuiTitle>
+          <EuiText size="m">
+            <h4>Date Added</h4>
+          </EuiText>
           <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

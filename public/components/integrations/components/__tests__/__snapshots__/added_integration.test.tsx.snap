@@ -325,15 +325,17 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     <div
                       className="euiFlexItem"
                     >
-                      <EuiTitle
-                        size="s"
+                      <EuiText
+                        size="m"
                       >
-                        <h3
-                          className="euiTitle euiTitle--small"
+                        <div
+                          className="euiText euiText--medium"
                         >
-                          Template
-                        </h3>
-                      </EuiTitle>
+                          <h4>
+                            Template
+                          </h4>
+                        </div>
+                      </EuiText>
                       <EuiLink
                         href="#/available/undefined"
                       >
@@ -349,15 +351,17 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     <div
                       className="euiFlexItem"
                     >
-                      <EuiTitle
-                        size="s"
+                      <EuiText
+                        size="m"
                       >
-                        <h3
-                          className="euiTitle euiTitle--small"
+                        <div
+                          className="euiText euiText--medium"
                         >
-                          Date Added
-                        </h3>
-                      </EuiTitle>
+                          <h4>
+                            Date Added
+                          </h4>
+                        </div>
+                      </EuiText>
                       <EuiText
                         size="m"
                       >

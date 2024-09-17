@@ -22,6 +22,42 @@ interface HeaderControlledComponentsWrapperProps {
   description?: string | DescriptionWithOptionalLink;
 }
 
+const renderTheComponent = (
+  component: TopNavControlButtonData | TopNavControlLinkData | React.ReactElement
+) => {
+  if (React.isValidElement(component)) {
+    return {
+      renderComponent: component,
+    };
+  }
+
+  switch ((component as TopNavControlButtonData | TopNavControlLinkData).controlType) {
+    case 'button': {
+      const buttonData = component as TopNavControlButtonData;
+      return {
+        label: buttonData.label,
+        run: buttonData.run,
+        fill: buttonData.fill,
+        color: buttonData.color,
+        iconType: buttonData.iconType,
+        iconSide: buttonData.iconSide,
+        controlType: 'button',
+      };
+    }
+    case 'link': {
+      const linkData = component as TopNavControlLinkData;
+      return {
+        label: linkData.label,
+        href: linkData.href,
+        target: linkData.target,
+        controlType: 'link',
+      };
+    }
+    default:
+      return {};
+  }
+};
+
 export const HeaderControlledComponentsWrapper = ({
   components = [],
   badgeContent,
@@ -90,32 +126,7 @@ export const HeaderControlledComponentsWrapper = ({
           {showActionsInHeader && HeaderControl ? (
             <HeaderControl
               setMountPoint={coreRefs.application?.setAppRightControls}
-              controls={components.map((component) => {
-                if (React.isValidElement(component)) {
-                  return {
-                    renderComponent: component,
-                  };
-                } else if ((component as TopNavControlButtonData).controlType === 'button') {
-                  const buttonData = component as TopNavControlButtonData;
-                  return {
-                    label: buttonData.label,
-                    run: buttonData.run,
-                    fill: buttonData.fill,
-                    color: buttonData.color,
-                    iconType: buttonData.iconType,
-                    iconSide: buttonData.iconSide,
-                    controlType: 'button',
-                  };
-                } else if ((component as TopNavControlLinkData).controlType === 'link') {
-                  const linkData = component as TopNavControlLinkData;
-                  return {
-                    label: linkData.label,
-                    href: linkData.href,
-                    target: linkData.target,
-                    controlType: 'link',
-                  };
-                }
-              })}
+              controls={components.map((component) => renderTheComponent(component))}
             />
           ) : (
             <div>

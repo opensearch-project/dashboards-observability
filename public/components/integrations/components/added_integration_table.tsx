@@ -94,7 +94,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       }
     });
 
-    await Promise.all(deletePromises);
+    Promise.all(deletePromises);
 
     props.setData({
       hits: props.data.hits.filter(
@@ -226,7 +226,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           body={
             <p>
               There are currently no added integrations in this table. Add integrations from the{' '}
-              <EuiLink href={'#/available'}>Available list</EuiLink>.
+              <EuiLink href={'#/available'}>available list</EuiLink>.
             </p>
           }
         />
