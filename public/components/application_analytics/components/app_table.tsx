@@ -40,6 +40,7 @@ import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
+import { TopNavControlButtonData } from '../../../../../../src/plugins/navigation/public';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -234,6 +235,30 @@ export function AppTable(props: AppTableProps) {
                 <h3>Applications {` (${applications.length})`}</h3>
               </EuiTitle>
             )}
+            <EuiFlexItem grow={false}>
+              <HeaderControlledComponentsWrapper
+                components={
+                  newNavigation
+                    ? [
+                        {
+                          label: createButtonText,
+                          run: () => {
+                            window.location.href = '#/create';
+                          },
+                          iconType: 'plus',
+                          iconSide: 'left',
+                          fill: true,
+                          controlType: 'button',
+                        } as TopNavControlButtonData,
+                      ]
+                    : [
+                        <EuiSmallButton fill href="#/create" iconType="plus" iconSide="left">
+                          {createButtonText}
+                        </EuiSmallButton>,
+                      ]
+                }
+              />
+            </EuiFlexItem>
           </EuiPageHeader>
           <EuiPageContent id="applicationArea" paddingSize="m">
             <EuiPageContentHeader>
@@ -247,15 +272,6 @@ export function AppTable(props: AppTableProps) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     isClearable={true}
                     aria-label="Search applications"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HeaderControlledComponentsWrapper
-                    components={[
-                      <EuiSmallButton fill href="#/create" iconType="plus" iconSide="left">
-                        {createButtonText}
-                      </EuiSmallButton>,
-                    ]}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

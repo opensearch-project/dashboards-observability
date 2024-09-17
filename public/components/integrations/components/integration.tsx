@@ -256,7 +256,7 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer size="s" />
         {IntegrationScreenshots({ integration, http })}
         <EuiSpacer size="s" />
-        <EuiTabs display="condensed" size="s">
+        <EuiTabs display="default" size="s">
           {renderTabs()}
         </EuiTabs>
         <EuiSpacer size="s" />

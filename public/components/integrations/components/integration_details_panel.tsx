@@ -22,45 +22,27 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-details`}>
-      <EuiTitle>
-        <h2>Details</h2>
-      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiText>
-            <h4>Version</h4>
-          </EuiText>
-          {/*
-          For the link, we have the slightly odd constraint to have it go to the end of the version
-          space while being horizontally next to the version (i.e. no direct EuiText). It should be
-          smaller, while aligning to the bottom of the line, but not the bottom of the entire flex
-          area, for a nice subscript effect.
-
-          The end result is a bit of flex magic: make two vertical boxes with the second one empty
-          and growing, then in the top one put two horizontal boxes with space-between, aligning to
-          the bottom.
-          */}
-          <EuiFlexGroup direction="column">
+          <EuiTitle size="s">
+            <h3>Version</h3>
+          </EuiTitle>
+          <EuiFlexGroup direction="row" alignItems="center" responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="m">{config.version}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <EuiLink href={OPENSEARCH_CATALOG_URL}>Check for new versions</EuiLink>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText size="m">{config.version}</EuiText>
             </EuiFlexItem>
-            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <EuiLink href={OPENSEARCH_CATALOG_URL}>Check for new versions</EuiLink>
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <h4>Category</h4>
-          </EuiText>
+          <EuiTitle size="s">
+            <h3>Category</h3>
+          </EuiTitle>
           <EuiBadgeGroup>
             {config.labels?.map((label: string) => {
               return <EuiBadge>{label}</EuiBadge>;
@@ -68,9 +50,9 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <h4>Contributer</h4>
-          </EuiText>
+          <EuiTitle size="s">
+            <h3>Contributor</h3>
+          </EuiTitle>
           <EuiText size="s">
             <EuiLink href={config.sourceUrl} external={true} target="blank">
               {config.author}
@@ -78,16 +60,16 @@ export function IntegrationDetails(props: { integration: IntegrationConfig }) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <h4>License</h4>
-          </EuiText>
+          <EuiTitle size="s">
+            <h3>License</h3>
+          </EuiTitle>
           <EuiText size="s">{config.license}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <EuiText>
-          <h4>Description</h4>
-        </EuiText>
+        <EuiTitle size="s">
+          <h3>Description</h3>
+        </EuiTitle>
         <EuiText size="s">{config.description}</EuiText>
       </EuiFlexItem>
     </EuiPanel>

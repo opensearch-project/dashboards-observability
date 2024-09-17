@@ -514,8 +514,8 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                     src="/api/integrations/repository/nginx/static/logo.svg"
                     style={
                       Object {
-                        "height": 100,
-                        "width": 100,
+                        "height": 60,
+                        "width": 60,
                       }
                     }
                   />
@@ -544,8 +544,8 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         src="/api/integrations/repository/nginx/static/logo.svg"
                         style={
                           Object {
-                            "height": 100,
-                            "width": 100,
+                            "height": 60,
+                            "width": 60,
                           }
                         }
                       />

@@ -4,14 +4,12 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
   EuiPageContent,
-  EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
@@ -27,11 +25,11 @@ import {
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const { http, dataSourceEnabled } = props;
-
   const { setToast } = useToast();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [selectedIntegrations, setSelectedIntegrations] = useState<any[]>([]);
 
   const tableColumns = [
     {
@@ -70,20 +68,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         </EuiText>
       ),
     },
-    {
-      field: 'actions',
-      name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiIcon
-          type={'trash'}
-          onClick={() => {
-            activateDeleteModal(record.id, record.name);
-          }}
-        />
-      ),
-    },
   ] as Array<EuiTableFieldDataColumnType<AddedIntegrationType>>;
 
   if (dataSourceEnabled) {
@@ -100,36 +84,38 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     });
   }
 
-  async function deleteAddedIntegration(integrationInstance: string, name: string) {
-    http
-      .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
-      .then(() => {
-        setToast(`${name} integration successfully deleted!`, 'success');
-        props.setData({
-          hits: props.data.hits.filter((i) => i.id !== integrationInstance),
-        });
-      })
-      .catch((_err) => {
-        setToast(`Error deleting ${name} or its assets`, 'danger');
-      })
-      .finally(() => {
-        window.location.hash = '#/installed';
-      });
+  async function deleteAddedIntegrations(selectedItems: any[]) {
+    const deletePromises = selectedItems.map(async (item) => {
+      try {
+        await http.delete(`${INTEGRATIONS_BASE}/store/${item.id}`);
+        setToast(`${item.name} integration successfully deleted!`, 'success');
+      } catch (error) {
+        setToast(`Error deleting ${item.name} or its assets`, 'danger');
+      }
+    });
+
+    await Promise.all(deletePromises);
+
+    props.setData({
+      hits: props.data.hits.filter(
+        (item) => !selectedItems.some((selected) => selected.id === item.id)
+      ),
+    });
+
+    window.location.hash = '#/installed';
   }
 
-  const activateDeleteModal = (integrationInstanceId: string, name: string) => {
+  const activateDeleteModal = () => {
+    const integrationNames = selectedIntegrations.map((item) => item.name).join(', ');
     setModalLayout(
       <DeleteModal
-        onConfirm={() => {
+        onConfirm={async () => {
           setIsModalVisible(false);
-          deleteAddedIntegration(integrationInstanceId, name);
+          await deleteAddedIntegrations(selectedIntegrations);
         }}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-        title={`Delete Integration`}
-        message={`Are you sure you want to delete the selected integration?`}
-        prompt={name}
+        onCancel={() => setIsModalVisible(false)}
+        title={`Delete Integrations`}
+        message={`Are you sure you want to delete the selected integrations: ${integrationNames}?`}
       />
     );
     setIsModalVisible(true);
@@ -147,6 +133,17 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   }
 
   const search = {
+    toolsLeft: selectedIntegrations.length > 0 && (
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={activateDeleteModal}
+        data-test-subj="deleteSelectedIntegrations"
+      >
+        Delete {selectedIntegrations.length} integration
+        {selectedIntegrations.length > 1 ? 's' : ''}
+      </EuiButton>
+    ),
     box: {
       incremental: true,
       compressed: true,
@@ -203,7 +200,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   });
 
   return (
-    <EuiPageContent data-test-subj="addedIntegrationsArea">
+    <EuiPageContent data-test-subj="addedIntegrationsArea" paddingSize="m">
       {entries && entries.length > 0 ? (
         <EuiInMemoryTable
           loading={props.loading}
@@ -218,23 +215,21 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           search={search}
           allowNeutralSort={false}
           isSelectable={true}
+          selection={{
+            onSelectionChange: (items) => setSelectedIntegrations(items),
+          }}
         />
       ) : (
-        <>
-          <EuiFlexGroup direction="column" alignItems="center">
-            <EuiFlexItem grow={true}>
-              <EuiIcon size="xxl" type="help" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiText textAlign="center" data-test-subj="no-added-integrations">
-            <h2>
-              There are currently no added integrations. Add them{' '}
-              <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned assets!
-            </h2>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
+        <EuiEmptyPrompt
+          iconType="minusInCircle"
+          title={<h2>No installed integrations</h2>}
+          body={
+            <p>
+              There are currently no added integrations in this table. Add integrations from the{' '}
+              <EuiLink href={'#/available'}>Available list</EuiLink>.
+            </p>
+          }
+        />
       )}
       {isModalVisible && modalLayout}
     </EuiPageContent>
