@@ -22,7 +22,7 @@ interface HeaderControlledComponentsWrapperProps {
   description?: string | DescriptionWithOptionalLink;
 }
 
-const renderTheComponent = (
+const renderHeaderComponent = (
   component: TopNavControlButtonData | TopNavControlLinkData | React.ReactElement
 ) => {
   if (React.isValidElement(component)) {
@@ -126,7 +126,7 @@ export const HeaderControlledComponentsWrapper = ({
           {showActionsInHeader && HeaderControl ? (
             <HeaderControl
               setMountPoint={coreRefs.application?.setAppRightControls}
-              controls={components.map((component) => renderTheComponent(component))}
+              controls={components.map((component) => renderHeaderComponent(component))}
             />
           ) : (
             <div>
