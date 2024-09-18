@@ -28,7 +28,7 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
           <div
             className="euiPageHeaderSection"
           >
-            <IntegrationHeaderActions
+            <IntegrationHeaderActionsOldNav
               onShowUpload={[Function]}
             >
               <EuiFlexGroup
@@ -154,7 +154,7 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
                   </EuiFlexItem>
                 </div>
               </EuiFlexGroup>
-            </IntegrationHeaderActions>
+            </IntegrationHeaderActionsOldNav>
           </div>
         </EuiPageHeaderSection>
       </header>
@@ -233,11 +233,11 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
       />
     </EuiSpacer>
     <EuiTabs
-      display="condensed"
+      display="default"
       size="s"
     >
       <div
-        className="euiTabs euiTabs--condensed euiTabs--small"
+        className="euiTabs euiTabs--small"
         role="tablist"
       >
         <EuiTab

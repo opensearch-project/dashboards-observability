@@ -21,9 +21,12 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { DataSourceViewConfig } from '../../../../../../src/plugins/data_source_management/public';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
@@ -32,7 +35,6 @@ import { useToast } from '../../../../public/components/common/toast';
 import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
 import { DeleteModal } from '../../common/helpers/delete_modal';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { AddedIntegrationProps } from './integration_types';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
@@ -89,7 +91,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const DataSourceMenu = dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
-  const activateDeleteModal = (integrationName?: string) => {
+  const activateDeleteModal = () => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -101,7 +103,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         }}
         title={`Delete Integration`}
         message={`Are you sure you want to delete the selected Integration?`}
-        prompt={integrationName}
       />
     );
     setIsModalVisible(true);
@@ -134,15 +135,25 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const badgeContent = <IntegrationHealthBadge status={data?.status} />;
 
     const deleteButton = (
-      <EuiSmallButtonIcon
-        iconType="trash"
-        aria-label="Delete"
-        color="danger"
-        onClick={() => {
-          activateDeleteModal(data?.name);
-        }}
-        data-test-subj="deleteInstanceButton"
-      />
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="integration.deleteButtonTooltip"
+            defaultMessage="Delete this instance"
+          />
+        }
+      >
+        <EuiSmallButtonIcon
+          display="base"
+          iconType="trash"
+          aria-label="Delete"
+          color="danger"
+          onClick={() => {
+            activateDeleteModal(data?.name);
+          }}
+          data-test-subj="deleteInstanceButton"
+        />
+      </EuiToolTip>
     );
 
     const headerContent = (
@@ -166,13 +177,13 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const additionalInfo = (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="m">
             <h4>Template</h4>
           </EuiText>
           <EuiLink href={`#/available/${data?.templateName}`}>{data?.templateName}</EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="m">
             <h4>Date Added</h4>
           </EuiText>
           <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
@@ -206,7 +217,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             deleteButton,
           ]}
         />
-        {additionalInfo}
+        <EuiPanel>{additionalInfo}</EuiPanel>
       </>
     ) : (
       <>
@@ -231,7 +242,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             {headerContent}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {additionalInfo}
+        <EuiPanel>{additionalInfo}</EuiPanel>
       </>
     );
   }
@@ -356,8 +367,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
     return (
       <EuiPanel>
-        <PanelTitle title={'Assets List'} />
-        <EuiSpacer size="l" />
+        <EuiTitle size="s">
+          <h3>Assets List</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           itemId="id"
           loading={false}
