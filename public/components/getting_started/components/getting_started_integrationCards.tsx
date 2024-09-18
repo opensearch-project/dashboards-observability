@@ -136,13 +136,12 @@ export const IntegrationCards = () => {
               icon={
                 integration.statics && integration.statics.logo && integration.statics.logo.path ? (
                   <img
-                    style={{ height: 100, width: 100 }}
                     alt=""
                     className="synopsisIcon"
                     src={`/api/integrations/repository/${integration.name}/static/${integration.statics.logo.path}`}
                   />
                 ) : (
-                  <div style={{ height: 100, width: 100, backgroundColor: '#ccc' }} />
+                  <div className="synopsisIcon" style={{ backgroundColor: '#ccc' }} />
                 )
               }
               title={integration.displayName || integration.name}

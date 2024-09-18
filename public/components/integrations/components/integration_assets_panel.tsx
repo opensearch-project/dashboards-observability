@@ -85,8 +85,8 @@ export function IntegrationAssets(props: {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-assets`}>
-      <EuiTitle>
-        <h2>Assets</h2>
+      <EuiTitle size="s">
+        <h3>Assets</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiInMemoryTable

@@ -25,10 +25,35 @@ import {
 import { IntegrationUploadFlyout } from './upload_flyout';
 import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
+import {
+  TopNavControlButtonData,
+  TopNavControlLinkData,
+} from '../../../../../../src/plugins/navigation/public';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
-export const IntegrationHeaderActions = ({ onShowUpload }: { onShowUpload: () => void }) => {
+export const IntegrationHeaderActions = ({
+  onShowUpload,
+}: {
+  onShowUpload: () => void;
+}): Array<TopNavControlButtonData | TopNavControlLinkData> => {
+  return [
+    {
+      label: 'View Catalog',
+      href: OPENSEARCH_CATALOG_URL,
+      target: '_blank',
+      controlType: 'link',
+    } as TopNavControlLinkData,
+    {
+      label: 'Upload Integration',
+      run: onShowUpload,
+      fill: true,
+      controlType: 'button',
+    } as TopNavControlButtonData,
+  ];
+};
+
+export const IntegrationHeaderActionsOldNav = ({ onShowUpload }: { onShowUpload: () => void }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -86,15 +111,12 @@ export const IntegrationHeader = () => {
     <div>
       {newNavigation ? (
         <HeaderControlledComponentsWrapper
-          description={
-            <>
-              View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
-              <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
-                Learn more
-              </EuiLink>
-            </>
-          }
-          components={[<IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />]}
+          description={{
+            text:
+              'View integrations with preconfigured assets immediately within your OpenSearch setup.',
+            url: OPENSEARCH_DOCUMENTATION_URL,
+          }}
+          components={IntegrationHeaderActions({ onShowUpload: () => setShowUploadFlyout(true) })}
         />
       ) : (
         <>
@@ -105,7 +127,7 @@ export const IntegrationHeader = () => {
               </EuiTitle>
             </EuiPageHeaderSection>
             <EuiPageHeaderSection>
-              <IntegrationHeaderActions onShowUpload={() => setShowUploadFlyout(true)} />
+              <IntegrationHeaderActionsOldNav onShowUpload={() => setShowUploadFlyout(true)} />
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiText size="s" color="subdued">
@@ -117,7 +139,7 @@ export const IntegrationHeader = () => {
         </>
       )}
       {!newNavigation && <EuiSpacer size="s" />}
-      <EuiTabs display="condensed" size="s">
+      <EuiTabs display="default" size="s">
         {renderTabs()}
       </EuiTabs>
       <EuiSpacer size="s" />

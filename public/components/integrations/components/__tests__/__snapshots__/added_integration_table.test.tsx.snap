@@ -92,15 +92,16 @@ exports[`Added Integration Table View Test Renders added integration table view 
 >
   <EuiPageContent
     data-test-subj="addedIntegrationsArea"
+    paddingSize="m"
   >
     <EuiPanel
       className="euiPageContent"
       data-test-subj="addedIntegrationsArea"
-      paddingSize="l"
+      paddingSize="m"
       role="main"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
         data-test-subj="addedIntegrationsArea"
         role="main"
       >
@@ -125,13 +126,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
               Object {
                 "field": "dateAdded",
                 "name": "Date Added",
-                "render": [Function],
-                "sortable": true,
-                "truncateText": true,
-              },
-              Object {
-                "field": "actions",
-                "name": "Actions",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -189,6 +183,12 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "type": "field_value_selection",
                 },
               ],
+              "toolsLeft": false,
+            }
+          }
+          selection={
+            Object {
+              "onSelectionChange": [Function],
             }
           }
           tableLayout="auto"
@@ -220,6 +220,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 ]
               }
               onChange={[Function]}
+              toolsLeft={false}
             >
               <EuiFlexGroup
                 alignItems="center"
@@ -589,13 +590,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                     "sortable": true,
                     "truncateText": true,
                   },
-                  Object {
-                    "field": "actions",
-                    "name": "Actions",
-                    "render": [Function],
-                    "sortable": true,
-                    "truncateText": true,
-                  },
                 ]
               }
               isSelectable={true}
@@ -632,6 +626,11 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 }
               }
               responsive={true}
+              selection={
+                Object {
+                  "onSelectionChange": [Function],
+                }
+              }
               tableLayout="auto"
             >
               <div
@@ -655,7 +654,46 @@ exports[`Added Integration Table View Test Renders added integration table view 
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
-                            />
+                            >
+                              <EuiI18n
+                                default="Select all rows"
+                                token="euiBasicTable.selectAllRows"
+                              >
+                                <EuiCheckbox
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  compressed={false}
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  indeterminate={false}
+                                  label="Select all rows"
+                                  onChange={[Function]}
+                                >
+                                  <div
+                                    className="euiCheckbox"
+                                  >
+                                    <input
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      className="euiCheckbox__input"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      onChange={[Function]}
+                                      type="checkbox"
+                                    />
+                                    <div
+                                      className="euiCheckbox__square"
+                                    />
+                                    <label
+                                      className="euiCheckbox__label"
+                                      htmlFor="_selection_column-checkbox_random_html_id"
+                                    >
+                                      Select all rows
+                                    </label>
+                                  </div>
+                                </EuiCheckbox>
+                              </EuiI18n>
+                            </div>
                           </EuiFlexItem>
                           <EuiFlexItem
                             grow={false}
@@ -690,6 +728,59 @@ exports[`Added Integration Table View Test Renders added integration table view 
                       <EuiTableHeader>
                         <thead>
                           <tr>
+                            <EuiTableHeaderCellCheckbox
+                              key="_selection_column_h"
+                            >
+                              <th
+                                className="euiTableHeaderCellCheckbox"
+                                scope="col"
+                                style={
+                                  Object {
+                                    "width": undefined,
+                                  }
+                                }
+                              >
+                                <div
+                                  className="euiTableCellContent"
+                                >
+                                  <EuiI18n
+                                    default="Select all rows"
+                                    token="euiBasicTable.selectAllRows"
+                                  >
+                                    <EuiCheckbox
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      compressed={false}
+                                      data-test-subj="checkboxSelectAll"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      indeterminate={false}
+                                      label={null}
+                                      onChange={[Function]}
+                                      type="inList"
+                                    >
+                                      <div
+                                        className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                      >
+                                        <input
+                                          aria-label="Select all rows"
+                                          checked={false}
+                                          className="euiCheckbox__input"
+                                          data-test-subj="checkboxSelectAll"
+                                          disabled={false}
+                                          id="_selection_column-checkbox_random_html_id"
+                                          onChange={[Function]}
+                                          type="checkbox"
+                                        />
+                                        <div
+                                          className="euiCheckbox__square"
+                                        />
+                                      </div>
+                                    </EuiCheckbox>
+                                  </EuiI18n>
+                                </div>
+                              </th>
+                            </EuiTableHeaderCellCheckbox>
                             <EuiTableHeaderCell
                               align="left"
                               data-test-subj="tableHeaderCell_name_0"
@@ -828,52 +919,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 </CellContents>
                               </th>
                             </EuiTableHeaderCell>
-                            <EuiTableHeaderCell
-                              align="left"
-                              data-test-subj="tableHeaderCell_actions_3"
-                              key="_data_h_actions_3"
-                            >
-                              <th
-                                className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_actions_3"
-                                role="columnheader"
-                                scope="col"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <CellContents
-                                  className="euiTableCellContent"
-                                  showSortMsg={false}
-                                >
-                                  <span
-                                    className="euiTableCellContent"
-                                  >
-                                    <EuiInnerText>
-                                      <EuiI18n
-                                        default="{innerText}; {description}"
-                                        token="euiTableHeaderCell.titleTextWithDesc"
-                                        values={
-                                          Object {
-                                            "description": undefined,
-                                            "innerText": "Actions",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiTableCellContent__text"
-                                          title="Actions"
-                                        >
-                                          Actions
-                                        </span>
-                                      </EuiI18n>
-                                    </EuiInnerText>
-                                  </span>
-                                </CellContents>
-                              </th>
-                            </EuiTableHeaderCell>
                           </tr>
                         </thead>
                       </EuiTableHeader>
@@ -888,6 +933,54 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             <tr
                               className="euiTableRow euiTableRow-isSelectable"
                             >
+                              <EuiTableRowCellCheckbox
+                                key="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                              >
+                                <td
+                                  className="euiTableRowCellCheckbox"
+                                >
+                                  <div
+                                    className="euiTableCellContent"
+                                  >
+                                    <EuiI18n
+                                      default="Select this row"
+                                      token="euiBasicTable.selectThisRow"
+                                    >
+                                      <EuiCheckbox
+                                        aria-label="Select this row"
+                                        checked={false}
+                                        compressed={false}
+                                        data-test-subj="checkboxSelectRow-ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                                        disabled={false}
+                                        id="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf-checkbox"
+                                        indeterminate={false}
+                                        onChange={[Function]}
+                                        title="Select this row"
+                                        type="inList"
+                                      >
+                                        <div
+                                          className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                        >
+                                          <input
+                                            aria-label="Select this row"
+                                            checked={false}
+                                            className="euiCheckbox__input"
+                                            data-test-subj="checkboxSelectRow-ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                                            disabled={false}
+                                            id="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf-checkbox"
+                                            onChange={[Function]}
+                                            title="Select this row"
+                                            type="checkbox"
+                                          />
+                                          <div
+                                            className="euiCheckbox__square"
+                                          />
+                                        </div>
+                                      </EuiCheckbox>
+                                    </EuiI18n>
+                                  </div>
+                                </td>
+                              </EuiTableRowCellCheckbox>
                               <EuiTableRowCell
                                 align="left"
                                 key="_data_column_name_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_0"
@@ -1023,70 +1116,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                         2023-06-15T16:28:36.370Z
                                       </div>
                                     </EuiText>
-                                  </div>
-                                </td>
-                              </EuiTableRowCell>
-                              <EuiTableRowCell
-                                align="left"
-                                key="_data_column_actions_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_3"
-                                mobileOptions={
-                                  Object {
-                                    "header": "Actions",
-                                    "render": undefined,
-                                  }
-                                }
-                                setScopeRow={false}
-                                textOnly={false}
-                                truncateText={true}
-                              >
-                                <td
-                                  className="euiTableRowCell"
-                                  style={
-                                    Object {
-                                      "width": undefined,
-                                    }
-                                  }
-                                >
-                                  <div
-                                    className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                  >
-                                    Actions
-                                  </div>
-                                  <div
-                                    className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                  >
-                                    <EuiIcon
-                                      className=""
-                                      key=".0"
-                                      onClick={[Function]}
-                                      type="trash"
-                                    >
-                                      <EuiIconBeaker
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                        focusable="false"
-                                        onClick={[Function]}
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                          focusable="false"
-                                          height={16}
-                                          onClick={[Function]}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                          />
-                                        </svg>
-                                      </EuiIconBeaker>
-                                    </EuiIcon>
                                   </div>
                                 </td>
                               </EuiTableRowCell>
@@ -1607,15 +1636,16 @@ exports[`Added Integration Table View Test Renders added integration table view 
 >
   <EuiPageContent
     data-test-subj="addedIntegrationsArea"
+    paddingSize="m"
   >
     <EuiPanel
       className="euiPageContent"
       data-test-subj="addedIntegrationsArea"
-      paddingSize="l"
+      paddingSize="m"
       role="main"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
         data-test-subj="addedIntegrationsArea"
         role="main"
       >
@@ -1640,13 +1670,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
               Object {
                 "field": "dateAdded",
                 "name": "Date Added",
-                "render": [Function],
-                "sortable": true,
-                "truncateText": true,
-              },
-              Object {
-                "field": "actions",
-                "name": "Actions",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -1704,6 +1727,12 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "type": "field_value_selection",
                 },
               ],
+              "toolsLeft": false,
+            }
+          }
+          selection={
+            Object {
+              "onSelectionChange": [Function],
             }
           }
           tableLayout="auto"
@@ -1735,6 +1764,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 ]
               }
               onChange={[Function]}
+              toolsLeft={false}
             >
               <EuiFlexGroup
                 alignItems="center"
@@ -2105,13 +2135,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                     "sortable": true,
                     "truncateText": true,
                   },
-                  Object {
-                    "field": "actions",
-                    "name": "Actions",
-                    "render": [Function],
-                    "sortable": true,
-                    "truncateText": true,
-                  },
                 ]
               }
               isSelectable={true}
@@ -2148,6 +2171,11 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 }
               }
               responsive={true}
+              selection={
+                Object {
+                  "onSelectionChange": [Function],
+                }
+              }
               tableLayout="auto"
             >
               <div
@@ -2171,7 +2199,46 @@ exports[`Added Integration Table View Test Renders added integration table view 
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
-                            />
+                            >
+                              <EuiI18n
+                                default="Select all rows"
+                                token="euiBasicTable.selectAllRows"
+                              >
+                                <EuiCheckbox
+                                  aria-label="Select all rows"
+                                  checked={false}
+                                  compressed={false}
+                                  disabled={false}
+                                  id="_selection_column-checkbox_random_html_id"
+                                  indeterminate={false}
+                                  label="Select all rows"
+                                  onChange={[Function]}
+                                >
+                                  <div
+                                    className="euiCheckbox"
+                                  >
+                                    <input
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      className="euiCheckbox__input"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      onChange={[Function]}
+                                      type="checkbox"
+                                    />
+                                    <div
+                                      className="euiCheckbox__square"
+                                    />
+                                    <label
+                                      className="euiCheckbox__label"
+                                      htmlFor="_selection_column-checkbox_random_html_id"
+                                    >
+                                      Select all rows
+                                    </label>
+                                  </div>
+                                </EuiCheckbox>
+                              </EuiI18n>
+                            </div>
                           </EuiFlexItem>
                           <EuiFlexItem
                             grow={false}
@@ -2206,6 +2273,59 @@ exports[`Added Integration Table View Test Renders added integration table view 
                       <EuiTableHeader>
                         <thead>
                           <tr>
+                            <EuiTableHeaderCellCheckbox
+                              key="_selection_column_h"
+                            >
+                              <th
+                                className="euiTableHeaderCellCheckbox"
+                                scope="col"
+                                style={
+                                  Object {
+                                    "width": undefined,
+                                  }
+                                }
+                              >
+                                <div
+                                  className="euiTableCellContent"
+                                >
+                                  <EuiI18n
+                                    default="Select all rows"
+                                    token="euiBasicTable.selectAllRows"
+                                  >
+                                    <EuiCheckbox
+                                      aria-label="Select all rows"
+                                      checked={false}
+                                      compressed={false}
+                                      data-test-subj="checkboxSelectAll"
+                                      disabled={false}
+                                      id="_selection_column-checkbox_random_html_id"
+                                      indeterminate={false}
+                                      label={null}
+                                      onChange={[Function]}
+                                      type="inList"
+                                    >
+                                      <div
+                                        className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                      >
+                                        <input
+                                          aria-label="Select all rows"
+                                          checked={false}
+                                          className="euiCheckbox__input"
+                                          data-test-subj="checkboxSelectAll"
+                                          disabled={false}
+                                          id="_selection_column-checkbox_random_html_id"
+                                          onChange={[Function]}
+                                          type="checkbox"
+                                        />
+                                        <div
+                                          className="euiCheckbox__square"
+                                        />
+                                      </div>
+                                    </EuiCheckbox>
+                                  </EuiI18n>
+                                </div>
+                              </th>
+                            </EuiTableHeaderCellCheckbox>
                             <EuiTableHeaderCell
                               align="left"
                               data-test-subj="tableHeaderCell_name_0"
@@ -2344,52 +2464,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 </CellContents>
                               </th>
                             </EuiTableHeaderCell>
-                            <EuiTableHeaderCell
-                              align="left"
-                              data-test-subj="tableHeaderCell_actions_3"
-                              key="_data_h_actions_3"
-                            >
-                              <th
-                                className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_actions_3"
-                                role="columnheader"
-                                scope="col"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <CellContents
-                                  className="euiTableCellContent"
-                                  showSortMsg={false}
-                                >
-                                  <span
-                                    className="euiTableCellContent"
-                                  >
-                                    <EuiInnerText>
-                                      <EuiI18n
-                                        default="{innerText}; {description}"
-                                        token="euiTableHeaderCell.titleTextWithDesc"
-                                        values={
-                                          Object {
-                                            "description": undefined,
-                                            "innerText": "Actions",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiTableCellContent__text"
-                                          title="Actions"
-                                        >
-                                          Actions
-                                        </span>
-                                      </EuiI18n>
-                                    </EuiInnerText>
-                                  </span>
-                                </CellContents>
-                              </th>
-                            </EuiTableHeaderCell>
                           </tr>
                         </thead>
                       </EuiTableHeader>
@@ -2404,6 +2478,54 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             <tr
                               className="euiTableRow euiTableRow-isSelectable"
                             >
+                              <EuiTableRowCellCheckbox
+                                key="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                              >
+                                <td
+                                  className="euiTableRowCellCheckbox"
+                                >
+                                  <div
+                                    className="euiTableCellContent"
+                                  >
+                                    <EuiI18n
+                                      default="Select this row"
+                                      token="euiBasicTable.selectThisRow"
+                                    >
+                                      <EuiCheckbox
+                                        aria-label="Select this row"
+                                        checked={false}
+                                        compressed={false}
+                                        data-test-subj="checkboxSelectRow-ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                                        disabled={false}
+                                        id="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf-checkbox"
+                                        indeterminate={false}
+                                        onChange={[Function]}
+                                        title="Select this row"
+                                        type="inList"
+                                      >
+                                        <div
+                                          className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                        >
+                                          <input
+                                            aria-label="Select this row"
+                                            checked={false}
+                                            className="euiCheckbox__input"
+                                            data-test-subj="checkboxSelectRow-ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
+                                            disabled={false}
+                                            id="_selection_column_ad7e6e30-0b99-11ee-b27c-c9863222e9bf-checkbox"
+                                            onChange={[Function]}
+                                            title="Select this row"
+                                            type="checkbox"
+                                          />
+                                          <div
+                                            className="euiCheckbox__square"
+                                          />
+                                        </div>
+                                      </EuiCheckbox>
+                                    </EuiI18n>
+                                  </div>
+                                </td>
+                              </EuiTableRowCellCheckbox>
                               <EuiTableRowCell
                                 align="left"
                                 key="_data_column_name_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_0"
@@ -2539,70 +2661,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                         2023-06-15T16:28:36.370Z
                                       </div>
                                     </EuiText>
-                                  </div>
-                                </td>
-                              </EuiTableRowCell>
-                              <EuiTableRowCell
-                                align="left"
-                                key="_data_column_actions_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_3"
-                                mobileOptions={
-                                  Object {
-                                    "header": "Actions",
-                                    "render": undefined,
-                                  }
-                                }
-                                setScopeRow={false}
-                                textOnly={false}
-                                truncateText={true}
-                              >
-                                <td
-                                  className="euiTableRowCell"
-                                  style={
-                                    Object {
-                                      "width": undefined,
-                                    }
-                                  }
-                                >
-                                  <div
-                                    className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                  >
-                                    Actions
-                                  </div>
-                                  <div
-                                    className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                  >
-                                    <EuiIcon
-                                      className=""
-                                      key=".0"
-                                      onClick={[Function]}
-                                      type="trash"
-                                    >
-                                      <EuiIconTrash
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium"
-                                        focusable="false"
-                                        onClick={[Function]}
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium"
-                                          focusable="false"
-                                          height={16}
-                                          onClick={[Function]}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M11 3h5v1H0V3h5V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2Zm-7.056 8H7v1H4.1l.392 2.519c.042.269.254.458.493.458h6.03c.239 0 .451-.189.493-.458l1.498-9.576H14l-1.504 9.73c-.116.747-.74 1.304-1.481 1.304h-6.03c-.741 0-1.365-.557-1.481-1.304l-1.511-9.73H9V5.95H3.157L3.476 8H8v1H3.632l.312 2ZM6 3h4V1H6v2Z"
-                                          />
-                                        </svg>
-                                      </EuiIconTrash>
-                                    </EuiIcon>
                                   </div>
                                 </td>
                               </EuiTableRowCell>
