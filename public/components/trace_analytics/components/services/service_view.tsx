@@ -250,7 +250,7 @@ export function ServiceView(props: ServiceViewProps) {
           />
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>{serviceHeader}</EuiFlexItem>
+            <EuiFlexItem>{!newNavigation ? serviceHeader : null}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
