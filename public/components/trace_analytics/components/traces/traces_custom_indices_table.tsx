@@ -2,40 +2,38 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCopy,
+  CriteriaWithPagination,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiHorizontalRule,
   EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSmallButtonEmpty,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
-  EuiText,
-  EuiToolTip,
+  EuiTextColor,
   PropertySort,
 } from '@elastic/eui';
-import { CriteriaWithPagination } from '@opensearch-project/oui/src/eui_components/basic_table';
-import round from 'lodash/round';
-import truncate from 'lodash/truncate';
-import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
-  TRACE_ANALYTICS_DATE_FORMAT,
+  TRACE_TABLE_OPTIONS,
+  TRACE_TABLE_TITLES,
+  TRACE_TABLE_TYPE_KEY,
   TRACES_MAX_NUM,
 } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
-  nanoToMilliSec,
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { getTableColumns } from './trace_table_helpers';
 
 interface TracesLandingTableProps {
   columnItems: string[];
@@ -47,218 +45,117 @@ interface TracesLandingTableProps {
   openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  tracesTableMode: TraceQueryMode;
+  setTracesTableMode: React.Dispatch<React.SetStateAction<TraceQueryMode>>;
 }
 
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
   const { columnItems, items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
   const [showAttributes, setShowAttributes] = useState(false);
+  const [isTitlePopoverOpen, setIsTitlePopoverOpen] = useState(false);
+  const [tableOptions, setTableOptions] = useState<EuiSelectableOption[]>(
+    TRACE_TABLE_OPTIONS.map((obj) =>
+      obj.key === props.tracesTableMode ? { ...obj, checked: 'on' } : obj
+    )
+  );
+
+  const titlePopoverButton = (totalItems?: number) => (
+    <EuiSmallButtonEmpty
+      onClick={() => setIsTitlePopoverOpen(!isTitlePopoverOpen)}
+      iconType="arrowDown"
+      iconSide="right"
+    >
+      <PanelTitle title={TRACE_TABLE_TITLES[props.tracesTableMode]} totalItems={totalItems} />
+    </EuiSmallButtonEmpty>
+  );
+
+  const renderTableOptions = (option: EuiSelectableOption, searchValue: string) => {
+    return (
+      <>
+        <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
+        <br />
+        <EuiTextColor color="subdued" className="popOverSelectableItem">
+          <small>{option['aria-describedby']}</small>
+        </EuiTextColor>
+      </>
+    );
+  };
 
   const renderTitleBar = (totalItems?: number) => {
     return (
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <PanelTitle title="Traces" totalItems={totalItems} />
+          <EuiPopover
+            button={titlePopoverButton(totalItems)}
+            isOpen={isTitlePopoverOpen}
+            closePopover={() => setIsTitlePopoverOpen(false)}
+          >
+            <EuiPopoverTitle className="tableModePopover">
+              Select trace table filter
+            </EuiPopoverTitle>
+            <EuiSelectable
+              singleSelection="always"
+              aria-label="Searchable trace mode"
+              searchable
+              searchProps={{
+                'data-test-subj': 'traceTableMode',
+              }}
+              renderOption={renderTableOptions}
+              listProps={{ rowHeight: 75 }}
+              options={tableOptions}
+              onChange={(newOptions) => {
+                setTableOptions(newOptions);
+                const tableMode = newOptions.filter((option) => option.checked === 'on')[0]
+                  .key as TraceQueryMode;
+                props.setTracesTableMode(tableMode);
+                sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, tableMode);
+                setIsTitlePopoverOpen(false);
+              }}
+            >
+              {(list, search) => (
+                <Fragment>
+                  {search}
+                  {list}
+                </Fragment>
+              )}
+            </EuiSelectable>
+          </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
-            {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {props.tracesTableMode !== 'traces' && (
+          <EuiFlexItem grow={false}>
+            <EuiSmallButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
+              {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
+            </EuiSmallButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };
 
-  const dynamicColumns = columnItems
-    .filter((col) => col.includes('attributes') || col.includes('instrumentation'))
-    .map((col) => ({
-      className: 'attributes-column',
-      field: col,
-      name: (
-        <EuiText className="euiTableCellContent">
-          <EuiToolTip content={col}>
-            <p className="euiTableCellContent__text attributes-column-header">{col}</p>
-          </EuiToolTip>
-        </EuiText>
-      ),
-      align: 'right',
-      sortable: true,
-      truncateText: true,
-      render: (item) =>
-        item ? (
-          <EuiText>
-            <EuiToolTip content={item}>
-              <EuiText size="s">
-                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
-              </EuiText>
-            </EuiToolTip>
-          </EuiText>
-        ) : (
-          '-'
-        ),
-    }));
-
   const columns = useMemo(() => {
-    if (mode === 'custom_data_prepper' || mode === 'data_prepper') {
-      return [
-        {
-          field: 'traceId',
-          name: 'Trace ID',
-          align: 'left',
-          sortable: true,
-          truncateText: false,
-          render: (item) => (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
-                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
-                >
-                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
-                    {item}
-                  </EuiText>
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={item}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      aria-label="Copy trace id"
-                      iconType="copyClipboard"
-                      onClick={copy}
-                    >
-                      Click to copy
-                    </EuiButtonIcon>
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        },
-        {
-          field: 'traceGroup',
-          name: 'Trace group',
-          align: 'left',
-          sortable: true,
-          truncateText: true,
-          className: 'trace-group-column',
-          render: (item) =>
-            item ? (
-              <EuiText size="s">
-                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
-              </EuiText>
-            ) : (
-              '-'
-            ),
-        },
-        {
-          field: 'durationInNanos',
-          name: 'Duration (ms)',
-          align: 'right',
-          sortable: true,
-          truncateText: true,
-          render: (item) =>
-            item ? <EuiText size="s">{round(nanoToMilliSec(Math.max(0, item)), 2)}</EuiText> : '-',
-        },
-        {
-          field: 'status.code',
-          name: 'Errors',
-          align: 'right',
-          sortable: true,
-          render: (item) =>
-            item == null ? (
-              '-'
-            ) : +item === 2 ? (
-              <EuiText color="danger" size="s">
-                Yes
-              </EuiText>
-            ) : (
-              'No'
-            ),
-        },
-        {
-          field: 'endTime',
-          name: 'Last updated',
-          align: 'right',
-          sortable: true,
-          className: 'trace-group-column',
-          render: (item) =>
-            item === 0 || item ? moment(item).format(TRACE_ANALYTICS_DATE_FORMAT) : '-',
-        },
-        ...(showAttributes ? dynamicColumns : []),
-      ] as Array<EuiTableFieldDataColumnType<any>>;
-    } else {
-      return [
-        {
-          field: 'trace_id',
-          name: 'Trace ID',
-          align: 'left',
-          sortable: true,
-          truncateText: true,
-          render: (item) => (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
-                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
-                >
-                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
-                    {item}
-                  </EuiText>
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={item}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      aria-label="Copy trace id"
-                      iconType="copyClipboard"
-                      onClick={copy}
-                    >
-                      Click to copy
-                    </EuiButtonIcon>
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        },
-        {
-          field: 'latency',
-          name: 'Latency (ms)',
-          align: 'right',
-          sortable: true,
-          truncateText: true,
-        },
-        {
-          field: 'error_count',
-          name: 'Errors',
-          align: 'right',
-          sortable: true,
-          render: (item) =>
-            item == null ? (
-              '-'
-            ) : item > 0 ? (
-              <EuiText color="danger" size="s">
-                Yes
-              </EuiText>
-            ) : (
-              'No'
-            ),
-        },
-        {
-          field: 'last_updated',
-          name: 'Last updated',
-          align: 'left',
-          sortable: true,
-          render: (item) => (item === 0 || item ? item : '-'),
-        },
-      ] as Array<EuiTableFieldDataColumnType<any>>;
-    }
-  }, [showAttributes, items]);
+    return getTableColumns(
+      showAttributes,
+      columnItems,
+      mode,
+      props.tracesTableMode,
+      getTraceViewUri,
+      openTraceFlyout
+    );
+  }, [
+    showAttributes,
+    columnItems,
+    mode,
+    props.tracesTableMode,
+    getTraceViewUri,
+    openTraceFlyout,
+    items,
+  ]);
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [showAttributes, items]);
+  const titleBar = useMemo(() => renderTitleBar(items?.length), [
+    showAttributes,
+    items,
+    isTitlePopoverOpen,
+  ]);
 
   const [sorting, setSorting] = useState<{ sort: PropertySort }>({
     sort: {

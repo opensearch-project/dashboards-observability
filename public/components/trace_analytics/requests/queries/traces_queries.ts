@@ -5,7 +5,7 @@
 
 import { PropertySort } from '@elastic/eui';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import { SpanSearchParams } from '../../components/traces/span_detail_table';
 
 export const getTraceGroupPercentilesQuery = () => {
@@ -471,7 +471,8 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
 export const getCustomIndicesTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',
-  sort?: PropertySort
+  sort?: PropertySort,
+  queryMode?: TraceQueryMode
 ) => {
   const jaegerQuery: any = {
     size: 0,
@@ -545,7 +546,9 @@ export const getCustomIndicesTracesQuery = (
     size: TRACES_MAX_NUM,
     _source: {
       includes: [
+        'spanId',
         'traceId',
+        'parentSpanId',
         'traceGroup',
         'durationInNanos',
         'status.code',
@@ -557,13 +560,7 @@ export const getCustomIndicesTracesQuery = (
     query: {
       bool: {
         must: [],
-        filter: [
-          {
-            term: {
-              parentSpanId: '', // Data prepper root span doesn't have any parent.
-            },
-          },
-        ],
+        filter: [],
         should: [],
         must_not: [],
       },
@@ -571,6 +568,20 @@ export const getCustomIndicesTracesQuery = (
     ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
     track_total_hits: false,
   };
+
+  if (queryMode === 'trace_root_spans') {
+    dataPrepperQuery.query.bool.filter.push({
+      term: {
+        parentSpanId: '', // Data prepper root span doesn't have any parent.
+      },
+    });
+  } else if (queryMode === 'service_entry_spans') {
+    dataPrepperQuery.query.bool.filter.push({
+      term: {
+        kind: 'SPAN_KIND_SERVER',
+      },
+    });
+  }
   if (traceId) {
     jaegerQuery.query.bool.filter.push({
       term: {

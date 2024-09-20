@@ -13,7 +13,7 @@ import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
@@ -36,12 +36,13 @@ export const handleCustomIndicesTracesRequest = async (
   setColumns: (items: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  sort?: PropertySort
+  sort?: PropertySort,
+  queryMode?: TraceQueryMode
 ) => {
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort),
+    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode),
     mode,
     dataSourceMDSId
   );

@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
+import { TRACE_TABLE_TYPE_KEY } from '../../../../../common/constants/trace_analytics';
+import { TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -68,6 +70,9 @@ export function TracesContent(props: TracesProps) {
     'latency' | 'error_rate' | 'throughput'
   >('');
   const [includeMetrics, setIncludeMetrics] = useState(false);
+  const [tracesTableMode, setTracesTableMode] = useState<TraceQueryMode>(
+    (sessionStorage.getItem(TRACE_TABLE_TYPE_KEY) as TraceQueryMode) || 'all_spans'
+  );
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
@@ -109,6 +114,7 @@ export function TracesContent(props: TracesProps) {
     jaegerIndicesExist,
     dataPrepperIndicesExist,
     includeMetrics,
+    tracesTableMode,
   ]);
 
   const onToggle = (isOpen: boolean) => {
@@ -159,16 +165,30 @@ export function TracesContent(props: TracesProps) {
         (must: any) => must?.term?.serviceName == null
       );
 
-      await handleCustomIndicesTracesRequest(
-        http,
-        DSL,
-        tableItems,
-        setTableItems,
-        setColumns,
-        mode,
-        props.dataSourceMDSId[0].id,
-        sort
-      );
+      if (tracesTableMode !== 'traces')
+        await handleCustomIndicesTracesRequest(
+          http,
+          DSL,
+          tableItems,
+          setTableItems,
+          setColumns,
+          mode,
+          props.dataSourceMDSId[0].id,
+          sort,
+          tracesTableMode
+        );
+      else {
+        await handleTracesRequest(
+          http,
+          DSL,
+          timeFilterDSL,
+          tableItems,
+          setTableItems,
+          mode,
+          props.dataSourceMDSId[0].id,
+          sort
+        );
+      }
       await handleServiceMapRequest(
         http,
         serviceMapDSL,
@@ -237,6 +257,8 @@ export function TracesContent(props: TracesProps) {
             attributesFilterFields={attributesFilterFields}
           />
           <EuiSpacer size="s" />
+
+          {/* Switch between custom data prepper and regular table */}
           {mode === 'custom_data_prepper' ? (
             <TracesCustomIndicesTable
               columnItems={columns}
@@ -248,6 +270,8 @@ export function TracesContent(props: TracesProps) {
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
+              tracesTableMode={tracesTableMode}
+              setTracesTableMode={setTracesTableMode}
             />
           ) : (
             <TracesTable
@@ -262,6 +286,7 @@ export function TracesContent(props: TracesProps) {
             />
           )}
 
+          {/* Show services list and graph when mode is custom data prepper */}
           {mode === 'custom_data_prepper' && (
             <>
               <EuiSpacer size="m" />

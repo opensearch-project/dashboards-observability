@@ -24,3 +24,35 @@ export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/que
 
 export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
 export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServiceIndices';
+
+export enum TRACE_TABLE_TITLES {
+  all_spans = 'Spans',
+  trace_root_spans = 'Trace root spans',
+  service_entry_spans = 'Service entry spans',
+  traces = 'Traces',
+}
+
+export const TRACE_TABLE_OPTIONS = [
+  {
+    label: TRACE_TABLE_TITLES.all_spans,
+    key: 'all_spans',
+    'aria-describedby': 'All spans from all traces',
+  },
+  {
+    label: TRACE_TABLE_TITLES.trace_root_spans,
+    key: 'trace_root_spans',
+    'aria-describedby': 'The root spans which represent the starting point of a trace',
+  },
+  {
+    label: TRACE_TABLE_TITLES.service_entry_spans,
+    key: 'service_entry_spans',
+    'aria-describedby': 'The spans that mark start of server-side processing (SPAN_KIND_SERVER)',
+  },
+  {
+    label: TRACE_TABLE_TITLES.traces,
+    key: 'traces',
+    'aria-describedby': 'Aggregates all spans by traceId to show all traces',
+  },
+];
+
+export const TRACE_TABLE_TYPE_KEY = 'TraceAnalyticsTraceTableType';

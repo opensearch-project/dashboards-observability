@@ -103,6 +103,18 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   min-width: 200px;
 }
 
+.span-group-column {
+  min-width: 150px;
+}
+
 .attributes-column-header {
   display: table-cell;
+}
+
+.tableModePopover {
+  width: 300px;
+}
+
+.popOverSelectableItem {
+  white-space: initial !important;
 }

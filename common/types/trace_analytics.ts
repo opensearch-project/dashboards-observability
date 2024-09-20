@@ -54,3 +54,4 @@ export interface GraphVisEdge {
 }
 
 export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'custom_data_prepper';
+export type TraceQueryMode = 'trace_root_spans' | 'all_spans' | 'traces' | 'service_entry_spans';
