@@ -7,6 +7,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiSuperDatePicker,
   EuiText,
@@ -48,15 +49,23 @@ export function DashboardControls() {
   };
 
   return isDashboardSelected ? (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-      <EuiFlexItem grow={true}>
-        <EuiText size="s" className="obsOverviewDashboardHeader">
-          <p>
-            <EuiLink onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}>
-              {dashboardState?.dashboardTitle}
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="m" className="obsOverviewDashboardHeader">
+              <h4>{dashboardState?.dashboardTitle}</h4>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}
+              external={true}
+            >
+              <EuiIcon type="popout" />
             </EuiLink>
-          </p>
-        </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">

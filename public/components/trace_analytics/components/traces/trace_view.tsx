@@ -276,7 +276,7 @@ export function TraceView(props: TraceViewProps) {
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {renderTitle(props.traceId)}
           </EuiFlexGroup>
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="s" />
           {renderOverview(fields)}
 
           <EuiSpacer />

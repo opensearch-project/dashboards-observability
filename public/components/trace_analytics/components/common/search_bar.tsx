@@ -24,6 +24,7 @@ export const renderDatePicker = (
 ) => {
   return (
     <EuiSuperDatePicker
+      compressed
       start={startTime}
       end={endTime}
       dateFormat={uiSettingsService.get('dateFormat')}

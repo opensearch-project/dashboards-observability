@@ -26,10 +26,7 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  DataSourceManagementPluginSetup,
-  DataSourceViewConfig,
-} from '../../../../../../../src/plugins/data_source_management/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import {
   DEFAULT_DATA_SOURCE_NAME,
@@ -37,9 +34,7 @@ import {
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
-import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
@@ -52,6 +47,8 @@ import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
 import { ServiceMetrics } from './service_metrics';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -122,9 +119,8 @@ export function ServiceView(props: ServiceViewProps) {
           },
         ]
       );
-  }, [props.serviceName]);
-
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+    props.setDataSourceMenuSelectable?.(false);
+  }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
     window.location.href = `#/services/${service}`;
@@ -228,7 +224,7 @@ export function ServiceView(props: ServiceViewProps) {
         {_page === 'serviceFlyout' ? (
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>{serviceHeader}</EuiFlexItem>
+              <EuiFlexItem>{!newNavigation ? serviceHeader : null}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
@@ -242,13 +238,9 @@ export function ServiceView(props: ServiceViewProps) {
             </EuiFlexGroup>
             {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
-        ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
-          <HeaderControlledComponentsWrapper
-            components={[renderDatePicker(startTime, setStartTime, endTime, setEndTime)]}
-          />
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>{serviceHeader}</EuiFlexItem>
+            <EuiFlexItem>{!newNavigation ? serviceHeader : null}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
@@ -261,29 +253,20 @@ export function ServiceView(props: ServiceViewProps) {
   const renderOverview = () => {
     return (
       <>
-        {props.dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={props.setActionMenu}
-            componentType={'DataSourceView'}
-            componentConfig={{
-              activeOption: props.dataSourceMDSId,
-              fullWidth: true,
-              dataSourceFilter: dataSourceFilterFn,
-            }}
-          />
-        )}
         <EuiPanel>
           <PanelTitle title="Overview" />
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>
-                  <EuiText className="overview-title">Name</EuiText>
-                  <EuiText size="s" className="overview-content">
-                    {props.serviceName || '-'}
-                  </EuiText>
-                </EuiFlexItem>
+                {newNavigation && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Name</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {props.serviceName || '-'}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
                 {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Number of connected services</EuiText>
