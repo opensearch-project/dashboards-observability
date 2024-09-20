@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { round, truncate } from 'lodash';
+import { round } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
@@ -40,8 +40,8 @@ export const fetchDynamicColumns = (columnItems: string[]) => {
         item ? (
           <EuiText>
             <EuiToolTip content={item}>
-              <EuiText size="s">
-                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
+              <EuiText size="s" className="attributes-column" title={item}>
+                {item}
               </EuiText>
             </EuiToolTip>
           </EuiText>
@@ -64,8 +64,8 @@ export const getTableColumns = (
     item ? (
       <EuiText>
         <EuiToolTip content={item}>
-          <EuiText size="s">
-            {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
+          <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+            {item}
           </EuiText>
         </EuiToolTip>
       </EuiText>
@@ -166,6 +166,7 @@ export const getTableColumns = (
         align: 'right',
         sortable: true,
         render: renderDateField,
+        className: 'span-group-column',
       },
       ...(showAttributes ? fetchDynamicColumns(columnItems) : []),
     ] as Array<EuiTableFieldDataColumnType<any>>;
@@ -209,7 +210,13 @@ export const getTableColumns = (
         sortable: true,
         render: renderErrorsField,
       },
-      { field: 'last_updated', name: 'Last updated', align: 'left', sortable: true },
+      {
+        field: 'last_updated',
+        name: 'Last updated',
+        align: 'left',
+        sortable: true,
+        className: 'span-group-column',
+      },
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
@@ -230,6 +237,12 @@ export const getTableColumns = (
       sortable: true,
       render: renderErrorsField,
     },
-    { field: 'last_updated', name: 'Last updated', align: 'left', sortable: true },
+    {
+      field: 'last_updated',
+      name: 'Last updated',
+      align: 'left',
+      sortable: true,
+      className: 'span-group-column',
+    },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 };

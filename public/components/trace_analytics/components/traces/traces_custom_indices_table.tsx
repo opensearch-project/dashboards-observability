@@ -53,7 +53,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
   const { columnItems, items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
   const [showAttributes, setShowAttributes] = useState(false);
   const [isTitlePopoverOpen, setIsTitlePopoverOpen] = useState(false);
-  const [tableOptions, setTableOptions] = useState<EuiSelectableOption[]>(
+  const [tableOptions, setTableOptions] = useState<EuiSelectableOption[]>(() =>
     TRACE_TABLE_OPTIONS.map((obj) =>
       obj.key === props.tracesTableMode ? { ...obj, checked: 'on' } : obj
     )

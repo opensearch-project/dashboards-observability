@@ -16,8 +16,6 @@ import {
 } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
-import { TRACE_TABLE_TYPE_KEY } from '../../../../../common/constants/trace_analytics';
-import { TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
@@ -58,6 +56,8 @@ export function TracesContent(props: TracesProps) {
     jaegerIndicesExist,
     attributesFilterFields,
     setCurrentSelectedService,
+    tracesTableMode,
+    setTracesTableMode,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -70,9 +70,6 @@ export function TracesContent(props: TracesProps) {
     'latency' | 'error_rate' | 'throughput'
   >('');
   const [includeMetrics, setIncludeMetrics] = useState(false);
-  const [tracesTableMode, setTracesTableMode] = useState<TraceQueryMode>(
-    (sessionStorage.getItem(TRACE_TABLE_TYPE_KEY) as TraceQueryMode) || 'all_spans'
-  );
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
