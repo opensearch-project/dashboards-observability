@@ -4,6 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import datemath from '@elastic/datemath';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -154,6 +155,7 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
+    const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
 
     if (mode === 'custom_data_prepper') {
       // service map should not be filtered by service name
@@ -172,7 +174,8 @@ export function TracesContent(props: TracesProps) {
           mode,
           props.dataSourceMDSId[0].id,
           sort,
-          tracesTableMode
+          tracesTableMode,
+          isUnderOneHour
         );
       else {
         await handleTracesRequest(
@@ -183,7 +186,8 @@ export function TracesContent(props: TracesProps) {
           setTableItems,
           mode,
           props.dataSourceMDSId[0].id,
-          sort
+          sort,
+          isUnderOneHour
         );
       }
       await handleServiceMapRequest(
@@ -204,7 +208,8 @@ export function TracesContent(props: TracesProps) {
         setTableItems,
         mode,
         props.dataSourceMDSId[0].id,
-        sort
+        sort,
+        isUnderOneHour
       );
     }
 

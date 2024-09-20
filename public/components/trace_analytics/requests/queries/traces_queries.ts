@@ -50,7 +50,8 @@ export const getTraceGroupPercentilesQuery = () => {
 export const getTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',
-  sort?: PropertySort
+  sort?: PropertySort,
+  isUnderOneHour?: boolean
 ) => {
   const field = sort?.field || '_key';
   const direction = sort?.direction || 'asc';
@@ -72,7 +73,7 @@ export const getTracesQuery = (
           order: {
             [field]: direction,
           },
-          execution_hint: 'map',
+          ...(isUnderOneHour && { execution_hint: 'map' }),
         },
         aggs: {
           latency: {
@@ -139,7 +140,7 @@ export const getTracesQuery = (
           order: {
             [field]: direction,
           },
-          execution_hint: 'map',
+          ...(isUnderOneHour && { execution_hint: 'map' }),
         },
         aggs: {
           latency: {
@@ -472,7 +473,8 @@ export const getCustomIndicesTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',
   sort?: PropertySort,
-  queryMode?: TraceQueryMode
+  queryMode?: TraceQueryMode,
+  isUnderOneHour?: boolean
 ) => {
   const jaegerQuery: any = {
     size: 0,
@@ -492,7 +494,7 @@ export const getCustomIndicesTracesQuery = (
           order: {
             [sort?.field || '_key']: sort?.direction || 'asc',
           },
-          execution_hint: 'map',
+          ...(isUnderOneHour && { execution_hint: 'map' }),
         },
         aggs: {
           latency: {

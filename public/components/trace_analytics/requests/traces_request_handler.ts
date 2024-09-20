@@ -37,12 +37,13 @@ export const handleCustomIndicesTracesRequest = async (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
   sort?: PropertySort,
-  queryMode?: TraceQueryMode
+  queryMode?: TraceQueryMode,
+  isUnderOneHour?: boolean
 ) => {
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode),
+    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
     mode,
     dataSourceMDSId
   );
@@ -90,7 +91,8 @@ export const handleTracesRequest = async (
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  sort?: PropertySort
+  sort?: PropertySort,
+  isUnderOneHour?: boolean
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -108,7 +110,7 @@ export const handleTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getTracesQuery(mode, undefined, sort),
+    getTracesQuery(mode, undefined, sort, isUnderOneHour),
     mode,
     dataSourceMDSId
   );
