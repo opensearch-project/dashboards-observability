@@ -16,6 +16,7 @@ import {
 import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/date_picker/super_date_picker/super_date_picker';
 import React from 'react';
 import { useObservable } from 'react-use';
+import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../framework/core_refs';
 import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
 import { redirectToDashboards } from '../../getting_started/components/utils';
@@ -58,12 +59,18 @@ export function DashboardControls() {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}
-              external={true}
+            <EuiToolTip
+              content={
+                <FormattedMessage id="dashboard.popout.tooltip" defaultMessage="Go to dashboard" />
+              }
             >
-              <EuiIcon type="popout" />
-            </EuiLink>
+              <EuiLink
+                onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}
+                external={true}
+              >
+                <EuiIcon type="popout" />
+              </EuiLink>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
