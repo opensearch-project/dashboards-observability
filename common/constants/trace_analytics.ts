@@ -26,33 +26,26 @@ export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpan
 export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServiceIndices';
 
 export enum TRACE_TABLE_TITLES {
-  all_spans = 'Spans',
-  trace_root_spans = 'Trace root spans',
-  service_entry_spans = 'Service entry spans',
+  all_spans = 'All Spans',
+  root_spans = 'Root Spans',
+  entry_spans = 'Service Entry Spans',
   traces = 'Traces',
 }
 
-export const TRACE_TABLE_OPTIONS = [
-  {
-    label: TRACE_TABLE_TITLES.all_spans,
-    key: 'all_spans',
-    'aria-describedby': 'All spans from all traces',
-  },
-  {
-    label: TRACE_TABLE_TITLES.trace_root_spans,
-    key: 'trace_root_spans',
-    'aria-describedby': 'The root spans which represent the starting point of a trace',
-  },
-  {
-    label: TRACE_TABLE_TITLES.service_entry_spans,
-    key: 'service_entry_spans',
-    'aria-describedby': 'The spans that mark start of server-side processing (SPAN_KIND_SERVER)',
-  },
-  {
-    label: TRACE_TABLE_TITLES.traces,
-    key: 'traces',
-    'aria-describedby': 'Aggregates all spans by traceId to show all traces',
-  },
-];
+const getDescription = (key: keyof typeof TRACE_TABLE_TITLES): string => {
+  const descriptions: Record<keyof typeof TRACE_TABLE_TITLES, string> = {
+    all_spans: 'Spans representing all activities in all traces across the system',
+    root_spans: 'Spans marking the root or starting point of each trace',
+    entry_spans: 'Spans that indicate the entry point of service-side processing',
+    traces: 'Spans grouped by traceId to show a complete trace lifecycle',
+  };
+  return descriptions[key];
+};
+
+export const TRACE_TABLE_OPTIONS = Object.entries(TRACE_TABLE_TITLES).map(([key, label]) => ({
+  label,
+  key,
+  'aria-describedby': getDescription(key as keyof typeof TRACE_TABLE_TITLES),
+}));
 
 export const TRACE_TABLE_TYPE_KEY = 'TraceAnalyticsTraceTableType';

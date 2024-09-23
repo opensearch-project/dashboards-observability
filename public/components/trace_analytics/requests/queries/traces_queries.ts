@@ -571,13 +571,13 @@ export const getCustomIndicesTracesQuery = (
     track_total_hits: false,
   };
 
-  if (queryMode === 'trace_root_spans') {
+  if (queryMode === 'root_spans') {
     dataPrepperQuery.query.bool.filter.push({
       term: {
         parentSpanId: '', // Data prepper root span doesn't have any parent.
       },
     });
-  } else if (queryMode === 'service_entry_spans') {
+  } else if (queryMode === 'entry_spans') {
     dataPrepperQuery.query.bool.filter.push({
       term: {
         kind: 'SPAN_KIND_SERVER',

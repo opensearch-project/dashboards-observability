@@ -101,7 +101,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
                 'data-test-subj': 'traceTableMode',
               }}
               renderOption={renderTableOptions}
-              listProps={{ rowHeight: 75 }}
+              listProps={{ rowHeight: 80 }}
               options={tableOptions}
               onChange={(newOptions) => {
                 setTableOptions(newOptions);
